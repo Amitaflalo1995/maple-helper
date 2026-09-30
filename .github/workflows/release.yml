@@ -81,7 +81,13 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force kb-in, dist-kb | Out-Null
           gh release download --repo $env:GITHUB_REPOSITORY --pattern kb.zip --pattern kb-manifest.json --dir kb-in 2>$null
-          if ($LASTEXITCODE -eq 0 -and (Test-Path kb-in/kb.zip)) {
+          if (-not (Test-Path kb-in/kb.zip)) {
+            # no release yet: a hand-curated seed (prerelease "kb-seed") carries what a fresh scrape can't
+            # rebuild in CI, e.g. the Hebrew name dictionary (aliases.json) made with Claude
+            gh release download kb-seed --repo $env:GITHUB_REPOSITORY --pattern kb.zip --pattern kb-manifest.json --dir kb-in 2>$null
+            if (Test-Path kb-in/kb.zip) { Write-Host "Using the kb-seed release" }
+          }
+          if (Test-Path kb-in/kb.zip) {
             # carry the published KB forward unchanged (its manifest already points at latest/download)
             $manifest = Get-Content kb-in/kb-manifest.json -Raw | ConvertFrom-Json
             $sha = (Get-FileHash kb-in/kb.zip -Algorithm SHA256).Hash.ToLower()
