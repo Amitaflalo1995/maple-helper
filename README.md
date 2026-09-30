@@ -8,9 +8,13 @@
 
 ## About
 
-Maple Helper is a Windows desktop assistant that puts a transparent chat overlay on top of Maple Story Classic World. Press **F9** to open it, then type a question or hold **F10** to speak. Answers draw on a screenshot of your game, your character profile, previous conversations, and a local copy of the NiaMeowDB game database.
+Maple Helper is a Windows desktop assistant that puts a chat overlay on top of Maple Story Classic World. Press **F9** to open it, then type a question or hold **F10** to speak. Answers draw on a screenshot of your game, your character profile, previous conversations, and a local copy of the NiaMeowDB game database.
 
 Use it to look up drops, find quest NPCs, or ask where to train without switching away from the game.
+
+## Download
+
+**[Download Maple Helper for Windows](https://github.com/Amitaflalo1995/maple-helper/releases/latest/download/MapleHelper-Setup.exe)**, run the installer, and follow the setup screens. The app updates itself and its game database in the background. A portable zip is on the [Releases page](https://github.com/Amitaflalo1995/maple-helper/releases/latest).
 
 ## Features
 
@@ -18,7 +22,9 @@ Use it to look up drops, find quest NPCs, or ask where to train without switchin
 - **Screen context:** Capture the game window when you open the overlay, with a camera button to refresh the screenshot.
 - **Character profiles:** Track your level, job, map, and active quests, with updates based on your conversations and screenshots.
 - **Conversation memory:** Keep separate chat history and session summaries for each character.
-- **Visual reference cards:** See images of relevant monsters, items, maps, NPCs, and quests alongside answers.
+- **Visual reference cards:** See images of relevant monsters, items, maps, NPCs, and quests alongside answers, grouped under titles (for example, what a monster drops).
+- **Tag cards:** Tap one or more cards to ask follow-up questions about them, such as "where is it?" or "which one is easier for me?".
+- **Who drops it:** Ask which monsters drop an item and get the answer grouped by monster, with pictures.
 - **Hebrew and English:** Use either language, including mixed text with English game names.
 - **Local speech recognition:** Transcribe voice input on your computer using ivrit.ai Whisper models.
 
@@ -27,7 +33,7 @@ The app uses screen capture and its own overlay window. It does not read game me
 ## Requirements
 
 - Windows 10 or 11.
-- Python 3.10 or later to run from source.
+- Python 3.10 or later to run from source (the installer needs no Python).
 - Claude Code installed, with either a Claude Pro or Max account or an Anthropic API key. The app uses Claude Code in both modes.
 - Maple Story Classic World running in **Borderless** or **Windowed Fullscreen** mode.
 - An internet connection for Claude responses and initial data downloads.
@@ -66,11 +72,12 @@ Open PowerShell in the repository folder.
 | --- | --- |
 | **F9** | Open or close the chat overlay. |
 | **F10** (hold) | Record your voice. Release to transcribe and, by default, send the question. |
-| **Esc** | Close the overlay. |
+| **Window buttons** | Minimize or close the overlay (F9 opens it again). |
+| **Tap a card** | Tag it for the next question; tap again to untag. |
 | **Camera button** | Take a fresh screenshot of the game window. |
 | **System tray menu** | Show the overlay, open settings, or quit the app. |
 
-In settings, you can change the hotkeys, language, opacity, font size, answer length, and whether voice questions are sent immediately.
+In settings, you can change the appearance (light or dark), hotkeys, language, font size, answer length, starting with Windows, and whether voice questions are sent immediately.
 
 The speech model downloads on first use, so the first voice request takes longer. Transcription uses CUDA when available and falls back to the CPU.
 
@@ -80,16 +87,19 @@ Settings, character profiles, conversation history, speech models, and downloade
 
 When you ask a question, the app sends Claude your question, the available game screenshot, character profile, recent conversation, earlier session summaries, and relevant knowledge-base context. Claude can also read local knowledge-base files to answer the question. After a chat session has been closed for 30 minutes, the app may send the session transcript to Claude to generate a summary for future conversations.
 
-Voice recordings are transcribed locally. The resulting text is used as your question. The app also checks GitHub Releases for knowledge-base updates.
+Voice recordings are transcribed locally. The resulting text is used as your question. The app also checks GitHub Releases for app and knowledge-base updates, and installs an update only when its SHA-256 matches the release's checksums.
 
 ## Development
 
-Install the test runner and run the Hebrew and English text-rendering tests:
+Install the development tools, then run the linter and the tests (CI runs the same on every pull request):
 
 ```powershell
-.\.venv\Scripts\python -m pip install pytest
+.\.venv\Scripts\python -m pip install -r requirements-dev.txt
+.\.venv\Scripts\python -m ruff check .
 .\.venv\Scripts\python -m pytest tests -q
 ```
+
+Changes go through a branch and a pull request; `main` accepts a merge only when CI (lint, tests, Windows build and installer round trip) is green. Releases are described in [docs/RELEASING.md](docs/RELEASING.md).
 
 For a small knowledge-base download during development, limit the scraper to five pages per category:
 
