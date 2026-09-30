@@ -51,6 +51,8 @@ def _body(text: str) -> QLabel:
 
 class _Bridge(QObject):
     status = Signal(str)
+    account = Signal(object)
+    logged_out = Signal()
 
 
 class CharacterForm(QWidget):
@@ -473,6 +475,7 @@ class SettingsDialog(GlassDialog):
     changed = Signal()
     update_kb_requested = Signal()
     history_cleared = Signal()
+    account_changed = Signal()
 
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, stylesheet_fn):
         self.t = t = I18n(settings["language"] or "he")
@@ -536,6 +539,30 @@ class SettingsDialog(GlassDialog):
         sec.add_row(t("start_with_windows"), self.autostart)
         lay.addWidget(sec)
 
+        # Claude account
+        sec = Section(t("sec_account"), rtl)
+        self.account_label = QLabel(bidi.plain(t("ob_checking"), rtl), objectName="RowLabel")
+        self.account_label.setWordWrap(True)
+        self.account_label.setContentsMargins(0, 10, 0, 10)
+        sec.add_widget(self.account_label)
+        self.switch_btn = QPushButton(t("account_switch"), objectName="Link")
+        self.switch_btn.clicked.connect(self._switch_account)
+        sec.add_widget(self.switch_btn)
+        self.logout_btn = QPushButton(t("account_logout"), objectName="LinkDanger")
+        self.logout_btn.clicked.connect(self._logout)
+        sec.add_widget(self.logout_btn)
+        for b in (self.switch_btn, self.logout_btn):
+            b.setCursor(Qt.PointingHandCursor)
+            b.hide()
+        lay.addWidget(sec)
+        self._account_bridge = _Bridge()
+        self._account_bridge.account.connect(self._on_account)
+        self._account_bridge.logged_out.connect(self._start_login)
+        self._account_status = None
+        self._login_timer = QTimer(self, interval=3000)
+        self._login_timer.timeout.connect(self._login_tick)
+        self._refresh_account()
+
         # characters
         sec = Section(t("characters"), rtl)
         self.chars_box = QWidget(objectName="Feed")
@@ -579,6 +606,85 @@ class SettingsDialog(GlassDialog):
         brow.addStretch(1)
         outer.addLayout(brow)
         rtl_buttons(self, rtl)
+
+    # Claude account ------------------------------------------------------
+
+    def _refresh_account(self):
+        threading.Thread(target=lambda: self._account_bridge.account.emit(claude_setup.account()),
+                         daemon=True).start()
+
+    def _set_account_text(self, text: str):
+        self.account_label.setText(bidi.plain(text, self.t.rtl))
+
+    def _on_account(self, acc: dict):
+        t = self.t
+        st = acc["status"]
+        was, self._account_status = self._account_status, st
+        api_key = bool(self.settings["api_key_fallback"])
+        if api_key:
+            self._set_account_text(t("account_api_key"))
+        elif st == "ok":
+            self._set_account_text(t("account_signed_in", email=acc.get("email") or "Claude"))
+        elif not self._login_timer.isActive():
+            self._set_account_text(t("ob_not_logged") if st == "logged_out" else t("ob_not_installed"))
+        connected = api_key or st == "ok"
+        self.switch_btn.setText(t("account_switch") if connected else t("ob_login"))
+        self.switch_btn.setVisible(st != "not_installed")
+        self.logout_btn.setVisible(connected)
+        if self._login_timer.isActive() and st == "ok":
+            self._login_timer.stop()
+        if was is not None and was != st and not api_key:
+            self.account_changed.emit()
+
+    def _switch_account(self):
+        """Sign out, then run the official sign-in so another account can be chosen in the browser."""
+        self.switch_btn.setEnabled(False)
+        self.logout_btn.hide()
+        self._set_account_text(self.t("account_signing_out"))
+        if self.settings["api_key_fallback"]:
+            claude_setup.delete_api_key()
+            self.settings["api_key_fallback"] = False
+            self.account_changed.emit()
+
+        def work():
+            claude_setup.logout()
+            self._account_bridge.logged_out.emit()
+        threading.Thread(target=work, daemon=True).start()
+
+    def _start_login(self):
+        self.switch_btn.setEnabled(True)
+        self._account_status = "logged_out"
+        self.account_changed.emit()
+        claude_setup.login()
+        self._set_account_text(self.t("account_browser"))
+        self._login_left = 60   # 3 minutes
+        self._login_timer.start()
+
+    def _login_tick(self):
+        self._login_left -= 1
+        if self._login_left <= 0:
+            self._login_timer.stop()
+        self._refresh_account()
+
+    def _logout(self):
+        t = self.t
+        dlg = ConfirmDialog(t("account_logout"), t("account_logout_confirm"), t("account_logout"), t("cancel"),
+                            t.rtl, self.stylesheet_fn(1.0))
+        if not dlg.exec():
+            return
+        self.logout_btn.hide()
+        self._set_account_text(t("account_signing_out"))
+        if self.settings["api_key_fallback"]:
+            claude_setup.delete_api_key()
+            self.settings["api_key_fallback"] = False
+            self.account_changed.emit()
+            self._refresh_account()
+            return
+
+        def work():
+            claude_setup.logout()
+            self._account_bridge.account.emit(claude_setup.account())
+        threading.Thread(target=work, daemon=True).start()
 
     def _fill_chars(self):
         while self.chars.count():

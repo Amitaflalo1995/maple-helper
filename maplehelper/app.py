@@ -24,6 +24,7 @@ from .voice import VoiceController
 
 HOTKEY_TOGGLE = 1
 RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
+BACKGROUND_ARG = "--background"   # start in the tray only (Windows autostart, silent updates)
 
 
 class HotkeyFilter(QAbstractNativeEventFilter):
@@ -119,8 +120,12 @@ class MapleHelperApp:
         self.make_tray()
         self.apply_autostart()
         QTimer.singleShot(4000, self.check_kb_update_silently)
-        t = I18n(self.settings["language"])
-        self.toast(t("app_tagline"), t("ob_done_hint").replace("F9", self.settings["hotkey_toggle"]))
+        if BACKGROUND_ARG in sys.argv[1:]:
+            # started with Windows or by a silent update: stay in the tray until the player asks for the chat
+            t = I18n(self.settings["language"])
+            self.toast(t("app_tagline"), t("ob_done_hint").replace("F9", self.settings["hotkey_toggle"]))
+        else:
+            QTimer.singleShot(0, lambda: self.overlay.toggle(self.capture))
         self.qapp.aboutToQuit.connect(self.shutdown)
         return True
 
@@ -214,8 +219,15 @@ class MapleHelperApp:
         dlg.changed.connect(self.on_settings_changed)
         dlg.update_kb_requested.connect(self.update_kb_interactive)
         dlg.history_cleared.connect(self.on_history_cleared)
+        dlg.account_changed.connect(self.on_account_changed)
         dlg.exec()
         self.overlay.refresh_profile_chip()
+
+    def on_account_changed(self):
+        # the warm Claude process was started under the old account: replace it
+        self.brain.api_key = claude_setup.load_api_key() if self.settings["api_key_fallback"] else None
+        self.brain.shutdown()
+        threading.Thread(target=self.brain.prewarm, daemon=True).start()
 
     def on_history_cleared(self):
         self.overlay.clear_feed()
@@ -237,7 +249,8 @@ class MapleHelperApp:
         try:
             with winreg.OpenKey(winreg.HKEY_CURRENT_USER, RUN_KEY, 0, winreg.KEY_SET_VALUE) as k:
                 if self.settings["start_with_windows"]:
-                    exe = sys.executable if getattr(sys, "frozen", False) else f'"{sys.executable}" -m maplehelper'
+                    exe = f'"{sys.executable}"' if getattr(sys, "frozen", False) else f'"{sys.executable}" -m maplehelper'
+                    exe += f" {BACKGROUND_ARG}"
                     winreg.SetValueEx(k, APP_NAME, 0, winreg.REG_SZ, exe)
                 else:
                     try:
