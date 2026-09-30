@@ -6,12 +6,13 @@ import ctypes.wintypes as wt
 import sys
 import threading
 import winreg
+from pathlib import Path
 
 from PySide6.QtCore import QAbstractNativeEventFilter, QLockFile, QTimer
 from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import QApplication, QMenu, QMessageBox, QSystemTrayIcon, QWidget
 
-from . import APP_NAME, claude_setup, updater, winapi
+from . import APP_NAME, __version__, claude_setup, updater, winapi
 from .brain import Brain
 from .i18n import I18n
 from .kb import KnowledgeBase
@@ -207,6 +208,15 @@ class MapleHelperApp:
     # ------------------------------------------------------------------ knowledge base updates
 
     def check_kb_update_silently(self):
+        self.pending_installer = None
+        if getattr(sys, "frozen", False):
+            def app_update():
+                path = updater.download_app_update(__version__)
+                if path:
+                    self.pending_installer = path
+                    QTimer.singleShot(0, lambda: self.toast(I18n(self.settings["language"])("update_ready")))
+            threading.Thread(target=app_update, daemon=True).start()
+
         def work():
             if updater.update_kb():
                 QTimer.singleShot(0, self.reload_kb)
@@ -230,12 +240,37 @@ class MapleHelperApp:
             winapi.unregister_hotkey(int(self.hotkey_host.winId()), HOTKEY_TOGGLE)
         except Exception:
             pass
+        if getattr(self, "pending_installer", None):
+            updater.run_installer_silently(self.pending_installer)
 
 
 APP_ID = "MapleHelper.App"
 
 
+def selftest(out_path: str) -> int:
+    """`Maple Helper.exe --selftest <file>`: checks every component loads in the packaged build."""
+    import json
+    import traceback
+    report = {}
+    for name, fn in {
+        "voice": lambda: __import__("faster_whisper") and "ok",
+        "ctranslate2": lambda: __import__("ctranslate2").__version__,
+        "audio": lambda: str(__import__("sounddevice").query_devices(kind="input")["name"]),
+        "claude": lambda: __import__("maplehelper.brain", fromlist=["find_claude"]).find_claude(),
+        "kb": lambda: len(KnowledgeBase().entities),
+        "assets": lambda: (ASSETS / "brand" / "app.ico").exists(),
+    }.items():
+        try:
+            report[name] = fn()
+        except Exception:
+            report[name] = "ERROR " + traceback.format_exc(limit=2)
+    Path(out_path).write_text(json.dumps(report, indent=1, default=str), encoding="utf-8")
+    return 0
+
+
 def main():
+    if len(sys.argv) > 2 and sys.argv[1] == "--selftest":
+        return selftest(sys.argv[2])
     # Windows shows this identity (not "Python") for the taskbar and notifications
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APP_ID)
     qapp = QApplication(sys.argv)

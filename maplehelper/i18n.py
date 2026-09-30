@@ -65,6 +65,8 @@ STRINGS = {
     "update_kb": {"he": "עדכן מאגר", "en": "Update database"},
     "kb_uptodate": {"he": "המאגר מעודכן", "en": "Database is up to date"},
     "kb_updated": {"he": "המאגר עודכן", "en": "Database updated"},
+    "update_ready": {"he": "גרסה חדשה של Maple Helper ירדה ותותקן כשתסגרו את האפליקציה.",
+                     "en": "A new Maple Helper version is ready and will install when you quit."},
     "clear_history": {"he": "נקה היסטוריה", "en": "Clear history"},
     "characters": {"he": "דמויות", "en": "Characters"},
     "add_character": {"he": "הוסף דמות", "en": "Add character"},

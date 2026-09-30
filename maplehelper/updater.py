@@ -6,6 +6,7 @@ The zip is unpacked into %APPDATA%/MapleHelper/kb, which then wins over the bund
 from __future__ import annotations
 
 import hashlib
+import re
 import io
 import json
 import shutil
@@ -66,3 +67,44 @@ def update_kb() -> bool:
     shutil.rmtree(USER_KB, ignore_errors=True)
     tmp.rename(USER_KB)
     return True
+
+
+# ---------------------------------------------------------------- app updates
+
+SETUP_ASSET = "MapleHelper-Setup.exe"
+
+
+def _version_tuple(v: str) -> tuple[int, ...]:
+    return tuple(int(x) for x in re.findall(r"\d+", v)[:3]) or (0,)
+
+
+def download_app_update(current: str) -> str | None:
+    """If GitHub has a newer release, download its installer. Returns the installer path."""
+    if not GITHUB_REPO:
+        return None
+    raw = _get(f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest", timeout=15)
+    if not raw:
+        return None
+    try:
+        rel = json.loads(raw)
+    except json.JSONDecodeError:
+        return None
+    if _version_tuple(rel.get("tag_name", "")) <= _version_tuple(current):
+        return None
+    asset = next((a for a in rel.get("assets", []) if a.get("name") == SETUP_ASSET), None)
+    if not asset:
+        return None
+    data = _get(asset["browser_download_url"], timeout=600)
+    if not data or len(data) != asset.get("size", len(data)):
+        return None
+    path = USER_KB.parent / "updates" / f"MapleHelper-Setup-{rel['tag_name']}.exe"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(data)
+    return str(path)
+
+
+def run_installer_silently(path: str) -> None:
+    """Runs after the app exits; the installer restarts the app when done."""
+    import subprocess
+    subprocess.Popen([path, "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART"], close_fds=True,
+                     creationflags=0x00000008 | 0x00000200)  # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
