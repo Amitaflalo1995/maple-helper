@@ -16,7 +16,7 @@ from ..kb import KnowledgeBase
 from ..store import ASSETS, History, Profiles, Settings
 from . import theme
 from .glass import GlassBackdrop
-from .widgets import Bubble, BubbleRow, EntityCard, QuickButton, SystemLine
+from .widgets import Bubble, BubbleRow, EntityCard, SystemLine
 
 SLOW_AFTER_MS = 30_000
 
@@ -75,23 +75,6 @@ class FocusLineEdit(QLineEdit):
     def focusOutEvent(self, e):
         super().focusOutEvent(e)
         self.focus_changed.emit(False)
-
-
-class ChipScroll(QScrollArea):
-    """Horizontal chip row without a visible scrollbar; the wheel scrolls it sideways."""
-
-    def __init__(self):
-        super().__init__()
-        self.setWidgetResizable(True)
-        self.setFrameShape(QFrame.NoFrame)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setFixedHeight(32)
-        self.setStyleSheet("background: transparent;")
-
-    def wheelEvent(self, e):
-        bar = self.horizontalScrollBar()
-        bar.setValue(bar.value() - e.angleDelta().y())
 
 
 class Overlay(QWidget):
@@ -225,22 +208,6 @@ class Overlay(QWidget):
         self.scroll.verticalScrollBar().rangeChanged.connect(
             lambda _a, b: self.scroll.verticalScrollBar().setValue(b))
 
-        # quick questions as glass chips, in a row that scrolls sideways when narrow
-        chips = QWidget(objectName="Feed")
-        self.quick = QHBoxLayout(chips)
-        self.quick.setContentsMargins(0, 0, 0, 0)
-        self.quick.setSpacing(6)
-        self.quick_buttons = {}
-        for key in ("grind", "item", "quest", "skill"):
-            b = QuickButton("")
-            b.clicked.connect(lambda _=False, k=key: self.ask(self.t(f"qb_{k}_q")))
-            self.quick_buttons[key] = b
-            self.quick.addWidget(b)
-        self.quick.addStretch(1)
-        self.chip_scroll = ChipScroll()
-        self.chip_scroll.setWidget(chips)
-        lay.addWidget(self.chip_scroll)
-
         # input capsule: [camera] field [mic] (send)
         self.capsule = Capsule(objectName="Capsule")
         self.capsule.setFixedHeight(42)
@@ -286,8 +253,6 @@ class Overlay(QWidget):
         self.recapture_btn.setToolTip(self.t("recapture"))
         self.settings_btn.setToolTip(self.t("settings"))
         self.mic_btn.setToolTip(self.t("hotkey_voice") + f" ({hk_voice})")
-        for key, b in self.quick_buttons.items():
-            b.setText(bidi.plain(self.t(f"qb_{key}"), self.t.rtl))
         self._on_text(self.input.text())
         self.refresh_profile_chip()
 

@@ -142,10 +142,3 @@ class EntityCard(QFrame):
         if self.url:
             webbrowser.open(self.url)
         super().mouseReleaseEvent(ev)
-
-
-class QuickButton(QPushButton):
-    def __init__(self, text: str):
-        super().__init__(text)
-        self.setObjectName("Chip")
-        self.setCursor(Qt.PointingHandCursor)
