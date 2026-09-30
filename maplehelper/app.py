@@ -185,7 +185,7 @@ class MapleHelperApp:
     def on_settings_changed(self):
         self.overlay.apply_language()
         self.overlay.setStyleSheet(self.style())
-        self.overlay.update()
+        self.overlay.apply_capture_mode()
         self.brain.length = self.settings["answer_length"]
         self.voice.set_key(self.settings["hotkey_voice"])
         self.register_hotkeys()

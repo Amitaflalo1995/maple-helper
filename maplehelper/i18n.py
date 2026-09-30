@@ -46,6 +46,7 @@ STRINGS = {
     "appearance": {"he": "מראה", "en": "Appearance"},
     "appearance_dark": {"he": "כהה (זכוכית שחורה)", "en": "Dark (black glass)"},
     "appearance_light": {"he": "בהיר (זכוכית לבנה)", "en": "Light (white glass)"},
+    "show_in_captures": {"he": "הצג את הצ'אט בצילומי מסך והקלטות", "en": "Show the chat in screenshots and recordings"},
     "opacity": {"he": "שקיפות", "en": "Opacity"},
     "font_size": {"he": "גודל גופן", "en": "Font size"},
     "answer_length": {"he": "אורך תשובות", "en": "Answer length"},

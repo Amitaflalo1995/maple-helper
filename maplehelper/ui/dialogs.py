@@ -433,6 +433,10 @@ class SettingsDialog(QDialog):
         self.length.setCurrentIndex(0 if settings["answer_length"] == "short" else 1)
         row(t("answer_length"), self.length)
 
+        self.show_in_captures = QCheckBox()
+        self.show_in_captures.setChecked(settings["show_in_captures"])
+        row(t("show_in_captures"), self.show_in_captures)
+
         self.autostart = QCheckBox()
         self.autostart.setChecked(settings["start_with_windows"])
         row(t("start_with_windows"), self.autostart)
@@ -497,6 +501,7 @@ class SettingsDialog(QDialog):
             "font_size": self.font.value(),
             "answer_length": self.length.currentData(),
             "start_with_windows": self.autostart.isChecked(),
+            "show_in_captures": self.show_in_captures.isChecked(),
         })
         s.save()
         self.changed.emit()

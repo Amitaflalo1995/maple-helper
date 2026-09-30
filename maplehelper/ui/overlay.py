@@ -108,8 +108,20 @@ class Overlay(QWidget):
 
     def showEvent(self, e):
         super().showEvent(e)
-        winapi.exclude_from_capture(int(self.winId()))
-        self.backdrop.start()
+        self.apply_capture_mode()
+
+    def apply_capture_mode(self):
+        """Hidden from captures → live frosted backdrop of the game.
+        Visible in captures (screenshots, streams) → the backdrop can't sample behind itself,
+        so the glass becomes a uniform frosted tint."""
+        visible = bool(self.settings["show_in_captures"])
+        winapi.set_capture_visibility(int(self.winId()), visible)
+        if visible:
+            self.backdrop.stop()
+            self.backdrop.pixmap = None
+        elif self.isVisible():
+            self.backdrop.start()
+        self.update()
 
     def hideEvent(self, e):
         super().hideEvent(e)
@@ -363,10 +375,19 @@ class Overlay(QWidget):
         super().keyPressEvent(e)
 
     def recapture(self):
-        # the overlay is excluded from screen capture, so the game can be captured with the chat open
+        if self.settings["show_in_captures"]:
+            # the chat would appear in the shot: step aside for a moment
+            self.setWindowOpacity(0.0)
+            QTimer.singleShot(120, self._do_recapture)
+        else:
+            # hidden from capture: the game can be captured with the chat open
+            self._do_recapture()
+
+    def _do_recapture(self):
         hwnd = self.game_hwnd or winapi.find_game_window()
         self.shot = winapi.capture_game(hwnd)
         self.shot_used = False
+        self.setWindowOpacity(1.0)
         self.add_system("✓ " + self.t("recapture"))
 
     # ------------------------------------------------------------------ feed

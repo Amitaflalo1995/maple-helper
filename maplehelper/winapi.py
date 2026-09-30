@@ -182,6 +182,10 @@ def glass_window(hwnd: int, tint_rgba=(18, 14, 12, 70), shadow: bool = True) -> 
 WDA_EXCLUDEFROMCAPTURE = 0x11
 
 
+def set_capture_visibility(hwnd: int, visible: bool) -> bool:
+    return bool(user32.SetWindowDisplayAffinity(wt.HWND(hwnd), 0 if visible else WDA_EXCLUDEFROMCAPTURE))
+
+
 def exclude_from_capture(hwnd: int) -> bool:
     """Keep this window out of screen captures: our own backdrop sampling and the
     screenshot sent to Claude then see the game underneath, not the chat."""
