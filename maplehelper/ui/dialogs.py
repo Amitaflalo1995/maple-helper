@@ -106,6 +106,8 @@ class CharacterForm(QWidget):
         self.job.picked.connect(lambda *_: setattr(self, "_job_picked", True))
         col2.addWidget(self.job)
         self.job_fixed = QLabel("Beginner", objectName="JobFixed")
+        # an English word in a Hebrew form still starts on the right, like the other fields
+        self.job_fixed.setAlignment((Qt.AlignRight if t.rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
         self.job_fixed.hide()
         col2.addWidget(self.job_fixed)
         row.addLayout(col2, 1)
