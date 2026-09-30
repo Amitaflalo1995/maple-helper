@@ -46,7 +46,7 @@ BORDER = "rgba(255,149,51,0.55)"
 
 FONT_FAMILY = "Rubik"
 ICON_FONT = "Segoe Fluent Icons"
-ICON = {"edit": "\ue70f", "delete": "\ue74d", "add": "\ue710", "minimize": "\ue921", "close": "\ue8bb", "settings": "\ue713", "camera": "\ue722", "mic": "\ue720", "send": "\ue74a", "stop": "\ue71a"}
+ICON = {"info": "\ue946", "edit": "\ue70f", "delete": "\ue74d", "add": "\ue710", "minimize": "\ue921", "close": "\ue8bb", "settings": "\ue713", "camera": "\ue722", "mic": "\ue720", "send": "\ue74a", "stop": "\ue71a"}
 
 
 def set_mode(mode: str) -> None:
@@ -118,6 +118,10 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QLineEdit#StepValue {{ background: transparent; border: none; font-weight: 600; padding: 0; color: {c['text']}; }}
     #JobFixed {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 8px; min-height: 28px;
                  max-height: 28px; padding: 0 12px; font-weight: 500; color: {c['text']}; }}
+    #InfoNote {{ background: {"rgba(255,149,51,0.12)" if MODE == "dark" else "rgba(255,149,51,0.10)"};
+                 border: 1px solid rgba(255,149,51,0.35); border-radius: 12px; }}
+    #InfoIcon {{ font-family: "{ICON_FONT}"; font-size: 15px; color: {ORANGE}; }}
+    #InfoText {{ color: {c['text']}; font-size: {s - 1}px; }}
     #JobHint {{ color: {c['muted']}; font-size: {s - 3}px; }}
     #ProfileCard {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 16px; }}
     #ProfileName {{ font-size: {s + 1}px; font-weight: 600; color: {c['text']}; }}

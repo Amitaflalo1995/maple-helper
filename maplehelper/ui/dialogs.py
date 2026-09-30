@@ -15,6 +15,7 @@ from .widgets import CharacterRow
 from ..i18n import I18n
 from ..kb import KnowledgeBase
 from ..store import ASSETS, History, Profiles, Settings
+from . import theme
 
 # MapleStory Classic job tree: base class -> [(job, min level)]
 JOBS = {
@@ -112,6 +113,19 @@ class CharacterForm(QWidget):
         self.job_hint = QLabel(objectName="JobHint")
         self.job_hint.setWordWrap(True)
         lay.addWidget(self.job_hint)
+        # the profile keeps itself current from screenshots: say so, so nobody feels they must maintain it
+        note = QFrame(objectName="InfoNote")
+        note.setLayoutDirection(Qt.RightToLeft if t.rtl else Qt.LeftToRight)
+        nl = QHBoxLayout(note)
+        nl.setContentsMargins(12, 10, 12, 10)
+        nl.setSpacing(10)
+        icon = QLabel(theme.ICON["info"], objectName="InfoIcon")
+        nl.addWidget(icon, 0, Qt.AlignTop)
+        text = QLabel(bidi.plain(t("auto_profile_note"), t.rtl), objectName="InfoText")
+        text.setWordWrap(True)
+        nl.addWidget(text, 1)
+        lay.addSpacing(6)
+        lay.addWidget(note)
         lay.addStretch(1)
 
     def base_class(self) -> str | None:
