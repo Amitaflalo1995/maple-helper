@@ -194,6 +194,7 @@ class ProfileCard(QFrame):
     """Name, "Lv. 32 · Assassin" (English, as in game) and a live portrait of the character."""
 
     clicked = Signal()
+    refresh_requested = Signal()
 
     def __init__(self):
         super().__init__(objectName="ProfileCard")
@@ -209,6 +210,31 @@ class ProfileCard(QFrame):
         col.addWidget(self.name)
         col.addWidget(self.meta)
         row.addLayout(col, 1)
+        from PySide6.QtWidgets import QToolButton
+        from . import theme
+        self.refresh = QToolButton(objectName="Refresh", text=theme.ICON["refresh"])
+        self.refresh.setCursor(Qt.PointingHandCursor)
+        self.refresh.clicked.connect(self.refresh_requested.emit)
+        row.addWidget(self.refresh, 0, Qt.AlignVCenter)
+        self._spin_frames = ["\ue72c", "\ue895"]      # refresh / sync glyphs alternate while busy
+        from PySide6.QtCore import QTimer
+        self._spin = QTimer(self, interval=260, timeout=self._tick)
+        self._frame = 0
+
+    def set_busy(self, busy: bool, tip: str = "") -> None:
+        from . import theme
+        self.refresh.setEnabled(not busy)
+        if busy:
+            self._spin.start()
+        else:
+            self._spin.stop()
+            self.refresh.setText(theme.ICON["refresh"])
+        if tip:
+            self.refresh.setToolTip(tip)
+
+    def _tick(self):
+        self._frame = (self._frame + 1) % len(self._spin_frames)
+        self.refresh.setText(self._spin_frames[self._frame])
 
     def show_character(self, c, avatar_path, kb, rtl: bool) -> None:
         align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter

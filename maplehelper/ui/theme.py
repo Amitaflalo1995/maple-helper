@@ -46,7 +46,7 @@ BORDER = "rgba(255,149,51,0.55)"
 
 FONT_FAMILY = "Rubik"
 ICON_FONT = "Segoe Fluent Icons"
-ICON = {"info": "\ue946", "edit": "\ue70f", "delete": "\ue74d", "add": "\ue710", "minimize": "\ue921", "close": "\ue8bb", "settings": "\ue713", "camera": "\ue722", "mic": "\ue720", "send": "\ue74a", "stop": "\ue71a"}
+ICON = {"refresh": "\ue72c", "info": "\ue946", "edit": "\ue70f", "delete": "\ue74d", "add": "\ue710", "minimize": "\ue921", "close": "\ue8bb", "settings": "\ue713", "camera": "\ue722", "mic": "\ue720", "send": "\ue74a", "stop": "\ue71a"}
 
 
 def set_mode(mode: str) -> None:
@@ -124,6 +124,11 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #InfoText {{ color: {c['text']}; font-size: {s - 1}px; }}
     #JobHint {{ color: {c['muted']}; font-size: {s - 3}px; }}
     #ProfileCard {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 16px; }}
+    QToolButton#Refresh {{ font-family: "{ICON_FONT}"; font-size: 15px; color: {c['muted']}; background: transparent;
+                           border: none; border-radius: 15px; min-width: 30px; max-width: 30px; min-height: 30px;
+                           max-height: 30px; }}
+    QToolButton#Refresh:hover {{ background: {c['fill3']}; color: {ORANGE}; }}
+    QToolButton#Refresh:disabled {{ color: {ORANGE}; }}
     #ProfileName {{ font-size: {s + 1}px; font-weight: 600; color: {c['text']}; }}
     #ProfileMeta {{ font-size: {s - 1}px; font-weight: 500; color: {c['muted']}; }}
     #BubbleUser {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFA24A, stop:1 {ORANGE_DEEP});

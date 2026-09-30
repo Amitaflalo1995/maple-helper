@@ -167,7 +167,8 @@ class Overlay(QWidget):
         lay.addWidget(self.title_bar)
 
         # the character, pinned at the top of the conversation
-        self.profile_card = ProfileCard()   # display only
+        self.profile_card = ProfileCard()
+        self.profile_card.refresh_requested.connect(self.sync_profile)
         lay.addWidget(self.profile_card)
 
         # conversation
@@ -227,6 +228,7 @@ class Overlay(QWidget):
         self.input.setPlaceholderText(bidi.plain(self._placeholder, self.t.rtl))
         self.recapture_btn.setToolTip(self.t("recapture"))
         self.settings_btn.setToolTip(self.t("settings"))
+        self.profile_card.refresh.setToolTip(self.t("refresh_tip"))
         self.min_btn.setToolTip(self.t("minimize"))
         self.close_btn.setToolTip(self.t("close_chat").replace("F9", self.settings["hotkey_toggle"]))
         self.mic_btn.setToolTip(self.t("mic_tip", key=hk_voice))
@@ -451,7 +453,10 @@ class Overlay(QWidget):
         self._worker.moveToThread(self._thread)
         self._thread.started.connect(self._worker.run)
         self._worker.delta.connect(self._on_delta)
-        self._worker.done.connect(lambda ans: self._on_done(ans, history))
+        # a bound method of this QObject → Qt queues the call onto the GUI thread.
+        # (a lambda here would run in the worker thread and build widgets there: crash + stray window)
+        self._pending_history = history
+        self._worker.done.connect(self._on_done_main)
         self._worker.done.connect(self._thread.quit)
         self._thread.start()
 
@@ -462,6 +467,59 @@ class Overlay(QWidget):
     def _on_slow(self):
         if self.busy:
             self.add_confirm(self.t("slow"), self.brain.cancel)
+
+    # ------------------------------------------------------------------ profile sync (refresh button)
+
+    SYNC_QUESTION = ("[Profile sync, not a chat question] Look at the screenshot and read MY character's current "
+                     "level and job (the HUD shows them). Reply with one short line in the profile's language, "
+                     "then @@META@@ with profile_update (level, job, base_class if visible) and avatar_box. "
+                     "If the game or the character is not visible, say so briefly and leave profile_update empty.")
+
+    def sync_profile(self):
+        if self.busy or getattr(self, "_syncing", False):
+            return
+        self._syncing = True
+        self.profile_card.set_busy(True, self.t("syncing"))
+        # the chat is opaque and on screen: step aside for the capture
+        self.setWindowOpacity(0.0)
+        QTimer.singleShot(120, self._sync_capture)
+
+    def _sync_capture(self):
+        hwnd = self.game_hwnd or winapi.find_game_window()
+        shot = winapi.capture_game(hwnd)
+        self.setWindowOpacity(1.0)
+        if not shot:
+            self._syncing = False
+            self.profile_card.set_busy(False)
+            self.add_system(self.t("sync_no_game"))
+            return
+        self._sync_shot = shot
+        self._sync_thread = QThread(self)
+        self._sync_worker = AskWorker(self.brain, self.SYNC_QUESTION, self.profiles.active, None, shot)
+        self._sync_worker.moveToThread(self._sync_thread)
+        self._sync_thread.started.connect(self._sync_worker.run)
+        self._sync_worker.done.connect(self._on_sync_done)      # bound method → runs on the GUI thread
+        self._sync_worker.done.connect(self._sync_thread.quit)
+        self._sync_thread.start()
+
+    def _on_sync_done(self, ans: Answer):
+        self._syncing = False
+        self.profile_card.set_busy(False)
+        if ans.error:
+            self.add_system(self.t("err_generic"))
+            return
+        changes = self.profiles.apply_update(ans.profile_update or {})
+        if ans.avatar_box:
+            self._update_avatar(self._sync_shot, ans.avatar_box)
+        if changes:
+            self._show_changes(changes)
+        else:
+            self.add_system(self.t("sync_nothing") if ans.profile_update or ans.avatar_box
+                            else self.t("sync_not_found"))
+        self.refresh_profile_chip()
+
+    def _on_done_main(self, ans: Answer):
+        self._on_done(ans, self._pending_history)
 
     def _on_done(self, ans: Answer, history: History | None):
         self._slow_timer.stop()
