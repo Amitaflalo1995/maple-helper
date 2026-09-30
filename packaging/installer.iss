@@ -24,7 +24,21 @@ OutputBaseFilename=MapleHelper-Setup
 SetupIconFile=..\assets\brand\app.ico
 UninstallDisplayIcon={app}\Maple Helper.exe
 UninstallDisplayName={#AppName}
-WizardStyle=modern
+; look: Windows 11 style that follows the system light/dark setting, like the app itself,
+; over a frosted image of the game world; mascot and app icon from the brand
+WizardStyle=modern dynamic windows11
+ShowLanguageDialog=no
+DisableWelcomePage=no
+LanguageDetectionMethod=locale
+WizardBackColor=#F5F5F7
+WizardBackColorDynamicDark=#1C1C1E
+WizardBackImageFile=installer-art\back-light.png
+WizardBackImageFileDynamicDark=installer-art\back-dark.png
+WizardImageFile=installer-art\side.png
+WizardImageFileDynamicDark=installer-art\side.png
+WizardSmallImageFile=installer-art\small.png
+WizardSmallImageFileDynamicDark=installer-art\small.png
+WizardImageAlphaFormat=defined
 Compression=lzma2/ultra
 SolidCompression=yes
 CloseApplications=force
@@ -53,3 +67,13 @@ Filename: "{app}\Maple Helper.exe"; Flags: nowait; Check: WizardSilent
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}"
+
+[Messages]
+hebrew.WelcomeLabel1=ברוכים הבאים ל-Maple Helper
+hebrew.WelcomeLabel2=העוזר האישי שלכם ב-MapleStory.%n%nההתקנה לוקחת פחות מדקה ולא דורשת הרשאות מנהל.
+hebrew.FinishedHeadingLabel=Maple Helper מוכן!
+hebrew.FinishedLabel=בכניסה הראשונה נחבר את Claude וניצור את הדמות שלכם.%n%nבתוך המשחק, לחצו F9 כדי לפתוח ולסגור את הצ'אט.
+english.WelcomeLabel1=Welcome to Maple Helper
+english.WelcomeLabel2=Your personal MapleStory assistant.%n%nSetup takes under a minute and needs no admin rights.
+english.FinishedHeadingLabel=Maple Helper is ready!
+english.FinishedLabel=On first launch we'll connect Claude and set up your character.%n%nIn game, press F9 to open and close the chat.

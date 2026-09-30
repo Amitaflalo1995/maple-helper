@@ -16,6 +16,21 @@ from .store import kb_dir
 HEBREW = re.compile(r"[֐-׿]")
 
 
+_FINALS = str.maketrans("ךםןףץ", "כמנפצ")
+
+
+def _heb_loose(s: str) -> str:
+    """Spelling-tolerant Hebrew: final letters, doubled yod/vav and a word-final he/alef don't matter
+    ("אלינייה" = "אליניה", "הנסיס" = "הניסיס" is left to the alias list)."""
+    s = s.translate(_FINALS)
+    s = re.sub(r"יי+", "י", s)
+    s = re.sub(r"וו+", "ו", s)
+    s = re.sub(r"(?<=[א-ת])[הא](?=\s|$)", "", s)
+    # definite article on every word: "החילזון האדום" = "חילזון אדום"
+    s = re.sub(r"(?:(?<=\s)|^)ה(?=[א-ת]{3,})", "", s)
+    return s
+
+
 def _norm(s: str) -> str:
     s = s.lower().replace("’", "'")
     s = re.sub(r"[^\w֐-׿' ]+", " ", s)
@@ -75,16 +90,18 @@ class KnowledgeBase:
             if len(n) >= 3:
                 pairs.append((n, key))
         pairs += [(a, k) for a, k in self.aliases.items() if len(a) >= 2]
+        pairs += [(_heb_loose(a), k) for a, k in self.aliases.items() if len(a) >= 3 and _heb_loose(a) != a]
         return sorted(pairs, key=lambda p: -len(p[0]))
 
     def find_mentions(self, text: str, max_results: int = 5) -> list[str]:
         """Entities named in free text (English names, Hebrew aliases, transliterations)."""
-        hay = f" {_norm(text)} "
+        norm = _norm(text)
+        hay = f" {norm} {_heb_loose(norm)} " if HEBREW.search(norm) else f" {norm} "
         found: list[str] = []
         taken: list[tuple[int, int]] = []
         for name, key in self._names:
             i = hay.find(f" {name} ")
-            if i < 0 and HEBREW.search(name):
+            if i < 0 and HEBREW.search(name) and len(name) >= 4:
                 # Hebrew prefixes: ב/ל/מ/ה/ו/ש/כ glued to the word ("לחילזון", "בהנסיס")
                 m = re.search(r"[ ][בלמהושכ]{1,2}" + re.escape(name) + r"[ ]", hay)
                 i = m.start() if m else -1

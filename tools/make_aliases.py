@@ -19,8 +19,9 @@ OUT = KB / "aliases.json"
 BATCH = 80
 
 PROMPT = """You map MapleStory Classic names to the Hebrew names Israeli players type or say.
-For each entry return 1-4 Hebrew aliases: a Hebrew translation when one is natural ("חילזון אדום"),
-and the Hebrew transliteration(s) of the English name as it is pronounced ("רד סנייל", "הנסיס"/"הניסיס").
+For each entry return 2-4 Hebrew aliases. ALWAYS include the phonetic Hebrew transliteration of the English
+name as players say it ("רד סנייל", "דארק לורד", "הנסיס"), plus common spelling variants ("הניסיס"),
+and a Hebrew translation only when players actually use one ("חילזון אדום").
 Skip generic words that would cause false matches (e.g. do not alias a monster as just "עץ").
 Return ONLY a JSON object: {"<key>": ["alias", ...], ...} with exactly the keys given.
 
