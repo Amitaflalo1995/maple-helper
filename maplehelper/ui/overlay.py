@@ -5,7 +5,7 @@ import time
 
 from PySide6.QtCore import (QEasingCurve, QObject, QParallelAnimationGroup, QPoint, QPropertyAnimation, QRect, QRectF,
                             Qt, QThread, QTimer, Signal)
-from PySide6.QtGui import QGuiApplication, QPainterPath, QPixmap
+from PySide6.QtGui import QGuiApplication, QIcon, QPainterPath, QPixmap
 from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QPushButton,
                                QScrollArea, QSizeGrip, QToolButton, QVBoxLayout, QWidget)
 
@@ -25,7 +25,7 @@ class AskWorker(QObject):
     delta = Signal(str)
     done = Signal(object)
 
-    def __init__(self, brain: Brain, question: str, character, history, shot: bytes | None, focus: str = ""):
+    def __init__(self, brain: Brain, question: str, character, history, shot: bytes | None, focus=None):
         super().__init__()
         self.brain, self.question, self.character, self.history, self.shot = brain, question, character, history, shot
         self.focus = focus
@@ -190,23 +190,24 @@ class Overlay(QWidget):
         self._anchor = None          # the answer being read: stay at its first line
         self.scroll.verticalScrollBar().rangeChanged.connect(self._on_range)
 
-        # "asking about: Mano ✕" — shown while a card is selected
-        self.focus_key = ""
+        # tagged cards: "asking about:" + a chip per card (tap a card again or its ✕ to untag)
+        self.focus_keys: list[str] = []
         self.focus_bar = QFrame(objectName="FocusBar")
         fb = QHBoxLayout(self.focus_bar)
         fb.setContentsMargins(8, 4, 6, 4)
-        fb.setSpacing(8)
-        self.focus_pic = QLabel()
-        self.focus_pic.setFixedSize(24, 24)
-        fb.addWidget(self.focus_pic)
-        self.focus_text = QLabel(objectName="FocusText")
-        fb.addWidget(self.focus_text, 1)
-        clear = self._icon_button(theme.ICON["close"])
-        clear.clicked.connect(lambda: self.set_focus(""))
-        fb.addWidget(clear)
+        fb.setSpacing(6)
+        self.focus_label = QLabel(objectName="FocusText")
+        fb.addWidget(self.focus_label)
+        self.focus_chips = QHBoxLayout()
+        self.focus_chips.setSpacing(6)
+        fb.addLayout(self.focus_chips, 1)
+        clear_all = self._icon_button(theme.ICON["close"])
+        clear_all.setToolTip(self.t("untag_all"))
+        clear_all.clicked.connect(lambda: self.set_tags([]))
+        fb.addWidget(clear_all)
         self.focus_bar.hide()
         lay.addWidget(self.focus_bar)
-        SELECTION.picked.connect(lambda k: self.set_focus("" if k == self.focus_key else k))
+        SELECTION.picked.connect(self.toggle_tag)
 
         # input capsule: [camera] field [mic] (send)
         self.capsule = Capsule(objectName="Capsule")
@@ -420,19 +421,40 @@ class Overlay(QWidget):
             if w:
                 w.deleteLater()
 
-    def set_focus(self, key: str):
-        """Select an entity to ask about (tap again or ✕ to clear)."""
-        e = self.kb.get(key) if key else None
-        self.focus_key = key if e else ""
-        if e:
-            pm = QPixmap(str(self.kb.picture(key)))
-            self.focus_pic.setPixmap(pm.scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-            self.focus_text.setText(bidi.plain(self.t("asking_about", name=e["name"]), self.t.rtl))
-            self.focus_text.setAlignment((Qt.AlignRight if self.t.rtl else Qt.AlignLeft) | Qt.AlignAbsolute
-                                         | Qt.AlignVCenter)
+    MAX_TAGS = 5
+
+    def toggle_tag(self, key: str):
+        tags = list(self.focus_keys)
+        if key in tags:
+            tags.remove(key)
+        elif self.kb.get(key):
+            tags = (tags + [key])[-self.MAX_TAGS:]
+        self.set_tags(tags)
+
+    def set_tags(self, keys: list[str]):
+        """Tag cards to ask about; the bar shows a chip per card."""
+        self.focus_keys = [k for k in keys if self.kb.get(k)]
+        while self.focus_chips.count():
+            w = self.focus_chips.takeAt(0).widget()
+            if w:
+                w.deleteLater()
+        for k in self.focus_keys:
+            chip = QPushButton(objectName="TagChip")
+            chip.setIcon(QIcon(str(self.kb.picture(k))))
+            chip.setText(self.kb.get(k)["name"] + "  ✕")
+            chip.setCursor(Qt.PointingHandCursor)
+            chip.setToolTip(self.t("untag"))
+            chip.clicked.connect(lambda _=False, k=k: self.toggle_tag(k))
+            self.focus_chips.addWidget(chip)
+        self.focus_chips.addStretch(1)
+        self.focus_label.setText(bidi.plain(self.t("asking_about_short"), self.t.rtl))
+        self.focus_bar.setVisible(bool(self.focus_keys))
+        if self.focus_keys:
             self.input.setFocus()
-        self.focus_bar.setVisible(bool(e))
-        SELECTION.changed.emit(self.focus_key)
+        SELECTION.changed.emit(self.focus_keys)
+
+    def set_focus(self, key: str):   # kept for callers that tag a single card
+        self.set_tags([key] if key else [])
 
     def add_bubble(self, text: str, role: str, tag: str = "") -> Bubble:
         b = Bubble(text, role, self.t.rtl, tag)
@@ -481,8 +503,8 @@ class Overlay(QWidget):
             return
         c = self.profiles.active
         history = History(c.id) if c else None
-        focus = self.focus_key
-        focus_name = (self.kb.get(focus) or {}).get("name", "") if focus else ""
+        focus = list(self.focus_keys)
+        focus_name = ", ".join(self.kb.get(k)["name"] for k in focus)
         self.add_bubble(question, "user", focus_name)
         shot = None if self.shot_used else self.shot
         self._question_shot = shot

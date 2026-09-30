@@ -144,6 +144,10 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #GroupHeader {{ background: transparent; border: 2px solid transparent; border-radius: 10px; }}
     #BubbleTag {{ color: rgba(255,255,255,0.85); font-size: {s - 3}px; font-weight: 600; }}
     #FocusBar {{ background: rgba(255,149,51,0.12); border: 1px solid rgba(255,149,51,0.55); border-radius: 12px; }}
+    QPushButton#TagChip {{ background: {"rgba(255,255,255,0.10)" if MODE == "dark" else "#FFFFFF"};
+                           border: 1px solid rgba(255,149,51,0.55); border-radius: 12px; min-height: 24px;
+                           max-height: 24px; padding: 0 8px; font-size: {s - 2}px; font-weight: 600; color: {c['text']}; }}
+    QPushButton#TagChip:hover {{ background: rgba(255,149,51,0.20); }}
     #FocusText {{ color: {c['text']}; font-size: {s - 1}px; }}
     #TileGrid {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 14px; }}
     #Tile {{ background: {"rgba(255,255,255,0.05)" if MODE == "dark" else "#F7F7F9"}; border: 1px solid {c['hair']};

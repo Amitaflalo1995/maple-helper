@@ -25,7 +25,7 @@ def _label(text: str = "", name: str | None = None, rich: bool = False, wrap: bo
 class Bubble(QFrame):
     """A chat message. Direction is decided per paragraph, not by the UI language."""
 
-    def __init__(self, text: str, role: str, ui_rtl: bool, tag: str = ""):
+    def __init__(self, text: str, role: str, ui_rtl: bool, tag: str = ""):  # tag: "Mano, Blue Snail"
         super().__init__()
         self.role = role
         self.setObjectName("BubbleUser" if role == "user" else "BubbleBot")
@@ -86,7 +86,7 @@ class _Selection(QObject):
     """One selected entity for the whole chat. Cards emit `picked`; the overlay decides and broadcasts `changed`."""
 
     picked = Signal(str)
-    changed = Signal(str)     # the selected key, or "" for none
+    changed = Signal(list)    # the tagged keys (empty list = none)
 
 
 SELECTION = _Selection()
@@ -100,8 +100,8 @@ class Selectable:
         self.setCursor(Qt.PointingHandCursor)
         SELECTION.changed.connect(self._on_selection)
 
-    def _on_selection(self, key: str):
-        self.setProperty("selected", "true" if key == self.key else "false")
+    def _on_selection(self, keys: list):
+        self.setProperty("selected", "true" if self.key in keys else "false")
         self.style().unpolish(self)
         self.style().polish(self)
 
