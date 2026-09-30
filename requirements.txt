@@ -1,5 +1,5 @@
 PySide6>=6.7
-mss>=9
+mss>=10.2.0
 pillow>=10
 keyring>=25
 faster-whisper>=1.0
