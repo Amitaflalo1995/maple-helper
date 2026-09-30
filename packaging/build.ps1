@@ -46,7 +46,9 @@ function Invoke-SelfTest([string]$Exe) {
     $argv = @("--selftest", "`"$report`"")
     if ($RequireKb) { $argv += "--require-kb" }
     # windowed exe: no console output; the verdict is the exit code plus the report file
-    $p = Start-Process -FilePath $Exe -ArgumentList $argv -Wait -PassThru -WindowStyle Hidden
+    $p = Start-Process -FilePath $Exe -ArgumentList $argv -PassThru -WindowStyle Hidden
+    $null = $p.Handle
+    if (-not $p.WaitForExit(300000)) { $p | Stop-Process -Force; throw "Self-test hung for $Exe" }
     if (Test-Path $report) { Get-Content $report | Write-Host } else { Write-Host "(no self-test report written)" }
     if ($p.ExitCode -ne 0) { throw "Self-test failed for $Exe (exit code $($p.ExitCode))" }
 }
@@ -102,7 +104,10 @@ if ($TestInstaller) {
     $target = Join-Path ([IO.Path]::GetTempPath()) "MapleHelper-install-test"
     Remove-Item -Recurse -Force $target -ErrorAction SilentlyContinue
     Write-Host "== Installing silently into $target"
-    $p = Start-Process $setup -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/DIR=`"$target`"" -Wait -PassThru
+    # not -Wait: in PowerShell 7 it also waits for child processes, and setup relaunches the app, so it never returns
+    $p = Start-Process $setup -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/DIR=`"$target`"" -PassThru
+    $null = $p.Handle   # keep the handle, or ExitCode reads empty after the exit
+    if (-not $p.WaitForExit(300000)) { throw "Installer did not finish within 5 minutes" }
     if ($p.ExitCode -ne 0) { throw "Installer exited with $($p.ExitCode)" }
     # a silent install relaunches the app (that is how self-updates restart it); stop it for the test
     Start-Sleep -Seconds 5
@@ -113,7 +118,8 @@ if ($TestInstaller) {
     if (-not $shortcut) { throw "Start Menu shortcut missing under $programs" }
 
     Write-Host "== Uninstalling"
-    Start-Process (Join-Path $target "unins000.exe") -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" -Wait
+    $u = Start-Process (Join-Path $target "unins000.exe") -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" -PassThru
+    $null = $u.WaitForExit(120000)
     # the uninstaller re-launches itself from %TEMP%, so wait for the files to disappear
     $deadline = (Get-Date).AddSeconds(90)
     while ((Test-Path (Join-Path $target $AppExe)) -and (Get-Date) -lt $deadline) { Start-Sleep -Seconds 2 }
