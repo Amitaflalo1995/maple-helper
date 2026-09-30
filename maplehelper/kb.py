@@ -108,7 +108,10 @@ class KnowledgeBase:
                 continue
             e = self.get(key)
             if e:
-                out = re.sub(rf"(?<![֐-׿]){re.escape(alias)}(?![֐-׿])", e["name"], out)
+                # keep a glued Hebrew prefix: "ובלו סנייל" → "ו-Blue Snail"
+                name = e["name"]
+                out = re.sub(rf"(?<![֐-׿])([ובלמהשכ]{{0,2}}){re.escape(alias)}(?![֐-׿])",
+                             lambda m, n=name: f"{m.group(1)}-{n}" if m.group(1) else n, out)
         return out
 
     # ------------------------------------------------------------ level digest
