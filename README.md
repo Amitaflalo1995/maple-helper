@@ -2,13 +2,13 @@
   <img src="assets/brand/wordmark.png" width="320" alt="Maple Helper">
 </p>
 
-<p align="center"><b>Your personal MapleStory assistant</b></p>
+<p align="center"><b>Your personal Maple Story Classic World assistant</b></p>
 
-<p align="center"><sub>Unofficial companion for MapleStory Classic · Not affiliated with Nexon</sub></p>
+<p align="center"><sub>Unofficial companion for Maple Story Classic World · Not affiliated with Nexon</sub></p>
 
 ## About
 
-Maple Helper is a Windows desktop assistant that puts a transparent chat overlay on top of MapleStory Classic. Press **F9** to open it, then type a question or hold **F10** to speak. Answers draw on a screenshot of your game, your character profile, previous conversations, and a local copy of the NiaMeowDB game database.
+Maple Helper is a Windows desktop assistant that puts a transparent chat overlay on top of Maple Story Classic World. Press **F9** to open it, then type a question or hold **F10** to speak. Answers draw on a screenshot of your game, your character profile, previous conversations, and a local copy of the NiaMeowDB game database.
 
 Use it to look up drops, find quest NPCs, or ask where to train without switching away from the game.
 
@@ -29,7 +29,7 @@ The app uses screen capture and its own overlay window. It does not read game me
 - Windows 10 or 11.
 - Python 3.10 or later to run from source.
 - Claude Code installed, with either a Claude Pro or Max account or an Anthropic API key. The app uses Claude Code in both modes.
-- MapleStory running in **Borderless** or **Windowed Fullscreen** mode.
+- Maple Story Classic World running in **Borderless** or **Windowed Fullscreen** mode.
 - An internet connection for Claude responses and initial data downloads.
 - A microphone if you want to use voice input.
 
@@ -102,4 +102,4 @@ For a small knowledge-base download during development, limit the scraper to fiv
 - Game data and images: [NiaMeowDB](https://meowdb.com), used with permission. Game assets belong to their rights holders.
 - Font: [Rubik](https://fonts.google.com/specimen/Rubik), distributed under the [SIL Open Font License](assets/fonts/OFL.txt).
 - Speech recognition: [ivrit.ai](https://huggingface.co/ivrit-ai) Whisper models.
-- MapleStory is a trademark of Nexon. This project is not affiliated with or endorsed by Nexon.
+- Maple Story Classic World is a trademark of Nexon. This project is not affiliated with or endorsed by Nexon.
