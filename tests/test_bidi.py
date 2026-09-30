@@ -107,3 +107,20 @@ def test_html_direction_follows_the_message():
     assert he.count('dir="rtl"') == 2 and he.count('dir="ltr"') == 1 and "<b>" in he
     en = bidi.to_html("Go grind **Red Snail** now.\nIt drops Red Potion.")
     assert 'dir="rtl"' not in en
+
+
+# lines inside a Hebrew answer: the message decides the direction (RTL), and punctuation between
+# two English/number blocks must stay in the Hebrew flow instead of gluing the blocks together
+HEBREW_MESSAGE_LINES = [
+    ("Mano (לבל 20) - Subi Throwing Stars", [("S", "2"), ("2", "ל"), ("ל", "M")]),
+    ("Fire Boar (לבל 32, The Burnt Land) - Wolbi Throwing Stars", [("W", "3"), ("3", "ל"), ("ל", "F")]),
+    ("Red Snail, Blue Snail", [("B", "R")]),
+]
+
+
+@pytest.mark.parametrize("line,checks", HEBREW_MESSAGE_LINES)
+def test_line_inside_hebrew_message(line, checks):
+    shown = bidi.isolate_ltr_runs(line)
+    x = glyph_x(shown)
+    for a, b in checks:
+        assert x[shown.index(a)] < x[shown.index(b)], f"{a!r} should be left of {b!r} in {line!r}"

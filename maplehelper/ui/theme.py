@@ -46,7 +46,7 @@ BORDER = "rgba(255,149,51,0.55)"
 
 FONT_FAMILY = "Rubik"
 ICON_FONT = "Segoe Fluent Icons"
-ICON = {"refresh": "\ue72c", "info": "\ue946", "edit": "\ue70f", "delete": "\ue74d", "add": "\ue710", "minimize": "\ue921", "close": "\ue8bb", "settings": "\ue713", "camera": "\ue722", "mic": "\ue720", "send": "\ue74a", "stop": "\ue71a"}
+ICON = {"open": "\ue8a7", "refresh": "\ue72c", "info": "\ue946", "edit": "\ue70f", "delete": "\ue74d", "add": "\ue710", "minimize": "\ue921", "close": "\ue8bb", "settings": "\ue713", "camera": "\ue722", "mic": "\ue720", "send": "\ue74a", "stop": "\ue71a"}
 
 
 def set_mode(mode: str) -> None:
@@ -138,11 +138,23 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #SystemLine {{ color: {c['muted']}; font-size: {s - 2}px; }}
 
     #Card {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 14px; }}
-    #Card:hover {{ background: {c['fill2']}; }}
+    #Card:hover {{ background: {c['fill2']}; border: 1px solid rgba(255,149,51,0.7); }}
+    #GroupHeader {{ background: transparent; border: 1px solid transparent; border-radius: 10px; }}
+    #GroupHeader:hover {{ border: 1px solid rgba(255,149,51,0.7); }}
+    #TileGridTitle {{ color: {c['muted']}; font-size: {s - 2}px; font-weight: 600; }}
+    #BubbleTag {{ color: rgba(255,255,255,0.85); font-size: {s - 3}px; font-weight: 600; }}
+    #FocusBar {{ background: rgba(255,149,51,0.12); border: 1px solid rgba(255,149,51,0.55); border-radius: 12px; }}
+    QPushButton#TagChip {{ background: {"rgba(255,255,255,0.10)" if MODE == "dark" else "#FFFFFF"};
+                           border: 1px solid rgba(255,149,51,0.55); border-radius: 12px; min-height: 24px;
+                           max-height: 24px; padding: 0 8px; font-size: {s - 2}px; font-weight: 600; color: {c['text']}; }}
+    QPushButton#TagChip:hover {{ background: rgba(255,149,51,0.20); }}
+    #FocusText {{ color: {c['text']}; font-size: {s - 1}px; }}
     #TileGrid {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 14px; }}
     #Tile {{ background: {"rgba(255,255,255,0.05)" if MODE == "dark" else "#F7F7F9"}; border: 1px solid {c['hair']};
              border-radius: 10px; }}
     #Tile:hover {{ border: 1px solid rgba(255,149,51,0.7); }}
+    #Card[selected="true"], #Tile[selected="true"], #GroupHeader[selected="true"] {{
+        border: 2px solid {ORANGE}; background: rgba(255,149,51,0.12); }}
     #TileName {{ font-size: {s - 1}px; font-weight: 500; color: {c['text']}; }}
     #CardName {{ font-weight: 600; color: {c['text']}; }}
     #CardSub {{ color: {c['muted']}; font-size: {s - 2}px; }}

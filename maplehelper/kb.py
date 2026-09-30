@@ -196,6 +196,47 @@ class KnowledgeBase:
                 found.append(k)
         return found
 
+    @cached_property
+    def droppers(self) -> dict[str, list[str]]:
+        """item key → monster keys that drop it (lowest level first)."""
+        out: dict[str, list[str]] = {}
+        for mkey, e in self.entities.items():
+            if e["category"] == "monster":
+                for ikey in self.monster_drops(mkey):
+                    out.setdefault(ikey, []).append(mkey)
+        lvl = lambda k: (self.get(k).get("props") or {}).get("Level") or 999  # noqa: E731
+        return {i: sorted(ms, key=lvl) for i, ms in out.items()}
+
+    def drop_groups(self, item_keys: list[str], limit: int = 8) -> list[dict]:
+        """Group items by the monsters that drop them: [{"monster": key, "items": [keys]}], by monster level."""
+        groups: dict[str, list[str]] = {}
+        for i in item_keys:
+            for m in self.droppers.get(i, []):
+                groups.setdefault(m, [])
+                if i not in groups[m]:
+                    groups[m].append(i)
+        lvl = lambda k: (self.get(k).get("props") or {}).get("Level") or 999  # noqa: E731
+        ordered = sorted(groups, key=lvl)[:limit]
+        return [{"monster": m, "items": groups[m]} for m in ordered]
+
+    def ensure_drop_table(self) -> None:
+        """Write drops.tsv next to index.json so Claude can grep 'which monsters drop X' in one step."""
+        path = self.root / "drops.tsv"
+        idx = self.root / "index.json"
+        try:
+            if path.exists() and idx.exists() and path.stat().st_mtime >= idx.stat().st_mtime:
+                return
+            lines = ["monster\tmonster_level\tmonster_key\titem\titem_type\titem_key"]
+            for ikey, monsters in self.droppers.items():
+                it = self.get(ikey)
+                for m in monsters:
+                    me = self.get(m)
+                    lv = (me.get("props") or {}).get("Level", "")
+                    lines.append(f"{me['name']}\t{lv}\t{m}\t{it['name']}\t{it.get('type') or ''}\t{ikey}")
+            path.write_text("\n".join(lines), encoding="utf-8")
+        except OSError:
+            pass
+
     def drops_digest(self, key: str) -> str:
         drops = self.monster_drops(key)
         if not drops:

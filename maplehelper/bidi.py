@@ -24,7 +24,7 @@ _RTL = re.compile(rf"[{RTL_CHARS}]")
 # may contain spaces and inner punctuation; ends with a letter, digit, % or ).
 _RUN = re.compile(
     r"(?:[+\-±]?\d|[A-Za-z])"                    # start
-    r"(?:[A-Za-z0-9.'’:&/+\-–%#×_ ()]*"          # body (balanced brackets are fixed up below)
+    r"(?:(?:[A-Za-z0-9.'’:&/+\-–%#×_ ()]|,(?=\d{3}\b))*"   # body; "1,500" keeps its thousands comma
     r"[A-Za-z0-9%)])?"                           # end
 )
 
@@ -75,7 +75,9 @@ def isolate_ltr_runs(text: str) -> str:
         if not run:
             continue
         out.append(text[pos:start])
-        out.append(f"{LRE}{run}{PDF}")
+        # the RLM after the block keeps following punctuation (") - ", ", ") in the Hebrew flow,
+        # so two English blocks never glue into one left-to-right chunk
+        out.append(f"{LRE}{run}{PDF}{RLM}")
         pos = end
     out.append(text[pos:])
     return "".join(out)

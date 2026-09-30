@@ -5,19 +5,19 @@ import time
 
 from PySide6.QtCore import (QEasingCurve, QObject, QParallelAnimationGroup, QPoint, QPropertyAnimation, QRect, QRectF,
                             Qt, QThread, QTimer, Signal)
-from PySide6.QtGui import QGuiApplication, QPainterPath, QPixmap
+from PySide6.QtGui import QGuiApplication, QIcon, QPainterPath, QPixmap
 from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QPushButton,
                                QScrollArea, QSizeGrip, QToolButton, QVBoxLayout, QWidget)
 
 from .. import bidi, winapi
 from ..brain import Answer, Brain
-from ..i18n import I18n
+from ..i18n import STRINGS, I18n
 from ..kb import KnowledgeBase
 from ..store import ASSETS, History, Profiles, Settings
 from . import theme
 from .glass import paint_glass
 from .minibubble import MiniBubble
-from .widgets import Bubble, BubbleRow, EntityCard, ProfileCard, SystemLine, TileGrid
+from .widgets import SELECTION, Bubble, BubbleRow, DropGroupCard, EntityCard, ProfileCard, SystemLine, TileGrid
 
 
 
@@ -25,12 +25,18 @@ class AskWorker(QObject):
     delta = Signal(str)
     done = Signal(object)
 
-    def __init__(self, brain: Brain, question: str, character, history, shot: bytes | None):
+    def __init__(self, brain: Brain, question: str, character, history, shot: bytes | None, focus=None):
         super().__init__()
         self.brain, self.question, self.character, self.history, self.shot = brain, question, character, history, shot
+        self.focus = focus
 
     def run(self):
-        ans = self.brain.ask(self.question, self.character, self.history, self.shot, on_delta=self.delta.emit)
+        # whatever happens, the chat gets an answer back (never stuck on "thinking")
+        try:
+            ans = self.brain.ask(self.question, self.character, self.history, self.shot, on_delta=self.delta.emit,
+                                 focus=self.focus)
+        except Exception as e:  # noqa: BLE001
+            ans = Answer(error=f"internal: {e}")
         self.done.emit(ans)
 
 
@@ -180,8 +186,28 @@ class Overlay(QWidget):
         self.feed_lay.addStretch(1)
         self.scroll.setWidget(self.feed)
         lay.addWidget(self.scroll, 1)
-        self.scroll.verticalScrollBar().rangeChanged.connect(
-            lambda _a, b: self.scroll.verticalScrollBar().setValue(b))
+        self._follow = True          # keep the newest content in view (off once an answer outgrows the view)
+        self._anchor = None          # the answer being read: stay at its first line
+        self.scroll.verticalScrollBar().rangeChanged.connect(self._on_range)
+
+        # tagged cards: "asking about:" + a chip per card (tap a card again or its ✕ to untag)
+        self.focus_keys: list[str] = []
+        self.focus_bar = QFrame(objectName="FocusBar")
+        fb = QHBoxLayout(self.focus_bar)
+        fb.setContentsMargins(8, 4, 6, 4)
+        fb.setSpacing(6)
+        self.focus_label = QLabel(objectName="FocusText")
+        fb.addWidget(self.focus_label)
+        self.focus_chips = QHBoxLayout()
+        self.focus_chips.setSpacing(6)
+        fb.addLayout(self.focus_chips, 1)
+        clear_all = self._icon_button(theme.ICON["close"])
+        clear_all.setToolTip(self.t("untag_all"))
+        clear_all.clicked.connect(lambda: self.set_tags([]))
+        fb.addWidget(clear_all)
+        self.focus_bar.hide()
+        lay.addWidget(self.focus_bar)
+        SELECTION.picked.connect(self.toggle_tag)
 
         # input capsule: [camera] field [mic] (send)
         self.capsule = Capsule(objectName="Capsule")
@@ -395,8 +421,43 @@ class Overlay(QWidget):
             if w:
                 w.deleteLater()
 
-    def add_bubble(self, text: str, role: str) -> Bubble:
-        b = Bubble(text, role, self.t.rtl)
+    MAX_TAGS = 5
+
+    def toggle_tag(self, key: str):
+        tags = list(self.focus_keys)
+        if key in tags:
+            tags.remove(key)
+        elif self.kb.get(key):
+            tags = (tags + [key])[-self.MAX_TAGS:]
+        self.set_tags(tags)
+
+    def set_tags(self, keys: list[str]):
+        """Tag cards to ask about; the bar shows a chip per card."""
+        self.focus_keys = [k for k in keys if self.kb.get(k)]
+        while self.focus_chips.count():
+            w = self.focus_chips.takeAt(0).widget()
+            if w:
+                w.deleteLater()
+        for k in self.focus_keys:
+            chip = QPushButton(objectName="TagChip")
+            chip.setIcon(QIcon(str(self.kb.picture(k))))
+            chip.setText(self.kb.get(k)["name"] + "  ✕")
+            chip.setCursor(Qt.PointingHandCursor)
+            chip.setToolTip(self.t("untag"))
+            chip.clicked.connect(lambda _=False, k=k: self.toggle_tag(k))
+            self.focus_chips.addWidget(chip)
+        self.focus_chips.addStretch(1)
+        self.focus_label.setText(bidi.plain(self.t("asking_about_short"), self.t.rtl))
+        self.focus_bar.setVisible(bool(self.focus_keys))
+        if self.focus_keys:
+            self.input.setFocus()
+        SELECTION.changed.emit(self.focus_keys)
+
+    def set_focus(self, key: str):   # kept for callers that tag a single card
+        self.set_tags([key] if key else [])
+
+    def add_bubble(self, text: str, role: str, tag: str = "") -> Bubble:
+        b = Bubble(text, role, self.t.rtl, tag)
         self._add_widget(BubbleRow(b, self.t.rtl))
         return b
 
@@ -413,8 +474,21 @@ class Overlay(QWidget):
         rest = [k for k in keys if k not in heads]
         for k in heads:
             self._add_widget(EntityCard(self.kb, k, self.t.lang))
-        if rest:
-            self._add_widget(TileGrid(self.kb, rest))
+        # tiles go in titled groups, so nothing looks like it belongs to the card above unless it does
+        groups: dict[str, list[str]] = {}
+        if heads and heads[0].startswith("monster/"):
+            groups[self.t("tiles_drops", name=self.kb.get(heads[0])["name"])] = []   # its drops first
+        drops = set(self.kb.monster_drops(heads[0])) if heads and heads[0].startswith("monster/") else set()
+        for k in rest:
+            if k in drops:
+                title = self.t("tiles_drops", name=self.kb.get(heads[0])["name"])
+            else:
+                kind = "tiles_" + k.split("/")[0]
+                title = self.t(kind if kind in STRINGS else "tiles_other")
+            groups.setdefault(title, []).append(k)
+        for title, ks in groups.items():
+            if ks:
+                self._add_widget(TileGrid(self.kb, ks, title))
 
     def add_confirm(self, text: str, on_yes):
         row = QWidget()
@@ -442,20 +516,24 @@ class Overlay(QWidget):
             return
         c = self.profiles.active
         history = History(c.id) if c else None
-        self.add_bubble(question, "user")
+        focus = list(self.focus_keys)
+        focus_name = ", ".join(self.kb.get(k)["name"] for k in focus)
+        self.add_bubble(question, "user", focus_name)
         shot = None if self.shot_used else self.shot
         self._question_shot = shot
         if shot is None and not self.shot_used and not self.game_hwnd:
             self.add_system(self.t("no_game"))
         self.shot_used = True
         if history:
-            history.append("user", question)
+            history.append("user", f"[about {focus_name}] {question}" if focus_name else question)
+        self._anchor = None
+        self._follow = True
         self._pending_bubble = self.add_bubble(self.t("thinking"), "assistant")
         self.busy = True
         self.send_btn.setEnabled(False)
 
         self._thread = QThread(self)
-        self._worker = AskWorker(self.brain, question, c, history, shot)
+        self._worker = AskWorker(self.brain, question, c, history, shot, focus)
         self._worker.moveToThread(self._thread)
         self._thread.started.connect(self._worker.run)
         self._worker.delta.connect(self._on_delta)
@@ -466,9 +544,32 @@ class Overlay(QWidget):
         self._worker.done.connect(self._thread.quit)
         self._thread.start()
 
+    def _on_range(self, _lo: int, hi: int):
+        bar = self.scroll.verticalScrollBar()
+        if self._anchor is not None:
+            bar.setValue(min(hi, self._anchor_top()))
+        elif self._follow:
+            bar.setValue(hi)
+
+    def _anchor_top(self) -> int:
+        row = self._anchor
+        return max(0, row.mapTo(self.feed, row.rect().topLeft()).y() - 8) if row else 0
+
+    def _keep_answer_readable(self):
+        """Once the answer (plus what follows it) is taller than the view, pin its first line to the top."""
+        if not self._pending_bubble:
+            return
+        row = self._pending_bubble.parentWidget()
+        top = row.mapTo(self.feed, row.rect().topLeft()).y()
+        below = self.feed.height() - top
+        if below > self.scroll.viewport().height() - 16:
+            self._anchor = row
+            self.scroll.verticalScrollBar().setValue(self._anchor_top())
+
     def _on_delta(self, text: str):
         if self._pending_bubble and text:
             self._pending_bubble.set_text(text)
+            QTimer.singleShot(0, self._keep_answer_readable)
 
     def sync_profile(self):
         if self.busy or getattr(self, "_syncing", False):
@@ -525,8 +626,12 @@ class Overlay(QWidget):
             self._pending_bubble.set_text(self.t(key))
             return
         self._pending_bubble.set_text(ans.text)
+        QTimer.singleShot(0, self._keep_answer_readable)
+        QTimer.singleShot(250, self._keep_answer_readable)   # after the cards' layout settles
         if history:
             history.append("assistant", ans.text, ans.entities)
+        for g in ans.drop_groups:
+            self._add_widget(DropGroupCard(self.kb, g["monster"], g["items"]))
         if ans.entities:
             self.add_cards(ans.entities)
         self._apply_profile_update(ans.profile_update)
