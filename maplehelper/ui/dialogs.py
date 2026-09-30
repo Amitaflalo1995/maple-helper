@@ -543,14 +543,13 @@ class SettingsDialog(GlassDialog):
             w = self.chars.takeAt(0).widget()
             if w:
                 w.deleteLater()
-        many = len(self.profiles.characters) > 1
         for i, c in enumerate(self.profiles.characters):
             if i:
                 sep = QFrame(objectName="Separator")
                 sep.setFixedHeight(1)
                 self.chars.addWidget(sep)
             row = CharacterRow(c, self.profiles.avatar_path(c), self.kb, c.id == self.profiles.active_id,
-                               self.t.rtl, can_delete=many)
+                               self.t.rtl, can_delete=True)
             row.chosen.connect(self._choose_char)
             row.edit_requested.connect(self._edit_char)
             row.delete_requested.connect(self._delete_char)
@@ -576,6 +575,9 @@ class SettingsDialog(GlassDialog):
                             t("cancel"), t.rtl, self.stylesheet_fn(1.0))
         if dlg.exec():
             self.profiles.remove(cid)
+            if not self.profiles.characters:
+                # advice needs a character: offer to create one right away
+                Onboarding(self.settings, self.profiles, self.kb, self.stylesheet_fn, only_character=True).exec()
             self._fill_chars()
             self.changed.emit()
 
