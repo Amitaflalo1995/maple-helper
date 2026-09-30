@@ -10,17 +10,36 @@ CREATE_NEW_CONSOLE = 0x00000010
 INSTALL_CMD = "irm https://claude.ai/install.ps1 | iex"
 
 
-def status() -> str:
-    """'not_installed' | 'logged_out' | 'ok'"""
+def account() -> dict:
+    """{'status': 'not_installed' | 'logged_out' | 'ok', 'email': str | None}"""
     exe = find_claude()
     if not exe:
-        return "not_installed"
+        return {"status": "not_installed", "email": None}
     try:
         r = subprocess.run([exe, "auth", "status"], capture_output=True, timeout=20, creationflags=CREATE_NO_WINDOW)
         data = json.loads(r.stdout.decode("utf-8", errors="replace") or "{}")
-        return "ok" if data.get("loggedIn") else "logged_out"
     except (OSError, subprocess.TimeoutExpired, json.JSONDecodeError):
-        return "logged_out"
+        return {"status": "logged_out", "email": None}
+    if not data.get("loggedIn"):
+        return {"status": "logged_out", "email": None}
+    return {"status": "ok", "email": data.get("email")}
+
+
+def status() -> str:
+    """'not_installed' | 'logged_out' | 'ok'"""
+    return account()["status"]
+
+
+def logout() -> bool:
+    """Sign Claude Code out of the current account (the next sign-in can pick another one)."""
+    exe = find_claude()
+    if not exe:
+        return False
+    try:
+        r = subprocess.run([exe, "auth", "logout"], capture_output=True, timeout=30, creationflags=CREATE_NO_WINDOW)
+        return r.returncode == 0
+    except (OSError, subprocess.TimeoutExpired):
+        return False
 
 
 def install() -> subprocess.Popen:
@@ -57,6 +76,14 @@ KEYRING_SERVICE = "MapleHelper"
 def save_api_key(key: str) -> None:
     import keyring
     keyring.set_password(KEYRING_SERVICE, "anthropic_api_key", key)
+
+
+def delete_api_key() -> None:
+    try:
+        import keyring
+        keyring.delete_password(KEYRING_SERVICE, "anthropic_api_key")
+    except Exception:
+        pass
 
 
 def load_api_key() -> str | None:
