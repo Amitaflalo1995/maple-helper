@@ -406,9 +406,9 @@ class ConfirmDialog(GlassDialog):
     def __init__(self, title: str, body: str, confirm: str, cancel: str, rtl: bool, stylesheet: str, danger=True):
         super().__init__(title, rtl)
         self.setStyleSheet(stylesheet)
-        self.resize(380, 200)
+        self.resize(420, 230)
         lay = QVBoxLayout(self.content)
-        msg = QLabel(bidi.plain(body, rtl), objectName="RowHint")
+        msg = QLabel(bidi.plain(body, rtl), objectName="DialogBody")
         msg.setWordWrap(True)
         lay.addWidget(msg)
         lay.addStretch(1)

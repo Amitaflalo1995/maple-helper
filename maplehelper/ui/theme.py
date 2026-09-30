@@ -168,6 +168,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #Group {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 14px; }}
     #Separator {{ background: {c['hair']}; border: none; }}
     #RowLabel {{ color: {c['text']}; }}
+    #DialogBody {{ font-size: {s + 1}px; color: {c['text']}; line-height: 140%; }}
     #RowHint {{ color: {c['muted']}; font-size: {s - 3}px; }}
     QPushButton#Link, QPushButton#LinkDanger {{ background: transparent; border: none; min-height: 34px;
                         font-weight: 500; text-align: right; padding: 0; color: {ORANGE}; }}
