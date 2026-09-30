@@ -86,9 +86,13 @@ class MapleHelperApp:
             return bool(r)
 
     def start(self) -> bool:
-        if not self.settings["onboarding_done"] or not self.profiles.active:
+        if not self.settings["onboarding_done"]:
             if not self.run_onboarding():
                 return False
+        elif not self.profiles.active:
+            # set up already (language, Claude): only a character is missing
+            self.style()
+            Onboarding(self.settings, self.profiles, self.kb, self.style, only_character=True).exec()
         api_key = claude_setup.load_api_key() if self.settings["api_key_fallback"] else None
         self.brain = Brain(self.kb, model=self.settings["model"], length=self.settings["answer_length"], api_key=api_key)
         self.overlay = Overlay(self.settings, self.profiles, self.kb, self.brain)
