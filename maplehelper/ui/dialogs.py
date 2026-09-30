@@ -6,10 +6,12 @@ import threading
 from PySide6.QtCore import QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QDialog, QFrame, QGridLayout, QHBoxLayout, QLabel,
-                               QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPushButton, QSlider, QSpinBox,
+                               QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPushButton, QScrollArea, QSlider, QSpinBox,
                                QStackedWidget, QVBoxLayout, QWidget)
 
 from .. import bidi, claude_setup
+from .controls import Section, Segmented, Switch
+from .glass import GlassDialog
 from ..i18n import I18n
 from ..kb import KnowledgeBase
 from ..store import ASSETS, History, Profiles, Settings
@@ -63,7 +65,6 @@ class CharacterForm(QWidget):
         lay.setSpacing(10)
         lay.addWidget(QLabel(t("ob_char_name")))
         self.name = QLineEdit()
-        self.name.setObjectName("Input")
         self.name.setMaxLength(24)
         self.name.textChanged.connect(lambda *_: self.changed.emit())
         lay.addWidget(self.name)
@@ -128,27 +129,26 @@ class CharacterForm(QWidget):
         return self.name.text().strip(), self.base_class(), self.job.currentText(), self.level.value()
 
 
-class Onboarding(QDialog):
+class Onboarding(GlassDialog):
     """Language → Claude connection → character. Every step is required."""
 
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, stylesheet_fn, only_character=False):
-        super().__init__(None, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        self.t = I18n(settings["language"] or "he")
+        title = self.t("add_character") if only_character else "Maple Helper"
+        super().__init__(title, self.t.rtl, settings["show_in_captures"], strength=settings["glass_strength"])
         self.settings, self.profiles, self.kb = settings, profiles, kb
         self.stylesheet_fn = stylesheet_fn
         self.only_character = only_character
-        self.setWindowTitle("Maple Helper")
-        self.setMinimumSize(560, 600)
-        self.t = I18n(settings["language"] or "he")
+        self.resize(600, 680)
         self._bridge = _Bridge()
         self._bridge.status.connect(self._on_status)
         self._claude_ok = False
         self._build()
 
     def _build(self):
-        self.setStyleSheet(self.stylesheet_fn(1.0) + f"QDialog {{ background: {theme.dialog_background()}; }}")
-        self.setLayoutDirection(Qt.RightToLeft if self.t.rtl else Qt.LeftToRight)
-        outer = QVBoxLayout(self)
-        outer.setContentsMargins(28, 24, 28, 20)
+        self.setStyleSheet(self.stylesheet_fn(1.0))
+        outer = QVBoxLayout(self.content)
+        outer.setContentsMargins(10, 4, 10, 0)
         self.stack = QStackedWidget()
         outer.addWidget(self.stack, 1)
         nav = QHBoxLayout()
@@ -233,7 +233,7 @@ class Onboarding(QDialog):
         lay.addWidget(line)
         lay.addWidget(_body(self.t("ob_use_api_key")))
         krow = QHBoxLayout()
-        self.key_edit = QLineEdit(objectName="Input")
+        self.key_edit = QLineEdit()
         self.key_edit.setEchoMode(QLineEdit.Password)
         self.key_edit.setPlaceholderText(self.t("ob_api_key_hint"))
         self.key_edit.setLayoutDirection(Qt.LeftToRight)
@@ -353,10 +353,8 @@ class Onboarding(QDialog):
     def _go_next(self):
         if not self._current_ok():
             return
-        page = self.stack.currentWidget()
-        if page.findChild(CharacterForm):
-            self.profiles.add(*self.form.values())
         if self.stack.currentIndex() == self.stack.count() - 1:
+            self.profiles.add(*self.form.values())
             if not self.only_character:
                 self.settings["onboarding_done"] = True
             self.accept()
@@ -371,114 +369,127 @@ class Onboarding(QDialog):
             self._update_nav()
 
 
-class SettingsDialog(QDialog):
+class SettingsDialog(GlassDialog):
     changed = Signal()
     update_kb_requested = Signal()
 
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, stylesheet_fn):
-        super().__init__(None, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        self.t = t = I18n(settings["language"] or "he")
+        super().__init__(t("settings"), t.rtl, settings["show_in_captures"], strength=settings["glass_strength"])
         self.settings, self.profiles, self.kb = settings, profiles, kb
         self.stylesheet_fn = stylesheet_fn
-        self.t = t = I18n(settings["language"] or "he")
-        self.setWindowTitle(f"Maple Helper · {t('settings')}")
-        self.setMinimumWidth(460)
-        self.setStyleSheet(stylesheet_fn(1.0) + f"QDialog {{ background: {theme.dialog_background()}; }}")
-        self.setLayoutDirection(Qt.RightToLeft if t.rtl else Qt.LeftToRight)
-        lay = QVBoxLayout(self)
-        lay.setSpacing(10)
-        grid = QGridLayout()
-        r = 0
+        self.setStyleSheet(stylesheet_fn(1.0))
+        self.resize(500, 720)
+        rtl = t.rtl
 
-        def row(label, widget):
-            nonlocal r
-            grid.addWidget(QLabel(label), r, 0)
-            grid.addWidget(widget, r, 1)
-            r += 1
+        outer = QVBoxLayout(self.content)
+        outer.setContentsMargins(0, 0, 0, 0)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        body = QWidget(objectName="Feed")
+        lay = QVBoxLayout(body)
+        lay.setContentsMargins(0, 0, 6, 0)
+        lay.setSpacing(18)
+        scroll.setWidget(body)
+        outer.addWidget(scroll, 1)
 
-        self.lang = QComboBox()
-        self.lang.addItem("עברית", "he")
-        self.lang.addItem("English", "en")
-        self.lang.setCurrentIndex(0 if (settings["language"] or "he") == "he" else 1)
-        row(t("language"), self.lang)
+        # appearance
+        sec = Section(t("sec_appearance"), rtl)
+        self.appearance = Segmented([(t("appearance_dark_short"), "dark"), (t("appearance_light_short"), "light")],
+                                    settings["appearance"], rtl)
+        sec.add_row(t("appearance"), self.appearance)
+        self.strength = QSlider(Qt.Horizontal)
+        self.strength.setRange(40, 100)
+        self.strength.setValue(int(settings["glass_strength"] * 100))
+        self.strength.setFixedWidth(160)
+        sec.add_row(t("glass_strength"), self.strength, t("glass_strength_hint"))
+        self.font = Segmented([("A", 13), ("A", 14), ("A", 16)], settings["font_size"], rtl)
+        for i, b in enumerate(self.font.group.buttons()):
+            f = b.font()
+            f.setPixelSize(11 + i * 2)
+            b.setFont(f)
+        sec.add_row(t("font_size"), self.font)
+        self.lang = Segmented([("עברית", "he"), ("English", "en")], settings["language"] or "he", rtl)
+        sec.add_row(t("language"), self.lang)
+        lay.addWidget(sec)
 
+        # keys
+        sec = Section(t("sec_keys"), rtl)
         fkeys = [f"F{i}" for i in range(1, 13)]
         self.hk_toggle = QComboBox()
         self.hk_toggle.addItems(fkeys)
         self.hk_toggle.setCurrentText(settings["hotkey_toggle"])
-        row(t("hotkey_toggle"), self.hk_toggle)
+        sec.add_row(t("hotkey_toggle"), self.hk_toggle)
         self.hk_voice = QComboBox()
         self.hk_voice.addItems(fkeys)
         self.hk_voice.setCurrentText(settings["hotkey_voice"])
-        row(t("hotkey_voice"), self.hk_voice)
+        sec.add_row(t("hotkey_voice"), self.hk_voice)
+        self.voice_send = Switch(settings["voice_send_immediately"])
+        sec.add_row(t("voice_send"), self.voice_send)
+        lay.addWidget(sec)
 
-        self.appearance = QComboBox()
-        self.appearance.addItem(t("appearance_dark"), "dark")
-        self.appearance.addItem(t("appearance_light"), "light")
-        self.appearance.setCurrentIndex(0 if settings["appearance"] != "light" else 1)
-        row(t("appearance"), self.appearance)
+        # answers
+        sec = Section(t("sec_answers"), rtl)
+        self.length = Segmented([(t("short"), "short"), (t("detailed"), "detailed")], settings["answer_length"], rtl)
+        sec.add_row(t("answer_length"), self.length)
+        lay.addWidget(sec)
 
-        self.opacity = QSlider(Qt.Horizontal)
-        self.opacity.setRange(40, 100)
-        self.opacity.setValue(int(settings["opacity"] * 100))
-        row(t("opacity"), self.opacity)
-
-        self.font = QSpinBox()
-        self.font.setRange(11, 22)
-        self.font.setValue(settings["font_size"])
-        row(t("font_size"), self.font)
-
-        self.length = QComboBox()
-        self.length.addItem(t("short"), "short")
-        self.length.addItem(t("detailed"), "detailed")
-        self.length.setCurrentIndex(0 if settings["answer_length"] == "short" else 1)
-        row(t("answer_length"), self.length)
-
-        self.show_in_captures = QCheckBox()
-        self.show_in_captures.setChecked(settings["show_in_captures"])
-        row(t("show_in_captures"), self.show_in_captures)
-
-        self.autostart = QCheckBox()
-        self.autostart.setChecked(settings["start_with_windows"])
-        row(t("start_with_windows"), self.autostart)
-        lay.addLayout(grid)
+        # privacy & system
+        sec = Section(t("sec_system"), rtl)
+        self.show_in_captures = Switch(settings["show_in_captures"])
+        sec.add_row(t("show_in_captures"), self.show_in_captures, t("show_in_captures_hint"))
+        self.autostart = Switch(settings["start_with_windows"])
+        sec.add_row(t("start_with_windows"), self.autostart)
+        lay.addWidget(sec)
 
         # characters
-        lay.addWidget(QLabel(t("characters")))
+        sec = Section(t("characters"), rtl)
         self.chars = QListWidget()
-        self.chars.setMaximumHeight(110)
         self._fill_chars()
         self.chars.itemClicked.connect(lambda it: (self.profiles.set_active(it.data(Qt.UserRole)), self._fill_chars()))
-        lay.addWidget(self.chars)
-        crow = QHBoxLayout()
-        add = QPushButton(t("add_character"), objectName="Secondary")
+        sec.add_widget(self.chars)
+        add = QPushButton(t("add_character"), objectName="Link")
+        add.setCursor(Qt.PointingHandCursor)
         add.clicked.connect(self._add_char)
-        clear = QPushButton(t("clear_history"), objectName="Secondary")
-        clear.clicked.connect(self._clear_history)
-        upd = QPushButton(t("update_kb"), objectName="Secondary")
-        upd.clicked.connect(self.update_kb_requested.emit)
-        for b in (add, clear, upd):
-            crow.addWidget(b)
-        lay.addLayout(crow)
+        sec.add_widget(add)
+        lay.addWidget(sec)
 
-        credit = QLabel(bidi.plain(t("credits")) + "  ·  " + bidi.plain(t("unofficial")))
+        # data
+        sec = Section(t("sec_data"), rtl)
+        upd = QPushButton(t("update_kb"), objectName="Link")
+        upd.setCursor(Qt.PointingHandCursor)
+        upd.clicked.connect(self.update_kb_requested.emit)
+        sec.add_widget(upd)
+        clear = QPushButton(t("clear_history"), objectName="LinkDanger")
+        clear.setCursor(Qt.PointingHandCursor)
+        clear.clicked.connect(self._clear_history)
+        sec.add_widget(clear)
+        lay.addWidget(sec)
+
+        credit = QLabel(bidi.plain(t("credits"), rtl) + "\n" + bidi.plain(t("unofficial"), rtl), objectName="RowHint")
         credit.setWordWrap(True)
-        credit.setStyleSheet("color: #C9B8A4; font-size: 11px;")
+        credit.setAlignment(Qt.AlignHCenter)
         lay.addWidget(credit)
+        lay.addStretch(1)
 
         brow = QHBoxLayout()
+        brow.setContentsMargins(0, 10, 0, 0)
         brow.addStretch(1)
         save = QPushButton(t("save"), objectName="Primary")
+        save.setCursor(Qt.PointingHandCursor)
         save.clicked.connect(self._save)
         brow.addWidget(save)
-        lay.addLayout(brow)
+        outer.addLayout(brow)
 
     def _fill_chars(self):
         self.chars.clear()
         for c in self.profiles.characters:
-            mark = "● " if c.id == self.profiles.active_id else "   "
+            mark = "✓  " if c.id == self.profiles.active_id else "     "
             it = QListWidgetItem(bidi.plain(f"{mark}{c.name} · {self.t('level')} {c.level} · {c.job}", self.t.rtl))
             it.setData(Qt.UserRole, c.id)
             self.chars.addItem(it)
+        self.chars.setFixedHeight(max(44, 40 * min(4, len(self.profiles.characters))))
 
     def _add_char(self):
         dlg = Onboarding(self.settings, self.profiles, self.kb, self.stylesheet_fn, only_character=True)
@@ -493,15 +504,16 @@ class SettingsDialog(QDialog):
     def _save(self):
         s = self.settings
         s.data.update({
-            "language": self.lang.currentData(),
-            "appearance": self.appearance.currentData(),
+            "language": self.lang.value(),
+            "appearance": self.appearance.value(),
+            "glass_strength": self.strength.value() / 100,
+            "font_size": self.font.value(),
             "hotkey_toggle": self.hk_toggle.currentText(),
             "hotkey_voice": self.hk_voice.currentText(),
-            "opacity": self.opacity.value() / 100,
-            "font_size": self.font.value(),
-            "answer_length": self.length.currentData(),
-            "start_with_windows": self.autostart.isChecked(),
+            "voice_send_immediately": self.voice_send.isChecked(),
+            "answer_length": self.length.value(),
             "show_in_captures": self.show_in_captures.isChecked(),
+            "start_with_windows": self.autostart.isChecked(),
         })
         s.save()
         self.changed.emit()

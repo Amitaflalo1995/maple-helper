@@ -55,7 +55,7 @@ DEFAULT_SETTINGS = {
     "language": None,             # "he" | "en"; None until onboarding
     "hotkey_toggle": "F9",
     "hotkey_voice": "F10",
-    "opacity": 0.85,
+    "glass_strength": 0.6,        # 0.4 clearer glass … 1.0 solid (readability over busy scenes)
     "appearance": "dark",
     "show_in_captures": False,    # True: the chat appears in screenshots/recordings (no live blur then)         # dark (black glass, white text) | light (white glass, dark text)
     "font_size": 14,

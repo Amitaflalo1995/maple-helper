@@ -137,8 +137,53 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QPushButton#Quick:checked {{ background: rgba(255,149,51,0.28); border: 1px solid rgba(255,149,51,0.8); }}
     QPushButton#Quick:hover {{ background: {c['fill3']}; }}
     QLineEdit {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 10px; padding: 7px 10px; }}
-    QComboBox, QSpinBox {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 10px; padding: 5px 10px; }}
-    QListWidget {{ background: {c['fill1']}; border: 1px solid {c['stroke']}; border-radius: 12px; }}
+    QLineEdit:focus {{ border: 1px solid rgba(255,149,51,0.85); }}
+
+    /* grouped settings (iOS inset-grouped) */
+    #SectionHeader {{ color: {c['muted']}; font-size: {s - 2}px; font-weight: 500; padding: 0 14px; }}
+    #Group {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 14px; }}
+    #Separator {{ background: {c['hair']}; border: none; }}
+    #RowLabel {{ color: {c['text']}; }}
+    #RowHint {{ color: {c['muted']}; font-size: {s - 3}px; }}
+    QPushButton#Link, QPushButton#LinkDanger {{ background: transparent; border: none; min-height: 34px;
+                        font-weight: 500; text-align: right; padding: 0; color: {ORANGE}; }}
+    QPushButton#LinkDanger {{ color: #FF453A; }}
+    QPushButton#Link:pressed, QPushButton#LinkDanger:pressed {{ color: {c['muted']}; }}
+
+    #Segmented {{ background: {c['fill2']}; border: 1px solid {c['hair']}; border-radius: 10px; }}
+    QPushButton#Segment {{ background: transparent; border: none; border-radius: 8px; min-height: 26px; max-height: 26px;
+                           padding: 0 12px; font-size: {s - 2}px; font-weight: 500; color: {c['text']}; }}
+    QPushButton#Segment:checked {{ background: {"rgba(255,255,255,0.22)" if MODE == "dark" else "#FFFFFF"};
+                                   border: 1px solid {c['stroke']}; }}
+    QPushButton#Segment:hover:!checked {{ background: {c['fill1']}; }}
+
+    QComboBox {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 10px; min-height: 26px;
+                 padding: 0 10px; color: {c['text']}; }}
+    QComboBox::drop-down {{ border: none; width: 22px; }}
+    QComboBox::down-arrow {{ image: none; width: 0; height: 0; }}
+    QComboBox QAbstractItemView {{ background: {"#2C2C2E" if MODE == "dark" else "#FFFFFF"}; color: {c['text']};
+                                   border: 1px solid {c['stroke']}; border-radius: 10px; padding: 4px; outline: none;
+                                   selection-background-color: {ORANGE}; selection-color: #FFFFFF; }}
+    QSpinBox {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 10px; min-height: 26px;
+                padding: 0 8px; color: {c['text']}; }}
+    QSpinBox::up-button, QSpinBox::down-button {{ width: 16px; border: none; background: transparent; }}
+
+    QSlider::groove:horizontal {{ height: 4px; background: {c['fill3']}; border-radius: 2px; }}
+    QSlider::sub-page:horizontal {{ background: {ORANGE}; border-radius: 2px; }}
+    QSlider::handle:horizontal {{ background: #FFFFFF; width: 22px; height: 22px; margin: -9px 0; border-radius: 11px;
+                                  border: 1px solid rgba(0,0,0,0.12); }}
+
+    QListWidget {{ background: transparent; border: none; outline: none; }}
+    QListWidget::item {{ padding: 8px 4px; border-radius: 8px; color: {c['text']}; }}
+    QListWidget::item:hover {{ background: {c['fill1']}; }}
+    QListWidget::item:selected {{ background: rgba(255,149,51,0.22); color: {c['text']}; }}
+
+    QMenu {{ background: {"#2C2C2E" if MODE == "dark" else "#FFFFFF"}; border: 1px solid {c['stroke']};
+             border-radius: 12px; padding: 6px; }}
+    QMenu::item {{ padding: 7px 18px; border-radius: 7px; color: {c['text']}; }}
+    QMenu::item:selected {{ background: {ORANGE}; color: #FFFFFF; }}
+    QToolTip {{ background: {"#2C2C2E" if MODE == "dark" else "#FFFFFF"}; color: {c['text']};
+                border: 1px solid {c['stroke']}; border-radius: 6px; padding: 4px 8px; }}
     """
 
 

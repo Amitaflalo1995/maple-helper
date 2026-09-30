@@ -56,8 +56,7 @@ class MapleHelperApp:
 
     def style(self, opacity: float | None = None) -> str:
         theme.set_mode(self.settings["appearance"])
-        return theme.stylesheet(self.font_family, self.settings["font_size"],
-                                self.settings["opacity"] if opacity is None else opacity)
+        return theme.stylesheet(self.font_family, self.settings["font_size"])
 
     def run_onboarding(self) -> bool:
         first = True

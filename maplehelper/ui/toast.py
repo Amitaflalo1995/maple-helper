@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QToolButton, QVBoxLay
 from .. import bidi
 from ..store import ASSETS
 from . import theme
+from .glass import SHADOW, paint_glass
 
 MARGIN = 16
 WIDTH = 360
@@ -24,12 +25,11 @@ class Toast(QWidget):
         self.setAttribute(Qt.WA_ShowWithoutActivating)
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
-        self.setFixedWidth(WIDTH)
+        self.setFixedWidth(WIDTH + 2 * SHADOW)
         c = theme.P()
-        bg = "rgba(28, 28, 30, 0.97)" if theme.MODE == "dark" else "rgba(250, 250, 252, 0.98)"
         self.setStyleSheet(f"""
             * {{ font-family: "{font_family}"; color: {c['text']}; }}
-            #Card {{ background: {bg}; border: 1px solid {c['stroke']}; border-radius: 16px; }}
+            #Card {{ background: transparent; border: none; }}
             #Accent {{ background: {theme.ORANGE}; border-radius: 2px; }}
             #Title {{ font-size: 14px; font-weight: 600; color: {c['text']}; }}
             #Body {{ font-size: 13px; color: {c['text']}; }}
@@ -38,7 +38,7 @@ class Toast(QWidget):
             QToolButton:hover {{ color: {c['text']}; }}
         """)
         outer = QVBoxLayout(self)
-        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setContentsMargins(SHADOW, SHADOW, SHADOW, SHADOW)
         card = QFrame(objectName="Card")
         outer.addWidget(card)
         row = QHBoxLayout(card)
@@ -79,8 +79,8 @@ class Toast(QWidget):
     def show_toast(self):
         self.adjustSize()
         screen = QGuiApplication.primaryScreen().availableGeometry()
-        x = screen.right() - self.width() - MARGIN
-        y = screen.bottom() - self.height() - MARGIN
+        x = screen.right() - self.width() - MARGIN + SHADOW
+        y = screen.bottom() - self.height() - MARGIN + SHADOW
         # stack above toasts that are still visible
         for other in Toast._live:
             if other.isVisible():
@@ -114,6 +114,9 @@ class Toast(QWidget):
 
     def mouseReleaseEvent(self, e):
         self.dismiss()
+
+    def paintEvent(self, e):
+        paint_glass(self, None, radius=18)
 
 
 def notify(title: str, message: str = "", rtl: bool = True, font_family: str | None = None, timeout_ms: int = 5000):

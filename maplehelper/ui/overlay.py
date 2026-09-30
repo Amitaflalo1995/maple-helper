@@ -15,7 +15,7 @@ from ..i18n import I18n
 from ..kb import KnowledgeBase
 from ..store import ASSETS, History, Profiles, Settings
 from . import theme
-from .glass import GlassBackdrop
+from .glass import GlassBackdrop, paint_glass
 from .minibubble import MiniBubble
 from .widgets import Bubble, BubbleRow, EntityCard, SystemLine
 
@@ -141,39 +141,8 @@ class Overlay(QWidget):
 
     def paintEvent(self, e):
         """Liquid glass: the blurred game behind, a neutral tint, a light-catching sheen and rim."""
-        c = theme.P()
-        p = QPainter(self)
-        p.setRenderHint(QPainter.Antialiasing)
-        p.setRenderHint(QPainter.SmoothPixmapTransform)
-        m = self.SHADOW
-        # soft shadow: stacked rounded rects fading out
-        for i in range(m, 0, -2):
-            sh = QPainterPath()
-            sh.addRoundedRect(QRectF(self.rect()).adjusted(m - i, m - i + 3, -(m - i), -(m - i) + 3),
-                              theme.RADIUS + i, theme.RADIUS + i)
-            p.fillPath(sh, QColor(0, 0, 0, int(26 * (1 - i / m)) + 2))
-        path = self._panel_path()
-        p.save()
-        p.setClipPath(path)
-        if self.backdrop.pixmap is not None:
-            p.drawPixmap(self.rect(), self.backdrop.pixmap)
-            alpha = c["glass_alpha"]
-        else:
-            alpha = c["solid_alpha"]
-        tint = QColor(*c["glass"])
-        tint.setAlphaF(alpha)
-        p.fillPath(path, tint)
-        sheen = QLinearGradient(0, m, 0, m + min(170, self.height()))
-        sheen.setColorAt(0.0, QColor(255, 255, 255, c["sheen"]))
-        sheen.setColorAt(1.0, QColor(255, 255, 255, 0))
-        p.fillPath(path, sheen)
-        p.restore()
-        rim = QLinearGradient(0, m, 0, self.height() - m)
-        rim.setColorAt(0.0, QColor(255, 255, 255, c["rim_top"]))
-        rim.setColorAt(0.4, QColor(255, 255, 255, c["rim"]))
-        rim.setColorAt(1.0, QColor(255, 255, 255, c["rim"] // 2))
-        p.setPen(QPen(rim, 1))
-        p.drawPath(path)
+        live = None if self.settings["show_in_captures"] else self.backdrop
+        paint_glass(self, live, self.settings["glass_strength"])
 
     # ------------------------------------------------------------------ layout
 
