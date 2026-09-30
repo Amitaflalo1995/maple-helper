@@ -11,7 +11,14 @@ import re
 from functools import cached_property
 from pathlib import Path
 
-from .store import kb_dir
+from .store import ASSETS, kb_dir
+
+FALLBACK_DIR = ASSETS / "fallback"
+CLASS_PICTURE_FALLBACK = {
+    "crusader": "fighter", "white-knight": "page", "dragon-knight": "spearman", "f-p-mage": "f-p-wizard",
+    "i-l-mage": "i-l-wizard", "priest": "cleric", "ranger": "hunter", "sniper": "crossbowman",
+    "hermit": "assassin", "chief-bandit": "bandit",
+}
 
 HEBREW = re.compile(r"[֐-׿]")
 
@@ -62,7 +69,37 @@ class KnowledgeBase:
         if e and e.get("image"):
             p = self.root / e["image"]
             return p if p.exists() else None
+        if e and e["category"] == "quest":
+            # a quest shows the NPC who gives it
+            giver = str((e.get("props") or {}).get("NPC") or "").lower()
+            npc = self._npc_by_name.get(giver) or self._npc_by_name.get(re.sub(r"\s*\(.*?\)", "", giver))
+            if npc and self.image_path(npc):
+                return self.image_path(npc)
+        if e and e["category"] == "class":
+            # 3rd jobs have no picture: use the 2nd job they come from
+            second = CLASS_PICTURE_FALLBACK.get(key.partition("/")[2])
+            if second and self.get(f"class/{second}"):
+                return self.image_path(f"class/{second}")
         return None
+
+    def picture(self, key: str) -> Path | None:
+        """Always a picture for a card: the entity's own, a related one, or its category icon."""
+        own = self.image_path(key)
+        if own:
+            return own
+        cat = key.partition("/")[0]
+        fb = FALLBACK_DIR / f"{cat}.png"
+        return fb if fb.exists() else (FALLBACK_DIR / "default.png")
+
+    @cached_property
+    def _npc_by_name(self) -> dict[str, str]:
+        out = {}
+        for k, e in self.entities.items():
+            if e["category"] == "npc":
+                n = e["name"].lower()
+                out.setdefault(n, k)
+                out.setdefault(re.sub(r"\s*\(.*?\)", "", n), k)
+        return out
 
     def page(self, key: str) -> str:
         e = self.get(key)
@@ -130,6 +167,42 @@ class KnowledgeBase:
                 out = re.sub(rf"(?<![֐-׿])([ובלמהשכ]{{0,2}}){re.escape(alias)}(?![֐-׿])",
                              lambda m, n=name: f"{m.group(1)}-{n}" if m.group(1) else n, out)
         return out
+
+    # ------------------------------------------------------------ drops
+
+    @cached_property
+    def _item_by_name(self) -> dict[str, str]:
+        out = {}
+        for k, e in self.entities.items():
+            if e["category"] == "item":
+                out.setdefault(e["name"].strip().lower(), k)
+        return out
+
+    def monster_drops(self, key: str) -> list[str]:
+        """Item keys a monster drops, read from its page (confirmed Classic drops + MSEA reference list)."""
+        body = self.page(key)
+        i = body.find("Drops (MS Classic)")
+        if i < 0:
+            return []
+        end = len(body)
+        for marker in ("Associated Quests", "Map Locations"):
+            j = body.find(marker, i)
+            if 0 < j < end:
+                end = j
+        found = []
+        for line in body[i:end].split("\n"):
+            k = self._item_by_name.get(line.strip().lower())
+            if k and k not in found:
+                found.append(k)
+        return found
+
+    def drops_digest(self, key: str) -> str:
+        drops = self.monster_drops(key)
+        if not drops:
+            return ""
+        e = self.get(key)
+        names = ", ".join(f"{self.get(k)['name']} [{k}]" for k in drops)
+        return f"Drops of {e['name']} (MSEA reference list; names and keys exactly as in the game): {names}"
 
     # ------------------------------------------------------------ level digest
 

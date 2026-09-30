@@ -139,6 +139,11 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
 
     #Card {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 14px; }}
     #Card:hover {{ background: {c['fill2']}; }}
+    #TileGrid {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 14px; }}
+    #Tile {{ background: {"rgba(255,255,255,0.05)" if MODE == "dark" else "#F7F7F9"}; border: 1px solid {c['hair']};
+             border-radius: 10px; }}
+    #Tile:hover {{ border: 1px solid rgba(255,149,51,0.7); }}
+    #TileName {{ font-size: {s - 1}px; font-weight: 500; color: {c['text']}; }}
     #CardName {{ font-weight: 600; color: {c['text']}; }}
     #CardSub {{ color: {c['muted']}; font-size: {s - 2}px; }}
     #CardStat {{ color: {c['text']}; font-size: {s - 2}px; }}

@@ -17,7 +17,7 @@ from ..store import ASSETS, History, Profiles, Settings
 from . import theme
 from .glass import paint_glass
 from .minibubble import MiniBubble
-from .widgets import Bubble, BubbleRow, EntityCard, ProfileCard, SystemLine
+from .widgets import Bubble, BubbleRow, EntityCard, ProfileCard, SystemLine, TileGrid
 
 SLOW_AFTER_MS = 30_000
 
@@ -406,8 +406,17 @@ class Overlay(QWidget):
         self._add_widget(SystemLine(text))
 
     def add_cards(self, keys: list[str]):
-        for k in keys:
+        if len(keys) <= 2:
+            for k in keys:
+                self._add_widget(EntityCard(self.kb, k, self.t.lang))
+            return
+        # the subject (monster, NPC, map, quest) stays a full card; the list (drops, rewards) becomes tiles
+        heads = [k for k in keys if k.split("/")[0] in ("monster", "npc", "map", "quest")][:1]
+        rest = [k for k in keys if k not in heads]
+        for k in heads:
             self._add_widget(EntityCard(self.kb, k, self.t.lang))
+        if rest:
+            self._add_widget(TileGrid(self.kb, rest))
 
     def add_confirm(self, text: str, on_yes):
         row = QWidget()

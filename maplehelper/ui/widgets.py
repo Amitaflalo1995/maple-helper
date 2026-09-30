@@ -99,7 +99,7 @@ class EntityCard(QFrame):
         pic = QLabel()
         pic.setFixedSize(56, 56)
         pic.setAlignment(Qt.AlignCenter)
-        img = kb.image_path(key)
+        img = kb.picture(key)          # never empty: own picture, related one, or category icon
         if img:
             pm = QPixmap(str(img))
             if not pm.isNull():
@@ -299,3 +299,55 @@ class CharacterRow(QFrame):
 
     def mouseReleaseEvent(self, e):
         self.chosen.emit(self.cid)
+
+
+class EntityTile(QFrame):
+    """Compact item tile for lists (drops, rewards): picture + official name. Click opens the source page."""
+
+    def __init__(self, kb, key: str):
+        super().__init__(objectName="Tile")
+        self.setCursor(Qt.PointingHandCursor)
+        e = kb.get(key) or {}
+        self.url = e.get("url")
+        self.setToolTip(e.get("name", key))
+        row = QHBoxLayout(self)
+        row.setContentsMargins(8, 6, 8, 6)
+        row.setSpacing(8)
+        pic = QLabel()
+        pic.setFixedSize(32, 32)
+        pic.setAlignment(Qt.AlignCenter)
+        img = kb.picture(key)
+        if img:
+            pm = QPixmap(str(img))
+            if not pm.isNull():
+                pic.setPixmap(pm.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        row.addWidget(pic)
+        name = QLabel(e.get("name", key), objectName="TileName")
+        name.setWordWrap(True)
+        from PySide6.QtWidgets import QApplication
+        rtl = QApplication.layoutDirection() == Qt.RightToLeft
+        name.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
+        row.addWidget(name, 1)
+
+    def mouseReleaseEvent(self, ev):
+        if self.url:
+            import webbrowser
+            webbrowser.open(self.url)
+
+
+class TileGrid(QFrame):
+    """Two-column grid of item tiles with a credit line."""
+
+    def __init__(self, kb, keys: list[str]):
+        super().__init__(objectName="TileGrid")
+        from PySide6.QtWidgets import QGridLayout
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(8, 8, 8, 6)
+        outer.setSpacing(4)
+        grid = QGridLayout()
+        grid.setSpacing(6)
+        for i, k in enumerate(keys):
+            grid.addWidget(EntityTile(kb, k), i // 2, i % 2)
+        outer.addLayout(grid)
+        credit = QLabel("NiaMeowDB (meowdb.com)", objectName="CardCredit")
+        outer.addWidget(credit)

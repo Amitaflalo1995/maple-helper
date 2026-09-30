@@ -149,6 +149,34 @@ def slug_of(url: str) -> str:
     return "__".join(parts[1:]) or parts[0]
 
 
+def _name_slug(name: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+
+
+def image_candidates(entity: dict, category: str, slug: str, name: str) -> list[str]:
+    """Where the site keeps a picture for this entity, most likely first."""
+    first = image_url(entity, category, slug)
+    out = [first] if first else []
+    if category == "npc":
+        bare = re.sub(r"\s*\(.*?\)", "", name)          # "Sam (Henesys Armor Seller)" → "Sam"
+        out += [f"{BASE}/msclassic/npcs/{_name_slug(name)}.webp", f"{BASE}/msclassic/npcs/{_name_slug(bare)}.webp",
+                f"{BASE}/msclassic/npcs/npc-{slug}.webp"]
+    elif category == "map":
+        out.append(f"{BASE}/msclassic/maps/minimaps/{slug}.png")
+    return out
+
+
+def save_image(data: bytes, path: Path) -> bool:
+    """Store as PNG (the site serves some pictures as WebP)."""
+    try:
+        import io
+        from PIL import Image
+        Image.open(io.BytesIO(data)).save(path, "PNG")
+        return True
+    except Exception:
+        return False
+
+
 def image_url(entity: dict, category: str, slug: str) -> str | None:
     img = entity.get("image")
     if isinstance(img, dict):
@@ -182,17 +210,16 @@ def scrape_one(category: str, slug: str, url: str, refresh: bool) -> dict | None
     name = html.unescape(str(entity.get("name") or entity.get("headline") or title_name or slug))
     text = main_text(page, name)
     props = props_of(entity)
-    img = image_url(entity, category, slug)
     img_file = None
-    if img:
-        img_path = KB / "img" / category / f"{slug}.png"
-        if not img_path.exists() or refresh:
-            data = fetch(img, binary=True)
+    img_path = KB / "img" / category / f"{slug}.png"
+    if not img_path.exists() or refresh:
+        for url in image_candidates(entity, category, slug, name):
+            data = fetch(url, binary=True)
             time.sleep(DELAY_SECONDS / 2)
-            if data:
-                img_path.write_bytes(data)
-        if img_path.exists():
-            img_file = f"img/{category}/{slug}.png"
+            if data and save_image(data, img_path):
+                break
+    if img_path.exists():
+        img_file = f"img/{category}/{slug}.png"
     front = {"name": name, "category": category, "url": url, "image": img_file, "props": props,
              "type": entity.get("category"), "source": "NiaMeowDB (meowdb.com)"}
     md = "---\n" + json.dumps(front, ensure_ascii=False, indent=1) + "\n---\n\n# " + name + "\n\n"
@@ -263,6 +290,37 @@ def scrape(limit: int | None, refresh: bool, changed_only: bool = False) -> None
 
 
 
+def fill_images() -> None:
+    """Fetch pictures for entities that have none (NPC portraits, map minimaps). Resumable."""
+    index_path = KB / "index.json"
+    index = json.loads(index_path.read_text(encoding="utf-8"))
+    todo = [e for e in index if not e.get("image") and e["category"] in ("npc", "map")]
+    lock = threading.Lock()
+    done = [0]
+
+    def work(e):
+        cat, _, slug = e["key"].partition("/")
+        (KB / "img" / cat).mkdir(parents=True, exist_ok=True)
+        path = KB / "img" / cat / f"{slug}.png"
+        for url in image_candidates({}, cat, slug, e["name"]):
+            data = fetch(url, binary=True)
+            time.sleep(DELAY_SECONDS / 2)
+            if data and save_image(data, path):
+                e["image"] = f"img/{cat}/{slug}.png"
+                break
+        with lock:
+            done[0] += 1
+            if done[0] % 50 == 0:
+                print(f"[{done[0]}/{len(todo)}]", flush=True)
+                index_path.write_text(json.dumps(index, ensure_ascii=False), encoding="utf-8")
+
+    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+        list(pool.map(work, todo))
+    index_path.write_text(json.dumps(index, ensure_ascii=False), encoding="utf-8")
+    got = sum(1 for e in todo if e.get("image"))
+    print(f"pictures added: {got}/{len(todo)}")
+
+
 def stamp() -> None:
     """Mark the existing copy with sitemap lastmod + content hashes (baseline for --changed)."""
     entity_urls()   # fills LASTMOD from the sitemap
@@ -284,9 +342,12 @@ if __name__ == "__main__":
     ap.add_argument("--refresh", action="store_true", help="re-download every page")
     ap.add_argument("--changed", action="store_true", help="only pages whose sitemap lastmod is newer, plus new pages")
     ap.add_argument("--stamp", action="store_true", help="record sitemap lastmod and content hash for the current copy")
+    ap.add_argument("--images", action="store_true", help="fetch missing NPC portraits and map minimaps")
     args = ap.parse_args()
     sys.stdout.reconfigure(encoding="utf-8")
     if args.stamp:
         stamp()
+    elif args.images:
+        fill_images()
     else:
         scrape(args.limit, args.refresh, args.changed)

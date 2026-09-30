@@ -20,6 +20,7 @@ from .kb import KnowledgeBase
 from .store import Character, History
 
 META = "@@META@@"
+DROP_WORDS = re.compile(r"דרופ|מפיל|נופל|שנופל|drops?\b|loot", re.I)
 CREATE_NO_WINDOW = 0x08000000
 
 SYSTEM_PROMPT = """You are Maple Helper, a personal in-game assistant for MapleStory Classic World (MapleStory Classic), shown as a small chat window on top of the game.
@@ -32,6 +33,10 @@ Knowledge base: the current directory is the full NiaMeowDB (meowdb.com) databas
 - Use the pre-fetched context first. Use Grep/Glob/Read only for what is missing. Never write text before a tool call.
 - Never invent facts, numbers, drops or locations. If the data does not say, say so briefly.
 
+Drops: a monster page lists its drops ("Drops (MS Classic)" confirmed by players, and "MSEA reference drops").
+When asked what a monster drops, list the drops by name (grouped: Etc / Use / Equipment is fine), say which list they
+come from, and return every dropped item's key in entities.
+
 Advice must fit the player's level and job. If the profile lacks level or job, ask for it before recommending.
 
 Style:
@@ -42,7 +47,9 @@ Style:
 
 After the answer, output a line containing only @@META@@ followed by one JSON object:
 {{"entities": ["monster/5", ...], "profile_update": {{}}, "avatar_box": [0.42, 0.55, 0.05, 0.1]}}
-- entities: knowledge-base keys (category/id from index.json) of the main monsters, items, maps, NPCs or quests you mentioned, max 4, most relevant first.
+- entities: knowledge-base keys (category/id from index.json) of what you mention, most relevant first, max 12.
+  When the answer is a LIST of items (drops, quest rewards, shop stock, what to buy/equip), include EVERY item's key
+  so the app can show each one with its picture. Find keys by grepping index.json for the item names.
 - avatar_box (only with a screenshot, only if clearly visible): [x, y, w, h] as fractions (0-1) of the screenshot, a snug box
   around the PLAYER'S OWN character sprite (find the name tag under it matching the profile name), head to feet, excluding
   the name tag. Omit it if unsure.
@@ -84,6 +91,8 @@ class Answer:
 
 REPLY_RULES = """<reply_rules>
 - At most {length} short lines. No filler, no follow-up offers.
+- NEVER translate game names: items, monsters, maps, NPCs, skills and quests stay in English exactly as in the data
+  ("Blue Snail Shell", not "קונכיית חילזון כחול"), even inside a Hebrew sentence.
 - Locations, drops and stats only from the context or the knowledge base (Grep pages/monster/*.md for "Map Locations" if needed).
 - Then the line @@META@@ and the JSON object. Always include it, even when empty. If the player states a new level/job, put it in profile_update.
 </reply_rules>"""
@@ -114,6 +123,10 @@ def build_prompt(question: str, character: Character | None, history: History | 
         body = kb.page_body(key, limit=2500)
         if body:
             ctx.append(f"[{key}]\n{body}")
+        if key.startswith("monster/"):
+            drops = kb.drops_digest(key)
+            if drops:
+                ctx.append(drops)
     if ctx:
         parts.append("<kb_context>\n" + "\n\n".join(ctx) + "\n</kb_context>")
     parts.append("<screenshot>" + ("attached above" if has_screenshot else "not available") + "</screenshot>")
@@ -209,15 +222,22 @@ class Brain:
             stated = stated_level(question)
             if stated:
                 meta.setdefault("profile_update", {})["level"] = stated
-        entities = [k for k in meta.get("entities", []) if isinstance(k, str) and kb_has(self.kb, k)]
+        entities = [k for k in meta.get("entities", []) if isinstance(k, str) and kb_has(self.kb, k)][:12]
+        if DROP_WORDS.search(question):
+            # a drops question: the monster card + every drop as a tile, straight from the database
+            monsters = [k for k in entities if k.startswith("monster/")] or \
+                [k for k in self.kb.find_mentions(question, 4) if k.startswith("monster/")]
+            if monsters:
+                drops = self.kb.monster_drops(monsters[0])
+                entities = [monsters[0]] + drops
         if not entities:
             # fallback: cards for the in-game names that appear in the answer itself
-            entities = [k for k in self.kb.find_mentions(text, max_results=4)
+            entities = [k for k in self.kb.find_mentions(text, max_results=12)
                         if k.split("/")[0] in ("monster", "item", "npc", "map", "quest")]
         box = meta.get("avatar_box")
         if not (isinstance(box, list) and len(box) == 4 and all(isinstance(v, (int, float)) for v in box)):
             box = None
-        return Answer(text=text, entities=entities[:4], profile_update=meta.get("profile_update") or {},
+        return Answer(text=text, entities=entities[:12], profile_update=meta.get("profile_update") or {},
                       avatar_box=box if screenshot_jpeg else None, cost_usd=result.get("total_cost_usd"))
 
     def summarize(self, transcript: str) -> str | None:
