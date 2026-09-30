@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (QButtonGroup, QFrame, QGridLayout, QHBoxLayout, Q
                                QScrollArea, QStackedWidget, QVBoxLayout, QWidget)
 
 from .. import bidi, claude_setup
-from .controls import Section, Segmented, Select, Stepper, Switch, rtl_buttons, track_slider
+from .controls import Section, Segmented, Select, Stepper, Switch, rtl_buttons
 from .glass import GlassDialog
 from .widgets import CharacterRow
 from ..i18n import I18n
