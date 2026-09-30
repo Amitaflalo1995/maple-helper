@@ -60,7 +60,8 @@ DEFAULT_SETTINGS = {
     "show_in_captures": False,    # True: the chat appears in screenshots/recordings (no live blur then)         # dark (black glass, white text) | light (white glass, dark text)
     "font_size": 14,
     "answer_length": "short",     # short | detailed
-    "window": None,               # {"x","y","w","h","screen"} saved on move/resize
+    "window": None,
+    "bubble_pos": None,           # where the minimized bubble sits               # {"x","y","w","h","screen"} saved on move/resize
     "start_with_windows": False,
     "voice_send_immediately": True,
     "microphone": None,

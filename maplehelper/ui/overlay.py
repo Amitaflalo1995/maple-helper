@@ -16,6 +16,7 @@ from ..kb import KnowledgeBase
 from ..store import ASSETS, History, Profiles, Settings
 from . import theme
 from .glass import GlassBackdrop
+from .minibubble import MiniBubble
 from .widgets import Bubble, BubbleRow, EntityCard, SystemLine
 
 SLOW_AFTER_MS = 30_000
@@ -98,6 +99,10 @@ class Overlay(QWidget):
         self._session_started: float | None = None
         self._anim: QParallelAnimationGroup | None = None
         self.backdrop = GlassBackdrop(self)
+        self.bubble = MiniBubble()
+        self.bubble.clicked.connect(self.restore_from_bubble)
+        self.bubble.moved.connect(lambda pt: self.settings.__setitem__("bubble_pos", {"x": pt.x(), "y": pt.y()}))
+        self.shot_provider = None
         self._build()
         self.apply_language()
         self.restore_geometry()
@@ -204,6 +209,14 @@ class Overlay(QWidget):
         self.settings_btn = self._icon_button(theme.ICON["settings"])
         self.settings_btn.clicked.connect(self.settings_requested.emit)
         tb.addWidget(self.settings_btn)
+        # window controls sit at the header's edge (left in Hebrew, right in English)
+        self.min_btn = self._icon_button(theme.ICON["minimize"])
+        self.min_btn.clicked.connect(self.minimize)
+        tb.addWidget(self.min_btn)
+        self.close_btn = self._icon_button(theme.ICON["close"])
+        self.close_btn.setObjectName("IconClose")
+        self.close_btn.clicked.connect(self.close_overlay)
+        tb.addWidget(self.close_btn)
         lay.addWidget(self.title_bar)
 
         # conversation
@@ -264,6 +277,8 @@ class Overlay(QWidget):
         self.input.setPlaceholderText(bidi.plain(self._placeholder, self.t.rtl))
         self.recapture_btn.setToolTip(self.t("recapture"))
         self.settings_btn.setToolTip(self.t("settings"))
+        self.min_btn.setToolTip(self.t("minimize"))
+        self.close_btn.setToolTip(self.t("close_chat").replace("F9", self.settings["hotkey_toggle"]))
         self.mic_btn.setToolTip(self.t("hotkey_voice") + f" ({hk_voice})")
         self._on_text(self.input.text())
         self.refresh_profile_chip()
@@ -354,6 +369,9 @@ class Overlay(QWidget):
         self._materialize(True)
 
     def close_overlay(self):
+        self.bubble.hide()
+        if not self.isVisible():
+            return
         def done():
             self.hide()
             self.setWindowOpacity(1.0)
@@ -361,15 +379,36 @@ class Overlay(QWidget):
         if self.game_hwnd:
             winapi.focus_window(self.game_hwnd)
 
+    def minimize(self):
+        """Shrink to the bubble, which appears where the chat's header was."""
+        pos = self.settings["bubble_pos"]
+        if pos:
+            self.bubble.move(pos["x"], pos["y"])
+        else:
+            g = self.geometry()
+            x = g.left() + self.SHADOW if self.t.rtl else g.right() - self.bubble.width() - self.SHADOW
+            self.bubble.move(x, g.top() + self.SHADOW)
+        self.close_overlay()
+        self.bubble.show()
+        self.bubble.raise_()
+
+    def restore_from_bubble(self):
+        self.bubble.hide()
+        hwnd = winapi.find_game_window()
+        shot = self.shot_provider(hwnd) if self.shot_provider else None
+        self.open_overlay(shot, hwnd)
+
     def toggle(self, shot_provider):
+        self.shot_provider = shot_provider
         if self.isVisible() and self.windowOpacity() > 0.5:
             self.close_overlay()
         else:
+            self.bubble.hide()
             hwnd = winapi.find_game_window()
             self.open_overlay(shot_provider(hwnd), hwnd)
 
     def keyPressEvent(self, e):
-        # Esc deliberately does nothing: only F9 closes (spec).
+        # Esc deliberately does nothing: F9 or the window buttons close the chat.
         if e.key() == Qt.Key_Escape:
             return
         super().keyPressEvent(e)

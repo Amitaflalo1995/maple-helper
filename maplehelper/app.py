@@ -80,6 +80,7 @@ class MapleHelperApp:
         self.overlay = Overlay(self.settings, self.profiles, self.kb, self.brain)
         self.overlay.setStyleSheet(self.style())
         self.overlay.setWindowOpacity(1.0)
+        self.overlay.shot_provider = self.capture
         self.overlay.settings_requested.connect(self.open_settings)
         self.overlay.profile_requested.connect(self.open_settings)
 
@@ -126,7 +127,7 @@ class MapleHelperApp:
                 self.overlay.close_overlay()
                 self.maybe_summarize_later()
             else:
-                self.overlay.toggle(self.capture)
+                self.overlay.toggle(self.capture)   # also restores from the minimized bubble
 
     def on_voice_start(self):
         # holding the voice key in game opens the chat (with a fresh screenshot)

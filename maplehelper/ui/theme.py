@@ -46,7 +46,7 @@ BORDER = "rgba(255,149,51,0.55)"
 
 FONT_FAMILY = "Rubik"
 ICON_FONT = "Segoe Fluent Icons"
-ICON = {"settings": "", "camera": "", "mic": "", "send": "", "stop": ""}
+ICON = {"minimize": "", "close": "", "settings": "", "camera": "", "mic": "", "send": "", "stop": ""}
 
 
 def set_mode(mode: str) -> None:
@@ -84,11 +84,15 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
                     min-height: 24px; max-height: 24px; padding: 0 11px; font-size: {s - 2}px; font-weight: 500; color: {c['text']}; }}
     #ProfilePill:hover {{ background: {c['fill3']}; }}
     #ProfilePill:pressed {{ background: {c['pressed']}; }}
-    QToolButton#Icon {{ font-family: "{ICON_FONT}"; font-size: 15px; color: {c['muted']}; background: transparent;
+    QToolButton#Icon {{ font-family: "{ICON_FONT}"; font-size: 14px; color: {c['muted']}; background: transparent;
                         border: none; border-radius: 14px; min-width: 28px; min-height: 28px; }}
     QToolButton#Icon:hover {{ background: {c['fill2']}; color: {c['text']}; }}
     QToolButton#Icon:pressed {{ background: {c['fill3']}; }}
     QToolButton#Icon[active="true"] {{ color: #FF453A; }}
+    QToolButton#IconClose {{ font-family: "{ICON_FONT}"; font-size: 11px; color: {c['muted']}; background: transparent;
+                             border: none; border-radius: 14px; min-width: 28px; min-height: 28px; }}
+    QToolButton#IconClose:hover {{ background: #FF453A; color: #FFFFFF; }}
+    QToolButton#IconClose:pressed {{ background: #D70015; color: #FFFFFF; }}
 
     QScrollArea, QScrollArea > QWidget > QWidget {{ background: transparent; border: none; }}
     QScrollBar:vertical {{ background: transparent; width: 6px; margin: 4px 1px; }}
