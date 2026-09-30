@@ -19,7 +19,6 @@ from .glass import paint_glass
 from .minibubble import MiniBubble
 from .widgets import Bubble, BubbleRow, EntityCard, ProfileCard, SystemLine, TileGrid
 
-SLOW_AFTER_MS = 30_000
 
 
 class AskWorker(QObject):
@@ -96,7 +95,6 @@ class Overlay(QWidget):
         self.busy = False
         self._thread: QThread | None = None
         self._pending_bubble: Bubble | None = None
-        self._slow_timer = QTimer(self, singleShot=True, interval=SLOW_AFTER_MS, timeout=self._on_slow)
         self._session_started: float | None = None
         self._anim: QParallelAnimationGroup | None = None
         self.bubble = MiniBubble()
@@ -455,7 +453,6 @@ class Overlay(QWidget):
         self._pending_bubble = self.add_bubble(self.t("thinking"), "assistant")
         self.busy = True
         self.send_btn.setEnabled(False)
-        self._slow_timer.start()
 
         self._thread = QThread(self)
         self._worker = AskWorker(self.brain, question, c, history, shot)
@@ -472,17 +469,6 @@ class Overlay(QWidget):
     def _on_delta(self, text: str):
         if self._pending_bubble and text:
             self._pending_bubble.set_text(text)
-
-    def _on_slow(self):
-        if self.busy:
-            self.add_confirm(self.t("slow"), self.brain.cancel)
-
-    # ------------------------------------------------------------------ profile sync (refresh button)
-
-    SYNC_QUESTION = ("[Profile sync, not a chat question] Look at the screenshot and read MY character's current "
-                     "level and job (the HUD shows them). Reply with one short line in the profile's language, "
-                     "then @@META@@ with profile_update (level, job, base_class if visible) and avatar_box. "
-                     "If the game or the character is not visible, say so briefly and leave profile_update empty.")
 
     def sync_profile(self):
         if self.busy or getattr(self, "_syncing", False):
@@ -531,7 +517,6 @@ class Overlay(QWidget):
         self._on_done(ans, self._pending_history)
 
     def _on_done(self, ans: Answer, history: History | None):
-        self._slow_timer.stop()
         self.busy = False
         self._on_text(self.input.text())
         if ans.error:
