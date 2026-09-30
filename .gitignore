@@ -6,3 +6,10 @@ build/
 dist/
 *.spec.bak
 data/kb/
+
+# CI / release scratch
+dist-kb/
+kb-in/
+test-results.xml
+.ruff_cache/
+.pytest_cache/

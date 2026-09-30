@@ -1,0 +1,40 @@
+# Lint + the full test suite. Reused by CI, Release and KB refresh, so no pipeline can skip it.
+name: Test
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Lint & test
+    # the app is Windows-only, and tests/test_bidi.py measures real glyph positions from Qt on Windows
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Lint
+        run: python -m ruff check . --output-format=github
+
+      - name: Test
+        run: python -m pytest --junitxml=test-results.xml -o junit_family=xunit2
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ github.run_attempt }}
+          path: test-results.xml
+          retention-days: 14

@@ -59,7 +59,7 @@ class GlassBackdrop(QObject):
 
 # ---------------------------------------------------------------- shared painting
 
-from PySide6.QtCore import QPoint, QRectF, Qt  # noqa: E402
+from PySide6.QtCore import QRectF, Qt  # noqa: E402
 from PySide6.QtGui import QColor, QLinearGradient, QPainter, QPainterPath, QPen  # noqa: E402
 from PySide6.QtWidgets import QDialog, QHBoxLayout, QLabel, QToolButton, QVBoxLayout, QWidget  # noqa: E402
 

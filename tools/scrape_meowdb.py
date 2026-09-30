@@ -265,7 +265,7 @@ def scrape(limit: int | None, refresh: bool, changed_only: bool = False) -> None
 
 def stamp() -> None:
     """Mark the existing copy with sitemap lastmod + content hashes (baseline for --changed)."""
-    urls = entity_urls()
+    entity_urls()   # fills LASTMOD from the sitemap
     index_path = KB / "index.json"
     index = json.loads(index_path.read_text(encoding="utf-8"))
     for e in index:

@@ -5,8 +5,8 @@ import threading
 
 from PySide6.QtCore import QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QDialog, QFrame, QGridLayout, QHBoxLayout, QLabel,
-                               QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPushButton, QScrollArea, QSlider, QSpinBox,
+from PySide6.QtWidgets import (QButtonGroup, QComboBox, QFrame, QGridLayout, QHBoxLayout, QLabel,
+                               QLineEdit, QListWidget, QListWidgetItem, QPushButton, QScrollArea, QSlider, QSpinBox,
                                QStackedWidget, QVBoxLayout, QWidget)
 
 from .. import bidi, claude_setup
@@ -15,7 +15,6 @@ from .glass import GlassDialog
 from ..i18n import I18n
 from ..kb import KnowledgeBase
 from ..store import ASSETS, History, Profiles, Settings
-from . import theme
 
 # MapleStory Classic job tree: base class -> [(job, min level)]
 JOBS = {

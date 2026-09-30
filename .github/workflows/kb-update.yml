@@ -50,6 +50,7 @@ jobs:
           gh release download --repo "$GITHUB_REPOSITORY" --pattern kb.zip --dir /tmp
           mkdir -p data/kb
           unzip -q /tmp/kb.zip -d data/kb
+          cp data/kb/index.json /tmp/prev-index.json
 
       - name: Fetch changes from NiaMeowDB
         if: steps.rel.outputs.exists == 'true'
@@ -60,6 +61,11 @@ jobs:
             python tools/scrape_meowdb.py --changed
           fi
           cat data/kb/last_run.json
+
+      # a broken scrape (site down, layout change) must never reach players: this fails the run instead
+      - name: Validate before publishing
+        if: steps.rel.outputs.exists == 'true'
+        run: python tools/kb_release.py validate data/kb --previous /tmp/prev-index.json --min-entities 500
 
       - name: Publish if anything changed
         if: steps.rel.outputs.exists == 'true'
