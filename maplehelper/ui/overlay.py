@@ -5,7 +5,7 @@ import time
 
 from PySide6.QtCore import (QEasingCurve, QObject, QParallelAnimationGroup, QPoint, QPropertyAnimation, QRect, QRectF,
                             Qt, QThread, QTimer, Signal)
-from PySide6.QtGui import QColor, QGuiApplication, QLinearGradient, QPainter, QPainterPath, QPen, QPixmap
+from PySide6.QtGui import QGuiApplication, QPainterPath, QPixmap
 from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QPushButton,
                                QScrollArea, QSizeGrip, QToolButton, QVBoxLayout, QWidget)
 
@@ -241,7 +241,7 @@ class Overlay(QWidget):
     def apply_language(self):
         self.t = I18n(self.settings["language"] or "he")
         self.setLayoutDirection(Qt.RightToLeft if self.t.rtl else Qt.LeftToRight)
-        hk_toggle, hk_voice = self.settings["hotkey_toggle"], self.settings["hotkey_voice"]
+        hk_voice = self.settings["hotkey_voice"]
         self._placeholder = self.t("input_placeholder").replace("F10", hk_voice)
         self.input.setPlaceholderText(bidi.plain(self._placeholder, self.t.rtl))
         self.recapture_btn.setToolTip(self.t("recapture"))

@@ -6,11 +6,10 @@ import ctypes.wintypes as wt
 import sys
 import threading
 import winreg
-from pathlib import Path
 
-from PySide6.QtCore import QAbstractNativeEventFilter, QLockFile, QTimer
+from PySide6.QtCore import QAbstractNativeEventFilter, QLockFile, QObject, QTimer, Signal
 from PySide6.QtGui import QAction, QIcon
-from PySide6.QtWidgets import QApplication, QMenu, QMessageBox, QSystemTrayIcon, QWidget
+from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon, QWidget
 
 from . import APP_NAME, __version__, claude_setup, updater, winapi
 from .brain import Brain
@@ -41,6 +40,18 @@ class HotkeyFilter(QAbstractNativeEventFilter):
         return False, 0
 
 
+class _MainThread(QObject):
+    """Background checks emit here; Qt delivers the call on the GUI thread (queued connection).
+
+    QTimer.singleShot(0, fn) from a plain Python thread never fires: that thread has no Qt event loop.
+    """
+    call = Signal(object)
+
+    def __init__(self):
+        super().__init__()
+        self.call.connect(lambda fn: fn())
+
+
 class MapleHelperApp:
     def __init__(self, qapp: QApplication):
         self.qapp = qapp
@@ -51,6 +62,7 @@ class MapleHelperApp:
         theme.FONT_FAMILY = self.font_family
         qapp.setWindowIcon(QIcon(str(ASSETS / "brand" / "app.ico")))
         qapp.setQuitOnLastWindowClosed(False)
+        self.main_thread = _MainThread()
 
     # ------------------------------------------------------------------ startup
 
@@ -216,13 +228,13 @@ class MapleHelperApp:
                 path = updater.download_app_update(__version__)
                 if path:
                     self.pending_installer = path
-                    QTimer.singleShot(0, lambda: self.toast(I18n(self.settings["language"])("update_ready")))
+                    self.main_thread.call.emit(lambda: self.toast(I18n(self.settings["language"])("update_ready")))
             threading.Thread(target=app_update, daemon=True).start()
 
         def work():
             if updater.update_kb():
-                QTimer.singleShot(0, self.reload_kb)
-                QTimer.singleShot(0, lambda: self.toast(I18n(self.settings["language"])("kb_updated")))
+                self.main_thread.call.emit(self.reload_kb)
+                self.main_thread.call.emit(lambda: self.toast(I18n(self.settings["language"])("kb_updated")))
         threading.Thread(target=work, daemon=True).start()
 
     def update_kb_interactive(self):
@@ -249,30 +261,10 @@ class MapleHelperApp:
 APP_ID = "MapleHelper.App"
 
 
-def selftest(out_path: str) -> int:
-    """`Maple Helper.exe --selftest <file>`: checks every component loads in the packaged build."""
-    import json
-    import traceback
-    report = {}
-    for name, fn in {
-        "voice": lambda: __import__("faster_whisper") and "ok",
-        "ctranslate2": lambda: __import__("ctranslate2").__version__,
-        "audio": lambda: str(__import__("sounddevice").query_devices(kind="input")["name"]),
-        "claude": lambda: __import__("maplehelper.brain", fromlist=["find_claude"]).find_claude(),
-        "kb": lambda: len(KnowledgeBase().entities),
-        "assets": lambda: (ASSETS / "brand" / "app.ico").exists(),
-    }.items():
-        try:
-            report[name] = fn()
-        except Exception:
-            report[name] = "ERROR " + traceback.format_exc(limit=2)
-    Path(out_path).write_text(json.dumps(report, indent=1, default=str), encoding="utf-8")
-    return 0
-
-
 def main():
-    if len(sys.argv) > 2 and sys.argv[1] == "--selftest":
-        return selftest(sys.argv[2])
+    if any(a.startswith("--selftest") for a in sys.argv[1:]):
+        from . import selftest   # `Maple Helper.exe --selftest <report file>`, see selftest.py
+        return selftest.main(sys.argv[1:])
     # Windows shows this identity (not "Python") for the taskbar and notifications
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APP_ID)
     qapp = QApplication(sys.argv)

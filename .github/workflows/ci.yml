@@ -1,0 +1,55 @@
+# Every push to main and every pull request: tests, then a full Windows build of the app
+# (frozen exe self-test, portable zip, installer round trip). Nothing is published.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+
+  build:
+    name: Build & smoke test
+    needs: test
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: ./packaging/install-inno.ps1
+
+      # CI proves the packaging works; the fixture KB keeps it fast. Releases bundle the real KB.
+      - name: Build, self-test, installer round trip
+        shell: pwsh
+        env:
+          PYTHON: python
+        run: ./packaging/build.ps1 -KbDir tests/fixtures/kb -RequireKb -TestInstaller
+
+      - name: Upload build
+        uses: actions/upload-artifact@v4
+        with:
+          name: maplehelper-ci-${{ github.sha }}
+          path: dist/release/*
+          retention-days: 14

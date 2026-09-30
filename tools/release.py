@@ -82,17 +82,20 @@ def main():
     set_version(args.version)
     run([PY, "-m", "pytest", "tests", "-q"])
     run([PY, "-m", "PyInstaller", "packaging/maplehelper.spec", "--noconfirm", "--distpath", "dist", "--workpath", "build"])
-    report = DIST / "selftest.json"
-    run([DIST / "Maple Helper" / "Maple Helper.exe", "--selftest", report])
-    time.sleep(2)
-    rep = json.loads(report.read_text(encoding="utf-8"))
-    bad = {k: v for k, v in rep.items() if isinstance(v, str) and v.startswith("ERROR")}
-    if bad:
-        sys.exit(f"self-test failed: {bad}")
+    report = DIST / "selftest.txt"
+    # the self-test's verdict is its exit code (run() raises on failure); the report says why
+    try:
+        run([DIST / "Maple Helper" / "Maple Helper.exe", "--selftest", report, "--require-kb"])
+    finally:
+        if report.exists():
+            print(report.read_text(encoding="utf-8"))
     run([ISCC, f"/DAppVersion={args.version}", "/Q", "packaging/installer.iss"])
     setup = DIST / "MapleHelper-Setup.exe"
+    # the in-app updater only runs an installer whose hash matches the release's SHA256SUMS.txt
+    sums = DIST / "SHA256SUMS.txt"
+    sums.write_text(f"{hashlib.sha256(setup.read_bytes()).hexdigest()}  {setup.name}\n", encoding="ascii")
     notes = args.notes or f"Maple Helper {args.version}"
-    run(["gh", "release", "create", f"v{args.version}", str(setup), str(kb_zip), str(manifest),
+    run(["gh", "release", "create", f"v{args.version}", str(setup), str(sums), str(kb_zip), str(manifest),
          "--repo", REPO, "--title", f"Maple Helper {args.version}", "--notes", notes])
 
 

@@ -1,0 +1,182 @@
+# Push a tag vX.Y.Z (matching maplehelper.__version__) to publish a release for players.
+# vX.Y.Z-anything publishes a prerelease: never "latest", so players and the auto-updater ignore it.
+#
+# Installed apps read two things from the *latest* release:
+#   - kb-manifest.json + kb.zip        (knowledge-base updates, maplehelper/updater.py update_kb)
+#   - MapleHelper-Setup.exe + SHA256SUMS.txt   (silent app self-update, verified by hash)
+# so every release carries all of them. The current KB is carried forward from the previous release.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+# shared with kb-update.yml: the two never modify release assets at the same time
+concurrency:
+  group: kb-update
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    name: Check version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      prerelease: ${{ steps.v.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - id: v
+        name: Tag must match __version__
+        run: |
+          tag="$GITHUB_REF_NAME"; ver="${tag#v}"; base="${ver%%-*}"
+          code=$(python3 -c 'import re; print(re.search(r"__version__ = \"([^\"]+)\"", open("maplehelper/__init__.py").read()).group(1))')
+          if ! [[ "$base" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Tag $tag is not vMAJOR.MINOR.PATCH[-suffix]"; exit 1
+          fi
+          if [ "$base" != "$code" ]; then
+            echo "::error::Tag $tag does not match __version__ = $code in maplehelper/__init__.py. Bump it, commit, then tag."; exit 1
+          fi
+          prerelease=false; [ "$ver" != "$base" ] && prerelease=true
+          if [ "$prerelease" = false ] && ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::$tag points at a commit that is not on main. Merge first (or tag a -beta prerelease)."; exit 1
+          fi
+          echo "version=$base" >> "$GITHUB_OUTPUT"
+          echo "prerelease=$prerelease" >> "$GITHUB_OUTPUT"
+          echo "Releasing $base (prerelease: $prerelease)"
+
+  test:
+    uses: ./.github/workflows/test.yml
+
+  build:
+    name: Build release
+    needs: [version, test]
+    runs-on: windows-latest
+    timeout-minutes: 240      # the very first release scrapes the KB (~1h); later ones take ~15 min
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: ./packaging/install-inno.ps1
+
+      - name: Get the knowledge base
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force kb-in, dist-kb | Out-Null
+          gh release download --repo $env:GITHUB_REPOSITORY --pattern kb.zip --pattern kb-manifest.json --dir kb-in 2>$null
+          if ($LASTEXITCODE -eq 0 -and (Test-Path kb-in/kb.zip)) {
+            # carry the published KB forward unchanged (its manifest already points at latest/download)
+            $manifest = Get-Content kb-in/kb-manifest.json -Raw | ConvertFrom-Json
+            $sha = (Get-FileHash kb-in/kb.zip -Algorithm SHA256).Hash.ToLower()
+            if ($sha -ne $manifest.sha256) { Write-Host "::error::published kb.zip does not match kb-manifest.json"; exit 1 }
+            python -m zipfile -e kb-in/kb.zip data/kb
+            Copy-Item kb-in/kb.zip, kb-in/kb-manifest.json dist-kb/
+            Write-Host "Carrying forward KB $($manifest.version)"
+          } else {
+            # first release ever: build the KB (NiaMeowDB, used with permission; polite single-site scrape)
+            Write-Host "No published knowledge base yet: scraping NiaMeowDB"
+            python tools/scrape_meowdb.py
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+            python tools/kb_release.py validate data/kb --min-entities 500
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+            python tools/kb_release.py pack data/kb dist-kb
+          }
+          python tools/kb_release.py validate data/kb --min-entities 100
+          exit $LASTEXITCODE
+
+      - name: Build, sign, self-test, installer round trip
+        shell: pwsh
+        env:
+          PYTHON: python
+          MAPLEHELPER_SIGN: ${{ secrets.MAPLEHELPER_SIGN }}
+        run: ./packaging/build.ps1 -KbDir data/kb -RequireKb -TestInstaller
+
+      - name: Checksums
+        shell: pwsh
+        run: |
+          # covers the app downloads (kb.zip is verified through kb-manifest.json, and changes nightly)
+          Push-Location dist/release
+          Get-ChildItem -File | Sort-Object Name | ForEach-Object {
+            "{0}  {1}" -f (Get-FileHash $_.Name -Algorithm SHA256).Hash.ToLower(), $_.Name
+          } | Set-Content -Encoding ascii SHA256SUMS.txt
+          Get-Content SHA256SUMS.txt
+          Pop-Location
+          Copy-Item dist-kb/kb.zip, dist-kb/kb-manifest.json dist/release/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-assets
+          path: dist/release/*
+          retention-days: 30
+
+  publish:
+    name: Publish
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ github.ref_name }}
+      VERSION: ${{ needs.version.outputs.version }}
+      PRERELEASE: ${{ needs.version.outputs.prerelease }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-assets
+          path: assets
+
+      - name: Create the GitHub Release
+        run: |
+          cat > notes.md <<EOF
+          ## Download
+
+          - **[MapleHelper-Setup.exe](https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/MapleHelper-Setup.exe)**: installer (recommended; no admin rights needed)
+          - [MapleHelper-$VERSION-portable.zip](https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/MapleHelper-$VERSION-portable.zip): unzip anywhere and run \`Maple Helper.exe\`
+
+          Already installed? Maple Helper updates itself: the new version downloads in the background and installs when you close the app.
+
+          Windows may show "Windows protected your PC" because the app is not code-signed yet: click **More info → Run anyway**.
+          Verify downloads with \`SHA256SUMS.txt\`.
+
+          EOF
+          flags=(--title "Maple Helper $VERSION" --notes-file notes.md --generate-notes --verify-tag)
+          if [ "$PRERELEASE" = true ]; then flags+=(--prerelease --latest=false); else flags+=(--latest); fi
+          gh release create "$TAG" assets/* --repo "$GITHUB_REPOSITORY" "${flags[@]}"
+
+      - name: Verify what players will download
+        run: |
+          base="https://github.com/$GITHUB_REPOSITORY/releases"
+          if [ "$PRERELEASE" = true ]; then src="$base/download/$TAG"; else src="$base/latest/download"; fi
+          ok=false
+          for attempt in 1 2 3 4 5 6; do
+            if curl -fsSL "$src/SHA256SUMS.txt" -o SHA256SUMS.txt && cmp -s SHA256SUMS.txt assets/SHA256SUMS.txt; then ok=true; break; fi
+            echo "waiting for the release CDN ($attempt)"; sleep 10
+          done
+          [ "$ok" = true ] || { echo "::error::$src/SHA256SUMS.txt is not the one just published"; exit 1; }
+          curl -fsSL "$src/MapleHelper-Setup.exe" -o MapleHelper-Setup.exe
+          grep '  MapleHelper-Setup.exe$' SHA256SUMS.txt | sha256sum -c -
+          if [ "$PRERELEASE" = false ]; then
+            curl -fsSL "$src/kb-manifest.json" -o manifest.json
+            url=$(python3 -c 'import json; print(json.load(open("manifest.json"))["url"])')
+            want=$(python3 -c 'import json; print(json.load(open("manifest.json"))["sha256"])')
+            curl -fsSL "$url" -o kb.zip
+            echo "$want  kb.zip" | sha256sum -c -
+          fi

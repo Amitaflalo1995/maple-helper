@@ -1,0 +1,172 @@
+[
+ {
+  "key": "monster/100100",
+  "id": "100100",
+  "name": "Snail",
+  "category": "monster",
+  "url": "https://meowdb.com/msclassic/monster/100100",
+  "image": "img/monster/100100.png",
+  "props": {
+   "Level": 1,
+   "HP": 8,
+   "EXP": 3
+  },
+  "type": null
+ },
+ {
+  "key": "monster/100101",
+  "id": "100101",
+  "name": "Blue Snail",
+  "category": "monster",
+  "url": "https://meowdb.com/msclassic/monster/100101",
+  "image": "img/monster/100101.png",
+  "props": {
+   "Level": 2,
+   "HP": 15,
+   "EXP": 4
+  },
+  "type": null
+ },
+ {
+  "key": "monster/130101",
+  "id": "130101",
+  "name": "Red Snail",
+  "category": "monster",
+  "url": "https://meowdb.com/msclassic/monster/130101",
+  "image": "img/monster/130101.png",
+  "props": {
+   "Level": 4,
+   "HP": 45,
+   "EXP": 8
+  },
+  "type": null
+ },
+ {
+  "key": "monster/1210100",
+  "id": "1210100",
+  "name": "Pig",
+  "category": "monster",
+  "url": "https://meowdb.com/msclassic/monster/1210100",
+  "image": "img/monster/1210100.png",
+  "props": {
+   "Level": 7,
+   "HP": 80,
+   "EXP": 12
+  },
+  "type": null
+ },
+ {
+  "key": "monster/5130104",
+  "id": "5130104",
+  "name": "Axe Stump",
+  "category": "monster",
+  "url": "https://meowdb.com/msclassic/monster/5130104",
+  "image": "img/monster/5130104.png",
+  "props": {
+   "Level": 17,
+   "HP": 371,
+   "EXP": 32
+  },
+  "type": null
+ },
+ {
+  "key": "item/2000000",
+  "id": "2000000",
+  "name": "Red Potion",
+  "category": "item",
+  "url": "https://meowdb.com/msclassic/item/2000000",
+  "image": null,
+  "props": {},
+  "type": null
+ },
+ {
+  "key": "map/100000000",
+  "id": "100000000",
+  "name": "Henesys",
+  "category": "map",
+  "url": "https://meowdb.com/msclassic/map/100000000",
+  "image": null,
+  "props": {},
+  "type": null
+ },
+ {
+  "key": "npc/1012100",
+  "id": "1012100",
+  "name": "Athena Pierce",
+  "category": "npc",
+  "url": "https://meowdb.com/msclassic/npc/1012100",
+  "image": null,
+  "props": {},
+  "type": null
+ },
+ {
+  "key": "quest/1000",
+  "id": "1000",
+  "name": "Mai's First Training",
+  "category": "quest",
+  "url": "https://meowdb.com/msclassic/quest/1000",
+  "image": null,
+  "props": {},
+  "type": null
+ },
+ {
+  "key": "skill/warrior__power-strike",
+  "id": "warrior__power-strike",
+  "name": "Power Strike",
+  "category": "skill",
+  "url": "https://meowdb.com/msclassic/skill/warrior__power-strike",
+  "image": null,
+  "props": {},
+  "type": null
+ },
+ {
+  "key": "class/warrior",
+  "id": "warrior",
+  "name": "Warrior",
+  "category": "class",
+  "url": "https://meowdb.com/msclassic/class/warrior",
+  "image": null,
+  "props": {},
+  "type": null
+ },
+ {
+  "key": "guide/leveling",
+  "id": "leveling",
+  "name": "Leveling Guide",
+  "category": "guide",
+  "url": "https://meowdb.com/msclassic/guide/leveling",
+  "image": null,
+  "props": {},
+  "type": null
+ },
+ {
+  "key": "shop/henesys__potion-shop",
+  "id": "henesys__potion-shop",
+  "name": "Henesys Potion Shop",
+  "category": "shop",
+  "url": "https://meowdb.com/msclassic/shop/henesys__potion-shop",
+  "image": null,
+  "props": {},
+  "type": null
+ },
+ {
+  "key": "crafting/ellinia__staff",
+  "id": "ellinia__staff",
+  "name": "Staff Crafting",
+  "category": "crafting",
+  "url": "https://meowdb.com/msclassic/crafting/ellinia__staff",
+  "image": null,
+  "props": {},
+  "type": null
+ },
+ {
+  "key": "formula/exp",
+  "id": "exp",
+  "name": "EXP Formula",
+  "category": "formula",
+  "url": "https://meowdb.com/msclassic/formula/exp",
+  "image": null,
+  "props": {},
+  "type": null
+ }
+]

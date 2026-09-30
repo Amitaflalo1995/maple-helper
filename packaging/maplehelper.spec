@@ -1,5 +1,6 @@
 # PyInstaller spec: builds dist/Maple Helper/ (onedir; the installer wraps it).
 # Run from the repo root:  .venv\Scripts\pyinstaller packaging\maplehelper.spec --noconfirm
+import os
 from pathlib import Path
 
 from PyInstaller.utils.hooks import collect_all
@@ -7,7 +8,7 @@ from PyInstaller.utils.hooks import collect_all
 ROOT = Path(SPECPATH).parent
 
 datas = [(str(ROOT / "assets"), "assets")]
-kb = ROOT / "data" / "kb"
+kb = Path(os.environ.get("MAPLEHELPER_KB") or ROOT / "data" / "kb")   # CI points this at a KB of its choice
 if (kb / "index.json").exists():
     datas.append((str(kb), "data/kb"))
 

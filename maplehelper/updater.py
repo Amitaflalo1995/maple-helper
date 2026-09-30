@@ -48,15 +48,21 @@ def update_kb() -> bool:
         manifest = json.loads(raw)
     except json.JSONDecodeError:
         return False
-    if manifest.get("version", "") <= local_version():
+    if not isinstance(manifest, dict) or not manifest.get("url"):
+        return False
+    if str(manifest.get("version", "")) <= local_version():
         return False
     data = _get(manifest["url"], timeout=300)
     if not data or hashlib.sha256(data).hexdigest() != manifest.get("sha256"):
         return False
     tmp = USER_KB.with_name("kb.new")
     shutil.rmtree(tmp, ignore_errors=True)
-    with zipfile.ZipFile(io.BytesIO(data)) as z:
-        z.extractall(tmp)
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as z:
+            z.extractall(tmp)
+    except zipfile.BadZipFile:
+        shutil.rmtree(tmp, ignore_errors=True)
+        return False
     if not (tmp / "index.json").exists():
         shutil.rmtree(tmp, ignore_errors=True)
         return False
@@ -72,14 +78,36 @@ def update_kb() -> bool:
 # ---------------------------------------------------------------- app updates
 
 SETUP_ASSET = "MapleHelper-Setup.exe"
+SUMS_ASSET = "SHA256SUMS.txt"     # "<sha256>  <file name>" lines, published with every release
 
 
 def _version_tuple(v: str) -> tuple[int, ...]:
     return tuple(int(x) for x in re.findall(r"\d+", v)[:3]) or (0,)
 
 
+def _asset(rel: dict, name: str) -> dict | None:
+    return next((a for a in rel.get("assets", []) or [] if isinstance(a, dict) and a.get("name") == name), None)
+
+
+def _published_sha256(rel: dict, name: str) -> str | None:
+    """The release's own checksum for `name`, from its SHA256SUMS.txt."""
+    sums = _asset(rel, SUMS_ASSET)
+    raw = _get(sums["browser_download_url"], timeout=30) if sums else None
+    if not raw:
+        return None
+    for line in raw.decode("utf-8", errors="replace").splitlines():
+        parts = line.split()
+        if len(parts) == 2 and parts[1].lstrip("*") == name and re.fullmatch(r"[0-9a-fA-F]{64}", parts[0]):
+            return parts[0].lower()
+    return None
+
+
 def download_app_update(current: str) -> str | None:
-    """If GitHub has a newer release, download its installer. Returns the installer path."""
+    """If GitHub has a newer release, download its installer. Returns the installer path.
+
+    The installer is only kept when its SHA-256 matches the release's SHA256SUMS.txt:
+    it is executed on the player's PC, so a truncated or corrupted download must never run.
+    """
     if not GITHUB_REPO:
         return None
     raw = _get(f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest", timeout=15)
@@ -89,13 +117,16 @@ def download_app_update(current: str) -> str | None:
         rel = json.loads(raw)
     except json.JSONDecodeError:
         return None
+    if not isinstance(rel, dict) or rel.get("draft") or rel.get("prerelease"):
+        return None
     if _version_tuple(rel.get("tag_name", "")) <= _version_tuple(current):
         return None
-    asset = next((a for a in rel.get("assets", []) if a.get("name") == SETUP_ASSET), None)
-    if not asset:
+    asset = _asset(rel, SETUP_ASSET)
+    want = _published_sha256(rel, SETUP_ASSET) if asset else None
+    if not want:
         return None
     data = _get(asset["browser_download_url"], timeout=600)
-    if not data or len(data) != asset.get("size", len(data)):
+    if not data or hashlib.sha256(data).hexdigest() != want:
         return None
     path = USER_KB.parent / "updates" / f"MapleHelper-Setup-{rel['tag_name']}.exe"
     path.parent.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,13 @@
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 130
+target-version = "py313"
+extend-exclude = ["packaging/*.spec"]
+
+[tool.ruff.lint]
+# pyflakes, pycodestyle errors, import order is left alone; B = likely bugs
+select = ["F", "E", "W", "B"]
+ignore = ["E501", "E731", "B008", "B905"]
