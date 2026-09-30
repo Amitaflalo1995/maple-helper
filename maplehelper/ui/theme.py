@@ -46,7 +46,7 @@ BORDER = "rgba(255,149,51,0.55)"
 
 FONT_FAMILY = "Rubik"
 ICON_FONT = "Segoe Fluent Icons"
-ICON = {"refresh": "\ue72c", "info": "\ue946", "edit": "\ue70f", "delete": "\ue74d", "add": "\ue710", "minimize": "\ue921", "close": "\ue8bb", "settings": "\ue713", "camera": "\ue722", "mic": "\ue720", "send": "\ue74a", "stop": "\ue71a"}
+ICON = {"open": "\ue8a7", "refresh": "\ue72c", "info": "\ue946", "edit": "\ue70f", "delete": "\ue74d", "add": "\ue710", "minimize": "\ue921", "close": "\ue8bb", "settings": "\ue713", "camera": "\ue722", "mic": "\ue720", "send": "\ue74a", "stop": "\ue71a"}
 
 
 def set_mode(mode: str) -> None:
@@ -139,6 +139,12 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
 
     #Card {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 14px; }}
     #Card:hover {{ background: {c['fill2']}; }}
+    #Card[selected="true"], #Tile[selected="true"], #GroupHeader[selected="true"] {{
+        border: 2px solid {ORANGE}; background: rgba(255,149,51,0.12); }}
+    #GroupHeader {{ background: transparent; border: 2px solid transparent; border-radius: 10px; }}
+    #BubbleTag {{ color: rgba(255,255,255,0.85); font-size: {s - 3}px; font-weight: 600; }}
+    #FocusBar {{ background: rgba(255,149,51,0.12); border: 1px solid rgba(255,149,51,0.55); border-radius: 12px; }}
+    #FocusText {{ color: {c['text']}; font-size: {s - 1}px; }}
     #TileGrid {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 14px; }}
     #Tile {{ background: {"rgba(255,255,255,0.05)" if MODE == "dark" else "#F7F7F9"}; border: 1px solid {c['hair']};
              border-radius: 10px; }}

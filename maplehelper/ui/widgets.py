@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import webbrowser
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget
 
@@ -25,12 +25,15 @@ def _label(text: str = "", name: str | None = None, rich: bool = False, wrap: bo
 class Bubble(QFrame):
     """A chat message. Direction is decided per paragraph, not by the UI language."""
 
-    def __init__(self, text: str, role: str, ui_rtl: bool):
+    def __init__(self, text: str, role: str, ui_rtl: bool, tag: str = ""):
         super().__init__()
         self.role = role
         self.setObjectName("BubbleUser" if role == "user" else "BubbleBot")
         lay = QVBoxLayout(self)
         lay.setContentsMargins(13, 8, 13, 9)
+        if tag:
+            t = QLabel("↩ " + tag, objectName="BubbleTag")
+            lay.addWidget(t)
         self.label = _label(rich=True)
         self.label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
         lay.addWidget(self.label)
@@ -79,15 +82,42 @@ CATEGORY_LABELS = {
 }
 
 
-class EntityCard(QFrame):
-    """Image + official English name + key stats + credit link to NiaMeowDB."""
+class _Selection(QObject):
+    """One selected entity for the whole chat. Cards emit `picked`; the overlay decides and broadcasts `changed`."""
 
-    clicked = Signal(str)
+    picked = Signal(str)
+    changed = Signal(str)     # the selected key, or "" for none
+
+
+SELECTION = _Selection()
+
+
+class Selectable:
+    """Mixin: a tap selects this entity (orange border); every selectable follows the shared selection."""
+
+    def _init_selectable(self, key: str):
+        self.key = key
+        self.setCursor(Qt.PointingHandCursor)
+        SELECTION.changed.connect(self._on_selection)
+
+    def _on_selection(self, key: str):
+        self.setProperty("selected", "true" if key == self.key else "false")
+        self.style().unpolish(self)
+        self.style().polish(self)
+
+    def mouseReleaseEvent(self, ev):
+        if ev.button() == Qt.LeftButton:
+            SELECTION.picked.emit(self.key)
+
+
+class EntityCard(Selectable, QFrame):
+    """Image + official English name + key stats + credit; tap to ask about it, ↗ opens its NiaMeowDB page."""
 
     def __init__(self, kb: KnowledgeBase, key: str, lang: str):
         super().__init__()
         self.setObjectName("Card")
-        self.setCursor(Qt.PointingHandCursor)
+        self._init_selectable(key)
+        self.setToolTip("לחצו כדי לשאול עליה" if lang == "he" else "Tap to ask about it")
         e = kb.get(key) or {}
         self.url = e.get("url")
         he = lang == "he"
@@ -125,6 +155,14 @@ class EntityCard(QFrame):
         credit = _label("NiaMeowDB (meowdb.com)", "CardCredit")
         col.addWidget(credit)
         row.addLayout(col, 1)
+        if self.url:
+            from PySide6.QtWidgets import QToolButton
+            from . import theme
+            link = QToolButton(objectName="Icon", text=theme.ICON["open"])
+            link.setCursor(Qt.PointingHandCursor)
+            link.setToolTip("NiaMeowDB")
+            link.clicked.connect(lambda: webbrowser.open(self.url))
+            row.addWidget(link, 0, Qt.AlignTop)
 
     @staticmethod
     def _stats(e: dict, he: bool) -> str:
@@ -138,10 +176,6 @@ class EntityCard(QFrame):
                 break
         return " · ".join(bits)
 
-    def mouseReleaseEvent(self, ev):
-        if self.url:
-            webbrowser.open(self.url)
-        super().mouseReleaseEvent(ev)
 
 
 # ------------------------------------------------------------------ profile card (pinned at the top of the chat)
@@ -301,12 +335,12 @@ class CharacterRow(QFrame):
         self.chosen.emit(self.cid)
 
 
-class EntityTile(QFrame):
-    """Compact item tile for lists (drops, rewards): picture + official name. Click opens the source page."""
+class EntityTile(Selectable, QFrame):
+    """Compact item tile for lists (drops, rewards): picture + official name. Tap to ask about it."""
 
     def __init__(self, kb, key: str):
         super().__init__(objectName="Tile")
-        self.setCursor(Qt.PointingHandCursor)
+        self._init_selectable(key)
         e = kb.get(key) or {}
         self.url = e.get("url")
         self.setToolTip(e.get("name", key))
@@ -329,10 +363,6 @@ class EntityTile(QFrame):
         name.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
         row.addWidget(name, 1)
 
-    def mouseReleaseEvent(self, ev):
-        if self.url:
-            import webbrowser
-            webbrowser.open(self.url)
 
 
 class TileGrid(QFrame):
@@ -365,7 +395,10 @@ class DropGroupCard(QFrame):
         outer = QVBoxLayout(self)
         outer.setContentsMargins(10, 8, 10, 8)
         outer.setSpacing(6)
-        head = QHBoxLayout()
+        header = _GroupHeader(monster)
+        outer.addWidget(header)
+        head = QHBoxLayout(header)
+        head.setContentsMargins(4, 2, 4, 2)
         head.setSpacing(10)
         pic = QLabel()
         pic.setFixedSize(40, 40)
@@ -387,9 +420,14 @@ class DropGroupCard(QFrame):
         col.addWidget(name)
         col.addWidget(sub)
         head.addLayout(col, 1)
-        outer.addLayout(head)
         grid = QGridLayout()
         grid.setSpacing(6)
         for i, k in enumerate(items):
             grid.addWidget(EntityTile(kb, k), i // 2, i % 2)
         outer.addLayout(grid)
+
+
+class _GroupHeader(Selectable, QFrame):
+    def __init__(self, key: str):
+        super().__init__(objectName="GroupHeader")
+        self._init_selectable(key)

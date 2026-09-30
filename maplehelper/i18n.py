@@ -19,6 +19,7 @@ STRINGS = {
     "transcribing": {"he": "מתמלל…", "en": "Transcribing…"},
     "voice_loading": {"he": "מוריד את מודל הדיבור (פעם אחת, כ-1.6GB)…", "en": "Downloading the voice model (once, ~1.6GB)…"},
     "no_game": {"he": "חלון המשחק לא נמצא, שולח בלי צילום מסך.", "en": "Game window not found, sending without a screenshot."},
+    "asking_about": {"he": "שואלים על: {name}", "en": "Asking about: {name}"},
     "syncing": {"he": "מצלם ומעדכן את הדמות…", "en": "Capturing and updating your character…"},
     "sync_nothing": {"he": "✓ הדמות מעודכנת, לא זוהו שינויים", "en": "✓ Character is up to date, no changes found"},
     "sync_not_found": {"he": "לא הצלחתי לזהות את הדמות במסך. ודאו שהמשחק פתוח והדמות נראית.",

@@ -109,7 +109,7 @@ LENGTH_LINES = {"short": 6, "detailed": 15}
 
 
 def build_prompt(question: str, character: Character | None, history: History | None, kb: KnowledgeBase,
-                 has_screenshot: bool, length: str = "short") -> str:
+                 has_screenshot: bool, length: str = "short", focus: str = "") -> str:
     parts = []
     if character:
         parts.append(f"<player_profile>\n{character.summary()}\n</player_profile>")
@@ -128,6 +128,13 @@ def build_prompt(question: str, character: Character | None, history: History | 
         digest = kb.level_digest(character.level)
         if digest:
             ctx.append(digest)
+    if focus and kb.get(focus):
+        e = kb.get(focus)
+        sel = [f"The player tapped this card: their question is about {e['name']} [{focus}] unless they say otherwise.",
+               kb.page_body(focus, limit=4000)]
+        if focus.startswith("monster/"):
+            sel.append(kb.drops_digest(focus))
+        ctx.append("<selected>\n" + "\n".join(x for x in sel if x) + "\n</selected>")
     if REVERSE_WORDS.search(question):
         items = item_keys_for_question(question, kb)
         groups = kb.drop_groups(items, limit=10)
@@ -268,12 +275,12 @@ class Brain:
             self._proc.kill()
 
     def ask(self, question: str, character: Character | None, history: History | None,
-            screenshot_jpeg: bytes | None, on_delta=None) -> Answer:
+            screenshot_jpeg: bytes | None, on_delta=None, focus: str = "") -> Answer:
         """Blocking call; on_delta(visible_text_so_far) is invoked while the answer streams."""
         if not self.exe:
             return Answer(error="claude_not_installed")
         self.kb.ensure_drop_table()
-        prompt = build_prompt(question, character, history, self.kb, screenshot_jpeg is not None, self.length)
+        prompt = build_prompt(question, character, history, self.kb, screenshot_jpeg is not None, self.length, focus)
         content = []
         if screenshot_jpeg:
             content.append({"type": "image", "source": {"type": "base64", "media_type": "image/jpeg",
