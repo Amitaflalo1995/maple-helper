@@ -372,7 +372,7 @@ class Overlay(QWidget):
         self.shot = winapi.capture_game(hwnd)
         self.shot_used = False
         self.setWindowOpacity(1.0)
-        self.add_system("✓ " + self.t("recapture"))
+        self.add_system("✓ " + self.t("recaptured"))
 
     # ------------------------------------------------------------------ feed
 

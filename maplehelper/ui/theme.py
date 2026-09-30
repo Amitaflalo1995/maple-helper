@@ -171,7 +171,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #DialogBody {{ font-size: {s + 1}px; color: {c['text']}; line-height: 140%; }}
     #RowHint {{ color: {c['muted']}; font-size: {s - 3}px; }}
     QPushButton#Link, QPushButton#LinkDanger {{ background: transparent; border: none; min-height: 34px;
-                        font-weight: 500; text-align: right; padding: 0; color: {ORANGE}; }}
+                        font-weight: 500; text-align: left; padding: 0; color: {ORANGE}; }}
     QPushButton#LinkDanger {{ color: #FF453A; }}
     QPushButton#Link:pressed, QPushButton#LinkDanger:pressed {{ color: {c['muted']}; }}
 
@@ -186,7 +186,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QPushButton#Segment:hover:!checked {{ background: {c['fill1']}; }}
 
     QPushButton#Select {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 8px;
-                          min-height: 28px; max-height: 28px; padding: 0 28px 0 12px; color: {c['text']};
+                          min-height: 28px; max-height: 28px; padding: 0 28px; color: {c['text']};
                           text-align: left; font-weight: 500; }}
     QPushButton#Select:hover {{ background: {c['fill3']}; }}
     QPushButton#Select:pressed {{ background: {c['pressed']}; }}
