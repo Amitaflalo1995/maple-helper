@@ -184,8 +184,9 @@ class Overlay(QWidget):
         self.feed_lay.addStretch(1)
         self.scroll.setWidget(self.feed)
         lay.addWidget(self.scroll, 1)
-        self.scroll.verticalScrollBar().rangeChanged.connect(
-            lambda _a, b: self.scroll.verticalScrollBar().setValue(b))
+        self._follow = True          # keep the newest content in view (off once an answer outgrows the view)
+        self._anchor = None          # the answer being read: stay at its first line
+        self.scroll.verticalScrollBar().rangeChanged.connect(self._on_range)
 
         # input capsule: [camera] field [mic] (send)
         self.capsule = Capsule(objectName="Capsule")
@@ -454,6 +455,8 @@ class Overlay(QWidget):
         self.shot_used = True
         if history:
             history.append("user", question)
+        self._anchor = None
+        self._follow = True
         self._pending_bubble = self.add_bubble(self.t("thinking"), "assistant")
         self.busy = True
         self.send_btn.setEnabled(False)
@@ -470,9 +473,32 @@ class Overlay(QWidget):
         self._worker.done.connect(self._thread.quit)
         self._thread.start()
 
+    def _on_range(self, _lo: int, hi: int):
+        bar = self.scroll.verticalScrollBar()
+        if self._anchor is not None:
+            bar.setValue(min(hi, self._anchor_top()))
+        elif self._follow:
+            bar.setValue(hi)
+
+    def _anchor_top(self) -> int:
+        row = self._anchor
+        return max(0, row.mapTo(self.feed, row.rect().topLeft()).y() - 8) if row else 0
+
+    def _keep_answer_readable(self):
+        """Once the answer (plus what follows it) is taller than the view, pin its first line to the top."""
+        if not self._pending_bubble:
+            return
+        row = self._pending_bubble.parentWidget()
+        top = row.mapTo(self.feed, row.rect().topLeft()).y()
+        below = self.feed.height() - top
+        if below > self.scroll.viewport().height() - 16:
+            self._anchor = row
+            self.scroll.verticalScrollBar().setValue(self._anchor_top())
+
     def _on_delta(self, text: str):
         if self._pending_bubble and text:
             self._pending_bubble.set_text(text)
+            QTimer.singleShot(0, self._keep_answer_readable)
 
     def sync_profile(self):
         if self.busy or getattr(self, "_syncing", False):
@@ -529,6 +555,8 @@ class Overlay(QWidget):
             self._pending_bubble.set_text(self.t(key))
             return
         self._pending_bubble.set_text(ans.text)
+        QTimer.singleShot(0, self._keep_answer_readable)
+        QTimer.singleShot(250, self._keep_answer_readable)   # after the cards' layout settles
         if history:
             history.append("assistant", ans.text, ans.entities)
         for g in ans.drop_groups:
