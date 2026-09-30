@@ -2,6 +2,6 @@ PySide6>=6.7
 mss>=9
 pillow>=10
 keyring>=25
-faster-whisper>=1.0
+faster-whisper>=1.2.1
 sounddevice>=0.4
 numpy>=1.26
