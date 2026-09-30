@@ -7,8 +7,8 @@ import sys
 import threading
 import winreg
 
-from PySide6.QtCore import QAbstractNativeEventFilter, QLockFile, QObject, QTimer, Signal
-from PySide6.QtGui import QAction, QIcon
+from PySide6.QtCore import QAbstractNativeEventFilter, QLockFile, QObject, Qt, QTimer, Signal
+from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon, QWidget
 
 from . import APP_NAME, __version__, claude_setup, updater, winapi
@@ -68,7 +68,10 @@ class MapleHelperApp:
 
     def style(self, opacity: float | None = None) -> str:
         theme.set_mode(self.settings["appearance"])
-        return theme.stylesheet(self.font_family, self.settings["font_size"])
+        self.qapp.setLayoutDirection(Qt.RightToLeft if I18n(self.settings["language"]).rtl else Qt.LeftToRight)
+        css = theme.stylesheet(self.font_family, self.settings["font_size"])
+        self.qapp.setStyleSheet(css)
+        return css
 
     def run_onboarding(self) -> bool:
         first = True
@@ -176,11 +179,24 @@ class MapleHelperApp:
         self.tray = QSystemTrayIcon(QIcon(str(ASSETS / "brand" / "app.ico")))
         self.tray.setToolTip(f"{APP_NAME} · {t('app_tagline')}")
         menu = QMenu()
-        a_show = QAction(t("tray_show"), menu, triggered=lambda: self.overlay.toggle(self.capture))
+        # rounded, app-styled menu (the app-wide stylesheet paints it; the window must be see-through at the corners)
+        menu.setWindowFlags(menu.windowFlags() | Qt.FramelessWindowHint | Qt.NoDropShadowWindowHint)
+        menu.setAttribute(Qt.WA_TranslucentBackground)
+        menu.setLayoutDirection(Qt.RightToLeft if t.rtl else Qt.LeftToRight)
+        header = QAction(APP_NAME, menu)
+        header.setEnabled(False)
+        menu.addAction(header)
+        menu.addSeparator()
+        key = self.settings["hotkey_toggle"]
+        a_show = QAction(t("tray_open"), menu, triggered=lambda: self.overlay.toggle(self.capture))
+        a_show.setShortcut(QKeySequence(key))          # shown in the menu's shortcut column
+        a_show.setShortcutVisibleInContextMenu(True)
         a_set = QAction(t("tray_settings"), menu, triggered=self.open_settings)
         a_quit = QAction(t("tray_quit"), menu, triggered=self.qapp.quit)
-        for a in (a_show, a_set, a_quit):
-            menu.addAction(a)
+        menu.addAction(a_show)
+        menu.addAction(a_set)
+        menu.addSeparator()
+        menu.addAction(a_quit)
         self.tray.setContextMenu(menu)
         self.tray.activated.connect(lambda r: self.overlay.toggle(self.capture)
                                     if r == QSystemTrayIcon.Trigger else None)
@@ -191,8 +207,13 @@ class MapleHelperApp:
         dlg = SettingsDialog(self.settings, self.profiles, self.kb, self.style)
         dlg.changed.connect(self.on_settings_changed)
         dlg.update_kb_requested.connect(self.update_kb_interactive)
+        dlg.history_cleared.connect(self.on_history_cleared)
         dlg.exec()
         self.overlay.refresh_profile_chip()
+
+    def on_history_cleared(self):
+        self.overlay.clear_feed()
+        self.toast(I18n(self.settings["language"])("history_cleared"))
 
     def on_settings_changed(self):
         self.overlay.apply_language()

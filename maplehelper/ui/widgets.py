@@ -142,3 +142,135 @@ class EntityCard(QFrame):
         if self.url:
             webbrowser.open(self.url)
         super().mouseReleaseEvent(ev)
+
+
+# ------------------------------------------------------------------ profile card (pinned at the top of the chat)
+
+from PySide6.QtCore import QRectF  # noqa: E402
+from PySide6.QtGui import QColor, QPainter, QPainterPath  # noqa: E402
+
+JOB_IMAGE_FALLBACK = {  # 3rd jobs have no picture in the database: use their 2nd job's
+    "crusader": "fighter", "white-knight": "page", "dragon-knight": "spearman", "f-p-mage": "f-p-wizard",
+    "i-l-mage": "i-l-wizard", "priest": "cleric", "ranger": "hunter", "sniper": "crossbowman",
+    "hermit": "assassin", "chief-bandit": "bandit",
+}
+
+
+def _slug(job: str) -> str:
+    return job.lower().replace("/", "-").replace(" ", "-")
+
+
+class Avatar(QLabel):
+    """Rounded-square portrait."""
+
+    def __init__(self, size: int = 46):
+        super().__init__()
+        self.setFixedSize(size, size)
+        self._pm = None
+
+    def set_image(self, path) -> None:
+        pm = QPixmap(str(path)) if path else QPixmap()
+        self._pm = None if pm.isNull() else pm
+        self.update()
+
+    def paintEvent(self, e):
+        from . import theme
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.SmoothPixmapTransform)
+        path = QPainterPath()
+        path.addRoundedRect(QRectF(self.rect()).adjusted(0.5, 0.5, -0.5, -0.5), 12, 12)
+        p.setClipPath(path)
+        p.fillPath(path, QColor(255, 255, 255, 26) if theme.MODE == "dark" else QColor(0, 0, 0, 10))
+        if self._pm:
+            dpr = self.devicePixelRatioF()
+            pm = self._pm.scaled(self.size() * dpr, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            pm.setDevicePixelRatio(dpr)
+            w, h = pm.width() / dpr, pm.height() / dpr
+            p.drawPixmap(int((self.width() - w) / 2), int((self.height() - h) / 2), pm)
+
+
+class ProfileCard(QFrame):
+    """Name, "Lv. 32 · Assassin" (English, as in game) and a live portrait of the character."""
+
+    clicked = Signal()
+
+    def __init__(self):
+        super().__init__(objectName="ProfileCard")
+        self.setCursor(Qt.PointingHandCursor)
+        row = QHBoxLayout(self)
+        row.setContentsMargins(10, 8, 12, 8)
+        row.setSpacing(10)
+        self.avatar = Avatar(46)
+        row.addWidget(self.avatar)
+        col = QVBoxLayout()
+        col.setSpacing(1)
+        self.name = QLabel(objectName="ProfileName")
+        self.meta = QLabel(objectName="ProfileMeta")
+        col.addWidget(self.name)
+        col.addWidget(self.meta)
+        row.addLayout(col, 1)
+
+    def show_character(self, c, avatar_path, kb, rtl: bool) -> None:
+        align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter
+        self.name.setText(bidi.plain(c.name, rtl))
+        self.name.setAlignment(align)
+        self.meta.setText(f"Lv. {c.level} · {c.job}")
+        self.meta.setAlignment(align)
+        img = avatar_path
+        if not img:
+            slug = _slug(c.job)
+            img = kb.image_path(f"class/{JOB_IMAGE_FALLBACK.get(slug, slug)}") or kb.image_path(
+                f"class/{_slug(c.base_class)}")
+        self.avatar.set_image(img)
+
+    def mouseReleaseEvent(self, e):
+        self.clicked.emit()
+
+
+class CharacterRow(QFrame):
+    chosen = Signal(str)
+    edit_requested = Signal(str)
+    delete_requested = Signal(str)
+
+    def __init__(self, c, avatar_path, kb, active: bool, rtl: bool, can_delete: bool):
+        super().__init__(objectName="CharacterRow")
+        self.cid = c.id
+        self.setCursor(Qt.PointingHandCursor)
+        row = QHBoxLayout(self)
+        row.setContentsMargins(0, 8, 0, 8)
+        row.setSpacing(10)
+        self.avatar = Avatar(36)
+        img = avatar_path
+        if not img:
+            slug = _slug(c.job)
+            img = kb.image_path(f"class/{JOB_IMAGE_FALLBACK.get(slug, slug)}") or kb.image_path(
+                f"class/{_slug(c.base_class)}")
+        self.avatar.set_image(img)
+        row.addWidget(self.avatar)
+        col = QVBoxLayout()
+        col.setSpacing(0)
+        align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter
+        name = QLabel(bidi.plain(c.name, rtl), objectName="ProfileName")
+        name.setAlignment(align)
+        meta = QLabel(f"Lv. {c.level} · {c.job}", objectName="ProfileMeta")
+        meta.setAlignment(align)
+        col.addWidget(name)
+        col.addWidget(meta)
+        row.addLayout(col, 1)
+        check = QLabel("✓" if active else "", objectName="Check")
+        check.setFixedWidth(18)
+        row.addWidget(check)
+        from . import theme
+        pencil = QPushButton(theme.ICON["edit"], objectName="IconPlain")
+        pencil.setCursor(Qt.PointingHandCursor)
+        pencil.clicked.connect(lambda: self.edit_requested.emit(self.cid))
+        row.addWidget(pencil)
+        if can_delete:
+            trash = QPushButton(theme.ICON["delete"], objectName="IconDanger")
+            trash.setCursor(Qt.PointingHandCursor)
+            trash.clicked.connect(lambda: self.delete_requested.emit(self.cid))
+            row.addWidget(trash)
+
+    def mouseReleaseEvent(self, e):
+        self.chosen.emit(self.cid)

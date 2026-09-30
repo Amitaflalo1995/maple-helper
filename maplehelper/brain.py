@@ -41,8 +41,11 @@ Style:
 - Plain text with short lines; **bold** allowed; no headings, no tables.
 
 After the answer, output a line containing only @@META@@ followed by one JSON object:
-{{"entities": ["monster/5", ...], "profile_update": {{}}}}
+{{"entities": ["monster/5", ...], "profile_update": {{}}, "avatar_box": [0.42, 0.55, 0.05, 0.1]}}
 - entities: knowledge-base keys (category/id from index.json) of the main monsters, items, maps, NPCs or quests you mentioned, max 4, most relevant first.
+- avatar_box (only with a screenshot, only if clearly visible): [x, y, w, h] as fractions (0-1) of the screenshot, a snug box
+  around the PLAYER'S OWN character sprite (find the name tag under it matching the profile name), head to feet, excluding
+  the name tag. Omit it if unsure.
 - profile_update: only facts the player stated or the screenshot clearly shows: "level" (int), "job", "base_class", "map", "quests_started" [..], "quests_completed" [..], "note" (a lasting preference or goal). Empty object if nothing changed.
 """
 
@@ -74,6 +77,7 @@ class Answer:
     text: str = ""
     entities: list[str] = field(default_factory=list)
     profile_update: dict = field(default_factory=dict)
+    avatar_box: list | None = None
     error: str | None = None
     cost_usd: float | None = None
 
@@ -210,8 +214,11 @@ class Brain:
             # fallback: cards for the in-game names that appear in the answer itself
             entities = [k for k in self.kb.find_mentions(text, max_results=4)
                         if k.split("/")[0] in ("monster", "item", "npc", "map", "quest")]
+        box = meta.get("avatar_box")
+        if not (isinstance(box, list) and len(box) == 4 and all(isinstance(v, (int, float)) for v in box)):
+            box = None
         return Answer(text=text, entities=entities[:4], profile_update=meta.get("profile_update") or {},
-                      cost_usd=result.get("total_cost_usd"))
+                      avatar_box=box if screenshot_jpeg else None, cost_usd=result.get("total_cost_usd"))
 
     def summarize(self, transcript: str) -> str | None:
         """One-paragraph summary of a finished session, kept as long-term context."""

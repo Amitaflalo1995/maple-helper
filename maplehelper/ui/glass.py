@@ -163,16 +163,5 @@ class GlassDialog(QDialog):
         self.content = QWidget(objectName="Feed")
         root.addWidget(self.content, 1)
 
-    def showEvent(self, e):
-        super().showEvent(e)
-        from .. import winapi
-        winapi.set_capture_visibility(int(self.winId()), self._show_in_captures)
-        if not self._show_in_captures:
-            self.backdrop.start()
-
-    def hideEvent(self, e):
-        super().hideEvent(e)
-        self.backdrop.stop()
-
     def paintEvent(self, e):
-        paint_glass(self, None if self._show_in_captures else self.backdrop, self._strength)
+        paint_glass(self, None)

@@ -16,18 +16,18 @@ RADIUS = 22
 
 PALETTES = {
     "dark": {
-        "glass": (18, 18, 20), "glass_alpha": 0.58, "solid_alpha": 0.95,
-        "sheen": 30, "rim_top": 95, "rim": 26,
+        "glass": (28, 28, 30), "glass_alpha": 1.0, "solid_alpha": 1.0,
+        "sheen": 14, "rim_top": 60, "rim": 22,
         "text": "#F5F5F7", "muted": "rgba(235,235,245,0.64)", "faint": "rgba(235,235,245,0.40)",
         "fill1": "rgba(255,255,255,0.08)", "fill2": "rgba(255,255,255,0.12)", "fill3": "rgba(255,255,255,0.20)",
         "pressed": "rgba(255,255,255,0.28)", "stroke": "rgba(255,255,255,0.14)", "hair": "rgba(255,255,255,0.07)",
         "scroll": "rgba(255,255,255,0.25)",
     },
     "light": {
-        "glass": (250, 250, 252), "glass_alpha": 0.66, "solid_alpha": 0.97,
-        "sheen": 70, "rim_top": 230, "rim": 90,
+        "glass": (242, 242, 247), "glass_alpha": 1.0, "solid_alpha": 1.0,
+        "sheen": 0, "rim_top": 40, "rim": 30,
         "text": "#1D1D1F", "muted": "rgba(60,60,67,0.66)", "faint": "rgba(60,60,67,0.42)",
-        "fill1": "rgba(255,255,255,0.55)", "fill2": "rgba(255,255,255,0.72)", "fill3": "rgba(255,255,255,0.92)",
+        "fill1": "#FFFFFF", "fill2": "#FFFFFF", "fill3": "#E5E5EA",
         "pressed": "rgba(230,230,235,0.95)", "stroke": "rgba(0,0,0,0.08)", "hair": "rgba(0,0,0,0.05)",
         "scroll": "rgba(0,0,0,0.25)",
     },
@@ -46,7 +46,7 @@ BORDER = "rgba(255,149,51,0.55)"
 
 FONT_FAMILY = "Rubik"
 ICON_FONT = "Segoe Fluent Icons"
-ICON = {"minimize": "", "close": "", "settings": "", "camera": "", "mic": "", "send": "", "stop": ""}
+ICON = {"edit": "\ue70f", "delete": "\ue74d", "add": "\ue710", "minimize": "\ue921", "close": "\ue8bb", "settings": "\ue713", "camera": "\ue722", "mic": "\ue720", "send": "\ue74a", "stop": "\ue71a"}
 
 
 def set_mode(mode: str) -> None:
@@ -99,10 +99,32 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QScrollBar::handle:vertical {{ background: {c['scroll']}; border-radius: 3px; min-height: 28px; }}
     QScrollBar::add-line, QScrollBar::sub-line, QScrollBar::add-page, QScrollBar::sub-page {{ height: 0; background: none; }}
 
+    #CharacterRow {{ background: transparent; border: none; }}
+    #Check {{ color: {ORANGE}; font-size: {s + 2}px; font-weight: 700; }}
+    QPushButton#IconDanger {{ font-family: "{ICON_FONT}"; font-size: 13px; color: {c['muted']}; background: transparent;
+                              border: none; border-radius: 13px; min-width: 26px; max-width: 26px;
+                              min-height: 26px; max-height: 26px; }}
+    QPushButton#IconDanger:hover {{ color: #FF3B30; background: {c['fill3']}; }}
+    QPushButton#IconPlain {{ font-family: "{ICON_FONT}"; font-size: 13px; color: {c['muted']}; background: transparent;
+                             border: none; border-radius: 13px; min-width: 26px; max-width: 26px;
+                             min-height: 26px; max-height: 26px; }}
+    QPushButton#IconPlain:hover {{ color: {ORANGE}; background: {c['fill3']}; }}
+    #Stepper {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 10px; }}
+    QToolButton#StepBtn {{ background: transparent; border: none; border-radius: 8px; color: {ORANGE};
+                           font-size: {s + 4}px; font-weight: 600; min-width: 30px; min-height: 28px; }}
+    QToolButton#StepBtn:hover {{ background: {c['fill3']}; }}
+    QToolButton#StepBtn:pressed {{ background: {c['pressed']}; }}
+    QToolButton#StepBtn:disabled {{ color: {c['faint']}; }}
+    QLineEdit#StepValue {{ background: transparent; border: none; font-weight: 600; padding: 0; color: {c['text']}; }}
+    #JobHint {{ color: {c['muted']}; font-size: {s - 3}px; }}
+    #ProfileCard {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 16px; }}
+    #ProfileCard:hover {{ background: {c['fill2']}; }}
+    #ProfileName {{ font-size: {s + 1}px; font-weight: 600; color: {c['text']}; }}
+    #ProfileMeta {{ font-size: {s - 1}px; font-weight: 500; color: {c['muted']}; }}
     #BubbleUser {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFA24A, stop:1 {ORANGE_DEEP});
-                   border-radius: 18px; }}
+                   border-radius: 15px; min-height: 32px; }}
     #BubbleUser QLabel {{ color: #FFFFFF; }}
-    #BubbleBot {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 18px; }}
+    #BubbleBot {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 15px; min-height: 32px; }}
     #SystemLine {{ color: {c['muted']}; font-size: {s - 2}px; }}
 
     #Card {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 14px; }}
@@ -131,6 +153,9 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
                            color: #FFFFFF; border: none; border-radius: 12px; min-height: 26px; padding: 4px 18px; font-weight: 600; }}
     QPushButton#Primary:pressed {{ background: {ORANGE_DEEP}; }}
     QPushButton#Primary:disabled {{ background: {c['fill2']}; color: {c['faint']}; }}
+    QPushButton#Danger {{ background: #FF3B30; color: #FFFFFF; border: none; border-radius: 12px; min-height: 26px;
+                          padding: 4px 18px; font-weight: 600; }}
+    QPushButton#Danger:pressed {{ background: #D70015; }}
     QPushButton#Secondary {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 12px; min-height: 26px; padding: 4px 18px; }}
     QPushButton#Secondary:hover {{ background: {c['fill3']}; }}
     QPushButton#Quick {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 14px; min-height: 30px; padding: 4px 12px; }}
@@ -150,13 +175,21 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QPushButton#LinkDanger {{ color: #FF453A; }}
     QPushButton#Link:pressed, QPushButton#LinkDanger:pressed {{ color: {c['muted']}; }}
 
-    #Segmented {{ background: {c['fill2']}; border: 1px solid {c['hair']}; border-radius: 10px; }}
+    #Segmented {{ background: {"rgba(118,118,128,0.24)" if MODE == "dark" else "#E3E3E8"}; border: none;
+                  border-radius: 10px; }}
     QPushButton#Segment {{ background: transparent; border: none; border-radius: 8px; min-height: 26px; max-height: 26px;
                            padding: 0 12px; font-size: {s - 2}px; font-weight: 500; color: {c['text']}; }}
-    QPushButton#Segment:checked {{ background: {"rgba(255,255,255,0.22)" if MODE == "dark" else "#FFFFFF"};
-                                   border: 1px solid {c['stroke']}; }}
+    QPushButton#Segment:checked {{ background: {"#636366" if MODE == "dark" else "#FFFFFF"};
+                                   border: 1px solid {"rgba(255,255,255,0.10)" if MODE == "dark" else "rgba(0,0,0,0.10)"};
+                                   font-weight: 700; color: {c['text']}; }}
+    QPushButton#Segment:!checked {{ color: {c['muted']}; }}
     QPushButton#Segment:hover:!checked {{ background: {c['fill1']}; }}
 
+    QPushButton#Select {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 8px;
+                          min-height: 28px; max-height: 28px; padding: 0 28px 0 12px; color: {c['text']};
+                          text-align: left; font-weight: 500; }}
+    QPushButton#Select:hover {{ background: {c['fill3']}; }}
+    QPushButton#Select:pressed {{ background: {c['pressed']}; }}
     QComboBox {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 10px; min-height: 26px;
                  padding: 0 10px; color: {c['text']}; }}
     QComboBox::drop-down {{ border: none; width: 22px; }}
@@ -168,20 +201,26 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
                 padding: 0 8px; color: {c['text']}; }}
     QSpinBox::up-button, QSpinBox::down-button {{ width: 16px; border: none; background: transparent; }}
 
-    QSlider::groove:horizontal {{ height: 4px; background: {c['fill3']}; border-radius: 2px; }}
-    QSlider::sub-page:horizontal {{ background: {ORANGE}; border-radius: 2px; }}
-    QSlider::handle:horizontal {{ background: #FFFFFF; width: 22px; height: 22px; margin: -9px 0; border-radius: 11px;
-                                  border: 1px solid rgba(0,0,0,0.12); }}
+    QSlider::groove:horizontal {{ height: 6px; background: {"rgba(255,255,255,0.22)" if MODE == "dark" else "rgba(0,0,0,0.13)"};
+                                  border-radius: 3px; }}
+    QSlider::add-page:horizontal {{ background: {"rgba(255,255,255,0.22)" if MODE == "dark" else "rgba(0,0,0,0.13)"};
+                                    border-radius: 3px; }}
+    QSlider::sub-page:horizontal {{ background: {ORANGE}; border-radius: 3px; }}
+    QSlider::handle:horizontal {{ background: #FFFFFF; width: 24px; height: 24px; margin: -9px 0; border-radius: 12px;
+                                  border: 1px solid rgba(0,0,0,0.14); }}
 
     QListWidget {{ background: transparent; border: none; outline: none; }}
     QListWidget::item {{ padding: 8px 4px; border-radius: 8px; color: {c['text']}; }}
     QListWidget::item:hover {{ background: {c['fill1']}; }}
     QListWidget::item:selected {{ background: rgba(255,149,51,0.22); color: {c['text']}; }}
 
-    QMenu {{ background: {"#2C2C2E" if MODE == "dark" else "#FFFFFF"}; border: 1px solid {c['stroke']};
-             border-radius: 12px; padding: 6px; }}
-    QMenu::item {{ padding: 7px 18px; border-radius: 7px; color: {c['text']}; }}
+    QMenu {{ background: {"rgba(44,44,46,0.98)" if MODE == "dark" else "rgba(255,255,255,0.98)"};
+             border: 1px solid {c['stroke']}; border-radius: 12px; padding: 5px; }}
+    QMenu::item {{ padding: 6px 16px 6px 28px; border-radius: 7px; color: {c['text']}; min-width: 64px; }}
     QMenu::item:selected {{ background: {ORANGE}; color: #FFFFFF; }}
+    QMenu::item:disabled {{ color: {c['muted']}; font-weight: 600; font-size: {s - 2}px; }}
+    QMenu::indicator {{ width: 14px; height: 14px; left: 8px; }}
+    QMenu::separator {{ height: 1px; background: {c['hair']}; margin: 4px 8px; }}
     QToolTip {{ background: {"#2C2C2E" if MODE == "dark" else "#FFFFFF"}; color: {c['text']};
                 border: 1px solid {c['stroke']}; border-radius: 6px; padding: 4px 8px; }}
     """

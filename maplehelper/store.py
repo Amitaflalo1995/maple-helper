@@ -25,7 +25,8 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 USER_KB = DATA_DIR / "kb"            # knowledge base updates downloaded at runtime
 SHOTS_DIR = DATA_DIR / "shots"       # screenshots live only until the answer arrives
 HISTORY_DIR = DATA_DIR / "history"
-for d in (SHOTS_DIR, HISTORY_DIR):
+AVATAR_DIR = DATA_DIR / "avatars"
+for d in (SHOTS_DIR, HISTORY_DIR, AVATAR_DIR):
     d.mkdir(parents=True, exist_ok=True)
 
 
@@ -55,9 +56,7 @@ DEFAULT_SETTINGS = {
     "language": None,             # "he" | "en"; None until onboarding
     "hotkey_toggle": "F9",
     "hotkey_voice": "F10",
-    "glass_strength": 0.6,        # 0.4 clearer glass … 1.0 solid (readability over busy scenes)
-    "appearance": "dark",
-    "show_in_captures": False,    # True: the chat appears in screenshots/recordings (no live blur then)         # dark (black glass, white text) | light (white glass, dark text)
+    "appearance": "dark",         # dark | light (opaque surfaces)
     "font_size": 14,
     "answer_length": "short",     # short | detailed
     "window": None,
@@ -100,6 +99,7 @@ class Character:
     map: str = ""
     active_quests: list[str] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
+    avatar: str = ""              # file in AVATAR_DIR, cropped from the latest screenshot
     updated_at: float = field(default_factory=time.time)
 
     def summary(self) -> str:
@@ -131,6 +131,25 @@ class Profiles:
         self.active_id = c.id
         self.save()
         return c
+
+    def edit(self, cid: str, name: str, base_class: str, job: str, level: int) -> None:
+        c = next((c for c in self.characters if c.id == cid), None)
+        if c:
+            c.name, c.base_class, c.job, c.level = name, base_class, job, level
+            c.updated_at = time.time()
+            self.save()
+
+    def remove(self, cid: str) -> None:
+        c = next((c for c in self.characters if c.id == cid), None)
+        if not c:
+            return
+        if c.avatar:
+            (AVATAR_DIR / c.avatar).unlink(missing_ok=True)
+        History(cid).clear()
+        self.characters.remove(c)
+        if self.active_id == cid:
+            self.active_id = self.characters[0].id if self.characters else None
+        self.save()
 
     def set_active(self, cid: str) -> None:
         self.active_id = cid
@@ -172,6 +191,23 @@ class Profiles:
             c.updated_at = time.time()
             self.save()
         return changed
+
+    def set_avatar(self, png_bytes: bytes) -> None:
+        c = self.active
+        if not c:
+            return
+        name = f"{c.id}-{int(time.time())}.png"
+        (AVATAR_DIR / name).write_bytes(png_bytes)
+        if c.avatar and c.avatar != name:
+            (AVATAR_DIR / c.avatar).unlink(missing_ok=True)
+        c.avatar = name
+        self.save()
+
+    def avatar_path(self, c: "Character | None" = None) -> Path | None:
+        c = c or self.active
+        if c and c.avatar and (AVATAR_DIR / c.avatar).exists():
+            return AVATAR_DIR / c.avatar
+        return None
 
     def save(self):
         _write_json(self.path, {"active": self.active_id, "characters": [asdict(c) for c in self.characters]})

@@ -15,9 +15,9 @@ from ..i18n import I18n
 from ..kb import KnowledgeBase
 from ..store import ASSETS, History, Profiles, Settings
 from . import theme
-from .glass import GlassBackdrop, paint_glass
+from .glass import paint_glass
 from .minibubble import MiniBubble
-from .widgets import Bubble, BubbleRow, EntityCard, SystemLine
+from .widgets import Bubble, BubbleRow, EntityCard, ProfileCard, SystemLine
 
 SLOW_AFTER_MS = 30_000
 
@@ -98,7 +98,6 @@ class Overlay(QWidget):
         self._slow_timer = QTimer(self, singleShot=True, interval=SLOW_AFTER_MS, timeout=self._on_slow)
         self._session_started: float | None = None
         self._anim: QParallelAnimationGroup | None = None
-        self.backdrop = GlassBackdrop(self)
         self.bubble = MiniBubble()
         self.bubble.clicked.connect(self.restore_from_bubble)
         self.bubble.moved.connect(lambda pt: self.settings.__setitem__("bubble_pos", {"x": pt.x(), "y": pt.y()}))
@@ -111,26 +110,9 @@ class Overlay(QWidget):
 
     SHADOW = 12   # room around the panel for its soft shadow
 
-    def showEvent(self, e):
-        super().showEvent(e)
-        self.apply_capture_mode()
-
     def apply_capture_mode(self):
-        """Hidden from captures → live frosted backdrop of the game.
-        Visible in captures (screenshots, streams) → the backdrop can't sample behind itself,
-        so the glass becomes a uniform frosted tint."""
-        visible = bool(self.settings["show_in_captures"])
-        winapi.set_capture_visibility(int(self.winId()), visible)
-        if visible:
-            self.backdrop.stop()
-            self.backdrop.pixmap = None
-        elif self.isVisible():
-            self.backdrop.start()
+        """Opaque window, visible in screenshots and recordings like any app."""
         self.update()
-
-    def hideEvent(self, e):
-        super().hideEvent(e)
-        self.backdrop.stop()
 
     def _panel_path(self) -> QPainterPath:
         m = self.SHADOW
@@ -141,8 +123,7 @@ class Overlay(QWidget):
 
     def paintEvent(self, e):
         """Liquid glass: the blurred game behind, a neutral tint, a light-catching sheen and rim."""
-        live = None if self.settings["show_in_captures"] else self.backdrop
-        paint_glass(self, live, self.settings["glass_strength"])
+        paint_glass(self, None)
 
     # ------------------------------------------------------------------ layout
 
@@ -171,10 +152,6 @@ class Overlay(QWidget):
         self.title = QLabel("Maple Helper", objectName="Title")
         tb.addWidget(self.title)
         tb.addStretch(1)
-        self.profile_chip = QPushButton(objectName="ProfilePill")
-        self.profile_chip.setCursor(Qt.PointingHandCursor)
-        self.profile_chip.clicked.connect(self.profile_requested.emit)
-        tb.addWidget(self.profile_chip)
         self.settings_btn = self._icon_button(theme.ICON["settings"])
         self.settings_btn.clicked.connect(self.settings_requested.emit)
         tb.addWidget(self.settings_btn)
@@ -187,6 +164,11 @@ class Overlay(QWidget):
         self.close_btn.clicked.connect(self.close_overlay)
         tb.addWidget(self.close_btn)
         lay.addWidget(self.title_bar)
+
+        # the character, pinned at the top of the conversation
+        self.profile_card = ProfileCard()
+        self.profile_card.clicked.connect(self.profile_requested.emit)
+        lay.addWidget(self.profile_card)
 
         # conversation
         self.scroll = QScrollArea()
@@ -235,7 +217,6 @@ class Overlay(QWidget):
         m = self.SHADOW
         self.grip.move(self.width() - m - 18 if not self.t.rtl else m + 2, self.height() - m - 18)
         if self.isVisible():
-            self.backdrop.refresh()
             QTimer.singleShot(300, self.save_geometry)
 
     def apply_language(self):
@@ -254,17 +235,16 @@ class Overlay(QWidget):
 
     def refresh_profile_chip(self):
         c = self.profiles.active
-        if not c:
-            self.profile_chip.hide()
-            return
-        self.profile_chip.show()
-        self.profile_chip.setText(bidi.plain(f"{c.name} · {self.t('level')} {c.level} · {c.job}", self.t.rtl))
+        self.profile_card.setVisible(c is not None)
+        if c:
+            self.profile_card.show_character(c, self.profiles.avatar_path(c), self.kb, self.t.rtl)
 
     def _on_text(self, text: str):
         """The field follows what is being typed; send lights up only when there is something to send."""
         d = bidi.direction(text) if text.strip() else ("rtl" if self.t.rtl else "ltr")
         self.input.setLayoutDirection(Qt.RightToLeft if d == "rtl" else Qt.LeftToRight)
-        self.input.setAlignment(Qt.AlignRight if d == "rtl" else Qt.AlignLeft)
+        # absolute: in an RTL widget a plain AlignRight means "trailing" = left
+        self.input.setAlignment((Qt.AlignRight if d == "rtl" else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
         self.send_btn.setEnabled(bool(text.strip()) and not self.busy)
 
     # ------------------------------------------------------------------ geometry
@@ -383,13 +363,9 @@ class Overlay(QWidget):
         super().keyPressEvent(e)
 
     def recapture(self):
-        if self.settings["show_in_captures"]:
-            # the chat would appear in the shot: step aside for a moment
-            self.setWindowOpacity(0.0)
-            QTimer.singleShot(120, self._do_recapture)
-        else:
-            # hidden from capture: the game can be captured with the chat open
-            self._do_recapture()
+        # the chat is part of the screen: step aside for a moment so the shot shows the game
+        self.setWindowOpacity(0.0)
+        QTimer.singleShot(120, self._do_recapture)
 
     def _do_recapture(self):
         hwnd = self.game_hwnd or winapi.find_game_window()
@@ -412,6 +388,12 @@ class Overlay(QWidget):
         a.setEasingCurve(QEasingCurve.OutCubic)
         a.finished.connect(lambda: w.setGraphicsEffect(None))
         a.start()
+
+    def clear_feed(self):
+        while self.feed_lay.count() > 1:
+            w = self.feed_lay.takeAt(0).widget()
+            if w:
+                w.deleteLater()
 
     def add_bubble(self, text: str, role: str) -> Bubble:
         b = Bubble(text, role, self.t.rtl)
@@ -453,6 +435,7 @@ class Overlay(QWidget):
         history = History(c.id) if c else None
         self.add_bubble(question, "user")
         shot = None if self.shot_used else self.shot
+        self._question_shot = shot
         if shot is None and not self.shot_used and not self.game_hwnd:
             self.add_system(self.t("no_game"))
         self.shot_used = True
@@ -495,6 +478,8 @@ class Overlay(QWidget):
         if ans.entities:
             self.add_cards(ans.entities)
         self._apply_profile_update(ans.profile_update)
+        if ans.avatar_box and getattr(self, "_question_shot", None):
+            self._update_avatar(self._question_shot, ans.avatar_box)
 
     def _apply_profile_update(self, update: dict):
         c = self.profiles.active
@@ -509,6 +494,31 @@ class Overlay(QWidget):
                              lambda: self._show_changes(self.profiles.apply_update({"level": new_level})))
             return
         self._show_changes(self.profiles.apply_update(update))
+
+    def _update_avatar(self, shot_jpeg: bytes, box: list) -> None:
+        """Crop the player's own sprite (box from Claude, fractions of the image) into the portrait."""
+        import io
+        from PIL import Image
+        try:
+            img = Image.open(io.BytesIO(shot_jpeg)).convert("RGB")
+            W, H = img.size
+            x, y, w, h = box
+            if not (0 <= x < 1 and 0 <= y < 1 and 0.005 < w < 0.5 and 0.01 < h < 0.6):
+                return
+            pad_w, pad_h = w * 0.25, h * 0.12
+            left, top = max(0, (x - pad_w) * W), max(0, (y - pad_h) * H)
+            right, bottom = min(W, (x + w + pad_w) * W), min(H, (y + h + pad_h) * H)
+            crop = img.crop((int(left), int(top), int(right), int(bottom)))
+            side = max(crop.size)
+            square = Image.new("RGB", (side, side), crop.getpixel((0, 0)))
+            square.paste(crop, ((side - crop.width) // 2, (side - crop.height) // 2))
+            square = square.resize((128, 128), Image.LANCZOS)
+            buf = io.BytesIO()
+            square.save(buf, "PNG")
+            self.profiles.set_avatar(buf.getvalue())
+            self.refresh_profile_chip()
+        except Exception:
+            pass
 
     def _show_changes(self, changes):
         labels = {"level": "level", "job": "job", "base_class": "job", "map": "map",

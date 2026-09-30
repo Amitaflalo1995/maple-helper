@@ -10,8 +10,9 @@ from PySide6.QtWidgets import (QButtonGroup, QComboBox, QFrame, QGridLayout, QHB
                                QStackedWidget, QVBoxLayout, QWidget)
 
 from .. import bidi, claude_setup
-from .controls import Section, Segmented, Switch
+from .controls import Section, Segmented, Select, Stepper, Switch, rtl_buttons, track_slider
 from .glass import GlassDialog
+from .widgets import CharacterRow
 from ..i18n import I18n
 from ..kb import KnowledgeBase
 from ..store import ASSETS, History, Profiles, Settings
@@ -93,19 +94,20 @@ class CharacterForm(QWidget):
         row = QHBoxLayout()
         col1 = QVBoxLayout()
         col1.addWidget(QLabel(t("ob_level")))
-        self.level = QSpinBox()
-        self.level.setRange(1, MAX_LEVEL)
-        self.level.setValue(1)
+        self.level = Stepper(1, MAX_LEVEL, 1)
         self.level.valueChanged.connect(lambda *_: self._refresh_jobs())
         col1.addWidget(self.level)
         row.addLayout(col1)
         col2 = QVBoxLayout()
         col2.addWidget(QLabel(t("ob_job")))
-        self.job = QComboBox()
+        self.job = Select()
         self.job.currentIndexChanged.connect(lambda *_: self.changed.emit())
         col2.addWidget(self.job)
         row.addLayout(col2, 1)
         lay.addLayout(row)
+        self.job_hint = QLabel(objectName="JobHint")
+        self.job_hint.setWordWrap(True)
+        lay.addWidget(self.job_hint)
         lay.addStretch(1)
 
     def base_class(self) -> str | None:
@@ -115,11 +117,27 @@ class CharacterForm(QWidget):
     def _refresh_jobs(self):
         cls = self.base_class()
         self.job.clear()
+        hint = ""
         if cls:
             jobs = jobs_for(cls, self.level.value())
             self.job.addItems(jobs)
             self.job.setCurrentIndex(len(jobs) - 1)
+            nxt = next(((j, lv) for j, lv in JOBS[cls] if lv > self.level.value()), None)
+            if nxt:
+                hint = self.t("job_hint", job=nxt[0], level=nxt[1])
+        self.job_hint.setText(bidi.plain(hint, self.t.rtl) if hint else "")
+        self.job_hint.setVisible(bool(hint))
         self.changed.emit()
+
+    def load(self, c) -> None:
+        """Pre-fill for editing an existing character."""
+        self.name.setText(c.name)
+        for b in self.class_group.buttons():
+            if b.property("cls") == c.base_class:
+                b.setChecked(True)
+        self.level.setValue(c.level)
+        self._refresh_jobs()
+        self.job.setCurrentText(c.job)
 
     def valid(self) -> bool:
         return bool(self.name.text().strip()) and bool(self.base_class()) and bool(self.job.currentText())
@@ -131,10 +149,13 @@ class CharacterForm(QWidget):
 class Onboarding(GlassDialog):
     """Language → Claude connection → character. Every step is required."""
 
-    def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, stylesheet_fn, only_character=False):
+    def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, stylesheet_fn, only_character=False,
+                 edit_id: str | None = None):
         self.t = I18n(settings["language"] or "he")
+        self.edit_id = edit_id
+        only_character = only_character or edit_id is not None
         title = self.t("add_character") if only_character else "Maple Helper"
-        super().__init__(title, self.t.rtl, settings["show_in_captures"], strength=settings["glass_strength"])
+        super().__init__(title, self.t.rtl)
         self.settings, self.profiles, self.kb = settings, profiles, kb
         self.stylesheet_fn = stylesheet_fn
         self.only_character = only_character
@@ -145,6 +166,7 @@ class Onboarding(GlassDialog):
         self._build()
 
     def _build(self):
+        self.title_label.hide()
         self.setStyleSheet(self.stylesheet_fn(1.0))
         outer = QVBoxLayout(self.content)
         outer.setContentsMargins(10, 4, 10, 0)
@@ -160,6 +182,7 @@ class Onboarding(GlassDialog):
         nav.addWidget(self.next)
         outer.addLayout(nav)
 
+        rtl_buttons(self, self.t.rtl)
         self.pages = []
         if not self.only_character:
             self.pages.append(self._page_language())
@@ -247,8 +270,14 @@ class Onboarding(GlassDialog):
     def _page_character(self):
         w = QWidget()
         lay = QVBoxLayout(w)
-        lay.addWidget(_title(self.t("add_character") if self.only_character else self.t("ob_welcome")))
+        heading = (self.t("edit_character") if self.edit_id else
+                   self.t("add_character") if self.only_character else self.t("ob_welcome"))
+        lay.addWidget(_title(heading))
         self.form = CharacterForm(self.t, self.kb)
+        if self.edit_id:
+            c = next((c for c in self.profiles.characters if c.id == self.edit_id), None)
+            if c:
+                self.form.load(c)
         self.form.changed.connect(self._update_nav)
         lay.addWidget(self.form, 1)
         return w
@@ -342,7 +371,8 @@ class Onboarding(GlassDialog):
         i = self.stack.currentIndex()
         self.back.setVisible(i > 0)
         last = i == self.stack.count() - 1
-        self.next.setText(self.t("ob_finish") if last else self.t("ob_next"))
+        finish = self.t("save_changes") if self.edit_id else self.t("ob_finish")
+        self.next.setText(bidi.plain(finish if last else self.t("ob_next"), self.t.rtl))
         self.next.setEnabled(self._current_ok())
 
     def _go_back(self):
@@ -353,7 +383,10 @@ class Onboarding(GlassDialog):
         if not self._current_ok():
             return
         if self.stack.currentIndex() == self.stack.count() - 1:
-            self.profiles.add(*self.form.values())
+            if self.edit_id:
+                self.profiles.edit(self.edit_id, *self.form.values())
+            else:
+                self.profiles.add(*self.form.values())
             if not self.only_character:
                 self.settings["onboarding_done"] = True
             self.accept()
@@ -368,13 +401,41 @@ class Onboarding(GlassDialog):
             self._update_nav()
 
 
+class ConfirmDialog(GlassDialog):
+    """Glass confirmation for destructive actions only (Apple: use sparingly)."""
+
+    def __init__(self, title: str, body: str, confirm: str, cancel: str, rtl: bool, stylesheet: str, danger=True):
+        super().__init__(title, rtl)
+        self.setStyleSheet(stylesheet)
+        self.resize(380, 200)
+        lay = QVBoxLayout(self.content)
+        msg = QLabel(bidi.plain(body, rtl), objectName="RowHint")
+        msg.setWordWrap(True)
+        lay.addWidget(msg)
+        lay.addStretch(1)
+        row = QHBoxLayout()
+        row.addStretch(1)
+        no = QPushButton(cancel, objectName="Secondary")
+        yes = QPushButton(confirm, objectName="Danger" if danger else "Primary")
+        for b in (no, yes):
+            b.setCursor(Qt.PointingHandCursor)
+        no.clicked.connect(self.reject)
+        yes.clicked.connect(self.accept)
+        row.addWidget(no)
+        row.addWidget(yes)
+        lay.addLayout(row)
+        rtl_buttons(self, rtl)
+        no.setFocus()
+
+
 class SettingsDialog(GlassDialog):
     changed = Signal()
     update_kb_requested = Signal()
+    history_cleared = Signal()
 
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, stylesheet_fn):
         self.t = t = I18n(settings["language"] or "he")
-        super().__init__(t("settings"), t.rtl, settings["show_in_captures"], strength=settings["glass_strength"])
+        super().__init__(t("settings"), t.rtl)
         self.settings, self.profiles, self.kb = settings, profiles, kb
         self.stylesheet_fn = stylesheet_fn
         self.setStyleSheet(stylesheet_fn(1.0))
@@ -398,16 +459,10 @@ class SettingsDialog(GlassDialog):
         self.appearance = Segmented([(t("appearance_dark_short"), "dark"), (t("appearance_light_short"), "light")],
                                     settings["appearance"], rtl)
         sec.add_row(t("appearance"), self.appearance)
-        self.strength = QSlider(Qt.Horizontal)
-        self.strength.setRange(40, 100)
-        self.strength.setValue(int(settings["glass_strength"] * 100))
-        self.strength.setFixedWidth(160)
-        sec.add_row(t("glass_strength"), self.strength, t("glass_strength_hint"))
         self.font = Segmented([("A", 13), ("A", 14), ("A", 16)], settings["font_size"], rtl)
+        # small / medium / large "A" (the stylesheet wins over setFont, so size it there)
         for i, b in enumerate(self.font.group.buttons()):
-            f = b.font()
-            f.setPixelSize(11 + i * 2)
-            b.setFont(f)
+            b.setStyleSheet(f"font-size: {11 + i * 4}px; font-weight: 600;")
         sec.add_row(t("font_size"), self.font)
         self.lang = Segmented([("עברית", "he"), ("English", "en")], settings["language"] or "he", rtl)
         sec.add_row(t("language"), self.lang)
@@ -416,11 +471,11 @@ class SettingsDialog(GlassDialog):
         # keys
         sec = Section(t("sec_keys"), rtl)
         fkeys = [f"F{i}" for i in range(1, 13)]
-        self.hk_toggle = QComboBox()
+        self.hk_toggle = Select()
         self.hk_toggle.addItems(fkeys)
         self.hk_toggle.setCurrentText(settings["hotkey_toggle"])
         sec.add_row(t("hotkey_toggle"), self.hk_toggle)
-        self.hk_voice = QComboBox()
+        self.hk_voice = Select()
         self.hk_voice.addItems(fkeys)
         self.hk_voice.setCurrentText(settings["hotkey_voice"])
         sec.add_row(t("hotkey_voice"), self.hk_voice)
@@ -436,19 +491,19 @@ class SettingsDialog(GlassDialog):
 
         # privacy & system
         sec = Section(t("sec_system"), rtl)
-        self.show_in_captures = Switch(settings["show_in_captures"])
-        sec.add_row(t("show_in_captures"), self.show_in_captures, t("show_in_captures_hint"))
         self.autostart = Switch(settings["start_with_windows"])
         sec.add_row(t("start_with_windows"), self.autostart)
         lay.addWidget(sec)
 
         # characters
         sec = Section(t("characters"), rtl)
-        self.chars = QListWidget()
+        self.chars_box = QWidget(objectName="Feed")
+        self.chars = QVBoxLayout(self.chars_box)
+        self.chars.setContentsMargins(0, 0, 0, 0)
+        self.chars.setSpacing(0)
+        sec.add_widget(self.chars_box)
         self._fill_chars()
-        self.chars.itemClicked.connect(lambda it: (self.profiles.set_active(it.data(Qt.UserRole)), self._fill_chars()))
-        sec.add_widget(self.chars)
-        add = QPushButton(t("add_character"), objectName="Link")
+        add = QPushButton("＋  " + t("add_character"), objectName="Link")
         add.setCursor(Qt.PointingHandCursor)
         add.clicked.connect(self._add_char)
         sec.add_widget(add)
@@ -480,15 +535,48 @@ class SettingsDialog(GlassDialog):
         save.clicked.connect(self._save)
         brow.addWidget(save)
         outer.addLayout(brow)
+        rtl_buttons(self, rtl)
 
     def _fill_chars(self):
-        self.chars.clear()
-        for c in self.profiles.characters:
-            mark = "✓  " if c.id == self.profiles.active_id else "     "
-            it = QListWidgetItem(bidi.plain(f"{mark}{c.name} · {self.t('level')} {c.level} · {c.job}", self.t.rtl))
-            it.setData(Qt.UserRole, c.id)
-            self.chars.addItem(it)
-        self.chars.setFixedHeight(max(44, 40 * min(4, len(self.profiles.characters))))
+        while self.chars.count():
+            w = self.chars.takeAt(0).widget()
+            if w:
+                w.deleteLater()
+        many = len(self.profiles.characters) > 1
+        for i, c in enumerate(self.profiles.characters):
+            if i:
+                sep = QFrame(objectName="Separator")
+                sep.setFixedHeight(1)
+                self.chars.addWidget(sep)
+            row = CharacterRow(c, self.profiles.avatar_path(c), self.kb, c.id == self.profiles.active_id,
+                               self.t.rtl, can_delete=many)
+            row.chosen.connect(self._choose_char)
+            row.edit_requested.connect(self._edit_char)
+            row.delete_requested.connect(self._delete_char)
+            self.chars.addWidget(row)
+
+    def _choose_char(self, cid: str):
+        self.profiles.set_active(cid)
+        self._fill_chars()
+        self.changed.emit()
+
+    def _edit_char(self, cid: str):
+        dlg = Onboarding(self.settings, self.profiles, self.kb, self.stylesheet_fn, edit_id=cid)
+        if dlg.exec():
+            self._fill_chars()
+            self.changed.emit()
+
+    def _delete_char(self, cid: str):
+        c = next((c for c in self.profiles.characters if c.id == cid), None)
+        if not c:
+            return
+        t = self.t
+        dlg = ConfirmDialog(t("delete_character"), t("delete_character_confirm", name=c.name), t("delete"),
+                            t("cancel"), t.rtl, self.stylesheet_fn(1.0))
+        if dlg.exec():
+            self.profiles.remove(cid)
+            self._fill_chars()
+            self.changed.emit()
 
     def _add_char(self):
         dlg = Onboarding(self.settings, self.profiles, self.kb, self.stylesheet_fn, only_character=True)
@@ -497,21 +585,25 @@ class SettingsDialog(GlassDialog):
 
     def _clear_history(self):
         c = self.profiles.active
-        if c:
+        if not c:
+            return
+        t = self.t
+        dlg = ConfirmDialog(t("clear_history"), t("clear_history_confirm", name=c.name), t("clear"), t("cancel"),
+                            t.rtl, self.stylesheet_fn(1.0))
+        if dlg.exec():
             History(c.id).clear()
+            self.history_cleared.emit()
 
     def _save(self):
         s = self.settings
         s.data.update({
             "language": self.lang.value(),
             "appearance": self.appearance.value(),
-            "glass_strength": self.strength.value() / 100,
             "font_size": self.font.value(),
             "hotkey_toggle": self.hk_toggle.currentText(),
             "hotkey_voice": self.hk_voice.currentText(),
             "voice_send_immediately": self.voice_send.isChecked(),
             "answer_length": self.length.value(),
-            "show_in_captures": self.show_in_captures.isChecked(),
             "start_with_windows": self.autostart.isChecked(),
         })
         s.save()
