@@ -88,6 +88,7 @@ STRINGS = {
                                  "en": "Delete {name}? Its profile, conversations and portrait will be removed. This can't be undone."},
     "auto_profile_note": {"he": "אין צורך לעדכן ידנית: בכל פעם שתשאלו שאלה, Maple Helper רואה את מסך המשחק ומעדכן בעצמו את הלבל, הג'וב והתמונה של הדמות.",
                           "en": "No need to update this by hand: every time you ask a question, Maple Helper looks at the game screen and keeps your level, job and portrait up to date."},
+    "job_hint_next_many": {"he": "הג'ובים הבאים ({jobs}) נפתחים בלבל {level}.", "en": "Next jobs ({jobs}) unlock at level {level}."},
     "job_hint_next": {"he": "הג'וב הבא, {job}, נפתח בלבל {level}.", "en": "Next job, {job}, unlocks at level {level}."},
     "job_hint": {"he": "הג'וב {job} נפתח בלבל {level}. עד אז הדמות היא Beginner.",
                  "en": "{job} unlocks at level {level}. Until then the character is a Beginner."},

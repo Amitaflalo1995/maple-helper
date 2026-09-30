@@ -138,24 +138,30 @@ class CharacterForm(QWidget):
         cls = self.base_class()
         previous = self.job.currentText()
         hint = ""
-        beginner = cls == "Beginner"
-        self.job.setVisible(not beginner)
-        self.job_fixed.setVisible(beginner)
-        if cls and not beginner:
+        jobs = ["Beginner"] if cls == "Beginner" else []
+        if cls and cls != "Beginner":
             # a class is chosen at its 1st job, so its level starts there (Warrior 10, Magician 8…)
             first_level = next(lv for j, lv in JOBS[cls] if j != "Beginner")
             self.level.setMinimum(first_level)
             jobs = [j for j in jobs_for(cls, self.level.value()) if j != "Beginner"]
-            self.job.clear()
+            upcoming = [(j, lv) for j, lv in JOBS[cls] if lv > self.level.value()]
+            if upcoming:
+                lv = upcoming[0][1]
+                names = [j for j, l in upcoming if l == lv]
+                hint = (self.t("job_hint_next", job=names[0], level=lv) if len(names) == 1 else
+                        self.t("job_hint_next_many", jobs=", ".join(names), level=lv))
+        else:
+            self.level.setMinimum(1)
+        # one possible job → a fixed field; a real choice → a dropdown
+        single = len(jobs) <= 1
+        self.job.setVisible(bool(cls) and not single)
+        self.job_fixed.setVisible(bool(cls) and single)
+        self.job_fixed.setText(jobs[0] if jobs else "")
+        self.job.clear()
+        if not single:
             self.job.addItems(jobs)
             keep = self._job_picked and previous in jobs
             self.job.setCurrentIndex(jobs.index(previous) if keep else len(jobs) - 1)
-            nxt = next(((j, lv) for j, lv in JOBS[cls] if lv > self.level.value()), None)
-            if nxt:
-                hint = self.t("job_hint_next", job=nxt[0], level=nxt[1])
-        else:
-            self.level.setMinimum(1)
-            self.job.clear()
         self.job_hint.setText(bidi.plain(hint, self.t.rtl) if hint else "")
         self.job_hint.setVisible(bool(hint))
         self.changed.emit()
@@ -172,7 +178,7 @@ class CharacterForm(QWidget):
         self._job_picked = True        # the saved job is the player's choice
 
     def current_job(self) -> str:
-        return "Beginner" if self.base_class() == "Beginner" else self.job.currentText()
+        return self.job_fixed.text() if self.job_fixed.isVisibleTo(self) else self.job.currentText()
 
     def valid(self) -> bool:
         return bool(self.name.text().strip()) and bool(self.base_class()) and bool(self.current_job())
