@@ -87,7 +87,7 @@ class CharacterForm(QWidget):
             b.setProperty("cls", cls)
             self.class_group.addButton(b)
             grid.addWidget(b, i // 3, i % 3)
-        self.class_group.buttonToggled.connect(lambda *_: self._refresh_jobs())
+        self.class_group.buttonToggled.connect(lambda *_: (setattr(self, "_job_picked", False), self._refresh_jobs()))
         lay.addLayout(grid)
 
         row = QHBoxLayout()
@@ -101,7 +101,12 @@ class CharacterForm(QWidget):
         col2.addWidget(QLabel(t("ob_job")))
         self.job = Select()
         self.job.currentIndexChanged.connect(lambda *_: self.changed.emit())
+        self._job_picked = False       # the user chose a job by hand: keep it while it stays available
+        self.job.picked.connect(lambda *_: setattr(self, "_job_picked", True))
         col2.addWidget(self.job)
+        self.job_fixed = QLabel("Beginner", objectName="JobFixed")
+        self.job_fixed.hide()
+        col2.addWidget(self.job_fixed)
         row.addLayout(col2, 1)
         lay.addLayout(row)
         self.job_hint = QLabel(objectName="JobHint")
@@ -115,15 +120,26 @@ class CharacterForm(QWidget):
 
     def _refresh_jobs(self):
         cls = self.base_class()
-        self.job.clear()
+        previous = self.job.currentText()
         hint = ""
-        if cls:
-            jobs = jobs_for(cls, self.level.value())
+        beginner = cls == "Beginner"
+        self.job.setVisible(not beginner)
+        self.job_fixed.setVisible(beginner)
+        if cls and not beginner:
+            # a class is chosen at its 1st job, so its level starts there (Warrior 10, Magician 8…)
+            first_level = next(lv for j, lv in JOBS[cls] if j != "Beginner")
+            self.level.setMinimum(first_level)
+            jobs = [j for j in jobs_for(cls, self.level.value()) if j != "Beginner"]
+            self.job.clear()
             self.job.addItems(jobs)
-            self.job.setCurrentIndex(len(jobs) - 1)
+            keep = self._job_picked and previous in jobs
+            self.job.setCurrentIndex(jobs.index(previous) if keep else len(jobs) - 1)
             nxt = next(((j, lv) for j, lv in JOBS[cls] if lv > self.level.value()), None)
             if nxt:
-                hint = self.t("job_hint", job=nxt[0], level=nxt[1])
+                hint = self.t("job_hint_next", job=nxt[0], level=nxt[1])
+        else:
+            self.level.setMinimum(1)
+            self.job.clear()
         self.job_hint.setText(bidi.plain(hint, self.t.rtl) if hint else "")
         self.job_hint.setVisible(bool(hint))
         self.changed.emit()
@@ -137,12 +153,16 @@ class CharacterForm(QWidget):
         self.level.setValue(c.level)
         self._refresh_jobs()
         self.job.setCurrentText(c.job)
+        self._job_picked = True        # the saved job is the player's choice
+
+    def current_job(self) -> str:
+        return "Beginner" if self.base_class() == "Beginner" else self.job.currentText()
 
     def valid(self) -> bool:
-        return bool(self.name.text().strip()) and bool(self.base_class()) and bool(self.job.currentText())
+        return bool(self.name.text().strip()) and bool(self.base_class()) and bool(self.current_job())
 
     def values(self) -> tuple[str, str, str, int]:
-        return self.name.text().strip(), self.base_class(), self.job.currentText(), self.level.value()
+        return self.name.text().strip(), self.base_class(), self.current_job(), self.level.value()
 
 
 class Onboarding(GlassDialog):

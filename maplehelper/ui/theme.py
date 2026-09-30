@@ -116,6 +116,8 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QToolButton#StepBtn:pressed {{ background: {c['pressed']}; }}
     QToolButton#StepBtn:disabled {{ color: {c['faint']}; }}
     QLineEdit#StepValue {{ background: transparent; border: none; font-weight: 600; padding: 0; color: {c['text']}; }}
+    #JobFixed {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 8px; min-height: 28px;
+                 max-height: 28px; padding: 0 12px; font-weight: 500; color: {c['text']}; }}
     #JobHint {{ color: {c['muted']}; font-size: {s - 3}px; }}
     #ProfileCard {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 16px; }}
     #ProfileName {{ font-size: {s + 1}px; font-weight: 600; color: {c['text']}; }}

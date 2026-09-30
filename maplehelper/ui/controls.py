@@ -168,6 +168,7 @@ class Select(QPushButton):
     anchored to itself, the current choice checked. API mirrors the bits of QComboBox we use."""
 
     currentIndexChanged = Signal(int)
+    picked = Signal(int)          # only when the user chooses from the menu
 
     def __init__(self, items: list[str] | None = None):
         super().__init__(objectName="Select")
@@ -217,7 +218,7 @@ class Select(QPushButton):
         menu.setLayoutDirection(self.layoutDirection())
         for i, t in enumerate(self._items):
             a = QAction(t, menu, checkable=True, checked=(i == self._index))
-            a.triggered.connect(lambda _=False, i=i: self.setCurrentIndex(i))
+            a.triggered.connect(lambda _=False, i=i: (self.setCurrentIndex(i), self.picked.emit(i)))
             menu.addAction(a)
         if 0 <= self._index < len(self._items):
             menu.setActiveAction(menu.actions()[self._index])
@@ -283,6 +284,15 @@ class Stepper(QFrame):
 
     def value(self) -> int:
         return self._v
+
+    def setMinimum(self, lo: int):
+        """Raise/lower the floor; a value below it moves up to it (and emits)."""
+        self.lo = lo
+        from PySide6.QtGui import QIntValidator
+        self.edit.setValidator(QIntValidator(lo, self.hi, self))
+        if self._v < lo:
+            self.setValue(lo)
+        self._sync()
 
     def setValue(self, v: int):
         v = max(self.lo, min(self.hi, int(v)))
