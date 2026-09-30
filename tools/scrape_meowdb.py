@@ -13,10 +13,12 @@ Usage:
     python tools/scrape_meowdb.py            # full run (resumes)
     python tools/scrape_meowdb.py --limit 5  # quick test, 5 pages per category
     python tools/scrape_meowdb.py --refresh  # re-download everything
+    python tools/scrape_meowdb.py --changed  # nightly: only pages changed on meowdb, plus new ones
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html
 import json
 import re
@@ -74,10 +76,18 @@ def fetch(url: str, binary: bool = False, retries: int = 3):
     return None
 
 
+LASTMOD: dict[str, str] = {}
+
+
 def entity_urls() -> dict[str, list[str]]:
     xml = fetch(SITEMAP)
     if not xml:
         sys.exit("Could not download the sitemap.")
+    for block in re.findall(r"<url>(.*?)</url>", xml, re.S):
+        loc = re.search(r"<loc>([^<]+)</loc>", block)
+        mod = re.search(r"<lastmod>([^<]+)</lastmod>", block)
+        if loc:
+            LASTMOD[loc.group(1)] = mod.group(1) if mod else ""
     out: dict[str, list[str]] = {k: [] for k in CATEGORIES}
     for loc in re.findall(r"<loc>([^<]+)</loc>", xml):
         path = loc.replace(f"{BASE}/msclassic/", "").strip("/")
@@ -191,10 +201,11 @@ def scrape_one(category: str, slug: str, url: str, refresh: bool) -> dict | None
     md += text + "\n"
     (KB / "pages" / category / f"{slug}.md").write_text(md, encoding="utf-8")
     return {"key": f"{category}/{slug}", "id": slug, "name": name, "category": category, "url": url,
-            "image": img_file, "props": props, "type": entity.get("category")}
+            "image": img_file, "props": props, "type": entity.get("category"),
+            "lastmod": LASTMOD.get(url, ""), "hash": hashlib.sha1(md.encode("utf-8")).hexdigest()[:16]}
 
 
-def scrape(limit: int | None, refresh: bool) -> None:
+def scrape(limit: int | None, refresh: bool, changed_only: bool = False) -> None:
     urls = entity_urls()
     index_path = KB / "index.json"
     index: dict[str, dict] = {}
@@ -209,13 +220,19 @@ def scrape(limit: int | None, refresh: bool) -> None:
         for url in locs[:limit] if limit else locs:
             slug = slug_of(url)
             key = f"{category}/{slug}"
-            if (KB / "pages" / category / f"{slug}.md").exists() and key in index and not refresh:
-                continue
+            have = (KB / "pages" / category / f"{slug}.md").exists() and key in index
+            if have and not refresh:
+                if not changed_only:
+                    continue
+                if index[key].get("lastmod", "") >= LASTMOD.get(url, ""):
+                    continue       # unchanged since our copy
             jobs.append((category, slug, key, url))
 
     lock = threading.Lock()
     counter = [0]
     total = len(jobs)
+
+    changes = [0]
 
     def work(job):
         category, slug, key, url = job
@@ -223,6 +240,8 @@ def scrape(limit: int | None, refresh: bool) -> None:
         with lock:
             counter[0] += 1
             if entry:
+                if index.get(key, {}).get("hash") != entry["hash"]:
+                    changes[0] += 1
                 index[key] = entry
                 print(f"[{counter[0]}/{total}] {category}: {entry['name']}", flush=True)
             else:
@@ -234,15 +253,40 @@ def scrape(limit: int | None, refresh: bool) -> None:
         list(pool.map(work, jobs))
 
     index_path.write_text(json.dumps(list(index.values()), ensure_ascii=False), encoding="utf-8")
-    meta = {"source": "NiaMeowDB (meowdb.com)", "fetched_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "count": len(index)}
-    (KB / "meta.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
-    print(f"Done. {len(index)} entities.")
+    meta_path = KB / "meta.json"
+    meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
+    meta.update({"source": "NiaMeowDB (meowdb.com)", "fetched_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                 "count": len(index)})
+    meta_path.write_text(json.dumps(meta, indent=1), encoding="utf-8")
+    (KB / "last_run.json").write_text(json.dumps({"checked": len(jobs), "changed": changes[0]}), encoding="utf-8")
+    print(f"Done. {len(index)} entities, {len(jobs)} checked, {changes[0]} changed.")
+
+
+
+def stamp() -> None:
+    """Mark the existing copy with sitemap lastmod + content hashes (baseline for --changed)."""
+    urls = entity_urls()
+    index_path = KB / "index.json"
+    index = json.loads(index_path.read_text(encoding="utf-8"))
+    for e in index:
+        cat, _, slug = e["key"].partition("/")
+        md = KB / "pages" / cat / f"{slug}.md"
+        e["lastmod"] = LASTMOD.get(e["url"], "")
+        if md.exists():
+            e["hash"] = hashlib.sha1(md.read_text(encoding="utf-8").encode("utf-8")).hexdigest()[:16]
+    index_path.write_text(json.dumps(index, ensure_ascii=False), encoding="utf-8")
+    print(f"stamped {len(index)} entities")
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=None)
-    ap.add_argument("--refresh", action="store_true")
+    ap.add_argument("--refresh", action="store_true", help="re-download every page")
+    ap.add_argument("--changed", action="store_true", help="only pages whose sitemap lastmod is newer, plus new pages")
+    ap.add_argument("--stamp", action="store_true", help="record sitemap lastmod and content hash for the current copy")
     args = ap.parse_args()
     sys.stdout.reconfigure(encoding="utf-8")
-    scrape(args.limit, args.refresh)
+    if args.stamp:
+        stamp()
+    else:
+        scrape(args.limit, args.refresh, args.changed)

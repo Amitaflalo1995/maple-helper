@@ -1,0 +1,73 @@
+name: Update knowledge base
+
+# Nightly: fetch only the NiaMeowDB pages that changed (sitemap lastmod) plus new pages.
+# Sundays: full refresh, to catch edits the sitemap doesn't date.
+# Publishes kb.zip + kb-manifest.json to the latest release only when content actually changed;
+# every installed Maple Helper picks it up on its next start.
+on:
+  schedule:
+    - cron: "0 1 * * *"          # 01:00 UTC ≈ 04:00 Israel
+  workflow_dispatch:
+    inputs:
+      full:
+        description: "Full refresh (re-download every page)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kb-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Find the latest release
+        id: rel
+        run: |
+          if gh release view --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No release yet - nothing to update."
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Restore the published knowledge base
+        if: steps.rel.outputs.exists == 'true'
+        run: |
+          gh release download --repo "$GITHUB_REPOSITORY" --pattern kb.zip --dir /tmp
+          mkdir -p data/kb
+          unzip -q /tmp/kb.zip -d data/kb
+
+      - name: Fetch changes from NiaMeowDB
+        if: steps.rel.outputs.exists == 'true'
+        run: |
+          if [ "${{ inputs.full }}" = "true" ] || [ "$(date -u +%u)" = "7" ]; then
+            python tools/scrape_meowdb.py --refresh
+          else
+            python tools/scrape_meowdb.py --changed
+          fi
+          cat data/kb/last_run.json
+
+      - name: Publish if anything changed
+        if: steps.rel.outputs.exists == 'true'
+        run: |
+          changed=$(python -c "import json;print(json.load(open('data/kb/last_run.json'))['changed'])")
+          if [ "$changed" -gt 0 ]; then
+            echo "$changed pages changed - publishing a new knowledge base"
+            python tools/release.py --kb-only
+          else
+            echo "No content changes."
+          fi
