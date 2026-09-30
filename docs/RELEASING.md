@@ -31,8 +31,16 @@ To retry after fixing: delete the tag (`git push --delete origin v0.2.0; git tag
 **Prereleases:** `v0.3.0-beta.1` (with `__version__ = "0.3.0"`) publishes a prerelease. GitHub never
 marks it "latest", so the auto-updater and KB updates ignore it. Share its link with testers.
 
-**First release:** with no earlier release to carry the KB forward from, the Release workflow scrapes
-NiaMeowDB itself (about an hour), validates the result, and bundles it. `tools/release.py` on a PC with
+**First release:** with no earlier release to carry the KB forward from, the Release workflow first
+looks for a prerelease tagged `kb-seed` and uses its `kb.zip` (this is how the Hebrew name dictionary,
+`aliases.json`, which is generated with Claude and can't be rebuilt in CI, gets into the first release).
+Without a seed it scrapes NiaMeowDB itself (about an hour), validates the result, and bundles it.
+Publish a seed from a PC with `data\kb`:
+```powershell
+python tools/kb_release.py validate data/kb --min-entities 500
+python tools/kb_release.py pack data/kb dist-kb
+gh release create kb-seed dist-kb/kb.zip dist-kb/kb-manifest.json --prerelease --latest=false --title "Knowledge base seed" --notes "Seed for the first release"
+``` `tools/release.py` on a PC with
 `data/kb` also still works, and now publishes `SHA256SUMS.txt` too.
 
 ## What every release carries, and why
