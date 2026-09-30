@@ -5,9 +5,8 @@ import threading
 
 from PySide6.QtCore import QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import (QButtonGroup, QComboBox, QFrame, QGridLayout, QHBoxLayout, QLabel,
-                               QLineEdit, QListWidget, QListWidgetItem, QPushButton, QScrollArea, QSlider, QSpinBox,
-                               QStackedWidget, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
+                               QScrollArea, QStackedWidget, QVBoxLayout, QWidget)
 
 from .. import bidi, claude_setup
 from .controls import Section, Segmented, Select, Stepper, Switch, rtl_buttons, track_slider
