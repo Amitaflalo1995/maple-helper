@@ -147,7 +147,7 @@ class CharacterForm(QWidget):
             upcoming = [(j, lv) for j, lv in JOBS[cls] if lv > self.level.value()]
             if upcoming:
                 lv = upcoming[0][1]
-                names = [j for j, l in upcoming if l == lv]
+                names = [job for job, need in upcoming if need == lv]
                 hint = (self.t("job_hint_next", job=names[0], level=lv) if len(names) == 1 else
                         self.t("job_hint_next_many", jobs=", ".join(names), level=lv))
         else:
