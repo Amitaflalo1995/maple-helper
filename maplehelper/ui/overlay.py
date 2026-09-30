@@ -17,7 +17,7 @@ from ..store import ASSETS, History, Profiles, Settings
 from . import theme
 from .glass import paint_glass
 from .minibubble import MiniBubble
-from .widgets import Bubble, BubbleRow, EntityCard, ProfileCard, SystemLine, TileGrid
+from .widgets import Bubble, BubbleRow, DropGroupCard, EntityCard, ProfileCard, SystemLine, TileGrid
 
 
 
@@ -30,7 +30,11 @@ class AskWorker(QObject):
         self.brain, self.question, self.character, self.history, self.shot = brain, question, character, history, shot
 
     def run(self):
-        ans = self.brain.ask(self.question, self.character, self.history, self.shot, on_delta=self.delta.emit)
+        # whatever happens, the chat gets an answer back (never stuck on "thinking")
+        try:
+            ans = self.brain.ask(self.question, self.character, self.history, self.shot, on_delta=self.delta.emit)
+        except Exception as e:  # noqa: BLE001
+            ans = Answer(error=f"internal: {e}")
         self.done.emit(ans)
 
 
@@ -527,6 +531,8 @@ class Overlay(QWidget):
         self._pending_bubble.set_text(ans.text)
         if history:
             history.append("assistant", ans.text, ans.entities)
+        for g in ans.drop_groups:
+            self._add_widget(DropGroupCard(self.kb, g["monster"], g["items"]))
         if ans.entities:
             self.add_cards(ans.entities)
         self._apply_profile_update(ans.profile_update)

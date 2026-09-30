@@ -13,6 +13,7 @@ import os
 import re
 import shutil
 import subprocess
+import threading
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -20,6 +21,7 @@ from .kb import KnowledgeBase
 from .store import Character, History
 
 META = "@@META@@"
+REVERSE_WORDS = re.compile(r"(מאיז[הו]|מאילו|איזה|אילו)\s+מפלצ|מי\s+מפיל|which\s+monsters?|who\s+drops|what\s+drops", re.I)
 DROP_WORDS = re.compile(r"דרופ|מפיל|נופל|שנופל|drops?\b|loot", re.I)
 CREATE_NO_WINDOW = 0x08000000
 
@@ -32,6 +34,10 @@ What you receive with each question:
 Knowledge base: the current directory is the full NiaMeowDB (meowdb.com) database for MapleStory Classic: index.json (every entity: key, name, category, props) and pages/<category>/<id>.md (full details: stats, drops, maps, quests). Categories: monster, item, map, quest, npc, skill, class, guide, shop, crafting, formula.
 - Use the pre-fetched context first. Use Grep/Glob/Read only for what is missing. Never write text before a tool call.
 - Never invent facts, numbers, drops or locations. If the data does not say, say so briefly.
+
+Which monsters drop something: drops.tsv (monster, level, key, item, item type, item key) lists every monster→item
+drop. Grep it for the item name or the item type (e.g. "Throwing Star", "Scroll", "Potion"). Answer grouped per monster
+(monster → the items it drops), lowest level first, and return the grouping as META "drop_groups".
 
 Drops: a monster page lists its drops ("Drops (MS Classic)" confirmed by players, and "MSEA reference drops").
 When asked what a monster drops, list the drops by name (grouped: Etc / Use / Equipment is fine), say which list they
@@ -53,6 +59,8 @@ After the answer, output a line containing only @@META@@ followed by one JSON ob
 - avatar_box (only with a screenshot, only if clearly visible): [x, y, w, h] as fractions (0-1) of the screenshot, a snug box
   around the PLAYER'S OWN character sprite (find the name tag under it matching the profile name), head to feet, excluding
   the name tag. Omit it if unsure.
+- drop_groups (only for "which monsters drop X" questions): [{{"monster": "monster/12", "items": ["item/5", ...]}}, ...]
+  lowest monster level first, max 8 groups.
 - profile_update: only facts the player stated or the screenshot clearly shows: "level" (int), "job", "base_class", "map", "quests_started" [..], "quests_completed" [..], "note" (a lasting preference or goal). Empty object if nothing changed.
 """
 
@@ -85,6 +93,7 @@ class Answer:
     entities: list[str] = field(default_factory=list)
     profile_update: dict = field(default_factory=dict)
     avatar_box: list | None = None
+    drop_groups: list = field(default_factory=list)
     error: str | None = None
     cost_usd: float | None = None
 
@@ -119,6 +128,17 @@ def build_prompt(question: str, character: Character | None, history: History | 
         digest = kb.level_digest(character.level)
         if digest:
             ctx.append(digest)
+    if REVERSE_WORDS.search(question):
+        items = item_keys_for_question(question, kb)
+        groups = kb.drop_groups(items, limit=10)
+        if groups:
+            lines = ["Which monsters drop it (from drops.tsv; lowest level first; names and keys as in game):"]
+            for g in groups:
+                m = kb.get(g["monster"])
+                lv = (m.get("props") or {}).get("Level", "?")
+                lines.append(f"- {m['name']} (Lv {lv}) [{g['monster']}]: "
+                             + ", ".join(f"{kb.get(i)['name']} [{i}]" for i in g["items"]))
+            ctx.append("\n".join(lines))
     for key in kb.find_mentions(question, max_results=4):
         body = kb.page_body(key, limit=2500)
         if body:
@@ -133,6 +153,33 @@ def build_prompt(question: str, character: Character | None, history: History | 
     parts.append(f"<question>\n{question}\n</question>")
     parts.append(REPLY_RULES.format(length=LENGTH_LINES.get(length, 6)))
     return "\n\n".join(parts)
+
+
+# Hebrew (and English) words for item families → the item "type" text in the database
+ITEM_FAMILIES = [
+    (r"כוכב|שוריקן|throwing\s*star|stars?\b", "Throwing Star"),
+    (r"חיצ(ים|י)|arrows?\b", "Arrow"),
+    (r"שיקוי|שיקויים|פוטיון|potions?\b", "Potion"),
+    (r"מגיל(ה|ות)|סקרול|scrolls?\b", "Scroll"),
+    (r"כפפ(ה|ות)|gloves?\b", "Glove"),
+    (r"נעל(יים)?|boots?|shoes?\b", "Shoes"),
+    (r"כוב(ע|עים)|hats?\b|helm", "Hat"),
+    (r"מגן|shields?\b", "Shield"),
+    (r"עגיל|earrings?\b", "Earring"),
+    (r"גלימ(ה|ות)|capes?\b", "Cape"),
+]
+
+
+def item_keys_for_question(question: str, kb: KnowledgeBase) -> list[str]:
+    """Items a 'which monsters drop …' question is about: named items, or a whole item family."""
+    named = [k for k in kb.find_mentions(question, 12) if k.startswith("item/")]
+    if named:
+        return named
+    for pattern, family in ITEM_FAMILIES:
+        if re.search(pattern, question, re.I):
+            return [k for k, e in kb.entities.items()
+                    if e["category"] == "item" and family.lower() in (e.get("type") or "").lower()]
+    return []
 
 
 def split_meta(raw: str) -> tuple[str, dict]:
@@ -155,6 +202,63 @@ class Brain:
         self.api_key = api_key
         self.exe = find_claude()
         self._proc: subprocess.Popen | None = None
+        self._warm: subprocess.Popen | None = None
+        self._warm_config: tuple | None = None
+        self._warm_lock = threading.Lock()
+
+    # ------------------------------------------------------------ warm process
+    # Claude Code needs ~3s to start. A process started ahead of time sits waiting for its first
+    # stdin message, so a question skips that startup entirely. One fresh process per question
+    # keeps every answer's context clean.
+
+    def _config(self) -> tuple:
+        return (self.exe, self.model, self.length, self.api_key, str(self.kb.root))
+
+    def _spawn(self) -> subprocess.Popen:
+        cmd = [self.exe, "-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose",
+               "--include-partial-messages", "--restricted", "--strict-mcp-config", "--tools", "Read,Grep,Glob",
+               "--model", self.model, "--no-session-persistence",
+               "--system-prompt", SYSTEM_PROMPT.format(length=LENGTH.get(self.length, LENGTH["short"]))]
+        env = dict(os.environ)
+        if self.api_key:
+            env["ANTHROPIC_API_KEY"] = self.api_key
+        else:
+            env.pop("ANTHROPIC_API_KEY", None)  # use the player's Claude account login
+        return subprocess.Popen(cmd, cwd=str(self.kb.root), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE, env=env, creationflags=CREATE_NO_WINDOW)
+
+    def prewarm(self) -> None:
+        """Start the next question's process now (no-op if one is ready)."""
+        if not self.exe:
+            return
+        with self._warm_lock:
+            if self._warm and self._warm.poll() is None and self._warm_config == self._config():
+                return
+            self._discard_warm()
+            try:
+                self._warm, self._warm_config = self._spawn(), self._config()
+            except OSError:
+                self._warm = None
+
+    def _take_warm(self) -> subprocess.Popen | None:
+        with self._warm_lock:
+            p, cfg = self._warm, self._warm_config
+            self._warm = None
+        if p and p.poll() is None and cfg == self._config():
+            return p
+        if p and p.poll() is None:
+            p.kill()
+        return None
+
+    def _discard_warm(self) -> None:
+        if self._warm and self._warm.poll() is None:
+            self._warm.kill()
+        self._warm = None
+
+    def shutdown(self) -> None:
+        with self._warm_lock:
+            self._discard_warm()
+        self.cancel()
 
     def available(self) -> bool:
         return self.exe is not None
@@ -168,6 +272,7 @@ class Brain:
         """Blocking call; on_delta(visible_text_so_far) is invoked while the answer streams."""
         if not self.exe:
             return Answer(error="claude_not_installed")
+        self.kb.ensure_drop_table()
         prompt = build_prompt(question, character, history, self.kb, screenshot_jpeg is not None, self.length)
         content = []
         if screenshot_jpeg:
@@ -176,22 +281,20 @@ class Brain:
         content.append({"type": "text", "text": prompt})
         msg = {"type": "user", "message": {"role": "user", "content": content}}
 
-        cmd = [self.exe, "-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose",
-               "--include-partial-messages", "--restricted", "--strict-mcp-config", "--tools", "Read,Grep,Glob",
-               "--model", self.model, "--no-session-persistence",
-               "--system-prompt", SYSTEM_PROMPT.format(length=LENGTH.get(self.length, LENGTH["short"]))]
-        env = dict(os.environ)
-        if self.api_key:
-            env["ANTHROPIC_API_KEY"] = self.api_key
-        else:
-            env.pop("ANTHROPIC_API_KEY", None)  # use the player's Claude account login
         try:
-            self._proc = subprocess.Popen(cmd, cwd=str(self.kb.root), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                          stderr=subprocess.PIPE, env=env, creationflags=CREATE_NO_WINDOW)
+            self._proc = self._take_warm() or self._spawn()
         except OSError as e:
             return Answer(error=f"launch_failed: {e}")
-        self._proc.stdin.write((json.dumps(msg) + "\n").encode("utf-8"))
-        self._proc.stdin.close()
+        try:
+            self._proc.stdin.write((json.dumps(msg) + "\n").encode("utf-8"))
+            self._proc.stdin.close()
+        except OSError:
+            # the warm process died meanwhile: start fresh once
+            self._proc = self._spawn()
+            self._proc.stdin.write((json.dumps(msg) + "\n").encode("utf-8"))
+            self._proc.stdin.close()
+        # get the next one ready while the player reads this answer
+        threading.Thread(target=self.prewarm, daemon=True).start()
 
         current = ""       # text of the assistant message being streamed
         result = None
@@ -223,7 +326,21 @@ class Brain:
             if stated:
                 meta.setdefault("profile_update", {})["level"] = stated
         entities = [k for k in meta.get("entities", []) if isinstance(k, str) and kb_has(self.kb, k)][:12]
-        if DROP_WORDS.search(question):
+        groups = []
+        for g in meta.get("drop_groups") or []:
+            if isinstance(g, dict) and kb_has(self.kb, str(g.get("monster", ""))):
+                items = [i for i in g.get("items") or [] if isinstance(i, str) and kb_has(self.kb, i)]
+                if items:
+                    groups.append({"monster": g["monster"], "items": items[:10]})
+        if REVERSE_WORDS.search(question) and not groups:
+            # the app builds the grouping itself: the question's items, else the items the answer names
+            items = item_keys_for_question(question, self.kb) or \
+                [k for k in entities if k.startswith("item/")] or \
+                [k for k in self.kb.find_mentions(text, 12) if k.startswith("item/")]
+            groups = self.kb.drop_groups(items)
+        if groups:
+            entities = []          # the grouped view replaces the flat cards
+        elif DROP_WORDS.search(question):
             # a drops question: the monster card + every drop as a tile, straight from the database
             monsters = [k for k in entities if k.startswith("monster/")] or \
                 [k for k in self.kb.find_mentions(question, 4) if k.startswith("monster/")]
@@ -237,7 +354,7 @@ class Brain:
         box = meta.get("avatar_box")
         if not (isinstance(box, list) and len(box) == 4 and all(isinstance(v, (int, float)) for v in box)):
             box = None
-        return Answer(text=text, entities=entities[:12], profile_update=meta.get("profile_update") or {},
+        return Answer(text=text, entities=entities[:12], drop_groups=groups[:8], profile_update=meta.get("profile_update") or {},
                       avatar_box=box if screenshot_jpeg else None, cost_usd=result.get("total_cost_usd"))
 
     def summarize(self, transcript: str) -> str | None:

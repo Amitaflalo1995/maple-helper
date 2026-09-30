@@ -351,3 +351,45 @@ class TileGrid(QFrame):
         outer.addLayout(grid)
         credit = QLabel("NiaMeowDB (meowdb.com)", objectName="CardCredit")
         outer.addWidget(credit)
+
+
+class DropGroupCard(QFrame):
+    """A monster and the items it drops: header row (picture, name, level) + item tiles."""
+
+    def __init__(self, kb, monster: str, items: list[str]):
+        super().__init__(objectName="TileGrid")
+        from PySide6.QtWidgets import QApplication, QGridLayout
+        rtl = QApplication.layoutDirection() == Qt.RightToLeft
+        e = kb.get(monster) or {}
+        self.url = e.get("url")
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(10, 8, 10, 8)
+        outer.setSpacing(6)
+        head = QHBoxLayout()
+        head.setSpacing(10)
+        pic = QLabel()
+        pic.setFixedSize(40, 40)
+        pic.setAlignment(Qt.AlignCenter)
+        img = kb.picture(monster)
+        if img:
+            pm = QPixmap(str(img))
+            if not pm.isNull():
+                pic.setPixmap(pm.scaled(40, 40, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        head.addWidget(pic)
+        align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter
+        col = QVBoxLayout()
+        col.setSpacing(0)
+        name = QLabel(e.get("name", monster), objectName="CardName")
+        name.setAlignment(align)
+        lv = (e.get("props") or {}).get("Level")
+        sub = QLabel(f"Lv. {lv}" if lv else "", objectName="CardSub")
+        sub.setAlignment(align)
+        col.addWidget(name)
+        col.addWidget(sub)
+        head.addLayout(col, 1)
+        outer.addLayout(head)
+        grid = QGridLayout()
+        grid.setSpacing(6)
+        for i, k in enumerate(items):
+            grid.addWidget(EntityTile(kb, k), i // 2, i % 2)
+        outer.addLayout(grid)

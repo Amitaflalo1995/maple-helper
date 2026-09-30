@@ -95,6 +95,7 @@ class MapleHelperApp:
             Onboarding(self.settings, self.profiles, self.kb, self.style, only_character=True).exec()
         api_key = claude_setup.load_api_key() if self.settings["api_key_fallback"] else None
         self.brain = Brain(self.kb, model=self.settings["model"], length=self.settings["answer_length"], api_key=api_key)
+        threading.Thread(target=self.brain.prewarm, daemon=True).start()   # first answer without startup delay
         self.overlay = Overlay(self.settings, self.profiles, self.kb, self.brain)
         self.overlay.setStyleSheet(self.style())
         self.overlay.setWindowOpacity(1.0)
@@ -225,6 +226,7 @@ class MapleHelperApp:
         self.overlay.setStyleSheet(self.style())
         self.overlay.apply_capture_mode()
         self.brain.length = self.settings["answer_length"]
+        threading.Thread(target=self.brain.prewarm, daemon=True).start()
         self.voice.set_key(self.settings["hotkey_voice"])
         self.register_hotkeys()
         self.apply_autostart()
@@ -276,6 +278,10 @@ class MapleHelperApp:
         self.overlay.kb = self.kb
 
     def shutdown(self):
+        try:
+            self.brain.shutdown()
+        except Exception:
+            pass
         try:
             winapi.unregister_hotkey(int(self.hotkey_host.winId()), HOTKEY_TOGGLE)
         except Exception:
