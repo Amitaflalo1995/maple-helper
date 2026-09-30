@@ -1,0 +1,248 @@
+"""Download the MapleStory Classic knowledge base from NiaMeowDB (meowdb.com).
+
+Used with permission from the NiaMeowDB team. Polite by design: a single
+worker, a fixed delay between requests, and resume support so a re-run only
+fetches what is missing.
+
+Output (under data/kb/):
+    pages/<category>/<slug>.md   one markdown file per entity (front matter + text)
+    index.json                   compact index: id, name, category, url, image, props
+    img/<category>/<slug>.png    entity images (monster sprites, item icons, ...)
+
+Usage:
+    python tools/scrape_meowdb.py            # full run (resumes)
+    python tools/scrape_meowdb.py --limit 5  # quick test, 5 pages per category
+    python tools/scrape_meowdb.py --refresh  # re-download everything
+"""
+from __future__ import annotations
+
+import argparse
+import html
+import json
+import re
+import sys
+import time
+import urllib.error
+import urllib.request
+import threading
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+BASE = "https://meowdb.com"
+SITEMAP = f"{BASE}/msclassic/sitemap.xml"
+USER_AGENT = "MapleHelper-KB/0.1 (MapleStory Classic companion app; used with NiaMeowDB permission)"
+DELAY_SECONDS = 1.0
+WORKERS = 3
+
+# sitemap path prefix -> (category name, path depth that marks an entity page)
+CATEGORIES = {
+    "monsters": ("monster", 2),
+    "item-db": ("item", 2),
+    "maps": ("map", 2),
+    "quest-tracker": ("quest", 2),
+    "npcs": ("npc", 2),
+    "skills": ("skill", 3),
+    "classes": ("class", 2),
+    "guides": ("guide", 2),
+    "npc-shops": ("shop", 3),
+    "crafting": ("crafting", 3),
+    "formulas": ("formula", 2),
+}
+NUMERIC_IDS = {"monsters", "item-db", "maps", "quest-tracker", "npcs"}
+LOCALES = {"es", "pt", "de", "fr", "ko", "ja", "zh-cn", "zh-tw", "th", "id", "vi", "tl", "pl", "ru", "it", "tr", "ms"}
+
+ROOT = Path(__file__).resolve().parent.parent
+KB = ROOT / "data" / "kb"
+
+
+def fetch(url: str, binary: bool = False, retries: int = 3):
+    for attempt in range(retries):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                data = r.read()
+                return data if binary else data.decode("utf-8", errors="replace")
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                return None
+            if e.code == 429 or e.code >= 500:
+                time.sleep(10 * (attempt + 1))
+                continue
+            raise
+        except (urllib.error.URLError, TimeoutError):
+            time.sleep(5 * (attempt + 1))
+    return None
+
+
+def entity_urls() -> dict[str, list[str]]:
+    xml = fetch(SITEMAP)
+    if not xml:
+        sys.exit("Could not download the sitemap.")
+    out: dict[str, list[str]] = {k: [] for k in CATEGORIES}
+    for loc in re.findall(r"<loc>([^<]+)</loc>", xml):
+        path = loc.replace(f"{BASE}/msclassic/", "").strip("/")
+        parts = path.split("/")
+        if not parts or parts[0] in LOCALES:
+            continue
+        prefix = parts[0]
+        if prefix in CATEGORIES and len(parts) == CATEGORIES[prefix][1]:
+            if prefix in NUMERIC_IDS and not parts[-1].isdigit():
+                continue  # listing pages such as item-db/all, item-db/equipment
+            out[prefix].append(loc)
+    return out
+
+
+def json_ld(page: str) -> list[dict]:
+    found = []
+    for raw in re.findall(r'<script type="application/ld\+json">(.*?)</script>', page, re.S):
+        try:
+            found.append(json.loads(raw))
+        except json.JSONDecodeError:
+            pass
+    return found
+
+
+def main_text(page: str, name: str) -> str:
+    """Readable text of the entity's own content, without site navigation and footer."""
+    body = re.sub(r"<script.*?</script>|<style.*?</style>|<svg.*?</svg>|<noscript.*?</noscript>", "", page, flags=re.S)
+    body = re.sub(r"</(div|p|li|tr|h\d|section|table|ul|ol)>|<br\s*/?>", "\n", body)
+    body = re.sub(r"</t[dh]>", " | ", body)
+    text = html.unescape(re.sub(r"<[^>]+>", " ", body))
+    text = re.sub(r"[ \t ]+", " ", text)
+    text = re.sub(r" ?\| ?(\n|$)", r"\1", text)
+    text = re.sub(r"\n\s*\n+", "\n", text)
+    # Skip the site navigation, then start at the breadcrumb ("... Database / <name>")
+    # or the first heading with the name.
+    nav = text.find("Explore the database")
+    if nav > 0:
+        text = text[nav:]
+    start = -1
+    m = re.search(r"/\s*" + re.escape(name) + r"\s*\n", text)
+    if m:
+        start = m.end()
+    elif name in text:
+        start = text.find(name)
+    if start > 0:
+        text = text[start:]
+    # Cut the site footer.
+    for marker in ("Random Meow Dad Joke", "Spot a mistake, missing data", "A cozy fan database", "Buy me a coffee", "© 20", "Privacy\n"):
+        i = text.find(marker)
+        if i > 200:
+            text = text[:i]
+    lines = [ln.strip() for ln in text.split("\n")]
+    lines = [ln for ln in lines if ln and ln not in {"Loading...", "Calculate", "Add to watchlist"}]
+    return "\n".join(lines).strip()
+
+
+def slug_of(url: str) -> str:
+    parts = url.replace(f"{BASE}/msclassic/", "").strip("/").split("/")
+    return "__".join(parts[1:]) or parts[0]
+
+
+def image_url(entity: dict, category: str, slug: str) -> str | None:
+    img = entity.get("image")
+    if isinstance(img, dict):
+        img = img.get("url")
+    if isinstance(img, list):
+        img = img[0] if img else None
+    if img:
+        return img if img.startswith("http") else BASE + img
+    if category == "item" and slug.isdigit():
+        return f"{BASE}/msclassic/api/assets/icons/{slug}"
+    return None
+
+
+def props_of(entity: dict) -> dict:
+    props = {}
+    for p in entity.get("additionalProperty", []) or []:
+        if isinstance(p, dict) and "name" in p:
+            props[p["name"]] = p.get("value")
+    return props
+
+
+def scrape_one(category: str, slug: str, url: str, refresh: bool) -> dict | None:
+    page = fetch(url)
+    time.sleep(DELAY_SECONDS)
+    if not page:
+        return None
+    lds = json_ld(page)
+    entity = next((d for d in lds if d.get("@type") not in ("BreadcrumbList", "WebSite", "Organization")), {})
+    title = re.search(r"<title>(.*?)</title>", page, re.S)
+    title_name = title.group(1).split(" | ")[0].split(" - MapleStory Classic")[0].strip() if title else ""
+    name = html.unescape(str(entity.get("name") or entity.get("headline") or title_name or slug))
+    text = main_text(page, name)
+    props = props_of(entity)
+    img = image_url(entity, category, slug)
+    img_file = None
+    if img:
+        img_path = KB / "img" / category / f"{slug}.png"
+        if not img_path.exists() or refresh:
+            data = fetch(img, binary=True)
+            time.sleep(DELAY_SECONDS / 2)
+            if data:
+                img_path.write_bytes(data)
+        if img_path.exists():
+            img_file = f"img/{category}/{slug}.png"
+    front = {"name": name, "category": category, "url": url, "image": img_file, "props": props,
+             "type": entity.get("category"), "source": "NiaMeowDB (meowdb.com)"}
+    md = "---\n" + json.dumps(front, ensure_ascii=False, indent=1) + "\n---\n\n# " + name + "\n\n"
+    if entity.get("description"):
+        md += html.unescape(entity["description"]) + "\n\n"
+    md += text + "\n"
+    (KB / "pages" / category / f"{slug}.md").write_text(md, encoding="utf-8")
+    return {"key": f"{category}/{slug}", "id": slug, "name": name, "category": category, "url": url,
+            "image": img_file, "props": props, "type": entity.get("category")}
+
+
+def scrape(limit: int | None, refresh: bool) -> None:
+    urls = entity_urls()
+    index_path = KB / "index.json"
+    index: dict[str, dict] = {}
+    if index_path.exists() and not refresh:
+        index = {e["key"]: e for e in json.loads(index_path.read_text(encoding="utf-8"))}
+
+    jobs = []
+    for prefix, locs in urls.items():
+        category = CATEGORIES[prefix][0]
+        (KB / "pages" / category).mkdir(parents=True, exist_ok=True)
+        (KB / "img" / category).mkdir(parents=True, exist_ok=True)
+        for url in locs[:limit] if limit else locs:
+            slug = slug_of(url)
+            key = f"{category}/{slug}"
+            if (KB / "pages" / category / f"{slug}.md").exists() and key in index and not refresh:
+                continue
+            jobs.append((category, slug, key, url))
+
+    lock = threading.Lock()
+    counter = [0]
+    total = len(jobs)
+
+    def work(job):
+        category, slug, key, url = job
+        entry = scrape_one(category, slug, url, refresh)
+        with lock:
+            counter[0] += 1
+            if entry:
+                index[key] = entry
+                print(f"[{counter[0]}/{total}] {category}: {entry['name']}", flush=True)
+            else:
+                print(f"[{counter[0]}/{total}] skip (not found) {url}", flush=True)
+            if counter[0] % 25 == 0:
+                index_path.write_text(json.dumps(list(index.values()), ensure_ascii=False), encoding="utf-8")
+
+    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+        list(pool.map(work, jobs))
+
+    index_path.write_text(json.dumps(list(index.values()), ensure_ascii=False), encoding="utf-8")
+    meta = {"source": "NiaMeowDB (meowdb.com)", "fetched_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "count": len(index)}
+    (KB / "meta.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
+    print(f"Done. {len(index)} entities.")
+
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument("--refresh", action="store_true")
+    args = ap.parse_args()
+    sys.stdout.reconfigure(encoding="utf-8")
+    scrape(args.limit, args.refresh)

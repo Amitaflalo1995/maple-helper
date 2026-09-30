@@ -1,0 +1,495 @@
+"""Onboarding (mandatory, no skipping), character editor and settings."""
+from __future__ import annotations
+
+import threading
+
+from PySide6.QtCore import QObject, Qt, QTimer, Signal
+from PySide6.QtGui import QPixmap
+from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QDialog, QFrame, QGridLayout, QHBoxLayout, QLabel,
+                               QLineEdit, QListWidget, QListWidgetItem, QMessageBox, QPushButton, QSlider, QSpinBox,
+                               QStackedWidget, QVBoxLayout, QWidget)
+
+from .. import bidi, claude_setup
+from ..i18n import I18n
+from ..kb import KnowledgeBase
+from ..store import ASSETS, History, Profiles, Settings
+
+# MapleStory Classic job tree: base class -> [(job, min level)]
+JOBS = {
+    "Beginner": [("Beginner", 1)],
+    "Warrior": [("Beginner", 1), ("Warrior", 10), ("Fighter", 30), ("Page", 30), ("Spearman", 30),
+                ("Crusader", 70), ("White Knight", 70), ("Dragon Knight", 70)],
+    "Magician": [("Beginner", 1), ("Magician", 8), ("F/P Wizard", 30), ("I/L Wizard", 30), ("Cleric", 30),
+                 ("F/P Mage", 70), ("I/L Mage", 70), ("Priest", 70)],
+    "Bowman": [("Beginner", 1), ("Bowman", 10), ("Hunter", 30), ("Crossbowman", 30), ("Ranger", 70), ("Sniper", 70)],
+    "Thief": [("Beginner", 1), ("Thief", 10), ("Assassin", 30), ("Bandit", 30), ("Hermit", 70), ("Chief Bandit", 70)],
+}
+CLASS_HE = {"Beginner": "ביגינר", "Warrior": "לוחם", "Magician": "קוסם", "Bowman": "קשת", "Thief": "גנב"}
+MAX_LEVEL = 200
+
+
+def jobs_for(base_class: str, level: int) -> list[str]:
+    return [j for j, lv in JOBS.get(base_class, []) if lv <= level]
+
+
+def _title(text: str) -> QLabel:
+    lb = QLabel(bidi.plain(text))
+    lb.setStyleSheet("font-size: 22px; font-weight: 600;")
+    lb.setWordWrap(True)
+    return lb
+
+
+def _body(text: str) -> QLabel:
+    lb = QLabel(bidi.plain(text))
+    lb.setWordWrap(True)
+    lb.setStyleSheet("color: #C9B8A4;")
+    return lb
+
+
+class _Bridge(QObject):
+    status = Signal(str)
+
+
+class CharacterForm(QWidget):
+    """Name, class (cards), level, job. Used by onboarding and 'add character'."""
+
+    changed = Signal()
+
+    def __init__(self, t: I18n, kb: KnowledgeBase):
+        super().__init__()
+        self.t = t
+        lay = QVBoxLayout(self)
+        lay.setSpacing(10)
+        lay.addWidget(QLabel(t("ob_char_name")))
+        self.name = QLineEdit()
+        self.name.setObjectName("Input")
+        self.name.setMaxLength(24)
+        self.name.textChanged.connect(lambda *_: self.changed.emit())
+        lay.addWidget(self.name)
+
+        lay.addWidget(QLabel(t("ob_class")))
+        grid = QGridLayout()
+        self.class_group = QButtonGroup(self)
+        self.class_group.setExclusive(True)
+        for i, cls in enumerate(JOBS):
+            b = QPushButton()
+            b.setCheckable(True)
+            b.setObjectName("Quick")
+            b.setMinimumHeight(72)
+            img = kb.image_path(f"class/{cls.lower()}")
+            label = cls if t.lang == "en" else f"{CLASS_HE[cls]}\n{cls}"
+            b.setText(label)
+            if img:
+                from PySide6.QtGui import QIcon
+                b.setIcon(QIcon(str(img)))
+                b.setIconSize(QPixmap(str(img)).size().scaled(40, 40, Qt.KeepAspectRatio))
+            b.setProperty("cls", cls)
+            self.class_group.addButton(b)
+            grid.addWidget(b, i // 3, i % 3)
+        self.class_group.buttonToggled.connect(lambda *_: self._refresh_jobs())
+        lay.addLayout(grid)
+
+        row = QHBoxLayout()
+        col1 = QVBoxLayout()
+        col1.addWidget(QLabel(t("ob_level")))
+        self.level = QSpinBox()
+        self.level.setRange(1, MAX_LEVEL)
+        self.level.setValue(1)
+        self.level.valueChanged.connect(lambda *_: self._refresh_jobs())
+        col1.addWidget(self.level)
+        row.addLayout(col1)
+        col2 = QVBoxLayout()
+        col2.addWidget(QLabel(t("ob_job")))
+        self.job = QComboBox()
+        self.job.currentIndexChanged.connect(lambda *_: self.changed.emit())
+        col2.addWidget(self.job)
+        row.addLayout(col2, 1)
+        lay.addLayout(row)
+        lay.addStretch(1)
+
+    def base_class(self) -> str | None:
+        b = self.class_group.checkedButton()
+        return b.property("cls") if b else None
+
+    def _refresh_jobs(self):
+        cls = self.base_class()
+        self.job.clear()
+        if cls:
+            jobs = jobs_for(cls, self.level.value())
+            self.job.addItems(jobs)
+            self.job.setCurrentIndex(len(jobs) - 1)
+        self.changed.emit()
+
+    def valid(self) -> bool:
+        return bool(self.name.text().strip()) and bool(self.base_class()) and bool(self.job.currentText())
+
+    def values(self) -> tuple[str, str, str, int]:
+        return self.name.text().strip(), self.base_class(), self.job.currentText(), self.level.value()
+
+
+class Onboarding(QDialog):
+    """Language → Claude connection → character. Every step is required."""
+
+    def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, stylesheet_fn, only_character=False):
+        super().__init__(None, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        self.settings, self.profiles, self.kb = settings, profiles, kb
+        self.stylesheet_fn = stylesheet_fn
+        self.only_character = only_character
+        self.setWindowTitle("Maple Helper")
+        self.setMinimumSize(560, 600)
+        self.t = I18n(settings["language"] or "he")
+        self._bridge = _Bridge()
+        self._bridge.status.connect(self._on_status)
+        self._claude_ok = False
+        self._build()
+
+    def _build(self):
+        self.setStyleSheet(self.stylesheet_fn(1.0) + "QDialog { background: #1C1612; }")
+        self.setLayoutDirection(Qt.RightToLeft if self.t.rtl else Qt.LeftToRight)
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(28, 24, 28, 20)
+        self.stack = QStackedWidget()
+        outer.addWidget(self.stack, 1)
+        nav = QHBoxLayout()
+        self.back = QPushButton(self.t("ob_back"), objectName="Secondary")
+        self.next = QPushButton(self.t("ob_next"), objectName="Primary")
+        self.back.clicked.connect(self._go_back)
+        self.next.clicked.connect(self._go_next)
+        nav.addWidget(self.back)
+        nav.addStretch(1)
+        nav.addWidget(self.next)
+        outer.addLayout(nav)
+
+        self.pages = []
+        if not self.only_character:
+            self.pages.append(self._page_language())
+            self.pages.append(self._page_claude())
+        self.pages.append(self._page_character())
+        if not self.only_character:
+            self.pages.append(self._page_done())
+        for p in self.pages:
+            self.stack.addWidget(p)
+        self._update_nav()
+
+    # pages ---------------------------------------------------------------
+
+    def _page_language(self):
+        w = QWidget()
+        lay = QVBoxLayout(w)
+        logo = QLabel()
+        wm = ASSETS / "brand" / "wordmark.png"
+        if wm.exists():
+            logo.setPixmap(QPixmap(str(wm)).scaled(260, 260, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        logo.setAlignment(Qt.AlignCenter)
+        lay.addWidget(logo)
+        lay.addWidget(_title("Maple Helper"), 0, Qt.AlignHCenter)
+        for line in ("העוזר האישי שלכם ב-MapleStory", "Your personal MapleStory assistant"):
+            lb = _body(line)
+            lb.setAlignment(Qt.AlignHCenter)
+            lay.addWidget(lb)
+        lay.addSpacing(16)
+        row = QHBoxLayout()
+        self.lang_group = QButtonGroup(self)
+        for code, label in (("he", "עברית"), ("en", "English")):
+            b = QPushButton(label, objectName="Quick")
+            b.setCheckable(True)
+            b.setMinimumHeight(56)
+            b.setProperty("lang", code)
+            if (self.settings["language"] or "he") == code:
+                b.setChecked(True)
+            self.lang_group.addButton(b)
+            row.addWidget(b)
+        self.lang_group.buttonClicked.connect(self._on_language)
+        lay.addLayout(row)
+        lay.addStretch(1)
+        return w
+
+    def _page_claude(self):
+        w = QWidget()
+        lay = QVBoxLayout(w)
+        lay.setSpacing(12)
+        lay.addWidget(_title(self.t("ob_connect")))
+        lay.addWidget(_body(self.t("ob_connect_body")))
+        lay.addWidget(_body(self.t("ob_need_plan")))
+        self.status_label = QLabel("")
+        self.status_label.setStyleSheet("font-weight: 600;")
+        lay.addWidget(self.status_label)
+        row = QHBoxLayout()
+        self.install_btn = QPushButton(self.t("ob_install"), objectName="Primary")
+        self.login_btn = QPushButton(self.t("ob_login"), objectName="Primary")
+        self.check_btn = QPushButton(self.t("ob_check"), objectName="Secondary")
+        self.install_btn.clicked.connect(lambda: (claude_setup.install(), self._poll_status(90)))
+        self.login_btn.clicked.connect(lambda: (claude_setup.login(), self._poll_status(120)))
+        self.check_btn.clicked.connect(self._check_status)
+        for b in (self.install_btn, self.login_btn, self.check_btn):
+            row.addWidget(b)
+        row.addStretch(1)
+        lay.addLayout(row)
+        lay.addSpacing(18)
+        line = QFrame()
+        line.setFrameShape(QFrame.HLine)
+        line.setStyleSheet("color: rgba(255,255,255,0.15);")
+        lay.addWidget(line)
+        lay.addWidget(_body(self.t("ob_use_api_key")))
+        krow = QHBoxLayout()
+        self.key_edit = QLineEdit(objectName="Input")
+        self.key_edit.setEchoMode(QLineEdit.Password)
+        self.key_edit.setPlaceholderText(self.t("ob_api_key_hint"))
+        self.key_edit.setLayoutDirection(Qt.LeftToRight)
+        key_btn = QPushButton(self.t("ob_check"), objectName="Secondary")
+        key_btn.clicked.connect(self._check_key)
+        krow.addWidget(self.key_edit, 1)
+        krow.addWidget(key_btn)
+        lay.addLayout(krow)
+        lay.addStretch(1)
+        return w
+
+    def _page_character(self):
+        w = QWidget()
+        lay = QVBoxLayout(w)
+        lay.addWidget(_title(self.t("add_character") if self.only_character else self.t("ob_welcome")))
+        self.form = CharacterForm(self.t, self.kb)
+        self.form.changed.connect(self._update_nav)
+        lay.addWidget(self.form, 1)
+        return w
+
+    def _page_done(self):
+        w = QWidget()
+        lay = QVBoxLayout(w)
+        lay.setSpacing(14)
+        mascot = QLabel()
+        m = ASSETS / "brand" / "mascot.png"
+        if m.exists():
+            mascot.setPixmap(QPixmap(str(m)).scaled(220, 220, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        mascot.setAlignment(Qt.AlignCenter)
+        lay.addWidget(mascot)
+        lay.addWidget(_title(self.t("ob_done_hint")))
+        lay.addWidget(_body(self.t("ob_borderless")))
+        lay.addWidget(_body(self.t("ob_privacy")))
+        lay.addWidget(_body(self.t("unofficial")))
+        lay.addStretch(1)
+        return w
+
+    # logic ---------------------------------------------------------------
+
+    RESTART = 2
+
+    def _on_language(self, btn):
+        lang = btn.property("lang")
+        if lang != self.t.lang:
+            # reopen in the chosen language (the app loops on RESTART)
+            self.settings["language"] = lang
+            self.done(self.RESTART)
+            return
+        self.settings["language"] = lang
+        self._update_nav()
+
+    def _check_status(self):
+        self.status_label.setText(self.t("ob_checking"))
+        threading.Thread(target=lambda: self._bridge.status.emit(claude_setup.status()), daemon=True).start()
+
+    def _poll_status(self, seconds: int):
+        self._poll_left = seconds // 3
+        self._poll_timer = QTimer(self, interval=3000)
+        self._poll_timer.timeout.connect(self._poll_tick)
+        self._poll_timer.start()
+
+    def _poll_tick(self):
+        self._poll_left -= 1
+        if self._poll_left <= 0 or self._claude_ok:
+            self._poll_timer.stop()
+            return
+        self._check_status()
+
+    def _on_status(self, st: str):
+        self._claude_ok = st == "ok"
+        text = {"ok": self.t("ob_connected"), "logged_out": self.t("ob_not_logged"),
+                "not_installed": self.t("ob_not_installed")}[st]
+        self.status_label.setText(text)
+        self.install_btn.setVisible(st == "not_installed")
+        self.login_btn.setVisible(st == "logged_out")
+        if self._claude_ok:
+            self.settings["api_key_fallback"] = False
+        self._update_nav()
+
+    def _check_key(self):
+        key = self.key_edit.text().strip()
+        if key and claude_setup.test_api_key(key):
+            claude_setup.save_api_key(key)
+            self.settings["api_key_fallback"] = True
+            self._claude_ok = True
+            self.status_label.setText(self.t("ob_connected"))
+        else:
+            self.status_label.setText("✗")
+        self._update_nav()
+
+    def showEvent(self, e):
+        super().showEvent(e)
+        if not self.only_character:
+            self._check_status()
+
+    def _current_ok(self) -> bool:
+        page = self.stack.currentWidget()
+        if not self.only_character and page is self.pages[0]:
+            return self.lang_group.checkedButton() is not None
+        if not self.only_character and page is self.pages[1]:
+            return self._claude_ok
+        if page.findChild(CharacterForm):
+            return self.form.valid()
+        return True
+
+    def _update_nav(self):
+        i = self.stack.currentIndex()
+        self.back.setVisible(i > 0)
+        last = i == self.stack.count() - 1
+        self.next.setText(self.t("ob_finish") if last else self.t("ob_next"))
+        self.next.setEnabled(self._current_ok())
+
+    def _go_back(self):
+        self.stack.setCurrentIndex(max(0, self.stack.currentIndex() - 1))
+        self._update_nav()
+
+    def _go_next(self):
+        if not self._current_ok():
+            return
+        page = self.stack.currentWidget()
+        if page.findChild(CharacterForm):
+            self.profiles.add(*self.form.values())
+        if self.stack.currentIndex() == self.stack.count() - 1:
+            if not self.only_character:
+                self.settings["onboarding_done"] = True
+            self.accept()
+            return
+        self.stack.setCurrentIndex(self.stack.currentIndex() + 1)
+        self._update_nav()
+
+    def restart_on_language(self):
+        """After a language restart, open straight on the Claude step."""
+        if not self.only_character and self.stack.count() > 1:
+            self.stack.setCurrentIndex(1)
+            self._update_nav()
+
+
+class SettingsDialog(QDialog):
+    changed = Signal()
+    update_kb_requested = Signal()
+
+    def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, stylesheet_fn):
+        super().__init__(None, Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        self.settings, self.profiles, self.kb = settings, profiles, kb
+        self.stylesheet_fn = stylesheet_fn
+        self.t = t = I18n(settings["language"] or "he")
+        self.setWindowTitle(f"Maple Helper · {t('settings')}")
+        self.setMinimumWidth(460)
+        self.setStyleSheet(stylesheet_fn(1.0) + "QDialog { background: #1C1612; }")
+        self.setLayoutDirection(Qt.RightToLeft if t.rtl else Qt.LeftToRight)
+        lay = QVBoxLayout(self)
+        lay.setSpacing(10)
+        grid = QGridLayout()
+        r = 0
+
+        def row(label, widget):
+            nonlocal r
+            grid.addWidget(QLabel(label), r, 0)
+            grid.addWidget(widget, r, 1)
+            r += 1
+
+        self.lang = QComboBox()
+        self.lang.addItem("עברית", "he")
+        self.lang.addItem("English", "en")
+        self.lang.setCurrentIndex(0 if (settings["language"] or "he") == "he" else 1)
+        row(t("language"), self.lang)
+
+        fkeys = [f"F{i}" for i in range(1, 13)]
+        self.hk_toggle = QComboBox()
+        self.hk_toggle.addItems(fkeys)
+        self.hk_toggle.setCurrentText(settings["hotkey_toggle"])
+        row(t("hotkey_toggle"), self.hk_toggle)
+        self.hk_voice = QComboBox()
+        self.hk_voice.addItems(fkeys)
+        self.hk_voice.setCurrentText(settings["hotkey_voice"])
+        row(t("hotkey_voice"), self.hk_voice)
+
+        self.opacity = QSlider(Qt.Horizontal)
+        self.opacity.setRange(40, 100)
+        self.opacity.setValue(int(settings["opacity"] * 100))
+        row(t("opacity"), self.opacity)
+
+        self.font = QSpinBox()
+        self.font.setRange(11, 22)
+        self.font.setValue(settings["font_size"])
+        row(t("font_size"), self.font)
+
+        self.length = QComboBox()
+        self.length.addItem(t("short"), "short")
+        self.length.addItem(t("detailed"), "detailed")
+        self.length.setCurrentIndex(0 if settings["answer_length"] == "short" else 1)
+        row(t("answer_length"), self.length)
+
+        self.autostart = QCheckBox()
+        self.autostart.setChecked(settings["start_with_windows"])
+        row(t("start_with_windows"), self.autostart)
+        lay.addLayout(grid)
+
+        # characters
+        lay.addWidget(QLabel(t("characters")))
+        self.chars = QListWidget()
+        self.chars.setMaximumHeight(110)
+        self._fill_chars()
+        self.chars.itemClicked.connect(lambda it: (self.profiles.set_active(it.data(Qt.UserRole)), self._fill_chars()))
+        lay.addWidget(self.chars)
+        crow = QHBoxLayout()
+        add = QPushButton(t("add_character"), objectName="Secondary")
+        add.clicked.connect(self._add_char)
+        clear = QPushButton(t("clear_history"), objectName="Secondary")
+        clear.clicked.connect(self._clear_history)
+        upd = QPushButton(t("update_kb"), objectName="Secondary")
+        upd.clicked.connect(self.update_kb_requested.emit)
+        for b in (add, clear, upd):
+            crow.addWidget(b)
+        lay.addLayout(crow)
+
+        credit = QLabel(bidi.plain(t("credits")) + "  ·  " + bidi.plain(t("unofficial")))
+        credit.setWordWrap(True)
+        credit.setStyleSheet("color: #C9B8A4; font-size: 11px;")
+        lay.addWidget(credit)
+
+        brow = QHBoxLayout()
+        brow.addStretch(1)
+        save = QPushButton(t("save"), objectName="Primary")
+        save.clicked.connect(self._save)
+        brow.addWidget(save)
+        lay.addLayout(brow)
+
+    def _fill_chars(self):
+        self.chars.clear()
+        for c in self.profiles.characters:
+            mark = "● " if c.id == self.profiles.active_id else "   "
+            it = QListWidgetItem(bidi.plain(f"{mark}{c.name} · {self.t('level')} {c.level} · {c.job}", self.t.rtl))
+            it.setData(Qt.UserRole, c.id)
+            self.chars.addItem(it)
+
+    def _add_char(self):
+        dlg = Onboarding(self.settings, self.profiles, self.kb, self.stylesheet_fn, only_character=True)
+        if dlg.exec():
+            self._fill_chars()
+
+    def _clear_history(self):
+        c = self.profiles.active
+        if c:
+            History(c.id).clear()
+
+    def _save(self):
+        s = self.settings
+        s.data.update({
+            "language": self.lang.currentData(),
+            "hotkey_toggle": self.hk_toggle.currentText(),
+            "hotkey_voice": self.hk_voice.currentText(),
+            "opacity": self.opacity.value() / 100,
+            "font_size": self.font.value(),
+            "answer_length": self.length.currentData(),
+            "start_with_windows": self.autostart.isChecked(),
+        })
+        s.save()
+        self.changed.emit()
+        self.accept()
