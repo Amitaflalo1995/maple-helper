@@ -138,10 +138,10 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #SystemLine {{ color: {c['muted']}; font-size: {s - 2}px; }}
 
     #Card {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 14px; }}
-    #Card:hover {{ background: {c['fill2']}; }}
-    #Card[selected="true"], #Tile[selected="true"], #GroupHeader[selected="true"] {{
-        border: 2px solid {ORANGE}; background: rgba(255,149,51,0.12); }}
-    #GroupHeader {{ background: transparent; border: 2px solid transparent; border-radius: 10px; }}
+    #Card:hover {{ background: {c['fill2']}; border: 1px solid rgba(255,149,51,0.7); }}
+    #GroupHeader {{ background: transparent; border: 1px solid transparent; border-radius: 10px; }}
+    #GroupHeader:hover {{ border: 1px solid rgba(255,149,51,0.7); }}
+    #TileGridTitle {{ color: {c['muted']}; font-size: {s - 2}px; font-weight: 600; }}
     #BubbleTag {{ color: rgba(255,255,255,0.85); font-size: {s - 3}px; font-weight: 600; }}
     #FocusBar {{ background: rgba(255,149,51,0.12); border: 1px solid rgba(255,149,51,0.55); border-radius: 12px; }}
     QPushButton#TagChip {{ background: {"rgba(255,255,255,0.10)" if MODE == "dark" else "#FFFFFF"};
@@ -153,6 +153,8 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #Tile {{ background: {"rgba(255,255,255,0.05)" if MODE == "dark" else "#F7F7F9"}; border: 1px solid {c['hair']};
              border-radius: 10px; }}
     #Tile:hover {{ border: 1px solid rgba(255,149,51,0.7); }}
+    #Card[selected="true"], #Tile[selected="true"], #GroupHeader[selected="true"] {{
+        border: 2px solid {ORANGE}; background: rgba(255,149,51,0.12); }}
     #TileName {{ font-size: {s - 1}px; font-weight: 500; color: {c['text']}; }}
     #CardName {{ font-weight: 600; color: {c['text']}; }}
     #CardSub {{ color: {c['muted']}; font-size: {s - 2}px; }}

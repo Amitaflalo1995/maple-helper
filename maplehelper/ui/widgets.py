@@ -368,12 +368,19 @@ class EntityTile(Selectable, QFrame):
 class TileGrid(QFrame):
     """Two-column grid of item tiles with a credit line."""
 
-    def __init__(self, kb, keys: list[str]):
+    def __init__(self, kb, keys: list[str], title: str = ""):
         super().__init__(objectName="TileGrid")
-        from PySide6.QtWidgets import QGridLayout
+        from PySide6.QtWidgets import QApplication, QGridLayout
+        from .. import bidi
         outer = QVBoxLayout(self)
         outer.setContentsMargins(8, 8, 8, 6)
         outer.setSpacing(4)
+        if title:
+            rtl = QApplication.layoutDirection() == Qt.RightToLeft
+            t = QLabel(bidi.plain(title, rtl), objectName="TileGridTitle")
+            t.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
+            t.setContentsMargins(4, 0, 4, 2)
+            outer.addWidget(t)
         grid = QGridLayout()
         grid.setSpacing(6)
         for i, k in enumerate(keys):

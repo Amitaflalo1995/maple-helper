@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLab
 
 from .. import bidi, winapi
 from ..brain import Answer, Brain
-from ..i18n import I18n
+from ..i18n import STRINGS, I18n
 from ..kb import KnowledgeBase
 from ..store import ASSETS, History, Profiles, Settings
 from . import theme
@@ -474,8 +474,21 @@ class Overlay(QWidget):
         rest = [k for k in keys if k not in heads]
         for k in heads:
             self._add_widget(EntityCard(self.kb, k, self.t.lang))
-        if rest:
-            self._add_widget(TileGrid(self.kb, rest))
+        # tiles go in titled groups, so nothing looks like it belongs to the card above unless it does
+        groups: dict[str, list[str]] = {}
+        if heads and heads[0].startswith("monster/"):
+            groups[self.t("tiles_drops", name=self.kb.get(heads[0])["name"])] = []   # its drops first
+        drops = set(self.kb.monster_drops(heads[0])) if heads and heads[0].startswith("monster/") else set()
+        for k in rest:
+            if k in drops:
+                title = self.t("tiles_drops", name=self.kb.get(heads[0])["name"])
+            else:
+                kind = "tiles_" + k.split("/")[0]
+                title = self.t(kind if kind in STRINGS else "tiles_other")
+            groups.setdefault(title, []).append(k)
+        for title, ks in groups.items():
+            if ks:
+                self._add_widget(TileGrid(self.kb, ks, title))
 
     def add_confirm(self, text: str, on_yes):
         row = QWidget()
