@@ -106,3 +106,90 @@ def register_hotkey(hwnd: int, hotkey_id: int, key_name: str) -> bool:
 
 def unregister_hotkey(hwnd: int, hotkey_id: int) -> None:
     user32.UnregisterHotKey(wt.HWND(hwnd), hotkey_id)
+
+
+# ---------------------------------------------------------------- glass material
+
+class _ACCENT(ctypes.Structure):
+    _fields_ = [("AccentState", ctypes.c_int), ("AccentFlags", ctypes.c_int),
+                ("GradientColor", ctypes.c_uint), ("AnimationId", ctypes.c_int)]
+
+
+class _WCAD(ctypes.Structure):
+    _fields_ = [("Attribute", ctypes.c_int), ("Data", ctypes.c_void_p), ("SizeOfData", ctypes.c_size_t)]
+
+
+ACCENT_ENABLE_ACRYLICBLURBEHIND = 4
+WCA_ACCENT_POLICY = 19
+
+
+def transparency_enabled() -> bool:
+    """Windows 'Transparency effects' setting (the reduced-transparency preference)."""
+    import winreg
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER,
+                            r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize") as k:
+            return bool(winreg.QueryValueEx(k, "EnableTransparency")[0])
+    except OSError:
+        return True
+
+
+def enable_acrylic(hwnd: int, tint_rgba: tuple[int, int, int, int] = (18, 14, 12, 80)) -> bool:
+    """Blur what is behind the window (the game) — the glass material. Returns False if unsupported."""
+    try:
+        r, g, b, a = tint_rgba
+        accent = _ACCENT(ACCENT_ENABLE_ACRYLICBLURBEHIND, 0x20 | 0x40 | 0x80 | 0x100, (a << 24) | (b << 16) | (g << 8) | r, 0)
+        data = _WCAD(WCA_ACCENT_POLICY, ctypes.cast(ctypes.pointer(accent), ctypes.c_void_p), ctypes.sizeof(accent))
+        return bool(user32.SetWindowCompositionAttribute(wt.HWND(hwnd), ctypes.byref(data)))
+    except (AttributeError, OSError):
+        return False
+
+
+def round_window(hwnd: int, w: int, h: int, radius: int) -> None:
+    """Clip the window (and its blur) to a rounded rectangle."""
+    gdi32 = ctypes.windll.gdi32
+    rgn = gdi32.CreateRoundRectRgn(0, 0, w + 1, h + 1, radius * 2, radius * 2)
+    user32.SetWindowRgn(wt.HWND(hwnd), rgn, True)
+
+
+class _BLURBEHIND(ctypes.Structure):
+    _fields_ = [("dwFlags", wt.DWORD), ("fEnable", wt.BOOL), ("hRgnBlur", wt.HRGN),
+                ("fTransitionOnMaximized", wt.BOOL)]
+
+
+class _MARGINS(ctypes.Structure):
+    _fields_ = [("l", ctypes.c_int), ("r", ctypes.c_int), ("t", ctypes.c_int), ("b", ctypes.c_int)]
+
+
+def glass_window(hwnd: int, tint_rgba=(18, 14, 12, 70), shadow: bool = True) -> bool:
+    """Acrylic material for a normal (non-layered) frameless window, the way DWM expects it:
+    blur-behind on the client area + acrylic accent + rounded corners and a system shadow."""
+    ok = False
+    try:
+        bb = _BLURBEHIND(1, True, None, False)
+        dwmapi.DwmEnableBlurBehindWindow(wt.HWND(hwnd), ctypes.byref(bb))
+        ok = enable_acrylic(hwnd, tint_rgba)
+        pref = ctypes.c_int(2)  # DWMWCP_ROUND
+        dwmapi.DwmSetWindowAttribute(wt.HWND(hwnd), 33, ctypes.byref(pref), ctypes.sizeof(pref))
+        if shadow:
+            m = _MARGINS(-1, -1, -1, -1)
+            dwmapi.DwmExtendFrameIntoClientArea(wt.HWND(hwnd), ctypes.byref(m))
+    except (AttributeError, OSError):
+        return False
+    return ok
+
+
+WDA_EXCLUDEFROMCAPTURE = 0x11
+
+
+def exclude_from_capture(hwnd: int) -> bool:
+    """Keep this window out of screen captures: our own backdrop sampling and the
+    screenshot sent to Claude then see the game underneath, not the chat."""
+    return bool(user32.SetWindowDisplayAffinity(wt.HWND(hwnd), WDA_EXCLUDEFROMCAPTURE))
+
+
+def grab_screen(x: int, y: int, w: int, h: int):
+    """Raw RGB capture of a screen rectangle (physical pixels) → PIL image."""
+    with mss.MSS() if hasattr(mss, "MSS") else mss.mss() as s:
+        shot = s.grab({"left": x, "top": y, "width": max(1, w), "height": max(1, h)})
+    return Image.frombytes("RGB", shot.size, shot.rgb)

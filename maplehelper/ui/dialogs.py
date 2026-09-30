@@ -13,6 +13,7 @@ from .. import bidi, claude_setup
 from ..i18n import I18n
 from ..kb import KnowledgeBase
 from ..store import ASSETS, History, Profiles, Settings
+from . import theme
 
 # MapleStory Classic job tree: base class -> [(job, min level)]
 JOBS = {
@@ -144,7 +145,7 @@ class Onboarding(QDialog):
         self._build()
 
     def _build(self):
-        self.setStyleSheet(self.stylesheet_fn(1.0) + "QDialog { background: #1C1612; }")
+        self.setStyleSheet(self.stylesheet_fn(1.0) + f"QDialog {{ background: {theme.dialog_background()}; }}")
         self.setLayoutDirection(Qt.RightToLeft if self.t.rtl else Qt.LeftToRight)
         outer = QVBoxLayout(self)
         outer.setContentsMargins(28, 24, 28, 20)
@@ -381,7 +382,7 @@ class SettingsDialog(QDialog):
         self.t = t = I18n(settings["language"] or "he")
         self.setWindowTitle(f"Maple Helper · {t('settings')}")
         self.setMinimumWidth(460)
-        self.setStyleSheet(stylesheet_fn(1.0) + "QDialog { background: #1C1612; }")
+        self.setStyleSheet(stylesheet_fn(1.0) + f"QDialog {{ background: {theme.dialog_background()}; }}")
         self.setLayoutDirection(Qt.RightToLeft if t.rtl else Qt.LeftToRight)
         lay = QVBoxLayout(self)
         lay.setSpacing(10)
@@ -409,6 +410,12 @@ class SettingsDialog(QDialog):
         self.hk_voice.addItems(fkeys)
         self.hk_voice.setCurrentText(settings["hotkey_voice"])
         row(t("hotkey_voice"), self.hk_voice)
+
+        self.appearance = QComboBox()
+        self.appearance.addItem(t("appearance_dark"), "dark")
+        self.appearance.addItem(t("appearance_light"), "light")
+        self.appearance.setCurrentIndex(0 if settings["appearance"] != "light" else 1)
+        row(t("appearance"), self.appearance)
 
         self.opacity = QSlider(Qt.Horizontal)
         self.opacity.setRange(40, 100)
@@ -483,6 +490,7 @@ class SettingsDialog(QDialog):
         s = self.settings
         s.data.update({
             "language": self.lang.currentData(),
+            "appearance": self.appearance.currentData(),
             "hotkey_toggle": self.hk_toggle.currentText(),
             "hotkey_voice": self.hk_voice.currentText(),
             "opacity": self.opacity.value() / 100,

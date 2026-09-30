@@ -30,7 +30,7 @@ class Bubble(QFrame):
         self.role = role
         self.setObjectName("BubbleUser" if role == "user" else "BubbleBot")
         lay = QVBoxLayout(self)
-        lay.setContentsMargins(12, 8, 12, 8)
+        lay.setContentsMargins(13, 8, 13, 9)
         self.label = _label(rich=True)
         self.label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
         lay.addWidget(self.label)
@@ -41,20 +41,19 @@ class Bubble(QFrame):
 
 
 class BubbleRow(QWidget):
-    """Aligns a bubble to the reading-start side (user) or end side (assistant)."""
+    """iMessage convention: your messages sit on the trailing side (left in Hebrew), answers span the width."""
 
     def __init__(self, bubble: Bubble, ui_rtl: bool):
         super().__init__()
         lay = QHBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
-        # In an RTL UI the layout mirrors automatically: "start" is the right edge.
+        # the layout mirrors in an RTL UI, so "trailing" is the left edge there
         if bubble.role == "user":
-            lay.addWidget(bubble, 0)
+            lay.addSpacing(48)
             lay.addStretch(1)
+            lay.addWidget(bubble, 0)
         else:
-            lay.addStretch(0)
             lay.addWidget(bubble, 1)
-        bubble.setMaximumWidth(10_000)
 
 
 class SystemLine(QLabel):
@@ -148,5 +147,5 @@ class EntityCard(QFrame):
 class QuickButton(QPushButton):
     def __init__(self, text: str):
         super().__init__(text)
-        self.setObjectName("Quick")
+        self.setObjectName("Chip")
         self.setCursor(Qt.PointingHandCursor)

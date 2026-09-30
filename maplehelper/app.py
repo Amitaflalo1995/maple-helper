@@ -55,6 +55,7 @@ class MapleHelperApp:
     # ------------------------------------------------------------------ startup
 
     def style(self, opacity: float | None = None) -> str:
+        theme.set_mode(self.settings["appearance"])
         return theme.stylesheet(self.font_family, self.settings["font_size"],
                                 self.settings["opacity"] if opacity is None else opacity)
 
@@ -184,6 +185,7 @@ class MapleHelperApp:
     def on_settings_changed(self):
         self.overlay.apply_language()
         self.overlay.setStyleSheet(self.style())
+        self.overlay.update()
         self.brain.length = self.settings["answer_length"]
         self.voice.set_key(self.settings["hotkey_voice"])
         self.register_hotkeys()
@@ -274,6 +276,7 @@ def main():
     # Windows shows this identity (not "Python") for the taskbar and notifications
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APP_ID)
     qapp = QApplication(sys.argv)
+    qapp.setStyle("Fusion")   # the native Windows 11 style ignores rounded corners on buttons
     qapp.setApplicationName(APP_NAME)
     qapp.setApplicationDisplayName(APP_NAME)
     lock = QLockFile(str(DATA_DIR / "app.lock"))

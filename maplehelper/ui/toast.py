@@ -25,15 +25,17 @@ class Toast(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
         self.setFixedWidth(WIDTH)
+        c = theme.P()
+        bg = "rgba(28, 28, 30, 0.97)" if theme.MODE == "dark" else "rgba(250, 250, 252, 0.98)"
         self.setStyleSheet(f"""
-            * {{ font-family: "{font_family}"; color: {theme.TEXT}; }}
-            #Card {{ background: rgba(28, 22, 18, 0.96); border: 1px solid {theme.BORDER}; border-radius: 14px; }}
+            * {{ font-family: "{font_family}"; color: {c['text']}; }}
+            #Card {{ background: {bg}; border: 1px solid {c['stroke']}; border-radius: 16px; }}
             #Accent {{ background: {theme.ORANGE}; border-radius: 2px; }}
-            #Title {{ font-size: 14px; font-weight: 600; color: {theme.CREAM}; }}
-            #Body {{ font-size: 13px; color: {theme.TEXT}; }}
-            #Brand {{ font-size: 11px; color: {theme.MUTED}; }}
-            QToolButton {{ background: transparent; border: none; color: {theme.MUTED}; font-size: 14px; }}
-            QToolButton:hover {{ color: {theme.TEXT}; }}
+            #Title {{ font-size: 14px; font-weight: 600; color: {c['text']}; }}
+            #Body {{ font-size: 13px; color: {c['text']}; }}
+            #Brand {{ font-size: 11px; color: {c['muted']}; }}
+            QToolButton {{ background: transparent; border: none; color: {c['muted']}; font-size: 14px; }}
+            QToolButton:hover {{ color: {c['text']}; }}
         """)
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)

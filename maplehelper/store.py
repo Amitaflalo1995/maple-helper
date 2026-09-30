@@ -56,6 +56,7 @@ DEFAULT_SETTINGS = {
     "hotkey_toggle": "F9",
     "hotkey_voice": "F10",
     "opacity": 0.85,
+    "appearance": "dark",         # dark (black glass, white text) | light (white glass, dark text)
     "font_size": 14,
     "answer_length": "short",     # short | detailed
     "window": None,               # {"x","y","w","h","screen"} saved on move/resize

@@ -127,5 +127,7 @@ def plain(text: str, rtl_ui: bool = False) -> str:
     """For single-line labels (plain text). In a Hebrew UI a label is always RTL
     (an RLM mark fixes its direction even when it starts with an English name)."""
     if rtl_ui or direction(text) == "rtl":
-        return RLM + isolate_ltr_runs(text)
+        # RLM on both ends: Qt buttons lay text out LTR regardless of the widget's
+        # direction; the trailing mark keeps final punctuation ("?") on the left.
+        return RLM + isolate_ltr_runs(text) + RLM
     return text

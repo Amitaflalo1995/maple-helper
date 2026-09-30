@@ -1,18 +1,21 @@
-"""The in-game chat window: transparent, always on top, draggable across monitors, F9 only to close."""
+"""The in-game chat window: a liquid-glass panel over the game, draggable across monitors, F9 only to close."""
 from __future__ import annotations
 
 import time
 
-from PySide6.QtCore import QObject, QPoint, QRect, Qt, QThread, QTimer, Signal
-from PySide6.QtGui import QGuiApplication, QIcon, QPixmap
-from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QLineEdit, QPushButton, QScrollArea, QSizeGrip,
-                               QToolButton, QVBoxLayout, QWidget)
+from PySide6.QtCore import (QEasingCurve, QObject, QParallelAnimationGroup, QPoint, QPropertyAnimation, QRect, QRectF,
+                            Qt, QThread, QTimer, Signal)
+from PySide6.QtGui import QColor, QGuiApplication, QLinearGradient, QPainter, QPainterPath, QPen, QPixmap
+from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QPushButton,
+                               QScrollArea, QSizeGrip, QToolButton, QVBoxLayout, QWidget)
 
 from .. import bidi, winapi
 from ..brain import Answer, Brain
 from ..i18n import I18n
 from ..kb import KnowledgeBase
 from ..store import ASSETS, History, Profiles, Settings
+from . import theme
+from .glass import GlassBackdrop
 from .widgets import Bubble, BubbleRow, EntityCard, QuickButton, SystemLine
 
 SLOW_AFTER_MS = 30_000
@@ -32,26 +35,63 @@ class AskWorker(QObject):
 
 
 class TitleBar(QWidget):
-    """Drag handle for the frameless window."""
+    """Drag handle: follows the pointer 1:1 from where it was grabbed."""
 
     def __init__(self, window: QWidget):
         super().__init__()
-        self.setObjectName("TitleBar")
         self._win = window
-        self._drag: QPoint | None = None
+        self._grab: QPoint | None = None
 
     def mousePressEvent(self, e):
         if e.button() == Qt.LeftButton:
-            self._drag = e.globalPosition().toPoint() - self._win.frameGeometry().topLeft()
+            self._grab = e.globalPosition().toPoint() - self._win.frameGeometry().topLeft()
 
     def mouseMoveEvent(self, e):
-        if self._drag is not None and e.buttons() & Qt.LeftButton:
-            self._win.move(e.globalPosition().toPoint() - self._drag)
+        if self._grab is not None and e.buttons() & Qt.LeftButton:
+            self._win.move(e.globalPosition().toPoint() - self._grab)
 
     def mouseReleaseEvent(self, e):
-        if self._drag is not None:
-            self._drag = None
+        if self._grab is not None:
+            self._grab = None
             self._win.save_geometry()
+
+
+class Capsule(QFrame):
+    """Input capsule; highlights its border while the field has focus."""
+
+    def set_focus_look(self, on: bool):
+        self.setProperty("focus", "true" if on else "false")
+        self.style().unpolish(self)
+        self.style().polish(self)
+
+
+class FocusLineEdit(QLineEdit):
+    focus_changed = Signal(bool)
+
+    def focusInEvent(self, e):
+        super().focusInEvent(e)
+        self.focus_changed.emit(True)
+
+    def focusOutEvent(self, e):
+        super().focusOutEvent(e)
+        self.focus_changed.emit(False)
+
+
+class ChipScroll(QScrollArea):
+    """Horizontal chip row without a visible scrollbar; the wheel scrolls it sideways."""
+
+    def __init__(self):
+        super().__init__()
+        self.setWidgetResizable(True)
+        self.setFrameShape(QFrame.NoFrame)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setFixedHeight(32)
+        self.setStyleSheet("background: transparent;")
+
+    def wheelEvent(self, e):
+        bar = self.horizontalScrollBar()
+        bar.setValue(bar.value() - e.angleDelta().y())
 
 
 class Overlay(QWidget):
@@ -60,6 +100,7 @@ class Overlay(QWidget):
 
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, brain: Brain):
         super().__init__(None, Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
+        self.setObjectName("Overlay")
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowTitle("Maple Helper")
         self.settings, self.profiles, self.kb, self.brain = settings, profiles, kb, brain
@@ -72,50 +113,111 @@ class Overlay(QWidget):
         self._pending_bubble: Bubble | None = None
         self._slow_timer = QTimer(self, singleShot=True, interval=SLOW_AFTER_MS, timeout=self._on_slow)
         self._session_started: float | None = None
+        self._anim: QParallelAnimationGroup | None = None
+        self.backdrop = GlassBackdrop(self)
         self._build()
         self.apply_language()
         self.restore_geometry()
 
+    # ------------------------------------------------------------------ material
+
+    SHADOW = 12   # room around the panel for its soft shadow
+
+    def showEvent(self, e):
+        super().showEvent(e)
+        winapi.exclude_from_capture(int(self.winId()))
+        self.backdrop.start()
+
+    def hideEvent(self, e):
+        super().hideEvent(e)
+        self.backdrop.stop()
+
+    def _panel_path(self) -> QPainterPath:
+        m = self.SHADOW
+        path = QPainterPath()
+        path.addRoundedRect(QRectF(self.rect()).adjusted(m + 0.5, m + 0.5, -m - 0.5, -m - 0.5),
+                            theme.RADIUS, theme.RADIUS)
+        return path
+
+    def paintEvent(self, e):
+        """Liquid glass: the blurred game behind, a neutral tint, a light-catching sheen and rim."""
+        c = theme.P()
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+        p.setRenderHint(QPainter.SmoothPixmapTransform)
+        m = self.SHADOW
+        # soft shadow: stacked rounded rects fading out
+        for i in range(m, 0, -2):
+            sh = QPainterPath()
+            sh.addRoundedRect(QRectF(self.rect()).adjusted(m - i, m - i + 3, -(m - i), -(m - i) + 3),
+                              theme.RADIUS + i, theme.RADIUS + i)
+            p.fillPath(sh, QColor(0, 0, 0, int(26 * (1 - i / m)) + 2))
+        path = self._panel_path()
+        p.save()
+        p.setClipPath(path)
+        if self.backdrop.pixmap is not None:
+            p.drawPixmap(self.rect(), self.backdrop.pixmap)
+            alpha = c["glass_alpha"]
+        else:
+            alpha = c["solid_alpha"]
+        tint = QColor(*c["glass"])
+        tint.setAlphaF(alpha)
+        p.fillPath(path, tint)
+        sheen = QLinearGradient(0, m, 0, m + min(170, self.height()))
+        sheen.setColorAt(0.0, QColor(255, 255, 255, c["sheen"]))
+        sheen.setColorAt(1.0, QColor(255, 255, 255, 0))
+        p.fillPath(path, sheen)
+        p.restore()
+        rim = QLinearGradient(0, m, 0, self.height() - m)
+        rim.setColorAt(0.0, QColor(255, 255, 255, c["rim_top"]))
+        rim.setColorAt(0.4, QColor(255, 255, 255, c["rim"]))
+        rim.setColorAt(1.0, QColor(255, 255, 255, c["rim"] // 2))
+        p.setPen(QPen(rim, 1))
+        p.drawPath(path)
+
     # ------------------------------------------------------------------ layout
 
-    def _build(self):
-        outer = QVBoxLayout(self)
-        outer.setContentsMargins(0, 0, 0, 0)
-        self.panel = QFrame(objectName="Panel")
-        outer.addWidget(self.panel)
-        lay = QVBoxLayout(self.panel)
-        lay.setContentsMargins(12, 8, 12, 10)
-        lay.setSpacing(8)
+    def _icon_button(self, glyph: str, tip: str = "") -> QToolButton:
+        b = QToolButton(objectName="Icon", text=glyph)
+        b.setCursor(Qt.PointingHandCursor)
+        b.setToolTip(tip)
+        return b
 
-        # title bar: logo · name · profile chip · settings
+    def _build(self):
+        lay = QVBoxLayout(self)
+        m = self.SHADOW
+        lay.setContentsMargins(m + 14, m + 10, m + 14, m + 12)
+        lay.setSpacing(10)
+
+        # header: app mark · name · profile pill · settings
         self.title_bar = TitleBar(self)
         tb = QHBoxLayout(self.title_bar)
-        tb.setContentsMargins(0, 0, 0, 0)
+        tb.setContentsMargins(2, 2, 0, 0)
+        tb.setSpacing(8)
         logo = QLabel()
         icon = ASSETS / "brand" / "icon-64.png"
         if icon.exists():
-            logo.setPixmap(QPixmap(str(icon)).scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            logo.setPixmap(QPixmap(str(icon)).scaled(22, 22, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         tb.addWidget(logo)
         self.title = QLabel("Maple Helper", objectName="Title")
         tb.addWidget(self.title)
         tb.addStretch(1)
-        self.profile_chip = QPushButton(objectName="ProfileChip")
+        self.profile_chip = QPushButton(objectName="ProfilePill")
         self.profile_chip.setCursor(Qt.PointingHandCursor)
         self.profile_chip.clicked.connect(self.profile_requested.emit)
         tb.addWidget(self.profile_chip)
-        self.settings_btn = QToolButton(objectName="IconBtn", text="⚙")
-        self.settings_btn.setCursor(Qt.PointingHandCursor)
+        self.settings_btn = self._icon_button(theme.ICON["settings"])
         self.settings_btn.clicked.connect(self.settings_requested.emit)
         tb.addWidget(self.settings_btn)
         lay.addWidget(self.title_bar)
 
-        # messages
+        # conversation
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.feed = QWidget()
+        self.feed = QWidget(objectName="Feed")
         self.feed_lay = QVBoxLayout(self.feed)
-        self.feed_lay.setContentsMargins(0, 0, 4, 0)
+        self.feed_lay.setContentsMargins(0, 4, 6, 4)
         self.feed_lay.setSpacing(8)
         self.feed_lay.addStretch(1)
         self.scroll.setWidget(self.feed)
@@ -123,8 +225,10 @@ class Overlay(QWidget):
         self.scroll.verticalScrollBar().rangeChanged.connect(
             lambda _a, b: self.scroll.verticalScrollBar().setValue(b))
 
-        # quick buttons
-        self.quick = QHBoxLayout()
+        # quick questions as glass chips, in a row that scrolls sideways when narrow
+        chips = QWidget(objectName="Feed")
+        self.quick = QHBoxLayout(chips)
+        self.quick.setContentsMargins(0, 0, 0, 0)
         self.quick.setSpacing(6)
         self.quick_buttons = {}
         for key in ("grind", "item", "quest", "skill"):
@@ -133,41 +237,58 @@ class Overlay(QWidget):
             self.quick_buttons[key] = b
             self.quick.addWidget(b)
         self.quick.addStretch(1)
-        lay.addLayout(self.quick)
+        self.chip_scroll = ChipScroll()
+        self.chip_scroll.setWidget(chips)
+        lay.addWidget(self.chip_scroll)
 
-        # input row
-        row = QHBoxLayout()
-        row.setSpacing(6)
-        self.input = QLineEdit(objectName="Input")
-        self.input.returnPressed.connect(self._send_typed)
-        self.input.textChanged.connect(self._auto_direction)
-        row.addWidget(self.input, 1)
-        self.recapture_btn = QToolButton(objectName="IconBtn", text="📷")
-        self.recapture_btn.setCursor(Qt.PointingHandCursor)
+        # input capsule: [camera] field [mic] (send)
+        self.capsule = Capsule(objectName="Capsule")
+        self.capsule.setFixedHeight(42)
+        row = QHBoxLayout(self.capsule)
+        row.setContentsMargins(6, 5, 6, 5)
+        row.setSpacing(2)
+        self.recapture_btn = self._icon_button(theme.ICON["camera"])
         self.recapture_btn.clicked.connect(self.recapture)
         row.addWidget(self.recapture_btn)
-        self.mic_dot = QLabel(objectName="MicDot")
-        self.mic_dot.setFixedSize(10, 10)
-        self.mic_dot.hide()
-        row.addWidget(self.mic_dot)
-        lay.addLayout(row)
+        self.input = FocusLineEdit(objectName="Input")
+        self.input.returnPressed.connect(self._send_typed)
+        self.input.textChanged.connect(self._on_text)
+        self.input.focus_changed.connect(self.capsule.set_focus_look)
+        row.addWidget(self.input, 1)
+        self.mic_btn = self._icon_button(theme.ICON["mic"])
+        self.mic_btn.setEnabled(False)   # push-to-talk key; the icon shows the state
+        row.addWidget(self.mic_btn)
+        self.send_btn = QToolButton(objectName="Send", text=theme.ICON["send"])
+        self.send_btn.setCursor(Qt.PointingHandCursor)
+        self.send_btn.clicked.connect(self._send_typed)
+        self.send_btn.setEnabled(False)
+        row.addWidget(self.send_btn)
+        lay.addWidget(self.capsule)
 
-        grip_row = QHBoxLayout()
-        grip_row.setContentsMargins(0, 0, 0, 0)
-        grip_row.addStretch(1)
         self.grip = QSizeGrip(self)
-        self.grip.setFixedSize(14, 14)
-        grip_row.addWidget(self.grip)
-        lay.addLayout(grip_row)
+        self.grip.setFixedSize(16, 16)
+        self.grip.setStyleSheet("background: transparent;")
+
+    def resizeEvent(self, e):
+        super().resizeEvent(e)
+        m = self.SHADOW
+        self.grip.move(self.width() - m - 18 if not self.t.rtl else m + 2, self.height() - m - 18)
+        if self.isVisible():
+            self.backdrop.refresh()
+            QTimer.singleShot(300, self.save_geometry)
 
     def apply_language(self):
         self.t = I18n(self.settings["language"] or "he")
         self.setLayoutDirection(Qt.RightToLeft if self.t.rtl else Qt.LeftToRight)
-        self.input.setPlaceholderText(self.t("input_placeholder"))
+        hk_toggle, hk_voice = self.settings["hotkey_toggle"], self.settings["hotkey_voice"]
+        self._placeholder = self.t("input_placeholder").replace("F10", hk_voice)
+        self.input.setPlaceholderText(bidi.plain(self._placeholder, self.t.rtl))
         self.recapture_btn.setToolTip(self.t("recapture"))
         self.settings_btn.setToolTip(self.t("settings"))
+        self.mic_btn.setToolTip(self.t("hotkey_voice") + f" ({hk_voice})")
         for key, b in self.quick_buttons.items():
-            b.setText(self.t(f"qb_{key}"))
+            b.setText(bidi.plain(self.t(f"qb_{key}"), self.t.rtl))
+        self._on_text(self.input.text())
         self.refresh_profile_chip()
 
     def refresh_profile_chip(self):
@@ -176,23 +297,22 @@ class Overlay(QWidget):
             self.profile_chip.hide()
             return
         self.profile_chip.show()
-        # name · Lv 35 · Fighter: English parts isolated for RTL
         self.profile_chip.setText(bidi.plain(f"{c.name} · {self.t('level')} {c.level} · {c.job}", self.t.rtl))
 
-    def _auto_direction(self, text: str):
-        """The input box follows what is being typed (first strong character)."""
+    def _on_text(self, text: str):
+        """The field follows what is being typed; send lights up only when there is something to send."""
         d = bidi.direction(text) if text.strip() else ("rtl" if self.t.rtl else "ltr")
         self.input.setLayoutDirection(Qt.RightToLeft if d == "rtl" else Qt.LeftToRight)
         self.input.setAlignment(Qt.AlignRight if d == "rtl" else Qt.AlignLeft)
+        self.send_btn.setEnabled(bool(text.strip()) and not self.busy)
 
     # ------------------------------------------------------------------ geometry
 
     def restore_geometry(self):
         g = self.settings["window"]
-        screens = QGuiApplication.screens()
         if g:
             rect = QRect(g["x"], g["y"], g["w"], g["h"])
-            if any(s.availableGeometry().intersects(rect) for s in screens):
+            if any(s.availableGeometry().intersects(rect) for s in QGuiApplication.screens()):
                 self.setGeometry(rect)
                 return
         self.place_default()
@@ -205,19 +325,42 @@ class Overlay(QWidget):
             s = QGuiApplication.screenAt(QPoint(rect[0] + rect[2] // 2, rect[1] + rect[3] // 2))
             screen = s or screen
         a = screen.availableGeometry()
-        w, h = 420, min(620, a.height() - 80)
+        w, h = 420, min(640, a.height() - 80)
         self.setGeometry(a.right() - w - 24, a.top() + 60, w, h)
 
     def save_geometry(self):
         g = self.geometry()
         self.settings["window"] = {"x": g.x(), "y": g.y(), "w": g.width(), "h": g.height()}
 
-    def resizeEvent(self, e):
-        super().resizeEvent(e)
-        if self.isVisible():
-            QTimer.singleShot(300, self.save_geometry)
-
     # ------------------------------------------------------------------ show / hide
+
+    def _materialize(self, show: bool, on_done=None):
+        """The material arrives: opacity and a small scale settle together (critically damped, no bounce)."""
+        if self._anim:
+            self._anim.stop()           # interruptible: start from wherever it is now
+        g = self.geometry()
+        small = QRect(g.x() + round(g.width() * 0.015), g.y() + round(g.height() * 0.015),
+                      round(g.width() * 0.97), round(g.height() * 0.97))
+        fade = QPropertyAnimation(self, b"windowOpacity")
+        fade.setDuration(220 if show else 150)
+        fade.setStartValue(self.windowOpacity())
+        fade.setEndValue(1.0 if show else 0.0)
+        fade.setEasingCurve(QEasingCurve.OutCubic)
+        grp = QParallelAnimationGroup(self)
+        grp.addAnimation(fade)
+        if show:
+            self._target_geometry = g
+            self.setGeometry(small)
+            grow = QPropertyAnimation(self, b"geometry")
+            grow.setDuration(240)
+            grow.setStartValue(small)
+            grow.setEndValue(g)
+            grow.setEasingCurve(QEasingCurve.OutCubic)
+            grp.addAnimation(grow)
+        if on_done:
+            grp.finished.connect(on_done)
+        self._anim = grp
+        grp.start()
 
     def open_overlay(self, shot: bytes | None, game_hwnd: int | None):
         self.shot, self.shot_used, self.game_hwnd = shot, False, game_hwnd
@@ -225,19 +368,24 @@ class Overlay(QWidget):
             self.place_default(game_hwnd)
         if self._session_started is None:
             self._session_started = time.time()
+        self.setWindowOpacity(0.0)
         self.show()
         self.raise_()
         self.activateWindow()
         winapi.focus_window(int(self.winId()))
         self.input.setFocus()
+        self._materialize(True)
 
     def close_overlay(self):
-        self.hide()
+        def done():
+            self.hide()
+            self.setWindowOpacity(1.0)
+        self._materialize(False, done)
         if self.game_hwnd:
             winapi.focus_window(self.game_hwnd)
 
     def toggle(self, shot_provider):
-        if self.isVisible():
+        if self.isVisible() and self.windowOpacity() > 0.5:
             self.close_overlay()
         else:
             hwnd = winapi.find_game_window()
@@ -250,24 +398,26 @@ class Overlay(QWidget):
         super().keyPressEvent(e)
 
     def recapture(self):
-        was = self.isVisible()
-        self.hide()
-        QTimer.singleShot(150, lambda: self._do_recapture(was))
-
-    def _do_recapture(self, was_visible: bool):
+        # the overlay is excluded from screen capture, so the game can be captured with the chat open
         hwnd = self.game_hwnd or winapi.find_game_window()
         self.shot = winapi.capture_game(hwnd)
         self.shot_used = False
-        if was_visible:
-            self.show()
-            self.activateWindow()
-            self.input.setFocus()
-        self.add_system("📷 ✓")
+        self.add_system("✓ " + self.t("recapture"))
 
     # ------------------------------------------------------------------ feed
 
     def _add_widget(self, w: QWidget):
         self.feed_lay.insertWidget(self.feed_lay.count() - 1, w)
+        # new content fades in rather than popping
+        eff = QGraphicsOpacityEffect(w)
+        w.setGraphicsEffect(eff)
+        a = QPropertyAnimation(eff, b"opacity", w)
+        a.setDuration(180)
+        a.setStartValue(0.0)
+        a.setEndValue(1.0)
+        a.setEasingCurve(QEasingCurve.OutCubic)
+        a.finished.connect(lambda: w.setGraphicsEffect(None))
+        a.start()
 
     def add_bubble(self, text: str, role: str) -> Bubble:
         b = Bubble(text, role, self.t.rtl)
@@ -286,8 +436,8 @@ class Overlay(QWidget):
         lay = QHBoxLayout(row)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(SystemLine(text), 1)
-        yes = QPushButton(self.t("yes"), objectName="Quick")
-        no = QPushButton(self.t("no"), objectName="Quick")
+        yes = QPushButton(self.t("yes"), objectName="Chip")
+        no = QPushButton(self.t("no"), objectName="Chip")
         yes.clicked.connect(lambda: (on_yes(), row.setDisabled(True)))
         no.clicked.connect(lambda: row.setDisabled(True))
         lay.addWidget(yes)
@@ -316,6 +466,7 @@ class Overlay(QWidget):
             history.append("user", question)
         self._pending_bubble = self.add_bubble(self.t("thinking"), "assistant")
         self.busy = True
+        self.send_btn.setEnabled(False)
         self._slow_timer.start()
 
         self._thread = QThread(self)
@@ -338,6 +489,7 @@ class Overlay(QWidget):
     def _on_done(self, ans: Answer, history: History | None):
         self._slow_timer.stop()
         self.busy = False
+        self._on_text(self.input.text())
         if ans.error:
             key = f"err_{ans.error}" if ans.error in ("offline", "not_logged_in", "usage_limit",
                                                       "claude_not_installed") else "err_generic"
@@ -376,15 +528,12 @@ class Overlay(QWidget):
 
     def voice_state(self, state: str):
         """listening | transcribing | idle | loading"""
-        self.mic_dot.setVisible(state == "listening")
-        if state == "listening":
-            self.input.setPlaceholderText(self.t("listening"))
-        elif state == "transcribing":
-            self.input.setPlaceholderText(self.t("transcribing"))
-        elif state == "loading":
-            self.input.setPlaceholderText(self.t("voice_loading"))
-        else:
-            self.input.setPlaceholderText(self.t("input_placeholder"))
+        self.mic_btn.setProperty("active", "true" if state == "listening" else "false")
+        self.mic_btn.style().unpolish(self.mic_btn)
+        self.mic_btn.style().polish(self.mic_btn)
+        text = {"listening": self.t("listening"), "transcribing": self.t("transcribing"),
+                "loading": self.t("voice_loading")}.get(state, self._placeholder)
+        self.input.setPlaceholderText(bidi.plain(text, self.t.rtl))
 
     def voice_text(self, text: str, send: bool):
         text = text.strip()
