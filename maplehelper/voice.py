@@ -62,6 +62,7 @@ class VoiceController(QObject):
         self.key_name = key_name
         self.transcriber = Transcriber()
         self._held = False
+        self._manual = False
         self._chunks: list[np.ndarray] = []
         self._stream = None
         self._timer = QTimer(self, interval=POLL_MS, timeout=self._poll)
@@ -70,7 +71,18 @@ class VoiceController(QObject):
     def set_key(self, key_name: str):
         self.key_name = key_name
 
+    def toggle(self):
+        """Mic button: click to start, click again to stop and transcribe."""
+        if self._stream:
+            self._manual = False
+            self._stop()
+        else:
+            self._manual = True
+            self._start()
+
     def _poll(self):
+        if getattr(self, "_manual", False):
+            return            # a click-started recording is stopped by the next click, not by the key
         down = winapi.key_down(self.key_name)
         if down and not self._held:
             self._held = True
@@ -90,7 +102,7 @@ class VoiceController(QObject):
             self.failed.emit(f"mic: {e}")
             return
         self.started.emit()
-        self.state.emit("listening")
+        self.state.emit("listening_click" if self._manual else "listening")
 
     def _stop(self):
         if not self._stream:

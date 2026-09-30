@@ -81,6 +81,7 @@ class FocusLineEdit(QLineEdit):
 class Overlay(QWidget):
     settings_requested = Signal()
     profile_requested = Signal()
+    mic_clicked = Signal()
 
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, brain: Brain):
         super().__init__(None, Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
@@ -198,7 +199,7 @@ class Overlay(QWidget):
         self.input.focus_changed.connect(self.capsule.set_focus_look)
         row.addWidget(self.input, 1)
         self.mic_btn = self._icon_button(theme.ICON["mic"])
-        self.mic_btn.setEnabled(False)   # push-to-talk key; the icon shows the state
+        self.mic_btn.clicked.connect(self.mic_clicked.emit)   # click to talk; holding the voice key works too
         row.addWidget(self.mic_btn)
         self.send_btn = QToolButton(objectName="Send", text=theme.ICON["send"])
         self.send_btn.setCursor(Qt.PointingHandCursor)
@@ -228,7 +229,7 @@ class Overlay(QWidget):
         self.settings_btn.setToolTip(self.t("settings"))
         self.min_btn.setToolTip(self.t("minimize"))
         self.close_btn.setToolTip(self.t("close_chat").replace("F9", self.settings["hotkey_toggle"]))
-        self.mic_btn.setToolTip(self.t("hotkey_voice") + f" ({hk_voice})")
+        self.mic_btn.setToolTip(self.t("mic_tip", key=hk_voice))
         self._on_text(self.input.text())
         self.refresh_profile_chip()
 
@@ -531,10 +532,11 @@ class Overlay(QWidget):
 
     def voice_state(self, state: str):
         """listening | transcribing | idle | loading"""
-        self.mic_btn.setProperty("active", "true" if state == "listening" else "false")
+        self.mic_btn.setProperty("active", "true" if state.startswith("listening") else "false")
         self.mic_btn.style().unpolish(self.mic_btn)
         self.mic_btn.style().polish(self.mic_btn)
-        text = {"listening": self.t("listening"), "transcribing": self.t("transcribing"),
+        text = {"listening": self.t("listening"), "listening_click": self.t("listening_click"),
+                "transcribing": self.t("transcribing"),
                 "loading": self.t("voice_loading")}.get(state, self._placeholder)
         self.input.setPlaceholderText(bidi.plain(text, self.t.rtl))
 

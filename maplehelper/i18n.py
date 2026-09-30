@@ -12,6 +12,8 @@ STRINGS = {
     "cancel": {"he": "ביטול", "en": "Cancel"},
     "retry": {"he": "נסה שוב", "en": "Try again"},
     "recapture": {"he": "צלם מסך מחדש לשאלה הבאה", "en": "Retake the screenshot for the next question"},
+    "mic_tip": {"he": "לחצו כדי לדבר, או החזיקו {key}", "en": "Click to talk, or hold {key}"},
+    "listening_click": {"he": "מקשיב… לחצו שוב על המיקרופון לסיום", "en": "Listening… click the mic again to finish"},
     "listening": {"he": "מקשיב… שחרר את F10 לסיום", "en": "Listening… release F10 when done"},
     "transcribing": {"he": "מתמלל…", "en": "Transcribing…"},
     "voice_loading": {"he": "מוריד את מודל הדיבור (פעם אחת, כ-1.6GB)…", "en": "Downloading the voice model (once, ~1.6GB)…"},

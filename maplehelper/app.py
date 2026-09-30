@@ -109,6 +109,7 @@ class MapleHelperApp:
         self.voice.started.connect(self.on_voice_start)
         self.voice.state.connect(lambda s: self.overlay.voice_state(s))
         self.voice.text.connect(self.on_voice_text)
+        self.overlay.mic_clicked.connect(self.voice.toggle)
 
         self.make_tray()
         self.apply_autostart()
