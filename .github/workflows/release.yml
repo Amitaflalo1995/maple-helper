@@ -119,9 +119,11 @@ jobs:
         run: |
           # covers the app downloads (kb.zip is verified through kb-manifest.json, and changes nightly)
           Push-Location dist/release
-          Get-ChildItem -File | Sort-Object Name | ForEach-Object {
+          $lines = Get-ChildItem -File | Sort-Object Name | ForEach-Object {
             "{0}  {1}" -f (Get-FileHash $_.Name -Algorithm SHA256).Hash.ToLower(), $_.Name
-          } | Set-Content -Encoding ascii SHA256SUMS.txt
+          }
+          # LF line endings, so `sha256sum -c` (the Publish check, and players on any OS) reads it
+          [IO.File]::WriteAllText("$PWD/SHA256SUMS.txt", (($lines -join "`n") + "`n"), [Text.Encoding]::ASCII)
           Get-Content SHA256SUMS.txt
           Pop-Location
           Copy-Item dist-kb/kb.zip, dist-kb/kb-manifest.json dist/release/
@@ -178,7 +180,7 @@ jobs:
           done
           [ "$ok" = true ] || { echo "::error::$src/SHA256SUMS.txt is not the one just published"; exit 1; }
           curl -fsSL "$src/MapleHelper-Setup.exe" -o MapleHelper-Setup.exe
-          grep '  MapleHelper-Setup.exe$' SHA256SUMS.txt | sha256sum -c -
+          tr -d '\r' < SHA256SUMS.txt | grep '  MapleHelper-Setup.exe$' | sha256sum -c -
           if [ "$PRERELEASE" = false ]; then
             curl -fsSL "$src/kb-manifest.json" -o manifest.json
             url=$(python3 -c 'import json; print(json.load(open("manifest.json"))["url"])')
