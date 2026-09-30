@@ -166,8 +166,7 @@ class Overlay(QWidget):
         lay.addWidget(self.title_bar)
 
         # the character, pinned at the top of the conversation
-        self.profile_card = ProfileCard()
-        self.profile_card.clicked.connect(self.profile_requested.emit)
+        self.profile_card = ProfileCard()   # display only
         lay.addWidget(self.profile_card)
 
         # conversation

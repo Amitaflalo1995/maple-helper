@@ -197,7 +197,6 @@ class ProfileCard(QFrame):
 
     def __init__(self):
         super().__init__(objectName="ProfileCard")
-        self.setCursor(Qt.PointingHandCursor)
         row = QHBoxLayout(self)
         row.setContentsMargins(10, 8, 12, 8)
         row.setSpacing(10)

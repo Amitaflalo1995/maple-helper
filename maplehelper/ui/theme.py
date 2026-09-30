@@ -118,7 +118,6 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QLineEdit#StepValue {{ background: transparent; border: none; font-weight: 600; padding: 0; color: {c['text']}; }}
     #JobHint {{ color: {c['muted']}; font-size: {s - 3}px; }}
     #ProfileCard {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 16px; }}
-    #ProfileCard:hover {{ background: {c['fill2']}; }}
     #ProfileName {{ font-size: {s + 1}px; font-weight: 600; color: {c['text']}; }}
     #ProfileMeta {{ font-size: {s - 1}px; font-weight: 500; color: {c['muted']}; }}
     #BubbleUser {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFA24A, stop:1 {ORANGE_DEEP});
