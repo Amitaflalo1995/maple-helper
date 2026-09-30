@@ -19,6 +19,7 @@ from .store import ASSETS, DATA_DIR, History, Profiles, Settings
 from .ui import theme
 from .ui.dialogs import Onboarding, SettingsDialog
 from .ui.overlay import Overlay
+from .ui.toast import notify
 from .voice import VoiceController
 
 HOTKEY_TOGGLE = 1
@@ -96,7 +97,7 @@ class MapleHelperApp:
         self.apply_autostart()
         QTimer.singleShot(4000, self.check_kb_update_silently)
         t = I18n(self.settings["language"])
-        self.tray.showMessage(APP_NAME, t("ob_done_hint"), QSystemTrayIcon.Information, 4000)
+        self.toast(t("app_tagline"), t("ob_done_hint").replace("F9", self.settings["hotkey_toggle"]))
         self.qapp.aboutToQuit.connect(self.shutdown)
         return True
 
@@ -106,7 +107,11 @@ class MapleHelperApp:
         key = self.settings["hotkey_toggle"]
         if not winapi.register_hotkey(hwnd, HOTKEY_TOGGLE, key):
             t = I18n(self.settings["language"])
-            QMessageBox.warning(None, APP_NAME, t("hotkey_taken", key=key))
+            self.toast(t("settings"), t("hotkey_taken", key=key), timeout_ms=9000)
+
+    def toast(self, title: str, message: str = "", timeout_ms: int = 5000):
+        notify(title, message, rtl=I18n(self.settings["language"]).rtl, font_family=self.font_family,
+               timeout_ms=timeout_ms)
 
     # ------------------------------------------------------------------ events
 
@@ -205,6 +210,7 @@ class MapleHelperApp:
         def work():
             if updater.update_kb():
                 QTimer.singleShot(0, self.reload_kb)
+                QTimer.singleShot(0, lambda: self.toast(I18n(self.settings["language"])("kb_updated")))
         threading.Thread(target=work, daemon=True).start()
 
     def update_kb_interactive(self):
@@ -212,7 +218,7 @@ class MapleHelperApp:
         changed = updater.update_kb()
         if changed:
             self.reload_kb()
-        QMessageBox.information(None, APP_NAME, t("kb_updated") if changed else t("kb_uptodate"))
+        self.toast(t("kb_updated") if changed else t("kb_uptodate"))
 
     def reload_kb(self):
         self.kb = KnowledgeBase()
@@ -226,10 +232,15 @@ class MapleHelperApp:
             pass
 
 
+APP_ID = "MapleHelper.App"
+
+
 def main():
-    ctypes.windll.shcore.SetProcessDpiAwareness(2) if hasattr(ctypes.windll, "shcore") else None
+    # Windows shows this identity (not "Python") for the taskbar and notifications
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APP_ID)
     qapp = QApplication(sys.argv)
     qapp.setApplicationName(APP_NAME)
+    qapp.setApplicationDisplayName(APP_NAME)
     lock = QLockFile(str(DATA_DIR / "app.lock"))
     if not lock.tryLock(100):
         return 0  # already running
