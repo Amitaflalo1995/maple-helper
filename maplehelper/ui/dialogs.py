@@ -531,8 +531,10 @@ class SettingsDialog(GlassDialog):
         brow.addStretch(1)
         save = QPushButton(t("save"), objectName="Primary")
         save.setCursor(Qt.PointingHandCursor)
+        save.setMinimumWidth(180)
         save.clicked.connect(self._save)
         brow.addWidget(save)
+        brow.addStretch(1)
         outer.addLayout(brow)
         rtl_buttons(self, rtl)
 
