@@ -625,10 +625,14 @@ class ToolsDialog(GlassDialog):
         # picture and name in one left-to-right unit, so in Hebrew the picture stays beside its own name
         return f"<span style='white-space: nowrap'>{bidi.LRE}{img}{html.escape(name)} x{n}{bidi.PDF}{bidi.RLM}</span>"
 
-    def _things_label(self, head: str, things: list[str]) -> QLabel:
-        rtl = self.t.rtl
-        body = "&nbsp;&nbsp; ".join(self._thing_html(x) for x in things)
-        lb = QLabel(f"<div {'dir=rtl' if rtl else ''}><b>{html.escape(head)}</b>&nbsp; {body}</div>", objectName="CardSub")
+    def _things_label(self, head: str, things: list[str], extra: str = "") -> QLabel:
+        """A heading, then one thing per line: its picture beside its own name, never split by a wrap."""
+        side = "dir='rtl' align='right'" if self.t.rtl else "dir='ltr' align='left'"
+        lines = [f"<p {side} style='margin:0 0 2px 0;'><b>{html.escape(head)}</b></p>"]
+        lines += [f"<p {side} style='margin:0 0 2px 0;'>{self._thing_html(x)}</p>" for x in things]
+        if extra:
+            lines.append(f"<p {side} style='margin:0 0 2px 0;'>{bidi.LRE}{html.escape(extra)}{bidi.PDF}</p>")
+        lb = QLabel("".join(lines), objectName="CardSub")
         lb.setTextFormat(Qt.RichText)
         lb.setWordWrap(True)
         return lb
@@ -666,10 +670,7 @@ class ToolsDialog(GlassDialog):
             col.addWidget(self._things_label(t("q_needs_head"), q.needs[:4]))
         gets = q.rewards[:3]
         if gets or q.mesos:
-            lb = self._things_label(t("q_gets_head"), gets)
-            if q.mesos:
-                lb.setText(lb.text().replace("</div>", f"&nbsp;&nbsp; {bidi.LRE}{q.mesos:,} mesos{bidi.PDF}</div>"))
-            col.addWidget(lb)
+            col.addWidget(self._things_label(t("q_gets_head"), gets, f"{q.mesos:,} mesos" if q.mesos else ""))
         if q.after:
             col.addWidget(self._label(t("q_after", name=q.after), "RowHint"))
         acts = QHBoxLayout()
