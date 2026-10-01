@@ -96,3 +96,24 @@ class TestHistory:
         assert h.summaries() == [f"s{i}" for i in range(2, 12)]
         h.clear()
         assert h.recent() == [] and h.summaries() == []
+
+
+def test_profiles_written_by_a_newer_version_still_load(tmp_path, monkeypatch):
+    """A newer version (or a preview build) may save fields this one doesn't know: skip them, don't crash."""
+    import json
+
+    from maplehelper import store
+    monkeypatch.setattr(store.Profiles, "path", tmp_path / "profiles.json")
+    (tmp_path / "profiles.json").write_text(json.dumps({"active": "a", "characters": [
+        {"id": "a", "name": "Kiwi", "base_class": "Thief", "job": "Assassin", "level": 34, "from_the_future": 1}]}))
+    p = store.Profiles()
+    assert p.active.name == "Kiwi" and p.active.level == 34
+
+
+def test_launch_waits_for_a_running_update(monkeypatch):
+    from maplehelper import setupwait
+    states = iter([True, True, False])
+    monkeypatch.setattr(setupwait, "setup_running", lambda: next(states))
+    assert setupwait.wait_for_setup(limit_s=5, step_s=0) is True
+    monkeypatch.setattr(setupwait, "setup_running", lambda: False)
+    assert setupwait.wait_for_setup(limit_s=5, step_s=0) is False

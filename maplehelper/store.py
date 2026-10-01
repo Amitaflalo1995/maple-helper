@@ -6,7 +6,7 @@ import os
 import sys
 import time
 import uuid
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, fields
 from pathlib import Path
 
 
@@ -170,7 +170,10 @@ class Profiles:
 
     def __init__(self):
         raw = _read_json(self.path, {"active": None, "characters": []})
-        self.characters = [Character(**c) for c in raw.get("characters", [])]
+        known = {f.name for f in fields(Character)}
+        # a newer version may have saved fields this one doesn't know (after a downgrade, or a preview build):
+        # skip them instead of failing to start
+        self.characters = [Character(**{k: v for k, v in c.items() if k in known}) for c in raw.get("characters", [])]
         self.active_id = raw.get("active")
 
     @property
