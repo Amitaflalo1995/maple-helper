@@ -667,11 +667,11 @@ class Overlay(QWidget):
         super().keyPressEvent(e)
 
     def _update_shot_hint(self):
-        """Fresh screenshot: it goes with the next question. Used: say so, with a one-click retake."""
+        """Fresh screenshot: it goes with the next question. Used: say so, with a one-click retake.
+        No game open: explain how screenshots work, so the player knows before it matters."""
         if not self.game_hwnd and not self.shot:
-            self.shot_hint.hide()
-            return
-        if self.shot and not self.shot_used:
+            text = self.t("shot_hint_no_game")
+        elif self.shot and not self.shot_used:
             text = self.t("shot_hint_ready")
         else:
             text = self.t("shot_hint_used") + f" <a href='shot:now' style='color:{theme.ORANGE_DEEP}; " \

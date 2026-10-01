@@ -381,6 +381,7 @@ STRINGS = {
     "calc_acc_by_level_head": {"he": "ACC כדי לא לפספס, לפי הלבל שלכם", "en": "ACC to never miss, by your level"},
     "calc_acc_by_level_hint": {"he": "ככל שעולים בלבל צריך פחות ACC מול אותה מפלצת.", "en": "The higher your level, the less ACC you need against the same monster."},
     "calc_maps_head_plain": {"he": "איפה היא נמצאת", "en": "Where it lives"},
+    "shot_hint_no_game": {"he": "המשחק לא פתוח, אז אין צילום מסך. כשהמשחק פתוח, **F9 מצלם אותו** ושולח את הצילום עם השאלה הראשונה; לצילום חדש לוחצים על המצלמה.", "en": "The game isn't open, so there's no screenshot. With the game open, **F9 takes one** and sends it with your first question; tap the camera for a new one."},
     "shot_hint_ready": {"he": "צילום המסך מ-F9 יישלח עם **השאלה הבאה**.", "en": "The F9 screenshot goes with your **next question**."},
     "shot_hint_used": {"he": "השאלות הבאות נשלחות **בלי צילום**. רוצים שה-AI יראה את המסך עכשיו?", "en": "Your next questions go **without a screenshot**. Want the AI to see the screen now?"},
     "shot_hint_retake": {"he": "לצלם מחדש", "en": "Retake it"},
