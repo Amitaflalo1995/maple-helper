@@ -340,6 +340,7 @@ STRINGS = {
     "spot_crowd": {"he": "{n} במפה", "en": "{n} on the map"},
     "tool_crafting": {"he": "קראפטינג", "en": "Crafting"},
     "tool_town": {"he": "אזרחות", "en": "Citizenship"},
+    "craft_profession": {"he": "מקצוע", "en": "Profession"},
     "craft_my_level": {"he": "הרמה שלי במקצוע", "en": "My level in it"},
     "craft_level_hint": {"he": "רואים אותה בחלון המקצועות במשחק", "en": "Shown in the game's profession window"},
     "craft_head": {"he": "**{prof}** · רמה **{lv}**: {n} מתכונים, הכי משתלמים (EXP לכל meso) קודם", "en": "**{prof}** · level **{lv}**: {n} recipes, best EXP per meso first"},

@@ -722,11 +722,13 @@ class ToolsDialog(GlassDialog):
     def _page_crafting(self):
         t = self.t
         sc, lay = scroll_page()
+        # the professions live inside this tab's own card, in a lighter style than the main tabs
+        sec = Section(t("craft_profession"), t.rtl)
         grid = QGridLayout()
         grid.setSpacing(6)
         self.craft_pick = QButtonGroup(self)
         for i, prof in enumerate(crafting.PROFESSIONS):
-            b = QPushButton(crafting.NAMES[prof], objectName="Chip")
+            b = QPushButton(crafting.NAMES[prof], objectName="SubChip")
             b.setCheckable(True)
             b.setCursor(Qt.PointingHandCursor)
             b.setProperty("prof", prof)
@@ -734,8 +736,9 @@ class ToolsDialog(GlassDialog):
             grid.addWidget(b, i // 3, i % 3)
         self.craft_pick.button(0).setChecked(True)
         self.craft_pick.idClicked.connect(lambda *_: self._fill_crafting())
-        lay.addLayout(grid)
-        sec = Section("", t.rtl)
+        holder = QWidget()
+        holder.setLayout(grid)
+        sec.add_widget(holder)
         self.craft_level = Stepper(1, 10, 1)
         self.craft_level.valueChanged.connect(self._set_craft_level)
         sec.add_row(t("craft_my_level"), self.craft_level, hint=t("craft_level_hint"))
