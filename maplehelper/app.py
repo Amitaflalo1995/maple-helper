@@ -444,8 +444,7 @@ class MapleHelperApp:
     def show_guides(self, open_key: str | None = None):
         from .ui.guides import GuidesDialog
         def make():
-            dlg = GuidesDialog(self.kb, self.profiles.active, self.settings["language"], self.style(),
-                               summarize=self.brain.summarize_guide if self.brain.available() else None)
+            dlg = GuidesDialog(self.kb, self.profiles.active, self.settings["language"], self.style())
             dlg.ask_requested.connect(self.ask_about_guide)
             return dlg
         dlg = self.open_window("guides", make)
