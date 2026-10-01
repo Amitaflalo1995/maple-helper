@@ -631,7 +631,8 @@ class MapleHelperApp:
         except Exception:
             pass
         if getattr(self, "pending_installer", None):
-            updater.run_installer_silently(self.pending_installer, reopen=getattr(self, "_reopen_after_update", False))
+            updater.run_installer_silently(self.pending_installer, reopen=getattr(self, "_reopen_after_update", False),
+                                           lang=self.settings["language"] or "he")
 
 
 

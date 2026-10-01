@@ -209,20 +209,22 @@ def installer_version(path: str) -> str:
     return m.group(1) if m else ""
 
 
-def installer_args(path: str, reopen: bool) -> list[str]:
+def installer_args(path: str, reopen: bool, lang: str = "he") -> list[str]:
     # the installer starts the app again when done: in the tray after a quiet update on quit,
     # with the chat open when the player pressed "Update now" (see [Run] in packaging/installer.iss)
     log = USER_KB.parent / "logs" / "update.log"          # why an update failed, if it ever does
     # "Update now": /SILENT shows the installer's own progress window while the app is closed, so the
     # player sees the update happen; an update on quit stays fully quiet (/VERYSILENT)
-    args = [path, "/SILENT" if reopen else "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", f"/LOG={log}"]
+    args = [path, "/SILENT" if reopen else "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", f"/LOG={log}",
+            # the installer's window in the app's language, not Windows' ([Languages] in installer.iss)
+            "/LANG=" + ("english" if lang == "en" else "hebrew")]
     if reopen:
         args.append("/LAUNCHARGS=--updated")
     return args
 
 
-def run_installer_silently(path: str, reopen: bool = False) -> None:
+def run_installer_silently(path: str, reopen: bool = False, lang: str = "he") -> None:
     """Runs after the app exits; the installer restarts the app when done."""
     import subprocess
-    subprocess.Popen(installer_args(path, reopen), close_fds=True,
+    subprocess.Popen(installer_args(path, reopen, lang), close_fds=True,
                      creationflags=0x00000008 | 0x00000200)  # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
