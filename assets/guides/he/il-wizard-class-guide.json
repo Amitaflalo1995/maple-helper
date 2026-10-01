@@ -1,6 +1,6 @@
 {
  "key": "guide/il-wizard-class-guide",
- "source_hash": "1c618d3c5646",
+ "source_hash": "d694f43650df",
  "lang": "he",
  "title": "MapleStory Classic: מדריך I/L Wizard, לבל 30-70",
  "intro": "מדריך I/L Wizard ללבלים 30-70 עם חלוקת SP ואימון לפי אלמנטים. כולל ציוד, פוטים ומפות של COT2 Training Advisor.",
@@ -333,8 +333,7 @@
     "9% Critical Rate",
     "26% Critical Damage",
     "210 WDEF",
-    "372 MDEF",
-    "פתחו את הבילד של Grummash בלבל 70"
+    "372 MDEF"
    ]
   },
   {

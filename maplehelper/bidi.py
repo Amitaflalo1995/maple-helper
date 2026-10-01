@@ -23,7 +23,9 @@ _RTL = re.compile(rf"[{RTL_CHARS}]")
 # An LTR run: starts with a Latin letter, a digit, or a sign followed by a digit;
 # may contain spaces and inner punctuation; ends with a letter, digit, % or ).
 _RUN = re.compile(
-    r"(?:[+\-±]?\d|[A-Za-z])"                    # start
+    # start: a letter, a digit, or a sign/$/# right before a digit; but a hyphen glued to a Hebrew
+    # letter ("ב-84%", "ל-30") is the Hebrew prefix hyphen, not a minus sign
+    rf"(?:(?<![{RTL_CHARS}])[+\-±](?=\d)|[$#](?=\d)|\d|[A-Za-z])"
     r"(?:(?:[A-Za-z0-9.'’:&/+\-–%#×_ ()@<>]|,(?=\d{3}\b))*"   # body; "1,500" keeps its comma, a@b.com its @,
     r"[A-Za-z0-9%)>])?"                          # "Line 2 <Area 1>" stays one map name
 )
