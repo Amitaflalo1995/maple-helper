@@ -76,8 +76,8 @@ players who already have it. Fix forward:
 ## Owner setup (needs repository admin)
 
 1. **Branch protection** on `main` (Settings → Branches): require a pull request and the status
-   checks **`Lint & test (windows-latest)`**, **`Lint & test (macos-latest)`**, **`Build & smoke test`** and
-   **`Build & smoke test (macOS)`** from CI.
+   checks **`test / Lint & test`** (green only when the Windows and macOS test jobs both pass),
+   **`Build & smoke test`** and **`Build & smoke test (macOS)`** from CI.
 2. **Code signing (optional; removes the SmartScreen warning, and recommended now that updates
    install silently):** add a repository secret `MAPLEHELPER_SIGN` holding a sign command with a
    `{file}` placeholder. The build then signs `Maple Helper.exe` and the installer. For example:

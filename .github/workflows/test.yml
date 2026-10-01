@@ -8,7 +8,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  per-os:
     # both shipped platforms: tests/test_bidi.py measures real glyph positions from each OS's Qt
     name: Lint & test (${{ matrix.os }})
     strategy:
@@ -42,3 +42,15 @@ jobs:
           name: test-results-${{ matrix.os }}-${{ github.run_attempt }}
           path: test-results.xml
           retention-days: 14
+
+  # the check name branch protection requires ("test / Lint & test"): green only when every OS is green
+  all:
+    name: Lint & test
+    needs: per-os
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Every OS passed
+        run: |
+          echo "per-OS result: ${{ needs.per-os.result }}"
+          [ "${{ needs.per-os.result }}" = success ]
