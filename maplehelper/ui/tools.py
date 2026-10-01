@@ -877,6 +877,7 @@ class ToolsDialog(GlassDialog):
     def _page_prices(self):
         t = self.t
         sc, lay = scroll_page()
+        lay.addWidget(self._label(t("prices_intro"), "ToolHeader"))
         rows = item_rows(self.kb)
         self.price_input = EntityPicker(rows, self._p(t("price_placeholder", n=f"{len(rows):,}")), icon=32)
         self.price_input.picked.connect(self._fill_prices)
@@ -1065,6 +1066,7 @@ class ToolsDialog(GlassDialog):
     def _page_more(self):
         t = self.t
         sc, lay = scroll_page()
+        lay.addWidget(self._label(t("more_intro"), "ToolHeader"))
         sell = Section(t("sell_title"), t.rtl)
         sell.add_widget(self._label(t("sell_body"), "RowLabel"))
         go = QPushButton(self._p(t("sell_go")), objectName="Primary")
