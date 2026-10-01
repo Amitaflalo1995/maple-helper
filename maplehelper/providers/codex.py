@@ -98,6 +98,23 @@ def parse_events(lines, stderr: str = "") -> RawResult:
     return RawResult(text=answer)
 
 
+LIMITS_REQUEST = ({"id": 1, "method": "initialize", "params": {"clientInfo": {"name": "maple_helper", "version": "1"}}},
+                  {"method": "initialized"}, {"id": 2, "method": "account/rateLimits/read"})
+
+
+def read_limits_reply(lines) -> dict | None:
+    """The usage from the app-server's reply to request 2 (other lines are notifications)."""
+    from .. import usage
+    for line in lines:
+        try:
+            msg = json.loads(line)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            continue
+        if isinstance(msg, dict) and msg.get("id") == 2:
+            return usage.parse_codex((msg.get("result") or {}).get("rateLimits"))
+    return None
+
+
 def parse_status(returncode: int, output: str) -> dict:
     """`codex login status` prints e.g. "Logged in using ChatGPT" (it shows no email)."""
     t = output.lower()
@@ -108,12 +125,38 @@ def parse_status(returncode: int, output: str) -> dict:
 
 class Codex(Provider):
     name = "codex"
-    label = "Codex"
+    label = "ChatGPT"     # what players know it as (it runs through the Codex CLI)
     keyring_user = "openai_api_key"
     model_setting = "codex_model"
+    reports_usage = True      # read on demand from the app-server (codex exec doesn't report it)
 
     def find_exe(self) -> str | None:
         return find_codex()
+
+    def read_limits(self, timeout: float = 20) -> dict | None:
+        """The ChatGPT plan usage (5-hour and weekly windows), from `codex app-server`'s
+        account/rateLimits/read. None when not installed, signed out, on an API key, or on any error."""
+        exe = find_codex()
+        if not exe:
+            return None
+        try:
+            p = subprocess.Popen([exe, "app-server"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                 stderr=subprocess.DEVNULL, env=env(), creationflags=CREATE_NO_WINDOW)
+        except OSError:
+            return None
+        killer = threading.Timer(timeout, p.kill)
+        killer.start()
+        try:
+            for msg in LIMITS_REQUEST:
+                p.stdin.write((json.dumps(msg) + "\n").encode("utf-8"))
+            p.stdin.flush()
+            return read_limits_reply(p.stdout)
+        except OSError:
+            return None
+        finally:
+            killer.cancel()
+            p.kill()
+            p.wait()
 
     def account(self) -> dict:
         exe = find_codex()

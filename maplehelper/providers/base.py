@@ -22,7 +22,7 @@ class RawResult:
     text: str = ""
     error: str | None = None
     cost_usd: float | None = None
-    limits: dict | None = None     # plan usage, when the CLI reports it (Claude Code only, see usage.py)
+    limits: dict | None = None     # plan usage, when the CLI reports it with the answer (Claude Code, see usage.py)
 
 
 def find_posix(name: str, dirs: list[str]) -> str | None:
@@ -110,6 +110,10 @@ class Provider:
 
     def find_exe(self) -> str | None:
         raise NotImplementedError
+
+    def read_limits(self) -> dict | None:
+        """The plan usage read on demand (usage.parse shape); None when the CLI only reports it with answers."""
+        return None
 
     def account(self) -> dict:
         """{'status': 'not_installed' | 'logged_out' | 'ok', 'email': str | None, ...}"""

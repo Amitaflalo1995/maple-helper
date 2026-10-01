@@ -32,7 +32,7 @@ def test_onboarding_relabels_the_connect_page_for_codex(env):
     assert dlg.install_btn.text() == "Install Claude Code"
     dlg._on_provider("codex")
     assert s["provider"] == "codex"
-    assert dlg.install_btn.text() == "Install Codex CLI"
+    assert dlg.install_btn.text() == "Install ChatGPT"
     assert dlg.login_btn.text() == "Sign in with ChatGPT"
     assert "OpenAI" in dlg.key_edit.placeholderText()
     assert "OpenAI" in dlg.privacy_label.text()

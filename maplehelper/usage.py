@@ -1,4 +1,5 @@
-"""Claude plan usage, as Claude Code reports it after every answer (rate_limit_event).
+"""Plan usage: Claude's as Claude Code reports it after every answer (rate_limit_event),
+ChatGPT's as the Codex CLI reports it when asked (app-server account/rateLimits/read).
 
 The numbers are the player's whole plan (the 5-hour and weekly windows), including Claude use
 outside Maple Helper. They drive the usage meter in Settings, a heads-up in the chat when the
@@ -29,21 +30,41 @@ def parse(info: dict | None) -> dict | None:
     return out or None
 
 
-def record(settings, limits: dict | None, now: float | None = None) -> None:
+def parse_codex(snapshot: dict | None) -> dict | None:
+    """Same shape as parse(), from a Codex rate-limit snapshot ({"primary": {"usedPercent": 17,
+    "windowDurationMins": 300, "resetsAt": ...}, "secondary": {...}}); windows go by their length."""
+    if not isinstance(snapshot, dict):
+        return None
+    out = {}
+    for slot, fallback in (("primary", "five_hour"), ("secondary", "seven_day")):
+        w = snapshot.get(slot)
+        if not isinstance(w, dict) or not isinstance(w.get("usedPercent"), (int, float)):
+            continue
+        mins = w.get("windowDurationMins")
+        name = fallback if not mins else "five_hour" if mins <= 6 * 60 else "seven_day" if mins >= 6 * 24 * 60 else None
+        if name and name not in out:
+            out[name] = {"used": float(w["usedPercent"]) / 100, "resets": w.get("resetsAt")}
+    return out or None
+
+
+def record(settings, limits: dict | None, now: float | None = None, provider: str = "claude") -> None:
     if limits:
-        settings["usage"] = {**limits, "seen": now if now is not None else time.time()}
+        settings["usage"] = {**limits, "seen": now if now is not None else time.time(), "provider": provider}
 
 
-def current(settings, now: float | None = None) -> dict:
-    """The last known usage, minus windows that have reset since (their usage is back to zero)."""
+def current(settings, now: float | None = None, provider: str | None = None) -> dict:
+    """The last known usage, minus windows that have reset since (their usage is back to zero).
+    With a provider: only that provider's numbers (Claude's plan says nothing about ChatGPT's)."""
     now = now if now is not None else time.time()
     u = settings["usage"] or {}
+    if provider and u.get("provider", "claude") != provider:
+        return {}
     return {k: v for k, v in u.items() if k in WINDOWS and not (v.get("resets") and v["resets"] <= now)}
 
 
-def level(settings, now: float | None = None) -> str:
+def level(settings, now: float | None = None, provider: str | None = None) -> str:
     """'ok' | 'high' | 'critical', from the 5-hour window (the one that runs out during play)."""
-    used = current(settings, now).get("five_hour", {}).get("used", 0.0)
+    used = current(settings, now, provider).get("five_hour", {}).get("used", 0.0)
     return "critical" if used >= CRITICAL else "high" if used >= HIGH else "ok"
 
 
@@ -51,13 +72,13 @@ def reset_clock(resets: float | None) -> str:
     return time.strftime("%H:%M", time.localtime(resets)) if resets else ""
 
 
-def lines(settings, t, now: float | None = None) -> list[str]:
+def lines(settings, t, now: float | None = None, provider: str = "claude") -> list[str]:
     """Readable meter lines for Settings (t = I18n)."""
-    u = current(settings, now)
+    u = current(settings, now, provider)
     out = []
     if "five_hour" in u:
-        w = u["five_hour"]
-        out.append(t("usage_5h", pct=round(w["used"] * 100), at=reset_clock(w.get("resets"))))
+        pct, at = round(u["five_hour"]["used"] * 100), reset_clock(u["five_hour"].get("resets"))
+        out.append(t("usage_5h", pct=pct, at=at) if at else t("usage_5h_only", pct=pct))
     if "seven_day" in u:
         out.append(t("usage_week", pct=round(u["seven_day"]["used"] * 100)))
-    return out or [t("usage_unknown")]
+    return out or [t.p("usage_unknown", provider)]

@@ -35,3 +35,30 @@ def test_meter_lines():
     usage.record(s, usage.parse(EVENT), now=1000)
     text = "\n".join(usage.lines(s, I18n("en"), now=1000))
     assert "70%" in text and "15%" in text
+
+
+CODEX_SNAPSHOT = {"primary": {"usedPercent": 17, "windowDurationMins": 300, "resetsAt": 2000},
+                  "secondary": {"usedPercent": 41, "windowDurationMins": 10080, "resetsAt": 9000}, "planType": "plus"}
+
+
+def test_codex_usage_has_the_same_shape():
+    assert usage.parse_codex(CODEX_SNAPSHOT) == {"five_hour": {"used": 0.17, "resets": 2000},
+                                                 "seven_day": {"used": 0.41, "resets": 9000}}
+    assert usage.parse_codex({"primary": None, "secondary": None}) is None and usage.parse_codex(None) is None
+
+
+def test_usage_belongs_to_its_provider():
+    s = FakeSettings()
+    usage.record(s, usage.parse_codex(CODEX_SNAPSHOT), now=1000, provider="codex")
+    assert usage.current(s, now=1000, provider="claude") == {}          # Claude's meter never shows ChatGPT's plan
+    assert "17%" in "\n".join(usage.lines(s, I18n("en"), now=1000, provider="codex"))
+    assert usage.lines(s, I18n("he"), now=1000, provider="claude") == [I18n("he")("usage_unknown")]
+
+
+def test_codex_app_server_reply():
+    from maplehelper.providers.codex import read_limits_reply
+    lines = [b'{"id":1,"result":{}}\n', b'{"method":"remoteControl/status/changed","params":{}}\n',
+             ('{"id":2,"result":{"rateLimits":%s}}\n' % __import__("json").dumps(CODEX_SNAPSHOT)).encode()]
+    assert read_limits_reply(lines)["five_hour"]["used"] == 0.17
+    signed_out = [b'{"error":{"code":-32600,"message":"codex account authentication required"},"id":2}\n']
+    assert read_limits_reply(signed_out) is None

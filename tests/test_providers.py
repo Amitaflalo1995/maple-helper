@@ -13,7 +13,7 @@ class TestRegistry:
     def test_known_providers(self):
         assert providers.get("claude").name == "claude"
         assert providers.get("codex").name == "codex"
-        assert providers.get("codex").label == "Codex"
+        assert providers.get("codex").label == "ChatGPT"
 
     def test_unknown_or_missing_falls_back_to_claude(self):
         assert providers.get(None).name == "claude"
@@ -293,7 +293,7 @@ def test_guide_summaries_go_through_the_active_provider(kb):
 
 def test_only_claude_has_a_lighter_saver_model():
     assert providers.get("claude").saver_model == "haiku" and providers.get("claude").reports_usage
-    assert providers.get("codex").saver_model is None and not providers.get("codex").reports_usage
+    assert providers.get("codex").saver_model is None and providers.get("codex").reports_usage   # read on demand
 
 
 def test_switching_provider_swaps_the_backend(kb):
