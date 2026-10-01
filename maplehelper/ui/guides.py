@@ -155,7 +155,7 @@ class GuidesDialog(GlassDialog):
         back = QPushButton(bidi.plain(t("g_back"), rtl), objectName="Link")
         back.setCursor(Qt.PointingHandCursor)
         back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
-        lay.addWidget(back, 0, Qt.AlignLeft if not rtl else Qt.AlignRight)
+        lay.addWidget(back, 0, (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute)   # the reading start
         self.r_title = QLabel(objectName="PageTitle")
         self.r_title.setWordWrap(True)
         self.r_title.setLayoutDirection(Qt.LeftToRight)

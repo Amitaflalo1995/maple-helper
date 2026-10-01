@@ -91,7 +91,7 @@ STRINGS = {
     "g_minutes": {"he": "{n} דק' קריאה", "en": "{n} min read"},
     "g_search": {"he": "חיפוש במדריכים…", "en": "Search the guides…"},
     "g_none": {"he": "לא נמצאו מדריכים.", "en": "No guides found."},
-    "g_back": {"he": "‹ כל המדריכים", "en": "‹ All guides"},
+    "g_back": {"he": "→ כל המדריכים", "en": "← All guides"},
     "g_summary": {"he": "תקציר בעברית", "en": "Quick summary"},
     "g_summarizing": {"he": "מסכם את המדריך…", "en": "Summarizing the guide…"},
     "g_ask": {"he": "לשאול על המדריך", "en": "Ask about this guide"},
