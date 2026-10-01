@@ -662,6 +662,8 @@ class ToolsDialog(GlassDialog):
         else:
             key = next((m.key for m in combat.monsters(self.kb) if m.name.lower() == n), None)
         path = self.kb.picture(key) if key else None
+        if not path and re.search(r" x ?[\d,]+$", n):          # "Arrows for Bows x 500": the item itself
+            return self._picture_uri(kind, re.sub(r" x ?[\d,]+$", "", n))
         return path.as_uri() if path else None
 
     def _thing_html(self, text: str) -> str:
@@ -845,7 +847,7 @@ class ToolsDialog(GlassDialog):
         if i.master_quest:
             col.addWidget(self._label(t("craft_master", quest=i.master_quest.rstrip("!"), lv=i.master_level or "?"), "RowLabel"))
         if i.station_towns:
-            col.addWidget(self._label(t("craft_station", station=i.station, towns=", ".join(i.station_towns)),
+            col.addWidget(self._label(t("craft_station", station=i.station, towns=" · ".join(i.station_towns)),
                                       "RowLabel"))
         return card
 

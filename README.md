@@ -21,7 +21,7 @@
 
 Maple Helper is a desktop assistant for Windows and macOS that puts a chat overlay on top of Maple Story Classic World. Press **F9** to open it, then type a question or press **F10** to speak (press again to stop). Answers draw on a screenshot of your game, your character profile, previous conversations, and a local copy of the NiaMeowDB game database.
 
-Use it to look up drops, find quest NPCs, or ask where to train without switching away from the game.
+Use it to look up drops, find quest NPCs, or ask where to train without switching away from the game. The **play tools** window adds calculators and planners that read the same database: where to train, hit and damage, your build, quests for your level, crafting, citizenship and prices.
 
 <p align="center">
   <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/en/mano-light.webp" width="260" alt="The chat: what Mano drops, with a monster card and pictures of its drops">
@@ -32,6 +32,11 @@ Use it to look up drops, find quest NPCs, or ask where to train without switchin
   <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/hp-dark.webp" width="260" alt="Hebrew interface in dark mode: an instant answer for Blue Snail's HP">
   <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/guide-dark.webp" width="260" alt="The Warrior guide in Hebrew, dark mode">
   <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/en/settings-light.webp" width="260" alt="Settings: appearance, keys, answers, AI account and plan usage">
+</p>
+<p align="center">
+  <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/en/tools-train-light.webp" width="260" alt="Play tools, where to train: maps for your level with hit chance, hits to kill and EXP">
+  <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/en/tools-crafting-light.webp" width="260" alt="Play tools, crafting: the profession's teacher, quests and stations, then the best recipes for your level">
+  <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/tools-quests-dark.webp" width="260" alt="Play tools in Hebrew, dark mode: quests for your level with the NPC, what they need and the rewards">
 </p>
 
 Website: **https://amitaflalo1995.github.io/maple-helper-site/** (source: [maple-helper-site](https://github.com/Amitaflalo1995/maple-helper-site))
@@ -46,13 +51,23 @@ Website: **https://amitaflalo1995.github.io/maple-helper-site/** (source: [maple
 
 - **In-game chat:** Open and close the overlay with a global hotkey.
 - **Screen context:** Capture the game window when you open the overlay, with a camera button to refresh the screenshot.
-- **Character profiles:** Track your level, job, map, and active quests, with updates based on your conversations and screenshots.
+- **Character profiles:** Track your level, job, map, and active quests, with updates based on your conversations and screenshots. Edit, delete or switch characters from the character card's menu.
 - **Conversation memory:** Keep separate chat history and session summaries for each character.
 - **Visual reference cards:** See images of relevant monsters, items, maps, NPCs, and quests alongside answers, grouped under titles (for example, what a monster drops).
 - **Tag cards:** Tap one or more cards to ask follow-up questions about them, such as "where is it?" or "which one is easier for me?".
 - **Who drops it:** Ask which monsters drop an item and get the answer grouped by monster, with pictures.
 - **Guides library:** 32 full guides (every class, grind maps, the EXP table, the damage formula and more) with skill and item icons, character art, tables and tips, in English and Hebrew. The ones that fit your character come first.
 - **Plan usage:** See how much of your Claude or ChatGPT plan is used, with a heads-up in the chat before the 5-hour limit runs out, and a saver mode.
+- **Play tools:** A window of calculators and planners beside the chat, built from the game database and your character:
+  - **Where to train:** maps for your level, ranked, with your hit chance, hits to kill, EXP per kill and kills to level.
+  - **Hit & damage:** pick a monster to see the ACC you need to never miss, your hit chance and hits to kill.
+  - **Build plan:** your class guide's AP, SP and gear tables, with your current level highlighted.
+  - **Quests:** the quests you can take now (and soon), with the NPC, what they need and the rewards, best EXP first.
+  - **Crafting:** all six professions explained (what they make, the teacher and town, the first and master quests, where to craft), then every recipe for your level, best EXP per meso first.
+  - **Citizenship:** Henesys or Kerning City advice for your class, and the town's quests.
+  - **Prices:** NPC buy and sell prices, and a live Free Market median from player reports on NiaMeowDB.
+  - **EXP meter, bag & shopping:** EXP per hour and time to level, what to sell or keep, and a shopping list for a map.
+- **Game terms explained:** An orange **?** beside terms like ACC, Avoid or AP shows what they mean on hover.
 - **Items I'm looking for:** Star an item to keep a list of what you hunt, with who drops it and where.
 - **Hebrew and English:** Use either language, including mixed text with English game names.
 - **Local speech recognition:** Transcribe voice input on your computer using ivrit.ai Whisper models.
@@ -127,6 +142,9 @@ Open PowerShell (Windows) or Terminal (macOS) in the repository folder. On macOS
 | **Window buttons** | Minimize or close the overlay (F9 opens it again). |
 | **Tap a card** | Tag it for the next question; tap again to untag. |
 | **Camera button** | Take a fresh screenshot of the game window. |
+| **Tools button** | Open the play tools (where to train, calculator, build, quests, crafting, citizenship, prices, EXP meter, bag & shopping). |
+| **Character card** | Open its menu to switch, edit, delete, add or copy characters; **What now?** asks for the best next step. |
+| **Orange ?** | Hover it to see what a game term means. |
 | **System tray menu** | Show the overlay, open settings, or quit the app. |
 
 In settings, you can change the AI provider (Claude or ChatGPT) and its account, the appearance (light or dark), hotkeys, language, font size, answer length, starting with Windows, and whether voice questions are sent immediately.
@@ -139,7 +157,7 @@ Settings, character profiles, conversation history, speech models, and downloade
 
 When you ask a question, the app sends your chosen AI provider (Anthropic for Claude, OpenAI for ChatGPT) your question, the available game screenshot, character profile, recent conversation, earlier session summaries, and relevant knowledge-base context. The AI can also read local knowledge-base files to answer the question; it runs read-only and cannot change files. With Codex, the screenshot is written to a temporary file for the run and deleted right after. After a chat session has been closed for 30 minutes, the app may send the session transcript to the same provider to generate a summary for future conversations.
 
-Voice recordings are transcribed locally. The resulting text is used as your question. The app also checks GitHub Releases for app and knowledge-base updates, and installs an update only when its SHA-256 matches the release's checksums.
+Voice recordings are transcribed locally. The resulting text is used as your question. The Prices tool asks NiaMeowDB for recent Free Market listings of the item you look up (only the item name is sent). The app also checks GitHub Releases for app and knowledge-base updates, and installs an update only when its SHA-256 matches the release's checksums.
 
 ## Development
 
