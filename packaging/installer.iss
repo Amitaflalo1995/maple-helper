@@ -49,7 +49,11 @@ SolidCompression=yes
 LZMAUseSeparateProcess=yes
 LZMANumBlockThreads=4
 CloseApplications=force
+; the app's own .pyd/.pyc files count too, not only exe/dll
+CloseApplicationsFilter=*.exe,*.dll,*.pyd
 RestartApplications=no
+; the app waits while this exists, so a relaunch can't land in the middle of an update
+SetupMutex=MapleHelperSetup
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 
@@ -85,3 +89,19 @@ english.WelcomeLabel1=Welcome to Maple Helper
 english.WelcomeLabel2=Your personal MapleStory assistant.%n%nSetup takes under a minute and needs no admin rights.
 english.FinishedHeadingLabel=Maple Helper is ready!
 english.FinishedLabel=On first launch we'll connect your AI (Claude or Codex) and set up your character.%n%nIn game, press F9 to open and close the chat.
+
+[Code]
+// An update runs right after the app quits: wait (up to 30 s) until it has really exited,
+// so no file is still in use while it is replaced (a half-updated install otherwise).
+function InitializeSetup(): Boolean;
+var
+  i: Integer;
+begin
+  i := 0;
+  while CheckForMutexes('MapleHelperRunning') and (i < 60) do
+  begin
+    Sleep(500);
+    i := i + 1;
+  end;
+  Result := True;
+end;

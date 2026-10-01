@@ -138,7 +138,8 @@ class GlassDialog(QDialog):
 
     def __init__(self, title: str, rtl: bool, show_in_captures: bool = False, closable: bool = True,
                  strength: float = 0.6):
-        super().__init__(None, Qt.FramelessWindowHint | Qt.Dialog)
+        # on top like the chat and Settings, or a confirmation opened from Settings hides behind it
+        super().__init__(None, Qt.FramelessWindowHint | Qt.Dialog | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowTitle(title)
         self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
