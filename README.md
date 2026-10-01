@@ -24,17 +24,17 @@ Maple Helper is a desktop assistant for Windows and macOS that puts a chat overl
 Use it to look up drops, find quest NPCs, or ask where to train without switching away from the game.
 
 <p align="center">
-  <img src="site/assets/shots/en/mano-light.webp" width="260" alt="The chat: what Mano drops, with a monster card and pictures of its drops">
-  <img src="site/assets/shots/en/guide-light.webp" width="260" alt="The Warrior guide in the app, with class art, pros and cons, and a formula box">
-  <img src="site/assets/shots/en/wishlist-light.webp" width="260" alt="Items I'm looking for, with the monsters that drop each one">
+  <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/en/mano-light.webp" width="260" alt="The chat: what Mano drops, with a monster card and pictures of its drops">
+  <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/en/guide-light.webp" width="260" alt="The Warrior guide in the app, with class art, pros and cons, and a formula box">
+  <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/en/wishlist-light.webp" width="260" alt="Items I'm looking for, with the monsters that drop each one">
 </p>
 <p align="center">
-  <img src="site/assets/shots/hp-dark.webp" width="260" alt="Hebrew interface in dark mode: an instant answer for Blue Snail's HP">
-  <img src="site/assets/shots/guide-dark.webp" width="260" alt="The Warrior guide in Hebrew, dark mode">
-  <img src="site/assets/shots/en/settings-light.webp" width="260" alt="Settings: appearance, keys, answers, AI account and plan usage">
+  <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/hp-dark.webp" width="260" alt="Hebrew interface in dark mode: an instant answer for Blue Snail's HP">
+  <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/guide-dark.webp" width="260" alt="The Warrior guide in Hebrew, dark mode">
+  <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/en/settings-light.webp" width="260" alt="Settings: appearance, keys, answers, AI account and plan usage">
 </p>
 
-Website: **https://amitaflalo1995.github.io/maple-helper/**
+Website: **https://amitaflalo1995.github.io/maple-helper-site/** (source: [maple-helper-site](https://github.com/Amitaflalo1995/maple-helper-site))
 
 ## Download
 

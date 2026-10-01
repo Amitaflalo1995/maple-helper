@@ -2,7 +2,7 @@
 
   set APPDATA to an empty temp folder (never the player's real settings), then for each language/mode:
   SHOT_LANG=he|en QT_SCALE_FACTOR=2.5 QT_QPA_PLATFORM=offscreen PYTHONPATH=.       python tools/site_shots.py <raw_dir> light|dark all item/298,item/379
-  Step 2: python tools/site_shots_webp.py <raw_dir>  (crops, rounds the corners, writes site/assets/shots)
+  Step 2: python tools/site_shots_webp.py <raw_dir>  (crops, rounds the corners, writes the site repo's assets/shots)
 """
 import os
 import sys
