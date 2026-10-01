@@ -54,3 +54,13 @@ def test_missing_kb_is_empty(tmp_path):
     from maplehelper.kb import KnowledgeBase
     empty = KnowledgeBase(tmp_path)
     assert empty.entities == {} and empty.find_mentions("Red Snail") == []
+
+
+def test_top_maps_stop_at_the_end_of_the_map_table(kb_copy):
+    # a one-map monster: the "Change history" table under it has numeric rows that are not maps
+    from maplehelper.kb import KnowledgeBase
+    page = kb_copy / "pages" / "monster" / "130101.md"
+    text = page.read_text(encoding="utf-8").split("Snail Garden")[0].rstrip()
+    page.write_text(text + "\nChange history\nupdated in COT2 ▾ Stat | COT1 | COT2 | Change\n"
+                    "HP | 7,560 | 7,420 | -140\nP.DMG | 101 | 252 | +151\n", encoding="utf-8")
+    assert KnowledgeBase(kb_copy)._top_maps("monster/130101") == ["Henesys Hunting Ground I"]

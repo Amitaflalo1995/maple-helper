@@ -13,3 +13,6 @@ kb-in/
 test-results.xml
 .ruff_cache/
 .pytest_cache/
+
+# answer-eval runs (tools/eval_answers.py --mode claude)
+evals/reports/

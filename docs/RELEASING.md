@@ -10,6 +10,9 @@ Everything runs in GitHub Actions. You decide *when*; CI does the rest.
 
 ## Cut a release
 
+If the release changes how Claude answers (prompts, `brain.py`, the model), run the Claude answer evals on your
+machine first and check for regressions: see [EVALS.md](EVALS.md). CI never runs them (they spend plan usage).
+
 1. Bump `__version__` in `maplehelper/__init__.py` and add that version's notes (Hebrew and English) at the top of
    `assets/notes/whatsnew.json` (players see them after updating; a test fails without them). Commit and merge to `main`.
 2. Tag the merged commit and push the tag:

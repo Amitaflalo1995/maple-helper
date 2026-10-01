@@ -45,3 +45,29 @@ def test_a_name_containing_a_stat_word_is_not_a_stat_question():
     level = next(rx for rx, key, _ in quick.STATS if key == "Level")
     assert not level.search("כמה HP יש לבלו סנייל?")
     assert level.search("באיזה לבל Mano?") and level.search("what level is Mano")
+
+
+def test_how_much_is_a_number_question(kb):
+    # the module docstring's own example used to fall through to Claude because of "how"
+    ans = quick.answer("How much HP does Red Snail have?", kb, t)
+    assert ans and "HP: 45" in ans.text
+    assert quick.answer("how do I kill Red Snail?", kb, t) is None
+
+
+def test_hebrew_stat_word_with_the_article(kb):
+    # "מה הלבל של..." / "מה הדיוק של...": the definite article is glued to the stat word
+    ans = quick.answer("מה הלבל של רד סנייל?", kb, t)
+    assert ans and "Level: 4" in ans.text
+
+
+def test_defense_reads_physical_defense(kb):
+    # monsters carry "Physical Defense" (and "Magic Defense"), never a plain "Defense"
+    kb.get("monster/130101")["props"]["Physical Defense"] = 20
+    ans = quick.answer("Red Snail defense", kb, t)
+    assert ans and "Defense: 20" in ans.text
+
+
+def test_two_questions_in_one_go_to_claude(kb):
+    # answering only the drops of "level and drops" would look like the whole answer
+    assert quick.answer("Red Snail level and drops", kb, t) is None
+    assert quick.answer("where is Red Snail and what's its HP", kb, t) is None
