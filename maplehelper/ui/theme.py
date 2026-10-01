@@ -48,10 +48,11 @@ BORDER = "rgba(255,149,51,0.55)"
 
 FONT_FAMILY = "Rubik"
 ICON_FONT = "Segoe Fluent Icons"
-ICON = {"open": "\ue8a7", "refresh": "\ue72c", "info": "\ue946", "edit": "\ue70f", "delete": "\ue74d", "add": "\ue710", "minimize": "\ue921", "close": "\ue8bb", "settings": "\ue713", "camera": "\ue722", "mic": "\ue720", "send": "\ue74a", "stop": "\ue71a"}
+ICON = {"open": "\ue8a7", "refresh": "\ue72c", "info": "\ue946", "edit": "\ue70f", "delete": "\ue74d", "add": "\ue710", "minimize": "\ue921", "close": "\ue8bb", "settings": "\ue713", "camera": "\ue722", "mic": "\ue720", "send": "\ue74a", "stop": "\ue71a", "copy": "\ue8c8", "star": "\ue734", "star_on": "\ue735"}
 # the same keys without an icon font (a trailing U+FE0E asks for the plain glyph, not the color emoji)
 SYMBOL_ICONS = {"open": "\u2197", "refresh": "\u21bb", "info": "\u24d8", "edit": "\u270e", "delete": "\u232b", "add": "+", "minimize": "\u2013",
-                "close": "\u2715", "settings": "\u2699\ufe0e", "camera": "\ud83d\udcf7\ufe0e", "mic": "\ud83c\udf99\ufe0e", "send": "\u27a4", "stop": "\u25a0"}
+                "close": "\u2715", "settings": "\u2699\ufe0e", "camera": "\ud83d\udcf7\ufe0e", "mic": "\ud83c\udf99\ufe0e", "send": "\u27a4", "stop": "\u25a0",
+                "copy": "\u29c9", "star": "\u2606", "star_on": "\u2605"}
 
 
 def set_mode(mode: str) -> None:
@@ -100,6 +101,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QToolButton#Icon:hover {{ background: {c['fill2']}; color: {c['text']}; }}
     QToolButton#Icon:pressed {{ background: {c['fill3']}; }}
     QToolButton#Icon[active="true"] {{ color: #FF453A; }}
+    QToolButton#Icon[wished="true"] {{ color: {ORANGE}; }}
     QToolButton#IconClose {{ font-family: "{ICON_FONT}"; font-size: 11px; color: {c['muted']}; background: transparent;
                              border: none; border-radius: 14px; min-width: 28px; min-height: 28px; }}
     QToolButton#IconClose:hover {{ background: #FF453A; color: #FFFFFF; }}
