@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://amitaflalo1995.github.io/maple-helper/sitemap.xml
