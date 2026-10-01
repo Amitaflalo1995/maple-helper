@@ -32,7 +32,7 @@ jobs:
           python-version: "3.13"
 
       # uv installs the same wheels into the same interpreter as pip, several times faster
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.2.0   # this action publishes exact tags only, no floating v10
         with:
           enable-cache: true
           cache-dependency-glob: requirements*.txt
@@ -71,7 +71,7 @@ jobs:
           python-version: "3.13"
 
       # uv installs the same wheels into the same interpreter as pip, several times faster
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.2.0   # this action publishes exact tags only, no floating v10
         with:
           enable-cache: true
           cache-dependency-glob: requirements*.txt
