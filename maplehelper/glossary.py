@@ -16,14 +16,15 @@ from .store import ASSETS
 
 GLOSSARY = "maplestory-classic-glossary"
 
-# term shown in the app -> the glossary entry it uses (or an app definition below)
+# term shown in the app -> the glossary entry it uses (or an app definition below).
+# Everyday words players already know (Lv., EXP) get no "?" (the player asked for that)
 TERMS = {
-    "EXP": "EXP", "HP": "HP / MP", "MP": "HP / MP", "ACC": "ACC", "Accuracy": "ACC", "Avoid": "Avoid",
+    "HP": "HP / MP", "MP": "HP / MP", "ACC": "ACC", "Accuracy": "ACC", "Avoid": "Avoid",
     "AVOID": "Avoid", "P.DEF": "P.DEF", "PDEF": "P.DEF", "M.DEF": "M.DEF", "MDEF": "M.DEF",
     "W.ATK": "WATK / W.ATK", "WATK": "WATK / W.ATK", "M.ATK": "Magic / MATK", "AP": "AP", "SP": "SP",
     "STR": "STR / DEX / INT / LUK", "DEX": "STR / DEX / INT / LUK", "INT": "STR / DEX / INT / LUK",
     "LUK": "STR / DEX / INT / LUK", "mesos": "mesos", "NPC": "NPC", "Free Market": "FM", "KPQ": "kPQ",
-    "KS": "KS", "Citizenship": "Citizenship", "Lv.": "Lv.", "grind": "grind", "buff": "buff",
+    "KS": "KS", "Citizenship": "Citizenship", "grind": "grind", "buff": "buff",
     "Booster": "booster", "Mastery": "mastery", "Critical Rate": "crit", "scroll": "scroll", "mob": "mob",
     "catalyst": "catalyst", "Training Advisor": "Training Advisor",
 }
@@ -102,6 +103,9 @@ def explain(term: str, lang: str) -> str | None:
     return re.sub(r"\*\*", "", text) if text else None
 
 
+# what follows a term: ui/terms.py swaps in an orange "?" badge image once Qt runs; text fallback until then
+MARK = "<b style='font-size:large;'>&nbsp;?</b>"
+
 _PATTERN = re.compile(r"(?<![\w.])(" + "|".join(re.escape(t) for t in sorted(TERMS, key=len, reverse=True)) + r")(?![\w])")
 
 
@@ -113,7 +117,7 @@ def annotate(html_text: str, lang: str, color: str = "#F07A12", seen: set | None
 
     def link(term: str) -> str:
         return (f"<a href='g:{html.escape(term)}' style='color:{color}; text-decoration:none;'>"
-                f"<sup><b>?</b></sup></a>")
+                f"&nbsp;{MARK}</a>")
 
     def wanted(term: str) -> bool:
         key = TERMS.get(term, term)

@@ -316,7 +316,7 @@ class GuidesDialog(GlassDialog):
         self.browser.setOpenLinks(False)                      # guide: links open here, web links in the browser
         self.browser.anchorClicked.connect(self._on_link)
         from . import terms
-        self.browser.highlighted.connect(lambda url: terms.show(url.toString(), self.t.lang))   # hover shows it too
+        self.browser.highlighted.connect(lambda url: terms._hovered(url.toString(), self.t.lang))   # hover shows it too
         self.browser.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)   # wide tables wrap their cells instead
         self.zoom = ImageZoom(self.browser)
         self.browser.setLayoutDirection(Qt.LeftToRight)      # the guides are written in English

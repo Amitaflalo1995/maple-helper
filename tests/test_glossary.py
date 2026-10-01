@@ -10,8 +10,9 @@ def test_every_marked_term_is_explained_in_both_languages():
 
 
 def test_only_the_first_appearance_is_marked():
-    out = glossary.annotate("<p>ACC 47 and ACC 50, EXP 45</p>", "en")
-    assert out.count("g:ACC") == 1 and out.count("g:EXP") == 1
+    out = glossary.annotate("<p>ACC 47 and ACC 50, AP 5, Lv. 30, EXP 45</p>", "en")
+    assert out.count("g:ACC") == 1 and out.count("g:AP") == 1
+    assert "g:Lv." not in out and "g:EXP" not in out          # everyday words get no "?"
     assert glossary.annotate("<a href='x'>ACC</a>", "en").count("g:ACC") == 0     # never inside a link
 
 
