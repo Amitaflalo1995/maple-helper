@@ -467,14 +467,15 @@ class MapleHelperApp:
         pairs = pins.conversations(History(c.id).recent(100000))
         def make():
             dlg = HistoryDialog(pairs, c.name, self.settings["language"], self.style())
-            dlg.pin_requested.connect(self.overlay.pin_answer)
+            dlg.pin_requested.connect(lambda q, a, cid=c.id: self.overlay.pin_answer(q, a, cid))
             return dlg
-        self.open_window("history", make)
+        self.open_window(f"history:{c.id}", make)
 
     def show_wishlist(self):
         from .ui.wishlist import WishlistDialog
         keys = wishlist.items(self.settings, self.profiles.active_id)
-        self.open_window("wishlist", lambda: WishlistDialog(keys, self.kb, self.settings["language"], self.style()))
+        self.open_window(f"wishlist:{self.profiles.active_id}",
+                         lambda: WishlistDialog(keys, self.kb, self.settings["language"], self.style()))
 
     def show_patch_notes(self, entries: list[dict] | None = None):
         if entries is None:
