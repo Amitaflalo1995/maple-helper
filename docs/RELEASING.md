@@ -10,7 +10,8 @@ Everything runs in GitHub Actions. You decide *when*; CI does the rest.
 
 ## Cut a release
 
-1. Bump `__version__` in `maplehelper/__init__.py`, commit, and merge to `main`.
+1. Bump `__version__` in `maplehelper/__init__.py` and add that version's notes (Hebrew and English) at the top of
+   `assets/notes/whatsnew.json` (players see them after updating; a test fails without them). Commit and merge to `main`.
 2. Tag the merged commit and push the tag:
    ```powershell
    git switch main; git pull

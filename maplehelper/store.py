@@ -78,6 +78,7 @@ DEFAULT_SETTINGS = {
     "model": "sonnet",
     "api_key_fallback": False,    # use an Anthropic API key (stored in Credential Manager / Keychain)
     "onboarding_done": False,
+    "seen_version": "",           # the app version whose "what's new" the player has seen
 }
 
 

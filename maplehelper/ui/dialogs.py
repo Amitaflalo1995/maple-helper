@@ -496,6 +496,7 @@ class SettingsDialog(GlassDialog):
     history_cleared = Signal()
     account_changed = Signal()
     patch_notes_requested = Signal()
+    whats_new_requested = Signal()
 
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, stylesheet_fn):
         self.t = t = I18n(settings["language"] or "he")
@@ -607,6 +608,10 @@ class SettingsDialog(GlassDialog):
         notes.setCursor(Qt.PointingHandCursor)
         notes.clicked.connect(self.patch_notes_requested.emit)
         sec.add_widget(notes)
+        news = QPushButton(t("whats_new"), objectName="Link")
+        news.setCursor(Qt.PointingHandCursor)
+        news.clicked.connect(self.whats_new_requested.emit)
+        sec.add_widget(news)
         clear = QPushButton(t("clear_history"), objectName="LinkDanger")
         clear.setCursor(Qt.PointingHandCursor)
         clear.clicked.connect(self._clear_history)

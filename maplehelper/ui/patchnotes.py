@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QScrollA
 from .. import bidi
 from ..i18n import STRINGS, I18n
 from ..kb import KnowledgeBase
-from .controls import rtl_buttons
+from .controls import Section, rtl_buttons
 from .glass import GlassDialog
 from .widgets import EntityCard, Selectable
 
@@ -73,6 +73,44 @@ class ChangeCard(Selectable, QFrame):
     def mouseReleaseEvent(self, ev):
         if hasattr(self, "key"):
             super().mouseReleaseEvent(ev)
+
+
+class WhatsNewDialog(GlassDialog):
+    """What changed in the app itself, version by version."""
+
+    def __init__(self, notes: list[dict], lang: str, stylesheet: str):
+        self.t = t = I18n(lang or "he")
+        super().__init__(t("whats_new"), t.rtl)
+        self.setStyleSheet(stylesheet)
+        self.resize(480, 560)
+        outer = QVBoxLayout(self.content)
+        outer.setContentsMargins(0, 0, 0, 0)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        body = QWidget(objectName="Feed")
+        lay = QVBoxLayout(body)
+        lay.setContentsMargins(0, 0, 6, 0)
+        lay.setSpacing(18)
+        scroll.setWidget(body)
+        outer.addWidget(scroll, 1)
+        for n in notes:
+            sec = Section(t("version_title", version=n["version"]), t.rtl)
+            for line in n.get(t.lang) or n.get("en") or []:
+                sec.add_row("•  " + line)
+            lay.addWidget(sec)
+        lay.addStretch(1)
+        row = QHBoxLayout()
+        row.setContentsMargins(0, 10, 0, 0)
+        row.addStretch(1)
+        ok = QPushButton(t("close"), objectName="Primary")
+        ok.setCursor(Qt.PointingHandCursor)
+        ok.setMinimumWidth(160)
+        ok.clicked.connect(self.accept)
+        row.addWidget(ok)
+        row.addStretch(1)
+        outer.addLayout(row)
+        rtl_buttons(self, t.rtl)
 
 
 class PatchNotesDialog(GlassDialog):

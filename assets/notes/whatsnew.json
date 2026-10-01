@@ -1,0 +1,16 @@
+[
+ {"version": "0.4.0",
+  "he": ["מה חדש באפליקציה: אחרי כל עדכון מופיע כאן מה השתנה.",
+         "כפתור העתקה בכל כרטיס: הכרטיס נכנס ללוח כתמונה, ואפשר להדביק אותו בדיסקורד או בוואטסאפ."],
+  "en": ["What's new: after every update, this shows what changed.",
+         "A copy button on every card: the card goes to the clipboard as a picture to paste in Discord or WhatsApp."]},
+ {"version": "0.3.0",
+  "he": ["החלפת דמות והוספת דמות ישר מכרטיס הדמות בצ'אט.",
+         "פאץ' נוטס למאגר: אחרי עדכון מאגר רואים בדיוק מה נוסף, מה השתנה ומה הוסר.",
+         "מקש הדיבור: לוחצים פעם אחת כדי להתחיל ועוד פעם כדי לסיים.",
+         "מסך פתיחה חדש, ומצב בהיר כברירת מחדל."],
+  "en": ["Switch or add a character right from the character card in the chat.",
+         "Database patch notes: after an update, see exactly what was added, changed or removed.",
+         "Talk key: press once to start and again to finish.",
+         "A new welcome screen, and the light appearance by default."]}
+]
