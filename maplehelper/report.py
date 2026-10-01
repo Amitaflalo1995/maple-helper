@@ -19,7 +19,8 @@ from .store import DATA_DIR
 
 LOG_DIR = DATA_DIR / "logs"
 LOG_FILE = LOG_DIR / "maplehelper.log"
-PRIVATE_SETTINGS = ("window", "bubble_pos")
+PRIVATE_SETTINGS = ("window", "bubble_pos", "pins", "last_session", "wishlist", "microphone",
+                    "tips_dismissed", "usage_warned")
 log = logging.getLogger("maplehelper")
 
 

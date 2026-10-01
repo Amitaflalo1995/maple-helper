@@ -84,8 +84,20 @@ def update_kb() -> bool:
     meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
     meta["version"] = manifest["version"]
     meta_path.write_text(json.dumps(meta, indent=1), encoding="utf-8")
-    shutil.rmtree(USER_KB, ignore_errors=True)
-    tmp.rename(USER_KB)
+    # swap by renames: on Windows a folder another process works in (the AI runs inside the KB)
+    # can't be removed or renamed; then keep the current KB intact and try again next time
+    old = USER_KB.with_name("kb.old")
+    shutil.rmtree(old, ignore_errors=True)
+    try:
+        if USER_KB.exists():
+            USER_KB.rename(old)
+        tmp.rename(USER_KB)
+    except OSError:
+        if old.exists() and not USER_KB.exists():
+            old.rename(USER_KB)
+        shutil.rmtree(tmp, ignore_errors=True)
+        return False
+    shutil.rmtree(old, ignore_errors=True)
     return True
 
 
@@ -157,6 +169,18 @@ def download_app_update(current: str) -> str | None:
     return str(path)
 
 
+def remove_old_installers() -> None:
+    """Downloaded installers for this version or older are no longer needed (~100 MB each)."""
+    from . import __version__
+    folder = USER_KB.parent / "updates"
+    for f in folder.glob("MapleHelper-Setup-*.exe") if folder.exists() else []:
+        if _version_tuple(installer_version(str(f))) <= _version_tuple(__version__):
+            try:
+                f.unlink()
+            except OSError:
+                pass
+
+
 def installer_version(path: str) -> str:
     """'0.4.0' from '.../MapleHelper-Setup-v0.4.0.exe'."""
     m = re.search(r"Setup-v?([\d.]+)\.exe$", str(path))
@@ -166,7 +190,8 @@ def installer_version(path: str) -> str:
 def installer_args(path: str, reopen: bool) -> list[str]:
     # the installer starts the app again when done: in the tray after a quiet update on quit,
     # with the chat open when the player pressed "Update now" (see [Run] in packaging/installer.iss)
-    args = [path, "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART"]
+    log = USER_KB.parent / "logs" / "update.log"          # why an update failed, if it ever does
+    args = [path, "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", f"/LOG={log}"]
     if reopen:
         args.append("/LAUNCHARGS=--updated")
     return args

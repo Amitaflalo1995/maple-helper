@@ -124,6 +124,7 @@ class MapleHelperApp:
         self.pending_installer = None
         self._reopen_after_update = False
         QTimer.singleShot(4000, self.check_kb_update_silently)
+        QTimer.singleShot(8000, updater.remove_old_installers)
         # a session can run for hours: look again every 3 hours
         self._update_timer = QTimer(interval=3 * 60 * 60 * 1000, timeout=self.check_kb_update_silently)
         self._update_timer.start()
@@ -162,6 +163,7 @@ class MapleHelperApp:
         dlg = make()
         windows[kind] = dlg
         dlg.setWindowModality(Qt.NonModal)
+        dlg.setAttribute(Qt.WA_DeleteOnClose)                  # closed windows don't pile up in memory
         dlg.setWindowFlag(Qt.WindowStaysOnTopHint, True)      # over the game, like the chat
         dlg.finished.connect(lambda *_: windows.pop(kind, None) if windows.get(kind) is dlg else None)
         if on_close:
@@ -341,6 +343,9 @@ class MapleHelperApp:
 
     def turn_on_saver(self):
         self.settings["saver_mode"] = True
+        settings_win = self.__dict__.get("_windows", {}).get("settings")
+        if settings_win is not None and hasattr(settings_win, "saver"):
+            settings_win.saver.setChecked(True)     # its Save must not switch it off again
         self.apply_saver_mode()
         self.overlay.show_saver_badge(True)
         self.overlay.add_system(I18n(self.settings["language"])("saver_turned_on"))
@@ -354,6 +359,8 @@ class MapleHelperApp:
         self.overlay.show_saver_badge(self.settings["saver_mode"])
         threading.Thread(target=self.brain.prewarm, daemon=True).start()
         self.voice.set_key(self.settings["hotkey_voice"])
+        self.hotkeys.unregister(HOTKEY_TOGGLE)      # free both first: a swap would otherwise collide
+        self.hotkeys.unregister(HOTKEY_VOICE)
         self.register_hotkeys()
         self.register_voice_hotkey()
         self.apply_autostart()
@@ -381,8 +388,12 @@ class MapleHelperApp:
                     self.main_thread.call.emit(lambda: self.app_update_ready(path))
             threading.Thread(target=app_update, daemon=True).start()
 
+        if self.overlay.busy or getattr(self.overlay, "_syncing", False):
+            return                      # the 3-hourly timer tries again later
+
         def work():
             before = updater.local_version()
+            self.brain.shutdown()       # the warm AI process runs inside the KB folder being replaced
             if updater.update_kb():
                 report.log.info("knowledge base updated to %s", updater.local_version())
                 self.main_thread.call.emit(self.reload_kb)
@@ -390,6 +401,9 @@ class MapleHelperApp:
         threading.Thread(target=work, daemon=True).start()
 
     def announce_update(self, version: str, url: str):
+        if getattr(self, "_mac_announced", None) == version:
+            return                       # the 3-hourly check found the same version again
+        self._mac_announced = version
         t = I18n(self.settings["language"])
         self.toast(t("update_available", version=version), t("update_available_mac"), timeout_ms=20000)
         a = QAction(t("update_available", version=version), self._tray_menu, triggered=lambda: webbrowser.open(url))
@@ -506,6 +520,26 @@ class MapleHelperApp:
 
 
 
+_RUNNING = None
+
+
+def _hold_running_mutex():
+    """Windows: wait while an update installs, then hold a named mutex the installer waits on."""
+    global _RUNNING
+    if sys.platform != "win32":
+        return
+    import ctypes
+    import time
+    k32 = ctypes.windll.kernel32
+    for _ in range(240):                       # up to 2 minutes
+        h = k32.OpenMutexW(0x00100000, False, "MapleHelperSetup")   # SYNCHRONIZE
+        if not h:
+            break
+        k32.CloseHandle(h)
+        time.sleep(0.5)
+    _RUNNING = k32.CreateMutexW(None, False, "MapleHelperRunning")
+
+
 def main():
     if any(a.startswith("--selftest") for a in sys.argv[1:]):
         from . import selftest   # `Maple Helper.exe --selftest <report file>`, see selftest.py
@@ -520,6 +554,7 @@ def main():
     lock = QLockFile(str(DATA_DIR / "app.lock"))
     if not lock.tryLock(100):
         return 0  # already running
+    _hold_running_mutex()
     app = MapleHelperApp(qapp)
     if not app.start():
         return 0

@@ -215,3 +215,18 @@ def test_installer_relaunch_honours_the_launch_args():
     from pathlib import Path
     iss = (Path(__file__).resolve().parent.parent / "packaging" / "installer.iss").read_text(encoding="utf-8")
     assert 'Parameters: "{param:LAUNCHARGS|--background}"' in iss
+
+
+def test_kb_in_use_is_kept_whole_and_retried_later(env, monkeypatch):
+    # Windows refuses to rename a folder another process works in (the AI runs inside the KB)
+    user_kb, _, publish = env
+    publish()
+    real_rename = type(user_kb).rename
+
+    def busy(self, target):
+        if self == user_kb:
+            raise PermissionError("in use")
+        return real_rename(self, target)
+    monkeypatch.setattr(type(user_kb), "rename", busy)
+    assert updater.update_kb() is False and still_old(user_kb)
+    assert not user_kb.with_name("kb.new").exists()
