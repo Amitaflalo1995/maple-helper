@@ -104,7 +104,7 @@ h1, h2, h3 { line-height: 1.15; margin: 0; letter-spacing: -0.02em; text-wrap: b
 :lang(he) h1, :lang(he) h2, :lang(he) h3 { letter-spacing: 0; }
 p { margin: 0; text-wrap: pretty; }
 bdi, .ltr { unicode-bidi: isolate; }
-bdi { white-space: nowrap; }
+bdi, .nw { white-space: nowrap; }
 .ltr { direction: ltr; }
 
 :focus-visible {

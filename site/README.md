@@ -74,9 +74,11 @@ newest release, as long as each release keeps the asset names `MapleHelper-Setup
 ## Editing the content
 
 - Text lives directly in the two HTML files. Keep them in step: same sections, same facts.
-- In the Hebrew page, wrap English words inside Hebrew sentences in `<bdi>…</bdi>` (for example
-  `ל-<bdi>MapleStory Classic World</bdi>`), and key names in `<kbd>`. That keeps the word order and
-  punctuation right in right-to-left text.
+- In the Hebrew page, wrap every English word, number, version or file name inside a Hebrew sentence
+  in `<bdi dir="ltr">…</bdi>` (for example `ל-<bdi dir="ltr">MapleStory Classic World</bdi>`), and key
+  names in `<kbd>`. Keep a key and the punctuation right after it together with
+  `<span class="nw"><kbd>F9</kbd>.</span>`. Avoid a leading dot on file types in Hebrew text
+  (write `exe`, not `.exe`): next to Hebrew it reads as a misplaced full stop.
 - The FAQ appears twice in each page: once as the visible `<details>` list and once in the
   `FAQPage` JSON-LD in `<head>`. If you change a question or an answer, change both.
 - Colors are CSS variables at the top of `site.css`. Maple orange `#FF9533` / `#F07A12` is the only
@@ -85,7 +87,9 @@ newest release, as long as each release keeps the asset names `MapleHelper-Setup
 ## Regenerating the screenshots
 
 The screenshots are real renders of the app's Qt widgets (`Overlay`, `WishlistDialog`,
-`SettingsDialog`) made with PySide6 and `widget.grab()`, in Hebrew, light and dark. They were made
+`SettingsDialog`) made with PySide6 and `widget.grab()`, light and dark. `assets/shots/*.webp` show
+the Hebrew app (used by `index.html`); `assets/shots/en/*.webp` show the English app (used by
+`en/index.html`). The English page also has its own social image, `assets/img/og-en.jpg`. They were made
 with a throwaway `APPDATA` folder so no real user data is involved, then cropped to the window's
 rounded edge (the app draws a transparent shadow margin around it) and saved as WebP. Re-render them
 when the app's look changes, keeping the same file names and sizes, or update the `width`/`height`
