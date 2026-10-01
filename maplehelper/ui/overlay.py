@@ -90,6 +90,7 @@ class FocusLineEdit(QLineEdit):
 class Overlay(QWidget):
     wishlist_requested = Signal()
     closed = Signal()
+    update_requested = Signal()
     settings_requested = Signal()
     profile_requested = Signal()
     add_character_requested = Signal()
@@ -186,6 +187,21 @@ class Overlay(QWidget):
         tb.addWidget(self.close_btn)
         lay.addWidget(self.title_bar)
 
+        # a new version is downloaded: one tap installs it and reopens the app
+        self.update_bar = QFrame(objectName="InfoNote")
+        ub = QHBoxLayout(self.update_bar)
+        ub.setContentsMargins(12, 6, 8, 6)
+        ub.setSpacing(10)
+        ub.addWidget(QLabel(theme.ICON["refresh"], objectName="InfoIcon"), 0, Qt.AlignVCenter)
+        self.update_label = QLabel(objectName="InfoText")
+        ub.addWidget(self.update_label, 1)
+        self.update_btn = QPushButton(objectName="Primary")
+        self.update_btn.setCursor(Qt.PointingHandCursor)
+        self.update_btn.clicked.connect(self.update_requested.emit)
+        ub.addWidget(self.update_btn)
+        self.update_bar.hide()
+        lay.addWidget(self.update_bar)
+
         # the character, pinned at the top of the conversation
         self.profile_card = ProfileCard()
         self.profile_card.refresh_requested.connect(self.sync_profile)
@@ -278,6 +294,11 @@ class Overlay(QWidget):
         self.mic_btn.setToolTip(self.t("mic_tip", key=hk_voice))
         self._on_text(self.input.text())
         self.refresh_profile_chip()
+
+    def show_update(self, version: str):
+        self.update_label.setText(bidi.plain(self.t("update_bar", version=version), self.t.rtl))
+        self.update_btn.setText(bidi.plain(self.t("update_now"), self.t.rtl))
+        self.update_bar.show()
 
     def refresh_profile_chip(self):
         WISHLIST.changed.emit()          # the stars follow the active character

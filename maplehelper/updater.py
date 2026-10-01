@@ -157,8 +157,23 @@ def download_app_update(current: str) -> str | None:
     return str(path)
 
 
-def run_installer_silently(path: str) -> None:
+def installer_version(path: str) -> str:
+    """'0.4.0' from '.../MapleHelper-Setup-v0.4.0.exe'."""
+    m = re.search(r"Setup-v?([\d.]+)\.exe$", str(path))
+    return m.group(1) if m else ""
+
+
+def installer_args(path: str, reopen: bool) -> list[str]:
+    # the installer starts the app again when done: in the tray after a quiet update on quit,
+    # with the chat open when the player pressed "Update now" (see [Run] in packaging/installer.iss)
+    args = [path, "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART"]
+    if reopen:
+        args.append("/LAUNCHARGS=--updated")
+    return args
+
+
+def run_installer_silently(path: str, reopen: bool = False) -> None:
     """Runs after the app exits; the installer restarts the app when done."""
     import subprocess
-    subprocess.Popen([path, "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART"], close_fds=True,
+    subprocess.Popen(installer_args(path, reopen), close_fds=True,
                      creationflags=0x00000008 | 0x00000200)  # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP

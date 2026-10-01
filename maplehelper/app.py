@@ -99,6 +99,7 @@ class MapleHelperApp:
         self.overlay.settings_requested.connect(self.open_settings)
         self.overlay.wishlist_requested.connect(self.show_wishlist)
         self.overlay.closed.connect(self.maybe_summarize_later)
+        self.overlay.update_requested.connect(self.update_now)
         self.overlay.profile_requested.connect(self.open_settings)
         self.overlay.add_character_requested.connect(self.add_character)
 
@@ -115,7 +116,12 @@ class MapleHelperApp:
 
         self.make_tray()
         self.apply_autostart()
+        self.pending_installer = None
+        self._reopen_after_update = False
         QTimer.singleShot(4000, self.check_kb_update_silently)
+        # a session can run for hours: look again every 3 hours
+        self._update_timer = QTimer(interval=3 * 60 * 60 * 1000, timeout=self.check_kb_update_silently)
+        self._update_timer.start()
         if BACKGROUND_ARG in sys.argv[1:]:
             # started with Windows or by a silent update: stay in the tray until the player asks for the chat
             t = I18n(self.settings["language"])
@@ -232,6 +238,10 @@ class MapleHelperApp:
         a_quit = QAction(t("tray_quit"), menu, triggered=self.qapp.quit)
         menu.addAction(a_show)
         menu.addAction(a_set)
+        if getattr(self, "pending_installer", None):
+            a_upd = QAction(t("update_now_tray", version=updater.installer_version(self.pending_installer)), menu,
+                            triggered=self.update_now)
+            menu.addAction(a_upd)
         menu.addSeparator()
         menu.addAction(a_quit)
         self.tray.setContextMenu(menu)
@@ -305,7 +315,6 @@ class MapleHelperApp:
     # ------------------------------------------------------------------ knowledge base updates
 
     def check_kb_update_silently(self):
-        self.pending_installer = None
         if getattr(sys, "frozen", False) and osapi.IS_MAC:
             # no silent self-update on macOS (the installer is a Windows .exe): point at the new DMG instead
             def mac_update():
@@ -313,12 +322,11 @@ class MapleHelperApp:
                 if rel:
                     self.main_thread.call.emit(lambda: self.announce_update(*rel))
             threading.Thread(target=mac_update, daemon=True).start()
-        elif getattr(sys, "frozen", False):
+        elif getattr(sys, "frozen", False) and not self.pending_installer:
             def app_update():
                 path = updater.download_app_update(__version__)
                 if path:
-                    self.pending_installer = path
-                    self.main_thread.call.emit(lambda: self.toast(I18n(self.settings["language"])("update_ready")))
+                    self.main_thread.call.emit(lambda: self.app_update_ready(path))
             threading.Thread(target=app_update, daemon=True).start()
 
         def work():
@@ -334,6 +342,23 @@ class MapleHelperApp:
         self.toast(t("update_available", version=version), t("update_available_mac"), timeout_ms=20000)
         a = QAction(t("update_available", version=version), self._tray_menu, triggered=lambda: webbrowser.open(url))
         self._tray_menu.insertAction(self._tray_menu.actions()[2], a)   # right under the header
+
+    def app_update_ready(self, path: str):
+        """A newer version is downloaded and verified: offer it at the top of the chat and in the tray."""
+        self.pending_installer = path
+        version = updater.installer_version(path)
+        t = I18n(self.settings["language"])
+        self.overlay.show_update(version)
+        self.toast(t("update_bar", version=version), t("update_ready"))
+        self.tray.hide()
+        self.make_tray()   # adds "Update to X" to the tray menu
+
+    def update_now(self):
+        """Quit; the installer updates in the background and opens the new version with the chat."""
+        if not self.pending_installer:
+            return
+        self._reopen_after_update = True
+        self.qapp.quit()
 
     def update_kb_interactive(self):
         t = I18n(self.settings["language"])
@@ -393,7 +418,7 @@ class MapleHelperApp:
         except Exception:
             pass
         if getattr(self, "pending_installer", None):
-            updater.run_installer_silently(self.pending_installer)
+            updater.run_installer_silently(self.pending_installer, reopen=getattr(self, "_reopen_after_update", False))
 
 
 

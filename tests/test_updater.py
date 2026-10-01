@@ -201,3 +201,17 @@ def test_mac_update_notice_stays_quiet(app_env, kwargs):
     _, _, publish = app_env
     publish(**kwargs)
     assert updater.newer_release("0.3.0") is None
+
+
+def test_update_now_reopens_the_app_with_the_chat():
+    path = r"C:\x\updates\MapleHelper-Setup-v0.4.0.exe"
+    assert updater.installer_version(path) == "0.4.0"
+    assert updater.installer_args(path, reopen=True)[-1] == "/LAUNCHARGS=--updated"
+    # an update on quit restarts quietly in the tray (the installer's default)
+    assert not any(a.startswith("/LAUNCHARGS") for a in updater.installer_args(path, reopen=False))
+
+
+def test_installer_relaunch_honours_the_launch_args():
+    from pathlib import Path
+    iss = (Path(__file__).resolve().parent.parent / "packaging" / "installer.iss").read_text(encoding="utf-8")
+    assert 'Parameters: "{param:LAUNCHARGS|--background}"' in iss

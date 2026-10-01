@@ -69,8 +69,9 @@ Name: "{autodesktop}\{#AppName}"; Filename: "{app}\Maple Helper.exe"; Tasks: des
 
 [Run]
 Filename: "{app}\Maple Helper.exe"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent
-; after a silent self-update, start the app again (in the tray: the player closed it, don't pop the chat)
-Filename: "{app}\Maple Helper.exe"; Parameters: "--background"; Flags: nowait; Check: WizardSilent
+; after a silent self-update, start the app again: in the tray when it updated on quit (the player closed it),
+; with the chat open after "Update now" (the app passes /LAUNCHARGS=--updated)
+Filename: "{app}\Maple Helper.exe"; Parameters: "{param:LAUNCHARGS|--background}"; Flags: nowait; Check: WizardSilent
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}"
