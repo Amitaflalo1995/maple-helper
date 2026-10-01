@@ -41,7 +41,7 @@ class GuideRow(QFrame):
         col = QVBoxLayout()
         col.setSpacing(2)
         align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute
-        title = QLabel(g["title"], objectName="CardName")
+        title = QLabel(bidi.plain(guides.title(g["key"], g["title"], t.lang), rtl), objectName="CardName")
         title.setWordWrap(True)
         title.setAlignment(align)
         col.addWidget(title)
@@ -130,7 +130,8 @@ class GuidesDialog(GlassDialog):
         q = self.search.text().strip().lower()
         cat = self.cats.checkedButton().property("cat")
         if q:
-            shown = [g for g in self.all if q in g["title"].lower() or q in self.kb.page(g["key"]).lower()]
+            shown = [g for g in self.all if q in g["title"].lower() or q in self.kb.page(g["key"]).lower()
+                     or q in guides.text_of(g["key"], self.t.lang).lower()]
         elif cat == "for_you":
             by_key = {g["key"]: g for g in self.all}
             shown = [by_key[k] for k in self.picks if k in by_key]
@@ -179,6 +180,13 @@ class GuidesDialog(GlassDialog):
         actions.addWidget(web)
         actions.addStretch(1)
         lay.addLayout(actions)
+        self.lang_btn = QPushButton(objectName="Link")
+        self.lang_btn.setCursor(Qt.PointingHandCursor)
+        self.lang_btn.clicked.connect(lambda: self.open_guide(self._reading, english=not self._english))
+        actions.insertWidget(actions.count() - 1, self.lang_btn)
+        self.stale = QLabel(objectName="RowHint")
+        self.stale.setWordWrap(True)
+        lay.addWidget(self.stale)
         self.sum_box = QLabel(objectName="InfoText")
         self.sum_box.setWordWrap(True)
         self.sum_box.setTextInteractionFlags(Qt.TextSelectableByMouse)
@@ -194,15 +202,29 @@ class GuidesDialog(GlassDialog):
         lay.addWidget(self.browser, 1)
         return w
 
-    def open_guide(self, key: str):
+    def open_guide(self, key: str, english: bool = False):
         t = self.t
         self._reading = key
-        g = guides.parse(key, self.kb.page(key))
-        self.r_title.setText(g.title)
+        page = self.kb.page(key)
+        g, translated, stale = guides.localized(key, page, "en" if english else t.lang)
+        self._english = not translated
+        rtl = translated and t.rtl
+        self.r_title.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
+        self.r_title.setText(bidi.plain(g.title, rtl))
         meta = t(f"gcat_{guides.category(key)}") + (f" · {t('g_minutes', n=g.minutes)}" if g.minutes else "")
         self.r_meta.setText(bidi.plain(meta, t.rtl))
-        labels = {"pros": "Pros", "cons": "Cons"}
-        self.browser.setHtml(f"<p><i>{g.intro}</i></p>" + guides.to_html(g, labels))
+        has_translation = guides.translation(key, t.lang) is not None
+        self.lang_btn.setVisible(has_translation)
+        self.lang_btn.setText(bidi.plain(t("g_read_he" if self._english else "g_read_en"), t.rtl))
+        self.stale.setVisible(translated and stale)
+        self.stale.setText(bidi.plain(t("g_stale"), t.rtl))
+        labels = {"pros": t("g_pros") if rtl else "Pros", "cons": t("g_cons") if rtl else "Cons"}
+        self.browser.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
+        # table cells take their direction from the document, not from the cell's dir attribute
+        opt = self.browser.document().defaultTextOption()
+        opt.setTextDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
+        self.browser.document().setDefaultTextOption(opt)
+        self.browser.setHtml(guides.to_html(g, labels, rtl))
         self.sum_frame.hide()
         self.sum_btn.setEnabled(True)
         cached = guides.summary_path(key, t.lang, self.kb.page(key))

@@ -7,12 +7,15 @@ from __future__ import annotations
 
 import hashlib
 import html
+import json
 import re
 from dataclasses import dataclass, field
 
-from .store import DATA_DIR
+from . import bidi
+from .store import ASSETS, DATA_DIR
 
 SUMMARIES = DATA_DIR / "guide_summaries"
+TRANSLATIONS = ASSETS / "guides"     # <lang>/<slug>.json, translated once and shipped with the app
 CATEGORIES = ["for_you", "classes", "leveling", "mechanics", "general"]
 LEVELING = {"best-grind-maps-every-level", "exp-table-level-1-to-100", "hp-mp-gain-explained",
             "kerning-city-party-quest-kpq-guide", "beginners-guide-first-steps-in-maple-world",
@@ -110,36 +113,88 @@ def parse(key: str, page: str) -> Guide:
     return g
 
 
-def _table_html(rows: list[list[str]]) -> str:
-    esc = html.escape
+def _cell(text: str, rtl: bool) -> str:
+    """Escaped text; in a Hebrew guide, English names and numbers stay whole blocks."""
+    # any Hebrew in it makes it a Hebrew line, even when it opens with an English name ("Warrior, ג'וב 1")
+    return html.escape(bidi.plain(text, True) if rtl and bidi._RTL.search(text) else text)
+
+
+def _table_html(rows: list[list[str]], rtl: bool = False) -> str:
     head, *body = rows
-    return ("<table cellspacing='0' cellpadding='4'><tr>" + "".join(f"<th>{esc(c)}</th>" for c in head) + "</tr>"
-            + "".join("<tr>" + "".join(f"<td>{esc(c)}</td>" for c in r) + "</tr>" for r in body) + "</table>")
+    attrs = " dir='rtl' align='right'" if rtl else ""
+    cell = "<p dir='rtl' align='right' style='margin:0'>{}</p>" if rtl else "{}"     # Qt sets direction per paragraph
+    return (f"<table cellspacing='0' cellpadding='4'{attrs}><tr>"
+            + "".join(f"<th>{cell.format(_cell(c, rtl))}</th>" for c in head) + "</tr>"
+            + "".join("<tr>" + "".join(f"<td>{cell.format(_cell(c, rtl))}</td>" for c in r) + "</tr>" for r in body)
+            + "</table>")
 
 
-def to_html(g: Guide, labels: dict) -> str:
-    """Readable HTML for QTextBrowser: headings, paragraphs, and real tables for "a | b | c" rows."""
-    esc = html.escape
+def to_html(g: Guide, labels: dict, rtl: bool = False) -> str:
+    """Readable HTML for QTextBrowser: headings, paragraphs, and real tables for "a | b | c" rows.
+    A Hebrew guide reads right to left, with English game names kept as whole blocks."""
+    side = " dir='rtl' align='right'" if rtl else ""
     out = []
-    if g.pros or g.cons:
-        for name, items in ((labels["pros"], g.pros), (labels["cons"], g.cons)):
-            if items:
-                out.append(f"<h3>{esc(name)}</h3><ul>" + "".join(f"<li>{esc(i)}</li>" for i in items) + "</ul>")
+
+    def para(text: str) -> str:
+        return bidi.paragraph_html(text, "rtl" if rtl and bidi.direction(text) == "rtl" else None)
+    if g.intro:
+        out.append(f"<p{side}><i>{_cell(g.intro, rtl)}</i></p>")
+    for name, items in ((labels["pros"], g.pros), (labels["cons"], g.cons)):
+        if items:
+            out.append(f"<h3{side}>{html.escape(name)}</h3><ul{side}>"
+                       + "".join(f"<li>{_cell(i, rtl)}</li>" for i in items) + "</ul>")
     for heading, lines in g.sections:
         if heading:
-            out.append(f"<h3>{esc(heading)}</h3>")
+            out.append(f"<h3{side}>{_cell(heading, rtl)}</h3>")
         table: list[list[str]] = []
         for ln in lines:
             if " | " in ln:
-                table.append([c.strip() for c in ln.split(" | ")])
+                # some tables open with an empty icon column: "| Skill | Class | ..."
+                table.append([c.strip() for c in ln.strip().strip("|").split(" | ")])
                 continue
             if table:
-                out.append(_table_html(table))
+                out.append(_table_html(table, rtl))
                 table = []
-            out.append(f"<p>{esc(ln)}</p>")
+            out.append(para(ln))
         if table:
-            out.append(_table_html(table))
+            out.append(_table_html(table, rtl))
     return "\n".join(out)
+
+
+def page_hash(page: str) -> str:
+    return hashlib.sha1(page.encode("utf-8")).hexdigest()[:12]
+
+
+def translation(key: str, lang: str) -> dict | None:
+    """The shipped translation of a guide, or None (English is the original)."""
+    if lang == "en":
+        return None
+    path = TRANSLATIONS / lang / f"{key.split('/', 1)[1]}.json"
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def localized(key: str, page: str, lang: str) -> tuple[Guide, bool, bool]:
+    """(guide in the player's language when translated, translated?, English changed since the translation?)"""
+    tr = translation(key, lang)
+    if not tr:
+        return parse(key, page), False, False
+    g = Guide(key, tr.get("title") or key, tr.get("intro", ""), parse(key, page).minutes, tr.get("pros", []),
+              tr.get("cons", []), [(s.get("heading", ""), s.get("lines", [])) for s in tr.get("sections", [])])
+    return g, True, tr.get("source_hash") != page_hash(page)
+
+
+def title(key: str, fallback: str, lang: str) -> str:
+    tr = translation(key, lang)
+    return (tr or {}).get("title") or fallback
+
+
+def text_of(key: str, lang: str) -> str:
+    """All the translated text of a guide, for search."""
+    tr = translation(key, lang)
+    return json.dumps(tr, ensure_ascii=False) if tr else ""
 
 
 def all_guides(kb) -> list[dict]:
