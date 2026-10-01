@@ -28,6 +28,34 @@ TOOLS_NOTE = ("\nTools: you read the knowledge base with read-only shell command
               "(rg, grep, Select-String, Get-Content, cat). You cannot write files or use the network.")
 
 
+def store_apps() -> list[Path]:
+    """codex.exe inside OpenAI's desktop app from the Microsoft Store (the "ChatGPT"/Codex app), newest first.
+    Its folder (WindowsApps) can't be listed, but Windows records each installed package in the registry."""
+    try:
+        import winreg
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Classes\Local Settings\Software\Microsoft"
+                                                       r"\Windows\CurrentVersion\AppModel\Repository\Packages")
+    except (ImportError, OSError):
+        return []
+    found = []
+    i = 0
+    while True:
+        try:
+            name = winreg.EnumKey(key, i)
+        except OSError:
+            break
+        i += 1
+        if not name.startswith("OpenAI."):
+            continue
+        try:
+            root = winreg.QueryValueEx(winreg.OpenKey(key, name), "PackageRootFolder")[0]
+        except OSError:
+            continue
+        version = tuple(int(x) for x in name.split("_")[1].split(".") if x.isdigit()) if "_" in name else ()
+        found.append((version, Path(root) / "app" / "resources" / "codex.exe"))
+    return [p for _, p in sorted(found, reverse=True)]
+
+
 def find_windows() -> str | None:
     # only a real .exe: an npm .cmd shim runs through cmd.exe, which mangles the quoted instructions
     local, appdata = os.environ.get("LOCALAPPDATA", ""), os.environ.get("APPDATA", "")
@@ -36,6 +64,7 @@ def find_windows() -> str | None:
         Path(local) / "Programs" / "OpenAI" / "Codex" / "bin" / "codex.exe",
         vendor / "x86_64-pc-windows-msvc" / "codex" / "codex.exe",
         vendor / "aarch64-pc-windows-msvc" / "codex" / "codex.exe",
+        *store_apps(),
     ])
 
 
