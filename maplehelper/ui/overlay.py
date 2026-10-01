@@ -17,8 +17,8 @@ from ..store import ASSETS, History, Profiles, Settings
 from . import theme
 from .glass import paint_glass
 from .minibubble import MiniBubble
-from .widgets import (SELECTION, Bubble, BubbleRow, DropGroupCard, EntityCard, ProfileCard, SystemLine, TileGrid,
-                      character_image)
+from .widgets import (SELECTION, Bubble, BubbleRow, DropGroupCard, EntityCard, NoticeCard, ProfileCard, SystemLine,
+                      TileGrid, character_image)
 
 
 
@@ -508,6 +508,11 @@ class Overlay(QWidget):
 
     def add_system(self, text: str):
         self._add_widget(SystemLine(text))
+
+    def add_notice(self, text: str, action: str, on_click) -> None:
+        card = NoticeCard(text, action, self.t.rtl)
+        card.clicked.connect(on_click)
+        self._add_widget(card)
 
     def add_cards(self, keys: list[str]):
         if len(keys) <= 2:
