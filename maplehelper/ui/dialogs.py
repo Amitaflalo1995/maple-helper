@@ -494,6 +494,7 @@ class SettingsDialog(GlassDialog):
     changed = Signal()
     update_kb_requested = Signal()
     history_cleared = Signal()
+    report_requested = Signal()
     account_changed = Signal()
     patch_notes_requested = Signal()
 
@@ -607,6 +608,10 @@ class SettingsDialog(GlassDialog):
         notes.setCursor(Qt.PointingHandCursor)
         notes.clicked.connect(self.patch_notes_requested.emit)
         sec.add_widget(notes)
+        report_btn = QPushButton(t("report_problem"), objectName="Link")
+        report_btn.setCursor(Qt.PointingHandCursor)
+        report_btn.clicked.connect(self.report_requested.emit)
+        sec.add_widget(report_btn)
         clear = QPushButton(t("clear_history"), objectName="LinkDanger")
         clear.setCursor(Qt.PointingHandCursor)
         clear.clicked.connect(self._clear_history)

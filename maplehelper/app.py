@@ -9,7 +9,7 @@ from PySide6.QtCore import QLockFile, QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
-from . import APP_NAME, __version__, claude_setup, osapi, updater
+from . import APP_NAME, __version__, claude_setup, osapi, report, updater
 from .brain import Brain
 from .i18n import I18n
 from .kb import KnowledgeBase
@@ -226,6 +226,7 @@ class MapleHelperApp:
         dlg.changed.connect(self.on_settings_changed)
         dlg.update_kb_requested.connect(self.update_kb_interactive)
         dlg.history_cleared.connect(self.on_history_cleared)
+        dlg.report_requested.connect(self.make_report)
         dlg.account_changed.connect(self.on_account_changed)
         dlg.patch_notes_requested.connect(lambda: self.show_patch_notes())
         self.bring_dialogs_forward()
@@ -245,6 +246,20 @@ class MapleHelperApp:
         self.brain.api_key = claude_setup.load_api_key() if self.settings["api_key_fallback"] else None
         self.brain.shutdown()
         threading.Thread(target=self.brain.prewarm, daemon=True).start()
+
+    def make_report(self):
+        """Zip the log and diagnostics onto the desktop and show the file, ready to send."""
+        import subprocess
+        from pathlib import Path
+        from PySide6.QtCore import QStandardPaths
+        t = I18n(self.settings["language"])
+        info = report.system_info(__version__, updater.local_version(), claude_setup.status())
+        desktop = Path(QStandardPaths.writableLocation(QStandardPaths.DesktopLocation) or Path.home())
+        path = report.build_report(desktop, info, dict(self.settings.data))
+        report.log.info("problem report written: %s", path.name)
+        # show the file, selected, in Explorer / Finder
+        subprocess.Popen(["explorer", "/select,", str(path)] if sys.platform == "win32" else ["open", "-R", str(path)])
+        self.toast(t("report_saved"), t("report_saved_body", name=path.name), timeout_ms=12000)
 
     def on_history_cleared(self):
         self.overlay.clear_feed()
@@ -289,6 +304,7 @@ class MapleHelperApp:
         def work():
             before = updater.local_version()
             if updater.update_kb():
+                report.log.info("knowledge base updated to %s", updater.local_version())
                 self.main_thread.call.emit(self.reload_kb)
                 self.main_thread.call.emit(lambda: self.kb_updated(before))
         threading.Thread(target=work, daemon=True).start()
@@ -353,6 +369,8 @@ def main():
         from . import selftest   # `Maple Helper.exe --selftest <report file>`, see selftest.py
         return selftest.main(sys.argv[1:])
     osapi.prepare_process()
+    report.setup_logging()
+    report.log.info("Maple Helper %s starting on %s (%s)", __version__, sys.platform, " ".join(sys.argv[1:]) or "no args")
     qapp = QApplication(sys.argv)
     qapp.setStyle("Fusion")   # the native Windows 11 style ignores rounded corners on buttons
     qapp.setApplicationName(APP_NAME)

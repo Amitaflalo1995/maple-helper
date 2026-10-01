@@ -676,6 +676,8 @@ class Overlay(QWidget):
         self.busy = False
         self._on_text(self.input.text())
         if ans.error:
+            import logging
+            logging.getLogger(__name__).warning("answer failed: %s", ans.error)
             key = f"err_{ans.error}" if ans.error in ("offline", "not_logged_in", "usage_limit",
                                                       "claude_not_installed") else "err_generic"
             self._pending_bubble.set_text(self.t(key))
