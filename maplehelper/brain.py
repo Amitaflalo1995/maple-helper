@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 import os
 import re
 import shutil
@@ -20,6 +21,8 @@ from pathlib import Path
 
 from .kb import KnowledgeBase
 from .store import Character, History
+
+log = logging.getLogger(__name__)
 
 META = "@@META@@"
 REVERSE_WORDS = re.compile(r"(מאיז[הו]|מאילו|איזה|אילו)\s+מפלצ|מי\s+מפיל|which\s+monsters?|who\s+drops|what\s+drops", re.I)
@@ -322,6 +325,7 @@ class Brain:
         try:
             self._proc = self._take_warm() or self._spawn()
         except OSError as e:
+            log.error("could not start Claude Code: %s", e)
             return Answer(error=f"launch_failed: {e}")
         try:
             self._proc.stdin.write((json.dumps(msg) + "\n").encode("utf-8"))
@@ -355,8 +359,10 @@ class Brain:
         self._proc.wait()
         stderr = self._proc.stderr.read().decode("utf-8", errors="replace")
         if not result:
+            log.warning("no result from Claude Code (exit %s): %s", self._proc.returncode, stderr[-1500:])
             return Answer(error=classify_error(stderr) or "no_result")
         if result.get("is_error"):
+            log.warning("Claude Code error: %s | %s", str(result.get("result", ""))[:500], stderr[-1000:])
             return Answer(error=classify_error(str(result.get("result", "")) + stderr) or "api_error")
         text, meta = split_meta(result.get("result") or current)
         if not meta.get("profile_update"):
