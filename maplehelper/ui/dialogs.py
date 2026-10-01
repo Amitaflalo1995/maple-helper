@@ -250,8 +250,7 @@ class Onboarding(GlassDialog):
             logo.setPixmap(QPixmap(str(wm)).scaled(260, 260, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         logo.setAlignment(Qt.AlignCenter)
         lay.addWidget(logo)
-        lay.addWidget(_title("Maple Helper"), 0, Qt.AlignHCenter)
-        for line in ("העוזר האישי שלכם ב-MapleStory", "Your personal MapleStory assistant"):
+        for line in ("העוזר האישי שלכם ב-MapleStory Classic", "Your personal MapleStory Classic assistant"):
             lb = _body(line)
             lb.setAlignment(Qt.AlignHCenter)
             lay.addWidget(lb)
