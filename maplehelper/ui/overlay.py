@@ -9,16 +9,17 @@ from PySide6.QtGui import QAction, QGuiApplication, QIcon, QPainterPath, QPixmap
 from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QMenu, QPushButton,
                                QScrollArea, QSizeGrip, QToolButton, QVBoxLayout, QWidget)
 
-from .. import __version__, bidi, osapi
+from .. import __version__, bidi, osapi, quick
 from ..brain import Answer, Brain
 from ..i18n import STRINGS, I18n
 from ..kb import KnowledgeBase
+from ..session import SessionStats, lines as session_lines, questions as session_questions
 from ..store import ASSETS, History, Profiles, Settings
 from . import theme
 from .glass import paint_glass
 from .minibubble import MiniBubble
-from .widgets import (SELECTION, WISHLIST, Bubble, BubbleRow, DropGroupCard, EntityCard, NoticeCard, ProfileCard, SystemLine,
-                      TileGrid, character_image)
+from .widgets import (SELECTION, WISHLIST, Bubble, BubbleRow, DropGroupCard, EntityCard, NoticeCard, ProfileCard,
+                      SessionCard, SystemLine, TileGrid, character_image)
 
 
 
@@ -86,6 +87,8 @@ class FocusLineEdit(QLineEdit):
 
 class Overlay(QWidget):
     wishlist_requested = Signal()
+    closed = Signal()
+    update_requested = Signal()
     settings_requested = Signal()
     profile_requested = Signal()
     add_character_requested = Signal()
@@ -106,6 +109,7 @@ class Overlay(QWidget):
         self._thread: QThread | None = None
         self._pending_bubble: Bubble | None = None
         self._session_started: float | None = None
+        self.stats: SessionStats | None = None
         self._anim: QParallelAnimationGroup | None = None
         self.bubble = MiniBubble()
         self.bubble.clicked.connect(self.restore_from_bubble)
@@ -180,6 +184,21 @@ class Overlay(QWidget):
         self.close_btn.clicked.connect(self.close_overlay)
         tb.addWidget(self.close_btn)
         lay.addWidget(self.title_bar)
+
+        # a new version is downloaded: one tap installs it and reopens the app
+        self.update_bar = QFrame(objectName="InfoNote")
+        ub = QHBoxLayout(self.update_bar)
+        ub.setContentsMargins(12, 6, 8, 6)
+        ub.setSpacing(10)
+        ub.addWidget(QLabel(theme.ICON["refresh"], objectName="InfoIcon"), 0, Qt.AlignVCenter)
+        self.update_label = QLabel(objectName="InfoText")
+        ub.addWidget(self.update_label, 1)
+        self.update_btn = QPushButton(objectName="Primary")
+        self.update_btn.setCursor(Qt.PointingHandCursor)
+        self.update_btn.clicked.connect(self.update_requested.emit)
+        ub.addWidget(self.update_btn)
+        self.update_bar.hide()
+        lay.addWidget(self.update_bar)
 
         # the character, pinned at the top of the conversation
         self.profile_card = ProfileCard()
@@ -273,6 +292,11 @@ class Overlay(QWidget):
         self.mic_btn.setToolTip(self.t("mic_tip", key=hk_voice))
         self._on_text(self.input.text())
         self.refresh_profile_chip()
+
+    def show_update(self, version: str):
+        self.update_label.setText(bidi.plain(self.t("update_bar", version=version), self.t.rtl))
+        self.update_btn.setText(bidi.plain(self.t("update_now"), self.t.rtl))
+        self.update_bar.show()
 
     def refresh_profile_chip(self):
         WISHLIST.changed.emit()          # the stars follow the active character
@@ -391,6 +415,9 @@ class Overlay(QWidget):
             self.place_default(game_hwnd)
         if self._session_started is None:
             self._session_started = time.time()
+            self.stats = SessionStats()
+            self.stats.touch(self.profiles.active)
+            self._show_last_session()
         self.setWindowOpacity(0.0)
         self.show()
         self.raise_()
@@ -400,10 +427,27 @@ class Overlay(QWidget):
         self.input.setFocus()
         self._materialize(True)
 
+    def _show_last_session(self):
+        """A new session starts: first, what happened in the previous one."""
+        last = self.settings["last_session"]
+        if not last:
+            return
+        self.settings["last_session"] = None
+
+        def details():
+            rows = []
+            for name, asked in session_questions(last, History).items():
+                rows.append((self.t("sess_asked", name=name), "CardName"))
+                rows += [("• " + q, "CardStat") for q in asked]
+            return rows or [(self.t("sess_no_details"), "CardStat")]
+        self._add_widget(SessionCard(self.t("sess_title", minutes=last["minutes"]), session_lines(last, self.t),
+                                     self.t.rtl, details, self.t("sess_more"), self.t("sess_less")))
+
     def close_overlay(self):
         self.bubble.hide()
         if not self.isVisible():
             return
+        self.closed.emit()
         def done():
             self.hide()
             self.setWindowOpacity(1.0)
@@ -573,20 +617,30 @@ class Overlay(QWidget):
             self.input.clear()
             self.ask(q)
 
-    def ask(self, question: str):
+    def ask(self, question: str, force_claude: bool = False):
         if self.busy or not question.strip():
             return
         c = self.profiles.active
         history = History(c.id) if c else None
         focus = list(self.focus_keys)
         focus_name = ", ".join(self.kb.get(k)["name"] for k in focus)
-        self.add_bubble(question, "user", focus_name)
+        if not force_claude:          # "Ask Claude anyway" re-asks a question already in the chat
+            self.add_bubble(question, "user", focus_name)
+            if self.stats:
+                self.stats.question(c)     # once per question, however it gets answered
+            if not focus and self.settings["instant_answers"]:
+                qa = quick.answer(question, self.kb, self.t)
+                if qa:
+                    if history:
+                        history.append("user", question)
+                    self._show_quick(qa, question, history)
+                    return
         shot = None if self.shot_used else self.shot
         self._question_shot = shot
         if shot is None and not self.shot_used and not self.game_hwnd:
             self.add_system(self.t("no_game"))
         self.shot_used = True
-        if history:
+        if history and not force_claude:
             history.append("user", f"[about {focus_name}] {question}" if focus_name else question)
         self._anchor = None
         self._follow = True
@@ -605,6 +659,29 @@ class Overlay(QWidget):
         self._worker.done.connect(self._on_done_main)
         self._worker.done.connect(self._thread.quit)
         self._thread.start()
+
+    def _show_quick(self, qa, question: str, history):
+        """An instant answer from the KB, with the way to Claude one tap away."""
+        self._anchor = None
+        self._follow = True
+        self.add_bubble(qa.text, "assistant")
+        row = QWidget()
+        rl = QHBoxLayout(row)
+        rl.setContentsMargins(4, 0, 4, 0)
+        rl.setSpacing(8)
+        rl.addWidget(QLabel(bidi.plain(self.t("quick_badge"), self.t.rtl), objectName="SystemLine"))
+        again = QPushButton(bidi.plain(self.t("quick_ask_claude"), self.t.rtl), objectName="Link")
+        again.setCursor(Qt.PointingHandCursor)
+        again.clicked.connect(lambda: (again.setEnabled(False), self.ask(question, force_claude=True)))
+        rl.addWidget(again)
+        rl.addStretch(1)
+        self._add_widget(row)
+        if history:
+            history.append("assistant", qa.text, qa.entities)
+        for g in qa.drop_groups:
+            self._add_widget(DropGroupCard(self.kb, g["monster"], g["items"]))
+        if qa.entities and not qa.drop_groups:     # the drop groups already show the item
+            self.add_cards(qa.entities)
 
     def _on_range(self, _lo: int, hi: int):
         bar = self.scroll.verticalScrollBar()
@@ -683,6 +760,8 @@ class Overlay(QWidget):
         self.busy = False
         self._on_text(self.input.text())
         if ans.error:
+            import logging
+            logging.getLogger(__name__).warning("answer failed: %s", ans.error)
             key = f"err_{ans.error}" if ans.error in ("offline", "not_logged_in", "usage_limit",
                                                       "claude_not_installed") else "err_generic"
             self._pending_bubble.set_text(self.t(key))
@@ -744,6 +823,8 @@ class Overlay(QWidget):
                   "quest+": "quest_started", "quest-": "quest_done", "note": "note"}
         for field, value in changes:
             self.add_system(self.t("profile_updated", what=f"{self.t(labels[field])} {value}"))
+            if self.stats:
+                self.stats.change(self.profiles.active, field, value)
         if changes:
             self.refresh_profile_chip()
 
@@ -769,6 +850,13 @@ class Overlay(QWidget):
             self.input.setText(text)
             self.input.setFocus()
 
+    def save_session_summary(self):
+        if self.stats:
+            summary = self.stats.summary(self.profiles)
+            if summary:
+                self.settings["last_session"] = summary
+            self.stats = None
+
     def end_session(self) -> str:
         """Transcript of this session (for the long-term summary)."""
         c = self.profiles.active
@@ -776,4 +864,5 @@ class Overlay(QWidget):
             return ""
         recent = [r for r in History(c.id).recent(60) if r["t"] >= self._session_started]
         self._session_started = None
+        self.save_session_summary()
         return "\n".join(f"{r['role']}: {r['text']}" for r in recent)

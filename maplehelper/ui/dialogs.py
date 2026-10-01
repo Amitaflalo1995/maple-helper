@@ -494,8 +494,10 @@ class SettingsDialog(GlassDialog):
     changed = Signal()
     update_kb_requested = Signal()
     history_cleared = Signal()
+    report_requested = Signal()
     account_changed = Signal()
     patch_notes_requested = Signal()
+    whats_new_requested = Signal()
 
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, stylesheet_fn):
         self.t = t = I18n(settings["language"] or "he")
@@ -551,6 +553,8 @@ class SettingsDialog(GlassDialog):
         sec = Section(t("sec_answers"), rtl)
         self.length = Segmented([(t("short"), "short"), (t("detailed"), "detailed")], settings["answer_length"], rtl)
         sec.add_row(t("answer_length"), self.length)
+        self.instant = Switch(settings["instant_answers"])
+        sec.add_row(t("instant_answers"), self.instant, hint=t("instant_answers_hint"))
         lay.addWidget(sec)
 
         # privacy & system
@@ -607,6 +611,14 @@ class SettingsDialog(GlassDialog):
         notes.setCursor(Qt.PointingHandCursor)
         notes.clicked.connect(self.patch_notes_requested.emit)
         sec.add_widget(notes)
+        news = QPushButton(t("whats_new"), objectName="Link")
+        news.setCursor(Qt.PointingHandCursor)
+        news.clicked.connect(self.whats_new_requested.emit)
+        sec.add_widget(news)
+        report_btn = QPushButton(t("report_problem"), objectName="Link")
+        report_btn.setCursor(Qt.PointingHandCursor)
+        report_btn.clicked.connect(self.report_requested.emit)
+        sec.add_widget(report_btn)
         clear = QPushButton(t("clear_history"), objectName="LinkDanger")
         clear.setCursor(Qt.PointingHandCursor)
         clear.clicked.connect(self._clear_history)
@@ -779,6 +791,7 @@ class SettingsDialog(GlassDialog):
             "hotkey_toggle": self.hk_toggle.currentText(),
             "hotkey_voice": self.hk_voice.currentText(),
             "voice_send_immediately": self.voice_send.isChecked(),
+            "instant_answers": self.instant.isChecked(),
             "answer_length": self.length.value(),
             "start_with_windows": self.autostart.isChecked(),
         })

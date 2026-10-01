@@ -1,0 +1,38 @@
+[
+ {
+  "version": "0.4.0",
+  "he": [
+   "כשיוצאת גרסה חדשה מופיע בראש הצ'אט פס \"עדכן עכשיו\": לחיצה אחת מעדכנת ופותחת את הגרסה החדשה.",
+   "תשובות מהירות: שאלות פשוטות (HP, דרופים, מי מפיל, איפה) נענות מיד מהמאגר, בלי לחכות ל-Claude.",
+   "פריטים שאני מחפש: לחצו ☆ בכרטיס של פריט, ותראו מי מפיל אותו ואיפה. עדכון מאגר שנוגע בו יופיע בצ'אט.",
+   "סיכום הסשן הקודם: כשפותחים את הצ'אט שוב רואים כמה לבלים עליתם, אילו קווסטים סיימתם ועוד.",
+   "כפתור העתקה בכל כרטיס: הכרטיס נכנס ללוח כתמונה, להדבקה בדיסקורד או בוואטסאפ.",
+   "\"מה חדש\" אחרי כל עדכון (החלון הזה), ו\"דיווח על תקלה\" בהגדרות ← נתונים.",
+   "Maple Helper זמין עכשיו גם ל-Mac."
+  ],
+  "en": [
+   "When a new version is out, an \"Update now\" bar appears at the top of the chat: one tap updates and reopens it.",
+   "Instant answers: simple questions (HP, drops, who drops it, where) are answered at once from the database.",
+   "Items I'm hunting: tap ☆ on an item's card to see who drops it and where; a database update that touches it shows up in the chat.",
+   "Last session summary: when the chat opens again, see the levels you gained, the quests you finished and more.",
+   "A copy button on every card: the card goes to the clipboard as a picture for Discord or WhatsApp.",
+   "\"What's new\" after every update (this window), and \"Report a problem\" in Settings → Data.",
+   "Maple Helper now runs on Mac too."
+  ]
+ },
+ {
+  "version": "0.3.0",
+  "he": [
+   "החלפת דמות והוספת דמות ישר מכרטיס הדמות בצ'אט.",
+   "פאץ' נוטס למאגר: אחרי עדכון מאגר רואים בדיוק מה נוסף, מה השתנה ומה הוסר.",
+   "מקש הדיבור: לוחצים פעם אחת כדי להתחיל ועוד פעם כדי לסיים.",
+   "מסך פתיחה חדש, ומצב בהיר כברירת מחדל."
+  ],
+  "en": [
+   "Switch or add a character right from the character card in the chat.",
+   "Database patch notes: after an update, see exactly what was added, changed or removed.",
+   "Talk key: press once to start and again to finish.",
+   "A new welcome screen, and the light appearance by default."
+  ]
+ }
+]

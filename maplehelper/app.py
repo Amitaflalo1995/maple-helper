@@ -9,7 +9,7 @@ from PySide6.QtCore import QLockFile, QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
-from . import APP_NAME, __version__, claude_setup, osapi, updater, wishlist
+from . import APP_NAME, __version__, claude_setup, osapi, report, updater, whatsnew, wishlist
 from .brain import Brain
 from .i18n import I18n
 from .kb import KnowledgeBase
@@ -17,7 +17,7 @@ from .store import ASSETS, DATA_DIR, History, Profiles, Settings
 from .ui import theme
 from .ui.dialogs import Onboarding, SettingsDialog
 from .ui.overlay import Overlay
-from .ui.patchnotes import PatchNotesDialog, summary
+from .ui.patchnotes import PatchNotesDialog, WhatsNewDialog, summary
 from .ui.toast import notify
 from .voice import VoiceController
 
@@ -81,6 +81,7 @@ class MapleHelperApp:
             return bool(r)
 
     def start(self) -> bool:
+        fresh_install = not self.settings["onboarding_done"]
         if not self.settings["onboarding_done"]:
             if not self.run_onboarding():
                 return False
@@ -97,6 +98,8 @@ class MapleHelperApp:
         self.overlay.shot_provider = self.capture
         self.overlay.settings_requested.connect(self.open_settings)
         self.overlay.wishlist_requested.connect(self.show_wishlist)
+        self.overlay.closed.connect(self.maybe_summarize_later)
+        self.overlay.update_requested.connect(self.update_now)
         self.overlay.profile_requested.connect(self.open_settings)
         self.overlay.add_character_requested.connect(self.add_character)
 
@@ -113,7 +116,12 @@ class MapleHelperApp:
 
         self.make_tray()
         self.apply_autostart()
+        self.pending_installer = None
+        self._reopen_after_update = False
         QTimer.singleShot(4000, self.check_kb_update_silently)
+        # a session can run for hours: look again every 3 hours
+        self._update_timer = QTimer(interval=3 * 60 * 60 * 1000, timeout=self.check_kb_update_silently)
+        self._update_timer.start()
         if BACKGROUND_ARG in sys.argv[1:]:
             # started with Windows or by a silent update: stay in the tray until the player asks for the chat
             t = I18n(self.settings["language"])
@@ -121,8 +129,25 @@ class MapleHelperApp:
         else:
             QTimer.singleShot(0, lambda: self.overlay.toggle(self.capture))
         QTimer.singleShot(1500, self.check_permissions)
+        self.announce_whats_new(fresh_install)
         self.qapp.aboutToQuit.connect(self.shutdown)
         return True
+
+    def announce_whats_new(self, fresh_install: bool):
+        """First start after an app update: a note in the chat with a "What's new?" button."""
+        seen = self.settings["seen_version"] or ("" if fresh_install else whatsnew.FIRST_TRACKED)
+        self.settings["seen_version"] = __version__
+        if fresh_install:
+            return            # a new player gets the welcome screen, not a changelog
+        notes = whatsnew.since(seen, __version__)
+        if notes:
+            t = I18n(self.settings["language"])
+            self.overlay.add_notice(t("whats_new_notice", version=__version__), t("whats_new_show"),
+                                    lambda: self.show_whats_new(notes))
+
+    def show_whats_new(self, notes: list[dict] | None = None):
+        WhatsNewDialog(notes if notes is not None else whatsnew.load()[:6], self.settings["language"],
+                       self.style()).exec()
 
     def register_hotkeys(self):
         key = self.settings["hotkey_toggle"]
@@ -156,7 +181,6 @@ class MapleHelperApp:
         if hotkey_id == HOTKEY_TOGGLE:
             if self.overlay.isVisible():
                 self.overlay.close_overlay()
-                self.maybe_summarize_later()
             else:
                 self.overlay.toggle(self.capture)   # also restores from the minimized bubble
         elif hotkey_id == HOTKEY_VOICE:
@@ -214,6 +238,10 @@ class MapleHelperApp:
         a_quit = QAction(t("tray_quit"), menu, triggered=self.qapp.quit)
         menu.addAction(a_show)
         menu.addAction(a_set)
+        if getattr(self, "pending_installer", None):
+            a_upd = QAction(t("update_now_tray", version=updater.installer_version(self.pending_installer)), menu,
+                            triggered=self.update_now)
+            menu.addAction(a_upd)
         menu.addSeparator()
         menu.addAction(a_quit)
         self.tray.setContextMenu(menu)
@@ -227,8 +255,10 @@ class MapleHelperApp:
         dlg.changed.connect(self.on_settings_changed)
         dlg.update_kb_requested.connect(self.update_kb_interactive)
         dlg.history_cleared.connect(self.on_history_cleared)
+        dlg.report_requested.connect(self.make_report)
         dlg.account_changed.connect(self.on_account_changed)
         dlg.patch_notes_requested.connect(lambda: self.show_patch_notes())
+        dlg.whats_new_requested.connect(lambda: self.show_whats_new())
         self.bring_dialogs_forward()
         dlg.exec()
         self.overlay.refresh_profile_chip()
@@ -246,6 +276,20 @@ class MapleHelperApp:
         self.brain.api_key = claude_setup.load_api_key() if self.settings["api_key_fallback"] else None
         self.brain.shutdown()
         threading.Thread(target=self.brain.prewarm, daemon=True).start()
+
+    def make_report(self):
+        """Zip the log and diagnostics onto the desktop and show the file, ready to send."""
+        import subprocess
+        from pathlib import Path
+        from PySide6.QtCore import QStandardPaths
+        t = I18n(self.settings["language"])
+        info = report.system_info(__version__, updater.local_version(), claude_setup.status())
+        desktop = Path(QStandardPaths.writableLocation(QStandardPaths.DesktopLocation) or Path.home())
+        path = report.build_report(desktop, info, dict(self.settings.data))
+        report.log.info("problem report written: %s", path.name)
+        # show the file, selected, in Explorer / Finder
+        subprocess.Popen(["explorer", "/select,", str(path)] if sys.platform == "win32" else ["open", "-R", str(path)])
+        self.toast(t("report_saved"), t("report_saved_body", name=path.name), timeout_ms=12000)
 
     def on_history_cleared(self):
         self.overlay.clear_feed()
@@ -271,7 +315,6 @@ class MapleHelperApp:
     # ------------------------------------------------------------------ knowledge base updates
 
     def check_kb_update_silently(self):
-        self.pending_installer = None
         if getattr(sys, "frozen", False) and osapi.IS_MAC:
             # no silent self-update on macOS (the installer is a Windows .exe): point at the new DMG instead
             def mac_update():
@@ -279,17 +322,17 @@ class MapleHelperApp:
                 if rel:
                     self.main_thread.call.emit(lambda: self.announce_update(*rel))
             threading.Thread(target=mac_update, daemon=True).start()
-        elif getattr(sys, "frozen", False):
+        elif getattr(sys, "frozen", False) and not self.pending_installer:
             def app_update():
                 path = updater.download_app_update(__version__)
                 if path:
-                    self.pending_installer = path
-                    self.main_thread.call.emit(lambda: self.toast(I18n(self.settings["language"])("update_ready")))
+                    self.main_thread.call.emit(lambda: self.app_update_ready(path))
             threading.Thread(target=app_update, daemon=True).start()
 
         def work():
             before = updater.local_version()
             if updater.update_kb():
+                report.log.info("knowledge base updated to %s", updater.local_version())
                 self.main_thread.call.emit(self.reload_kb)
                 self.main_thread.call.emit(lambda: self.kb_updated(before))
         threading.Thread(target=work, daemon=True).start()
@@ -299,6 +342,23 @@ class MapleHelperApp:
         self.toast(t("update_available", version=version), t("update_available_mac"), timeout_ms=20000)
         a = QAction(t("update_available", version=version), self._tray_menu, triggered=lambda: webbrowser.open(url))
         self._tray_menu.insertAction(self._tray_menu.actions()[2], a)   # right under the header
+
+    def app_update_ready(self, path: str):
+        """A newer version is downloaded and verified: offer it at the top of the chat and in the tray."""
+        self.pending_installer = path
+        version = updater.installer_version(path)
+        t = I18n(self.settings["language"])
+        self.overlay.show_update(version)
+        self.toast(t("update_bar", version=version), t("update_ready"))
+        self.tray.hide()
+        self.make_tray()   # adds "Update to X" to the tray menu
+
+    def update_now(self):
+        """Quit; the installer updates in the background and opens the new version with the chat."""
+        if not self.pending_installer:
+            return
+        self._reopen_after_update = True
+        self.qapp.quit()
 
     def update_kb_interactive(self):
         t = I18n(self.settings["language"])
@@ -346,6 +406,10 @@ class MapleHelperApp:
 
     def shutdown(self):
         try:
+            self.overlay.save_session_summary()   # quitting ends the session: show it next time
+        except Exception:
+            pass
+        try:
             self.brain.shutdown()
         except Exception:
             pass
@@ -354,7 +418,7 @@ class MapleHelperApp:
         except Exception:
             pass
         if getattr(self, "pending_installer", None):
-            updater.run_installer_silently(self.pending_installer)
+            updater.run_installer_silently(self.pending_installer, reopen=getattr(self, "_reopen_after_update", False))
 
 
 
@@ -363,6 +427,8 @@ def main():
         from . import selftest   # `Maple Helper.exe --selftest <report file>`, see selftest.py
         return selftest.main(sys.argv[1:])
     osapi.prepare_process()
+    report.setup_logging()
+    report.log.info("Maple Helper %s starting on %s (%s)", __version__, sys.platform, " ".join(sys.argv[1:]) or "no args")
     qapp = QApplication(sys.argv)
     qapp.setStyle("Fusion")   # the native Windows 11 style ignores rounded corners on buttons
     qapp.setApplicationName(APP_NAME)
