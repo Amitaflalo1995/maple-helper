@@ -23,6 +23,19 @@ Maple Helper is a desktop assistant for Windows and macOS that puts a chat overl
 
 Use it to look up drops, find quest NPCs, or ask where to train without switching away from the game.
 
+<p align="center">
+  <img src="site/assets/shots/en/mano-light.webp" width="260" alt="The chat: what Mano drops, with a monster card and pictures of its drops">
+  <img src="site/assets/shots/en/guide-light.webp" width="260" alt="The Warrior guide in the app, with class art, pros and cons, and a formula box">
+  <img src="site/assets/shots/en/wishlist-light.webp" width="260" alt="Items I'm looking for, with the monsters that drop each one">
+</p>
+<p align="center">
+  <img src="site/assets/shots/hp-dark.webp" width="260" alt="Hebrew interface in dark mode: an instant answer for Blue Snail's HP">
+  <img src="site/assets/shots/guide-dark.webp" width="260" alt="The Warrior guide in Hebrew, dark mode">
+  <img src="site/assets/shots/en/settings-light.webp" width="260" alt="Settings: appearance, keys, answers, AI account and plan usage">
+</p>
+
+Website: **https://amitaflalo1995.github.io/maple-helper/**
+
 ## Download
 
 **[Download Maple Helper for Windows](https://github.com/Amitaflalo1995/maple-helper/releases/latest/download/MapleHelper-Setup.exe)**, run the installer, and follow the setup screens. The app updates itself and its game database in the background. A portable zip is on the [Releases page](https://github.com/Amitaflalo1995/maple-helper/releases/latest).
@@ -38,6 +51,9 @@ Use it to look up drops, find quest NPCs, or ask where to train without switchin
 - **Visual reference cards:** See images of relevant monsters, items, maps, NPCs, and quests alongside answers, grouped under titles (for example, what a monster drops).
 - **Tag cards:** Tap one or more cards to ask follow-up questions about them, such as "where is it?" or "which one is easier for me?".
 - **Who drops it:** Ask which monsters drop an item and get the answer grouped by monster, with pictures.
+- **Guides library:** 32 full guides (every class, grind maps, the EXP table, the damage formula and more) with skill and item icons, character art, tables and tips, in English and Hebrew. The ones that fit your character come first.
+- **Plan usage:** See how much of your Claude or ChatGPT plan is used, with a heads-up in the chat before the 5-hour limit runs out, and a saver mode.
+- **Items I'm looking for:** Star an item to keep a list of what you hunt, with who drops it and where.
 - **Hebrew and English:** Use either language, including mixed text with English game names.
 - **Local speech recognition:** Transcribe voice input on your computer using ivrit.ai Whisper models.
 
