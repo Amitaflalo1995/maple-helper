@@ -83,7 +83,7 @@
       ],
       "installUrl": "https://github.com/Amitaflalo1995/maple-helper/releases/latest",
       "releaseNotes": "https://github.com/Amitaflalo1995/maple-helper/releases",
-      "softwareRequirements": "Claude Pro or Max plan signed in through Claude Code",
+      "softwareRequirements": "Claude Pro or Max plan (via Claude Code) or a ChatGPT plan with Codex; or an Anthropic or OpenAI API key",
       "image": "https://amitaflalo1995.github.io/maple-helper/assets/img/icon-512.png",
       "screenshot": [
         "https://amitaflalo1995.github.io/maple-helper/assets/shots/en/mano-light.webp",
@@ -103,7 +103,7 @@
           "name": "Does Maple Helper cost anything?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "The app is free and its code is open on GitHub. Claude gives the harder answers, which needs your own Claude Pro or Max plan, or a pay-as-you-go Anthropic API key. Instant answers from the database don't count against your plan."
+            "text": "The app is free and its code is open on GitHub. Claude (or Codex, your choice) gives the harder answers, which needs your own plan: Claude Pro or Max, or ChatGPT with Codex. A pay-as-you-go API key works too. Instant answers from the database don't count against your plan."
           }
         },
         {
@@ -127,7 +127,7 @@
           "name": "Where does the game information come from?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "From NiaMeowDB, used with permission. A copy of the database is kept on your computer and updates itself, and when it does, the app shows you what changed."
+            "text": "From NiaMeowDB's public database, credited in the app. A copy of the database is kept on your computer and updates itself, and when it does, the app shows you what changed."
           }
         },
         {
@@ -140,10 +140,10 @@
         },
         {
           "@type": "Question",
-          "name": "What exactly is sent to Claude?",
+          "name": "What exactly is sent to the AI?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Only when you ask: your question, a screenshot of the game window, and the context needed to answer (your character's details and the recent conversation). Settings, history and voice recordings stay on your computer. When you close a chat, it may be sent once more to summarize it for next time."
+            "text": "Only when you ask, and only to the AI you chose (Anthropic's Claude or OpenAI's Codex): your question, a screenshot of the game window, and the context needed to answer (your character's details, the recent conversation and short summaries of earlier ones). Settings, the full history and voice recordings are kept on your computer. When you close a chat, it may be sent once more to summarize it for next time."
           }
         },
         {
@@ -275,7 +275,7 @@
         <li class="glass reveal">
           <span class="n" aria-hidden="true">2</span>
           <h3>Ask</h3>
-          <p>Type, or hold <kbd>F10</kbd> and talk. When you ask, the app takes a screenshot of the game window so the answer fits what's happening in your game.</p>
+          <p>Type, or press <kbd>F10</kbd> and talk. When the chat opens, the app takes a screenshot of the game window and sends it with your question, so the answer fits what's happening in your game.</p>
         </li>
         <li class="glass reveal">
           <span class="n" aria-hidden="true">3</span>
@@ -353,12 +353,12 @@
 
         <article class="tile third glass reveal">
           <h3><span class="ico"><svg aria-hidden="true"><use href="#i-user"/></svg></span>Your character, kept up to date</h3>
-          <p>No need to update anything by hand. Each time you ask, Maple Helper looks at the game screen and updates your level, job and character picture. Keep several characters, each with its own history.</p>
+          <p>No need to update anything by hand. When the AI answers, Maple Helper looks at the game screen and updates your level, job and character picture. Keep several characters, each with its own history.</p>
         </article>
 
         <article class="tile third glass reveal">
           <h3><span class="ico"><svg aria-hidden="true"><use href="#i-mic"/></svg></span>Ask out loud</h3>
-          <p>Hold <span class="nw"><kbd>F10</kbd>,</span> talk, let go. Speech is transcribed on your computer with ivrit.ai models, which understand Hebrew too, and the recording never leaves it.</p>
+          <p>Press <span class="nw"><kbd>F10</kbd>,</span> talk, press it again. Speech is transcribed on your computer with ivrit.ai models, which understand Hebrew too, and the recording never leaves it.</p>
         </article>
 
         <article class="tile half glass reveal">
@@ -399,14 +399,14 @@
               <div><b>Windows 10 or 11, or macOS 12 or later</b>
               <span>On a Mac you need Apple Silicon (M1 or newer).</span></div></li>
             <li><span class="ico"><svg aria-hidden="true"><use href="#i-chat"/></svg></span>
-              <div><b>A Claude Pro or Max plan</b>
-              <span>Signed in through Claude Code. If you don't have it yet, the app installs it and signs you in. An Anthropic API key works too.</span></div></li>
+              <div><b>A Claude Pro or Max plan, or ChatGPT with Codex</b>
+              <span>Signed in through Claude Code or the Codex CLI. If you don't have it yet, the app installs it and signs you in. An API key works too.</span></div></li>
             <li><span class="ico"><svg aria-hidden="true"><use href="#i-window"/></svg></span>
               <div><b>The game in a window mode</b>
               <span>Borderless or Windowed Fullscreen, so the chat can appear on top of it.</span></div></li>
             <li><span class="ico"><svg aria-hidden="true"><use href="#i-globe"/></svg></span>
               <div><b>An internet connection</b>
-              <span>For Claude's answers and updates. A microphone only if you want to talk.</span></div></li>
+              <span>For the AI's answers and updates. A microphone only if you want to talk.</span></div></li>
           </ul>
         </div>
 
@@ -460,7 +460,7 @@
             <div><span class="ico"><svg aria-hidden="true"><use href="#i-drive"/></svg></span>
               <p><b>Stays on your computer</b><span>Settings, characters, chat history, voice recordings and the game database. No ads, no tracking.</span></p></div>
             <div><span class="ico"><svg aria-hidden="true"><use href="#i-send"/></svg></span>
-              <p><b>Goes to Claude, only when you ask</b><span>Your question, a screenshot of the game window, and the context needed to answer: your character's details and the recent conversation. When you close a chat, it may be sent once more to summarize it for next time.</span></p></div>
+              <p><b>Goes to the AI you chose, only when you ask</b><span>Your question, a screenshot of the game window, and the context needed to answer: your character's details, the recent conversation and short summaries of earlier ones. When you close a chat, it may be sent once more to summarize it for next time.</span></p></div>
             <div><span class="ico"><svg aria-hidden="true"><use href="#i-zap"/></svg></span>
               <p><b>Never sent at all</b><span>Instant answers from the database and voice transcription. Both happen on your computer.</span></p></div>
           </div>
@@ -490,7 +490,7 @@
       <div class="faq">
         <details class="glass reveal">
           <summary><span>Does Maple Helper cost anything?</span></summary>
-          <div class="a"><p>The app is free and its code is open on GitHub. Claude gives the harder answers, which needs your own Claude Pro or Max plan, or a pay-as-you-go Anthropic API key. Instant answers from the database don't count against your plan.</p></div>
+          <div class="a"><p>The app is free and its code is open on GitHub. Claude (or Codex, your choice) gives the harder answers, which needs your own plan: Claude Pro or Max, or ChatGPT with Codex. A pay-as-you-go API key works too. Instant answers from the database don't count against your plan.</p></div>
         </details>
         <details class="glass reveal">
           <summary><span>Can I get banned for using it?</span></summary>
@@ -502,15 +502,15 @@
         </details>
         <details class="glass reveal">
           <summary><span>Where does the game information come from?</span></summary>
-          <div class="a"><p>From <a href="https://meowdb.com">NiaMeowDB</a>, used with permission. A copy of the database is kept on your computer and updates itself, and when it does, the app shows you what changed.</p></div>
+          <div class="a"><p>From <a href="https://meowdb.com">NiaMeowDB</a>'s public database, credited in the app. A copy of the database is kept on your computer and updates itself, and when it does, the app shows you what changed.</p></div>
         </details>
         <details class="glass reveal">
           <summary><span>Does it work on a Mac?</span></summary>
           <div class="a"><p>Yes, on macOS 12 or later with Apple Silicon. MapleStory Classic World has no Mac version, so you run the game through CrossOver, Whisky or a virtual machine, and Maple Helper finds the game window by its title.</p></div>
         </details>
         <details class="glass reveal">
-          <summary><span>What exactly is sent to Claude?</span></summary>
-          <div class="a"><p>Only when you ask: your question, a screenshot of the game window, and the context needed to answer (your character's details and the recent conversation). Settings, history and voice recordings stay on your computer. When you close a chat, it may be sent once more to summarize it for next time.</p></div>
+          <summary><span>What exactly is sent to the AI?</span></summary>
+          <div class="a"><p>Only when you ask, and only to the AI you chose (Anthropic's Claude or OpenAI's Codex): your question, a screenshot of the game window, and the context needed to answer (your character's details, the recent conversation and short summaries of earlier ones). Settings, the full history and voice recordings are kept on your computer. When you close a chat, it may be sent once more to summarize it for next time.</p></div>
         </details>
         <details class="glass reveal">
           <summary><span>How do I update?</span></summary>

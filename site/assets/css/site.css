@@ -685,7 +685,7 @@ section { padding-block: clamp(40px, 6vw, 72px); }
   flex: none;
   width: 12px;
   height: 12px;
-  border-inline-end: 2px solid var(--muted);
+  border-right: 2px solid var(--muted);
   border-bottom: 2px solid var(--muted);
   transform: translateY(-3px) rotate(45deg);
   transition: transform 0.25s var(--ease-out);

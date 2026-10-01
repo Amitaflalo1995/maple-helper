@@ -83,7 +83,7 @@
       ],
       "installUrl": "https://github.com/Amitaflalo1995/maple-helper/releases/latest",
       "releaseNotes": "https://github.com/Amitaflalo1995/maple-helper/releases",
-      "softwareRequirements": "Claude Pro or Max plan signed in through Claude Code",
+      "softwareRequirements": "Claude Pro or Max plan (via Claude Code) or a ChatGPT plan with Codex; or an Anthropic or OpenAI API key",
       "image": "https://amitaflalo1995.github.io/maple-helper/assets/img/icon-512.png",
       "screenshot": [
         "https://amitaflalo1995.github.io/maple-helper/assets/shots/mano-light.webp",
@@ -103,7 +103,7 @@
           "name": "האם Maple Helper עולה כסף?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "האפליקציה חינמית והקוד שלה פתוח ב-GitHub. את התשובות המורכבות נותן Claude, ולשם כך צריך מנוי Claude Pro או Max משלכם, או מפתח Anthropic API בתשלום לפי שימוש. התשובות המיידיות מהמאגר לא נספרות במנוי."
+            "text": "האפליקציה חינמית והקוד שלה פתוח ב-GitHub. את התשובות המורכבות נותן Claude (או Codex, לבחירתכם), ולשם כך צריך מנוי משלכם: Claude Pro או Max, או מנוי ChatGPT עם Codex. אפשר גם מפתח API בתשלום לפי שימוש. התשובות המיידיות מהמאגר לא נספרות במנוי."
           }
         },
         {
@@ -127,7 +127,7 @@
           "name": "מאיפה מגיע המידע על המשחק?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "מהמאגר של NiaMeowDB, בהרשאה. עותק של המאגר נשמר על המחשב ומתעדכן לבד, וכשהוא מתעדכן האפליקציה מראה מה השתנה."
+            "text": "מהמאגר הציבורי של NiaMeowDB, עם קרדיט באפליקציה. עותק של המאגר נשמר על המחשב ומתעדכן לבד, וכשהוא מתעדכן האפליקציה מראה מה השתנה."
           }
         },
         {
@@ -140,10 +140,10 @@
         },
         {
           "@type": "Question",
-          "name": "מה בדיוק נשלח ל-Claude?",
+          "name": "מה בדיוק נשלח ל-AI?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "רק כשאתם שואלים: השאלה, צילום של חלון המשחק, וההקשר שצריך כדי לענות (פרטי הדמות והשיחה האחרונה). הגדרות, היסטוריה והקלטות קול נשארים על המחשב. כשסוגרים שיחה, היא עשויה להישלח פעם אחת כדי לסכם אותה לפעם הבאה."
+            "text": "רק כשאתם שואלים, ורק ל-AI שבחרתם (Claude של Anthropic או Codex של OpenAI): השאלה, צילום של חלון המשחק, וההקשר שצריך כדי לענות (פרטי הדמות, השיחה האחרונה וסיכומים קצרים של שיחות קודמות). ההגדרות, ההיסטוריה המלאה והקלטות הקול נשמרים על המחשב. כשסוגרים שיחה, היא עשויה להישלח פעם אחת כדי לסכם אותה לפעם הבאה."
           }
         },
         {
@@ -275,7 +275,7 @@
         <li class="glass reveal">
           <span class="n" aria-hidden="true">2</span>
           <h3>שואלים</h3>
-          <p>כותבים, או מחזיקים <kbd>F10</kbd> ומדברים. כשאתם שואלים, האפליקציה מצלמת את חלון המשחק, כדי שהתשובה תתאים למה שקורה אצלכם עכשיו.</p>
+          <p>כותבים, או לוחצים <kbd>F10</kbd> ומדברים. כשהצ'אט נפתח האפליקציה מצלמת את חלון המשחק, והצילום נשלח עם השאלה, כדי שהתשובה תתאים למה שקורה אצלכם עכשיו.</p>
         </li>
         <li class="glass reveal">
           <span class="n" aria-hidden="true">3</span>
@@ -353,12 +353,12 @@
 
         <article class="tile third glass reveal">
           <h3><span class="ico"><svg aria-hidden="true"><use href="#i-user"/></svg></span>הדמות מתעדכנת לבד</h3>
-          <p>אין צורך לעדכן ידנית. בכל שאלה <bdi dir="ltr">Maple Helper</bdi> רואה את מסך המשחק ומעדכן את הלבל, הג'וב והתמונה של הדמות. אפשר לנהל כמה דמויות, ולכל אחת היסטוריה משלה.</p>
+          <p>אין צורך לעדכן ידנית. כשה-<bdi dir="ltr">AI</bdi> עונה, <bdi dir="ltr">Maple Helper</bdi> רואה את מסך המשחק ומעדכן את הלבל, הג'וב והתמונה של הדמות. אפשר לנהל כמה דמויות, ולכל אחת היסטוריה משלה.</p>
         </article>
 
         <article class="tile third glass reveal">
           <h3><span class="ico"><svg aria-hidden="true"><use href="#i-mic"/></svg></span>שאלה בקול</h3>
-          <p>מחזיקים <span class="nw"><kbd>F10</kbd>,</span> מדברים ומשחררים. התמלול נעשה על המחשב, עם מודלים של <bdi dir="ltr">ivrit.ai</bdi> שמבינים עברית, וההקלטה לא יוצאת ממנו.</p>
+          <p>לוחצים <span class="nw"><kbd>F10</kbd>,</span> מדברים, ולוחצים שוב לסיום. התמלול נעשה על המחשב, עם מודלים של <bdi dir="ltr">ivrit.ai</bdi> שמבינים עברית, וההקלטה לא יוצאת ממנו.</p>
         </article>
 
         <article class="tile half glass reveal">
@@ -399,14 +399,14 @@
               <div><b><bdi dir="ltr">Windows 10</bdi> או <bdi dir="ltr">11</bdi>, או <bdi dir="ltr">macOS 12</bdi> ומעלה</b>
               <span>ב-<bdi dir="ltr">Mac</bdi> צריך מעבד <bdi dir="ltr">Apple Silicon</bdi> (<bdi dir="ltr">M1</bdi> ומעלה).</span></div></li>
             <li><span class="ico"><svg aria-hidden="true"><use href="#i-chat"/></svg></span>
-              <div><b>מנוי <bdi dir="ltr">Claude Pro</bdi> או <bdi dir="ltr">Max</bdi></b>
-              <span>מחובר דרך <bdi dir="ltr">Claude Code</bdi>. אם עוד לא התקנתם אותו, האפליקציה מתקינה ומחברת אתכם. אפשר גם להשתמש במפתח <bdi dir="ltr">Anthropic API</bdi>.</span></div></li>
+              <div><b>מנוי <bdi dir="ltr">Claude Pro</bdi> או <bdi dir="ltr">Max</bdi>, או <bdi dir="ltr">ChatGPT</bdi> עם <bdi dir="ltr">Codex</bdi></b>
+              <span>מחובר דרך <bdi dir="ltr">Claude Code</bdi> או <bdi dir="ltr">Codex CLI</bdi>. אם עוד לא התקנתם, האפליקציה מתקינה ומחברת אתכם. אפשר גם מפתח <bdi dir="ltr">API</bdi>.</span></div></li>
             <li><span class="ico"><svg aria-hidden="true"><use href="#i-window"/></svg></span>
               <div><b>המשחק במצב חלון</b>
               <span><bdi dir="ltr">Borderless</bdi> או <bdi dir="ltr">Windowed Fullscreen</bdi>, כדי שהצ'אט יוכל להופיע מעליו.</span></div></li>
             <li><span class="ico"><svg aria-hidden="true"><use href="#i-globe"/></svg></span>
               <div><b>חיבור לאינטרנט</b>
-              <span>בשביל התשובות של <bdi dir="ltr">Claude</bdi> והעדכונים. מיקרופון רק אם רוצים לדבר.</span></div></li>
+              <span>בשביל התשובות של ה-<bdi dir="ltr">AI</bdi> והעדכונים. מיקרופון רק אם רוצים לדבר.</span></div></li>
           </ul>
         </div>
 
@@ -422,7 +422,7 @@
             <ol class="install">
               <li><span><b>מורידים את המתקין</b> <a href="https://github.com/Amitaflalo1995/maple-helper/releases/latest/download/MapleHelper-Setup.exe"><bdi dir="ltr">MapleHelper-Setup.exe</bdi></a> ומריצים אותו. לא צריך הרשאות מנהל.</span></li>
               <li><span><b>אם מופיע מסך כחול של <bdi dir="ltr">SmartScreen</bdi></b>, לוחצים על "מידע נוסף" (<bdi dir="ltr">More info</bdi>) ואז על "הפעל בכל זאת" (<bdi dir="ltr">Run anyway</bdi>).</span></li>
-              <li><span><b>עוברים על מסכי ההגדרה:</b> שפה, חיבור ל-<bdi dir="ltr">Claude</bdi> ופרטי הדמות.</span></li>
+              <li><span><b>עוברים על מסכי ההגדרה:</b> שפה, חיבור ל-<bdi dir="ltr">Claude</bdi> או ל-<bdi dir="ltr">Codex</bdi>, ופרטי הדמות.</span></li>
               <li><span><b>פותחים את המשחק ולוחצים <span class="nw"><kbd>F9</kbd>.</span></b></span></li>
             </ol>
             <p class="callout"><svg aria-hidden="true"><use href="#i-info"/></svg>
@@ -460,7 +460,7 @@
             <div><span class="ico"><svg aria-hidden="true"><use href="#i-drive"/></svg></span>
               <p><b>נשאר על המחשב</b><span>הגדרות, דמויות, היסטוריית שיחות, הקלטות קול ומאגר המשחק. אין פרסומות ואין מעקב.</span></p></div>
             <div><span class="ico"><svg aria-hidden="true"><use href="#i-send"/></svg></span>
-              <p><b>נשלח ל-<bdi dir="ltr">Claude</bdi>, רק כשאתם שואלים</b><span>השאלה, צילום של חלון המשחק, וההקשר שצריך כדי לענות: פרטי הדמות והשיחה האחרונה. כשסוגרים שיחה, היא עשויה להישלח פעם אחת כדי לסכם אותה לפעם הבאה.</span></p></div>
+              <p><b>נשלח ל-<bdi dir="ltr">AI</bdi> שבחרתם, רק כשאתם שואלים</b><span>השאלה, צילום של חלון המשחק, וההקשר שצריך כדי לענות: פרטי הדמות, השיחה האחרונה וסיכומים קצרים של שיחות קודמות. כשסוגרים שיחה, היא עשויה להישלח פעם אחת כדי לסכם אותה לפעם הבאה.</span></p></div>
             <div><span class="ico"><svg aria-hidden="true"><use href="#i-zap"/></svg></span>
               <p><b>לא נשלח בכלל</b><span>תשובות מיידיות מהמאגר והתמלול של הקול. הם נעשים על המחשב.</span></p></div>
           </div>
@@ -490,7 +490,7 @@
       <div class="faq">
         <details class="glass reveal">
           <summary><span>האם <bdi dir="ltr">Maple Helper</bdi> עולה כסף?</span></summary>
-          <div class="a"><p>האפליקציה חינמית והקוד שלה פתוח ב-<bdi dir="ltr">GitHub</bdi>. את התשובות המורכבות נותן <bdi dir="ltr">Claude</bdi>, ולשם כך צריך מנוי <bdi dir="ltr">Claude Pro</bdi> או <bdi dir="ltr">Max</bdi> משלכם, או מפתח <bdi dir="ltr">Anthropic API</bdi> בתשלום לפי שימוש. התשובות המיידיות מהמאגר לא נספרות במנוי.</p></div>
+          <div class="a"><p>האפליקציה חינמית והקוד שלה פתוח ב-<bdi dir="ltr">GitHub</bdi>. את התשובות המורכבות נותן <bdi dir="ltr">Claude</bdi> (או <bdi dir="ltr">Codex</bdi>, לבחירתכם), ולשם כך צריך מנוי משלכם: <bdi dir="ltr">Claude Pro</bdi> או <bdi dir="ltr">Max</bdi>, או מנוי <bdi dir="ltr">ChatGPT</bdi> עם <bdi dir="ltr">Codex</bdi>. אפשר גם מפתח <bdi dir="ltr">API</bdi> בתשלום לפי שימוש. התשובות המיידיות מהמאגר לא נספרות במנוי.</p></div>
         </details>
         <details class="glass reveal">
           <summary><span>אפשר לקבל באן בגלל זה?</span></summary>
@@ -502,15 +502,15 @@
         </details>
         <details class="glass reveal">
           <summary><span>מאיפה מגיע המידע על המשחק?</span></summary>
-          <div class="a"><p>מהמאגר של <a href="https://meowdb.com"><bdi dir="ltr">NiaMeowDB</bdi></a>, בהרשאה. עותק של המאגר נשמר על המחשב ומתעדכן לבד, וכשהוא מתעדכן האפליקציה מראה מה השתנה.</p></div>
+          <div class="a"><p>מהמאגר הציבורי של <a href="https://meowdb.com"><bdi dir="ltr">NiaMeowDB</bdi></a>, עם קרדיט באפליקציה. עותק של המאגר נשמר על המחשב ומתעדכן לבד, וכשהוא מתעדכן האפליקציה מראה מה השתנה.</p></div>
         </details>
         <details class="glass reveal">
           <summary><span>זה עובד על <bdi dir="ltr">Mac</bdi>?</span></summary>
           <div class="a"><p>כן, על <bdi dir="ltr">macOS 12</bdi> ומעלה עם מעבד <bdi dir="ltr">Apple Silicon</bdi>. ל-<bdi dir="ltr">MapleStory Classic World</bdi> אין גרסת <bdi dir="ltr">Mac</bdi>, אז מריצים את המשחק דרך <bdi dir="ltr">CrossOver</bdi>, <bdi dir="ltr">Whisky</bdi> או מכונה וירטואלית, ו-<bdi dir="ltr">Maple Helper</bdi> מוצא את חלון המשחק לפי השם שלו.</p></div>
         </details>
         <details class="glass reveal">
-          <summary><span>מה בדיוק נשלח ל-<bdi dir="ltr">Claude</bdi>?</span></summary>
-          <div class="a"><p>רק כשאתם שואלים: השאלה, צילום של חלון המשחק, וההקשר שצריך כדי לענות (פרטי הדמות והשיחה האחרונה). הגדרות, היסטוריה והקלטות קול נשארים על המחשב. כשסוגרים שיחה, היא עשויה להישלח פעם אחת כדי לסכם אותה לפעם הבאה.</p></div>
+          <summary><span>מה בדיוק נשלח ל-<bdi dir="ltr">AI</bdi>?</span></summary>
+          <div class="a"><p>רק כשאתם שואלים, ורק ל-AI שבחרתם (Claude של Anthropic או Codex של OpenAI): השאלה, צילום של חלון המשחק, וההקשר שצריך כדי לענות (פרטי הדמות, השיחה האחרונה וסיכומים קצרים של שיחות קודמות). ההגדרות, ההיסטוריה המלאה והקלטות הקול נשמרים על המחשב. כשסוגרים שיחה, היא עשויה להישלח פעם אחת כדי לסכם אותה לפעם הבאה.</p></div>
         </details>
         <details class="glass reveal">
           <summary><span>איך מעדכנים?</span></summary>
