@@ -276,15 +276,20 @@ class ProfileCard(QFrame):
         self.name.setAlignment(align)
         self.meta.setText(f"Lv. {c.level} · {c.job}")
         self.meta.setAlignment(align)
-        img = avatar_path
-        if not img:
-            slug = _slug(c.job)
-            img = kb.image_path(f"class/{JOB_IMAGE_FALLBACK.get(slug, slug)}") or kb.image_path(
-                f"class/{_slug(c.base_class)}")
-        self.avatar.set_image(img)
+        self.avatar.set_image(character_image(c, avatar_path, kb))
 
     def mouseReleaseEvent(self, e):
-        self.clicked.emit()
+        if e.button() == Qt.LeftButton and self.rect().contains(e.position().toPoint()):
+            self.clicked.emit()
+
+
+def character_image(c, avatar_path, kb):
+    """The character's own portrait, else the picture of its job (or class)."""
+    if avatar_path:
+        return avatar_path
+    slug = _slug(c.job)
+    return kb.image_path(f"class/{JOB_IMAGE_FALLBACK.get(slug, slug)}") or kb.image_path(
+        f"class/{_slug(c.base_class)}")
 
 
 class CharacterRow(QFrame):

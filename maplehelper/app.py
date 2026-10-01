@@ -103,6 +103,7 @@ class MapleHelperApp:
         self.overlay.shot_provider = self.capture
         self.overlay.settings_requested.connect(self.open_settings)
         self.overlay.profile_requested.connect(self.open_settings)
+        self.overlay.add_character_requested.connect(self.add_character)
 
         # hotkeys live on a hidden native window
         self.hotkey_host = QWidget()
@@ -222,6 +223,14 @@ class MapleHelperApp:
         dlg.account_changed.connect(self.on_account_changed)
         dlg.exec()
         self.overlay.refresh_profile_chip()
+
+    def add_character(self):
+        before = self.profiles.active_id
+        if Onboarding(self.settings, self.profiles, self.kb, self.style, only_character=True).exec():
+            self.overlay.refresh_profile_chip()
+            c = self.profiles.active
+            if c and c.id != before:
+                self.overlay.add_system(I18n(self.settings["language"])("switched_character", name=c.name))
 
     def on_account_changed(self):
         # the warm Claude process was started under the old account: replace it
