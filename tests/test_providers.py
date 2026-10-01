@@ -341,6 +341,7 @@ def test_model_names_and_chatgpt_list(monkeypatch):
 def test_codex_runs_without_the_store_alias_folder(monkeypatch):
     """Codex's sandbox can't start the Store's pwsh.exe app alias: keep that folder off its PATH."""
     monkeypatch.setattr(codex.sys, "platform", "win32")
+    monkeypatch.setattr(codex.os, "pathsep", ";")            # Windows' separator, on any CI runner
     alias = r"C:\Users\x\AppData\Local\Microsoft\WindowsApps"
     monkeypatch.setenv("PATH", ";".join([r"C:\Windows\System32", alias, r"C:\tools"]))
     path = codex.env()["PATH"].split(codex.os.pathsep)
