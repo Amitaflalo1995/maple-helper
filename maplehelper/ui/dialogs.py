@@ -351,6 +351,7 @@ class Onboarding(GlassDialog):
         sec = Section("", self.t.rtl)
         sec.add_row(self.t("ob_borderless"))
         sec.add_row(self.t("ob_privacy"))
+        sec.add_row(self.t("disclaimer"))
         lay.addWidget(sec)
         note = QLabel(bidi.plain(self.t("unofficial"), self.t.rtl), objectName="RowHint")
         note.setWordWrap(True)
