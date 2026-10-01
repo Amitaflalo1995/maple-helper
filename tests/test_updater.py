@@ -259,3 +259,9 @@ def test_update_now_shows_the_installer_progress():
     assert "/SILENT" in args and "/VERYSILENT" not in args and args[-1] == "/LAUNCHARGS=--updated"
     quiet = updater.installer_args("C:/x/MapleHelper-Setup-v0.7.0.exe", reopen=False)
     assert "/VERYSILENT" in quiet
+
+
+def test_installer_window_speaks_the_apps_language():
+    """The update window follows the app's language, not Windows' (an English player saw a Hebrew installer)."""
+    assert "/LANG=english" in updater.installer_args("C:/x/MapleHelper-Setup-v0.7.3.exe", reopen=True, lang="en")
+    assert "/LANG=hebrew" in updater.installer_args("C:/x/MapleHelper-Setup-v0.7.3.exe", reopen=True, lang="he")
