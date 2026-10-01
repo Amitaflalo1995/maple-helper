@@ -97,7 +97,10 @@ class Overlay(QWidget):
     profile_requested = Signal()
     add_character_requested = Signal()
     mic_clicked = Signal()
-    limits_read = Signal(object)      # plan usage read in the background after an answer (ChatGPT)
+    limits_read = Signal(object)
+    profile_changed = Signal()        # level / EXP / stats changed (a screenshot read or the chat)
+    sync_finished = Signal(bool)      # a screenshot read ended (True = it read the game)
+    tools_requested = Signal()      # plan usage read in the background after an answer (ChatGPT)
 
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, brain: Brain):
         super().__init__(None, Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
@@ -180,6 +183,10 @@ class Overlay(QWidget):
         self.history_btn = self._icon_button(theme.ICON["search"])
         self.history_btn.clicked.connect(self.history_requested.emit)
         tb.addWidget(self.history_btn)
+        self.tools_btn = self._icon_button(theme.ICON["tools"])
+        self.tools_btn.setToolTip(self.t("tools"))
+        self.tools_btn.clicked.connect(self.tools_requested.emit)
+        tb.addWidget(self.tools_btn)
         self.guides_btn = self._icon_button(theme.ICON["book"])
         self.guides_btn.clicked.connect(self.guides_requested.emit)
         tb.addWidget(self.guides_btn)
@@ -220,6 +227,9 @@ class Overlay(QWidget):
         self.profile_card.clicked.connect(self.character_menu)
         self.profile_card.setCursor(Qt.PointingHandCursor)
         lay.addWidget(self.profile_card)
+        self.timer_bar = None            # set_timers() adds the running play timers here
+        self._timer_slot = lay.count()
+        self._main_lay = lay
         from .plancard import PlanPanel, TipStrip
         self.tip_strip = TipStrip()
         self.tip_strip.asked.connect(self.ask)
@@ -406,6 +416,26 @@ class Overlay(QWidget):
         data[c.id] = {**data.get(c.id, {}), kind: c.level}
         self.settings["tips_dismissed"] = data
         self.refresh_plan()
+
+    def set_timers(self, timers):
+        """Show the play timers (they live in the app, so they keep running while the chat is hidden)."""
+        from .tools import TimerBar
+        self.timer_bar = TimerBar(timers, self.t)
+        self._main_lay.insertWidget(self._timer_slot, self.timer_bar)
+
+    def ask_with_screenshot(self, question: str):
+        """Like "What now?": a fresh screenshot of the game, then the question."""
+        self.setWindowOpacity(0.0)
+        QTimer.singleShot(120, lambda: self._capture_and_ask(question))
+
+    def _capture_and_ask(self, question: str):
+        hwnd = osapi.find_game_window()
+        if hwnd:
+            self.game_hwnd = hwnd
+            self.shot = self.shot_provider(hwnd) if self.shot_provider else osapi.capture_game(hwnd)
+            self.shot_used = False
+        self.setWindowOpacity(1.0)
+        self.ask(question)
 
     def what_now(self):
         """'What now?': a fresh screenshot and the question, so Claude sees where the player is."""
@@ -884,9 +914,10 @@ class Overlay(QWidget):
             QTimer.singleShot(0, self._keep_answer_readable)
 
     SYNC_QUESTION = ("[Profile sync, not a chat question] Look at the screenshot and read MY character's current "
-                     "level, job and EXP bar percentage (the HUD shows them). Reply with one short line in the "
+                     "level, job and EXP bar percentage (the HUD shows them), and if the stat window is open, its "
+                     "Accuracy, damage range and max HP/MP. Reply with one short line in the "
                      "profile's language, then @@META@@ with profile_update (level, job, base_class if visible, "
-                     "exp_percent) and avatar_box. If the game or the character is not visible, say so briefly "
+                     "exp_percent, stats) and avatar_box. If the game or the character is not visible, say so briefly "
                      "and leave profile_update empty.")
 
     def sync_profile(self):
@@ -909,6 +940,7 @@ class Overlay(QWidget):
             self._syncing = False
             self.profile_card.set_busy(False)
             self.add_system(self.t("sync_no_game"))
+            self.sync_finished.emit(False)
             return
         self._sync_shot = shot
         self._sync_thread = QThread(self)
@@ -925,8 +957,10 @@ class Overlay(QWidget):
         self.profile_card.set_busy(False)
         if ans.error:
             self.add_system(self.t("err_generic"))
+            self.sync_finished.emit(False)
             return
         if self.profiles.active_id != getattr(self, "_sync_cid", None):
+            self.sync_finished.emit(False)
             return             # the player switched character meanwhile: this read belongs to the other one
         changes = self.profiles.apply_update(ans.profile_update or {})
         if ans.avatar_box:
@@ -937,6 +971,7 @@ class Overlay(QWidget):
             self.add_system(self.t("sync_nothing") if ans.profile_update or ans.avatar_box
                             else self.t("sync_not_found"))
         self.refresh_profile_chip()
+        self.sync_finished.emit(bool(ans.profile_update))
 
     def _on_done_main(self, ans: Answer):
         self._on_done(ans, self._pending_history)
@@ -1015,10 +1050,12 @@ class Overlay(QWidget):
             pass
 
     def _show_changes(self, changes):
+        if changes:
+            self.profile_changed.emit()        # the play tools (stats, EXP meter) follow the profile
         changes = [ch for ch in changes if ch[0] != "exp"]     # the EXP bar shows it; no chat line per percent
         self.refresh_plan()
         labels = {"level": "level", "job": "job", "base_class": "job", "map": "map",
-                  "quest+": "quest_started", "quest-": "quest_done", "note": "note"}
+                  "quest+": "quest_started", "quest-": "quest_done", "note": "note", "stats": "stats_word"}
         for field, value in changes:
             self.add_system(self.t("profile_updated", what=f"{self.t(labels[field])} {value}"))
             if self.stats:

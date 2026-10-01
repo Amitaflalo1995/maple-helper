@@ -78,6 +78,7 @@ DEFAULT_SETTINGS = {
     "provider": "claude",          # claude | codex: which AI CLI answers (see providers/)
     "model": "sonnet",             # Claude's model
     "codex_model": None,           # Codex's model; None = the Codex CLI default
+    "timer_presets": None,         # play timers [{name, seconds}]; None = the defaults (see timers.py)
     "last_model": {},              # provider -> the model that actually answered last (shown in Settings)
     # per provider: use an API key (stored in Credential Manager / Keychain) instead of the account login.
     # Older files hold a single bool here, which meant the Anthropic key.
@@ -139,6 +140,8 @@ class Character:
     notes: list[str] = field(default_factory=list)
     avatar: str = ""              # file in AVATAR_DIR, cropped from the latest screenshot
     exp_pct: float | None = None  # EXP bar of the current level, read from a screenshot
+    stats: dict = field(default_factory=dict)          # from the stat window: acc, dmg_min, dmg_max, hp, mp
+    quests_done: list[str] = field(default_factory=list)   # quest keys the player marked done
     updated_at: float = field(default_factory=time.time)
 
     def summary(self) -> str:
@@ -150,6 +153,9 @@ class Character:
         if self.notes:
             parts.append("Notes: " + "; ".join(self.notes[-10:]))
         return "\n".join(parts)
+
+
+STAT_KEYS = ("acc", "dmg_min", "dmg_max", "hp", "mp")
 
 
 class Profiles:
@@ -222,6 +228,16 @@ class Profiles:
             if q in c.active_quests:
                 c.active_quests.remove(q)
                 changed.append(("quest-", q))
+        stats = update.get("stats")
+        if isinstance(stats, dict):
+            clean = {k: int(v) for k, v in stats.items()
+                     if k in STAT_KEYS and isinstance(v, (int, float)) and 0 < v < 1_000_000}
+            if clean.get("dmg_min", 0) > clean.get("dmg_max", 10**9):
+                clean["dmg_min"], clean["dmg_max"] = clean["dmg_max"], clean["dmg_min"]
+            new = {**c.stats, **clean}
+            if new != c.stats:
+                c.stats = new
+                changed.append(("stats", ", ".join(f"{k} {v}" for k, v in clean.items())))
         pct = update.get("exp_percent")
         if isinstance(pct, (int, float)) and 0 <= pct <= 100 and pct != c.exp_pct:
             c.exp_pct = round(float(pct), 2)

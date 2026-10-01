@@ -174,3 +174,28 @@ def tip(kb, c, t, dismissed: dict | None = None) -> Tip | None:
             return Tip("map", "tip_map", {"map": best.map, "mob": best.mob},
                        t("tip_map_q", map=best.map))
     return None
+
+
+def exp_position(kb, level: int, pct: float) -> float | None:
+    """Total EXP earned from level 1 (to compare two readings across a level-up)."""
+    table = exp_table(kb)
+    if level not in table:
+        return None
+    return sum(table.get(lv, 0) for lv in range(1, level)) + table[level] * pct / 100
+
+
+def exp_rate(kb, start: tuple[float, int, float], end: tuple[float, int, float]) -> dict | None:
+    """Two readings (time, level, EXP %) -> {"per_hour": EXP/hour, "pct_hour": % of the current level per hour,
+    "to_level": seconds to the next level, "minutes": minutes measured}; None if they can't be compared."""
+    (t0, lv0, p0), (t1, lv1, p1) = start, end
+    a, b = exp_position(kb, lv0, p0), exp_position(kb, lv1, p1)
+    hours = (t1 - t0) / 3600
+    if a is None or b is None or hours <= 0 or b <= a:
+        return None
+    per_hour = (b - a) / hours
+    need = exp_table(kb).get(lv1)
+    out = {"per_hour": round(per_hour), "minutes": round(hours * 60, 1)}
+    if need:
+        out["pct_hour"] = round(per_hour / need * 100, 1)
+        out["to_level"] = round(need * (1 - p1 / 100) / per_hour * 3600)
+    return out

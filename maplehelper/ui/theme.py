@@ -48,11 +48,12 @@ BORDER = "rgba(255,149,51,0.55)"
 
 FONT_FAMILY = "Rubik"
 ICON_FONT = "Segoe Fluent Icons"
-ICON = {"open": "\ue8a7", "refresh": "\ue72c", "info": "\ue946", "edit": "\ue70f", "delete": "\ue74d", "add": "\ue710", "minimize": "\ue921", "close": "\ue8bb", "settings": "\ue713", "camera": "\ue722", "mic": "\ue720", "send": "\ue74a", "stop": "\ue71a", "copy": "\ue8c8", "star": "\ue734", "star_on": "\ue735", "plan": "\ue8fd", "book": "\ue82d", "search": "\ue721"}
+ICON = {"open": "\ue8a7", "refresh": "\ue72c", "info": "\ue946", "edit": "\ue70f", "delete": "\ue74d", "add": "\ue710", "minimize": "\ue921", "close": "\ue8bb", "settings": "\ue713", "camera": "\ue722", "mic": "\ue720", "send": "\ue74a", "stop": "\ue71a", "copy": "\ue8c8", "star": "\ue734", "star_on": "\ue735", "plan": "\ue8fd", "book": "\ue82d", "search": "\ue721", "tools": "\ue90f", "timer": "\ue916", "play": "\ue768", "check": "\ue73e"}
 # the same keys without an icon font (a trailing U+FE0E asks for the plain glyph, not the color emoji)
 SYMBOL_ICONS = {"open": "\u2197", "refresh": "\u21bb", "info": "\u24d8", "edit": "\u270e", "delete": "\u232b", "add": "+", "minimize": "\u2013",
                 "close": "\u2715", "settings": "\u2699\ufe0e", "camera": "\ud83d\udcf7\ufe0e", "mic": "\ud83c\udf99\ufe0e", "send": "\u27a4", "stop": "\u25a0",
-                "copy": "\u29c9", "star": "\u2606", "star_on": "\u2605", "plan": "\u2261", "book": "\u2630", "search": "\u2315"}
+                "copy": "\u29c9", "star": "\u2606", "star_on": "\u2605", "plan": "\u2261", "book": "\u2630", "search": "\u2315",
+                "tools": "\u2692\ufe0e", "timer": "\u23f1\ufe0e", "play": "\u25b6\ufe0e", "check": "\u2713"}
 
 
 def set_mode(mode: str) -> None:
@@ -196,6 +197,18 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
                         min-height: 28px; max-height: 28px; padding: 0 13px; font-size: {s - 2}px; font-weight: 500; color: {c['text']}; }}
     QPushButton#Chip:hover {{ background: {c['fill3']}; }}
     QPushButton#Chip:pressed {{ background: {c['pressed']}; }}
+    #Tag, #TagGood, #TagWarn, #TagAccent {{ font-size: {s - 3}px; font-weight: 600; border-radius: 8px; padding: 2px 8px; }}
+    #Tag {{ color: {c['muted']}; background: {c['fill3']}; }}
+    #TagGood {{ color: #2E9E5B; background: rgba(52,199,89,0.16); }}
+    #TagWarn {{ color: #C9620A; background: rgba(255,149,51,0.18); }}
+    #TagAccent {{ color: {ORANGE_DEEP}; background: rgba(255,149,51,0.12); }}
+    #BigStat {{ font-size: {s + 10}px; font-weight: 700; letter-spacing: -0.4px; color: {c['text']}; }}
+    #BigStatLabel {{ font-size: {s - 3}px; color: {c['muted']}; }}
+    QPushButton#TimerChip, QPushButton#TimerChipDone {{ border-radius: 12px; min-height: 24px; max-height: 24px;
+                         padding: 0 10px; font-size: {s - 2}px; font-weight: 600; }}
+    QPushButton#TimerChip {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; color: {c['text']}; }}
+    QPushButton#TimerChipDone {{ background: rgba(255,149,51,0.22); border: 1px solid rgba(255,149,51,0.8); color: {ORANGE_DEEP}; }}
+    #ToolHeader {{ font-size: {s - 1}px; color: {c['muted']}; }}
 
     #Capsule {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 21px; }}
     #Capsule[focus="true"] {{ border: 1px solid rgba(255,149,51,0.85); }}

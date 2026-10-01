@@ -107,6 +107,15 @@ class MapleHelperApp:
         self.overlay.update_requested.connect(self.update_now)
         self.overlay.profile_requested.connect(self.open_settings)
         self.overlay.add_character_requested.connect(self.add_character)
+        # play tools: timers keep running while the chat is hidden; the EXP meter lives as long as the app
+        from .timers import Timers
+        self.timers = Timers()
+        self.timers.finished.connect(self.on_timer_done)
+        self.exp_meter: dict = {}
+        self.overlay.set_timers(self.timers)
+        self.overlay.tools_requested.connect(lambda: self.show_tools())
+        self.overlay.profile_changed.connect(self.on_profile_changed)
+        self.overlay.sync_finished.connect(lambda ok: self._tools_call("sync_done", ok))
 
         self.hotkeys = osapi.Hotkeys()
         self.hotkeys.pressed.connect(self.on_hotkey)
@@ -454,6 +463,41 @@ class MapleHelperApp:
                                 lambda: self.show_patch_notes(entries))
         if not self.overlay.isVisible():
             self.toast(t("kb_updated"), t("kb_updated_open"))
+
+    def show_tools(self, page: str = "train"):
+        from .ui.tools import ToolsDialog
+
+        def make():
+            dlg = ToolsDialog(self.kb, self.profiles, self.settings, self.settings["language"], self.style(),
+                              self.timers, self.exp_meter, page)
+            dlg.sync_requested.connect(self.overlay.sync_profile)
+            dlg.ask_requested.connect(self.ask_from_tools)
+            dlg.tag_requested.connect(self.ask_about_guide)
+            dlg.guide_requested.connect(self.show_guides)
+            return dlg
+        self.open_window("tools", make)
+
+    def ask_from_tools(self, question: str, with_screenshot: bool):
+        if not self.overlay.isVisible():
+            self.overlay.toggle(self.capture)
+        if with_screenshot:
+            self.overlay.ask_with_screenshot(question)
+        else:
+            self.overlay.ask(question)
+
+    def _tools_call(self, method: str, *args):
+        tools = self.__dict__.get("_windows", {}).get("tools")
+        if tools is not None:
+            getattr(tools, method)(*args)
+
+    def on_profile_changed(self):
+        self._tools_call("profile_changed")
+
+    def on_timer_done(self, name: str):
+        from PySide6.QtWidgets import QApplication
+        t = I18n(self.settings["language"])
+        QApplication.beep()
+        self.toast(t("timer_done", name=name), t("timer_done_body"), timeout_ms=8000)
 
     def show_guides(self, open_key: str | None = None):
         from .ui.guides import GuidesDialog
