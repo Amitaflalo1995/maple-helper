@@ -9,7 +9,7 @@ from PySide6.QtCore import QLockFile, QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
-from . import APP_NAME, __version__, claude_setup, osapi, updater, wishlist
+from . import APP_NAME, __version__, claude_setup, osapi, updater, whatsnew, wishlist
 from .brain import Brain
 from .i18n import I18n
 from .kb import KnowledgeBase
@@ -17,7 +17,7 @@ from .store import ASSETS, DATA_DIR, History, Profiles, Settings
 from .ui import theme
 from .ui.dialogs import Onboarding, SettingsDialog
 from .ui.overlay import Overlay
-from .ui.patchnotes import PatchNotesDialog, summary
+from .ui.patchnotes import PatchNotesDialog, WhatsNewDialog, summary
 from .ui.toast import notify
 from .voice import VoiceController
 
@@ -81,6 +81,7 @@ class MapleHelperApp:
             return bool(r)
 
     def start(self) -> bool:
+        fresh_install = not self.settings["onboarding_done"]
         if not self.settings["onboarding_done"]:
             if not self.run_onboarding():
                 return False
@@ -121,8 +122,25 @@ class MapleHelperApp:
         else:
             QTimer.singleShot(0, lambda: self.overlay.toggle(self.capture))
         QTimer.singleShot(1500, self.check_permissions)
+        self.announce_whats_new(fresh_install)
         self.qapp.aboutToQuit.connect(self.shutdown)
         return True
+
+    def announce_whats_new(self, fresh_install: bool):
+        """First start after an app update: a note in the chat with a "What's new?" button."""
+        seen = self.settings["seen_version"] or ("" if fresh_install else whatsnew.FIRST_TRACKED)
+        self.settings["seen_version"] = __version__
+        if fresh_install:
+            return            # a new player gets the welcome screen, not a changelog
+        notes = whatsnew.since(seen, __version__)
+        if notes:
+            t = I18n(self.settings["language"])
+            self.overlay.add_notice(t("whats_new_notice", version=__version__), t("whats_new_show"),
+                                    lambda: self.show_whats_new(notes))
+
+    def show_whats_new(self, notes: list[dict] | None = None):
+        WhatsNewDialog(notes if notes is not None else whatsnew.load()[:6], self.settings["language"],
+                       self.style()).exec()
 
     def register_hotkeys(self):
         key = self.settings["hotkey_toggle"]
@@ -229,6 +247,7 @@ class MapleHelperApp:
         dlg.history_cleared.connect(self.on_history_cleared)
         dlg.account_changed.connect(self.on_account_changed)
         dlg.patch_notes_requested.connect(lambda: self.show_patch_notes())
+        dlg.whats_new_requested.connect(lambda: self.show_whats_new())
         self.bring_dialogs_forward()
         dlg.exec()
         self.overlay.refresh_profile_chip()
