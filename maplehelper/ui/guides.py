@@ -122,8 +122,12 @@ class GuidesDialog(GlassDialog):
         q = self.search.text().strip().lower()
         cat = self.cats.checkedButton().property("cat")
         if q:
-            shown = [g for g in self.all if q in g["title"].lower() or q in self.kb.page(g["key"]).lower()
-                     or q in guides.text_of(g["key"], self.t.lang).lower()]
+            texts = self.__dict__.setdefault("_texts", {})
+            for g in self.all:
+                if g["key"] not in texts:
+                    texts[g["key"]] = (guides.search_text(g["key"], self.kb.page(g["key"])) + " "
+                                       + guides.text_of(g["key"], self.t.lang)).lower()
+            shown = [g for g in self.all if q in g["title"].lower() or q in texts[g["key"]]]
         elif cat == "for_you":
             by_key = {g["key"]: g for g in self.all}
             shown = [by_key[k] for k in self.picks if k in by_key]

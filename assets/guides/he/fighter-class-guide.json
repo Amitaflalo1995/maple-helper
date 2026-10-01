@@ -1,6 +1,6 @@
 {
  "key": "guide/fighter-class-guide",
- "source_hash": "255056aa7cae",
+ "source_hash": "7baeafc83215",
  "lang": "he",
  "title": "מדריך Fighter ל-MapleStory Classic: לבלים 30-70",
  "intro": "מדריך Fighter ל-MapleStory Classic ללבלים 30-70 עם חלוקת SP, Rage, חרבות מול גרזנים, מגנים, ציוד ומפות Training Advisor.",
@@ -474,8 +474,7 @@
     "Duskmander",
     "100% פגיעה · מכה 1 מובטחת · 142 EXP למכה",
     "Rafflesia",
-    "100% פגיעה · מכה 1 מובטחת · 127 EXP למכה",
-    "פתחו את הבילד של Grummash בלבל 70"
+    "100% פגיעה · מכה 1 מובטחת · 127 EXP למכה"
    ]
   },
   {
@@ -1021,17 +1020,14 @@
     "דקה אחת",
     "83 Power Strikes, 242,339 נזק, 996 MP, 243.3 נזק/MP",
     "Sword Mastery",
-    "+90 WDEF במקום הדימום של Axe Mastery",
-    "פתחו את בילד ה-Fighter המלא של Grummash",
-    "השתמשו בבילד הזה ב-Training Advisor"
+    "+90 WDEF במקום הדימום של Axe Mastery"
    ]
   },
   {
    "heading": "בלבל 70: הופכים ל-Crusader",
    "lines": [
     "Fighter עולה ל-Crusader דרך Tylus ב-El Nath. הג'וב השלישי ו-El Nath לא נמצאים בגרסת ההשקה. המדריך הזה עוצר לפני ה-SP של הג'וב השלישי. תסיימו את בילד הג'וב השני, ואז תתכננו לפי ספר הסקילים של Crusader.",
-    "הסקילים של Crusader ב-CoT2",
-    "מצאתם ערך של Fighter שלא מתאים ל-MapleStory Classic World? תגידו לנו איזה פריט, סקיל, שלב בקווסט או טווח לבלים שגוי ומה אתם רואים במשחק. אנחנו נבדוק ונתקן את המדריך."
+    "הסקילים של Crusader ב-CoT2"
    ]
   }
  ]

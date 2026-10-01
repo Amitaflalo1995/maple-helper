@@ -57,8 +57,20 @@ def _norm(line: str) -> str:
     return re.sub(r"\s+", " ", line.lower().replace("&", "and")).strip()
 
 
+_CARD_META = re.compile(r"^\S.{0,40} \d+ min read\b")   # "Mechanics 5 min read · By Nia Meow", other guides' cards
+_SITE_LINKS = ("Spot a ", "Use this build in Training Advisor", "Open Grummash's", "See also")
+
+
 def _junk(line: str) -> bool:
-    return line in ("›", "Guides", "Contents") or line.startswith(JUNK)
+    return (line in ("›", "Guides", "Contents") or line.startswith(JUNK) or line.startswith(_SITE_LINKS)
+            or bool(_CARD_META.match(line)))
+
+
+def own_minutes(page: str) -> int | None:
+    """The guide's reading time: the first "N min read" before its contents, not a related card's."""
+    head = page.split("\nContents\n", 1)[0]
+    m = re.search(r"(\d+) min read", head)
+    return int(m.group(1)) if m else None
 
 
 def parse(key: str, page: str) -> Guide:
@@ -68,8 +80,7 @@ def parse(key: str, page: str) -> Guide:
     body_start = next((i for i, ln in enumerate(lines) if ln.startswith("# ")), 0) + 1
     intro = next((ln for ln in lines[body_start:] if ln and not _junk(ln)), "")
     g.intro = intro
-    m = re.search(r"(\d+) min read", page)
-    g.minutes = int(m.group(1)) if m else None
+    g.minutes = own_minutes(page)
 
     # the contents list ends where its first heading starts again; a nested heading may share a
     # line with its parent ("Starting at level 30 Recommended citizenship")
@@ -135,7 +146,7 @@ def to_html(g: Guide, labels: dict, rtl: bool = False) -> str:
     out = []
 
     def para(text: str) -> str:
-        return bidi.paragraph_html(text, "rtl" if rtl and bidi.direction(text) == "rtl" else None)
+        return bidi.paragraph_html(text, "rtl" if rtl and bidi._RTL.search(text) else None)
     if g.intro:
         out.append(f"<p{side}><i>{_cell(g.intro, rtl)}</i></p>")
     for name, items in ((labels["pros"], g.pros), (labels["cons"], g.cons)):
@@ -147,6 +158,8 @@ def to_html(g: Guide, labels: dict, rtl: bool = False) -> str:
             out.append(f"<h3{side}>{_cell(heading, rtl)}</h3>")
         table: list[list[str]] = []
         for ln in lines:
+            if ln.strip() in (g.intro.strip(), g.title.strip()):
+                continue        # guides without contents repeat their intro and title in the text
             if " | " in ln:
                 # some tables open with an empty icon column: "| Skill | Class | ..."
                 table.append([c.strip() for c in ln.strip().strip("|").split(" | ")])
@@ -158,6 +171,18 @@ def to_html(g: Guide, labels: dict, rtl: bool = False) -> str:
         if table:
             out.append(_table_html(table, rtl))
     return "\n".join(out)
+
+
+def content_hash(g: Guide) -> str:
+    """Hash of what the reader shows (not the page's site banner or other guides' cards)."""
+    body = json.dumps([g.title, g.intro, g.pros, g.cons, g.sections], ensure_ascii=False)
+    return hashlib.sha1(body.encode("utf-8")).hexdigest()[:12]
+
+
+def search_text(key: str, page: str) -> str:
+    """The guide's own words, for search (not the site menus around it)."""
+    g = parse(key, page)
+    return " ".join([g.title, g.intro, *g.pros, *g.cons, *(h + " " + " ".join(ls) for h, ls in g.sections)])
 
 
 def page_hash(page: str) -> str:
@@ -182,7 +207,7 @@ def localized(key: str, page: str, lang: str) -> tuple[Guide, bool, bool]:
         return parse(key, page), False, False
     g = Guide(key, tr.get("title") or key, tr.get("intro", ""), parse(key, page).minutes, tr.get("pros", []),
               tr.get("cons", []), [(s.get("heading", ""), s.get("lines", [])) for s in tr.get("sections", [])])
-    return g, True, tr.get("source_hash") != page_hash(page)
+    return g, True, tr.get("source_hash") != content_hash(parse(key, page))
 
 
 def title(key: str, fallback: str, lang: str) -> str:
@@ -193,7 +218,12 @@ def title(key: str, fallback: str, lang: str) -> str:
 def text_of(key: str, lang: str) -> str:
     """All the translated text of a guide, for search."""
     tr = translation(key, lang)
-    return json.dumps(tr, ensure_ascii=False) if tr else ""
+    if not tr:
+        return ""
+    parts = [tr.get("title", ""), tr.get("intro", ""), *tr.get("pros", []), *tr.get("cons", [])]
+    for s in tr.get("sections", []):
+        parts += [s.get("heading", ""), *s.get("lines", [])]
+    return " ".join(parts)
 
 
 def all_guides(kb) -> list[dict]:
@@ -201,9 +231,8 @@ def all_guides(kb) -> list[dict]:
     out = []
     for key, e in kb.entities.items():
         if e.get("category") == "guide":
-            m = re.search(r"(\d+) min read", kb.page(key)[:6000])
             out.append({"key": key, "title": e.get("name", key), "category": category(key),
-                        "minutes": int(m.group(1)) if m else None})
+                        "minutes": own_minutes(kb.page(key))})
     return sorted(out, key=lambda g: g["title"])
 
 
