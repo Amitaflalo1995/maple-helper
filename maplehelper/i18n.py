@@ -146,6 +146,8 @@ STRINGS = {
                    "en": "You've used {pct}% of your 5-hour limit (resets at {at}). Saver mode helps it last."},
     "usage_critical": {"he": "כמעט נגמרה המכסה של 5 השעות: נוצלו {pct}%. אחרי זה Claude לא יענה עד השעה {at}, אבל תשובות מהירות מהמאגר ימשיכו לעבוד.",
                        "en": "Your 5-hour limit is almost used up ({pct}%). Claude stops answering until {at}; instant answers keep working."},
+    "usage_critical_codex": {"he": "כמעט נגמרה המכסה של 5 השעות: נוצלו {pct}%. אחרי זה ChatGPT לא יענה עד השעה {at}, אבל תשובות מהירות מהמאגר ימשיכו לעבוד.",
+                             "en": "Your 5-hour limit is almost used up ({pct}%). ChatGPT stops answering until {at}; instant answers keep working."},
     "saver_turn_on": {"he": "הפעלת מצב חיסכון", "en": "Turn on saver mode"},
     "saver_turned_on": {"he": "✓ מצב חיסכון פועל", "en": "✓ Saver mode is on"},
     "err_usage_limit": {"he": "הגעת למגבלת השימוש של מנוי Claude. נסה שוב מאוחר יותר.",
