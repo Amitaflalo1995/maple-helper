@@ -185,7 +185,6 @@ STRINGS = {
     "sec_account": {"he": "חשבון Claude", "en": "Claude account"},
     "sec_account_codex": {"he": "חשבון ChatGPT", "en": "ChatGPT account"},
     "account_signed_in": {"he": "מחובר כ-{email}", "en": "Signed in as {email}"},
-    "account_signed_in_codex": {"he": "מחובר עם ChatGPT", "en": "Signed in with ChatGPT"},
     "account_api_key": {"he": "מחובר עם מפתח API", "en": "Connected with an API key"},
     "account_switch": {"he": "החלף חשבון", "en": "Switch account"},
     "account_logout": {"he": "התנתק", "en": "Sign out"},
