@@ -12,9 +12,8 @@ import re
 from dataclasses import dataclass, field
 
 from . import bidi
-from .store import ASSETS, DATA_DIR
+from .store import ASSETS
 
-SUMMARIES = DATA_DIR / "guide_summaries"
 TRANSLATIONS = ASSETS / "guides"     # <lang>/<slug>.json, translated once and shipped with the app
 CATEGORIES = ["for_you", "classes", "leveling", "mechanics", "general"]
 LEVELING = {"best-grind-maps-every-level", "exp-table-level-1-to-100", "hp-mp-gain-explained",
@@ -230,8 +229,3 @@ def for_you(kb, c) -> list[str]:
         if k and kb.get(k) and k not in seen:
             seen.append(k)
     return seen
-
-
-def summary_path(key: str, lang: str, page: str):
-    digest = hashlib.sha1(page.encode("utf-8")).hexdigest()[:10]   # a KB update makes a new summary
-    return SUMMARIES / f"{key.split('/', 1)[1]}-{lang}-{digest}.md"
