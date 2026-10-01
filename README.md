@@ -6,6 +6,16 @@
 
 <p align="center"><sub>Unofficial companion for Maple Story Classic World · Not affiliated with Nexon</sub></p>
 
+<p align="center">
+  <a href="https://github.com/Amitaflalo1995/maple-helper/releases/latest"><img src="https://img.shields.io/badge/Download-Windows%20installer-2ea44f?style=for-the-badge&logo=windows&logoColor=white" alt="Download the Windows installer"></a>
+  <a href="https://github.com/Amitaflalo1995/maple-helper/releases"><img src="https://img.shields.io/badge/All-releases-555?style=for-the-badge&logo=github&logoColor=white" alt="All releases"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Amitaflalo1995/maple-helper/releases/latest"><img src="https://img.shields.io/github/v/release/Amitaflalo1995/maple-helper?label=latest&sort=semver" alt="Latest release"></a>
+  <a href="https://github.com/Amitaflalo1995/maple-helper/releases"><img src="https://img.shields.io/github/downloads/Amitaflalo1995/maple-helper/total" alt="Total downloads"></a>
+</p>
+
 ## About
 
 Maple Helper is a Windows desktop assistant that puts a transparent chat overlay on top of Maple Story Classic World. Press **F9** to open it, then type a question or hold **F10** to speak. Answers draw on a screenshot of your game, your character profile, previous conversations, and a local copy of the NiaMeowDB game database.
@@ -32,6 +42,15 @@ The app uses screen capture and its own overlay window. It does not read game me
 - Maple Story Classic World running in **Borderless** or **Windowed Fullscreen** mode.
 - An internet connection for Claude responses and initial data downloads.
 - A microphone if you want to use voice input.
+
+## Install
+
+Download the latest release from the [Releases page](https://github.com/Amitaflalo1995/maple-helper/releases/latest):
+
+- **`MapleHelper-Setup-<version>.exe`**: the installer. This is the recommended option and doesn't need admin rights.
+- **`MapleHelper-<version>-portable.zip`**: unzip it anywhere and run `MapleHelper.exe`.
+
+Both include the knowledge base. The app tells you when a new version is available.
 
 ## Run from source
 
