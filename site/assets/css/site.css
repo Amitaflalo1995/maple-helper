@@ -296,7 +296,7 @@ kbd, .key {
 .dl .btn svg { width: 26px; height: 26px; }
 .dl .btn span { display: flex; flex-direction: column; line-height: 1.25; }
 .dl .btn b { font-size: 17px; font-weight: 600; }
-.dl .btn small { font-size: 13px; font-weight: 400; opacity: 0.86; }
+.dl .btn small { font-size: 13px; font-weight: 400; opacity: 0.86; white-space: nowrap; }
 .dl .btn.secondary small { color: var(--muted); opacity: 1; }
 .dl-meta {
   margin-top: 14px;
