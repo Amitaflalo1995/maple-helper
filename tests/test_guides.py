@@ -171,3 +171,21 @@ def test_hovering_a_guide_picture_finds_it():
         point = b.cursorRect(c).bottomLeft() + QPoint(img.width() // 2, -img.height() // 2)
     assert d.zoom.image_at(point).endswith(img.name().rsplit("/", 1)[-1])
     d.close()
+
+
+def test_hovering_a_guide_cover_shows_it_large(tmp_path):
+    import sys
+    from PySide6.QtCore import QEvent, QPointF
+    from PySide6.QtGui import QEnterEvent, QImage
+    from PySide6.QtWidgets import QApplication
+    app = QApplication.instance() or QApplication(sys.argv)
+    from maplehelper.ui.guides import CoverPic
+    img = QImage(1200, 630, QImage.Format_RGB32)
+    img.fill(0)
+    img.save(str(tmp_path / "cover.png"))
+    pic = CoverPic(str(tmp_path / "cover.png"))
+    QApplication.sendEvent(pic, QEnterEvent(QPointF(5, 5), QPointF(5, 5), QPointF(5, 5)))
+    assert pic.pop.isVisible() and pic.pop.pixmap().width() == 480
+    QApplication.sendEvent(pic, QEvent(QEvent.Leave))
+    assert not pic.pop.isVisible()
+    app.processEvents()
