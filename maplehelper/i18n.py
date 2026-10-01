@@ -52,6 +52,14 @@ STRINGS = {
     "quest_started": {"he": "קווסט חדש", "en": "New quest"},
     "quest_done": {"he": "קווסט הושלם", "en": "Quest completed"},
     "note": {"he": "הערה", "en": "Note"},
+    # last-session summary (in Hebrew the arrow points left: the text reads right to left)
+    "sess_title": {"he": "הסשן הקודם · {minutes} דק'", "en": "Last session · {minutes} min"},
+    "sess_level": {"he": "{name}: לבל {a} ← {b}", "en": "{name}: level {a} → {b}"},
+    "sess_char": {"he": "{name} · לבל {level}", "en": "{name} · level {level}"},
+    "sess_job": {"he": "ג'וב חדש: {job}", "en": "New job: {job}"},
+    "sess_quests_done": {"he": "קווסטים שהושלמו ({n}): {names}", "en": "Quests completed ({n}): {names}"},
+    "sess_quests_started": {"he": "קווסטים חדשים: {n}", "en": "New quests: {n}"},
+    "sess_questions": {"he": "{n} שאלות", "en": "{n} questions"},
     # errors
     "err_offline": {"he": "אין חיבור לאינטרנט. נסה שוב.", "en": "No internet connection. Try again."},
     "err_not_logged_in": {"he": "צריך להתחבר מחדש ל-Claude.", "en": "You need to sign in to Claude again."},

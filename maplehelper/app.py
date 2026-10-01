@@ -98,6 +98,7 @@ class MapleHelperApp:
         self.overlay.shot_provider = self.capture
         self.overlay.settings_requested.connect(self.open_settings)
         self.overlay.wishlist_requested.connect(self.show_wishlist)
+        self.overlay.closed.connect(self.maybe_summarize_later)
         self.overlay.profile_requested.connect(self.open_settings)
         self.overlay.add_character_requested.connect(self.add_character)
 
@@ -174,7 +175,6 @@ class MapleHelperApp:
         if hotkey_id == HOTKEY_TOGGLE:
             if self.overlay.isVisible():
                 self.overlay.close_overlay()
-                self.maybe_summarize_later()
             else:
                 self.overlay.toggle(self.capture)   # also restores from the minimized bubble
         elif hotkey_id == HOTKEY_VOICE:
@@ -380,6 +380,10 @@ class MapleHelperApp:
         self.overlay.kb = self.kb
 
     def shutdown(self):
+        try:
+            self.overlay.save_session_summary()   # quitting ends the session: show it next time
+        except Exception:
+            pass
         try:
             self.brain.shutdown()
         except Exception:

@@ -13,12 +13,15 @@ from .. import __version__, bidi, osapi
 from ..brain import Answer, Brain
 from ..i18n import STRINGS, I18n
 from ..kb import KnowledgeBase
+from ..session import SessionStats, lines as session_lines
 from ..store import ASSETS, History, Profiles, Settings
 from . import theme
 from .glass import paint_glass
 from .minibubble import MiniBubble
 from .widgets import (SELECTION, WISHLIST, Bubble, BubbleRow, DropGroupCard, EntityCard, NoticeCard, ProfileCard, SystemLine,
                       TileGrid, character_image)
+from .widgets import (SELECTION, Bubble, BubbleRow, DropGroupCard, EntityCard, NoticeCard, ProfileCard, SessionCard,
+                      SystemLine, TileGrid, character_image)
 
 
 
@@ -86,6 +89,7 @@ class FocusLineEdit(QLineEdit):
 
 class Overlay(QWidget):
     wishlist_requested = Signal()
+    closed = Signal()
     settings_requested = Signal()
     profile_requested = Signal()
     add_character_requested = Signal()
@@ -106,6 +110,7 @@ class Overlay(QWidget):
         self._thread: QThread | None = None
         self._pending_bubble: Bubble | None = None
         self._session_started: float | None = None
+        self.stats: SessionStats | None = None
         self._anim: QParallelAnimationGroup | None = None
         self.bubble = MiniBubble()
         self.bubble.clicked.connect(self.restore_from_bubble)
@@ -391,6 +396,9 @@ class Overlay(QWidget):
             self.place_default(game_hwnd)
         if self._session_started is None:
             self._session_started = time.time()
+            self.stats = SessionStats()
+            self.stats.touch(self.profiles.active)
+            self._show_last_session()
         self.setWindowOpacity(0.0)
         self.show()
         self.raise_()
@@ -400,10 +408,20 @@ class Overlay(QWidget):
         self.input.setFocus()
         self._materialize(True)
 
+    def _show_last_session(self):
+        """A new session starts: first, what happened in the previous one."""
+        last = self.settings["last_session"]
+        if not last:
+            return
+        self.settings["last_session"] = None
+        self._add_widget(SessionCard(self.t("sess_title", minutes=last["minutes"]), session_lines(last, self.t),
+                                     self.t.rtl))
+
     def close_overlay(self):
         self.bubble.hide()
         if not self.isVisible():
             return
+        self.closed.emit()
         def done():
             self.hide()
             self.setWindowOpacity(1.0)
@@ -588,6 +606,8 @@ class Overlay(QWidget):
         self.shot_used = True
         if history:
             history.append("user", f"[about {focus_name}] {question}" if focus_name else question)
+        if self.stats:
+            self.stats.question(c)
         self._anchor = None
         self._follow = True
         self._pending_bubble = self.add_bubble(self.t("thinking"), "assistant")
@@ -746,6 +766,8 @@ class Overlay(QWidget):
                   "quest+": "quest_started", "quest-": "quest_done", "note": "note"}
         for field, value in changes:
             self.add_system(self.t("profile_updated", what=f"{self.t(labels[field])} {value}"))
+            if self.stats:
+                self.stats.change(self.profiles.active, field, value)
         if changes:
             self.refresh_profile_chip()
 
@@ -771,6 +793,13 @@ class Overlay(QWidget):
             self.input.setText(text)
             self.input.setFocus()
 
+    def save_session_summary(self):
+        if self.stats:
+            summary = self.stats.summary(self.profiles)
+            if summary:
+                self.settings["last_session"] = summary
+            self.stats = None
+
     def end_session(self) -> str:
         """Transcript of this session (for the long-term summary)."""
         c = self.profiles.active
@@ -778,4 +807,5 @@ class Overlay(QWidget):
             return ""
         recent = [r for r in History(c.id).recent(60) if r["t"] >= self._session_started]
         self._session_started = None
+        self.save_session_summary()
         return "\n".join(f"{r['role']}: {r['text']}" for r in recent)

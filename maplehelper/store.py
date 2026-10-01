@@ -80,6 +80,7 @@ DEFAULT_SETTINGS = {
     "onboarding_done": False,
     "wishlist": {},               # character id -> item keys the player is hunting for
     "seen_version": "",           # the app version whose "what's new" the player has seen
+    "last_session": None,         # summary of the previous play session, shown when the chat next opens
 }
 
 
