@@ -107,6 +107,8 @@ class MapleHelperApp:
         self.overlay.update_requested.connect(self.update_now)
         self.overlay.profile_requested.connect(self.open_settings)
         self.overlay.add_character_requested.connect(self.add_character)
+        self.overlay.edit_character_requested.connect(self.edit_character)
+        self.overlay.delete_character_requested.connect(self.delete_character)
         # play tools: the EXP meter lives as long as the app (the window may close in between)
         self.exp_meter: dict = {}
         self.overlay.tools_requested.connect(lambda: self.show_tools())
@@ -304,6 +306,33 @@ class MapleHelperApp:
             c = self.profiles.active
             if c and c.id != before:
                 self.overlay.add_system(I18n(self.settings["language"])("switched_character", name=c.name))
+
+    def edit_character(self, cid: str):
+        if Onboarding(self.settings, self.profiles, self.kb, self.style, edit_id=cid).exec():
+            self.overlay.refresh_profile_chip()
+            self.overlay.refresh_plan()
+            self.on_profile_changed()
+
+    def delete_character(self, cid: str):
+        from .ui.dialogs import ConfirmDialog
+        c = next((c for c in self.profiles.characters if c.id == cid), None)
+        if not c:
+            return
+        t = I18n(self.settings["language"])
+        if not ConfirmDialog(t("delete_character"), t("delete_character_confirm", name=c.name), t("delete"),
+                             t("cancel"), t.rtl, self.style()).exec():
+            return
+        self.profiles.remove(cid)
+        if not self.profiles.characters:
+            # advice needs a character: offer to create one right away
+            Onboarding(self.settings, self.profiles, self.kb, self.style, only_character=True).exec()
+        self.overlay.clear_feed()
+        self.overlay.refresh_profile_chip()
+        self.overlay.refresh_plan()
+        now = self.profiles.active
+        if now:
+            self.overlay.add_system(t("switched_character", name=now.name))
+        self.on_profile_changed()
 
     def apply_ai_settings(self):
         """Point the brain at the chosen provider, with its model, saver mode and (when used) its stored API key."""

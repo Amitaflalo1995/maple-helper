@@ -100,7 +100,9 @@ class Overlay(QWidget):
     limits_read = Signal(object)
     profile_changed = Signal()        # level / EXP / stats changed (a screenshot read or the chat)
     sync_finished = Signal(bool)      # a screenshot read ended (True = it read the game)
-    tools_requested = Signal()      # plan usage read in the background after an answer (ChatGPT)
+    tools_requested = Signal()
+    edit_character_requested = Signal(str)
+    delete_character_requested = Signal(str)      # plan usage read in the background after an answer (ChatGPT)
 
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, brain: Brain):
         super().__init__(None, Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
@@ -441,20 +443,27 @@ class Overlay(QWidget):
         # mid-answer the reply still belongs to the current character
         busy = self.busy or getattr(self, "_syncing", False)
         active = self.profiles.active_id
-        for c in self.profiles.characters:
+        # the card already shows the current character: the menu lists only the others to switch to
+        others = [c for c in self.profiles.characters if c.id != active]
+        for c in others:
             img = character_image(c, self.profiles.avatar_path(c), self.kb)
             a = QAction(QIcon(str(img)) if img else QIcon(), bidi.plain(f"{c.name}  ·  Lv. {c.level} {c.job}",
                                                                            self.t.rtl), menu)
-            a.setCheckable(True)
-            a.setChecked(c.id == active)
-            if c.id == active:      # the portrait takes the check mark's place: bold marks the current one
-                f = a.font()
-                f.setBold(True)
-                a.setFont(f)
-            a.setEnabled(not busy or c.id == active)
+            a.setEnabled(not busy)
             a.triggered.connect(lambda _=False, cid=c.id: self.switch_character(cid))
             menu.addAction(a)
-        menu.addSeparator()
+        if others:
+            menu.addSeparator()
+        if self.profiles.active is not None:
+            edit = QAction(bidi.plain("✎  " + self.t("edit_character"), self.t.rtl), menu)
+            edit.setEnabled(not busy)
+            edit.triggered.connect(lambda: self.edit_character_requested.emit(active))
+            menu.addAction(edit)
+            delete = QAction(bidi.plain("🗑︎  " + self.t("delete_character"), self.t.rtl), menu)
+            delete.setEnabled(not busy)
+            delete.triggered.connect(lambda: self.delete_character_requested.emit(active))
+            menu.addAction(delete)
+            menu.addSeparator()
         add = QAction(bidi.plain("＋  " + self.t("add_character"), self.t.rtl), menu)
         add.setEnabled(not busy)
         add.triggered.connect(self.add_character_requested.emit)
