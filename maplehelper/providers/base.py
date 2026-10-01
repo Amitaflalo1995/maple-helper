@@ -40,7 +40,9 @@ def find_windows_exe(name: str, candidates: list[Path]) -> str | None:
     """A real .exe on PATH, else a known install spot."""
     p = shutil.which(name)
     if p and p.lower().endswith(".exe"):
-        return p
+        # which() takes the extension from PATHEXT (".EXE"). Claude Code started as claude.EXE hangs when it
+        # re-runs itself as its built-in rg, so the path always ends in a lowercase ".exe"
+        return p[:-4] + ".exe"
     for c in candidates:
         if c.exists():
             return str(c)
