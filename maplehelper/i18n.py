@@ -205,7 +205,7 @@ STRINGS = {
     "answer_length": {"he": "אורך תשובות", "en": "Answer length"},
     "short": {"he": "קצר", "en": "Short"},
     "detailed": {"he": "מפורט", "en": "Detailed"},
-    "start_with_windows": {"he": "הפעלה עם הפעלת המחשב", "en": "Start when the computer starts"},
+    "start_with_windows": {"he": "הפעלה עם הדלקת המחשב", "en": "Start when the computer starts"},
     "report_problem": {"he": "דיווח על תקלה", "en": "Report a problem"},
     "report_saved": {"he": "דוח התקלה נשמר בשולחן העבודה",
                      "en": "The problem report was saved to your desktop"},
