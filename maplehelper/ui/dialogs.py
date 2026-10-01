@@ -36,17 +36,19 @@ def jobs_for(base_class: str, level: int) -> list[str]:
 
 
 def _title(text: str) -> QLabel:
-    lb = QLabel(bidi.plain(text))
-    lb.setStyleSheet("font-size: 22px; font-weight: 600;")
+    lb = QLabel(bidi.plain(text), objectName="PageTitle")
     lb.setWordWrap(True)
     return lb
 
 
 def _body(text: str) -> QLabel:
-    lb = QLabel(bidi.plain(text))
+    lb = QLabel(bidi.plain(text), objectName="PageBody")
     lb.setWordWrap(True)
-    lb.setStyleSheet("color: #C9B8A4;")
     return lb
+
+
+def _field(text: str) -> QLabel:
+    return QLabel(text, objectName="FieldLabel")
 
 
 class _Bridge(QObject):
@@ -65,13 +67,13 @@ class CharacterForm(QWidget):
         self.t = t
         lay = QVBoxLayout(self)
         lay.setSpacing(10)
-        lay.addWidget(QLabel(t("ob_char_name")))
+        lay.addWidget(_field(t("ob_char_name")))
         self.name = QLineEdit()
         self.name.setMaxLength(24)
         self.name.textChanged.connect(lambda *_: self.changed.emit())
         lay.addWidget(self.name)
 
-        lay.addWidget(QLabel(t("ob_class")))
+        lay.addWidget(_field(t("ob_class")))
         grid = QGridLayout()
         self.class_group = QButtonGroup(self)
         self.class_group.setExclusive(True)
@@ -95,13 +97,13 @@ class CharacterForm(QWidget):
 
         row = QHBoxLayout()
         col1 = QVBoxLayout()
-        col1.addWidget(QLabel(t("ob_level")))
+        col1.addWidget(_field(t("ob_level")))
         self.level = Stepper(1, MAX_LEVEL, 1)
         self.level.valueChanged.connect(lambda *_: self._refresh_jobs())
         col1.addWidget(self.level)
         row.addLayout(col1)
         col2 = QVBoxLayout()
-        col2.addWidget(QLabel(t("ob_job")))
+        col2.addWidget(_field(t("ob_job")))
         self.job = Select()
         self.job.currentIndexChanged.connect(lambda *_: self.changed.emit())
         self._job_picked = False       # the user chose a job by hand: keep it while it stays available
@@ -225,7 +227,6 @@ class Onboarding(GlassDialog):
         nav.addWidget(self.next)
         outer.addLayout(nav)
 
-        rtl_buttons(self, self.t.rtl)
         self.pages = []
         if not self.only_character:
             self.pages.append(self._page_language())
@@ -235,6 +236,7 @@ class Onboarding(GlassDialog):
             self.pages.append(self._page_done())
         for p in self.pages:
             self.stack.addWidget(p)
+        rtl_buttons(self, self.t.rtl)
         self._update_nav()
 
     # pages ---------------------------------------------------------------
@@ -275,38 +277,46 @@ class Onboarding(GlassDialog):
         lay = QVBoxLayout(w)
         lay.setSpacing(12)
         lay.addWidget(_title(self.t("ob_connect")))
-        lay.addWidget(_body(self.t("ob_connect_body")))
-        lay.addWidget(_body(self.t("ob_need_plan")))
-        self.status_label = QLabel("")
-        self.status_label.setStyleSheet("font-weight: 600;")
-        lay.addWidget(self.status_label)
-        row = QHBoxLayout()
-        self.install_btn = QPushButton(self.t("ob_install"), objectName="Primary")
-        self.login_btn = QPushButton(self.t("ob_login"), objectName="Primary")
-        self.check_btn = QPushButton(self.t("ob_check"), objectName="Secondary")
+        lay.addWidget(_body(self.t("ob_connect_body") + " " + self.t("ob_need_plan")))
+        lay.addSpacing(6)
+        rtl = self.t.rtl
+        sec = Section(self.t("sec_account"), rtl)
+        status_row = QWidget()
+        srow = QHBoxLayout(status_row)
+        srow.setContentsMargins(0, 6, 0, 6)
+        srow.setSpacing(14)
+        self.status_label = QLabel(bidi.plain(self.t("ob_checking"), rtl), objectName="RowLabel")
+        self.status_label.setWordWrap(True)
+        srow.addWidget(self.status_label, 1)
+        self.install_btn = QPushButton(self.t("ob_install"), objectName="Link")
+        self.login_btn = QPushButton(self.t("ob_login"), objectName="Link")
+        self.check_btn = QPushButton(self.t("ob_check"), objectName="Link")
         self.install_btn.clicked.connect(lambda: (claude_setup.install(), self._poll_status(90)))
         self.login_btn.clicked.connect(lambda: (claude_setup.login(), self._poll_status(120)))
         self.check_btn.clicked.connect(self._check_status)
         for b in (self.install_btn, self.login_btn, self.check_btn):
-            row.addWidget(b)
-        row.addStretch(1)
-        lay.addLayout(row)
-        lay.addSpacing(18)
-        line = QFrame()
-        line.setFrameShape(QFrame.HLine)
-        line.setStyleSheet("color: rgba(255,255,255,0.15);")
-        lay.addWidget(line)
-        lay.addWidget(_body(self.t("ob_use_api_key")))
-        krow = QHBoxLayout()
+            b.setCursor(Qt.PointingHandCursor)
+            srow.addWidget(b)
+        self.install_btn.hide()
+        self.login_btn.hide()
+        sec.add_widget(status_row)
+        lay.addWidget(sec)
+        lay.addSpacing(8)
+        sec = Section(self.t("ob_use_api_key"), rtl)
+        kbox = QWidget()
+        krow = QHBoxLayout(kbox)
+        krow.setContentsMargins(0, 10, 0, 10)
         self.key_edit = QLineEdit()
         self.key_edit.setEchoMode(QLineEdit.Password)
         self.key_edit.setPlaceholderText(self.t("ob_api_key_hint"))
         self.key_edit.setLayoutDirection(Qt.LeftToRight)
         key_btn = QPushButton(self.t("ob_check"), objectName="Secondary")
+        key_btn.setCursor(Qt.PointingHandCursor)
         key_btn.clicked.connect(self._check_key)
         krow.addWidget(self.key_edit, 1)
         krow.addWidget(key_btn)
-        lay.addLayout(krow)
+        sec.add_widget(kbox)
+        lay.addWidget(sec)
         lay.addStretch(1)
         return w
 
@@ -335,10 +345,18 @@ class Onboarding(GlassDialog):
             mascot.setPixmap(QPixmap(str(m)).scaled(220, 220, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         mascot.setAlignment(Qt.AlignCenter)
         lay.addWidget(mascot)
-        lay.addWidget(_title(self.t("ob_done_hint")))
-        lay.addWidget(_body(self.t("ob_borderless")))
-        lay.addWidget(_body(self.t("ob_privacy")))
-        lay.addWidget(_body(self.t("unofficial")))
+        title = _title(self.t("ob_done_hint"))
+        title.setAlignment(Qt.AlignHCenter)
+        lay.addWidget(title)
+        lay.addSpacing(4)
+        sec = Section("", self.t.rtl)
+        sec.add_row(self.t("ob_borderless"))
+        sec.add_row(self.t("ob_privacy"))
+        lay.addWidget(sec)
+        note = QLabel(bidi.plain(self.t("unofficial"), self.t.rtl), objectName="RowHint")
+        note.setWordWrap(True)
+        note.setAlignment(Qt.AlignHCenter)
+        lay.addWidget(note)
         lay.addStretch(1)
         return w
 
@@ -357,7 +375,7 @@ class Onboarding(GlassDialog):
         self._update_nav()
 
     def _check_status(self):
-        self.status_label.setText(self.t("ob_checking"))
+        self.status_label.setText(bidi.plain(self.t("ob_checking"), self.t.rtl))
         threading.Thread(target=lambda: self._bridge.status.emit(claude_setup.status()), daemon=True).start()
 
     def _poll_status(self, seconds: int):
@@ -377,7 +395,7 @@ class Onboarding(GlassDialog):
         self._claude_ok = st == "ok"
         text = {"ok": self.t("ob_connected"), "logged_out": self.t("ob_not_logged"),
                 "not_installed": self.t("ob_not_installed")}[st]
-        self.status_label.setText(text)
+        self.status_label.setText(bidi.plain(text, self.t.rtl))
         self.install_btn.setVisible(st == "not_installed")
         self.login_btn.setVisible(st == "logged_out")
         if self._claude_ok:
@@ -390,7 +408,7 @@ class Onboarding(GlassDialog):
             claude_setup.save_api_key(key)
             self.settings["api_key_fallback"] = True
             self._claude_ok = True
-            self.status_label.setText(self.t("ob_connected"))
+            self.status_label.setText(bidi.plain(self.t("ob_connected"), self.t.rtl))
         else:
             self.status_label.setText("✗")
         self._update_nav()
