@@ -9,7 +9,7 @@ from PySide6.QtCore import QLockFile, QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
-from . import APP_NAME, __version__, claude_setup, osapi, updater
+from . import APP_NAME, __version__, claude_setup, osapi, updater, wishlist
 from .brain import Brain
 from .i18n import I18n
 from .kb import KnowledgeBase
@@ -96,6 +96,7 @@ class MapleHelperApp:
         self.overlay.setWindowOpacity(1.0)
         self.overlay.shot_provider = self.capture
         self.overlay.settings_requested.connect(self.open_settings)
+        self.overlay.wishlist_requested.connect(self.show_wishlist)
         self.overlay.profile_requested.connect(self.open_settings)
         self.overlay.add_character_requested.connect(self.add_character)
 
@@ -318,11 +319,20 @@ class MapleHelperApp:
         if interactive:
             self.show_patch_notes(entries)
             return
+        hits = wishlist.touched(entries, wishlist.items(self.settings, self.profiles.active_id), self.kb)
+        if hits:
+            self.overlay.add_notice(t("wish_kb_hit", names=", ".join(hits)), t("patch_notes_show"),
+                                    lambda: self.show_patch_notes(entries))
         # in the chat, where the player looks next; a dialog over the game would interrupt play
         self.overlay.add_notice(t("patch_notes_summary", summary=summary(t, entries)), t("patch_notes_show"),
                                 lambda: self.show_patch_notes(entries))
         if not self.overlay.isVisible():
             self.toast(t("kb_updated"), t("kb_updated_open"))
+
+    def show_wishlist(self):
+        from .ui.wishlist import WishlistDialog
+        keys = wishlist.items(self.settings, self.profiles.active_id)
+        WishlistDialog(keys, self.kb, self.settings["language"], self.style()).exec()
 
     def show_patch_notes(self, entries: list[dict] | None = None):
         if entries is None:
