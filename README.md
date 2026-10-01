@@ -24,22 +24,22 @@ Maple Helper is a desktop assistant for Windows and macOS that puts a chat overl
 Use it to look up drops, find quest NPCs, or ask where to train without switching away from the game. The **play tools** window adds calculators and planners that read the same database: where to train, hit and damage, your build, quests for your level, crafting, citizenship and prices.
 
 <p align="center">
-  <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/en/mano-light.webp" width="260" alt="The chat: what Mano drops, with a monster card and pictures of its drops">
-  <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/en/guide-light.webp" width="260" alt="The Warrior guide in the app, with class art, pros and cons, and a formula box">
-  <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/en/wishlist-light.webp" width="260" alt="Items I'm looking for, with the monsters that drop each one">
+  <img src="https://www.maplehelper.app/assets/shots/en/mano-light.webp" width="260" alt="The chat: what Mano drops, with a monster card and pictures of its drops">
+  <img src="https://www.maplehelper.app/assets/shots/en/guide-light.webp" width="260" alt="The Warrior guide in the app, with class art, pros and cons, and a formula box">
+  <img src="https://www.maplehelper.app/assets/shots/en/wishlist-light.webp" width="260" alt="Items I'm looking for, with the monsters that drop each one">
 </p>
 <p align="center">
-  <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/hp-dark.webp" width="260" alt="Hebrew interface in dark mode: an instant answer for Blue Snail's HP">
-  <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/guide-dark.webp" width="260" alt="The Warrior guide in Hebrew, dark mode">
-  <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/en/settings-light.webp" width="260" alt="Settings: appearance, keys, answers, AI account and plan usage">
+  <img src="https://www.maplehelper.app/assets/shots/en/hp-dark.webp" width="260" alt="Dark mode: an instant answer for Blue Snail's HP">
+  <img src="https://www.maplehelper.app/assets/shots/en/tools-calc-dark.webp" width="260" alt="Play tools, hit & damage: the ACC you need to never miss a monster, dark mode">
+  <img src="https://www.maplehelper.app/assets/shots/en/settings-light.webp" width="260" alt="Settings: appearance, keys, answers, AI account and plan usage">
 </p>
 <p align="center">
-  <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/en/tools-train-light.webp" width="260" alt="Play tools, where to train: maps for your level with hit chance, hits to kill and EXP">
-  <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/en/tools-crafting-light.webp" width="260" alt="Play tools, crafting: the profession's teacher, quests and stations, then the best recipes for your level">
-  <img src="https://amitaflalo1995.github.io/maple-helper-site/assets/shots/tools-quests-dark.webp" width="260" alt="Play tools in Hebrew, dark mode: quests for your level with the NPC, what they need and the rewards">
+  <img src="https://www.maplehelper.app/assets/shots/en/tools-train-light.webp" width="260" alt="Play tools, where to train: maps for your level with hit chance, hits to kill and EXP">
+  <img src="https://www.maplehelper.app/assets/shots/en/tools-crafting-light.webp" width="260" alt="Play tools, crafting: the profession's teacher, quests and stations, then the best recipes for your level">
+  <img src="https://www.maplehelper.app/assets/shots/en/tools-quests-light.webp" width="260" alt="Play tools, quests: quests for your level with the NPC, what they need and the rewards">
 </p>
 
-Website: **https://amitaflalo1995.github.io/maple-helper-site/** (source: [maple-helper-site](https://github.com/Amitaflalo1995/maple-helper-site))
+Website: **https://maplehelper.app/** (source: [maple-helper-site](https://github.com/Amitaflalo1995/maple-helper-site))
 
 ## Download
 
