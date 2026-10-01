@@ -114,6 +114,38 @@ class _Selection(QObject):
 SELECTION = _Selection()
 
 
+class _Wishlist(QObject):
+    """The active character's wished items, shared by every card (the overlay binds the store)."""
+
+    changed = Signal()
+
+    def __init__(self):
+        super().__init__()
+        self.settings = self.profiles = None
+
+    def bind(self, settings, profiles):
+        self.settings, self.profiles = settings, profiles
+        self.changed.emit()
+
+    def keys(self) -> list[str]:
+        from .. import wishlist
+        if not self.settings or not self.profiles:
+            return []
+        return wishlist.items(self.settings, self.profiles.active_id)
+
+    def has(self, key: str) -> bool:
+        return key in self.keys()
+
+    def toggle(self, key: str) -> None:
+        from .. import wishlist
+        if self.settings and self.profiles:
+            wishlist.toggle(self.settings, self.profiles.active_id, key)
+            self.changed.emit()
+
+
+WISHLIST = _Wishlist()
+
+
 class Selectable:
     """Mixin: a tap selects this entity (orange border); every selectable follows the shared selection."""
 
@@ -197,6 +229,13 @@ class EntityCard(Selectable, QFrame):
             link.setToolTip("NiaMeowDB")
             link.clicked.connect(lambda: webbrowser.open(self.url))
             bl.addWidget(link)
+        if key.startswith("item/"):
+            self._star = QToolButton(objectName="Icon")
+            self._star.setCursor(Qt.PointingHandCursor)
+            self._star.clicked.connect(lambda: WISHLIST.toggle(self.key))
+            WISHLIST.changed.connect(self._refresh_star)
+            self._refresh_star()
+            bl.addWidget(self._star)
         copy = QToolButton(objectName="Icon", text=theme.ICON["copy"])
         copy.setCursor(Qt.PointingHandCursor)
         copy.setToolTip(self._t("copy_card"))
@@ -204,6 +243,15 @@ class EntityCard(Selectable, QFrame):
         bl.addWidget(copy)
         bl.addStretch(1)
         row.addWidget(self._buttons, 0, Qt.AlignTop)
+
+    def _refresh_star(self):
+        from . import theme
+        on = WISHLIST.has(self.key)
+        self._star.setText(theme.ICON["star_on" if on else "star"])
+        self._star.setProperty("wished", "true" if on else "false")
+        self._star.style().unpolish(self._star)
+        self._star.style().polish(self._star)
+        self._star.setToolTip(self._t("wish_remove" if on else "wish_add"))
 
     def copy_image(self):
         """The card as a picture on the clipboard, ready to paste in Discord or WhatsApp."""
