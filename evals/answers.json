@@ -1,0 +1,840 @@
+{
+ "about": "Answer-quality cases for Maple Helper. Facts come from data/kb; see docs/EVALS.md before editing.",
+ "cases": [
+  {
+   "id": "stats-mano-hp-he",
+   "question": "כמה HP יש למאנו?",
+   "lang": "he",
+   "kind": "stats",
+   "checks": {
+    "must_mention": [
+     "Mano",
+     "7420"
+    ],
+    "entities_include": [
+     "monster/700004"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "stats-mano-hp-en",
+   "question": "how much hp does mano have",
+   "lang": "en",
+   "kind": "stats",
+   "checks": {
+    "must_mention": [
+     "Mano",
+     "7420"
+    ],
+    "entities_include": [
+     "monster/700004"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "stats-blue-snail-hp-he",
+   "question": "חילזון כחול כמה חיים",
+   "lang": "he",
+   "kind": "stats",
+   "checks": {
+    "must_mention": [
+     "Blue Snail",
+     "51"
+    ],
+    "entities_include": [
+     "monster/3"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "stats-stone-golem-level",
+   "question": "what level is Stone Golem",
+   "lang": "en",
+   "kind": "stats",
+   "checks": {
+    "must_mention": [
+     "Stone Golem",
+     "56"
+    ],
+    "entities_include": [
+     "monster/48"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "stats-jr-balrog-hp",
+   "question": "Jr. Balrog hp",
+   "lang": "en",
+   "kind": "stats",
+   "checks": {
+    "must_mention": [
+     "Jr. Balrog",
+     "325400"
+    ],
+    "entities_include": [
+     "monster/700001"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "stats-king-slime-hp-he",
+   "question": "כמה חיים יש לקינג סליים",
+   "lang": "he",
+   "kind": "stats",
+   "checks": {
+    "must_mention": [
+     "King Slime",
+     "16820"
+    ],
+    "entities_include": [
+     "monster/800003"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "stats-horny-mushroom-level-he",
+   "question": "באיזה לבל הורני שרום",
+   "lang": "he",
+   "kind": "stats",
+   "checks": {
+    "must_mention": [
+     "Horny Mushroom",
+     "22"
+    ],
+    "entities_include": [
+     "monster/19"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "stats-tauromacis-level-he",
+   "question": "מה הלבל של טאורומאסיס",
+   "lang": "he",
+   "kind": "stats",
+   "checks": {
+    "must_mention": [
+     "Tauromacis",
+     "70"
+    ],
+    "entities_include": [
+     "monster/52"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "stats-wild-boar-exp-he",
+   "question": "כמה אקספי נותן ווילד בואר",
+   "lang": "he",
+   "kind": "stats",
+   "checks": {
+    "must_mention": [
+     "Wild Boar",
+     "46"
+    ],
+    "entities_include": [
+     "monster/22"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "stats-mushmom-hp-exp",
+   "question": "Mushmom HP and EXP",
+   "lang": "en",
+   "kind": "stats",
+   "checks": {
+    "must_mention": [
+     "Mushmom",
+     "34440",
+     "376"
+    ],
+    "entities_include": [
+     "monster/700000"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "stats-mano-accuracy-he",
+   "question": "מה הדיוק של מאנו",
+   "lang": "he",
+   "kind": "stats",
+   "checks": {
+    "must_mention": [
+     "Mano",
+     "97"
+    ],
+    "entities_include": [
+     "monster/700004"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "stats-stone-golem-defense-he",
+   "question": "כמה הגנה יש לגולם אבן",
+   "lang": "he",
+   "kind": "stats",
+   "checks": {
+    "must_mention": [
+     "Stone Golem",
+     "30"
+    ],
+    "entities_include": [
+     "monster/48"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "stats-crimson-balrog-exp-he",
+   "question": "כמה EXP נותן קרימזון בלרוג",
+   "lang": "he",
+   "kind": "stats",
+   "checks": {
+    "must_mention": [
+     "Crimson Balrog",
+     "2652"
+    ],
+    "entities_include": [
+     "monster/700005"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "stats-cold-eye-exp",
+   "question": "how many exp does Cold Eye give",
+   "lang": "en",
+   "kind": "stats",
+   "checks": {
+    "must_mention": [
+     "Cold Eye",
+     "94"
+    ],
+    "entities_include": [
+     "monster/37"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "drops-mano-he",
+   "question": "מה מאנו מפיל",
+   "lang": "he",
+   "kind": "drops",
+   "checks": {
+    "must_mention": [
+     "Subi Throwing Stars",
+     "Gold Burgernet Helm"
+    ],
+    "entities_include": [
+     "monster/700004",
+     "item/294"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "drops-orange-mushroom-en",
+   "question": "what does orange mushroom drop",
+   "lang": "en",
+   "kind": "drops",
+   "checks": {
+    "must_mention": [
+     "Orange Mushroom Cap",
+     "Hunter's Bow"
+    ],
+    "entities_include": [
+     "monster/9",
+     "item/356"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "drops-blue-snail-he",
+   "question": "מה הדרופים של בלו סנייל",
+   "lang": "he",
+   "kind": "drops",
+   "checks": {
+    "must_mention": [
+     "Blue Snail Shell"
+    ],
+    "entities_include": [
+     "monster/3",
+     "item/349"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "drops-jr-balrog-en",
+   "question": "Jr. Balrog drops",
+   "lang": "en",
+   "kind": "drops",
+   "checks": {
+    "must_mention": [
+     "Doombringer",
+     "Red Katana"
+    ],
+    "entities_include": [
+     "monster/700001"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "drops-stone-golem-he",
+   "question": "מה נופל מסטון גולם",
+   "lang": "he",
+   "kind": "drops",
+   "checks": {
+    "must_mention": [
+     "Kumbi Throwing Stars",
+     "Elixir"
+    ],
+    "entities_include": [
+     "monster/48",
+     "item/297"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "drops-tauromacis-he",
+   "question": "מה מפיל טאורומאסיס",
+   "lang": "he",
+   "kind": "drops",
+   "checks": {
+    "must_mention": [
+     "Tauromacis Horn"
+    ],
+    "entities_include": [
+     "monster/52",
+     "item/393"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "who-drops-blue-snail-shell",
+   "question": "who drops Blue Snail Shell",
+   "lang": "en",
+   "kind": "who_drops",
+   "checks": {
+    "must_mention": [
+     "Blue Snail"
+    ],
+    "entities_include": [
+     "item/349",
+     "monster/3"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "who-drops-subi-he",
+   "question": "מי מפיל Subi Throwing Stars",
+   "lang": "he",
+   "kind": "who_drops",
+   "checks": {
+    "must_mention": [
+     "Mano",
+     "Trixter"
+    ],
+    "entities_include": [
+     "item/294",
+     "monster/700004"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "who-drops-orange-mushroom-cap",
+   "question": "which monsters drop Orange Mushroom Cap",
+   "lang": "en",
+   "kind": "who_drops",
+   "checks": {
+    "must_mention": [
+     "Orange Mushroom"
+    ],
+    "entities_include": [
+     "monster/9"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "who-drops-curse-eye-tail-he",
+   "question": "מאיפה משיגים Curse Eye Tail",
+   "lang": "he",
+   "kind": "who_drops",
+   "checks": {
+    "must_mention": [
+     "Curse Eye"
+    ],
+    "entities_include": [
+     "monster/31"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "who-drops-red-potion-he",
+   "question": "מי מפיל את Red Potion",
+   "lang": "he",
+   "kind": "who_drops",
+   "checks": {
+    "must_mention": [
+     "Snail",
+     "Blue Snail"
+    ],
+    "entities_include": [
+     "item/270",
+     "monster/2"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "where-blue-snail-he",
+   "question": "איפה יש בלו סנייל",
+   "lang": "he",
+   "kind": "where",
+   "checks": {
+    "must_mention": [
+     "Snail Hunting Ground III"
+    ],
+    "entities_include": [
+     "monster/3"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "where-mano-en",
+   "question": "where is Mano",
+   "lang": "en",
+   "kind": "where",
+   "checks": {
+    "must_mention": [
+     "Thicket Around the Beach III"
+    ],
+    "must_not_mention": [
+     "P.DMG",
+     "M.DEF"
+    ],
+    "entities_include": [
+     "monster/700004"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "where-lupin-he",
+   "question": "באיזו מפה יש לופין",
+   "lang": "he",
+   "kind": "where",
+   "checks": {
+    "must_mention": [
+     "Monkey Swamp I"
+    ],
+    "entities_include": [
+     "monster/35"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "where-curse-eye-en",
+   "question": "where to find Curse Eye",
+   "lang": "en",
+   "kind": "where",
+   "checks": {
+    "must_mention": [
+     "Sleepy Dungeon V"
+    ],
+    "entities_include": [
+     "monster/31"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "where-stirge-he",
+   "question": "איפה יש סטירג'",
+   "lang": "he",
+   "kind": "where",
+   "checks": {
+    "must_mention": [
+     "Transfer Area"
+    ],
+    "entities_include": [
+     "monster/17"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "where-jr-balrog-en",
+   "question": "where's Jr. Balrog",
+   "lang": "en",
+   "kind": "where",
+   "checks": {
+    "must_mention": [
+     "The Cursed Sanctuary"
+    ],
+    "entities_include": [
+     "monster/700001"
+    ],
+    "instant": true
+   }
+  },
+  {
+   "id": "judge-screen-monster-he",
+   "question": "מה המפלצת שעל המסך",
+   "lang": "he",
+   "kind": "screenshot",
+   "checks": {
+    "instant": false
+   }
+  },
+  {
+   "id": "judge-this-monster-hp-he",
+   "question": "כמה HP יש למפלצת הזאת",
+   "lang": "he",
+   "kind": "screenshot",
+   "checks": {
+    "instant": false
+   }
+  },
+  {
+   "id": "judge-what-am-i-fighting",
+   "question": "what am I fighting right now?",
+   "lang": "en",
+   "kind": "screenshot",
+   "checks": {
+    "instant": false
+   }
+  },
+  {
+   "id": "judge-blue-snail-worth-he",
+   "question": "כדאי לי לגרינד בלו סנייל?",
+   "lang": "he",
+   "kind": "judgement",
+   "checks": {
+    "must_mention": [
+     "Blue Snail"
+    ],
+    "instant": false
+   }
+  },
+  {
+   "id": "judge-mano-at-15",
+   "question": "should I kill Mano at level 15",
+   "lang": "en",
+   "kind": "judgement",
+   "checks": {
+    "must_mention": [
+     "Mano",
+     "20"
+    ],
+    "instant": false
+   }
+  },
+  {
+   "id": "judge-fighter-or-spearman-he",
+   "question": "מה עדיף פייטר או ספירמן",
+   "lang": "he",
+   "kind": "judgement",
+   "checks": {
+    "must_mention": [
+     "Fighter",
+     "Spearman"
+    ],
+    "instant": false
+   }
+  },
+  {
+   "id": "judge-mano-vs-king-slime-hp",
+   "question": "Mano or King Slime HP",
+   "lang": "en",
+   "kind": "judgement",
+   "checks": {
+    "must_mention": [
+     "7420",
+     "16820"
+    ],
+    "instant": false
+   }
+  },
+  {
+   "id": "judge-mano-level-and-drops-he",
+   "question": "מה הלבל של מאנו ומה הוא מפיל",
+   "lang": "he",
+   "kind": "judgement",
+   "checks": {
+    "must_mention": [
+     "20"
+    ],
+    "instant": false
+   }
+  },
+  {
+   "id": "npc-athena-pierce-he",
+   "question": "איפה אתנה פירס",
+   "lang": "he",
+   "kind": "npc",
+   "checks": {
+    "must_mention": [
+     "Bowman Instructional School"
+    ],
+    "entities_include": [
+     "npc/221"
+    ]
+   }
+  },
+  {
+   "id": "npc-grendel-en",
+   "question": "who is Grendel the Really Old",
+   "lang": "en",
+   "kind": "npc",
+   "checks": {
+    "must_mention": [
+     "Magic Library"
+    ],
+    "entities_include": [
+     "npc/313"
+    ]
+   }
+  },
+  {
+   "id": "npc-shanks-he",
+   "question": "איפה שנקס",
+   "lang": "he",
+   "kind": "npc",
+   "checks": {
+    "must_mention": [
+     "Southperry"
+    ],
+    "entities_include": [
+     "npc/15"
+    ]
+   }
+  },
+  {
+   "id": "quest-proof-of-companionship",
+   "question": "what level do i need for Proof of Companionship",
+   "lang": "en",
+   "kind": "quest",
+   "checks": {
+    "must_mention": [
+     "21",
+     "Lakelis"
+    ],
+    "entities_include": [
+     "quest/10311"
+    ]
+   }
+  },
+  {
+   "id": "quest-mai-training-he",
+   "question": "כמה אקספי נותן הקווסט Mai's Training",
+   "lang": "he",
+   "kind": "quest",
+   "checks": {
+    "must_mention": [
+     "70"
+    ],
+    "entities_include": [
+     "quest/1009"
+    ]
+   }
+  },
+  {
+   "id": "job-thief-first-he",
+   "question": "איפה עושים ג'וב ראשון לגנב",
+   "lang": "he",
+   "kind": "job",
+   "checks": {
+    "must_mention": [
+     "Kerning City",
+     "Dark Lord"
+    ]
+   }
+  },
+  {
+   "id": "job-second-level-he",
+   "question": "באיזה לבל עושים ג'וב שני",
+   "lang": "he",
+   "kind": "job",
+   "checks": {
+    "must_mention": [
+     "30"
+    ]
+   }
+  },
+  {
+   "id": "job-magician-en",
+   "question": "how do I become a magician",
+   "lang": "en",
+   "kind": "job",
+   "checks": {
+    "must_mention": [
+     "Grendel the Really Old",
+     "Ellinia"
+    ]
+   }
+  },
+  {
+   "id": "job-bowman-branches-he",
+   "question": "לאיזה ג'ובים אפשר להתקדם מקשת",
+   "lang": "he",
+   "kind": "job",
+   "checks": {
+    "must_mention": [
+     "Hunter",
+     "Crossbowman"
+    ]
+   }
+  },
+  {
+   "id": "train-level-25-he",
+   "question": "איפה לגרינד בלבל 25",
+   "lang": "he",
+   "kind": "training",
+   "checks": {
+    "must_mention_any": [
+     "Ant Tunnel"
+    ]
+   }
+  },
+  {
+   "id": "train-level-50-en",
+   "question": "best training spot for level 50",
+   "lang": "en",
+   "kind": "training",
+   "checks": {
+    "must_mention_any": [
+     "Line 2 <Area 2>",
+     "Line 2 <Area 3>",
+     "Line 1 <Area 4>",
+     "Kerning City Subway"
+    ]
+   }
+  },
+  {
+   "id": "train-level-15-he",
+   "question": "איפה להתאמן בלבל 15",
+   "lang": "he",
+   "kind": "training",
+   "checks": {
+    "must_mention_any": [
+     "Line 1 <Area 1>",
+     "West Rocky Mountain III",
+     "Tree Dungeon, Forest Up North IV"
+    ]
+   }
+  },
+  {
+   "id": "guide-exp-to-31-he",
+   "question": "כמה אקספי צריך מלבל 30 ל31",
+   "lang": "he",
+   "kind": "guide",
+   "checks": {
+    "must_mention": [
+     "95700"
+    ]
+   }
+  },
+  {
+   "id": "guide-release-date",
+   "question": "when does MapleStory Classic World release",
+   "lang": "en",
+   "kind": "guide",
+   "checks": {
+    "must_mention": [
+     "2026"
+    ],
+    "must_mention_any": [
+     "October 21",
+     "Oct 21",
+     "21 October",
+     "21 באוקטובר"
+    ]
+   }
+  },
+  {
+   "id": "guide-kpq-he",
+   "question": "מה זה KPQ ומאיזה לבל",
+   "lang": "he",
+   "kind": "guide",
+   "checks": {
+    "must_mention": [
+     "21"
+    ],
+    "must_mention_any": [
+     "Lakelis",
+     "King Slime"
+    ]
+   }
+  },
+  {
+   "id": "guide-party-bonus-he",
+   "question": "כמה בונוס אקספי יש בפארטי של 4",
+   "lang": "he",
+   "kind": "guide",
+   "checks": {
+    "must_mention": [
+     "30%"
+    ]
+   }
+  },
+  {
+   "id": "guide-ks-en",
+   "question": "what does KS mean",
+   "lang": "en",
+   "kind": "guide",
+   "checks": {
+    "must_mention_any": [
+     "kill steal",
+     "kill-steal",
+     "killsteal"
+    ]
+   }
+  },
+  {
+   "id": "guide-dps-70-he",
+   "question": "איזה ג'וב שני עושה הכי הרבה דמג' בלבל 70",
+   "lang": "he",
+   "kind": "guide",
+   "checks": {
+    "must_mention": [
+     "Bandit"
+    ],
+    "instant": false
+   }
+  },
+  {
+   "id": "guide-forgotten-hollow-en",
+   "question": "what is Forgotten Hollow",
+   "lang": "en",
+   "kind": "guide",
+   "checks": {
+    "must_mention_any": [
+     "Rotten Mushmom",
+     "cave fairy"
+    ]
+   }
+  }
+ ]
+}
