@@ -15,26 +15,29 @@ from .kb import KnowledgeBase
 HE = "֐-׿"
 
 
-def _he(words: str) -> str:
-    """Whole Hebrew words: not a letter on either side (so "מי" doesn't match inside another word)."""
-    return rf"(?<![{HE}])({words})(?![{HE}])"
+def _he(words: str, the: bool = False) -> str:
+    """Whole Hebrew words: not a letter on either side (so "מי" doesn't match inside another word).
+    the=True also accepts the definite article glued on: "מה הלבל של..." is the usual way to ask."""
+    return rf"(?<![{HE}]){'ה?' if the else ''}({words})(?![{HE}])"
 
 
 # questions that need judgement, the screenshot or the player's situation: always Claude
+# ("how much / how many" is a plain number question, not a "how do I")
 NEEDS_CLAUDE = re.compile(
-    r"\b(why|how|should|best|better|worth|recommend|my|me|i|here|this|that)\b|"
+    r"\b(why|how(?!\s+(?:much|many)\b)|should|best|better|worth|recommend|my|me|i|here|this|that)\b|"
     + _he("למה|איך|כדאי|הכי|עדיף|שווה|מומלץ|שלי|אני|פה|כאן|הזה|הזאת|זה|במסך|תמליץ|לי"), re.I)
 DROPS = re.compile(r"\b(drops?|loot)\b|(מפיל|מפילה|מפילים|דרופ|דרופים|נופל)", re.I)
 WHO = re.compile(r"\b(who|which (monster|mob)s?)\b|" + _he("מי|מאיפה") + "|איזה מפלצ|איפה משיגים", re.I)
 WHERE = re.compile(r"\b(where|location|spawn)\b|(איפה|באיזו מפה|באיזה מפה|מיקום)", re.I)
 STATS = [  # (pattern, props key, label); Hebrew as whole words: "לבלו סנייל" (Blue Snail) is not "לבל"
-    (re.compile(r"\bhp\b|" + _he("חיים|אייץ' פי"), re.I), "HP", "HP"),
-    (re.compile(r"\bmp\b|" + _he("מאנה|מנה"), re.I), "MP", "MP"),
-    (re.compile(r"\bexp\b|\bxp\b|" + _he("אקספי|נסיון|ניסיון"), re.I), "EXP", "EXP"),
-    (re.compile(r"\blevel\b|\blv\b|" + _he("לבל|רמה"), re.I), "Level", "Level"),
-    (re.compile(r"\bdef(ense)?\b|" + _he("הגנה"), re.I), "Defense", "Defense"),
-    (re.compile(r"\bacc(uracy)?\b|" + _he("דיוק"), re.I), "Accuracy", "Accuracy"),
-    (re.compile(r"\b(att|attack|damage)\b|" + _he("נזק|התקפה"), re.I), "Physical Damage", "Damage"),
+    (re.compile(r"\bhp\b|" + _he("חיים|אייץ' פי", the=True), re.I), "HP", "HP"),
+    (re.compile(r"\bmp\b|" + _he("מאנה|מנה", the=True), re.I), "MP", "MP"),
+    (re.compile(r"\bexp\b|\bxp\b|" + _he("אקספי|נסיון|ניסיון", the=True), re.I), "EXP", "EXP"),
+    (re.compile(r"\blevel\b|\blv\b|" + _he("לבל|רמה", the=True), re.I), "Level", "Level"),
+    # the knowledge base has no plain "Defense": monsters carry "Physical Defense" and "Magic Defense"
+    (re.compile(r"\bdef(ense)?\b|" + _he("הגנה", the=True), re.I), "Physical Defense", "Defense"),
+    (re.compile(r"\bacc(uracy)?\b|" + _he("דיוק", the=True), re.I), "Accuracy", "Accuracy"),
+    (re.compile(r"\b(att|attack|damage)\b|" + _he("נזק|התקפה", the=True), re.I), "Physical Damage", "Damage"),
 ]
 MAX_WORDS = 9
 
@@ -59,6 +62,9 @@ def answer(question: str, kb: KnowledgeBase, t) -> Answer | None:
                       drop_groups=groups)
     if cat != "monster":
         return None
+    asks = [bool(DROPS.search(q) and not WHO.search(q)), bool(WHERE.search(q)), any(rx.search(q) for rx, _, _ in STATS)]
+    if sum(asks) > 1:
+        return None          # "Mano's level and drops": answering only half would look like the whole answer
     if DROPS.search(q) and not WHO.search(q):
         drops = kb.monster_drops(key)
         if not drops:
