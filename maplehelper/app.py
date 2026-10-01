@@ -639,19 +639,16 @@ _RUNNING = None
 
 
 def _hold_running_mutex():
-    """Windows: wait while an update installs, then hold a named mutex the installer waits on."""
+    """Windows: wait while an update installs, then hold a named mutex the installer waits on.
+    (The launchers already waited before importing anything heavy; this covers other entry points.)"""
     global _RUNNING
     if sys.platform != "win32":
         return
     import ctypes
-    import time
+
+    from .setupwait import wait_for_setup
+    wait_for_setup()
     k32 = ctypes.windll.kernel32
-    for _ in range(240):                       # up to 2 minutes
-        h = k32.OpenMutexW(0x00100000, False, "MapleHelperSetup")   # SYNCHRONIZE
-        if not h:
-            break
-        k32.CloseHandle(h)
-        time.sleep(0.5)
     _RUNNING = k32.CreateMutexW(None, False, "MapleHelperRunning")
 
 

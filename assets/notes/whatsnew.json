@@ -1,5 +1,16 @@
 [
  {
+  "version": "0.7.1",
+  "he": [
+   "עדכון אמין יותר: פתיחת האפליקציה בזמן שעדכון מותקן מחכה שההתקנה תסתיים, במקום לקטוע אותה באמצע.",
+   "האפליקציה לא נתקעת בפתיחה אם נשמרו בה נתונים מגרסה חדשה יותר."
+  ],
+  "en": [
+   "More reliable updates: opening the app while an update installs now waits for it to finish instead of breaking it halfway.",
+   "The app no longer fails to start when a newer version saved data it doesn't know."
+  ]
+ },
+ {
   "version": "0.7.0",
   "he": [
    "כלי משחק חדשים (כפתור הכלים בצ'אט): איפה לאמן, מחשבון פגיעה ונזק, תוכנית בילד (AP / SP / ציוד), קווסטים ללבל שלך, קראפטינג, אזרחות, מחיר פריט, מד EXP ותיק וקניות.",
