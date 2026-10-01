@@ -2,14 +2,14 @@
  {
   "version": "0.6.1",
   "he": [
-   "מדריכים מלאים עם תמונות: דמויות, אייקונים של סקילים ופריטים, מפלצות, טבלאות וקופסאות טיפים, כמו באתר, ובעברית מלאה.",
+   "מדריכים מלאים עם תמונות: דמויות, אייקונים של סקילים ופריטים, מפלצות, טבלאות וקופסאות טיפים, כמו באתר, ובעברית מלאה. מעבר עם העכבר על תמונה מגדיל אותה.",
    "קישורים בין מדריכים נפתחים ישר בתוך האפליקציה.",
    "שימוש במנוי עובר לאזור \"חשבון AI\" בהגדרות, וגם עם ChatGPT רואים כמה מהמכסה נוצל ומקבלים התראה כשהיא נגמרת.",
    "החלונות (הגדרות, מדריכים, היסטוריה ועוד) כבר לא חוסמים את הצ'אט.",
    "עדכון אוטומטי בטוח יותר, ותיקוני עברית ותצוגה."
   ],
   "en": [
-   "Full guides with pictures: character art, skill and item icons, monsters, tables and tip boxes, just like the site (in Hebrew too).",
+   "Full guides with pictures: character art, skill and item icons, monsters, tables and tip boxes, just like the site (in Hebrew too). Hover a picture to see it enlarged.",
    "Links between guides open right in the app.",
    "Plan usage moved under \"AI account\" in Settings, and with ChatGPT you also see how much of your limit is used and get a heads-up when it runs low.",
    "Windows (Settings, Guides, History and more) no longer block the chat.",

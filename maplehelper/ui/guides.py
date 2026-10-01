@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import webbrowser
 
-from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QPixmap
+from PySide6.QtCore import QEvent, QObject, QPoint, Qt, QUrl, Signal
+from PySide6.QtGui import QCursor, QGuiApplication, QPixmap, QTextCursor
 from PySide6.QtWidgets import (QButtonGroup, QFrame, QHBoxLayout, QLabel, QLineEdit, QPushButton, QScrollArea,
                                QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
 
@@ -13,6 +13,87 @@ from .. import bidi, guides
 from ..i18n import I18n
 from .controls import rtl_buttons
 from .glass import GlassDialog
+
+
+ZOOM = 3            # pictures are pixel art: a whole-number zoom keeps them sharp
+ZOOM_MAX_W = 720
+
+
+def zoomed(pix: QPixmap) -> QPixmap:
+    """The picture enlarged for the hover view: up to 3x (whole steps stay pixel-sharp), at most ZOOM_MAX_W wide."""
+    if pix.isNull():
+        return pix
+    k = max(1, min(ZOOM, ZOOM_MAX_W // max(1, pix.width())))
+    return pix.scaled(pix.width() * k, pix.height() * k, Qt.KeepAspectRatio, Qt.FastTransformation)
+
+
+class ImageZoom(QObject):
+    """Hovering a picture in the guide shows it enlarged next to the mouse."""
+
+    def __init__(self, browser: QTextBrowser):
+        super().__init__(browser)
+        self.browser = browser
+        self.pop = QLabel(None, Qt.ToolTip | Qt.FramelessWindowHint)
+        self.pop.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.pop.setStyleSheet("background: rgba(28,28,30,0.92); border-radius: 12px; padding: 8px;")
+        self._shown = None
+        browser.viewport().setMouseTracking(True)
+        browser.viewport().installEventFilter(self)
+
+    def image_at(self, pos: QPoint) -> str | None:
+        """The file of the picture under this viewport point, if any."""
+        b = self.browser
+        c = b.cursorForPosition(pos)
+        for back in (0, 1):                 # the picture is the character just before or after the cursor
+            at = QTextCursor(c)
+            if back:
+                at.movePosition(QTextCursor.Left)
+            nxt = QTextCursor(at)
+            nxt.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor)
+            fmt = nxt.charFormat()
+            if not fmt.isImageFormat():
+                continue
+            img = fmt.toImageFormat()
+            left = b.cursorRect(at)
+            right = b.cursorRect(nxt)
+            x0, x1 = sorted((left.x(), right.x()))
+            h = img.height() or left.height()
+            if x0 - 2 <= pos.x() <= max(x1, x0 + img.width()) + 2 and right.bottom() - h - 4 <= pos.y() <= right.bottom() + 4:
+                url = QUrl(img.name())
+                return url.toLocalFile() if url.isLocalFile() else img.name()
+        return None
+
+    def eventFilter(self, obj, e):
+        if e.type() == QEvent.MouseMove:
+            name = self.image_at(e.position().toPoint())
+            if name:
+                self.show(name)
+            else:
+                self.hide()
+        elif e.type() in (QEvent.Leave, QEvent.Wheel, QEvent.MouseButtonPress):
+            self.hide()
+        return False
+
+    def show(self, name: str):
+        if name != self._shown:
+            pix = zoomed(QPixmap(name))
+            if pix.isNull():
+                return
+            self.pop.setPixmap(pix)
+            self.pop.adjustSize()
+            self._shown = name
+        # beside the mouse, kept on the screen
+        at = QCursor.pos() + QPoint(18, 18)
+        screen = (QGuiApplication.screenAt(QCursor.pos()) or QGuiApplication.primaryScreen()).availableGeometry()
+        w, h = self.pop.width(), self.pop.height()
+        x = at.x() if at.x() + w <= screen.right() else QCursor.pos().x() - w - 18
+        y = at.y() if at.y() + h <= screen.bottom() else max(screen.top(), screen.bottom() - h)
+        self.pop.move(x, y)
+        self.pop.show()
+
+    def hide(self):
+        self._shown = None
+        self.pop.hide()
 
 
 class GuideRow(QFrame):
@@ -180,6 +261,7 @@ class GuidesDialog(GlassDialog):
         self.browser.setOpenLinks(False)                      # guide: links open here, web links in the browser
         self.browser.anchorClicked.connect(self._on_link)
         self.browser.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)   # wide tables wrap their cells instead
+        self.zoom = ImageZoom(self.browser)
         self.browser.setLayoutDirection(Qt.LeftToRight)      # the guides are written in English
         lay.addWidget(self.browser, 1)
         return w

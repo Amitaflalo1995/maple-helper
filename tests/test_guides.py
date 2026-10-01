@@ -141,3 +141,33 @@ def test_reader_html_for_a_hebrew_guide():
     h = guides.book_html(b, "dark")
     assert "dir='rtl'" in h and "<b>" in h and "a.png" in h and "href='guide:fighter-class-guide'" in h
     assert "[[img:" not in h and guides.NOTE_COLORS["dark"]["note"] in h and "y.png" in h and "<table" in h
+
+
+def test_hovering_a_guide_picture_finds_it():
+    import sys
+    from PySide6.QtCore import QPoint
+    from PySide6.QtGui import QPixmap, QTextCursor
+    from PySide6.QtWidgets import QApplication
+    app = QApplication.instance() or QApplication(sys.argv)
+    from maplehelper.ui.guides import GuidesDialog, zoomed
+    assert zoomed(QPixmap(32, 32)).size().toTuple() == (96, 96)
+    assert zoomed(QPixmap(360, 200)).size().toTuple() == (720, 400)
+    d = GuidesDialog(SimpleNamespace(entities={}, page=lambda k: "", get=lambda k: None), None, "en", "")
+    d.resize(560, 900)
+    d.show()
+    d.open_guide("guide/warrior-class-guide")
+    app.processEvents()
+    b, c = d.browser, QTextCursor(d.browser.document())
+    while not c.atEnd():
+        n = QTextCursor(c)
+        n.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor)
+        if n.charFormat().isImageFormat():
+            break
+        c.movePosition(QTextCursor.Right)
+    img = n.charFormat().toImageFormat()
+    r = b.cursorRect(n)
+    point = r.bottomLeft() - QPoint(img.width() // 2, img.height() // 2)
+    if d.zoom.image_at(point) is None:                    # left-to-right text: the picture is right of its start
+        point = b.cursorRect(c).bottomLeft() + QPoint(img.width() // 2, -img.height() // 2)
+    assert d.zoom.image_at(point).endswith(img.name().rsplit("/", 1)[-1])
+    d.close()
