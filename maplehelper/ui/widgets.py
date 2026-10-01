@@ -169,11 +169,17 @@ class EntityCard(Selectable, QFrame):
         sub = CATEGORY_LABELS.get(cat, (cat, cat))[0 if he else 1]
         if e.get("type"):
             sub = f"{sub} · {e['type']}"
-        col.addWidget(_label(bidi.plain(sub), "CardSub"))
+        # in Hebrew every line starts on the right, even an all-English one like "NPC"
+        side = (Qt.AlignRight if he else Qt.AlignLeft) | Qt.AlignAbsolute
+        sub_label = _label(bidi.plain(sub, he), "CardSub")
+        sub_label.setAlignment(side)
+        col.addWidget(sub_label)
 
         stats = self._stats(e, he)
         if stats:
-            col.addWidget(_label(bidi.plain(stats), "CardStat"))
+            stat_label = _label(bidi.plain(stats, he), "CardStat")
+            stat_label.setAlignment(side)
+            col.addWidget(stat_label)
         credit = _label("NiaMeowDB (meowdb.com)", "CardCredit")
         col.addWidget(credit)
         row.addLayout(col, 1)
