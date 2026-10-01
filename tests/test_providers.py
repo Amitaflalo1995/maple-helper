@@ -139,7 +139,19 @@ class TestDiscovery:
         monkeypatch.setattr(base.shutil, "which", lambda _name: str(tmp_path / "codex.cmd"))
         for var in ("LOCALAPPDATA", "APPDATA", "USERPROFILE"):
             monkeypatch.setenv(var, str(tmp_path))
+        monkeypatch.setattr(codex, "store_apps", lambda: [])
         assert codex.find_windows() is None
+
+    def test_windows_codex_from_the_store_app(self, tmp_path, monkeypatch):
+        """OpenAI's Microsoft Store app carries the CLI; its folder comes from the package registry."""
+        exe = tmp_path / "OpenAI.Codex_26.9.1.0_x64__x" / "app" / "resources" / "codex.exe"
+        exe.parent.mkdir(parents=True)
+        exe.write_bytes(b"")
+        monkeypatch.setattr(base.shutil, "which", lambda _name: None)
+        for var in ("LOCALAPPDATA", "APPDATA", "USERPROFILE"):
+            monkeypatch.setenv(var, str(tmp_path))
+        monkeypatch.setattr(codex, "store_apps", lambda: [tmp_path / "gone" / "codex.exe", exe])
+        assert codex.find_windows() == str(exe)
 
 
 def test_creation_flags_are_windows_only():
