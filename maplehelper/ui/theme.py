@@ -210,6 +210,11 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
                          padding: 0 10px; font-size: {s - 2}px; font-weight: 600; }}
     QPushButton#TimerChip {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; color: {c['text']}; }}
     QPushButton#TimerChipDone {{ background: rgba(255,149,51,0.22); border: 1px solid rgba(255,149,51,0.8); color: {ORANGE_DEEP}; }}
+    QPushButton#NowChip {{ background: rgba(255,149,51,0.12); border: 1px solid rgba(255,149,51,0.55); border-radius: 12px;
+                           min-height: 24px; max-height: 24px; padding: 0 11px; font-size: {s - 2}px; font-weight: 600;
+                           color: {ORANGE_DEEP}; }}
+    QPushButton#NowChip:hover {{ background: rgba(255,149,51,0.22); }}
+    QPushButton#NowChip:pressed {{ background: rgba(255,149,51,0.32); }}
     #ToolHeader {{ font-size: {s - 1}px; color: {c['muted']}; }}
 
     #Capsule {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 21px; }}

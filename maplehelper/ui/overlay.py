@@ -230,21 +230,16 @@ class Overlay(QWidget):
         self.timer_bar = None            # set_timers() adds the running play timers here
         self._timer_slot = lay.count()
         self._main_lay = lay
-        from .plancard import PlanPanel, TipStrip
+        from .plancard import TipStrip
         self.tip_strip = TipStrip()
         self.tip_strip.asked.connect(self.ask)
         self.tip_strip.dismissed.connect(self._dismiss_tip)
         lay.addWidget(self.tip_strip)
-        self.plan_panel = PlanPanel()
-        self.plan_panel.asked.connect(self.ask)
-        self.plan_panel.what_now.connect(self.what_now)
-        self.plan_panel.guide_requested.connect(self.guide_requested.emit)
-        lay.addWidget(self.plan_panel)
         from .pinsview import PinsBar
         self.pins_bar = PinsBar()
         self.pins_bar.unpin.connect(self._unpin)
         lay.addWidget(self.pins_bar)
-        self.profile_card.plan_btn.toggled.connect(self._toggle_plan)
+        self.profile_card.now_btn.clicked.connect(self.what_now)
 
         # conversation
         self.scroll = QScrollArea()
@@ -329,7 +324,8 @@ class Overlay(QWidget):
         self.guides_btn.setToolTip(self.t("guides"))
         self.history_btn.setToolTip(self.t("history"))
         self.profile_card.refresh.setToolTip(self.t("refresh_tip"))
-        self.profile_card.plan_btn.setToolTip(self.t("plan_open"))
+        self.profile_card.now_btn.setText(self.t("plan_what_now"))
+        self.profile_card.now_btn.setToolTip(self.t("what_now_tip"))
         if getattr(self, "_update_version", None):
             self.show_update(self._update_version)
         self.profile_card.setToolTip(self.t("switch_character"))
@@ -394,19 +390,10 @@ class Overlay(QWidget):
         c = self.profiles.active
         if not c:
             self.tip_strip.show_tip(None, self.t, self.t.rtl)
-            self.plan_panel.hide()
             return
         self.profile_card.exp.show_progress(plan.progress(self.kb, c.level, c.exp_pct), self.t, self.t.rtl)
         dismissed = (self.settings["tips_dismissed"] or {}).get(c.id, {})
         self.tip_strip.show_tip(plan.tip(self.kb, c, self.t, dismissed), self.t, self.t.rtl)
-        if self.profile_card.plan_btn.isChecked():
-            self.plan_panel.fill(self.kb, c, self.t, self.t.rtl)
-
-    def _toggle_plan(self, on: bool):
-        c = self.profiles.active
-        if on and c:
-            self.plan_panel.fill(self.kb, c, self.t, self.t.rtl)
-        self.plan_panel.setVisible(on and c is not None)
 
     def _dismiss_tip(self, kind: str):
         c = self.profiles.active
@@ -439,7 +426,6 @@ class Overlay(QWidget):
 
     def what_now(self):
         """'What now?': a fresh screenshot and the question, so Claude sees where the player is."""
-        self.profile_card.plan_btn.setChecked(False)
         self.setWindowOpacity(0.0)        # the chat is part of the screen: step aside for the shot
         QTimer.singleShot(120, self._what_now_capture)
 
