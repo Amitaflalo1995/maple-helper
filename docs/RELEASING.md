@@ -4,8 +4,8 @@ Everything runs in GitHub Actions. You decide *when*; CI does the rest.
 
 | Workflow | Runs on | Does |
 |---|---|---|
-| **CI** (`ci.yml`) | every push to `main`, every PR | lint + tests on Windows and macOS, then a full build on each. Windows: frozen-exe self-test, portable zip, installer install → self-test → uninstall. macOS: `.app` self-test, DMG mount → self-test. The builds are downloadable from the run page (14 days). |
-| **Release** (`release.yml`) | pushing a tag `vX.Y.Z` | the same checks with the real knowledge base bundled, then publishes the GitHub Release with the Windows installer + portable zip and the macOS DMG (both platforms or nothing). Installed Windows apps update themselves to it; Mac apps show a download notice. |
+| **CI** (`ci.yml`) | every push to `main`, every PR | lint + tests on Windows and macOS and, alongside them, a full build on each (the installer is compressed lighter than in releases, to save time). Windows: frozen-exe self-test, portable zip, installer install → self-test → uninstall. macOS: `.app` self-test, DMG mount → self-test. The builds are downloadable from the run page (14 days). |
+| **Release** (`release.yml`) | pushing a tag `vX.Y.Z` | the same checks with the real knowledge base bundled (both builds run alongside the tests), then, once everything passed, publishes the GitHub Release with the Windows installer + portable zip and the macOS DMG (both platforms or nothing). Installed Windows apps update themselves to it; Mac apps show a download notice. |
 | **Update knowledge base** (`kb-update.yml`) | nightly (changed pages), full refresh on Sundays, or the *Run workflow* button | scrapes NiaMeowDB politely, **validates**, and replaces `kb.zip` + `kb-manifest.json` on the latest release when content changed. |
 
 ## Cut a release

@@ -5,6 +5,10 @@
 #ifndef AppVersion
   #define AppVersion "0.1.0"
 #endif
+; releases ship lzma2/ultra; CI passes /DCompression=lzma2/fast (build.ps1 -FastInstaller) to save build time
+#ifndef Compression
+  #define Compression "lzma2/ultra"
+#endif
 
 [Setup]
 AppId={{4B526220-22E4-45D2-88B7-C62A0B7385E4}
@@ -39,8 +43,11 @@ WizardImageFileDynamicDark=installer-art\side.png
 WizardSmallImageFile=installer-art\small.png
 WizardSmallImageFileDynamicDark=installer-art\small.png
 WizardImageAlphaFormat=defined
-Compression=lzma2/ultra
+Compression={#Compression}
 SolidCompression=yes
+; compress on the runner's 4 cores instead of one
+LZMAUseSeparateProcess=yes
+LZMANumBlockThreads=4
 CloseApplications=force
 RestartApplications=no
 ArchitecturesAllowed=x64compatible
