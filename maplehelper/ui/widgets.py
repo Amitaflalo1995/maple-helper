@@ -89,6 +89,26 @@ class NoticeCard(QFrame):
         lay.addWidget(btn, 0, Qt.AlignVCenter)
 
 
+class SessionCard(QFrame):
+    """'Last session': levels gained, quests done, questions asked, per character."""
+
+    def __init__(self, title: str, lines: list[str], rtl: bool):
+        super().__init__(objectName="Card")
+        self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
+        col = QVBoxLayout(self)
+        col.setContentsMargins(14, 10, 14, 10)
+        col.setSpacing(3)
+        align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute
+        head = QLabel(bidi.plain(title, rtl), objectName="CardName")
+        head.setAlignment(align)
+        col.addWidget(head)
+        for ln in lines:
+            lb = QLabel(bidi.plain(ln, rtl), objectName="CardStat")
+            lb.setWordWrap(True)
+            lb.setAlignment(align)
+            col.addWidget(lb)
+
+
 # ------------------------------------------------------------------ entity cards
 
 CARD_FIELDS = {
