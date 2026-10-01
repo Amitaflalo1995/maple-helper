@@ -1,0 +1,443 @@
+{
+ "key": "guide/spearman-class-guide",
+ "source_hash": "553b909d0c9d",
+ "lang": "he",
+ "title": "מדריך Spearman ל-MapleStory Classic: לבל 30-70",
+ "intro": "מדריך Spearman ל-MapleStory Classic ללבלים 30-70: חלוקת SP, Spear מול Polearm, ציוד, פוטים ומפות מ-Training Advisor.",
+ "pros": [
+  "מקום 3 ב-Damage/MP בלבל 70: דמג' מעולה על כל נקודת MP.",
+  "ה-EHP הפיזי הכי גבוה מבין בילדי ה-Warrior הריאליים בלבל 70.",
+  "Spear ו-Polearm נותנים ל-Warrior את הטווח הכי ארוך במתקפת מלי בסיסית.",
+  "Polearm Mastery מוסיף +20 Movement Speed בלי לתפוס סלוט ציוד."
+ ],
+ "cons": [
+  "במסלול ה-Spear אין Speed פסיבי. Polearm פותר את התנועה רק אחרי השקעה ב-Mastery.",
+  "אין באף או דיבאף לפארטי לפני ג'וב שלישי: Hyper Body הוא סקיל של Dragon Knight ב-CoT2.",
+  "אין אפשרות למגן. ל-Spearman אין את הפסיבי Guard שיכול לבטל מתקפות פיזיות.",
+  "Mastery, Booster ו-Final Attack נועלים את ה-SP על Spear או על Polearm.",
+  "Power Strike ו-Slash Blast נשארים סקילי ה-DPS העיקריים עד ג'וב שלישי בלבל 70+."
+ ],
+ "sections": [
+  {
+   "heading": "מתחילים בלבל 30",
+   "lines": [
+    "Warrior חדש? קודם תסיים את מדריך ה-Warrior ללבל 1-30. שם יש את נוסחת ה-Accuracy, חלוקת SP בג'וב הראשון, ציוד מוקדם, אזרחות ומפות אימון.",
+    "נקודת הסיום של הג'וב הראשון: Power Strike 20, Slash Blast 20, Precise Strikes 15, Improved HP Recovery 3 ו-Max HP Increase 3.",
+    "סטטים לדוגמה בלבל 30: 135 STR בסיס / 27 DEX בסיס",
+    "138 STR / 30 DEX / 73 ACC עם הציוד לדוגמה",
+    "אחרי התקדמות הג'וב: את ה-SP הראשון של Spearman שמים ב-Rush.",
+    "Forked Spear: 52 W.ATK לפני סקרולים."
+   ]
+  },
+  {
+   "heading": "Accuracy אחרי לבל 30",
+   "lines": [
+    "הסכומים האלה מניחים שהלבל שלך זהה ללבל של המוב. מוב בלבל גבוה ממך מעלה את דרישת ה-ACC. עמודת ה-100% אומרת שכל מתקפה פוגעת.",
+    "מוב | לבל | Avoidability | 90% פגיעה | 100% פגיעה",
+    "Jr. Wraith | 34 | 24 | 75 ACC | 79 ACC",
+    "Lorang | 38 | 23 | 72 ACC | 76 ACC",
+    "Zombie Lupin | 41 | 28 | 88 ACC | 92 ACC",
+    "Wraith | 48 | 31 | 97 ACC | 101 ACC",
+    "Croco | 52 | 30 | 94 ACC | 98 ACC",
+    "Rotten Mushroom | 56 | 33 | 103 ACC | 108 ACC",
+    "Wild Kargo | 62 | 35 | 109 ACC | 114 ACC",
+    "Tauromacis | 70 | 39 | 121 ACC | 126 ACC",
+    "קרא את ההסבר המלא על Accuracy של Warrior · פתח את Accuracy Simulator"
+   ]
+  },
+  {
+   "heading": "לבל 30-70: בילד סקילים ולבלינג ל-Spearman",
+   "lines": [
+    "Polearm הוא ברירת המחדל הקלה יותר בג'וב השני, אבל הסדר המפורט משתמש ב-Spear כדי להתאים לבילד הריאלי של Grummash בלבל 70. אם אתה הולך על Polearm, תחליף את Spear Mastery, Final Attack: Spear ו-Spear Booster בגרסאות ה-Polearm שלהם באותם לבלים."
+   ]
+  },
+  {
+   "heading": "התקדמות ג'וב ל-Spearman בלבל 30",
+   "lines": [
+    "חזור ל-Dances with Balrog ב-Perion ותתחיל את התקדמות הג'וב השני של ה-Warrior. תעבור את המבחן של המדריך, תביא בחזרה את ה-Proof of a Hero ותבחר Spearman.",
+    "את ה-SP הראשון בג'וב השני שמים ב-Rush. Rush 1 נותן מיד תנועה ושליטה במובים. הוא עולה 40 MP, אז תשתמש בו במשורה וכדי לאסוף מובים לקבוצה."
+   ]
+  },
+  {
+   "heading": "יעד סקילים לדוגמה ל-Spear בלבל 70",
+   "lines": [
+    "| סקיל | SP | תוצאה במקסימום",
+    "| Spear Mastery | 20 / 20 | Mastery 10 ו-+20% Critical Rate.",
+    "| Polearm Mastery | 1 / 20 | נקודה ספייר ששמורה בצד. בילד ה-Spear לא משתמש בסטטים שלו.",
+    "| Final Attack: Spear | 30 / 30 | 50% פרוק, 260% דמג', סופג 10% כ-HP.",
+    "| Spear Booster | 20 / 20 | +2 שלבי Attack Speed ל-300 שניות.",
+    "| Iron Will | 30 / 30 | +50 WDEF ו-35% סיכוי להתעלם מנוקבק ל-300 שניות.",
+    "| Rush | 20 / 20 | מרחק 150, 80% דמג', עד ארבעה מובים, 20 MP."
+   ]
+  },
+  {
+   "heading": "חלוקת SP ל-Spearman: לבל 30-70",
+   "lines": [
+    "לבל | השקעה | סה\"כ מצטבר | סיבה",
+    "30 | Rush +1 | Rush 1 | תנועה ושליטה במובים מיד.",
+    "31 | Spear Mastery +3 | Mastery 3 | פותח את Final Attack.",
+    "32 | Spear Mastery +2, Spear Booster +1 | Mastery 5 / Booster 1 | פותח את Booster ולוקח נקודה אחת לנוחות.",
+    "33 | Spear Mastery +1, Final Attack +2 | M 6 / FA 2 | ממשיכים לבנות את שני סקילי הדמג'.",
+    "34-37 | Spear Mastery +12 | Mastery 18 | מעלה את הדמג' המינימלי ואת אחוז הקריט.",
+    "38 | Spear Mastery +2, Final Attack +1 | Mastery 20 / FA 3 | מקסום Mastery.",
+    "39-47 | Final Attack +27 | Final Attack 30 | מקסום אחוז הפרוק, הדמג' וה-HP שחוזר.",
+    "48 | Spear Booster +3 | Booster 4 | מאריך את באף המהירות.",
+    "49-53 | Spear Booster +15 | Booster 19 | משך ארוך יותר והטלות מחדש זולות יותר.",
+    "54 | Spear Booster +1, Rush +2 | Booster 20 / Rush 3 | מקסום Booster וחזרה ל-Rush.",
+    "55-59 | Rush +15 | Rush 18 | מעלה מרחק, דמג' ויעילות MP.",
+    "60 | Rush +2, Iron Will +1 | Rush 20 / IW 1 | מקסום Rush, ואז פותחים את Iron Will.",
+    "61-69 | Iron Will +27 | Iron Will 28 | מוציאים את שאר ה-SP על יוטיליטי.",
+    "70 | Iron Will +2, Polearm Mastery +1 | IW 30 / Polearm Mastery 1 | מסיימים את Iron Will ושמים בצד את ה-SP הספייר האחרון.",
+    "אי אפשר להשקיע SP של הג'וב השני בסקילים של הג'וב הראשון, אז תסיים את תוכנית הג'וב הראשון עד לבל 30. Character Builder מסמן כל בילד שמפר את זה.",
+    "Final Attack מחזיר HP: במקסימום יש לו 50% סיכוי להוסיף מכת Spear של 260% והוא סופג 10% מהדמג' כ-HP. ההילינג לא יכול לעבור 25% מה-Max HP של ה-Spearman או מה-Max HP של המוב."
+   ]
+  },
+  {
+   "heading": "שינויים אפשריים לסדר ברירת המחדל",
+   "lines": [
+    "Booster 10 מוקדם יותר",
+    "קח יותר Booster אחרי מקסום Mastery אם הזמן הקצר של הבאף מעצבן אותך. בלבל 10 הוא מחזיק 190 שניות אבל עדיין עולה 21 HP ו-21 MP. זה מעכב את הדמג' וההילינג של Final Attack.",
+    "Rush 10 מוקדם יותר",
+    "Rush מגיע למרחק התנועה המלא של 150 בלבל 10 ויורד ל-31 MP. תעלה אותו אחרי מקסום Mastery אם המבנה של המפה והשליטה במובים חשובים לך יותר מ-Final Attack.",
+    "מסלול Polearm",
+    "תשתמש ב-Polearm Mastery, Final Attack: Polearm ו-Polearm Booster באותם מקומות. Polearm Mastery מוסיף +20 Speed, ו-Weaponcrafting נותן לך ארבעה שדרוגי Polearm עד לבל 50. את הנקודה הספייר של לבל 70 שים ב-Spear Mastery."
+   ]
+  },
+  {
+   "heading": "חלוקת AP ל-Spearman: לבל 30-70",
+   "lines": [
+    "תשאיר את ה-DEX הכולל על המינימום שהנשק הבא שלך צריך, וכל השאר ל-STR. כל Spear ו-Polearm ברשימה למטה בלבל 30-70 צריך DEX שווה ללבל שלו, ו-DEX מציוד מוריד את כמות ה-DEX הבסיסי שאתה צריך. הדוגמה הזאת מגיעה ל-60 DEX בסיס ו-302 STR בסיס בלבל 70. הציוד של Grummash נותן את ה-10 DEX האחרונים בשביל Redemption.",
+    "לבלים | AP בכל לבל | AP בסיס בסוף",
+    "31-36 | STR +3 / DEX +2 | 153 STR / 39 DEX",
+    "37-57 | STR +4 / DEX +1 | 237 STR / 60 DEX",
+    "58-70 | STR +5 | 302 STR / 60 DEX"
+   ]
+  },
+  {
+   "heading": "ציוד מומלץ: לבל 30-70",
+   "lines": [
+    "תשתמש בנשק שמגיע להריגה מובטחת טובה יותר, עד שה-SP של ה-Spearman נועל אותך על משפחת נשק. אחרי שמתחילים Mastery, מעבר למשפחה אחרת מכבה את Mastery, Booster ו-Final Attack. Weaponcrafting מציע Polearm בלבלי סקיל 5, 7, 8 ו-10, אבל אין מתכון ל-Spear.",
+    "לבל | Spear | Polearm | איפה לחפש",
+    "30 | Forked Spear",
+    "52 W.ATK, Speed 7 | Mithril Pole Arm",
+    "55 W.ATK, Speed 8 | River או Scott.",
+    "35 | Nakamaki",
+    "57 W.ATK, Speed 7 | Axe Pole Arm",
+    "60 W.ATK, Speed 8 | Scott. Axe Pole Arm זמין גם ב-Weaponcrafting 7.",
+    "40 | Zeco",
+    "59 W.ATK, Speed 6 | Crescent Polearm",
+    "65 W.ATK, Speed 8 | תבדוק דרופים של האייטם. Crescent זמין ב-Weaponcrafting 8.",
+    "50 | Serpent's Tongue",
+    "69 W.ATK, Speed 6 | The Nine Dragons",
+    "75 W.ATK, Speed 8 | תבדוק דרופים של האייטם. Nine Dragons זמין ב-Weaponcrafting 10.",
+    "60 | Holy Spear",
+    "82 W.ATK, Speed 6 | Skylar",
+    "85 W.ATK, Speed 8 | תבדוק את דפי האייטמים ואת ה-Free Market.",
+    "70 | Redemption",
+    "95 W.ATK, Speed 7 | The Gold Dragon",
+    "95 W.ATK, Speed 8 | דרופים בלבל גבוה או Free Market."
+   ]
+  },
+  {
+   "heading": "מפות אימון: לבל 30-70",
+   "lines": [
+    "התוצאות האלה מ-Training Advisor משתמשות בבילד ה-Spear לדוגמה, 100% פגיעה, והריגות מובטחות של Power Strike במכה אחת או בשתיים. Danger משתמש ב-HP ובהגנות האמיתיים של הבילד. Refill סופר את הפורטלים עד חנות הפוטים המחוברת הכי קרובה.",
+    "לבלים | מפות Advisor הכי טובות | הריגות מובטחות | Danger ו-Refill",
+    "30-34 | Line 1 <Area 1>",
+    "Tree Dungeon, Forest Up North IV | Bubbling ב-2 מכות. Green Mushroom ב-2 מכות ו-Slime במכה אחת | Safe ב-4%, 3 פורטלים עד Dr. Faymus.",
+    "Safe ב-3%, 5 פורטלים עד Len.",
+    "35-39 | Ant Tunnel IV",
+    "Ant Tunnel I | Horny Mushroom ו-Zombie Mushroom ב-2 מכות | Safe ב-7%. Mr. Sweatbottom במרחק 6 או 3 פורטלים.",
+    "40-44 | Ant Tunnel II",
+    "Ant Tunnel III | Zombie Mushroom ו-Horny Mushroom במכה אחת | Safe ב-7%. Mr. Sweatbottom במרחק 4 או 5 פורטלים.",
+    "45-49 | Ant Tunnel II",
+    "Ant Tunnel III | Zombie Mushroom ו-Horny Mushroom במכה אחת | Safe ב-6%. Mr. Sweatbottom במרחק 4 או 5 פורטלים.",
+    "50-54 | The Burnt Land I",
+    "The Burnt Land III | Fire Boar ו-Dark Axe Stump במכה אחת | Safe ב-8%. Arturo במרחק 4 או 6 פורטלים.",
+    "55-59 | The Burnt Land I",
+    "The Burnt Land III | Fire Boar ו-Dark Axe Stump במכה אחת | Safe ב-8%. Arturo במרחק 4 או 6 פורטלים.",
+    "60-64 | The Faded Canopy",
+    "Perilous Descent I | Glowshroom, Echopus ו-Raffle ב-2 מכות. Echopus ב-2 מכות ו-Zombie Mushroom במכה אחת | Safe ב-10%. Luma במרחק 3 או 4 פורטלים.",
+    "65-69 | Perilous Descent III",
+    "Perilous Descent II | Duskmander ו-Echopus ב-2 מכות. Zombie Mushroom במכה אחת | Safe ב-9%. Luma במרחק 6 או 5 פורטלים.",
+    "70 | The Forest of Evil II",
+    "Perilous Descent III | Malady ו-Zombie Lupin ב-2 מכות. Duskmander ו-Echopus ב-2 מכות | Forest of Evil הוא Caution ב-14%, 7 פורטלים עד Len.",
+    "Perilous Descent הוא Safe ב-8%, 6 פורטלים עד Luma."
+   ]
+  },
+  {
+   "heading": "בילד לדוגמה בלבל 50",
+   "lines": [
+    "209 STR בסיס / 53 DEX בסיס",
+    "240 STR / 60 DEX / 81 W.ATK / 121 ACC עם ציוד. סקילים: Spear Mastery 20, Final Attack: Spear 30, Spear Booster 10, Rush 1.",
+    "Serpent's Tongue, Mithril Crusader Helm, Dark Crusader Chainmail ו-Steel Brist. לשריון ולכפפות יש דרופים וקראפטים בדפי האייטמים.",
+    "המטרות הכי טובות עם 100% פגיעה לפי EXP לכל מכה נדרשת: Fire Boar: מכה אחת מובטחת, 62 EXP למכה. Ligator: מכה אחת מובטחת, 59 EXP למכה. The Burnt Land I היא ההערכה הכי טובה לכל המפה."
+   ]
+  },
+  {
+   "heading": "בילד לדוגמה בלבל 70",
+   "lines": [
+    "302 STR בסיס / 60 DEX בסיס",
+    "337 STR / 70 DEX / 107 W.ATK / 140 ACC עם ציוד. סקילים: Spear Mastery 20, Final Attack: Spear 30, Spear Booster 20, Iron Will 30, Rush 20, Polearm Mastery 1.",
+    "Redemption עם השריון הריאלי של Grummash וסקרולים מסוג Lesser.",
+    "המטרות הכי טובות עם 100% פגיעה לפי EXP לכל מכה נדרשת: Glowshroom: מכה אחת מובטחת, 90 EXP למכה. Malady: 2 מכות מובטחות, 87.5 EXP למכה. The Forest of Evil II מנצחת בהערכה לכל המפה עם הריגות מובטחות ב-2 מכות של Malady ו-Zombie Lupin."
+   ]
+  },
+  {
+   "heading": "Spear מול Polearm: מה עדיף?",
+   "lines": [
+    "Polearm יכול לתת קצת יותר דמג' ב-Power Strike וב-Slash Blast בלבל 10-70. Polearm Mastery נותן גם +20 Movement Speed. ל-Spear יש נשקים מהירים יותר בכמה לבלים והוא מקבל +20% Critical Rate מ-Spear Mastery, אז הפער בדמג' נהיה קטן עד לבל 70."
+   ]
+  },
+  {
+   "heading": "החלוקה 60/40 בין הנפה לדקירה",
+   "lines": [
+    "Power Strike ו-Slash Blast משתמשים בחלוקת המתקפות הרגילה של Warrior: 60% מהמתקפות הן הנפות ו-40% דקירות. Spear חזק יותר כשהוא דוקר. Polearm חזק יותר כשהוא מניף.",
+    "60% סיכוי להנפה",
+    "40% סיכוי לדקירה",
+    "2.30× ממוצע Spear",
+    "2.70× ממוצע Polearm",
+    "נשק | 60% הנפה | 40% דקירה | ממוצע משוקלל | בונוס Mastery במקסימום",
+    "Spear | 1.5× רול חלש | 3.5× רול חזק | 2.30× | +20% Critical Rate",
+    "Polearm | 3.5× רול חזק | 1.5× רול חלש | 2.70× | +20 Movement Speed",
+    "מכפילי פעולה משוקללים. Spear: (60% × 1.5) + (40% × 3.5) = 2.30",
+    "Polearm: (60% × 3.5) + (40% × 1.5) = 2.70",
+    "Polearm מקבל את הפעולה החזקה שלו יותר פעמים כי הנפות נפוצות יותר מדקירות.",
+    "מכפיל ה-STR הממוצע של Polearm גבוה בערך ב-17.4%. זה לא אומר 17.4% יותר דמג' כולל. W.ATK, DEX, רול הדמג' הבסיסי, Critical Rate, מהירות הנשק, ה-WDEF של האויב ונקודות השבירה של הריגה מובטחת עדיין משפיעים על התוצאה הסופית.",
+    "ראה את נוסחת הדמג' המלאה של Warrior"
+   ]
+  },
+  {
+   "heading": "Polearm מול Spear: לבל 10-70",
+   "lines": [
+    "לבלים | בעד Polearm | בעד Spear",
+    "10-29 | הרול החזק של 3.5× קורה ב-60% מהמתקפות, וה-Polearm ברשימה בדרך כלל עם יותר W.ATK. | ה-Spear בטווח הלבלים הזה בדרך כלל מהירים יותר. Fish Spear נותן גם +1 ACC.",
+    "30-69 | ה-Polearm במדריך נושאים 3-6 W.ATK יותר ברוב השלבים ברשימה, מעל המכפיל הממוצע של 2.70×. Polearm Mastery נותן גם +20 Movement Speed. | Spear Mastery מוסיף +20% Critical Rate, וכמה Spear נשארים מהירים יותר.",
+    "70 | בילד ה-Polearm לדוגמה עדיין מוביל בדמג' של Power Strike לדקה בערך ב-2.0%. | Redemption מהיר בשלב Attack Speed אחד, Spear Mastery שומר על ה-+20% Critical Rate שלו, והמתקפות של הג'וב השלישי ב-CoT2 מבטלות את יתרון ההנפה הרגיל של Polearm.",
+    "שלוש שאלות סוגרות את הבחירה לרוב השחקנים:",
+    "אתה רוצה +20 Movement Speed או +20% Critical Rate? בחר Polearm בשביל תנועה או Spear בשביל קריט.",
+    "אתה מעדיף מתקפות מהירות יותר? Spear מבלה פחות זמן בכל אנימציית מתקפה, וזה יכול להוריד את כמות המכות שאתה סופג כשאתה עומד מול המובים.",
+    "כמה קל להשיג את הנשק הבא? Weaponcrafting מציע Janitor's Mop בלבל סקיל 5, Axe Pole Arm ב-7, Crescent Polearm ב-8 ו-The Nine Dragons ב-10. אין שם מתכון ל-Spear, אבל Spear עם סקרולים בזול מה-Free Market עדיין יכול להפוך את ההחלטה.",
+    "מה זה +20 Speed בפועל: Blue Carzen Boots מוסיפות 4 Speed, חמישה סקרולי Speed מסוג Lesser מוסיפים 5, ו-White Napoleon מוסיף 3. זה +12 משני סלוטי הציוד, בזמן ש-Polearm Mastery נותן +20 בלי להשתמש באף אחד מהם."
+   ]
+  },
+  {
+   "heading": "השוואה בלבל 30",
+   "lines": [
+    "ההשוואה משתמשת ב-138 STR, 30 DEX, מטרה באותו לבל עם 0 WDEF, Power Strike במקסימום, ועדיין בלי Mastery או Booster של הג'וב השני.",
+    "נשק | W.ATK / Speed | דמג' Power Strike | ממוצע להטלה | הטלות לדקה | דמג' לדקה",
+    "Forked Spear | 52 / 7 | 171-828 | 406 | 70.4 | בערך 28,600",
+    "Mithril Pole Arm | 55 / 8 | 180-876 | 474 | 67.0 | בערך 31,700",
+    "Polearm מוביל בערך ב-11% בלבל 30 עם הנשקים האלה מהחנות. יש לו 3 W.ATK יותר והוא מקבל את הפעולה החזקה יותר פעמים. התוצאה שלך משתנה עם סקרולים ועם השאלה אם המכה הכי חלשה שלך מגיעה לנקודת שבירה של מכה אחת או שתיים."
+   ]
+  },
+  {
+   "heading": "השוואה בלבל 70",
+   "lines": [
+    "כאן שתי המשפחות מקבלות 337 STR, 70 DEX, 107 W.ATK כולל, Mastery ו-Booster תואמים במקסימום, ואותו סטנדרט של סקרולי Lesser.",
+    "מסלול נשק | בונוס Mastery | דמג' Power Strike | ממוצע להטלה | הטלות לדקה | דמג' לדקה",
+    "Redemption Spear | +20% Critical Rate | 1,654 - 3,754 | 2,691 | 81.0 | 217,852",
+    "The Gold Dragon Polearm | +20 Speed | 1,654-3,754 | 2,927 | 75.9 | בערך 222,200",
+    "Polearm מוביל רק בערך ב-2.0% במבחן ה-Power Strike הזה בלבל 70. הקריט של Spear Mastery והמהירות של Redemption מוחקים את רוב יתרון ההנפה. Piercing Crusher משתמש באותו מכפיל 2.5× ל-Spear ול-Polearm. הבילד השמור של Grummash מסתיים על Spear.",
+    "דקירת Spear: ל-Spear ול-Polearm יש את אותו אזור פגיעה. Spear מקבל את רול הדמג' החזק שלו בפעולה הזאת. הנפת Polearm: Polearm מקבל את רול הדמג' החזק שלו בפעולה הזאת."
+   ]
+  },
+  {
+   "heading": "טווח הנשק (Hitbox)",
+   "lines": [
+    "מכת מלי פוגעת בתוך קופסה שלפניך. הקופסה הזאת היא ה-hitbox, וטווח הנשק הוא כמה רחוק קדימה היא מגיעה. ל-Spear ול-Polearm יש חמש מתקפות בסיסיות, שלוש הנפות ושתי דקירות, ולכל אחת קופסה משלה. כל מתקפה בוחרת אחת מהחמש באקראי, אז המספר למטה הוא הטווח הממוצע של מתקפה בסיסית אחת.",
+    "Forked Spear, הנפה מעל הראש. כל מפלצת שהגוף שלה נוגע בקופסה הכחולה חוטפת מכה: 51-133 px לפניך, מ-24 px מתחת לרגליים ועד 120 px מעליהן.",
+    "ל-Spear ול-Polearm יש את טווח המלי הכי ארוך מכל הנשקים. הם בממוצע 122 px למתקפה בסיסית. Scimitar, Lion's Fang, Sparta ו-Doombringer הבאים בתור עם 102 px, וגרזנים ונשקים קהים דו-ידניים בממוצע 90 px. ל-Spear ול-Polearm יש את אותם אזורי פגיעה, אז הטווח לא משנה במה תבחר. לטווח יש השפעה ישירה על ה-DPS בפועל. טווח ארוך יותר עוזר לפגוע במובים מרחוק ולא נותן להם להתקרב מספיק כדי לפגוע בך. ההשוואה המלאה נמצאת במדריך טווח הנשקים.",
+    "122 px טווח ממוצע",
+    "Forked Spear (Lv 30)",
+    "Mithril Pole Arm (Lv 30)",
+    "Axe Pole Arm (Lv 35)",
+    "Nakamaki (Lv 35)",
+    "Crescent Polearm (Lv 40)",
+    "Zeco (Lv 40)",
+    "Serpent's Tongue (Lv 50)",
+    "The Nine Dragons (Lv 50)",
+    "Holy Spear (Lv 60)",
+    "Skylar (Lv 60)",
+    "Redemption (Lv 70)",
+    "The Gold Dragon (Lv 70)"
+   ]
+  },
+  {
+   "heading": "אילו סקילים של Spearman משתמשים בטווח הנשק?",
+   "lines": [
+    "סקיל | משתמש בטווח הנשק? | Hitbox",
+    "מתקפה בסיסית | כן | אחת מחמש המתקפות של הנשק שלך, נבחרת באקראי.",
+    "Power Strike | כן | אותן חמש מתקפות וקופסאות כמו המתקפה הבסיסית.",
+    "Slash Blast | כן | אותן חמש מתקפות וקופסאות כמו המתקפה הבסיסית. ברגע שמפלצת בתוך הקופסה, המכות הנוספות של Slash Blast יכולות להגיע למובים 130 px קדימה, או 150 px מלבל סקיל 11, עם כל נשק.",
+    "Rush | לא | ל-Rush יש קופסה משלו: 200 px לפניך וגובה 50 px, או 220 px מלבל סקיל 11.",
+    "Final Attack | כן, עם שתי מתקפות משלו | מכת Final Attack משתמשת בהנפה רחבה או בדקירה עמוקה, נבחרות באקראי, ולכל אחת קופסה משלה. הן מגיעות ל-124-144 px, תלוי בנשק. הוא בוחר מטרה משלו בתוך הקופסה, עד מפלצת אחת."
+   ]
+  },
+  {
+   "heading": "הסבר על Mastery ו-Booster",
+   "lines": [
+    "Mastery מעלה את הדמג' המינימלי. Booster גורם לך לתקוף מהר יותר. שניהם עובדים רק עם משפחת הנשק התואמת.",
+    "במקסימום, שני ה-Mastery מעלים את רמת ה-Mastery של הנשק ל-10. זה מעלה את רכיב ה-STR שמשמש את רול הדמג' הכי חלש, אז המכה המינימלית עולה הרבה יותר מהמקסימלית. זה בדיוק מה שבילד של הריגה מובטחת במכה אחת או שתיים רוצה.",
+    "Booster מזיז את הנשק התואם בשני שלבי Attack Speed כבר מלבל סקיל 1. לבלי סקיל גבוהים יותר מאריכים את המשך ומורידים את עלות ה-HP וה-MP.",
+    "דוגמה ל-Booster בלבל 70: בילד ה-Redemption של Grummash עושה 70.4 Power Strike לדקה בלי Booster ו-81.0 עם Booster. זה 15.1 % יותר מתקפות. הדמג' הממוצע להטלה נשאר 2,691, והדמג' לדקה עולה מבערך 189,439 ל-217,852.",
+    "Spear Booster: אנימציית הסקיל של Shamana. לבל סקיל 1 כבר נותן את כל העלייה של שני שלבי מהירות."
+   ]
+  },
+  {
+   "heading": "הסבר על Final Attack",
+   "lines": [
+    "Final Attack הוא טוגל. כשהוא פעיל וסקיל מתקפה משאיר מטרה בטווח, הגרסה התואמת לנשק יכולה להוסיף מתקפה שנייה.",
+    "50% סיכוי לפרוק",
+    "260% דמג' למטרה אחת",
+    "10% מהדמג' נספג כ-HP",
+    "25% תקרת ספיגה מה-Max HP",
+    "במקסימום, מכת ההמשך עושה 260% דמג' למוב אחד וסופגת 10% מהדמג' כ-HP. ה-HP שמתקבל בכל פרוק לא יכול לעבור 25% מה-Max HP שלך או מה-Max HP של האויב. בניגוד ל-Final Attack של Fighter, ה-Final Attack של Spearman לא פוגע בכמה מובים.",
+    "תשאיר אותו דולק כשהמכה הנוספת חוסכת Power Strike או Slash Blast מההריגה. תכבה אותו כשהסקיל הראשון כבר מבטיח את ההריגה, כי מכת המשך מיותרת עולה זמן אנימציה, גם אם הפרוק עצמו לא צורך עוד MP.",
+    "לכל פרוק של FA יש אנימציית מתקפה משלו, ואי אפשר לתקוף שוב עד שהיא נגמרת: בערך 0.7 שניות עם Booster. Final Attack: Spear ו-Final Attack: Polearm של Spearman פוגעים רק במוב אחד ותמיד מוסיפים דמג' אם אתה משתמש ב-Power Strike. עם Slash Blast הם אולי מוסיפים דמג', תלוי בכמות המטרות. ה-FA של Spearman גם ייחודי: כל פרוק מרפא אותך ב-10% מהדמג' שהוא עושה.",
+    "אתה תוקף עם | מובים לפניך | Final Attack במקסימום דולק מול כבוי",
+    "Power Strike | כל כמות | 3% יותר",
+    "Slash Blast | 2 | 3% יותר",
+    "Slash Blast | 3 | 8% פחות",
+    "Slash Blast | 4 | 14% פחות",
+    "Final Attack לא עולה MP, אז הוא גם חוסך פוטים: בערך 50 % יותר דמג' לכל MP מול מוב אחד ו-25 % מול ארבעה. תשאיר אותו דולק כשה-MP הוא המגבלה שלך, גם מול קבוצות.",
+    "Final Attack: Spear: מטרה אחת, מכת המשך כבדה וספיגת HP."
+   ]
+  },
+  {
+   "heading": "הסבר על Iron Will ו-Rush",
+   "lines": [
+    "אלה כלי ההישרדות והשליטה במפה של Spearman. אף אחד מהם לא מחליף פוטי HP טובים או 100% פגיעה."
+   ]
+  },
+  {
+   "heading": "Iron Will",
+   "lines": [
+    "Iron Will עובד רק עליך ב-CoT2. בלבל סקיל מקסימלי הוא נותן +50 WDEF ו-35% סיכוי להתעלם מנוקבק ל-300 שניות. ה-WDEF מוריד דמג' פיזי רלוונטי, ולא עושה כלום נגד דמג' מג'יק. התעלמות מנוקבק משאירה אותך קרוב מספיק כדי להמשיך להכות. תעלה אותו אחרי Rush, כי הוא החלק הכי חלש בבילד של Spearman.",
+    "Rush",
+    "Rush 1 זז מרחק 130, תוקף ועושה נוקבק לעד ארבעה מובים, עולה 40 MP ויש לו קולדאון של שנייה. Rush מגיע למרחק 150 בלבל סקיל 10. בלבל סקיל מקסימלי הוא עושה 80% דמג' ועולה 20 MP. אי אפשר לחטוף נוקבק בזמן ה-Rush עצמו.",
+    "לופ גרינד פשוט: Booster ו-Iron Will במקסימום מחזיקים שניהם 300 שניות, אז תטיל אותם מחדש ביחד. Final Attack הוא טוגל. Rush אוסף מובים, ואז Power Strike מטפל במטרה אחת ו-Slash Blast בכמה.",
+    "Iron Will: +50 WDEF ו-35% התעלמות מנוקבק במקסימום. Rush: Shamana דוחפת מובים קדימה עם גרסת ה-Spearman של הסקיל."
+   ]
+  },
+  {
+   "heading": "W.ATK או Critical Rate על הכפפות?",
+   "lines": [
+    "המספרים האלה מבוססים על בילד ה-Spearman הריאלי של Grummash בלבל 70 וחמישה סקרולי כפפות Lesser שהצליחו. שתי האפשרויות משתמשות באותם חמישה סלוטים.",
+    "5x Gloves Attack Scroll: Lesser",
+    "+5 W.ATK",
+    "מ-102 ל-107 W.ATK כולל",
+    "בערך 4.9% יותר דמג' צפוי.",
+    "5x Gloves Crit. Rate Scroll: Lesser",
+    "+5% Critical Rate",
+    "מ-34% ל-39% Critical Rate",
+    "בערך 1.19% יותר דמג' צפוי.",
+    "תבחר Attack. סט חמשת סקרולי ה-Attack עושה בערך 3.66% יותר דמג' צפוי מסט ה-Critical Rate בבילד הזה.",
+    "Spear Mastery מעלה את הבילד הזה ל-34% Critical Rate, אבל ה-Critical Damage שלו עדיין 26%. עוד Critical Rate משפיע מעט.",
+    "היחס זהה בכל דרגה. Lesser נותן +1 W.ATK או +1% Critical Rate (+2 M.ATK), Intermediate נותן +2/+2% (+4 M.ATK), Greater נותן +3/+3% (+6 M.ATK), ו-Chaos נותן +4/+4% (+8 M.ATK). לדרגות תואמות יש אותם אחוזי הצלחה והשמדה.",
+    "W.ATK עוזר גם להריגות מובטחות. הוא מעלה כל מכה פיזית, כולל הרול הרגיל הכי חלש שלך וכל מכת קריט. Critical Rate משנה רק כמה פעמים יוצא קריט, אז הוא לא יכול לשפר את הרול הכי חלש בלי קריט."
+   ]
+  },
+  {
+   "heading": "מצא את מפת האימון הכי טובה לבילד שלך עם Training Advisor",
+   "lines": [
+    "Danger מודד כמה חזק מוב מכה אותך: פחות מ-10% מה-HP שלך זה Safe, 10-24% זה Caution, 25-49% זה Danger, ו-50%+ זה Lethal.",
+    "הבילדים לדוגמה למעלה משתמשים ב-Power Strike עם Final Attack כבוי. הרשימות הקצרות שלהם כוללות רק מטרות עם 100% פגיעה שרול הדמג' המינימלי הורג במכה אחת או שתיים, מדורגות לפי EXP לכל מכה נדרשת.",
+    "הריגות מובטחות עם Power Strike. מכה אחת מובטחת: דמג' מינימלי למכה ≥ HP של המוב",
+    "2 מכות מובטחות: 2 × דמג' מינימלי למכה ≥ HP של המוב",
+    "דמג' מינימלי הוא המכה הכי חלשה האפשרית שלך. אם הוא לפחות ה-HP של המוב, כל Power Strike הורג במכה אחת, גם כשהמשחק נותן לך את רול הדמג' הכי נמוך. הבטחה דורשת גם 100% פגיעה, כי פספוס לא עושה דמג'.",
+    "פתח את הבילד השמור שלך ב-Character Builder ותכניס את הלבל, ה-AP, הציוד, הסקרולים, לבלי הסקילים, HP, MP, WDEF ו-MDEF האמיתיים שלך.",
+    "בחר Power Strike. תדליק את Final Attack רק אם אתה מתכנן להתאמן איתו.",
+    "פתח את By mob ותפעיל את Show min damage per hit. תבדוק את Hit Rate, Min / hit, Hits / kill ו-MP / kill.",
+    "פתח את By map ותשווה EXP, Danger וההליכה לחנות הפוטים הכי קרובה.",
+    "תרחישי פוטים ובאפים זמניים משנים את החישוב בלי לשנות את הבילד השמור. ככה קל להשוות תוצאות בלי פוט, עם פוט Accuracy, עם פוט Attack Power, Spear, Polearm ו-Final Attack.",
+    "ה-Spearman של Grummash ב-Training Advisor: אחוז פגיעה, דמג', הריגות, צריכת MP ו-EXP לשעה מותאמים לבילד המצויד. פתח את ה-Spearman הזה ב-Training Advisor"
+   ]
+  },
+  {
+   "heading": "פוטים מומלצים",
+   "lines": [
+    "Spearman יעיל ב-MP, אבל Power Strike, Slash Blast, Booster ו-Rush עדיין מרוקנים את הארנק של שחקן חדש. תקנה את הפוטים הכי משתלמים.",
+    "הכי שווה לקנות: הכי הרבה HP או MP לכל מסו",
+    "Red Potion 50 מסוס · 100 HP 2 HP למסו Fried Chicken 60 מסוס · 120 HP 2 HP למסו Meat 80 מסוס · 160 HP 2 HP למסו Orange 50 מסוס · 50 MP 1 MP למסו Lemon 150 מסוס · 150 MP 1 MP למסו",
+    "לפי מצב: קנה כשהבאף מגיע לנקודת שבירה שימושית",
+    "Sniper Potion 500 מסוס · +5 ACC ל-10 דק' לביטול פספוסים Supreme Sniper Potion 600 מסוס · +7 ACC ל-15 דק' באף ה-ACC הכי טוב בחנות Warrior Potion 500 מסוס · +10 Attack Power ל-10 דק' לנקודת שבירה של דמג'",
+    "לא לקנות: פחות החזר לכל מסו מהאפשרויות למעלה",
+    "White Potion 350 מסוס · 500 HP 1.43 HP למסו Blue Potion 220 מסוס · 200 MP 0.91 MP למסו",
+    "Lemon היה האייטם הכי נקנה גם ב-CoT1 וגם ב-CoT2, ובצדק. הוא משתווה ל-Orange עם 1 MP למסו, מחזיר פי שלושה MP בכל שימוש ונמכר בכל אזור אימון מרכזי.",
+    "דוגמת עלות בלבל 70: בילד ה-Redemption של Grummash עושה בערך 81 Power Strike לדקה. ב-12 MP כל אחד, זה בערך 972 MP, או 6.5 Lemon ו-972 מסוס לדקה, לפני Booster, Iron Will, Rush, אוכל HP או פספוסים.",
+    "פוטי Accuracy מחזירים את עצמם כשהם מבטלים פספוסים או פותחים מפה מהירה יותר. תבדוק קודם את הפוט ב-Training Advisor. אם אחוז הפגיעה שלך נשאר 100% בלעדיו, תוציא את המסוס על משהו אחר.",
+    "השווה יעילות של פוטים מהחנות"
+   ]
+  },
+  {
+   "heading": "טעויות נפוצות של Spearman",
+   "lines": [
+    "רוב הבילדים הגרועים של Spearman נובעים מפיצול SP בין נשקים, מהסתמכות על דמג' ממוצע במקום על המכות החלשות, או משריפת מסוס על Rush ופוטים בלי לבדוק את התוצאה במפה.",
+    "פיצול SP בין Spear ל-Polearm. Mastery, Booster ו-Final Attack עובדים רק עם המשפחה התואמת. תבחר מסלול ראשי אחד.",
+    "להניח ש-Polearm תמיד מנצח כי המכפיל הממוצע שלו גבוה יותר. מהירות נשק, קריט, סקרולים ונקודות שבירה של הריגה מובטחת יכולים לשנות את התוצאה. תשווה את שני הנשקים ב-Character Builder.",
+    "לעבור למפה בלבל גבוה יותר עם אחוז פגיעה גרוע. פספוס עדיין צורך את ה-HP וה-MP של המתקפה. תחפש מובים שמולם אתה שומר על 90% עד 100% פגיעה.",
+    "ספאם של Rush. Rush 1 שימושי, אבל הוא עולה 40 MP. ספאם מוקדם יכול לרוקן לך את בר ה-MP ואת הארנק.",
+    "להשאיר את Final Attack דולק בלי לבדוק. מכת ההמשך עוזרת כשהיא גומרת מוב, ומבזבזת זמן אנימציה כשהמכה הראשונה כבר מבטיחה את ההריגה.",
+    "לצפות ש-Iron Will יבאף את הפארטי. הוא מבאף רק את ה-Spearman. Hyper Body לא זמין עד הג'וב השלישי.",
+    "לקנות כל שדרוג שריון כשחסרים פוטים. נקודת שבירה של נשק או Accuracy חשובה יותר מעלייה קטנה ב-WDEF. תשאיר מספיק מסוס לאוכל HP ול-Lemon."
+   ]
+  },
+  {
+   "heading": "בילד Spearman לדוגמה בלבל 70 של Grummash",
+   "lines": [
+    "זאת נקודת סיום ריאלית של Spear, עם כל סלוטי הציוד מלאים ומסוקרלים בסקרולי Lesser. היא מראה לאן מסלול ה-AP וה-SP של המדריך בונה."
+   ]
+  },
+  {
+   "heading": "ציוד וסקרולים",
+   "lines": [
+    "סלוט | אייטם | סטטים בסיסיים שימושיים | סקרולים | דוגמה למקור",
+    "כובע | Mithril Planet | +7 DEX, +7 ACC, 70 WDEF, 29 MDEF, +10 MP | Hat Accuracy Scroll: Lesser ×7 | בדוק את דף האייטם",
+    "עגילים | Metal Silver Earrings | +6% Critical Damage, 49 MDEF | Earring STR Scroll: Lesser ×5 | בדוק את דף האייטם",
+    "גלימה | Red Gaia Cape | +4 STR, +5 ACC | Cape STR Scroll: Lesser ×5 | Free Market",
+    "חולצה | Bronze Platine | +7 STR, 95 WDEF | Topwear HP Scroll: Lesser ×7 | בדוק את דף האייטם",
+    "נשק | Redemption | 95 W.ATK, Speed 7 | Spear Attack Scroll: Lesser ×7 | בדוק את דף האייטם או את ה-Free Market",
+    "כפפות | Bronze Husk | +7 STR, +1 ACC, +4% Critical Rate | Gloves Attack Scroll: Lesser ×5 | בדוק את דף האייטם",
+    "מכנסיים | Bronze Platine Pants | +7 STR, 73 WDEF | Bottomwear HP Scroll: Lesser ×7 | בדוק את דף האייטם",
+    "נעליים | Blue Carzen Boots | +3 DEX, +7 Avoidability, +4 Speed | Shoes Speed Scroll: Lesser ×5 | Free Market"
+   ]
+  },
+  {
+   "heading": "סטטים סופיים",
+   "lines": [
+    "337 STR כולל",
+    "70 DEX כולל",
+    "140 Accuracy כולל",
+    "107 W.ATK כולל",
+    "קטגוריה | ערך סופי",
+    "AP בסיס | 302 STR / 60 DEX / 4 INT / 4 LUK",
+    "סטטים כוללים | 337 STR / 70 DEX / 4 INT / 4 LUK",
+    "התקפה | 107 W.ATK, 140 ACC, 34 % Critical Rate, + 26 % Critical Damage",
+    "HP ו-MP | 3,022 HP / 1,143 MP",
+    "הגנה | 496 WDEF עם Iron Will, 92 MDEF, 24 Avoidability",
+    "EHP פיזי | 4,330 מול ערך הייחוס הפיזי של הטייר ליסט",
+    "מהירות Redemption | Speed 7 לפני Booster. Speed 5 כש-Spear Booster פעיל"
+   ]
+  },
+  {
+   "heading": "דמג' ו-MP",
+   "lines": [
+    "אלה תוצאות גולמיות מול מטרה באותו לבל עם 0 WDEF, עם Spear Mastery ו-Booster במקסימום. Final Attack לא נכלל, כדי שמכת ההמשך האקראית שלו לא תנפח את הבסיס.",
+    "סקיל | טווח מכה גולמי | דמג' צפוי להטלה | בסיס לדקה | Damage/MP",
+    "Power Strike | 1,654 - 3,754 | 2,691 עם קריט | 81.0 הטלות, 217,852 דמג' | 224.2",
+    "Slash Blast, ארבע מטרות | 827 - 1,877 למטרה | 5,381 על ארבע מטרות | בערך 435,700 דמג' | 448.4",
+    "עם Final Attack דולק: Power Strike מגיע ל-224,676 דמג' לדקה על מטרה אחת, מ-55.8 הטלות ו-670 MP. כל פרוק מוסיף הנפה משלו לפני המתקפה הבאה, אז אתה מטיל פחות ומוציא פחות MP. זה המספר שדירוג ה-DPS של לבל 70 משתמש בו.",
+    "פתח את הבילד המלא של ה-Spearman של Grummash · השתמש בבילד הזה ב-Training Advisor"
+   ]
+  },
+  {
+   "heading": "בלבל 70: הופכים ל-Dragon Knight",
+   "lines": [
+    "Spearman מתקדם ל-Dragon Knight דרך Tylus ב-El Nath. הג'וב השלישי ו-El Nath לא נמצאים בגרסת ההשקה. המדריך הזה נעצר לפני SP של הג'וב השלישי. תסיים את בילד הג'וב השני, ואז תתכנן לפי ספר הסקילים של Dragon Knight.",
+    "סקילים של Dragon Knight ב-CoT2",
+    "מצאת ערך של Spearman שלא מתאים ל-MapleStory Classic World? תגיד לנו איזה אייטם, סקיל, שלב קווסט או טווח לבלים לא נכון ומה אתה רואה במשחק. נבדוק ונתקן את המדריך."
+   ]
+  }
+ ]
+}

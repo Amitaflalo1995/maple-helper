@@ -1,0 +1,1038 @@
+{
+ "key": "guide/fighter-class-guide",
+ "source_hash": "255056aa7cae",
+ "lang": "he",
+ "title": "מדריך Fighter ל-MapleStory Classic: לבלים 30-70",
+ "intro": "מדריך Fighter ל-MapleStory Classic ללבלים 30-70 עם חלוקת SP, Rage, חרבות מול גרזנים, מגנים, ציוד ומפות Training Advisor.",
+ "pros": [
+  "מקום 1 בנזק לכל MP בלבל 70: מאוד חסכוני במאנה כשזה מגיע לנזק.",
+  "Rage במקסימום נותן לחברי פארטי קרובים +40 Attack Power ו- -40 WDEF; בוסט יפה לנזק פיזי.",
+  "מגוון ענק של נשקים: חרב/גרזן ביד אחת וחרב/גרזן בשתי ידיים."
+ ],
+ "cons": [
+  "טווח קצר ותנועה מוגבלת; כל הזמן סופג מכות בפרצוף.",
+  "Weapon Mastery, Booster ו-Final Attack נועלים את ה-SP למסלול נשק אחד.",
+  "Power Strike ו-Slash Blast נשארים סקילי ה-DPS הראשיים עד הג'וב השלישי בלבל 70+."
+ ],
+ "sections": [
+  {
+   "heading": "מתחילים בלבל 30",
+   "lines": [
+    "Warrior חדש? תסיימו קודם את מדריך ה-Warrior ללבלים 1-30. נוסחת ה-Accuracy, חלוקת ה-SP של הג'וב הראשון, הציוד המוקדם, האזרחות ומפות האימון נמצאים שם.",
+    "נקודת הסיום של הג'וב הראשון: Power Strike 20, Slash Blast 20, Precise Strikes 15, Improved HP Recovery 3 ו-Max HP Increase 3.",
+    "סטטים לדוגמה בלבל 30: 135 STR בסיסי / 27 DEX בסיסי",
+    "138 STR / 30 DEX / 73 ACC עם הציוד לדוגמה",
+    "אחרי קידום הג'וב: שימו את ה-SP הראשון של Fighter ב-Rush.",
+    "Blue Axe: 50 W.ATK לפני מגילות."
+   ]
+  },
+  {
+   "heading": "Accuracy אחרי לבל 30",
+   "lines": [
+    "הסכומים האלה מניחים שהלבל שלך שווה ללבל של המוב. להילחם במוב מעל הלבל שלך מעלה את דרישת ה-ACC. עמודת ה-100% אומרת שכל התקפה פוגעת.",
+    "מוב | לבל | Avoidability | 90% פגיעה | 100% פגיעה",
+    "Jr. Wraith | 34 | 24 | 75 ACC | 79 ACC",
+    "Lorang | 38 | 23 | 72 ACC | 76 ACC",
+    "Zombie Lupin | 41 | 28 | 88 ACC | 92 ACC",
+    "Wraith | 48 | 31 | 97 ACC | 101 ACC",
+    "Croco | 52 | 30 | 94 ACC | 98 ACC",
+    "Rotten Mushroom | 56 | 33 | 103 ACC | 108 ACC",
+    "Wild Kargo | 62 | 35 | 109 ACC | 114 ACC",
+    "Tauromacis | 70 | 39 | 121 ACC | 126 ACC",
+    "קראו את ההסבר המלא על Accuracy של Warrior פתחו את Accuracy Simulator"
+   ]
+  },
+  {
+   "heading": "לבלים 30-70: בילד סקילים ועליית לבלים ל-Fighter",
+   "lines": [
+    "סדר ברירת המחדל לוקח Rush בלבל 30 ו-Rage בלבל 31, פותח את Booster ו-Final Attack, ממקסם את Mastery, ואז מסיים את Rage, Final Attack, Booster ו-Rush. הוא לוקח בחשבון ערך לפארטי, נזק מינימלי, תחזוקת MP ותנועה."
+   ]
+  },
+  {
+   "heading": "קידום ג'וב ל-Fighter בלבל 30",
+   "lines": [
+    "דברו עם Dances with Balrog ב-Perion ותתחילו את The Warrior's Next Journey .",
+    "קחו את המכתב שלו ל-Warrior Job Instructor ב-West Rocky Mountain IV.",
+    "תיכנסו למבחן, תהרגו את המפלצות ותאספו 30 Dark Marbles.",
+    "תחזרו עם The Proof of a Hero ותבחרו Fighter .",
+    "Power Guard הוא סקיל של הג'וב השלישי ב-Classic World. Fighter מקבל Rush בג'וב השני. Power Guard מופיע בספר הסקילים של Crusader.",
+    "ה-Fighter הריאלי של Grummash בלבל 70 עם גרזן דו-ידני הוא בילד הייחוס לסדר ה-SP הראשי. Fighter עם חרב משתמש ב-Sword Mastery, Final Attack: Sword ו-Sword Booster באותם לבלים כמו סקילי הגרזן המקבילים.",
+    "Rush מגיע מיד: Rush 1 מזיז את ה-Fighter קדימה, דוחף עד ארבע מפלצות, מונע נוקבק בזמן התנועה ועולה 40 MP."
+   ]
+  },
+  {
+   "heading": "יעד הסקילים של Fighter בלבל 70",
+   "lines": [
+    "סקיל",
+    "בילד גרזן",
+    "בילד חרב",
+    "תוצאה ברמה מקסימלית",
+    "Sword Mastery",
+    "0 / 20",
+    "20 / 20",
+    "Mastery 10 ו-+90 WDEF.",
+    "Axe Mastery",
+    "20 / 20",
+    "0 / 20",
+    "Mastery 10 וסיכוי של 25% לדימום של 100% מהנזק הכולל, בשלושה טיקים שווים בהפרש של שנייה.",
+    "Final Attack: Sword",
+    "0 / 30",
+    "30 / 30",
+    "סיכוי 50%, נזק 140%, עד שלוש מפלצות.",
+    "Final Attack: Axe",
+    "30 / 30",
+    "0 / 30",
+    "סיכוי 50%, נזק 140%, עד שלוש מפלצות.",
+    "Sword Booster",
+    "0 / 20",
+    "20 / 20",
+    "+2 שלבי מהירות התקפה ל-300 שניות.",
+    "Axe Booster",
+    "20 / 20",
+    "0 / 20",
+    "+2 שלבי מהירות התקפה ל-300 שניות."
+   ]
+  },
+  {
+   "heading": "Rage",
+   "lines": [
+    "30 / 30",
+    "30 / 30",
+    "+40 Attack Power ו- -40 WDEF ל-300 שניות.",
+    "Rush",
+    "20 / 20",
+    "20 / 20",
+    "נזק 80%, ארבע מפלצות, מרחק 150, 20 MP.",
+    "SP של הג'וב השני בשימוש",
+    "120 / 121",
+    "120 / 121",
+    "נשאר 1 SP."
+   ]
+  },
+  {
+   "heading": "חלוקת SP ל-Fighter: לבלים 30-70",
+   "lines": [
+    "הולכים על חרב? תעקבו אחרי אותו סדר, אבל תשתמשו ב-Sword Mastery, Final Attack: Sword ו-Sword Booster בכל מקום שהטבלה מציינת את סקיל הגרזן המקביל."
+   ]
+  },
+  {
+   "heading": "לבל",
+   "lines": [
+    "הוצאה",
+    "תוצאה מצטברת",
+    "סיבה"
+   ]
+  },
+  {
+   "heading": "30",
+   "lines": [
+    "Rush +1",
+    "Rush 1",
+    "מקבלים תנועה, איסוף מפלצות והגנה מנוקבק מיד. סקיל ברמה 1 עולה 40 MP.",
+    "31",
+    "Rage +1, Axe Mastery +2",
+    "Rush 1, Rage 1, Mastery 2",
+    "Rage נותן לפארטי +10 Attack Power תמורת 10 MP. Mastery מתחיל להעלות את הנזק המינימלי.",
+    "32",
+    "Axe Mastery +3",
+    "Axe Mastery 5",
+    "פותח את Axe Booster.",
+    "33",
+    "Axe Booster +1, Final Attack: Axe +1, Axe Mastery +1",
+    "Booster 1, FA 1, Mastery 6",
+    "מקבלים +2 מהירות התקפה, את הטוגל של Final Attack ועוד נזק מינימלי.",
+    "34-37",
+    "Axe Mastery +12",
+    "Axe Mastery 18",
+    "מעלה את הנזק המינימלי ואת סיכוי הדימום של הגרזן.",
+    "38",
+    "Axe Mastery +2, Final Attack: Axe +1",
+    "Mastery 20, FA 2",
+    "מסיים את Mastery.",
+    "39-47",
+    "Rage +27",
+    "Rage 28",
+    "מעלה את הנזק הפיזי שלך ואת הנזק של הפארטי.",
+    "48",
+    "Rage +2, Final Attack: Axe +1",
+    "Rage 30, FA 3",
+    "מסיים את Rage.",
+    "49-57",
+    "Final Attack: Axe +27",
+    "Final Attack 30",
+    "מסיים את סיכוי ההפעלה והנזק שלו.",
+    "58-63",
+    "Axe Booster +18",
+    "Axe Booster 19",
+    "מאריך את המשך ומוריד את עלות ה-HP וה-MP.",
+    "64",
+    "Axe Booster +1, Rush +2",
+    "Booster 20, Rush 3",
+    "מסיים את Booster.",
+    "65-69",
+    "Rush +15",
+    "Rush 18",
+    "מוריד את עלות ה-MP של Rush ומעלה את הנזק שלו.",
+    "70",
+    "Rush +2, שומרים 1 SP",
+    "Rush 20; 1 SP גמיש",
+    "תואם לבילד השמור של Grummash.",
+    "אי אפשר להוציא SP של הג'וב השני על סקילים של הג'וב הראשון, אז תסיימו את התוכנית של הג'וב הראשון עד לבל 30. ה-Character Builder מסמן כל בילד ששובר את זה."
+   ]
+  },
+  {
+   "heading": "שינויים אפשריים בסדר ברירת המחדל",
+   "lines": [
+    "Booster 10 מוקדם יותר",
+    "Booster 1 כבר נותן +2 שלבי מהירות התקפה. להעלות אותו ל-10 אחרי Mastery 20 מוריד את עלות התחזוקה ואת ההטלות החוזרות. זה שינוי הנוחות הכי טוב כשה-MP לחוץ.",
+    "Rush 10 מוקדם יותר",
+    "Rush 10 מגדיל קצת את המרחק שלו ועולה 31 MP. תשימו כאן SP כשאיסוף מפלצות או מעבר במפה חוסכים יותר זמן מעוד נקודה בסקיל נזק.",
+    "Sword Booster: התקפות חרב מהירות יותר אחרי חמש נקודות ב-Sword Mastery.",
+    "Axe Booster: התקפות גרזן מהירות יותר אחרי חמש נקודות ב-Axe Mastery.",
+    "Rush: תנועה, איסוף מפלצות והגנה מנוקבק בזמן הדאש.",
+    "לופ גרינד פשוט: Rage במקסימום ו-Booster מחזיקים שניהם 300 שניות, אז תרעננו אותם ביחד. תשאירו את Final Attack דלוק כשהמכה הנוספת על שלוש מטרות משפרת את מהירות הניקוי, תשתמשו ב-Rush כדי לאסוף את המפלצות, ואז Power Strike על מטרה אחת או Slash Blast על כמה.",
+    "הסקירה של Ducky Duck Gaming על Fighter עוברת גם על מחזור הבאפים הזה ועל הטוגל של Final Attack."
+   ]
+  },
+  {
+   "heading": "חלוקת AP ל-Fighter: לבלים 30-70",
+   "lines": [
+    "הטבלה היא מסלול לדוגמה. תשמרו את סך ה-DEX על המינימום שהנשק הבא שלכם צריך, תורידו את ה-DEX שמגיע מציוד אחר, ותשימו את השאר ב-STR.",
+    "הדוגמה הזו שמה 3 STR ו-2 DEX בכל לבל מ-31 עד 36, ואז חוזרת ל-4 STR ו-1 DEX עד לבל 57. בלבל 57, ה-DEX הבסיסי מגיע ל-60. כל AP מלבל 58 עד 70 הולך ל-STR."
+   ]
+  },
+  {
+   "heading": "לבל",
+   "lines": [
+    "STR בסיסי",
+    "DEX בסיסי",
+    "כלל AP"
+   ]
+  },
+  {
+   "heading": "30",
+   "lines": [
+    "135",
+    "27",
+    "30 DEX בסך הכל עם Jousting Helmet",
+    "35",
+    "150",
+    "37",
+    "3 STR, 2 DEX לכל לבל",
+    "36",
+    "153",
+    "39",
+    "חוזרים ל-4 STR, 1 DEX בלבל הבא",
+    "40",
+    "169",
+    "43",
+    "4 STR, 1 DEX לכל לבל",
+    "45",
+    "189",
+    "48",
+    "4 STR, 1 DEX לכל לבל",
+    "50",
+    "209",
+    "53",
+    "4 STR, 1 DEX לכל לבל",
+    "55",
+    "229",
+    "58",
+    "4 STR, 1 DEX לכל לבל",
+    "57",
+    "237",
+    "60",
+    "הגעתם לתקרת ה-DEX",
+    "60",
+    "252",
+    "60",
+    "5 STR לכל לבל",
+    "65",
+    "277",
+    "60",
+    "5 STR לכל לבל",
+    "70",
+    "302",
+    "60*",
+    "AP בסיסי סופי",
+    "נשקים דו-ידניים של לבל 70 דורשים 70 DEX. *הבילד של Grummash מגיע לדרישה עם 60 DEX בסיסי ו-+10 DEX מהכובע והנעליים שלו. תבדקו את הציוד שלכם לפני שאתם עוצרים ב-60. אם יש לכם יותר DEX מציוד, אפשר להוריד את סך ה-DEX הבסיסי."
+   ]
+  },
+  {
+   "heading": "ציוד מומלץ: לבלים 30-70",
+   "lines": [
+    "תבחרו חרב או גרזן לפני שאתם מוציאים SP על סקילים של נשק מסוים. בתוך אותה משפחה, אפשר להחליף בין נשק חד-ידני לדו-ידני בלי לשנות Mastery, Booster או Final Attack."
+   ]
+  },
+  {
+   "heading": "לבל",
+   "lines": [
+    "אפשרויות 1H",
+    "אפשרויות 2H",
+    "ציוד Accuracy ונזק",
+    "איפה משיגים"
+   ]
+  },
+  {
+   "heading": "30",
+   "lines": [
+    "Gladius",
+    "47 W.ATK, Speed 4",
+    "Fireman's Axe",
+    "47 W.ATK, Speed 4",
+    "Scimitar",
+    "53 W.ATK, Speed 6",
+    "Blue Axe",
+    "50 W.ATK, Speed 5",
+    "Red Cross Shield",
+    "110 WDEF, 18.0% guard",
+    "Jousting Helmet",
+    "+3 DEX, +3 ACC",
+    "Steel Missel",
+    "+3 STR, +1 ACC, +2% קריט",
+    "River ב-Perion מוכר את הנשקים והמגן. Harry מוכר את הקסדה. Steel Missel הוא קראפט Smithing 6.",
+    "40",
+    "Traus",
+    "60 W.ATK, Speed 5",
+    "Blue Counter",
+    "57 W.ATK, Speed 4",
+    "Zard",
+    "60 W.ATK, Speed 5",
+    "Sabretooth",
+    "60 W.ATK, Speed 5",
+    "Gold Nordic Helm",
+    "+4 DEX, +5 ACC",
+    "Iron Knuckle",
+    "+4 STR, +1 ACC, +2% קריט",
+    "Echopus מפיל Blue Counter. תבדקו בדפי הפריטים את מקורות הדרופ של שאר הנשקים. Sabretooth הוא גם קראפט Weaponcrafting 8. הכובע והכפפות הם קראפט Smithing 8.",
+    "50",
+    "Jeweled Katar",
+    "70 W.ATK, Speed 5",
+    "Buck",
+    "70 W.ATK, Speed 5",
+    "Lion's Fang",
+    "73 W.ATK, Speed 6",
+    "The Rising",
+    "73 W.ATK, Speed 6",
+    "Mithril Crusader Helm",
+    "+5 DEX, +6 ACC",
+    "Steel Brist",
+    "+5 STR, +1 ACC, +3% קריט",
+    "Rafflesia מפיל Jeweled Katar. תבדקו בדפי הפריטים את מקורות הדרופ של Lion's Fang ו-Buck. The Rising הוא קראפט Weaponcrafting 10. הכובע והכפפות הם קראפט Smithing 10.",
+    "60",
+    "Neocora",
+    "77 W.ATK, Speed 4",
+    "Hawkhead",
+    "77 W.ATK, Speed 4",
+    "Sparta",
+    "83 W.ATK, Speed 6",
+    "The Shining",
+    "80 W.ATK, Speed 5",
+    "Blue Oriental Helmet",
+    "+6 DEX, +6 ACC",
+    "Bronze Clench",
+    "+6 STR, +1 ACC, +3% קריט",
+    "תבדקו בדפי הפריטים או ב-Free Market את הנשקים, הקסדה ו-Bronze Clench.",
+    "70",
+    "Red Katana",
+    "87 W.ATK, Speed 4",
+    "Mikhail",
+    "87 W.ATK, Speed 4",
+    "Gold Ancient Shield",
+    "192 WDEF, +35 HP, 27.7% guard",
+    "Doombringer",
+    "93 W.ATK, Speed 6",
+    "Chrono",
+    "93 W.ATK, Speed 6",
+    "תשתמשו ביעד ה-Accuracy שלכם כדי לבחור בין ציוד STR, DEX ו-Accuracy ישיר.",
+    "תבדקו בדפי הפריטים או ב-Free Market את הנשקים ואת Gold Ancient Shield."
+   ]
+  },
+  {
+   "heading": "מפות אימון: לבלים 30-70",
+   "lines": [
+    "המפה הכי טובה היא הרבה פעמים מתחת ללבל שלכם. Training Advisor מתגמל הריגות מהירות ואמינות, אז מפה צפופה של וואן שוטים מובטחים יכולה לנצח מפה קשה יותר עם יותר EXP לכל מוב.",
+    "כל מוב ברשימה הוא 100% פגיעה לבילד לדוגמה. הבחירות הראשיות מדרגות מפות שבהן כל ספאון לוקח לכל היותר שני Power Strikes, גם בנזק הכי חלש האפשרי. Danger משתמש ב-HP, WDEF ו-MDEF האמיתיים של הבילד. כל תוצאה מראה גם את מספר הפורטלים לחנות הפוטים הקרובה המחוברת. Stirges ו-Flyeyes לא נכללים, כי התנועה המעופפת שלהם הופכת את התוצאה התיאורטית של ה-Advisor ללא אמינה ל-Warrior של מלי."
+   ]
+  },
+  {
+   "heading": "לבלים",
+   "lines": [
+    "בילד שנבדק",
+    "בחירות Training Advisor",
+    "הריגות עם הנזק הכי חלש שלך",
+    "30-34",
+    "Lv 30",
+    "138 STR / 30 DEX",
+    "73 ACC / 50 W.ATK",
+    "Line 1 <Area 1>",
+    "~1,770 EXP/min · Safe ב-4% · 3 פורטלים ל-Dr. Faymus",
+    "Tree Dungeon, Forest Up North IV",
+    "~1,650 EXP/min · Safe ב-3% · 5 פורטלים ל-Len",
+    "Bubbling ו-Green Mushroom: 2 מכות",
+    "Slime: מכה 1",
+    "35-39",
+    "Lv 35",
+    "153 STR / 40 DEX",
+    "82 ACC / 50 W.ATK",
+    "Ant Tunnel II",
+    "~3,857 EXP/min · Safe ב-7% · 4 פורטלים ל-Mr. Sweatbottom",
+    "Ant Tunnel III",
+    "~3,845 EXP/min · Safe ב-7% · 5 פורטלים ל-Mr. Sweatbottom",
+    "Zombie Mushroom: 2 מכות",
+    "Horny Mushroom: מכה 1",
+    "40-44",
+    "Lv 40",
+    "173 STR / 47 DEX",
+    "91 ACC / 60 W.ATK",
+    "Ant Tunnel Park",
+    "~4,309 EXP/min · Safe ב-9% · 11 פורטלים ל-Mr. Sweatbottom",
+    "Deep Ant Tunnel II",
+    "~4,209 EXP/min · Safe ב-9% · 10 פורטלים ל-Mr. Sweatbottom",
+    "Evil Eye, Zombie Mushroom ו-Horny Mushroom: מכה 1",
+    "45-49",
+    "Lv 45",
+    "193 STR / 52 DEX",
+    "97 ACC / 60 W.ATK",
+    "The Burnt Land I",
+    "~5,153 EXP/min · Safe ב-10% · 4 פורטלים ל-Arturo",
+    "The Burnt Land III",
+    "~5,029 EXP/min · Safe ב-10% · 6 פורטלים ל-Arturo",
+    "Fire Boar ו-Dark Axe Stump: מכה 1",
+    "50-54",
+    "Lv 50",
+    "240 STR / 60 DEX",
+    "121 ACC / 85 W.ATK",
+    "Tree Dungeon, Monkey Forest II",
+    "~7,883 EXP/min · Caution ב-16% · 6 פורטלים ל-Len",
+    "Monkey Forest II",
+    "~7,845 EXP/min · Caution ב-16% · 5 פורטלים ל-Len",
+    "Zombie Lupin, Curse Eye ו-Lupin: מכה 1",
+    "55-59",
+    "Lv 55",
+    "260 STR / 65 DEX",
+    "128 ACC / 85 W.ATK",
+    "The Forest of Evil II",
+    "~7,939 EXP/min · Caution ב-19% · 7 פורטלים ל-Len",
+    "Perilous Descent III",
+    "~7,922 EXP/min · Caution ב-11% · 6 פורטלים ל-Luma",
+    "Malady, Duskmander ו-Echopus: 2 מכות",
+    "Zombie Lupin: מכה 1",
+    "60-64",
+    "Lv 60",
+    "283 STR / 67 DEX",
+    "133 ACC / 92 W.ATK",
+    "The Forest of Evil II",
+    "~10,557 EXP/min · Caution ב-18% · 7 פורטלים ל-Len",
+    "Line 2 <Area 3>",
+    "~8,469 EXP/min · Safe ב-10% · 7 פורטלים ל-Dr. Faymus",
+    "Malady ו-Wraith: 2 מכות",
+    "Zombie Lupin: מכה 1",
+    "65-69",
+    "Lv 65",
+    "308 STR / 67 DEX",
+    "137 ACC / 92 W.ATK",
+    "Perilous Descent III",
+    "~9,743 EXP/min · Safe ב-10% · 6 פורטלים ל-Luma",
+    "The Forest of Evil II",
+    "~10,692 EXP/min · Caution ב-17% · 7 פורטלים ל-Len",
+    "Duskmander, Echopus ו-Malady: 2 מכות",
+    "Zombie Lupin: מכה 1",
+    "70",
+    "Lv 70",
+    "337 STR / 70 DEX",
+    "140 ACC / 105 W.ATK",
+    "Perilous Descent III",
+    "~11,089 EXP/min · Safe ב-9% · 6 פורטלים ל-Luma",
+    "The End of Fleeting Light",
+    "~10,380 EXP/min · Safe ב-9% · 2 פורטלים ל-Luma",
+    "Duskmander, Echopus, Rafflesia ו-Aqumander: מכה 1",
+    "בילד Fighter לדוגמה בלבל 50",
+    "209 STR בסיסי / 53 DEX בסיסי",
+    "240 STR / 60 DEX / 85 W.ATK / 121 ACC עם ציוד",
+    "סקילים: Axe Mastery 20, Rage 30, Final Attack: Axe 9, Axe Booster 1, Rush 1.",
+    "The Rising",
+    "Mithril Crusader Helm",
+    "Dark Crusader Chainmail",
+    "Steel Brist",
+    "The Rising הוא קראפט Weaponcrafting 10. הקסדה והכפפות הם קראפט Smithing 10. תבדקו בדף הפריט את מקורות הדרופ של Dark Crusader Chainmail.",
+    "מטרות ה-Power Strike המובטחות הכי טובות עם Rage פעיל",
+    "Zombie Lupin",
+    "100% פגיעה · מכה 1 מובטחת · 99 EXP למכה",
+    "Glowshroom",
+    "100% פגיעה · מכה 1 מובטחת · 90 EXP למכה",
+    "Fighter לבל 70 של Grummash",
+    "302 STR בסיסי / 60 DEX בסיסי",
+    "337 STR / 70 DEX / 105 W.ATK / 140 ACC עם ציוד",
+    "סקילים: Axe Mastery 20, Rage 30, Final Attack: Axe 30, Axe Booster 20, Rush 20, עם 1 SP פנוי.",
+    "Chrono",
+    "Mithril Planet",
+    "Bronze Husk",
+    "Red Gaia Cape",
+    "תבדקו בדפי הפריטים או ב-Free Market את Chrono, Mithril Planet, Bronze Husk ו-Red Gaia Cape.",
+    "מטרות ה-Power Strike המובטחות הכי טובות עם Rage פעיל",
+    "Duskmander",
+    "100% פגיעה · מכה 1 מובטחת · 142 EXP למכה",
+    "Rafflesia",
+    "100% פגיעה · מכה 1 מובטחת · 127 EXP למכה",
+    "פתחו את הבילד של Grummash בלבל 70"
+   ]
+  },
+  {
+   "heading": "Rage בהסבר",
+   "lines": [
+    "Rage מעלה את ה-Attack Power של חברי פארטי קרובים ומוריד WDEF. Attack Power משמש התקפות פיזיות. כישופים משתמשים ב-Magic Attack, אז Rage לא משפיע על נזק הכישופים.",
+    "רמת הסקיל Rage"
+   ]
+  },
+  {
+   "heading": "MP",
+   "lines": [
+    "Attack Power",
+    "WDEF",
+    "משך",
+    "אזור הפארטי",
+    "1",
+    "10",
+    "+10",
+    "-10",
+    "150 שניות",
+    "500 x 300 px",
+    "16",
+    "17",
+    "+25",
+    "-25",
+    "225 שניות",
+    "600 x 400 px"
+   ]
+  },
+  {
+   "heading": "30",
+   "lines": [
+    "25",
+    "+40",
+    "-40",
+    "300 שניות",
+    "600 x 400 px",
+    "אזור הפארטי גדל ברמה 16. ראו את התרשימים של רמה 1 ורמה 30 למטה.",
+    "רמה 1",
+    "500 x 300 px",
+    "250 px ימינה ושמאלה, 150 px למעלה ולמטה."
+   ]
+  },
+  {
+   "heading": "רמה 30",
+   "lines": [
+    "600 x 400 px",
+    "300 px ימינה ושמאלה, 200 px למעלה ולמטה. הקו המקווקו מראה את האזור של רמה 1."
+   ]
+  },
+  {
+   "heading": "איך Attack Power משפיע על הנזק של Warrior",
+   "lines": [
+    "נזק פיזי גולמי",
+    "MAX = (1 + (STR x Weapon Multiplier + DEX) / 100 + Attack Power / 50) x W.ATK x Skill Power",
+    "MIN = (0.8 + (STR x Weapon Multiplier x Mastery + DEX) / 100 + Attack Power / 50) x W.ATK x Skill Power",
+    "Mastery = (Mastery Level / 10 + 0.1) x 0.8",
+    "Rage מעלה גם את ה-MIN וגם את ה-MAX של טווח הנזק."
+   ]
+  },
+  {
+   "heading": "Rage במקסימום על Power Strike של Fighter לבל 70",
+   "lines": [
+    "לבילד ה-Fighter של Grummash יש 337 STR, 70 DEX, 105 W.ATK, Axe Mastery במקסימום ו-Power Strike במקסימום של 260%. מול מטרה בלבל שווה עם 0 WDEF:"
+   ]
+  },
+  {
+   "heading": "Power Strike",
+   "lines": [
+    "מינימום",
+    "מקסימום",
+    "ממוצע עם 14% קריט",
+    "בלי Rage",
+    "2,028",
+    "3,224",
+    "2,783",
+    "עם Rage במקסימום",
+    "2,247",
+    "3,442",
+    "3,009",
+    "רווח",
+    "+219",
+    "+218",
+    "+226 לכל קאסט",
+    "בבילד הזה, Rage במקסימום מעלה את הנזק הממוצע של Power Strike בבערך 8.1%.",
+    "בנוסחה הזו, +40 Attack Power תורם לנזק הגולמי בדיוק כמו +80 DEX. על גרזן דו-ידני צריך בערך 27-45 STR כדי להשתוות לזה, תלוי בסוג ההתקפה ובאם הרול משתמש ב-Mastery. Rage הוא באמת באף משמעותי לנזק פיזי.",
+    "Rage: רמת סקיל 16 היא הברייקפוינט של טווח הפארטי; רמת סקיל 30 נותנת +40 Attack Power לחמש דקות.",
+    "ראו את כל רמות הסקיל של Rage",
+    "קראו את נוסחת הנזק"
+   ]
+  },
+  {
+   "heading": "Final Attack בהסבר",
+   "lines": [
+    "Final Attack הוא טוגל. במקסימום, יש לו סיכוי של 50% להוסיף מכת המשך של 140% נגד עד שלוש מפלצות אחרי סקיל התקפה. הוא לא מראה עלות HP או MP נוספת.",
+    "ה-Final Attack של Page ושל Spearman פוגע במטרה אחת. מכת ההמשך על שלוש מטרות של Fighter מתאימה יותר לגרינד על קבוצות, במיוחד אחרי ש-Slash Blast משאיר כמה מפלצות בחיים.",
+    "לכל פרוק של FA יש אנימציית התקפה משלו אחרי שהסקיל שלך נגמר, ואי אפשר לתקוף שוב עד שהיא נגמרת: בערך 0.6 שניות עם Booster. ה-Final Attack: Sword וה-Final Attack: Axe של Fighter מתפזרים לעד שלוש מפלצות, אז בסך הכל עושים יותר נזק נגד שתיים או שלוש מפלצות. נגד מוב אחד זה לא עוזר, ועדיף לכבות את FA.",
+    "אתם תוקפים עם | מפלצות מקדימה | Final Attack דלוק לעומת כבוי",
+    "Power Strike | 1 | 12% פחות נזק",
+    "Power Strike | 2 | 6% יותר",
+    "Power Strike | 3 | 24% יותר",
+    "Slash Blast | 2 או 3 | 6% יותר",
+    "Slash Blast | 4 | 3% פחות",
+    "תשאירו אותו דלוק לקבוצות קטנות. תכבו אותו לבוסים ולפארם של מוב בודד.",
+    "Final Attack לא עולה MP, אז הוא גם חוסך פוטים: בערך 26% יותר נזק לכל MP נגד מוב אחד ו-39% נגד ארבעה. תשאירו אותו דלוק כשה-MP הוא המגבלה שלכם, גם נגד קבוצות.",
+    "Final Attack: Axe: סיכוי 50%, נזק 140% ועד שלוש מפלצות ברמת סקיל 30.",
+    "רמות הסקיל של Final Attack: Axe",
+    "רמות הסקיל של Final Attack: Sword"
+   ]
+  },
+  {
+   "heading": "כדאי להשתמש במגן?",
+   "lines": [
+    "Fighter עם נשק חד-ידני תוקף מהר יותר ויכול לשים מגן. Fighter עם נשק דו-ידני מקבל יותר W.ATK, טווח התקפה קצת יותר ארוך ומכפילי נשק חזקים יותר. גם חרב וגם גרזן עובדים; הבחירה משנה את מסלול הסקילים של Mastery, Booster ו-Final Attack."
+   ]
+  },
+  {
+   "heading": "השוואה בלבל 30",
+   "lines": [
+    "אותו Fighter בלבל 30: 138 STR, 30 DEX, Power Strike במקסימום, Rush 1, Jousting Helmet, Steel Missel ונשקים בלי מגילות. Rage, Mastery ו-Booster עדיין על 0. הנזק מחושב מול מטרה עם 0 WDEF כדי שיהיה קל להשוות את ההבדל בין הנשקים.",
+    "מסלול"
+   ]
+  },
+  {
+   "heading": "נשק",
+   "lines": [
+    "W.ATK / מהירות",
+    "טווח Power Strike",
+    "צפוי לכל קאסט",
+    "Power Strikes לדקה",
+    "נזק בדקה אחת"
+   ]
+  },
+  {
+   "heading": "מגן",
+   "lines": [
+    "1H Sword",
+    "Gladius",
+    "47 / Speed 4",
+    "158-462",
+    "318",
+    "83",
+    "26,398",
+    "Red Cross Shield",
+    "110 WDEF, 18.0% guard",
+    "1H Axe",
+    "Fireman's Axe",
+    "47 / Speed 4",
+    "150-563",
+    "329",
+    "83",
+    "27,323",
+    "Red Cross Shield",
+    "110 WDEF, 18.0% guard",
+    "2H Sword",
+    "Scimitar",
+    "53 / Speed 6",
+    "189-654",
+    "432",
+    "74",
+    "31,985",
+    "אין",
+    "2H Axe",
+    "Blue Axe",
+    "50 / Speed 5",
+    "171-707",
+    "418",
+    "80",
+    "33,414",
+    "אין"
+   ]
+  },
+  {
+   "heading": "השוואה בלבל 70",
+   "lines": [
+    "אותם סטטים של לבל 70 כמו בבילד של Grummash: 337 STR, 70 DEX, Rage במקסימום, Mastery במקסימום, Booster במקסימום, 14% Critical Rate ו-+26% Critical Damage. על כל נשק יש שבע מגילות Lesser Attack מוצלחות, והכפפות מוסיפות 5 W.ATK. גם כאן הנזק מחושב מול מטרה עם 0 WDEF.",
+    "מסלול"
+   ]
+  },
+  {
+   "heading": "נשק",
+   "lines": [
+    "סך W.ATK / מהירות עם Booster",
+    "טווח Power Strike",
+    "צפוי לכל קאסט",
+    "Power Strikes לדקה",
+    "נזק בדקה אחת"
+   ]
+  },
+  {
+   "heading": "מגן",
+   "lines": [
+    "1H Sword",
+    "Red Katana",
+    "99 / Speed 2",
+    "1,966-2,204",
+    "2,161",
+    "100",
+    "216,141",
+    "Gold Ancient Shield",
+    "192 WDEF, +35 HP, 27.7% guard",
+    "1H Axe",
+    "Mikhail",
+    "99 / Speed 2",
+    "1,508 - 2,725",
+    "2,263",
+    "100",
+    "226,277",
+    "Gold Ancient Shield",
+    "192 WDEF, +35 HP, 27.7% guard",
+    "2H Sword",
+    "Doombringer",
+    "105 / Speed 4",
+    "2,651-2,982",
+    "2,920",
+    "83",
+    "242,339",
+    "אין",
+    "2H Axe",
+    "Chrono",
+    "105 / Speed 4",
+    "2,247 - 3,442",
+    "3,009",
+    "83",
+    "249,778",
+    "אין"
+   ]
+  },
+  {
+   "heading": "חד-ידני עם מגן: מכניקת ה-Guard",
+   "lines": [
+    "המגן יכול לחסום לגמרי מכות פיזיות רגילות שמתאימות לזה. ל-Red Cross Shield יש 110 WDEF, שבעה סלוטים וסיכוי Guard של 18.0% לפני מגילות. ל-Gold Ancient Shield יש 192 WDEF, +35 HP, שבעה סלוטים וסיכוי Guard של 27.7% לפני מגילות. ה-WDEF של המגן גם מוריד את המכות שעוברות. התקפות קסם לא יכולות להפעיל Shield Guard, וחלק מההתקפות המיוחדות יכולות לעקוף אותו."
+   ]
+  },
+  {
+   "heading": "דו-ידני",
+   "lines": [
+    "יותר W.ATK ומכפילי נזק חזקים יותר מנצחים בהשוואת ה-Power Strike בשני הלבלים. הנזק המינימלי הגבוה יותר גם מקל להגיע להריגות מובטחות במכה אחת או בשתיים."
+   ]
+  },
+  {
+   "heading": "מגילות למגן",
+   "lines": [
+    "ל-Shield DEF Scroll: Lesser יש 100% הצלחה והיא מוסיפה 2 WDEF לכל סלוט. ה-WDEF הנוסף מעלה גם את סיכוי ה-Guard.",
+    "מגן | נקי | 7x DEF Lesser",
+    "Red Cross Shield | 110 WDEF",
+    "18.0% Guard | 124 WDEF",
+    "19.9% Guard",
+    "Gold Ancient Shield | 192 WDEF",
+    "+35 HP",
+    "27.7% Guard | 206 WDEF",
+    "29.2% Guard",
+    "תשתמשו ב-Shield DEF Scroll: Lesser . בלבל 70, שבע Shield Accuracy Scrolls: Lesser מוסיפות +7 ACC, אבל בילד ה-Fighter החד-ידני הריאלי לא מרוויח שום מוב חדש עם 100% פגיעה, שום מפה של מכה אחת או שתיים ושום מפה טובה יותר ב-Training Advisor."
+   ]
+  },
+  {
+   "heading": "חרבות מול גרזנים: מה הכי טוב?",
+   "lines": [
+    "גרזן עושה יותר נזק ממוצע. בלבל 30, הגרזן החד-ידני מוביל בבערך 3.5% על החרב החד-ידנית, והגרזן הדו-ידני מוביל בבערך 4.5% על החרב הדו-ידנית לאורך דקה. בלבל 70, הפערים האלה הם בערך 4.7% ו-3.1%. המספרים האלה לא כוללים את הדימום של Axe Mastery, שמוסיף עוד סיכוי לנזק ברמת סקיל מקסימלית.",
+    "חרב נותנת נזק יציב יותר. חרבות משתמשות באותו מכפיל במכות הנפה ובדקירות, אז המכות המינימליות והמקסימליות שלהן קרובות יותר. זה עוזר כשאפילו המכה הכי חלשה של החרב יכולה להבטיח הריגה במכה אחת או בשתיים. Sword Mastery נותן גם +90 WDEF.",
+    "תבחרו גרזן בשביל נזק ממוצע גבוה יותר ודימום. תבחרו חרב בשביל רולים עקביים יותר ו-WDEF נוסף. אחרי שבחרתם משפחת נשק, תחליטו אם אתם רוצים מגן או את הנזק הגבוה יותר של נשק דו-ידני.",
+    "חרב חד-ידנית: התקפות מהירות, אפשרות למגן ומכפיל קבוע של 1.8.",
+    "גרזן דו-ידני: התקפות איטיות יותר עם מכפיל ההנפה הכי גבוה של Fighter."
+   ]
+  },
+  {
+   "heading": "טווח הנשק (Hitbox)",
+   "lines": [
+    "כל מכת מלי נוחתת בתוך קופסה שמולכם, שנקראת ה-hitbox. האורך שלה הוא הטווח של הנשק שלכם. לחרב או לגרזן יש חמש התקפות בסיסיות, שלוש הנפות ושתי דקירות, עם קופסה לכל אחת. כל התקפה משתמשת באחת מהחמש באקראי. הפסים מציגים את הטווח הממוצע של התקפה בסיסית אחת לנשקים של לבלים 30-70.",
+    "Scimitar, הנפה 1. כל מפלצת שהגוף שלה נוגע בקופסה הכחולה נפגעת: 47-100 px מולכם, מ-2 px מתחת לרגליים ועד 95 px מעליהן.",
+    "חלק מהנשקים הדו-ידניים מגיעים רחוק יותר. Scimitar, Lion's Fang, Sparta ו-Doombringer מגיעים בממוצע ל-102 px לכל התקפה בסיסית. גרזנים דו-ידניים ושאר החרבות הדו-ידניות מגיעים בממוצע ל-87-90 px, וחרבות וגרזנים חד-ידניים ל-74-86 px. לטווח יש השפעה ישירה על ה-DPS בפועל. טווח ארוך יותר מקל לפגוע במפלצות מרחוק ומונע מהן להתקרב מספיק כדי להרביץ לכם. מדריך טווח הנשקים שלנו מציג גרף לכל משפחת נשקים.",
+    "102 px טווח ממוצע",
+    "Scimitar (Lv 30)",
+    "Lion's Fang (Lv 50)",
+    "Sparta (Lv 60)",
+    "Doombringer (Lv 70)",
+    "90 px טווח ממוצע",
+    "Blue Axe (Lv 30)",
+    "Niam (Lv 35)",
+    "Sabretooth (Lv 40)",
+    "The Rising (Lv 50)",
+    "The Shining (Lv 60)",
+    "Chrono (Lv 70)",
+    "87 px טווח ממוצע",
+    "Lionheart (Lv 35)",
+    "Zard (Lv 40)",
+    "86 px טווח ממוצע",
+    "Fireman's Axe (Lv 30)",
+    "Cutlus (Lv 35)",
+    "Dankke (Lv 35)",
+    "Blue Counter (Lv 40)",
+    "Buck (Lv 50)",
+    "Neocora (Lv 60)",
+    "Hawkhead (Lv 60)",
+    "Red Katana (Lv 70)",
+    "Mikhail (Lv 70)",
+    "74 px טווח ממוצע",
+    "Gladius (Lv 30)",
+    "Traus (Lv 40)",
+    "Hero's Gladius (Lv 45)",
+    "Jeweled Katar (Lv 50)"
+   ]
+  },
+  {
+   "heading": "אילו סקילים של Fighter משתמשים בטווח הנשק?",
+   "lines": [
+    "סקיל | משתמש בטווח הנשק? | Hitbox",
+    "התקפה בסיסית | כן | אחת מחמש ההתקפות של הנשק שלכם, נבחרת באקראי.",
+    "Power Strike | כן | אותן חמש התקפות וקופסאות כמו ההתקפה הבסיסית.",
+    "Slash Blast | כן | אותן חמש התקפות וקופסאות כמו ההתקפה הבסיסית. ברגע שמפלצת בתוך הקופסה, הפגיעות הנוספות של Slash Blast יכולות להגיע למפלצות 130 px קדימה, או 150 px מרמת סקיל 11, עם כל נשק.",
+    "Rush | לא | ל-Rush יש קופסה משלו: 200 px מולכם ובגובה 50 px, או 220 px מרמת סקיל 11.",
+    "Final Attack | כן, שתי התקפות משלו | פגיעת Final Attack משתמשת בהנפה רחבה או בדקירה עמוקה, באקראי, ולכל אחת יש קופסה משלה. הן מגיעות ל-92-135 px, תלוי בנשק. הוא בוחר מטרות משלו בתוך הקופסה, עד 3 מפלצות. ברגע שמפלצת בתוך הקופסה, הוא מגיע גם ל-130 px, או 150 px מרמת סקיל 16."
+   ]
+  },
+  {
+   "heading": "W.ATK או Critical Rate על הכפפות?",
+   "lines": [
+    "המספרים האלה משתמשים בבילד ה-Fighter הריאלי של Grummash בלבל 70 ובחמש מגילות Lesser מוצלחות על הכפפות. שתי האפשרויות משתמשות באותם חמישה סלוטים.",
+    "5x Gloves Attack Scroll: Lesser",
+    "+5 W.ATK",
+    "מ-100 ל-105 W.ATK בסך הכל",
+    "בערך 5% יותר נזק צפוי.",
+    "5x Gloves Crit. Rate Scroll: Lesser",
+    "+5% Critical Rate",
+    "מ-14% ל-19% Critical Rate",
+    "בערך 1.25% יותר נזק צפוי.",
+    "תבחרו Attack. סט חמש מגילות ה-Attack נותן בערך 3.7% יותר נזק צפוי מסט ה-Critical Rate בבילד הזה.",
+    "ל-Fighter יש רק 26% Critical Damage בבילד הזה. Critical Rate לא מרוויח מספיק לכל נקודה כדי להתחרות ב-W.ATK.",
+    "היחס זהה בכל דרגה. Lesser נותן +1 W.ATK או +1% Critical Rate (+2 M.ATK), Intermediate נותן +2/+2% (+4 M.ATK), Greater נותן +3/+3% (+6 M.ATK), ו-Chaos נותן +4/+4% (+8 M.ATK). לדרגות תואמות יש אותם סיכויי הצלחה והשמדה.",
+    "W.ATK עוזר גם להריגות מובטחות. הוא מעלה כל פגיעה פיזית, כולל הרול הרגיל הכי חלש שלך וכל קריט. Critical Rate משנה רק כמה פעמים יוצא קריט, אז הוא לא יכול לשפר את הרול הכי חלש בלי קריט."
+   ]
+  },
+  {
+   "heading": "מצאו את מפת האימון הכי טובה לבילד שלכם עם Training Advisor",
+   "lines": [
+    "Danger מודד כמה חזק מוב מרביץ לכם: פחות מ-10% מה-HP שלכם זה Safe, 10-24% זה Caution, 25-49% זה Danger, ו-50%+ זה Lethal.",
+    "הבילדים לדוגמה למעלה משתמשים ב-Power Strike עם Final Attack כבוי. הבחירות שלהם כוללות רק מטרות עם 100% פגיעה שרול הנזק המינימלי הורג במכה אחת או שתיים, מדורגות לפי EXP לכל מכה נדרשת.",
+    "הריגות Power Strike מובטחות",
+    "וואן שוט מובטח: Min / hit >= Mob HP",
+    "טו שוט מובטח: 2 x Min / hit >= Mob HP",
+    "Min / hit זו המכה הכי חלשה האפשרית שלך. אם המספר הזה לפחות שווה ל-HP של המוב, כל Power Strike הורג אותו במכה אחת. הבטחה דורשת גם 100% פגיעה, כי פספוס לא עושה נזק.",
+    "פתחו את הבילד השמור שלכם ב-Character Builder ותכניסו את הלבל, ה-AP, הציוד, המגילות, רמות הסקילים, ה-HP, ה-MP, ה-WDEF וה-MDEF האמיתיים שלכם.",
+    "בחרו Power Strike . תפעילו Rage רק אם אתם מצפים להשאיר אותו פעיל בזמן האימון.",
+    "פתחו את By mob ותפעילו Show min damage per hit . תבדקו Hit Rate, Min / hit, Hits / kill ו-MP / kill.",
+    "פתחו את By map ותשוו EXP, Danger וההליכה לחנות הפוטים הקרובה.",
+    "תרחישי פוטים ובאפים זמניים משנים את החישוב בלי לשנות את הבילד השמור. ככה קל להשוות תוצאות בלי באף, עם Rage, עם פוט Accuracy ועם פוט Attack Power.",
+    "ה-Fighter של Grummash ב-Training Advisor: אחוז פגיעה, נזק, הריגות, צריכת MP ו-EXP לשעה מותאמים אישית לבילד עם הציוד.",
+    "פתחו את ה-Fighter הזה ב-Training Advisor"
+   ]
+  },
+  {
+   "heading": "פוטים מומלצים",
+   "lines": [
+    "Fighter חסכוני ב-MP, אבל Power Strike, Slash Blast, Booster, Rage ו-Rush עדיין מרוקנים את הארנק של שחקן חדש. תקנו את הפוטים הכי משתלמים.",
+    "הכי שווה לקנות",
+    "הכי הרבה HP או MP לכל מסו",
+    "Red Potion",
+    "50 מסוס · 100 HP",
+    "2 HP לכל מסו",
+    "Fried Chicken",
+    "60 מסוס · 120 HP",
+    "2 HP לכל מסו",
+    "Meat",
+    "80 מסוס · 160 HP",
+    "2 HP לכל מסו",
+    "Orange",
+    "50 מסוס · 50 MP",
+    "1 MP לכל מסו",
+    "Lemon",
+    "150 מסוס · 150 MP",
+    "1 MP לכל מסו",
+    "לפי מצב",
+    "תקנו רק כשהבאף מגיע לברייקפוינט שימושי",
+    "Sniper Potion",
+    "500 מסוס · +5 ACC ל-10 דקות",
+    "להיפטר מפספוסים",
+    "Supreme Sniper Potion",
+    "600 מסוס · +7 ACC ל-15 דקות",
+    "באף ה-ACC הכי טוב בחנות",
+    "Warrior Potion",
+    "500 מסוס · +10 Attack Power ל-10 דקות",
+    "לברייקפוינט של נזק",
+    "לא לקנות",
+    "שחזור גרוע יותר לכל מסו מהאפשרויות למעלה",
+    "White Potion",
+    "350 מסוס · 500 HP",
+    "1.43 HP לכל מסו",
+    "Blue Potion",
+    "220 מסוס · 200 MP",
+    "0.91 MP לכל מסו",
+    "Lemon היה הפריט הכי נקנה גם ב-CoT1 וגם ב-CoT2, ובצדק. הוא שווה ל-Orange עם 1 MP לכל מסו, משחזר פי שלושה MP בכל שימוש, ונמכר בכל אזור אימון מרכזי.",
+    "דוגמת עלות בלבל 70: בילד ה-Chrono של Grummash משתמש בבערך 83 Power Strikes בדקה. ב-12 MP כל אחד, זה 996 MP, או 6.6 Lemons ו-996 מסוס לדקה, עוד לפני Rage, Booster, Rush, אוכל ל-HP או פספוסים.",
+    "פוטי Accuracy מחזירים את עצמם כשהם מעלימים פספוסים או פותחים מפה מהירה יותר. תבדקו את הפוט ב-Training Advisor קודם. אם אחוז הפגיעה שלכם נשאר 100% גם בלעדיו, תוציאו את המסוס על משהו אחר.",
+    "השוו יעילות של פוטים מהחנות"
+   ]
+  },
+  {
+   "heading": "טעויות נפוצות של Fighter",
+   "lines": [
+    "רוב הבילדים הגרועים של Fighter נובעים מנעילת SP לנשק מוקדם מדי, מהתעקשות על מפות שהדמות לא מצליחה לפגוע בהן, או מבזבוז מסוס מהר יותר ממה שהבילד מרוויח.",
+    "להוציא SP על Mastery לפני שבחרתם חרב או גרזן. נשקים חד-ידניים ודו-ידניים חולקים את אותם סקילים של המשפחה. חרב וגרזן לא.",
+    "לעבור למפה בלבל גבוה יותר עם אחוז פגיעה גרוע. פספוס עדיין צורך את ה-HP וה-MP של ההתקפה. תבדקו קודם 100% פגיעה וכמה מהמכות הכי חלשות שלכם צריך כדי להרוג.",
+    "למקסם את Rush מוקדם. Rush 1 שימושי, אבל הוא עולה 40 MP. רמות סקיל מוקדמות יכולות לרוקן לכם את פס ה-MP ואת ארנק המסוס.",
+    "להשאיר את Final Attack דלוק בלי לבדוק אותו. הוא עוזר כשמכת ההמשך גומרת מפלצות, ומבזבז זמן כש-Power Strike כבר מבטיח את ההריגה.",
+    "להתייחס למגן כאל WDEF בלבד. מגן יכול לעשות Guard ולחסום לגמרי מכות פיזיות מתאימות. סיכוי ה-Guard הנקי הוא 18.0% ב-Red Cross Shield ו-27.7% ב-Gold Ancient Shield. מגילות Shield DEF מעלות WDEF וסיכוי Guard.",
+    "להניח ש-Rage מחזק קסם. Rage מעלה Attack Power שמשמש התקפות פיזיות. הוא לא מעלה Magic Attack.",
+    "לקנות כל שדרוג שריון כשחסרים פוטים. ברייקפוינט של נשק או של Accuracy חשוב יותר מעלייה קטנה ב-WDEF. תשאירו מספיק מסוס לאוכל ל-HP ול-Lemons."
+   ]
+  },
+  {
+   "heading": "בילד Fighter לדוגמה בלבל 70 של Grummash",
+   "lines": [
+    "זו נקודת סיום ריאלית של גרזן דו-ידני, עם כל סלוט ציוד מלא ועם מגילות Lesser. היא מראה לאן מסלול ה-AP וה-SP של הגרזן במדריך בונה."
+   ]
+  },
+  {
+   "heading": "ציוד ומגילות",
+   "lines": [
+    "סלוט",
+    "פריט",
+    "סטטים בסיסיים שימושיים"
+   ]
+  },
+  {
+   "heading": "מגילות",
+   "lines": [
+    "דוגמת מקור",
+    "כובע",
+    "Mithril Planet",
+    "+7 DEX, +7 ACC, 70 WDEF, 29 MDEF, +10 MP",
+    "Hat Accuracy Scroll: Lesser x7",
+    "תבדקו בדף הפריט",
+    "עגילים",
+    "Metal Silver Earrings",
+    "+6% Critical Damage, 49 MDEF",
+    "Earring STR Scroll: Lesser x5",
+    "תבדקו בדף הפריט",
+    "גלימה",
+    "Red Gaia Cape",
+    "+4 STR, +5 ACC",
+    "Cape STR Scroll: Lesser x5",
+    "חולצה",
+    "Bronze Platine",
+    "+7 STR, 95 WDEF",
+    "Topwear HP Scroll: Lesser x7",
+    "תבדקו בדף הפריט"
+   ]
+  },
+  {
+   "heading": "נשק",
+   "lines": [
+    "Chrono",
+    "93 W.ATK, Speed 6",
+    "Two-handed Axe Attack Scroll: Lesser x7",
+    "תבדקו בדף הפריט",
+    "כפפות",
+    "Bronze Husk",
+    "+7 STR, +1 ACC, +4% Critical Rate",
+    "Gloves Attack Scroll: Lesser x5",
+    "תבדקו בדף הפריט",
+    "מכנסיים",
+    "Bronze Platine Pants",
+    "+7 STR, 73 WDEF",
+    "Bottomwear HP Scroll: Lesser x7",
+    "תבדקו בדף הפריט",
+    "נעליים",
+    "Blue Carzen Boots",
+    "+3 DEX, +7 Avoidability, +4 Speed",
+    "Shoes Speed Scroll: Lesser x5"
+   ]
+  },
+  {
+   "heading": "סטטים סופיים",
+   "lines": [
+    "337",
+    "סך STR",
+    "70",
+    "סך DEX",
+    "140",
+    "סך Accuracy",
+    "105",
+    "סך W.ATK",
+    "קטגוריה",
+    "ערך סופי",
+    "AP בסיסי",
+    "302 STR / 60 DEX / 4 INT / 4 LUK",
+    "סך הסטטים",
+    "337 STR / 70 DEX / 4 INT / 4 LUK",
+    "התקפה",
+    "105 W.ATK, + 40 Attack Power עם Rage, 140 ACC, 14 % Critical Rate, + 26 % Critical Damage",
+    "הגנה ותנועה",
+    "406 WDEF, 92 MDEF, 24 Avoidability, +140 HP מפריטים, +10 MP מפריטים, +9 Speed",
+    "מהירות Chrono",
+    "Speed 6 לפני Booster; Speed 4 כש-Axe Booster פעיל"
+   ]
+  },
+  {
+   "heading": "נזק ו-MP",
+   "lines": [
+    "אלה תוצאות גולמיות מול לבל שווה ו-0 WDEF עם Rage במקסימום פעיל. Final Attack לא נכלל, כדי שמכת ההמשך האקראית שלו לא תנפח את הבסיס.",
+    "סקיל",
+    "טווח פגיעה גולמי",
+    "נזק צפוי לכל קאסט",
+    "בסיס לדקה אחת",
+    "נזק/MP",
+    "פגיעה פיזית רגילה",
+    "864-1,324",
+    "1,157 עם קריט",
+    "טווח ייחוס",
+    "-"
+   ]
+  },
+  {
+   "heading": "Power Strike",
+   "lines": [
+    "2,247 - 3,442",
+    "3,009 עם קריט",
+    "83 קאסטים, 249,778 נזק, 996 MP",
+    "250.8",
+    "Slash Blast, ארבע מטרות",
+    "1,123 - 1,721 לכל מטרה",
+    "6,019 על פני ארבע מטרות",
+    "83 קאסטים, 499,557 נזק, 996 MP",
+    "501.6"
+   ]
+  },
+  {
+   "heading": "נקודת סיום ריאלית עם חרב בלבל 70",
+   "lines": [
+    "תשמרו את אותו AP, שריון, אקססוריז ורמת מגילות Lesser. תחליפו את Chrono ב-",
+    "Doombringer עם Two-handed Sword Attack Scroll: Lesser x7. תשתמשו ב-Sword Mastery 20, Final Attack: Sword 30 ו-Sword Booster 20 באותם לבלים כמו סקילי הגרזן.",
+    "תוצאת החרב בלבל 70",
+    "ערך",
+    "סך הסטטים",
+    "337 STR, 70 DEX, 105 W.ATK, 140 ACC, +40 Attack Power עם Rage"
+   ]
+  },
+  {
+   "heading": "Power Strike",
+   "lines": [
+    "2,651-2,982 נזק גולמי, 2,920 צפוי עם קריט",
+    "דקה אחת",
+    "83 Power Strikes, 242,339 נזק, 996 MP, 243.3 נזק/MP",
+    "Sword Mastery",
+    "+90 WDEF במקום הדימום של Axe Mastery",
+    "פתחו את בילד ה-Fighter המלא של Grummash",
+    "השתמשו בבילד הזה ב-Training Advisor"
+   ]
+  },
+  {
+   "heading": "בלבל 70: הופכים ל-Crusader",
+   "lines": [
+    "Fighter עולה ל-Crusader דרך Tylus ב-El Nath. הג'וב השלישי ו-El Nath לא נמצאים בגרסת ההשקה. המדריך הזה עוצר לפני ה-SP של הג'וב השלישי. תסיימו את בילד הג'וב השני, ואז תתכננו לפי ספר הסקילים של Crusader.",
+    "הסקילים של Crusader ב-CoT2",
+    "מצאתם ערך של Fighter שלא מתאים ל-MapleStory Classic World? תגידו לנו איזה פריט, סקיל, שלב בקווסט או טווח לבלים שגוי ומה אתם רואים במשחק. אנחנו נבדוק ונתקן את המדריך."
+   ]
+  }
+ ]
+}

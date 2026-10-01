@@ -91,13 +91,19 @@ class MapleHelperApp:
             Onboarding(self.settings, self.profiles, self.kb, self.style, only_character=True).exec()
         api_key = claude_setup.load_api_key() if self.settings["api_key_fallback"] else None
         self.brain = Brain(self.kb, model=self.settings["model"], length=self.settings["answer_length"], api_key=api_key)
+        self.apply_saver_mode()
         threading.Thread(target=self.brain.prewarm, daemon=True).start()   # first answer without startup delay
         self.overlay = Overlay(self.settings, self.profiles, self.kb, self.brain)
         self.overlay.setStyleSheet(self.style())
         self.overlay.setWindowOpacity(1.0)
         self.overlay.shot_provider = self.capture
         self.overlay.settings_requested.connect(self.open_settings)
+        self.overlay.saver_requested.connect(self.turn_on_saver)
+        self.overlay.show_saver_badge(self.settings["saver_mode"])
         self.overlay.wishlist_requested.connect(self.show_wishlist)
+        self.overlay.history_requested.connect(self.show_history)
+        self.overlay.guides_requested.connect(lambda: self.show_guides())
+        self.overlay.guide_requested.connect(lambda key: self.show_guides(key))
         self.overlay.closed.connect(self.maybe_summarize_later)
         self.overlay.update_requested.connect(self.update_now)
         self.overlay.profile_requested.connect(self.open_settings)
@@ -295,11 +301,26 @@ class MapleHelperApp:
         self.overlay.clear_feed()
         self.toast(I18n(self.settings["language"])("history_cleared"))
 
+    def apply_saver_mode(self):
+        """Saver mode: short answers on the lighter model. The warm process is respawned on the next prewarm."""
+        from . import usage
+        saver = self.settings["saver_mode"]
+        self.brain.model = usage.SAVER_MODEL if saver else self.settings["model"]
+        self.brain.length = "short" if saver else self.settings["answer_length"]
+
+    def turn_on_saver(self):
+        self.settings["saver_mode"] = True
+        self.apply_saver_mode()
+        self.overlay.show_saver_badge(True)
+        self.overlay.add_system(I18n(self.settings["language"])("saver_turned_on"))
+        threading.Thread(target=self.brain.prewarm, daemon=True).start()
+
     def on_settings_changed(self):
         self.overlay.apply_language()
         self.overlay.setStyleSheet(self.style())
         self.overlay.apply_capture_mode()
-        self.brain.length = self.settings["answer_length"]
+        self.apply_saver_mode()
+        self.overlay.show_saver_badge(self.settings["saver_mode"])
         threading.Thread(target=self.brain.prewarm, daemon=True).start()
         self.voice.set_key(self.settings["hotkey_voice"])
         self.register_hotkeys()
@@ -388,6 +409,34 @@ class MapleHelperApp:
                                 lambda: self.show_patch_notes(entries))
         if not self.overlay.isVisible():
             self.toast(t("kb_updated"), t("kb_updated_open"))
+
+    def show_guides(self, open_key: str | None = None):
+        from .ui.guides import GuidesDialog
+        dlg = GuidesDialog(self.kb, self.profiles.active, self.settings["language"], self.style(),
+                           summarize=self.brain.summarize_guide if self.brain.available() else None,
+                           open_key=open_key)
+        dlg.ask_requested.connect(self.ask_about_guide)
+        self.bring_dialogs_forward()
+        dlg.exec()
+
+    def ask_about_guide(self, key: str):
+        """Tag the guide in the chat, so the next question is about it (Claude reads the page)."""
+        if not self.overlay.isVisible():
+            self.overlay.toggle(self.capture)
+        self.overlay.set_tags([key])
+        self.overlay.input.setFocus()
+
+    def show_history(self):
+        from . import pins
+        from .ui.pinsview import HistoryDialog
+        c = self.profiles.active
+        if not c:
+            return
+        pairs = pins.conversations(History(c.id).recent(100000))
+        dlg = HistoryDialog(pairs, c.name, self.settings["language"], self.style())
+        dlg.pin_requested.connect(self.overlay.pin_answer)
+        self.bring_dialogs_forward()
+        dlg.exec()
 
     def show_wishlist(self):
         from .ui.wishlist import WishlistDialog

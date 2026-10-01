@@ -1,0 +1,653 @@
+{
+ "key": "guide/warrior-class-guide",
+ "source_hash": "a9bef358bd4d",
+ "lang": "he",
+ "title": "MapleStory Classic: מדריך Warrior, לבל 1-30",
+ "intro": "מדריך Warrior ל-MapleStory Classic ללבלים 1-30 עם AP, Accuracy, סקילים, ציוד, מפות של Training Advisor ובחירות לג'וב השני.",
+ "pros": [
+  "Slash Blast פוגע בעד ארבעה מובים כבר מהנקודה הראשונה.",
+  "HP גבוה ושריון פיזי חזק.",
+  "Power Strike ו-Slash Blast יעילים בטירוף ב-DMG/MP.",
+  "גישה למגוון הכי רחב של משפחות נשק."
+ ],
+ "cons": [
+  "טווח מלי קצר ותנועתיות מוגבלת.",
+  "חוטפים מכות ממובים הרבה.",
+  "סביר שיעשו לכם KS."
+ ],
+ "sections": [
+  {
+   "heading": "להבין את ה-Accuracy של Warrior וכמה DEX צריך",
+   "lines": [
+    "לפני כל מדריך בילד, צריך להבין איך Accuracy של Warrior עובד ב-MapleStory Classic World. זה משפיע על כל בילד ועל כל מקום אימון מומלץ.",
+    "Base Accuracy",
+    "floor((1.2 x Total DEX + 2 x Level + 0.6 x Total LUK) / 2.5 + 10)",
+    "Total Accuracy הוא Base Accuracy ועוד Accuracy ישיר מציוד, סקרולים, סקילים ופוטים.",
+    "+0.80",
+    "Base ACC לכל לבל",
+    "+0.48",
+    "Base ACC לכל DEX",
+    "+0.24",
+    "Base ACC לכל LUK",
+    "+1.00",
+    "Total ACC לכל ACC ישיר",
+    "ה-Accuracy של Warrior מגיע מלבל הדמות, DEX, LUK, Accuracy ישיר והפסיבי Precise Strikes. לבל הדמות תורם ל-Warriors יותר Accuracy מאשר לכל קלאס מתקדם אחר. שחקני COT2 בירכו על השינוי כי עכשיו ה-Accuracy של Warrior גדל חזק עם הלבל.",
+    "לבל דמות אחד מוסיף Base Accuracy כמו בערך 1.67 DEX. לבל גם סוגר את הקנס על לחימה במוב בלבל גבוה יותר. בגלל זה כמה לבלים יכולים לתקן \"מפה גרועה\" מהר יותר מהוספת עוד DEX בסיסי.",
+    "אחוז פגיעה: פער לבלים ו-Avoidability של המוב",
+    "L = max(0, Mob Level - Your Level)",
+    "A = Total Accuracy x 100 / (10 x L + 255)",
+    "D = A - Mob Avoidability",
+    "לכל מוב יש ערך Avoidability משלו, סטט ההתחמקות שלו. פער הלבלים שלך מתקן קודם את ה-Total Accuracy, ואז התוצאה מושווית ל-Avoidability של המוב. Avoidability גבוה יותר של מוב או מוב מעל הלבל שלך, שניהם מעלים את ה-Accuracy שצריך."
+   ]
+  },
+  {
+   "heading": "דוגמה: Zombie Mushroom",
+   "lines": [
+    "Zombie Mushroom הוא לבל 24 עם 14 Avoidability. אחוז הפגיעה שלך משתנה לפי הפרש הלבלים בינך לבין המוב.",
+    "הלבל שלך",
+    "הפרש לבלים",
+    "Avoidability של המוב",
+    "Total ACC ל-100% פגיעה",
+    "19",
+    "5 לבלים מתחת למוב",
+    "14",
+    "56 ACC",
+    "24",
+    "אותו לבל",
+    "14",
+    "47 ACC",
+    "29",
+    "5 לבלים מעל המוב",
+    "14",
+    "47 ACC",
+    "Precise Strikes מקסימלי מוסיף 20 Accuracy ישיר ו-5% Critical Rate. תבדקו את הלבל, הציוד ופוט ה-Accuracy שלכם לפני שאתם משקיעים עוד AP ב-DEX. STR נותן ל-Warriors הרבה יותר דמג'."
+   ]
+  },
+  {
+   "heading": "יעדי Accuracy אמיתיים",
+   "lines": [
+    "היעדים האלה משתמשים ב-Avoidability של כל מוב ובלבל השחקן שמוצג. עמודת ה-100% אומרת שאתם אף פעם לא מפספסים. לחימה בלבל נמוך יותר מעלה את דרישת ה-ACC כדי לפגוע.",
+    "מוב | לבל המוב | Avoidability של המוב | הלבל שלך | 90% פגיעה | 100% פגיעה",
+    "Green Mushroom | 14 | 8 | 14 | 26 ACC | 27 ACC",
+    "Horny Mushroom | 22 | 13 | 22 | 41 ACC | 44 ACC",
+    "פתחו את Accuracy Simulator"
+   ]
+  },
+  {
+   "heading": "לבלים 1-10: מ-Beginner ל-Warrior",
+   "lines": [
+    "תעשו את הקווסטים של Maple Island, תלבשו את הנשק הכי חזק שהם נותנים, ותצאו ל-Victoria Island בלבל 10. לכו ל-Perion ודברו עם Dances with Balrog בשביל ההתקדמות ל-Warrior.",
+    "עובדה מעניינת: ה-Club הוא נשק ההתחלה הכי טוב ללבלים 1-4 כי יש לו יותר סיכוי מה-Sword או ה-Hand Axe להרוג מובים של Maple Island במכה אחת פחות בממוצע. בלבל 5, תעברו ל-Razor ."
+   ]
+  },
+  {
+   "heading": "בילד סקילים של Beginner",
+   "lines": [
+    "Three Snails 3",
+    "התקפת קונכייה מרחוק",
+    "Recovery 3",
+    "ריפוי HP קצר",
+    "Nimble Feet 3",
+    "באף Speed קצר",
+    "מקבלים 9 SP של Beginner עד לבל 10, מספיק כדי למקסם את שלושת הסקילים ב-3/3/3. תעלו אותם באיזה סדר שבא לכם."
+   ]
+  },
+  {
+   "heading": "חלוקת AP: לבלים 1-10",
+   "lines": [
+    "דמויות חדשות מתחילות עם 12 STR / 5 DEX / 4 INT / 4 LUK. תשימו את כל 5 ה-AP ב-STR בכל לבל עד לבל 10. ככה מגיעים ל-57 STR / 5 DEX בלבל 10. את ה-5 DEX ההתחלתיים אפשר להוריד ל-4 רק בהמשך עם AP Reset."
+   ]
+  },
+  {
+   "heading": "לבל",
+   "lines": [
+    "AP שהתקבל",
+    "להשקיע",
+    "סטטים בסיסיים אחרי ההשקעה",
+    "סה\"כ AP",
+    "1",
+    "25 AP התחלתיים",
+    "STR +8, DEX +1",
+    "12 STR / 5 DEX / 4 INT / 4 LUK",
+    "25",
+    "2",
+    "+5",
+    "STR +5",
+    "17 STR / 5 DEX / 4 INT / 4 LUK",
+    "30",
+    "3",
+    "+5",
+    "STR +5",
+    "22 STR / 5 DEX / 4 INT / 4 LUK",
+    "35",
+    "4",
+    "+5",
+    "STR +5",
+    "27 STR / 5 DEX / 4 INT / 4 LUK",
+    "40",
+    "5",
+    "+5",
+    "STR +5",
+    "32 STR / 5 DEX / 4 INT / 4 LUK",
+    "45",
+    "6",
+    "+5",
+    "STR +5",
+    "37 STR / 5 DEX / 4 INT / 4 LUK",
+    "50",
+    "7",
+    "+5",
+    "STR +5",
+    "42 STR / 5 DEX / 4 INT / 4 LUK",
+    "55",
+    "8",
+    "+5",
+    "STR +5",
+    "47 STR / 5 DEX / 4 INT / 4 LUK",
+    "60",
+    "9",
+    "+5",
+    "STR +5",
+    "52 STR / 5 DEX / 4 INT / 4 LUK",
+    "65",
+    "10",
+    "+5",
+    "STR +5",
+    "57 STR / 5 DEX / 4 INT / 4 LUK",
+    "70",
+    "בילד לדוגמה של Warrior בלבל 10",
+    "57 STR בסיסי / 5 DEX בסיסי",
+    "57 STR / 6 DEX / 30 W.ATK / 24 ACC עם ציוד",
+    "סקילים: Power Strike 1. Three Snails, Recovery ו-Nimble Feet 3.",
+    "Wooden Sword",
+    "Metal Koif",
+    "Juno",
+    "River מוכר Wooden Sword ב-Perion. Metal Koif הוא קראפט של Smithing 1. Juno נופל מ-Stump או שאפשר לקראפט אותו ב-Smithing 2.",
+    "הטרגטים המובטחים הכי טובים ל-Power Strike",
+    "Red Snail",
+    "100% פגיעה · מובטח בשתי מכות · 4 EXP למכה",
+    "Shroom",
+    "100% פגיעה · מובטח בשתי מכות · 3 EXP למכה"
+   ]
+  },
+  {
+   "heading": "לבלים 10-30: בילד סקילים ולבלינג ל-Warrior",
+   "lines": [
+    "תבנו קודם Power Strike בשביל הריגות אמינות, ואז תסיימו את Slash Blast ו-Precise Strikes."
+   ]
+  },
+  {
+   "heading": "אזרחות מומלצת בלבל 12",
+   "lines": [
+    "Henesys היא האזרחות הכללית הכי טובה ל-Warrior. אזרחות נפתחת בלבל 12. לכו ל-Henesys Town Hall ותירשמו אצל Arthur. Raymond מוכר Supreme Sniper Potion ל-+7 Accuracy למשך 15 דקות. הדרגות המאוחרות בחנות של Flint מוסיפות Overall Armor STR Scroll: Lesser ו-Gloves Attack Scroll: Lesser.",
+    "Kerning City מעדיפה התחמקות, דמג' קריטי, LUK ו-INT. ההנחות של האזרחות חלות על מחירים זכאים בעיר הפעילה שלכם, אז ההנחה לא מורידה את המחיר של כל פריט בכל חנות במשחק.",
+    "השוו ערי אזרחות ודרגות"
+   ]
+  },
+  {
+   "heading": "Power Strike או Slash Blast?",
+   "lines": [
+    "שני הסקילים עולים 12 MP במקסימום. Slash Blast עולה גם 8 HP. תשתמשו ב-Slash Blast כשאתם יכולים לפגוע לפחות בשלושה מובים.",
+    "Slash Blast מקבל הגדלת טווח קטנה בסקיל לבל 11. הטווח שלו עולה מ-130 px ל-150 px. הוא כבר מכוון לעד ארבעה מובים בסקיל Lv1."
+   ]
+  },
+  {
+   "heading": "יעד הסקילים של Warrior בלבל 30",
+   "lines": [
+    "סקיל"
+   ]
+  },
+  {
+   "heading": "יעד",
+   "lines": [
+    "תוצאה",
+    "Improved HP Recovery",
+    "3 / 15",
+    "פותח את Max HP Increase; ריפוי HP מפריטים +7%.",
+    "Max HP Increase",
+    "3 / 15",
+    "+12% Max HP.",
+    "Precise Strikes",
+    "15 / 15",
+    "+20 Accuracy ו-+5% Critical Rate.",
+    "Iron Body",
+    "0 / 20",
+    "מדלגים."
+   ]
+  },
+  {
+   "heading": "Power Strike",
+   "lines": [
+    "20 / 20",
+    "260% דמג' ב-12 MP.",
+    "Slash Blast",
+    "20 / 20",
+    "130% דמג' לארבעה מובים ב-8 HP ו-12 MP."
+   ]
+  },
+  {
+   "heading": "איך Max HP Increase השתנה ב-MSClassic",
+   "lines": [
+    "ב-MapleStory שלפני Big Bang, Max HP Increase הוסיף בונוס Max HP בכל פעם ש-Warrior עלה לבל. לקחת אותו מאוחר אמר לפספס HP לתמיד, אז Warriors מקסמו אותו כמה שיותר מוקדם.",
+    "MapleStory Classic World שינה את הסקיל לאחוז מיידי מה-Max HP הבסיסי. סקיל Lv3 נותן +12% Max HP וסקיל Lv15 נותן +25%. לדחות אותו כבר לא עולה HP מלבלים קודמים. Classic World גם העלה את ה-HP הבסיסי לכל הקלאסים, ו-Warriors מקבלים את בונוס ה-HP הכי גדול מהתקדמויות ג'וב. Max HP Increase עדיין \"טיפה\" שימושי, אבל כבר לא מומלץ למקסם אותו בגלל ה-SP המוגבל בג'וב הראשון."
+   ]
+  },
+  {
+   "heading": "חלוקת SP ל-Warrior: לבלים 10-30",
+   "lines": []
+  },
+  {
+   "heading": "לבל",
+   "lines": [
+    "להשקיע",
+    "תוצאה מצטברת",
+    "סיבה",
+    "10",
+    "Power Strike +1",
+    "Power Strike 1",
+    "פותח את Slash Blast.",
+    "11",
+    "Power Strike +2, Slash Blast +1",
+    "PS 3, SB 1",
+    "מקבלים מובינג על ארבעה טרגטים מיד."
+   ]
+  },
+  {
+   "heading": "12",
+   "lines": [
+    "Power Strike +1, Slash Blast +2",
+    "PS 4, SB 3",
+    "שומר על שתי ההתקפות שימושיות.",
+    "13",
+    "Slash Blast +1, Precise Strikes +2",
+    "SB 4, Precise 2",
+    "מתחילים את פסיבי ה-Accuracy.",
+    "14",
+    "Precise Strikes +3",
+    "Precise 5",
+    "עוזר לאחוז הפגיעה המוקדם.",
+    "15-19",
+    "Power Strike +15",
+    "Power Strike 19",
+    "מעלה דמג' לטרגט יחיד.",
+    "20",
+    "Power Strike +1, Slash Blast +2",
+    "PS 20, SB 6",
+    "מסיים את Power Strike.",
+    "21-24",
+    "Slash Blast +12",
+    "Slash Blast 18",
+    "מעלה דמג' נגד מובים מקובצים.",
+    "25",
+    "Slash Blast +2, Precise Strikes +1",
+    "SB 20, Precise 6",
+    "מסיים את Slash Blast.",
+    "26-28",
+    "Precise Strikes +9",
+    "Precise Strikes 15",
+    "מסיים Accuracy ו-Critical Rate.",
+    "29",
+    "Improved HP Recovery +3",
+    "Improved HP Recovery 3",
+    "פותח את Max HP Increase.",
+    "30",
+    "Max HP Increase +3",
+    "Max HP Increase 3",
+    "משתמש ב-3 ה-SP האחרונים ל-+12% Max HP.",
+    "אי אפשר להשקיע SP של ג'וב שני בסקילים של ג'וב ראשון, אז תסיימו את התוכנית של הג'וב הראשון עד לבל 30. Character Builder מסמן כל בילד ששובר את זה.",
+    "תעלו את Precise Strikes מוקדם יותר אם בעיות Accuracy פוגעות במפת הגרינד המועדפת עליכם. פוטי MP עולים כסף אמיתי ואין לכם מה לבזבז MP על מכות שמפספסות. גרינד בפארטי עם הרבה מובים יכול גם להקדים את Slash Blast לפני Power Strike.",
+    "לבלים 10 עד 30 נותנים לכם 61 SP, ולמקסם את ששת הסקילים של הג'וב הראשון עולה 105. Power Strike ו-Precise Strikes מצדיקים את הנקודות שלהם בכל מפה. Slash Blast הוא זה שכדאי לקצץ כשמתאמנים איפה שמובים כמעט לא מתקבצים. Max HP Increase נותן +10% מה-Max HP הבסיסי על נקודה אחת ו-25% על כל החמש עשרה, אז תשקיעו נקודה אחת מוקדם ותשימו בו את מה שנשאר מ-61 ה-SP של הג'וב הראשון ברגע ש-Power Strike ו-Precise Strikes גמורים.",
+    "Power Strike: סקיל ה-260% לטרגט יחיד שלכם מלבל 10 ועד 70.",
+    "Slash Blast: פוגע בעד ארבעה מ-lv 1; הגדלת טווח קטנה ב-lv 11."
+   ]
+  },
+  {
+   "heading": "חלוקת AP ל-Warrior: לבלים 10-30",
+   "lines": [
+    "תשאירו 5 DEX בסיסי עד לבל 10, ואז תעלו DEX בנקודות הציון למטה. בלבל 15, ה-Sabre, Metal Koif ו-Steel Fitted Mail של הדוגמה נותנים לכם 14 DEX כולל. שני Power Strikes הכי חלשים שלכם תמיד יהרגו Slime. INT ו-LUK נשארים על 4.",
+    "ה-Blue Axe של לבל 30 צריך 30 DEX כולל, כולל ציוד. הדוגמה הזו משתמשת ב-27 DEX בסיסי ו-+3 DEX מ-Jousting Helmet. אם הציוד שלכם נותן פחות DEX, תוסיפו רק מספיק DEX בסיסי כדי להגיע ל-30 כולל."
+   ]
+  },
+  {
+   "heading": "לבל",
+   "lines": [
+    "STR בסיסי",
+    "DEX בסיסי",
+    "תוכנית AP",
+    "10",
+    "57",
+    "5",
+    "הכל ל-STR עד לבל 10"
+   ]
+  },
+  {
+   "heading": "12",
+   "lines": [
+    "65",
+    "7",
+    "לבלים 11-12: 4 STR, 1 DEX",
+    "14",
+    "71",
+    "11",
+    "לבלים 13-14: 3 STR, 2 DEX",
+    "15",
+    "75"
+   ]
+  },
+  {
+   "heading": "12",
+   "lines": [
+    "4 STR, 1 DEX; נקודת השבירה של Slime בשתי מכות עם ציוד הדוגמה",
+    "19",
+    "91",
+    "16",
+    "לבלים 16-19: 4 STR, 1 DEX",
+    "20",
+    "94",
+    "18",
+    "3 STR, 2 DEX; 20 DEX כולל עם Iron Viking Helm",
+    "25",
+    "114",
+    "23",
+    "לבלים 21-25: 4 STR, 1 DEX",
+    "29",
+    "130",
+    "27",
+    "לבלים 26-29: 4 STR, 1 DEX",
+    "30",
+    "135",
+    "27",
+    "STR +5; 30 DEX כולל עם Jousting Helmet"
+   ]
+  },
+  {
+   "heading": "ציוד מומלץ: לבלים 10-30",
+   "lines": [
+    "שדרוגי נשק הכי חשובים. תקנו ציוד Accuracy או תשתמשו בפוטי ACC רק כשזה עוזר לכם לגרנד במפה טובה יותר / להוריד מיסים. שדרוגי שריון יקרים יכולים לחכות."
+   ]
+  },
+  {
+   "heading": "לבל",
+   "lines": [
+    "אפשרויות נשק",
+    "ציוד שימושי",
+    "איפה להשיג",
+    "10-14",
+    "Long Sword",
+    "27 W.ATK, Speed 4",
+    "Wooden Sword",
+    "30 W.ATK, Speed 5",
+    "Metal Axe",
+    "30 W.ATK, Speed 5",
+    "Metal Koif",
+    "+1 DEX, +2 ACC, +10 HP",
+    "Juno",
+    "+1 ACC, +1% Critical Rate",
+    "River ב-Perion מוכר את הנשקים. קראפט של Metal Koif עם Smithing 1. Juno נופל מ-Stump או שאפשר לקראפט אותו עם Smithing 2.",
+    "15",
+    "Sabre",
+    "32 W.ATK, Speed 4",
+    "Battle Axe",
+    "32 W.ATK, Speed 4",
+    "Steel Fitted Mail",
+    "+2 STR, +1 DEX",
+    "River ו-Harry מוכרים את שלושתם ב-Perion.",
+    "20",
+    "Viking Sword",
+    "37 W.ATK, Speed 4",
+    "Two-Handed Sword",
+    "40 W.ATK, Speed 5",
+    "Iron Axe",
+    "35 W.ATK, Speed 5",
+    "Red Kendo Robe",
+    "+4 STR",
+    "Iron Viking Helm",
+    "+2 DEX, +3 ACC",
+    "River מוכר את הנשקים ו-Harry מוכר את הרובה ב-Perion. קראפט של הקסדה עם Smithing 4.",
+    "25",
+    "Mithril Axe",
+    "45 W.ATK",
+    "Broadsword",
+    "45 W.ATK",
+    "Two-Handed Axe",
+    "45 W.ATK",
+    "White Fingerless Gloves",
+    "+2 ACC, +1% Critical Rate",
+    "River מוכר את הנשקים ב-Perion. קראפט של הכפפות עם Smithing 5.",
+    "30",
+    "Gladius",
+    "47 W.ATK, Speed 4",
+    "Fireman's Axe",
+    "47 W.ATK, Speed 4",
+    "Scimitar",
+    "53 W.ATK, Speed 6",
+    "Blue Axe",
+    "50 W.ATK, Speed 5",
+    "Red Cross Shield",
+    "110 WDEF, 18.0% guard",
+    "Jousting Helmet",
+    "+3 DEX, +3 ACC",
+    "Steel Missel",
+    "+3 STR, +1 ACC, +2% Critical Rate",
+    "River מוכר את ארבעת הנשקים ואת המגן ב-Perion. Harry מוכר את הקסדה. קראפט של Steel Missel עם Smithing 6."
+   ]
+  },
+  {
+   "heading": "מגדר ו-overalls מוקדמים של Warrior",
+   "lines": [
+    "Warriors נקבות יכולות ללבוש Steel Fitted Mail בלבל 15. Warriors זכרים מקבלים את ה-overalls הראשונים של הקלאס בלבל 20 עם הסדרה של Kendo Robe. זה נותן ל-Warriors נקבות חמישה לבלים נוספים עם overall שאפשר לשים עליו סקרולים של STR או DEX.",
+    "למה overalls חשובים: סקרולי Lesser Overall STR, DEX, INT ו-LUK נותנים +1 ב-100%. סקרולי Intermediate נותנים +2 ב-60%. בנתוני הפריטים הנוכחיים אין סקרולים של STR, DEX, INT או LUK לחולצות או למכנסיים.",
+    "כל ג'וב יכול ללבוש Sauna Robe בלבל 30: Blue Sauna Robe לדמויות זכרים ו-Red Sauna Robe לדמויות נקבות. ל-Warriors כבר יש overalls של הקלאס לפני כן, אז תשוו את הסטטים הבסיסיים ואת התוצאה עם הסקרולים לפני שמחליפים."
+   ]
+  },
+  {
+   "heading": "מפות אימון: לבלים 10-30",
+   "lines": [
+    "ל-NiaMeowDB יש כלי מדהים שנקרא Training Advisor (Recommended Training) , מותאם לדמות ולבילד שלכם בעמוד Character Builder. הוא עוזר למצוא את המובים והמפות הכי טובים לאימון, מדורגים לפי EXP למכה או לקאסט של סקיל.",
+    "כל שורה דורשת 100% פגיעה. מלבל 15 ומעלה, כל ספאון מת תוך שני Power Strikes עם רול הדמג' הכי חלש האפשרי שלכם. הבחירות של לבל 10 מאפשרות עד ארבעה קאסטים כי ל-Power Strike יש רק סקיל Lv אחד.",
+    "מה זה אומר רול מינימלי? הדמג' שלכם משתנה ממכה למכה. הרול המינימלי הוא המכה הכי חלשה שהבילד הנוכחי שלכם יכול לעשות. מובטח בשתי מכות אומר שאפילו שני Power Strikes הכי חלשים שלכם יהרגו את המוב. רולים רגילים וגבוהים יכולים להרוג אותו מהר יותר.",
+    "נתוני ה-EXP/min הם הערכות של Training Advisor לבילד הדוגמה שמוצג בכל שורה, עם Final Attack כבוי. הם משווים מפות באותו מודל; תנועה, איסוף לוט, צפיפות והציוד האמיתי שלכם ישנו את התוצאה. Stirges ו-Flyeyes לא נכללים כי ל-Warriors יהיה שם זמן נוראי.",
+    "בדיקת לבל",
+    "בילד לדוגמה",
+    "הבחירות של Training Advisor",
+    "הריגות עם הדמג' הכי חלש שלכם",
+    "Danger והליכה למילוי",
+    "Lv 10",
+    "57 STR / 6 DEX",
+    "24 ACC / 30 W.ATK",
+    "Power Strike 1",
+    "The Rain-Forest East of Henesys",
+    "~551 EXP/min לפי המודל",
+    "Mushroom Garden",
+    "~516 EXP/min לפי המודל",
+    "Rain-Forest: Pig בשלוש מכות; Ribbon Pig בארבע",
+    "Mushroom Garden: Red Snail ו-Shroom בשתי מכות; Orange Mushroom בארבע",
+    "Safe.",
+    "Henesys: 2 פורטלים ל-Rain-Forest, 3 ל-Mushroom Garden.",
+    "Lv 15",
+    "77 STR / 14 DEX",
+    "41 ACC / 32 W.ATK",
+    "Power Strike 7",
+    "Dungeon, Southern Forest I",
+    "~592 EXP/min לפי המודל",
+    "Right Around Lith Harbor",
+    "~507 EXP/min לפי המודל",
+    "Slime ו-Red Snail: שתי מכות",
+    "Blue Snail: מכה אחת",
+    "Safe.",
+    "Ellinia: 4 פורטלים ל-Southern Forest I. Lith Harbor: פורטל אחד ל-Right Around Lith Harbor.",
+    "Lv 20",
+    "98 STR / 20 DEX",
+    "48 ACC / 40 W.ATK",
+    "Power Strike 20",
+    "Tree Dungeon, Forest Up North IV",
+    "~1,367 EXP/min לפי המודל",
+    "Dungeon, Southern Forest III",
+    "~1,326 EXP/min לפי המודל",
+    "Green Mushroom ו-Slime: שתי מכות",
+    "Safe.",
+    "Ellinia: 4 פורטלים לכל אחת מהמפות.",
+    "Lv 25",
+    "118 STR / 25 DEX",
+    "57 ACC / 45 W.ATK",
+    "Power Strike 20",
+    "Tree Dungeon, Forest Up North IV",
+    "~1,396 EXP/min לפי המודל",
+    "Dungeon, Southern Forest III",
+    "~1,351 EXP/min לפי המודל",
+    "Green Mushroom: שתי מכות",
+    "Slime: מכה אחת",
+    "Safe.",
+    "Ellinia: 4 פורטלים לכל אחת מהמפות.",
+    "Lv 30",
+    "138 STR / 30 DEX",
+    "73 ACC / 50 W.ATK",
+    "Power Strike 20",
+    "Line 1 <Area 1>",
+    "~1,762 EXP/min לפי המודל",
+    "Tree Dungeon, Forest Up North IV",
+    "~1,650 EXP/min לפי המודל",
+    "Bubbling ו-Green Mushroom: שתי מכות",
+    "Slime: מכה אחת",
+    "Safe.",
+    "Kerning City: 2 פורטלים ל-Area 1. Ellinia: 4 פורטלים ל-Forest Up North IV.",
+    "בילד לדוגמה של Warrior בלבל 30",
+    "135 STR בסיסי / 27 DEX בסיסי",
+    "138 STR / 30 DEX / 50 W.ATK / 73 ACC עם ציוד",
+    "סקילים: Power Strike 20, Slash Blast 20, Precise Strikes 15, Improved HP Recovery 3 ו-Max HP Increase 3.",
+    "Blue Axe",
+    "Jousting Helmet",
+    "Steel Missel",
+    "River מוכר Blue Axe ו-Harry מוכר Jousting Helmet ב-Perion. Steel Missel הוא קראפט של Smithing 6.",
+    "הטרגטים המובטחים הכי טובים ל-Power Strike",
+    "Bubbling",
+    "100% פגיעה · מובטח בשתי מכות · 14 EXP למכה",
+    "Green Mushroom",
+    "100% פגיעה · מובטח בשתי מכות · 13 EXP למכה",
+    "להיגמר ממסוס זו בעיית התקדמות אמיתית. Power Strike מקסימלי עולה 12 MP לקאסט. תשתמשו בהתקפות רגילות כשהן גומרות מוב עם מעט HP, תשתמשו ב-Slash Blast רק כשיש מספיק מובים בטווח, ותשוו את ה-EXP שאתם מרוויחים למספר ה-Lemons שאתם שורפים."
+   ]
+  },
+  {
+   "heading": "טווח נשק (Hitbox)",
+   "lines": [
+    "ה-hitbox שלכם הוא התיבה מול הדמות שבה התקפת מלי נוחתת. טווח הנשק הוא כמה רחוק קדימה התיבה הזו מגיעה. לכל נשק של Warrior יש חמש התקפות בסיסיות, שלוש הנפות ושתי דקירות, ולכל אחת יש תיבה משלה. המשחק בוחר אחת מהחמש באקראי בכל התקפה. המספרים למטה הם הטווח הממוצע של התקפה בסיסית אחת.",
+    "Sword, הנפה 1. כל מפלצת שהגוף שלה נוגע בתיבה הכחולה נפגעת: 18-88 px מולכם, מ-6 עד 62 px מעל הרגליים.",
+    "נשקים דו-ידניים מגיעים קצת יותר רחוק. Scimitar עומד בממוצע על 102 px להתקפה בסיסית. שאר החרבות והגרזנים הדו-ידניים בממוצע 87-90 px, רוב החרבות והגרזנים החד-ידניים 86 px, ו-Long Sword ו-Gladius 74 px. לטווח יש השפעה ישירה על ה-DPS בפועל. טווח ארוך יותר הופך מובים לקלים יותר לפגיעה ממרחק ומונע מהם להתקרב מספיק כדי לפגוע בכם. השוו כל משפחת נשק במדריך טווח הנשקים .",
+    "122 px טווח ממוצע",
+    "Pole Arm (Lv 10)",
+    "Spear (Lv 10)",
+    "Fork on a Stick (Lv 15)",
+    "Iron Ball (Lv 15)",
+    "Studded Polearm (Lv 20)",
+    "Janitor's Mop (Lv 25)",
+    "Forked Spear (Lv 30)",
+    "Mithril Pole Arm (Lv 30)",
+    "102 px טווח ממוצע",
+    "Scimitar (Lv 30)",
+    "90 px טווח ממוצע",
+    "Metal Axe (Lv 10)",
+    "Wooden Mallet (Lv 10)",
+    "Heavy Mace (Lv 15)",
+    "Iron Axe (Lv 20)",
+    "Pickaxe (Lv 20)",
+    "Square Hammer (Lv 20)",
+    "Monkey Wrench (Lv 25)",
+    "Two-Handed Axe (Lv 25)",
+    "Blue Axe (Lv 30)",
+    "Mithril Maul (Lv 30)",
+    "87 px טווח ממוצע",
+    "Wooden Sword (Lv 10)",
+    "Two-Handed Sword (Lv 20)",
+    "Broadsword (Lv 25)",
+    "86 px טווח ממוצע",
+    "Hand Axe (Lv 0)",
+    "Sword (Lv 0)",
+    "Battle Axe (Lv 15)",
+    "Sabre (Lv 15)",
+    "Machete (Lv 20)",
+    "Viking Sword (Lv 20)",
+    "Eloon (Lv 25)",
+    "Mithril Axe (Lv 25)",
+    "Fireman's Axe (Lv 30)",
+    "81 px טווח ממוצע",
+    "Wooden Club (Lv 0)",
+    "Mace (Lv 15)",
+    "Square Shovel (Lv 17)",
+    "Iron Mace (Lv 20)",
+    "Pointed Shovel (Lv 22)",
+    "Fusion Mace (Lv 25)",
+    "War Hammer (Lv 30)",
+    "74 px טווח ממוצע",
+    "Long Sword (Lv 10)",
+    "Gladius (Lv 30)"
+   ]
+  },
+  {
+   "heading": "אילו סקילים של Warrior משתמשים בטווח הנשק?",
+   "lines": [
+    "סקיל | משתמש בטווח הנשק? | Hitbox",
+    "התקפה בסיסית | כן | אחת מחמש ההתקפות של הנשק, נבחרת באקראי.",
+    "Power Strike | כן | אותן חמש התקפות ותיבות כמו ההתקפה הבסיסית.",
+    "Slash Blast | כן | אותן חמש התקפות ותיבות כמו ההתקפה הבסיסית. ברגע שמפלצת בתוך התיבה, הפגיעות הנוספות של Slash Blast יכולות להגיע למובים 130 px קדימה, או 150 px מסקיל Lv 11, עם כל נשק."
+   ]
+  },
+  {
+   "heading": "פוטים מומלצים",
+   "lines": [
+    "Power Strike ו-Slash Blast יעילים ב-MP. מיסים עדיין שורפים את כל עלות ה-MP. תקנו את הפוטים הכי משתלמים ותשמרו פוטי Accuracy למפות שצריכות אותם.",
+    "הכי משתלם לקנות הריפוי הכי טוב בחנות לכל מסו",
+    "Red Potion 100 HP ב-50 מסוס 0.5 מסו לכל HP",
+    "Fried Chicken 120 HP ב-60 מסוס 0.5 מסו לכל HP",
+    "Meat 160 HP ב-80 מסוס 0.5 מסו לכל HP",
+    "Orange 50 MP ב-50 מסוס 1 מסו לכל MP",
+    "Lemon 150 MP ב-150 מסוס 1 מסו לכל MP",
+    "לפי מצב לקנות בשביל נקודת שבירה של דמג' או Accuracy",
+    "Sniper Potion +5 Accuracy ל-10 דקות סוגר פער קטן באחוז הפגיעה",
+    "Supreme Sniper Potion +7 Accuracy ל-15 דקות נמכר אצל Raymond ב-Henesys",
+    "Warrior Potion +10 Attack Power ל-10 דקות באף לדמג' פיזי",
+    "לא משתלם לקנות יותר ריפוי לכל שימוש, פחות ריפוי לכל מסו",
+    "White Potion 500 HP ב-350 מסוס 0.7 מסו לכל HP",
+    "Blue Potion 200 MP ב-220 מסוס 1.1 מסוס לכל MP",
+    "השוו את המשתלמות של פוטים בחנות"
+   ]
+  },
+  {
+   "heading": "טעויות נפוצות של Warrior",
+   "lines": [
+    "להוסיף DEX בשביל ההתקדמות לג'וב הראשון. ב-MSClassic World אין דרישת סטטים. תוסיפו DEX כשציוד או נקודת שבירה אמיתית של Accuracy צריכים את זה.",
+    "למקסם Max HP Increase מוקדם מתוך הרגל ישן. עכשיו הוא נותן אחוז קבוע מה-HP הבסיסי. לדחות אותו לא מאבד HP לתמיד.",
+    "לעבור למפה שבה Power Strike מפספס. מיס עולה אותו MP ולא עושה דמג'.",
+    "להתעלם מ-Danger ומההליכה למילוי. Warriors חוטפים הרבה בפנים. הערכת EXP קצת נמוכה יותר יכולה להיות טובה יותר כשהמפה בטוחה יותר וקרובה בהרבה לעיר."
+   ]
+  },
+  {
+   "heading": "בחירת הג'וב השני בלבל 30",
+   "lines": [
+    "תחזרו ל-Dances with Balrog ב-Perion אחרי שסיימתם את המבחן של Warrior. ה-AP וה-SP של הג'וב הראשון נשארים איתכם."
+   ]
+  },
+  {
+   "heading": "Fighter",
+   "lines": [
+    "Swords או axes, Rage לחברי פארטי קרובים, ותוצאת ה-Damage/MP הכי גבוהה מבין הבילדים הריאליים של Grummash בלבל 70.",
+    "המשיכו למדריך Fighter לבל 30-70"
+   ]
+  },
+  {
+   "heading": "Page",
+   "lines": [
+    "Swords או blunt weapons, Threaten להורדת Speed ו-WDEF של האויב, ועוד אופציה להשתמש במגן עם נשקים חד-ידניים.",
+    "המשיכו למדריך Page לבל 30-70"
+   ]
+  },
+  {
+   "heading": "Spearman",
+   "lines": [
+    "Spears או polearms, Iron Will להגנה אישית, טווח נשק ארוך, ובלי סלוט למגן.",
+    "המשיכו למדריך Spearman לבל 30-70",
+    "השוו את שלושת הענפים של Warrior",
+    "מצאתם ערך של Warrior שלא מתאים ל-MapleStory Classic World? תגידו לנו איזה פריט, סקיל, שלב בקווסט או טווח לבלים לא נכון ומה אתם רואים במשחק. נבדוק את זה ונתקן את המדריך."
+   ]
+  }
+ ]
+}

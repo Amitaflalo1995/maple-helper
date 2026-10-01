@@ -86,6 +86,10 @@ class FocusLineEdit(QLineEdit):
 
 
 class Overlay(QWidget):
+    history_requested = Signal()
+    guides_requested = Signal()
+    guide_requested = Signal(str)
+    saver_requested = Signal()
     wishlist_requested = Signal()
     closed = Signal()
     update_requested = Signal()
@@ -168,7 +172,16 @@ class Overlay(QWidget):
         self.version_label = QLabel(f"v{__version__}", objectName="Version")
         self.version_label.setLayoutDirection(Qt.LeftToRight)
         tb.addWidget(self.version_label)
+        self.saver_badge = QLabel(objectName="SaverBadge")
+        self.saver_badge.hide()
+        tb.addWidget(self.saver_badge)
         tb.addStretch(1)
+        self.history_btn = self._icon_button(theme.ICON["search"])
+        self.history_btn.clicked.connect(self.history_requested.emit)
+        tb.addWidget(self.history_btn)
+        self.guides_btn = self._icon_button(theme.ICON["book"])
+        self.guides_btn.clicked.connect(self.guides_requested.emit)
+        tb.addWidget(self.guides_btn)
         self.wish_btn = self._icon_button(theme.ICON["star"])
         self.wish_btn.clicked.connect(self.wishlist_requested.emit)
         tb.addWidget(self.wish_btn)
@@ -206,6 +219,21 @@ class Overlay(QWidget):
         self.profile_card.clicked.connect(self.character_menu)
         self.profile_card.setCursor(Qt.PointingHandCursor)
         lay.addWidget(self.profile_card)
+        from .plancard import PlanPanel, TipStrip
+        self.tip_strip = TipStrip()
+        self.tip_strip.asked.connect(self.ask)
+        self.tip_strip.dismissed.connect(self._dismiss_tip)
+        lay.addWidget(self.tip_strip)
+        self.plan_panel = PlanPanel()
+        self.plan_panel.asked.connect(self.ask)
+        self.plan_panel.what_now.connect(self.what_now)
+        self.plan_panel.guide_requested.connect(self.guide_requested.emit)
+        lay.addWidget(self.plan_panel)
+        from .pinsview import PinsBar
+        self.pins_bar = PinsBar()
+        self.pins_bar.unpin.connect(self._unpin)
+        lay.addWidget(self.pins_bar)
+        self.profile_card.plan_btn.toggled.connect(self._toggle_plan)
 
         # conversation
         self.scroll = QScrollArea()
@@ -284,8 +312,13 @@ class Overlay(QWidget):
         self.input.setPlaceholderText(bidi.plain(self._placeholder, self.t.rtl))
         self.recapture_btn.setToolTip(self.t("recapture"))
         self.settings_btn.setToolTip(self.t("settings"))
+        self.saver_badge.setText("🍃 " + self.t("saver_on_badge"))
+        self.saver_badge.setToolTip(self.t("saver_hint"))
         self.wish_btn.setToolTip(self.t("wishlist"))
+        self.guides_btn.setToolTip(self.t("guides"))
+        self.history_btn.setToolTip(self.t("history"))
         self.profile_card.refresh.setToolTip(self.t("refresh_tip"))
+        self.profile_card.plan_btn.setToolTip(self.t("plan_open"))
         self.profile_card.setToolTip(self.t("switch_character"))
         self.min_btn.setToolTip(self.t("minimize"))
         self.close_btn.setToolTip(self.t("close_chat").replace("F9", self.settings["hotkey_toggle"]))
@@ -304,6 +337,80 @@ class Overlay(QWidget):
         self.profile_card.setVisible(c is not None)
         if c:
             self.profile_card.show_character(c, self.profiles.avatar_path(c), self.kb, self.t.rtl)
+        self.refresh_plan()
+        self.refresh_pins()
+
+    # ------------------------------------------------------------------ plan (EXP, tips, "My plan")
+
+    def refresh_pins(self):
+        from .. import pins
+        c = self.profiles.active
+        self.pins_bar.show_pins(pins.items(self.settings, c.id if c else None), self.t, self.t.rtl)
+
+    def pin_answer(self, question: str, answer: str):
+        from .. import pins
+        c = self.profiles.active
+        if c and pins.add(self.settings, c.id, question, answer):
+            self.refresh_pins()
+            self.add_system(self.t("pinned_done"))
+
+    def _unpin(self, answer: str):
+        from .. import pins
+        c = self.profiles.active
+        if c:
+            pins.remove(self.settings, c.id, answer)
+            self.refresh_pins()
+
+    def copy_character_card(self):
+        """The character as a picture on the clipboard, to brag in Discord or WhatsApp."""
+        from PySide6.QtWidgets import QApplication
+        from .. import plan
+        from .pinsview import character_card_image
+        c = self.profiles.active
+        if not c:
+            return
+        pm = character_card_image(c, self.profiles.avatar_path(c), self.kb,
+                                  plan.progress(self.kb, c.level, c.exp_pct), self.t)
+        QApplication.clipboard().setPixmap(pm)
+        self.add_system(self.t("copied"))
+
+    def refresh_plan(self):
+        from .. import plan
+        c = self.profiles.active
+        if not c:
+            self.tip_strip.show_tip(None, self.t, self.t.rtl)
+            self.plan_panel.hide()
+            return
+        self.profile_card.exp.show_progress(plan.progress(self.kb, c.level, c.exp_pct), self.t, self.t.rtl)
+        dismissed = (self.settings["tips_dismissed"] or {}).get(c.id, {})
+        self.tip_strip.show_tip(plan.tip(self.kb, c, self.t, dismissed), self.t, self.t.rtl)
+        if self.plan_panel.isVisible():
+            self.plan_panel.fill(self.kb, c, self.t, self.t.rtl)
+
+    def _toggle_plan(self, on: bool):
+        c = self.profiles.active
+        if on and c:
+            self.plan_panel.fill(self.kb, c, self.t, self.t.rtl)
+        self.plan_panel.setVisible(on and c is not None)
+
+    def _dismiss_tip(self, kind: str):
+        c = self.profiles.active
+        if not c:
+            return
+        data = dict(self.settings["tips_dismissed"] or {})
+        data[c.id] = {**data.get(c.id, {}), kind: c.level}
+        self.settings["tips_dismissed"] = data
+        self.refresh_plan()
+
+    def what_now(self):
+        """'What now?': a fresh screenshot and the question, so Claude sees where the player is."""
+        self.profile_card.plan_btn.setChecked(False)
+        hwnd = osapi.find_game_window()
+        if hwnd:
+            self.game_hwnd = hwnd
+            self.shot = self.shot_provider(hwnd) if self.shot_provider else osapi.capture_game(hwnd)
+            self.shot_used = False
+        self.ask(self.t("what_now_q"))
 
     def character_menu(self):
         """Click the character card: pick another character or add one, right from the chat."""
@@ -332,6 +439,10 @@ class Overlay(QWidget):
         add.setEnabled(not busy)
         add.triggered.connect(self.add_character_requested.emit)
         menu.addAction(add)
+        share = QAction(bidi.plain("⧉  " + self.t("share_character"), self.t.rtl), menu)
+        share.triggered.connect(self.copy_character_card)
+        share.setEnabled(self.profiles.active is not None)
+        menu.addAction(share)
         card = self.profile_card
         menu.setMinimumWidth(card.width())
         menu.exec(card.mapToGlobal(QPoint(0, card.height() + 4)))
@@ -620,6 +731,7 @@ class Overlay(QWidget):
     def ask(self, question: str, force_claude: bool = False):
         if self.busy or not question.strip():
             return
+        self._last_question = question
         c = self.profiles.active
         history = History(c.id) if c else None
         focus = list(self.focus_keys)
@@ -660,11 +772,33 @@ class Overlay(QWidget):
         self._worker.done.connect(self._thread.quit)
         self._thread.start()
 
+    def _note_usage(self, limits: dict | None):
+        """Remember the plan usage; when the 5-hour window runs low, say so once (with the way to save)."""
+        from .. import usage
+        if not limits:
+            return
+        usage.record(self.settings, limits)
+        lvl = usage.level(self.settings)
+        w = usage.current(self.settings).get("five_hour", {})
+        if lvl == "ok" or self.settings["usage_warned"] == [w.get("resets"), lvl]:
+            return
+        self.settings["usage_warned"] = [w.get("resets"), lvl]
+        text = self.t("usage_high" if lvl == "high" else "usage_critical", pct=round(w["used"] * 100),
+                      at=usage.reset_clock(w.get("resets")))
+        if self.settings["saver_mode"]:
+            self.add_system(text)
+        else:
+            self.add_notice(text, self.t("saver_turn_on"), self.saver_requested.emit)
+
+    def show_saver_badge(self, on: bool):
+        self.saver_badge.setVisible(on)
+
     def _show_quick(self, qa, question: str, history):
         """An instant answer from the KB, with the way to Claude one tap away."""
         self._anchor = None
         self._follow = True
-        self.add_bubble(qa.text, "assistant")
+        b = self.add_bubble(qa.text, "assistant")
+        b.add_pin(lambda: self.pin_answer(question, qa.text), self.t("pin"))
         row = QWidget()
         rl = QHBoxLayout(row)
         rl.setContentsMargins(4, 0, 4, 0)
@@ -759,6 +893,7 @@ class Overlay(QWidget):
     def _on_done(self, ans: Answer, history: History | None):
         self.busy = False
         self._on_text(self.input.text())
+        self._note_usage(ans.limits)
         if ans.error:
             import logging
             logging.getLogger(__name__).warning("answer failed: %s", ans.error)
@@ -767,6 +902,8 @@ class Overlay(QWidget):
             self._pending_bubble.set_text(self.t(key))
             return
         self._pending_bubble.set_text(ans.text)
+        q = getattr(self, "_last_question", "")
+        self._pending_bubble.add_pin(lambda q=q, a=ans.text: self.pin_answer(q, a), self.t("pin"))
         QTimer.singleShot(0, self._keep_answer_readable)
         QTimer.singleShot(250, self._keep_answer_readable)   # after the cards' layout settles
         if history:
@@ -819,6 +956,8 @@ class Overlay(QWidget):
             pass
 
     def _show_changes(self, changes):
+        changes = [ch for ch in changes if ch[0] != "exp"]     # the EXP bar shows it; no chat line per percent
+        self.refresh_plan()
         labels = {"level": "level", "job": "job", "base_class": "job", "map": "map",
                   "quest+": "quest_started", "quest-": "quest_done", "note": "note"}
         for field, value in changes:

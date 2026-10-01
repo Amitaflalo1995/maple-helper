@@ -78,6 +78,11 @@ DEFAULT_SETTINGS = {
     "model": "sonnet",
     "api_key_fallback": False,    # use an Anthropic API key (stored in Credential Manager / Keychain)
     "onboarding_done": False,
+    "pins": {},                   # character id -> pinned answers [{q, a, t}]
+    "tips_dismissed": {},         # character id -> {tip kind: level it was hidden at}
+    "usage": None,                # last known Claude plan usage (see usage.py)
+    "saver_mode": False,          # short answers on a lighter model, so the plan lasts longer
+    "usage_warned": 0,            # reset time of the 5-hour window we already warned about
     "wishlist": {},               # character id -> item keys the player is hunting for
     "seen_version": "",           # the app version whose "what's new" the player has seen
     "last_session": None,         # summary of the previous play session, shown when the chat next opens
@@ -115,6 +120,7 @@ class Character:
     active_quests: list[str] = field(default_factory=list)
     notes: list[str] = field(default_factory=list)
     avatar: str = ""              # file in AVATAR_DIR, cropped from the latest screenshot
+    exp_pct: float | None = None  # EXP bar of the current level, read from a screenshot
     updated_at: float = field(default_factory=time.time)
 
     def summary(self) -> str:
@@ -198,6 +204,10 @@ class Profiles:
             if q in c.active_quests:
                 c.active_quests.remove(q)
                 changed.append(("quest-", q))
+        pct = update.get("exp_percent")
+        if isinstance(pct, (int, float)) and 0 <= pct <= 100 and pct != c.exp_pct:
+            c.exp_pct = round(float(pct), 2)
+            changed.append(("exp", c.exp_pct))
         note = update.get("note")
         if note and note not in c.notes:
             c.notes.append(note)

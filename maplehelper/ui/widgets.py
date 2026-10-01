@@ -42,6 +42,18 @@ class Bubble(QFrame):
     def set_text(self, text: str) -> None:
         self.label.setText(bidi.to_html(text) if text else "")
 
+    def add_pin(self, on_pin, tip: str) -> None:
+        """A small 📌 under a finished answer."""
+        from PySide6.QtWidgets import QToolButton
+        row = QHBoxLayout()
+        row.addStretch(1)
+        b = QToolButton(objectName="Icon", text="📌")
+        b.setCursor(Qt.PointingHandCursor)
+        b.setToolTip(tip)
+        b.clicked.connect(lambda: (on_pin(), b.setEnabled(False)))
+        row.addWidget(b)
+        self.layout().addLayout(row)
+
 
 class BubbleRow(QWidget):
     """iMessage convention: your messages sit on the trailing side (left in Hebrew), answers span the width."""
@@ -391,6 +403,10 @@ class ProfileCard(QFrame):
         self.meta = QLabel(objectName="ProfileMeta")
         col.addWidget(self.name)
         col.addWidget(self.meta)
+        from .plancard import ExpBar
+        self.exp = ExpBar()
+        self.exp.hide()
+        col.addWidget(self.exp)
         row.addLayout(col, 1)
         from PySide6.QtWidgets import QToolButton
         from . import theme
@@ -398,6 +414,10 @@ class ProfileCard(QFrame):
         self.refresh.setCursor(Qt.PointingHandCursor)
         self.refresh.clicked.connect(self.refresh_requested.emit)
         row.addWidget(self.refresh, 0, Qt.AlignVCenter)
+        self.plan_btn = QToolButton(objectName="Refresh", text=theme.ICON["plan"])
+        self.plan_btn.setCursor(Qt.PointingHandCursor)
+        self.plan_btn.setCheckable(True)
+        row.addWidget(self.plan_btn, 0, Qt.AlignVCenter)
         self._spin_frames = ["\ue72c", "\ue895"]      # refresh / sync glyphs alternate while busy
         from PySide6.QtCore import QTimer
         self._spin = QTimer(self, interval=260, timeout=self._tick)

@@ -24,8 +24,8 @@ _RTL = re.compile(rf"[{RTL_CHARS}]")
 # may contain spaces and inner punctuation; ends with a letter, digit, % or ).
 _RUN = re.compile(
     r"(?:[+\-±]?\d|[A-Za-z])"                    # start
-    r"(?:(?:[A-Za-z0-9.'’:&/+\-–%#×_ ()@]|,(?=\d{3}\b))*"   # body; "1,500" keeps its comma, a@b.com its @
-    r"[A-Za-z0-9%)])?"                           # end
+    r"(?:(?:[A-Za-z0-9.'’:&/+\-–%#×_ ()@<>]|,(?=\d{3}\b))*"   # body; "1,500" keeps its comma, a@b.com its @,
+    r"[A-Za-z0-9%)>])?"                          # "Line 2 <Area 1>" stays one map name
 )
 
 
@@ -40,7 +40,7 @@ def _balanced(run: str) -> str:
             if depth == 0:
                 break
             depth -= 1
-        if depth == 0 and (ch.isalnum() or ch in "%)"):
+        if depth == 0 and (ch.isalnum() or ch in "%)>"):
             last_ok = i + 1
     return run[:last_ok]
 
@@ -77,7 +77,10 @@ def isolate_ltr_runs(text: str) -> str:
         out.append(text[pos:start])
         # the RLM after the block keeps following punctuation (") - ", ", ") in the Hebrew flow,
         # so two English blocks never glue into one left-to-right chunk
-        out.append(f"{LRE}{run}{PDF}{RLM}")
+        # Qt mirrors a ">" that follows a digit inside a Hebrew line ("Line 2 <Area 1>" shows "<Area 1<"),
+        # so map names with an <area> suffix are shown as "Line 2 · Area 1"
+        shown = re.sub(r"\s*<([^<>]+)>", r" · \1", run)
+        out.append(f"{LRE}{shown}{PDF}{RLM}")
         pos = end
     out.append(text[pos:])
     return "".join(out)

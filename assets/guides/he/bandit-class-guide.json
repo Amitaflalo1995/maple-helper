@@ -1,0 +1,461 @@
+{
+ "key": "guide/bandit-class-guide",
+ "source_hash": "7ad67ac92cf3",
+ "lang": "he",
+ "title": "MapleStory Classic: מדריך Bandit ללבל 30-70",
+ "intro": "מדריך Bandit ללבלים 30-70 עם הריסט של Sindit וחלוקת SP. כולל AP, דאגרים, מגנים, Savage Blow, ציוד ומפות מ-Training Advisor.",
+ "pros": [
+  "מקום 1 בדמג' למטרה בודדת בלבל 70 בבנצ'מרק הנוכחי של COT2.",
+  "Haste נותן לפארטי Speed ו-Jump; Steal יכול לעשות סטאן ולהעלות את ה-Attack Power שלך.",
+  "מי שמשחק עם דאגר יכול ללבוש מגן, ו-Guard יכול לחסום לגמרי פגיעות פיזיות מתאימות."
+ ],
+ "cons": [
+  "טווח קצר מאוד והרבה ספיגת מכות פנים מול פנים.",
+  "Savage Blow במקסימום עולה 28 MP לכל התקפה ופחות חסכוני ב-MP מ-Double Stab.",
+  "דרישות STR ו-DEX של דאגרים יכולות לבזבז AP אם מתכננים את מסלול הנשק מאוחר."
+ ],
+ "sections": [
+  {
+   "heading": "מתחילים בלבל 30",
+   "lines": [
+    "Thief חדש? תסיימו קודם את המדריך ל-Thief לבל 1-30. נוסחת ה-Accuracy, חלוקת ה-SP של הג'וב הראשון, הציוד המוקדם, האזרחות ומפות האימון מוסברים שם.",
+    "תשאירו את Lucky Seven ו-Keen Eyes. תחזיקו גם את הקלו ואת הכוכבים. ההתקדמות ל-Bandit לא אמורה להכריח אתכם לעבור מיד לדאגר ול-Savage Blow. Lucky Seven נשאר ההתקפה הטובה יותר בהתחלה."
+   ]
+  },
+  {
+   "heading": "אזרחות מומלצת: Kerning City",
+   "lines": [
+    "תשאירו את האזרחות של Kerning City מהמדריך של הג'וב הראשון. Distinguished Citizen פותח את סקרול Lesser Overall LUK, ו-Guardian of the Village פותח את סקרול Lesser Glove Attack. הפרס Wolbi של Helpful Stranger חשוב יותר ל-Assassins, אבל סקרולי ה-LUK וה-W.ATK מעולים ל-Bandits. Max מוכר Wolbi Throwing Stars בדרגה Helpful Stranger, הדרגה השלישית, שדורשת 2,000 contribution ולוקחת בערך שבועיים של דיילי מהלוח של Kerning City ותרומות שבועיות."
+   ]
+  },
+  {
+   "heading": "ACC עדיין גורם מכריע במקומות אימון אופטימליים",
+   "lines": [
+    "ה-Accuracy של Bandit מגיע מהלבל של הדמות ומהסטטים. Nimble Body מוסיף עליו. תבדקו את אחוז הפגיעה לפני שאתם עוברים למוב בלבל גבוה יותר.",
+    "Base ACC = floor((1.2 x DEX + 2 x Level + 0.6 x LUK) x 0.25 + 15)",
+    "Total ACC = Base ACC + direct Accuracy + Nimble Body",
+    "+0.50 Base ACC לכל לבל",
+    "+0.30 Base ACC לכל DEX",
+    "+0.15 Base ACC לכל LUK",
+    "+15 ACC מ-Nimble Body",
+    "לבל הדמות תורם יותר Accuracy מנקודה אחת של DEX. הלבל גם סוגר את הקנס על אחוז הפגיעה מול מובים בלבל גבוה יותר. ה-Avoidability של המוב נשאר חלק מהדרישה.",
+    "מוב | לבל | Avoid של המוב | ACC ל-100% פגיעה באותו לבל",
+    "Jr. Wraith | 34 | 24 | 79 ACC",
+    "Lorang | 38 | 23 | 76 ACC",
+    "Zombie Lupin | 41 | 28 | 92 ACC",
+    "Wraith | 48 | 31 | 101 ACC",
+    "עמודת ה-100% אומרת שכל התקפה פוגעת כשהדמות והמוב באותו לבל. להילחם בלבל נמוך יותר מעלה את דרישת ה-ACC."
+   ]
+  },
+  {
+   "heading": "בילד סקילים וחלוקת SP ל-Bandit",
+   "lines": []
+  },
+  {
+   "heading": "התקדמות ג'וב ל-Bandit בלבל 30",
+   "lines": [
+    "מדברים עם Dark Lord ב-Kerning City ומקבלים את The Thief's Next Journey.",
+    "מביאים את המכתב שלו ל-Thief Job Instructor ב-Construction Site North of Kerning City.",
+    "נכנסים לאזור הטסט. הורגים את המפלצות שם עד שאוספים 30 Dark Marbles.",
+    "מחזירים את The Proof of a Hero ל-Dark Lord ובוחרים Bandit .",
+    "Dark Lord מתחיל ומסיים את ההתקדמות ל-Bandit ב-Kerning City. Thief Job Instructor מריץ את הטסט של Dark Marble צפונית ל-Kerning City.",
+    "ה-SP הראשון של Bandit: Haste 1. ממשיכים להשתמש ב-Lucky Seven במקסימום. Haste מגיע ל-20 בלבל 37, ואחריו Nimble Recovery 8 בלבל 39."
+   ]
+  },
+  {
+   "heading": "חלוקת SP ל-Bandit (Sindit): לבלים 30-70 (עם ריסט)",
+   "lines": [
+    "לבלים | לאן הולך ה-SP | תוצאה",
+    "30-36 | Haste +19 | Haste 19; ממשיכים עם Lucky Seven",
+    "37 | Haste +1, Nimble Recovery +2 | Haste 20 מקסימום, Recovery 2",
+    "38-39 | Nimble Recovery +6 | Nimble Recovery 8",
+    "40 ריסט | Dagger Mastery 20, Dagger Booster 1, Savage Blow 10 | Mastery 20 מקסימום; מאפסים את ה-SP של הג'וב הראשון ל-Double Stab במקסימום, שמחליף את Lucky Seven",
+    "41-43 | Savage Blow +9 | Savage Blow 19; עוברים ל-Savage Blow בלבל 42",
+    "44 | Savage Blow +2, Haste +1 | Savage Blow 21 עם שש פגיעות, Haste 1",
+    "45-47 | Savage Blow +9 | Savage Blow 30 מקסימום",
+    "48-53 | Haste +18 | Haste 19",
+    "54 | Haste +1, Nimble Recovery +2 | Haste 20 מקסימום, Recovery 2",
+    "55-57 | Nimble Recovery +9 | Nimble Recovery 11",
+    "58 | Nimble Recovery +1, Steal +2 | Recovery 12, Steal 2",
+    "59-67 | Steal +27 | Steal 29",
+    "68 | Steal +1, Dagger Booster +2 | Steal 30 מקסימום, Booster 3",
+    "69-70 | Dagger Booster +6 | Dagger Booster 9",
+    "אי אפשר לשים SP של ג'וב שני על סקילים של ג'וב ראשון, אז תסיימו את התוכנית של הג'וב הראשון עד לבל 30. ה-Character Builder מסמן כל בילד ששובר את זה.",
+    "עם הריסט, תתקפו עם Double Stab בלבלים 40-41. מלבל 42, Savage Blow 16 מדורג מעליו ב-Training Advisor."
+   ]
+  },
+  {
+   "heading": "חלוקת SP ל-Bandit: לבלים 30-70 (בלי ריסט)",
+   "lines": [
+    "בשביל Bandit עם דאגר שאף פעם לא קונה SP Reset Scroll. ה-SP של הג'וב הראשון אמור כבר ללכת לפי תוכנית הדאגר עם Double Stab במקסימום, שנשאר ההתקפה הראשית עד לבל 43, כש-Savage Blow מגיע לסקיל Lv18. אחרי נקודה אחת ב-Haste, Mastery הולך ראשון כי הוא מעלה את הרול המינימלי של Double Stab: בלבל 39 המסלול הזה מביא בערך 4,740 EXP/min ב-Training Advisor, מול בערך 3,600 EXP/min אם לוקחים Savage Blow קודם. למקסם Dagger Mastery הרבה יותר חשוב מלמקסם Savage Blow ליעילות בפארם EXP.",
+    "לבלים | לאן הולך ה-SP | תוצאה",
+    "30 | Haste +1 | Haste 1; מתקפים עם Double Stab במקסימום",
+    "31 | Dagger Mastery +3 | Mastery 3",
+    "32 | Dagger Mastery +2, Dagger Booster +1 | Mastery 5, Booster 1",
+    "33-37 | Dagger Mastery +15 | Mastery 20 מקסימום",
+    "38-44 | Savage Blow +21 | Savage Blow 21 עם שש פגיעות",
+    "45-47 | Savage Blow +9 | Savage Blow 30 מקסימום",
+    "48-53 | Haste +18 | Haste 19",
+    "54 | Haste +1, Nimble Recovery +2 | Haste 20 מקסימום, Recovery 2",
+    "55-57 | Nimble Recovery +9 | Nimble Recovery 11",
+    "58 | Nimble Recovery +1, Steal +2 | Recovery 12, Steal 2",
+    "59-67 | Steal +27 | Steal 29",
+    "68 | Steal +1, Dagger Booster +2 | Steal 30 מקסימום, Booster 3",
+    "69-70 | Dagger Booster +6 | Dagger Booster 9"
+   ]
+  },
+  {
+   "heading": "יעד סקילים לדוגמה בלבל 70",
+   "lines": [
+    "סקיל | יעד בלבל 70 | מה הוא עושה",
+    "Dagger Mastery | 20 / 20 | Mastery 10, Critical Rate +20%, ו-20% סיכוי להתעלם מנוקבק.",
+    "Nimble Recovery | 12 / 20 | התחמקות יכולה להחזיר 6% HP ו-MP, עם 64% סיכוי להפעלה ונעילה של 30 שניות.",
+    "Dagger Booster | 9 / 20 | Attack Speed +2 שלבים למשך 180 שניות. עולה 22 HP ו-22 MP.",
+    "Haste | 20 / 20 | Speed +30 ו-Jump +10 לפארטי למשך 300 שניות.",
+    "Steal | 30 / 30 | פוגע בשני מובים ומנסה לגנוב. הפעלה מוצלחת עושה סטאן ונותנת Attack Power +35 למשך 30 שניות.",
+    "Savage Blow | 30 / 30 | שש פגיעות של 75% כל אחת, 450% דמג' בסך הכול ו-28 MP."
+   ]
+  },
+  {
+   "heading": "אפשרויות SP ופשרות ל-Bandit בלבל 70",
+   "lines": [
+    "למקסם את כל ששת הסקילים של Bandit עולה 140 SP, אבל לבלים 30-70 נותנים 121. תשאירו Dagger Mastery 20 ו-Savage Blow 30. גם Haste נשאר על 20. 51 ה-SP שנשארו הולכים ל-Dagger Booster, Nimble Recovery ו-Steal.",
+    "עדיפות | Booster | Recovery | Steal | פשרה",
+    "הדוגמה של Grummash | 9 | 12 | 30 | Booster של 180 שניות עם Recovery חלקי.",
+    "Recovery ו-Steal | 1 | 20 | 30 | Recovery ו-Steal מלאים; מפעילים Booster מחדש כל 100 שניות.",
+    "פחות באפים חוזרים | 20 | 1 | 30 | Booster ו-Haste מחזיקים שניהם 300 שניות; Recovery כמעט לא מרפא.",
+    "Recovery וזמן פעילות | 20 | 20 | 11 | Recovery ו-Booster במקסימום; Steal יורד ל-50% הצלחה ו-+15 Attack Power.",
+    "הפירוט של Ducky Duck Gaming על הקלאס Bandit עובר גם הוא על הפשרות האלה ב-SP."
+   ]
+  },
+  {
+   "heading": "לעשות ריסט ל-Sindit בסביבות לבל 40",
+   "lines": [
+    "ה-SP Reset Scroll מאפס כל סקיל חוץ מסקילים של Beginner. זה כולל את ה-SP של הג'וב הראשון ושל Bandit. המחיר שלו בקאש שופ החי לא מאושר.",
+    "SP Reset Scroll",
+    "הבילד Sindit של Random ב-COT2 עבר בסביבות לבל 40-41 עם דאגר של לבל 40. דאגר חלש יותר של לבל 35 הזיז את נקודת השבירה השימושית לקרוב ללבל 43-44. תבדקו את הדמג' המינימלי שלכם לפני שאתם משתמשים בסקרול.",
+    "יש לכם שלוש דרכים שימושיות לחלק את 61 ה-SP של הג'וב הראשון אחרי הריסט:",
+    "Double Stab במקסימום",
+    "Nimble Body 15 / Disorder 20 / Dark Sight 6 / Double Stab 20. Double Stab נשאר ההתקפה הזולה יותר כשהוא מבטיח את אותו קיל כמו Savage Blow.",
+    "Dark Sight במקסימום",
+    "Nimble Body 15 / Disorder 20 / Dark Sight 20 / Double Stab 6. Dark Sight במקסימום מוריד את קנס ה-Speed שלו ומוריד את עלות ההפעלה ל-30 MP. Double Stab 6 חלש מדי בשביל לתקוף איתו, אז באפשרות הזו תשלבו Savage Blow 21 / Dagger Mastery 9 בריסט.",
+    "אפשר למקסם את שניהם. Nimble Body 15 / Disorder 6 / Dark Sight 20 / Double Stab 20 משתמש בכל 61 ה-SP של הג'וב הראשון. תבחרו בזה אם Disorder במקסימום פחות חשוב לכם מלשמור גם על דמג' עם הדאגר וגם על Dark Sight במהירות מלאה.",
+    "SP של Bandit בלבל 40: Dagger Mastery 20 / Dagger Booster 1 / Savage Blow 10.",
+    "Dagger Mastery במקסימום מעלה את הרול הנמוך של כל התקפת דאגר, והרול הנמוך הוא מה שקובע קילים מובטחים. בלבל 40 הוא נותן ל-Double Stab במקסימום רול נמוך של 798, מול 588 ל-Savage Blow 21 עם Dagger Mastery 9, ובערך 4,740 EXP/min ב-Training Advisor מול 3,950. Booster נותן את כל העלייה של שני שלבי מהירות כבר בסקיל Lv1.",
+    "מתי Savage Blow עוקף את Double Stab ואת Lucky Seven?",
+    "Savage Blow עוקף לראשונה את הדמג' להתקפה של Double Stab במקסימום בסקיל Lv11: 325% דמג' בסך הכול מול 320% של Double Stab. ל-Savage Blow יש אנימציית התקפה ארוכה יותר, אז הדמג' לדקה לא עוקף את Double Stab עד סקיל Lv21 עם דאגר Fast 4 עם Booster במחשבון הנוכחי.",
+    "לבל 35 היא נקודת השבירה הראשונה ב-DPS עם ציוד נקי מול Lucky Seven במקסימום במחשבון הנוכחי. Savage Blow 1 / Dagger Mastery 14 / Dagger Booster 1 עם Halfmoon Zamadar נקי מגיע לבערך 46,762 דמג' לדקה. Lucky Seven במקסימום עם Adamantium Guards נקי ו-Wolbi מגיע לבערך 46,287. Savage Blow מנצח בבערך 1.0%.",
+    "לבל 40 היא נקודת ריסט מעשית יותר, כי ה-Gephart החזק יותר הופך את הריסט לשדרוג הרבה יותר גדול. הדאגר שלכם והקילים המובטחים ב-Training Advisor יכולים להזיז את לבל הריסט הכי טוב מוקדם או מאוחר יותר.",
+    "התוצאות האלה בלבל 40 משתמשות ב-Adamantium Guards נקי ו-Wolbi מהמדריך לפני הריסט, ואז Gephart נקי עם Dagger Mastery 9 ו-Dagger Booster 1 אחריו. למטרה יש 0 WDEF.",
+    "התקפה בלבל 40 | דמג' צפוי להתקפה | דמג' לדקה | דמג' ל-MP",
+    "Lucky Seven 20 | 615 | 51,004 | 38.4",
+    "Double Stab 20 | 719 | 71,897 | 44.9",
+    "Savage Blow 21 | 876 | 72,746 | 36.5",
+    "בנקודת השבירה הזו, Savage Blow עושה בערך 21.9% יותר דמג' להתקפה ו-1.2% יותר דמג' לדקה מ-Double Stab. הוא עושה בערך 42.6% יותר דמג' לדקה מ-Lucky Seven עם הציוד לדוגמה. Double Stab נשאר חסכוני יותר ב-MP בבערך 23.0%. המחשבון הנוכחי משתמש עכשיו בתזמון המאושר של Savage Blow, מעוגל לצעדים של 30 ms של המשחק, אבל הדאגר שלכם והקיל המובטח עדיין קובעים אם הריסט שווה את זה.",
+    "למה להעלות Haste קודם?",
+    "Haste משפר תנועה ותועלת לפארטי, בזמן ש-Lucky Seven כבר מטפל בדמג'. הריסט מעביר את נקודות ה-Haste האלה ל-Savage Blow ול-Mastery, ואז מעלים Haste שוב.",
+    "הערות מהקהילה על בילד Bandit: Random ו-Grummash",
+    "המדריך של Random ל-Sindit ב-COT2 משאיר את Booster על 1 וממקסם Nimble Recovery. הבילד הריאלי של Grummash ללבל 70 משתמש ב-Booster 9 וב-Nimble Recovery 12. שניהם מקבלים את כל העלייה של שני שלבי מהירות. Random מקבל Recovery חזק יותר אבל מפעיל Booster מחדש כל 100 שניות. Grummash מוותר על 8 לבלים של Nimble Recovery בשביל Booster של 180 שניות.",
+    "הריסט המאוחר ותוכנית ה-Haste המוקדמת לקוחים מ-Random. ערכי הסקילים, השוואות הדמג' ותוצאות המפות לדוגמה מבוססים על הדאטה הנוכחית של MapleStory Classic World."
+   ]
+  },
+  {
+   "heading": "חלוקת AP ל-Bandit: לבלים 30-70",
+   "lines": [
+    "בילד ברירת המחדל הולך על דאגרי DEX. הוא מתחיל מ-30 DEX בסיסי ו-132 LUK בסיסי מהמדריך של הג'וב הראשון. מוסיפים 1 DEX ו-4 LUK בכל לבל עד לבל 61 . שמים את כל 5 ה-AP ב-LUK מלבל 62 עד 70. בסוף יש 61 DEX בסיסי ו-301 LUK בסיסי.",
+    "לבל | DEX בסיסי | LUK בסיסי | בדיקת ציוד",
+    "30 | 30 | 132 | Reef Claw דורש 25 DEX ו-60 LUK.",
+    "40 | 40 | 172 | Gephart דורש 35 DEX ו-80 LUK.",
+    "50 | 50 | 212 | Shinkita דורש 45 DEX ו-100 LUK.",
+    "60 | 60 | 252 | Deadly Fin דורש 55 DEX ו-120 LUK.",
+    "70 | 61 | 301 | Kandine דורש 65 Total DEX ו-140 LUK.",
+    "הבילד הריאלי בלבל 70 מקבל את 4 ה-DEX האחרונים מציוד אחר. יותר DEX מציוד מאפשר לעצור את ה-DEX הבסיסי נמוך יותר. ה-DEX או ה-STR של הדאגר עצמו לא עוזרים לעמוד בדרישה של אותו דאגר."
+   ]
+  },
+  {
+   "heading": "דאגרי DEX או דאגרי STR?",
+   "lines": [
+    "ל-Bandits יש שני קווי נשק עיקריים. לדאגרי DEX יש 3 W.ATK בסיסי יותר באותו לבל. דאגרי STR תוקפים שלב אחד מהר יותר, ונשארים מהירים בשלב אחד גם עם Booster. דרישת הנשק משתנה, אבל כל דאגר עדיין משתמש ב-LUK כסטט הדמג' הראשי.",
+    "לבל | דאגר DEX | דרישה | W.ATK / מהירות | דאגר STR או מהיר | דרישה | W.ATK / מהירות",
+    "30 | Reef Claw | 25 DEX / 60 LUK | 48 / Fast 4 | Cass | 25 STR / 60 LUK | 45 / Faster 3",
+    "40 | Gephart | 35 DEX / 80 LUK | 58 / Fast 4 | Korean Fan | 70 LUK | 55 / Faster 3",
+    "50 | Shinkita | 45 DEX / 100 LUK | 68 / Fast 4 | Sai | 45 STR / 100 LUK | 65 / Faster 3",
+    "60 | Deadly Fin | 55 DEX / 120 LUK | 78 / Fast 4 | Serpent's Coil | 55 STR / 120 LUK | 75 / Faster 3",
+    "70 | Kandine | 65 DEX / 140 LUK | 88 / Fast 4 | Golden River | 65 STR / 140 LUK | 85 / Faster 3",
+    "אפשרויות Weaponcrafting נוכחיות: Halfmoon Zamadar נפתח בסקיל לבל 7 ו-Gephart ב-8. Sai נפתח ב-10. אין מתכון ל-Shinkita, אז תתכננו איך תשיגו את הדאגר של לבל 50 לפני שאתם מוסיפים גם STR וגם DEX."
+   ]
+  },
+  {
+   "heading": "מה זה דאגרי STR והאם הם שווים משהו?",
+   "lines": [
+    "שחקנים קוראים ל-Cass, Sai, Serpent's Coil ו-Golden River דאגרי STR כי STR מחליף את DEX בדרישות שלהם. הם לא הופכים את STR לסטט הדמג' הראשי של Bandit. Korean Fan שייך לאותו קו נשקים של Faster (3), אבל הוא דורש רק 70 LUK.",
+    "בלבל 70, קו ה-DEX וקו ה-STR עושים כמעט אותו דמג'. הדאגר של DEX מקבל 9 Accuracy יותר.",
+    "Dagger Booster מזיז את שני הקווים שני שלבים מהר יותר, כך שדאגר STR של Faster 3 מגיע למהירות 1 ודאגר DEX של Fast 4 מגיע למהירות 2.",
+    "עם בילד סטטים ריאלי דומה, Golden River (STR) מקבל 90 קאסטים של Savage Blow בדקה, לעומת Kandine (DEX) עם 83. זה בערך 5% יותר דמג'. ה-+5% האלה הם על סטטים זהים; ברגע ששמים 65 STR בשביל Golden River, הוא נגמר 1.3% מאחור.",
+    "הבעיה הענקית היא AP. שריון Thief של לבל 70 עדיין דורש 60 DEX, אז ה-65 STR של Golden River צריכים להגיע מאיפשהו, אלא אם אתם מתכננים ללכת בלי שריון או עם שריון רגיל של לבל נמוך.",
+    "אנחנו ממש לא ממליצים ללכת על דאגרי STR כל עוד השריון המטא במשחק עדיין דורש DEX."
+   ]
+  },
+  {
+   "heading": "למה LUK עושה יותר דמג'",
+   "lines": [
+    "נוסחאות הדמג' של דאגר הן:",
+    "Maximum raw hit = (1 + (2 × LUK + STR + DEX) / 100 + Attack Power / 50) × W.ATK × Skill Damage",
+    "Minimum raw hit = (0.8 + (2 × LUK × Mastery + STR + DEX) / 100 + Attack Power / 50) × W.ATK × Skill Damage",
+    "לנקודת LUK אחת יש פי שניים משקל מנקודת STR או DEX ברול המקסימלי. ברול המינימלי, לנקודת LUK יש פי 1.76 מהמשקל שלהן עם Dagger Mastery במקסימום. DEX גם עוזר ל-Accuracy ולדרישות ציוד.",
+    "STR גם מעלה את ה-WDEF שלכם. ברגע שדרישות הציוד ואחוז הפגיעה מכוסים, תשימו את שאר ה-AP ב-LUK.",
+    "בדיקת סטטים בלבל 70 | Savage Blow ממוצע | רווח",
+    "343 LUK / 65 DEX / 4 STR | 3,890 | בסיס",
+    "הוספת 10 LUK | 3,981 | +91 / +2.34%",
+    "הוספת 10 STR | 3,939 | +49 / +1.25%",
+    "הוספת 10 DEX | 3,939 | +49 / +1.25%",
+    "ההשוואה הזו שומרת על 100 W.ATK של הבילד הריאלי בלבל 70, Dagger Mastery במקסימום, Savage Blow במקסימום, 29% Critical Rate ו-26% Critical Damage. המטרה באותו לבל עם 0 WDEF. עשר נקודות LUK מוסיפות בערך פי 1.88 מהדמג' הממוצע של עשר STR או עשר DEX בבילד הזה.",
+    "קראו את נוסחת הדמג' המלאה"
+   ]
+  },
+  {
+   "heading": "טווח נשק (Hitbox)",
+   "lines": [
+    "כל התקפת דאגר פוגעת בתוך קופסה שמולכם, שנקראת hitbox. האורך שלה הוא הטווח של הדאגר. לדאגר יש חמש התקפות בסיסיות, שלוש הנפות ושתי דקירות, לכל אחת קופסה משלה, והמשחק בוחר אחת רנדומלית בכל פעם. המספרים למטה הם הטווח הממוצע של התקפה בסיסית אחת.",
+    "Shinkita, Swing 3. כל מפלצת שהגוף שלה נוגע בקופסה הכחולה נפגעת: 22-102 px מולכם, מ-10 עד 50 px מעל הרגליים.",
+    "Cass, Halfmoon Zamadar ו-Shinkita מגיעים רחוק יותר. הם בממוצע 86 px להתקפה בסיסית, מול 74 px לשאר הדאגרים בשורות למטה. בלבל 50, Shinkita מגיע ל-86 px ו-Sai ל-74 px. כל הדאגרים של לבל 60 ו-70 בממוצע 74 px. לטווח יש השפעה ישירה על ה-DPS בפועל. טווח ארוך יותר הופך מובים לקלים יותר לפגיעה ממרחק ומונע מהם להתקרב מספיק כדי לפגוע בכם. השוו כל משפחת נשקים במדריך טווח הנשק .",
+    "86 px טווח ממוצע",
+    "Cass (Lv 30)",
+    "Halfmoon Zamadar (Lv 35)",
+    "Shinkita (Lv 50)",
+    "74 px טווח ממוצע",
+    "Reef Claw (Lv 30)",
+    "Gephart (Lv 40)",
+    "Korean Fan (Lv 40)",
+    "Bazlud (Lv 45)",
+    "Sai (Lv 50)",
+    "Deadly Fin (Lv 60)",
+    "Serpent's Coil (Lv 60)",
+    "Kandine (Lv 70)",
+    "Golden River (Lv 70)"
+   ]
+  },
+  {
+   "heading": "אילו סקילים של Bandit משתמשים בטווח הנשק?",
+   "lines": [
+    "סקיל | משתמש בטווח הנשק? | Hitbox",
+    "התקפה בסיסית | כן | אחת מחמש ההתקפות של הנשק, נבחרת רנדומלית.",
+    "Double Stab | כן, רק דקירות | Double Stab תמיד משתמש ב-Thrust 1 או Thrust 2. הם מגיעים ל-84 ו-83 px עם Cass, Halfmoon Zamadar ו-Shinkita, ול-74 ו-70 px עם כל דאגר אחר של לבל 30-70.",
+    "Savage Blow | לא | ל-Savage Blow יש קופסה משלו: 18-95 px מולכם ו-6-62 px מעל הרגליים. כל דאגר נותן את אותה קופסה.",
+    "Steal | לא | ל-Steal יש קופסה משלו: 180 px מולכם ו-60 px מעל הרגליים. כל דאגר נותן את אותה קופסה.",
+    "Lucky Seven | לא | הכוכבים עפים עד 200 px, או 400 px עם Keen Eyes במקסימום. בתוך 65 px הקלו מרביץ אגרוף במקום לזרוק כוכבים."
+   ]
+  },
+  {
+   "heading": "היתרון של האוברול לבנות",
+   "lines": [
+    "כל ג'וב יכול ללבוש Sauna Robe של לבל 30 עם +1 לכל סטט ו-10 סלוטים. Blue Sauna Robe רק לבנים, ו-Red Sauna Robe רק לבנות.",
+    "Blue Sauna Robe",
+    "Dark Avenger",
+    "Black Knucklevest",
+    "Black Knucklevest Pants",
+    "Bandits בנות מקבלות את אפשרות הדמג' הטובה יותר בלבל 35. Dark Avenger מתחיל עם +6 LUK ויש לו 10 סלוטים של אוברול. עשרה סקרולי Lesser Overall LUK מעלים אותו ל-+16 LUK. סקרולי Intermediate Overall LUK מוסיפים +2 LUK ב-60% הצלחה. ל-Bandit בן, ה-Black Knucklevest והמכנסיים מתחילים גם הם עם +6 LUK ביחד, אבל אי אפשר לשים סקרולי LUK על חולצות ומכנסיים. Blue Sauna Robe של בן מגיע ל-+11 LUK עם עשרה סקרולי Lesser.",
+    "בשביל דמג', תשתמשו ב-Dark Avenger על Bandit בת. Bandits בנים יכולים להישאר עם Blue Sauna Robe עם סקרולים, או להשתמש בחולצה ומכנסיים כשהשריון הנוסף חשוב יותר."
+   ]
+  },
+  {
+   "heading": "מגנים ו-Guard",
+   "lines": [
+    "דאגרים מאפשרים ללבוש מגן. WDEF של המגן מוריד דמג' פיזי מתאים ומעלה את הסיכוי ל-Guard, שחוסם לגמרי פגיעה פיזית מתאימה. סקרולי WDEF למגן מעלים את שני הערכים.",
+    "מגן | WDEF בסיסי | Guard בסיסי | עם 7 סקרולי Lesser WDEF | סטט נוסף",
+    "Pan Lid | 44 | 8.1% | 58 WDEF / 10.4% Guard | כל קלאס",
+    "Seclusion Wristguard | 54 | 9.7% | 68 WDEF / 12.0% Guard | דרישה של 34 DEX",
+    "Nimble Wristguard | 54 | 9.7% | 68 WDEF / 12.0% Guard | דרישה של 34 LUK",
+    "Jurgen Wristguard | 54 | 9.7% | 68 WDEF / 12.0% Guard | +1 DEX",
+    "Jurgen Wristguard עוזר להגיע לדרישה של 65 DEX של Kandine. לשלושת ה-wristguards של Thief יש אותו WDEF ואותו סיכוי ל-Guard. Jurgen מנצח כשה-+1 DEX שלו עוזר ללבוש דאגר."
+   ]
+  },
+  {
+   "heading": "W.ATK או Critical Rate על כפפות?",
+   "lines": [
+    "המספרים האלה מבוססים על הבילד הריאלי של Grummash ל-Bandit בלבל 70 וחמישה סקרולים מוצלחים של Lesser לכפפות. שתי האפשרויות משתמשות באותם חמישה סלוטים.",
+    "5x Gloves Attack Scroll: Lesser",
+    "+5 W.ATK",
+    "מ-95 ל-100 W.ATK בסך הכול",
+    "בערך 5.26% יותר דמג' צפוי.",
+    "5x Gloves Crit. Rate Scroll: Lesser",
+    "+5% Critical Rate",
+    "מ-29% ל-34% Critical Rate",
+    "בערך 1.21% יותר דמג' צפוי.",
+    "תבחרו Attack. הסטאפ של חמישה סקרולי Attack עושה בערך 4.01% יותר דמג' צפוי מהסטאפ של Critical Rate בבילד הזה.",
+    "Dagger Mastery נותן לבילד הזה הרבה Critical Rate, אבל ה-Critical Damage שלו הוא 26%. W.ATK מנצח בפער גדול.",
+    "היחס זהה בכל דרגה. Lesser נותן +1 W.ATK או +1% Critical Rate (+2 M.ATK), Intermediate +2/+2% (+4 M.ATK), Greater +3/+3% (+6 M.ATK), ו-Chaos +4/+4% (+8 M.ATK). לדרגות מקבילות יש אותם אחוזי הצלחה והשמדה.",
+    "W.ATK עוזר גם לקילים מובטחים. הוא מעלה כל פגיעה פיזית, כולל הרול הרגיל הכי חלש שלכם וכל קריט. Critical Rate משנה כמה פעמים קורה קריט, אז הוא לא יכול לשפר את הרול הכי חלש בלי קריט."
+   ]
+  },
+  {
+   "heading": "בילדים לדוגמה ומפות מ-Training Advisor לפי לבל",
+   "lines": [
+    "לכל התקפה יש טווח דמג'. הרול הנמוך הוא הפגיעה הכי חלשה שהיא יכולה לעשות. קיל מובטח בהתקפה אחת אומר שאפילו הפגיעה הכי חלשה הורגת את המוב ב-100% אחוז פגיעה. מפות קלות של מכה אחת יכולות לנצח ב-EXP לשעה ובעלות MP.",
+    "לבלים 30-39",
+    "דוגמה ללבל 30",
+    "30 DEX בסיסי / 132 LUK בסיסי / 34 DEX כולל / 139 LUK כולל / 77 ACC / 40 W.ATK",
+    "תשאירו Lucky Seven ו-Keen Eyes במקסימום. תלבשו Adamantium Guards נקי עם Wolbi ותשימו את ה-SP הראשון של Bandit ב-Haste. Sindit מתוכנן עם DEX נמוך יכול להשתמש ב-Meba במקום, אבל כדי להתאים לסטאפ ה-AP הזה מהמדריך של הג'וב הראשון צריך AP Reset.",
+    "Adamantium Guards",
+    "Transfer Area Stirge בהתקפה 1, בערך 3,083 EXP/min · Safe · Dr. Faymus, 4 פורטלים",
+    "Dangerous Steam Stirge בהתקפה 1; Zombie ו-Horny Mushroom ב-2 התקפות, בערך 2,976 EXP/min · Caution · Mr. Sweatbottom, 8 פורטלים",
+    "כמה Meba טוב? Meba הוא Faster 3 עם 19 W.ATK. Adamantium Guards הוא Fast 4 עם 23 W.ATK ו-+1% Critical Damage. Wolbi מוסיף 17 W.ATK. ל-Meba + Wolbi יש 36 W.ATK. ל-Adamantium Guards + Wolbi יש 40 W.ATK בסך הכול.",
+    "סטאפ קלו בלבל 30 | דמג' צפוי לקאסט | דמג' לדקה | דמג' ל-MP",
+    "Meba נקי + Wolbi | 451 | 40,630 | 28.22",
+    "Adamantium Guards נקי + Wolbi | 502 | 41,671 | 31.38",
+    "Meba + 7 סקרולי Lesser Claw Attack + Wolbi | 539 | 48,532 | 33.70",
+    "Adamantium Guards + 7 סקרולי Lesser Claw Attack + Wolbi | 590 | 48,965 | 36.87",
+    "בלבל 35, Ant Tunnel II מגיעה לבערך 3,238 EXP/min על Zombie ו-Horny Mushrooms בשתי התקפות, וארבע המפות של Ant Tunnel נמצאות בהפרש של כמה אחוזים אחת מהשנייה. עד לבל 39 הן מגיעות לבערך 3,508 EXP/min עם Lucky Seven. Ant Tunnel II במרחק ארבעה פורטלים מ-Mr. Sweatbottom.",
+    "לבלים 40-49",
+    "נקודת ציון | התקפה ראשית | המפות הנקיות הכי טובות | קילים מובטחים",
+    "40 לפני ריסט: 179 LUK, 91 ACC, 40 W.ATK | Lucky Seven 20 | Ant Tunnel II ; Ant Tunnel III | Zombie ו-Horny Mushroom ב-2 התקפות, בערך 3,508 EXP/min · Caution · 4-5 פורטלים ל-Mr. Sweatbottom",
+    "40 אחרי ריסט: 177 LUK, 87 ACC, 58 W.ATK | Double Stab 20 | Ant Tunnel Park ; Deep Ant Tunnel II | Zombie Mushroom, Horny Mushroom ו-Evil Eye בהתקפה 1, בערך 4,630-4,740 EXP/min · Caution · 10-11 פורטלים ל-Mr. Sweatbottom",
+    "42: 185 LUK, 89 ACC, 58 W.ATK | Savage Blow 16 | The Burnt Land I ; The Burnt Land III | Dark Axe Stump בהתקפה 1; Fire Boar ב-2 התקפות, בערך 4,610-4,720 EXP/min · Caution · 4-6 פורטלים ל-Arturo",
+    "45: 197 LUK, 94 ACC, 63 W.ATK | Savage Blow 24 | Tree Dungeon, Forest Up North IX ; The Burnt Land V | Curse Eye ב-2 התקפות; Fire Boar בהתקפה 1 ו-Lupin ב-2 התקפות, בערך 4,850-4,890 EXP/min · Caution · 5 פורטלים ל-Len או 8 ל-Arturo",
+    "לבלים 50-59",
+    "דוגמה ללבל 50",
+    "45 DEX בסיסי / 217 LUK בסיסי / 51 DEX כולל / 255 LUK כולל / 119 ACC / 80 W.ATK",
+    "Dagger Mastery ו-Savage Blow במקסימום. נקודת הציון הזו מניחה דמות בת, כי Dark Avenger רק לבנות. ל-Bandit בן עם Blue Sauna Robe עם סקרולי Lesser מלאים יש 5 LUK פחות, אז תבדקו את נקודות השבירה לקילים ב-Training Advisor.",
+    "Shinkita",
+    "Jurgen Wristguard",
+    "Brown Moon Gloves",
+    "Green Goni Shoes",
+    "Tree Dungeon, Monkey Forest II Zombie Lupin ו-Curse Eye בהתקפה 1, בערך 7,883 EXP/min · Caution · 6 פורטלים ל-Len",
+    "Monkey Forest II Zombie Lupin ו-Lupin בהתקפה 1, בערך 7,845 EXP/min · Caution · 5 פורטלים ל-Len",
+    "בלבל 55, Primeval Forest I עוברת להוביל עם בערך 8,747 EXP/min, שני פורטלים מ-Luma. The Faded Canopy קרובה מאחוריה.",
+    "לבלים 60-70",
+    "נקודת ציון | בילד | המפות המובילות ב-Advisor | למה הן עובדות",
+    "60 | 295 LUK, 133 ACC, 90 W.ATK | Perilous Descent III ; The End of Fleeting Light | Duskmander, Echopus ו-Aqumander בהתקפה 1; Rafflesia ב-2 התקפות · Caution · 2-6 פורטלים ל-Luma",
+    "65 | 315 LUK, 140 ACC, 90 W.ATK | The Forest of Evil II ; Perilous Descent III | Malady ב-2 התקפות; שאר המובים ברשימה בהתקפה 1 · Caution · 7 פורטלים ל-Len או 6 ל-Luma",
+    "70 | 343 LUK, 147 ACC, 100 W.ATK | The Forest of Evil II ; Perilous Descent III | Malady, Zombie Lupin, Duskmander ו-Echopus בהתקפה 1, בערך 11,100-12,000 EXP/min · Caution · 7 פורטלים ל-Len או 6 ל-Luma",
+    "ההמלצות ללבל 70 משתמשות במובים של לבל 41-55 כי כל ספאון מת מ-Savage Blow אחד גם בתוצאת הדמג' הכי חלשה. מהירות הקלירינג הזו מנצחת הרבה מטרות באותו לבל שצריכות התקפה שנייה.",
+    "לפני שמתמקמים: אחרי הריסט בלבל 40, תריצו שוב את השוואת המפות עם הדאגר עליכם. הסטאפ של Lucky Seven משנות ה-30 לא יכול להגיד לכם איך Savage Blow יתפקד. תבדקו גם את Double Stab כשהוא כבר גומר את המובים הקטנים."
+   ]
+  },
+  {
+   "heading": "מכניקות הסקילים של Bandit",
+   "lines": []
+  },
+  {
+   "heading": "נקודות שבירה במספר הפגיעות של Savage Blow",
+   "lines": [
+    "סקיל Lv של Savage Blow | פגיעות | דמג' לפגיעה | סך דמג' הסקיל | MP",
+    "1 | 4 | 65% | 260% | 14",
+    "10 | 4 | 75% | 300% | 16",
+    "11 | 5 | 65% | 325% | 19",
+    "20 | 5 | 75% | 375% | 21",
+    "21 | 6 | 65% | 390% | 24",
+    "30 | 6 | 75% | 450% | 28",
+    "Savage Blow מתחיל עם ארבע פגיעות, מגיע לחמש פגיעות בסקיל Lv11, ולשש פגיעות בסקיל Lv21. הפגיעה השישית היא נקודת השבירה הכי חשובה."
+   ]
+  },
+  {
+   "heading": "Steal והבאף של +35 Attack Power",
+   "lines": [
+    "Steal במקסימום תוקף עד שני מובים ב-180% דמג' ב-24 MP ויש לו 90% סיכוי לגנוב. גניבה מוצלחת יכולה לגרום למוב להפיל אייטם, עושה לו סטאן ל-1.5 שניות, ונותנת ל-Bandit +35 Attack Power למשך 30 שניות. אפשר לנסות שוב אחרי כישלון; מכל מוב אפשר לגנוב בהצלחה רק פעם אחת.",
+    "בנוסחת הדמג' של דאגר, +35 Attack Power תורם את אותו רכיב דמג' גולמי כמו +70 STR או +70 DEX.",
+    "התקפה בלבל 70 | בלי באף Steal | עם +35 Attack Power | רווח | דמג' ל-MP עם הבאף",
+    "Double Stab | 2,766 להתקפה | 3,007 להתקפה | + 8.7 % | 187.94",
+    "Savage Blow | 3,890 להתקפה | 4,229 להתקפה | + 8.7 % | 151.03"
+   ]
+  },
+  {
+   "heading": "Double Stab עדיין יכול להיות שימושי",
+   "lines": [
+    "Double Stab במקסימום נותן יותר דמג' ל-MP מ-Savage Blow במקסימום. תשתמשו בו כששתי ההתקפות מבטיחות את אותו קיל ואתם מרוששים ורעבים לפוטי MP."
+   ]
+  },
+  {
+   "heading": "Dagger Mastery, Booster ו-Nimble Recovery",
+   "lines": [
+    "Dagger Mastery במקסימום נותן mastery level 10, Critical Rate +20%, ו-20% סיכוי להתעלם מנוקבק. Dagger Booster נותן את כל העלייה של שני שלבי מהירות כבר בסקיל Lv1; SP נוסף מאריך את הזמן ומוריד את העלות. סקיל Lv1 מחזיק 100 שניות ועולה 30 HP ו-30 MP. סקיל Lv9 מחזיק 180 שניות ועולה 22 מכל אחד.",
+    "ל-Nimble Recovery יש נעילה של 30 שניות והוא יכול להיות מופעל רק אחרי התחמקות. סקיל Lv12 של Grummash מחזיר 6% HP ו-MP עם 64% סיכוי אחרי התחמקות. סקיל Lv20 של Random מחזיר 10% עם 100% סיכוי. בטסט של Random ב-Ant Tunnel בלבל 39, סקיל Lv8 החזיר בערך 104 HP ו-88 MP במשך 80 שניות. זה חיסכון פסיבי; אל תספגו מכות נוספות בניסיון להפעיל אותו."
+   ]
+  },
+  {
+   "heading": "Haste",
+   "lines": [
+    "Haste במקסימום נותן לחברי פארטי קרובים Speed +30 ו-Jump +10 למשך 300 שניות. Bandits צריכים להגיע לכל מטרה במלי, אז מעברי פלטפורמות מהירים יותר ופחות הליכה בין קבוצות מובים משפרים ישירות את מהירות הקלירינג.",
+    "אזור הפארטי של Haste גדל בסקיל Lv11. עשרת לבלי הסקיל הראשונים מכסים 500 x 300 px. סקיל Lv11 עד 20 מכסים 600 x 400 px.",
+    "סקיל Lv1 500 x 300 px",
+    "250 px ימינה ושמאלה, 150 px למעלה ולמטה.",
+    "סקיל Lv20 600 x 400 px",
+    "300 px ימינה ושמאלה, 200 px למעלה ולמטה. הקו המקווקו מראה את האזור של סקיל Lv1.",
+    "הצג את כל לבלי הסקיל של Haste",
+    "לופ גרינד פשוט: תשמרו את Haste ו-Booster פעילים, תשתמשו ב-Steal על מטרה חדשה כשבאף ה-Attack Power של 30 שניות חסר, ואז תגמרו עם Savage Blow. תשתמשו ב-Double Stab במקום כשהוא מבטיח את אותו קיל בפחות MP; תנו ל-Nimble Recovery לקרות לבד."
+   ]
+  },
+  {
+   "heading": "מצאו את מפת האימון הכי טובה לבילד שלכם עם Training Advisor",
+   "lines": [
+    "Danger מודד כמה חזק מוב פוגע בכם: פחות מ-10% מה-HP שלכם זה Safe, 10-24% זה Caution, 25-49% זה Danger, ו-50%+ זה Lethal.",
+    "תפתחו את ה-Character Builder ותכניסו את ה-AP האמיתי שלכם עם הסקילים הנוכחיים. תוסיפו את הדאגר, המגן ושאר הציוד.",
+    "תגללו למטה, תפתחו את Training Advisor, ותגדירו את אמינות אחוז הפגיעה ל-100%.",
+    "לפני הריסט, תבחרו Lucky Seven ותכניסו את הקלו והכוכב. אחרי הריסט, תבחרו Savage Blow בלבל הסקיל הנוכחי שלו.",
+    "תשאירו את Factor Danger into recommendations מופעל. Bandits נלחמים בטווח מלי, אז מפות מסוכנות מקבלות קנס EXP חזק יותר.",
+    "תסננו לקילים בהתקפה אחת או שתיים שעדיין עובדים בתוצאת הדמג' הכי חלשה. תשוו EXP לדקה, שימוש ב-MP, דמג' ממגע ומבנה המפה.",
+    "תשוו את לופ המילוי. סקרול לעיר הקרובה מחזיר אתכם לעיר, אבל עדיין צריך ללכת חזרה למפת האימון.",
+    "הבילד השמור של Bandit ב-Training Advisor: אחוז פגיעה נוכחי, Danger, דמג' ו-EXP לשעה לדמות עם הציוד. פתחו את ה-Bandit הזה ב-Training Advisor"
+   ]
+  },
+  {
+   "heading": "פוטים מומלצים",
+   "lines": [
+    "Bandits מוציאים הרבה על HP בגלל ספיגת מכות פנים מול פנים, ועל MP ברגע ש-Savage Blow מגיע ל-28 MP. תקנו את הפוטים הכי משתלמים.",
+    "הכי שווה לקנות הכי הרבה HP או MP לכל מסו",
+    "Red Potion 50 מסוס · 100 HP 2 HP למסו",
+    "Fried Chicken 60 מסוס · 120 HP 2 HP למסו",
+    "Meat 80 מסוס · 160 HP 2 HP למסו",
+    "Orange 50 מסוס · 50 MP 1 MP למסו",
+    "Lemon 150 מסוס · 150 MP 1 MP למסו",
+    "לפי מצב לקנות רק כשהבאף מגיע לנקודת שבירה שימושית",
+    "Sniper Potion 500 מסוס · +5 ACC ל-10 דקות כדי להעלים מיסים",
+    "Supreme Sniper Potion 600 מסוס · +7 ACC ל-15 דקות באף ה-ACC הכי טוב בחנות",
+    "Warrior Potion 500 מסוס · +10 Attack Power ל-10 דקות לנקודת שבירה בדמג'",
+    "לא לקנות מילוי גרוע יותר לכל מסו מהאפשרויות למעלה",
+    "White Potion 350 מסוס · 500 HP 1.43 HP למסו",
+    "Blue Potion 220 מסוס · 200 MP 0.91 MP למסו",
+    "השוואת יעילות הפוטים בחנות"
+   ]
+  },
+  {
+   "heading": "טעויות נפוצות",
+   "lines": [
+    "לעשות ריסט לסקילים בלבל 30. Lucky Seven נשאר הסקיל הכי טוב וקל לשימוש עד בערך לבל 40, כשהריסט יכול למקסם Dagger Mastery בשביל Double Stab ו-Savage Blow.",
+    "לזרוק את Double Stab אחרי ש-Savage Blow במקסימום. Double Stab נשאר שימושי כששתי ההתקפות מבטיחות את אותו קיל ועלות ה-MP חשובה.",
+    "להוסיף STR או DEX נוספים בשביל דמג'. תעמדו בדרישות של הדאגר והשריון. תוסיפו מספיק Accuracy כדי לפגוע, ואז תשימו את שאר ה-AP ב-LUK. דאגר STR עדיין משתמש ב-LUK כסטט הדמג' הראשי.",
+    "להתייחס למגן כ-WDEF בלבד. מגן יכול לעשות Guard ולחסום לגמרי פגיעות פיזיות מתאימות. סקרולי WDEF על המגן מעלים את אחוז ההפעלה.",
+    "לבחור מפות לפי לבל מובים קרוב אליכם. במפות האימון הכי טובות יכולים להיות מובים הרבה יותר חלשים שתמיד מתים מ-Savage Blow אחד."
+   ]
+  },
+  {
+   "heading": "בילד ריאלי ל-Bandit בלבל 70",
+   "lines": [
+    "המדריך הזה מבוסס במידה רבה על בילד ריאלי ל-Bandit בלבל 70 מאת Grummash. כל סלוט ציוד עם סקרולים מוצלחים של Lesser.",
+    "סטטים סופיים עם ציוד: 4 STR / 65 DEX / 4 INT / 343 LUK, 147 ACC, 100 W.ATK, 29 % Critical Rate, + 26 % Critical Damage, ו-+35 Attack Power כש-Steal במקסימום פעיל.",
+    "Kandine",
+    "White Nightfox",
+    "Dark Studded Top",
+    "Dark Studded Pants",
+    "Gold Rover",
+    "Blue Mystique Shoes",
+    "Black Gaia Cape",
+    "Metal Silver Earrings",
+    "Jurgen Wristguard",
+    "סקילים של ג'וב ראשון | סקילים של ג'וב שני",
+    "Nimble Body 15, Disorder 20, Dark Sight 6, Double Stab 20 | Dagger Mastery 20, Nimble Recovery 12, Dagger Booster 9, Haste 20, Steal 30, Savage Blow 30",
+    "הבילד השמור הזה משתמש באפשרות של Double Stab במקסימום לג'וב הראשון. גם Dark Sight במקסימום או האפשרות עם Disorder מופחת שממקסמת את שני הסקילים תקינות אחרי הריסט.",
+    "פתחו את הבילד של לבל 70"
+   ]
+  },
+  {
+   "heading": "בלבל 70: הופכים ל-Chief Bandit",
+   "lines": [
+    "Arec אחראי על ההתקדמות ל-Chief Bandit ב-El Nath.",
+    "Bandit מתקדם ל-Chief Bandit דרך Arec ב-El Nath. ג'וב שלישי ו-El Nath לא בגרסת ההשקה. המדריך הזה נעצר לפני ה-SP של הג'וב השלישי. תסיימו את הבילד של הג'וב השני, ואז תתכננו לפי ספר הסקילים של Chief Bandit ב-COT2.",
+    "סקילים של Chief Bandit ב-COT2",
+    "דוגמאות הדמג', ה-Accuracy, הסקילים, האייטמים, המפלצות, הספאונים והמפות מבוססות על הדאטה הנוכחית של COT2. ה-Training Advisor מספק את ההערכות למפות. פידבק מהקהילה מתקבל בברכה בהצעות בפורום ."
+   ]
+  }
+ ]
+}

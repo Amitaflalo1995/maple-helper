@@ -269,6 +269,8 @@ class KnowledgeBase:
         maps = []
         # table rows: "Map Region | Count | Share | Types | Mob Rate | Respawn"
         for line in body[i:].split("\n")[2:2 + n * 3]:
+            if " | " not in line:
+                break  # end of the table: the "Change history" table below it has numeric rows too ("HP | 7,560 | ...")
             cols = [c.strip() for c in line.split(" | ")]
             if len(cols) >= 3 and cols[1].isdigit():
                 maps.append(cols[0])

@@ -1,0 +1,46 @@
+"""Answers the player pinned, per character, so a quest route or a build stays one tap away."""
+from __future__ import annotations
+
+import time
+
+MAX_PINS = 12
+
+
+def items(settings, cid: str | None) -> list[dict]:
+    return list((settings["pins"] or {}).get(cid or "", []))
+
+
+def add(settings, cid: str | None, question: str, answer: str, now: float | None = None) -> bool:
+    if not cid or not answer.strip():
+        return False
+    data = dict(settings["pins"] or {})
+    pins = [p for p in data.get(cid, []) if p.get("a") != answer]
+    pins.insert(0, {"q": question, "a": answer, "t": now if now is not None else time.time()})
+    data[cid] = pins[:MAX_PINS]
+    settings["pins"] = data
+    return True
+
+
+def remove(settings, cid: str | None, answer: str) -> None:
+    data = dict(settings["pins"] or {})
+    data[cid] = [p for p in data.get(cid or "", []) if p.get("a") != answer]
+    settings["pins"] = data
+
+
+def conversations(records: list[dict]) -> list[dict]:
+    """History records -> [{q, a, t}] question/answer pairs, oldest first."""
+    out, q = [], None
+    for r in records:
+        if r.get("role") == "user":
+            q = r
+        elif r.get("role") == "assistant" and q is not None:
+            out.append({"q": q.get("text", ""), "a": r.get("text", ""), "t": r.get("t", q.get("t", 0))})
+            q = None
+    return out
+
+
+def search(pairs: list[dict], query: str) -> list[dict]:
+    """Newest first; every word of the query must appear in the question or the answer."""
+    words = [w for w in query.lower().split() if w]
+    hits = [p for p in pairs if all(w in (p["q"] + " " + p["a"]).lower() for w in words)]
+    return list(reversed(hits))

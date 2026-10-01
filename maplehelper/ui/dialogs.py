@@ -557,6 +557,20 @@ class SettingsDialog(GlassDialog):
         sec.add_row(t("instant_answers"), self.instant, hint=t("instant_answers_hint"))
         lay.addWidget(sec)
 
+        # plan usage
+        from .. import usage
+        sec = Section(t("sec_usage"), rtl)
+        meter = QLabel(bidi.plain("\n".join(usage.lines(settings, t)), rtl), objectName="RowLabel")
+        meter.setWordWrap(True)
+        meter.setContentsMargins(0, 10, 0, 2)
+        sec.add_widget(meter)
+        note = QLabel(bidi.plain(t("usage_note"), rtl), objectName="RowHint")
+        note.setContentsMargins(0, 0, 0, 8)
+        sec.add_widget(note)
+        self.saver = Switch(settings["saver_mode"])
+        sec.add_row(t("saver_mode"), self.saver, hint=t("saver_hint"))
+        lay.addWidget(sec)
+
         # privacy & system
         sec = Section(t("sec_system"), rtl)
         self.autostart = Switch(settings["start_with_windows"])
@@ -792,6 +806,7 @@ class SettingsDialog(GlassDialog):
             "hotkey_voice": self.hk_voice.currentText(),
             "voice_send_immediately": self.voice_send.isChecked(),
             "instant_answers": self.instant.isChecked(),
+            "saver_mode": self.saver.isChecked(),
             "answer_length": self.length.value(),
             "start_with_windows": self.autostart.isChecked(),
         })
