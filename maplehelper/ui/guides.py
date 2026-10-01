@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import webbrowser
 
-from PySide6.QtCore import QEvent, QObject, QPoint, Qt, QUrl, Signal
+from PySide6.QtCore import QEvent, QObject, QPoint, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import QCursor, QGuiApplication, QPixmap, QTextCursor
-from PySide6.QtWidgets import (QButtonGroup, QFrame, QHBoxLayout, QLabel, QLineEdit, QPushButton, QScrollArea,
+from PySide6.QtWidgets import (QApplication, QButtonGroup, QFrame, QHBoxLayout, QLabel, QLineEdit, QPushButton, QScrollArea,
                                QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
 
 from .. import bidi, guides
@@ -39,6 +39,25 @@ class ImageZoom(QObject):
         self._shown = None
         browser.viewport().setMouseTracking(True)
         browser.viewport().installEventFilter(self)
+        # mouse-move events don't always reach a glass dialog's text view (Windows), so also look
+        # where the mouse is a few times a second while the guide is on screen
+        self._poll = QTimer(self, interval=120)
+        self._poll.timeout.connect(self._check_mouse)
+        self._poll.start()
+
+    def _check_mouse(self):
+        b = self.browser
+        if not b.isVisible():
+            self.hide()
+            return
+        vp = b.viewport()
+        under = QApplication.widgetAt(QCursor.pos())
+        pos = vp.mapFromGlobal(QCursor.pos())
+        if under is vp or (under is not None and vp.isAncestorOf(under)):
+            name = self.image_at(pos)
+            self.show(name) if name else self.hide()
+        elif self._shown:
+            self.hide()
 
     def image_at(self, pos: QPoint) -> str | None:
         """The file of the picture under this viewport point, if any."""
@@ -96,6 +115,42 @@ class ImageZoom(QObject):
         self.pop.hide()
 
 
+COVER_W = 480       # a guide's cover picture, shown when hovering its card
+
+
+class CoverPic(QLabel):
+    """The small cover on a guide's card; hovering it shows the cover large."""
+
+    def __init__(self, path: str | None):
+        super().__init__()
+        self.full = QPixmap(path) if path else QPixmap()
+        self.pop = QLabel(None, Qt.ToolTip | Qt.FramelessWindowHint)
+        self.pop.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.pop.setStyleSheet("background: rgba(28,28,30,0.92); border-radius: 12px; padding: 8px;")
+        self.destroyed.connect(self.pop.deleteLater)
+
+    def enterEvent(self, e):
+        if not self.full.isNull():
+            big = self.full.scaledToWidth(min(COVER_W, self.full.width()), Qt.SmoothTransformation)
+            self.pop.setPixmap(big)
+            self.pop.adjustSize()
+            at = QCursor.pos() + QPoint(18, 18)
+            screen = (QGuiApplication.screenAt(QCursor.pos()) or QGuiApplication.primaryScreen()).availableGeometry()
+            x = at.x() if at.x() + self.pop.width() <= screen.right() else QCursor.pos().x() - self.pop.width() - 18
+            y = at.y() if at.y() + self.pop.height() <= screen.bottom() else max(screen.top(), screen.bottom() - self.pop.height())
+            self.pop.move(x, y)
+            self.pop.show()
+        super().enterEvent(e)
+
+    def leaveEvent(self, e):
+        self.pop.hide()
+        super().leaveEvent(e)
+
+    def hideEvent(self, e):
+        self.pop.hide()
+        super().hideEvent(e)
+
+
 class GuideRow(QFrame):
     clicked = Signal(str)
 
@@ -106,10 +161,10 @@ class GuideRow(QFrame):
         row = QHBoxLayout(self)
         row.setContentsMargins(10, 8, 10, 8)
         row.setSpacing(10)
-        pic = QLabel()
+        img = kb.picture(self.key)
+        pic = CoverPic(str(img) if img else None)
         pic.setFixedSize(44, 44)
         pic.setAlignment(Qt.AlignCenter)
-        img = kb.picture(self.key)
         pm = QPixmap(str(img)) if img else QPixmap()
         if not pm.isNull():
             pic.setPixmap(pm.scaled(44, 44, Qt.KeepAspectRatio, Qt.SmoothTransformation))
