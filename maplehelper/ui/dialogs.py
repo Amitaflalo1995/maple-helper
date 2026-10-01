@@ -551,6 +551,8 @@ class SettingsDialog(GlassDialog):
         sec = Section(t("sec_answers"), rtl)
         self.length = Segmented([(t("short"), "short"), (t("detailed"), "detailed")], settings["answer_length"], rtl)
         sec.add_row(t("answer_length"), self.length)
+        self.instant = Switch(settings["instant_answers"])
+        sec.add_row(t("instant_answers"), self.instant, hint=t("instant_answers_hint"))
         lay.addWidget(sec)
 
         # privacy & system
@@ -779,6 +781,7 @@ class SettingsDialog(GlassDialog):
             "hotkey_toggle": self.hk_toggle.currentText(),
             "hotkey_voice": self.hk_voice.currentText(),
             "voice_send_immediately": self.voice_send.isChecked(),
+            "instant_answers": self.instant.isChecked(),
             "answer_length": self.length.value(),
             "start_with_windows": self.autostart.isChecked(),
         })

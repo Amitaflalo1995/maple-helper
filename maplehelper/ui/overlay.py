@@ -9,7 +9,7 @@ from PySide6.QtGui import QAction, QGuiApplication, QIcon, QPainterPath, QPixmap
 from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QMenu, QPushButton,
                                QScrollArea, QSizeGrip, QToolButton, QVBoxLayout, QWidget)
 
-from .. import __version__, bidi, osapi
+from .. import __version__, bidi, osapi, quick
 from ..brain import Answer, Brain
 from ..i18n import STRINGS, I18n
 from ..kb import KnowledgeBase
@@ -566,20 +566,28 @@ class Overlay(QWidget):
             self.input.clear()
             self.ask(q)
 
-    def ask(self, question: str):
+    def ask(self, question: str, force_claude: bool = False):
         if self.busy or not question.strip():
             return
         c = self.profiles.active
         history = History(c.id) if c else None
         focus = list(self.focus_keys)
         focus_name = ", ".join(self.kb.get(k)["name"] for k in focus)
-        self.add_bubble(question, "user", focus_name)
+        if not force_claude:          # "Ask Claude anyway" re-asks a question already in the chat
+            self.add_bubble(question, "user", focus_name)
+            if not focus and self.settings["instant_answers"]:
+                qa = quick.answer(question, self.kb, self.t)
+                if qa:
+                    if history:
+                        history.append("user", question)
+                    self._show_quick(qa, question, history)
+                    return
         shot = None if self.shot_used else self.shot
         self._question_shot = shot
         if shot is None and not self.shot_used and not self.game_hwnd:
             self.add_system(self.t("no_game"))
         self.shot_used = True
-        if history:
+        if history and not force_claude:
             history.append("user", f"[about {focus_name}] {question}" if focus_name else question)
         self._anchor = None
         self._follow = True
@@ -598,6 +606,29 @@ class Overlay(QWidget):
         self._worker.done.connect(self._on_done_main)
         self._worker.done.connect(self._thread.quit)
         self._thread.start()
+
+    def _show_quick(self, qa, question: str, history):
+        """An instant answer from the KB, with the way to Claude one tap away."""
+        self._anchor = None
+        self._follow = True
+        self.add_bubble(qa.text, "assistant")
+        row = QWidget()
+        rl = QHBoxLayout(row)
+        rl.setContentsMargins(4, 0, 4, 0)
+        rl.setSpacing(8)
+        rl.addWidget(QLabel(bidi.plain(self.t("quick_badge"), self.t.rtl), objectName="SystemLine"))
+        again = QPushButton(bidi.plain(self.t("quick_ask_claude"), self.t.rtl), objectName="Link")
+        again.setCursor(Qt.PointingHandCursor)
+        again.clicked.connect(lambda: (again.setEnabled(False), self.ask(question, force_claude=True)))
+        rl.addWidget(again)
+        rl.addStretch(1)
+        self._add_widget(row)
+        if history:
+            history.append("assistant", qa.text, qa.entities)
+        for g in qa.drop_groups:
+            self._add_widget(DropGroupCard(self.kb, g["monster"], g["items"]))
+        if qa.entities and not qa.drop_groups:     # the drop groups already show the item
+            self.add_cards(qa.entities)
 
     def _on_range(self, _lo: int, hi: int):
         bar = self.scroll.verticalScrollBar()
