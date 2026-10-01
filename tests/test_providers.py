@@ -120,6 +120,12 @@ class TestDiscovery:
         monkeypatch.setattr(base.shutil, "which", lambda _name: None)
         assert base.find_posix("claude", ["/nonexistent", str(exe.parent)]) == str(exe)
 
+    def test_windows_exe_path_ends_in_lowercase_exe(self, monkeypatch):
+        # shutil.which("claude") takes the extension from PATHEXT (".EXE"); Claude Code started as claude.EXE
+        # hangs when it runs its built-in rg, so every answer that greps the knowledge base never came back
+        monkeypatch.setattr(base.shutil, "which", lambda _name: r"C:\Users\p\.local\bin\claude.EXE")
+        assert base.find_windows_exe("claude", []) == r"C:\Users\p\.local\bin\claude.exe"
+
     def test_windows_codex_ignores_the_npm_cmd_shim(self, tmp_path, monkeypatch):
         # a .cmd shim goes through cmd.exe, which mangles the quoted instructions: only a real .exe is used
         exe = tmp_path / "Programs" / "OpenAI" / "Codex" / "bin" / "codex.exe"
