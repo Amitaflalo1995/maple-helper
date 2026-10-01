@@ -124,6 +124,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #InfoText {{ color: {c['text']}; font-size: {s - 1}px; }}
     #JobHint {{ color: {c['muted']}; font-size: {s - 3}px; }}
     #ProfileCard {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 16px; }}
+    #ProfileCard:hover {{ border: 1px solid rgba(255,149,51,0.7); }}
     QToolButton#Refresh {{ font-family: "{ICON_FONT}"; font-size: 15px; color: {c['muted']}; background: transparent;
                            border: none; border-radius: 15px; min-width: 30px; max-width: 30px; min-height: 30px;
                            max-height: 30px; }}

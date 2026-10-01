@@ -5,8 +5,8 @@ import time
 
 from PySide6.QtCore import (QEasingCurve, QObject, QParallelAnimationGroup, QPoint, QPropertyAnimation, QRect, QRectF,
                             Qt, QThread, QTimer, Signal)
-from PySide6.QtGui import QGuiApplication, QIcon, QPainterPath, QPixmap
-from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QPushButton,
+from PySide6.QtGui import QAction, QGuiApplication, QIcon, QPainterPath, QPixmap
+from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QMenu, QPushButton,
                                QScrollArea, QSizeGrip, QToolButton, QVBoxLayout, QWidget)
 
 from .. import bidi, winapi
@@ -17,7 +17,8 @@ from ..store import ASSETS, History, Profiles, Settings
 from . import theme
 from .glass import paint_glass
 from .minibubble import MiniBubble
-from .widgets import SELECTION, Bubble, BubbleRow, DropGroupCard, EntityCard, ProfileCard, SystemLine, TileGrid
+from .widgets import (SELECTION, Bubble, BubbleRow, DropGroupCard, EntityCard, ProfileCard, SystemLine, TileGrid,
+                      character_image)
 
 
 
@@ -86,6 +87,7 @@ class FocusLineEdit(QLineEdit):
 class Overlay(QWidget):
     settings_requested = Signal()
     profile_requested = Signal()
+    add_character_requested = Signal()
     mic_clicked = Signal()
 
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, brain: Brain):
@@ -173,6 +175,8 @@ class Overlay(QWidget):
         # the character, pinned at the top of the conversation
         self.profile_card = ProfileCard()
         self.profile_card.refresh_requested.connect(self.sync_profile)
+        self.profile_card.clicked.connect(self.character_menu)
+        self.profile_card.setCursor(Qt.PointingHandCursor)
         lay.addWidget(self.profile_card)
 
         # conversation
@@ -253,6 +257,7 @@ class Overlay(QWidget):
         self.recapture_btn.setToolTip(self.t("recapture"))
         self.settings_btn.setToolTip(self.t("settings"))
         self.profile_card.refresh.setToolTip(self.t("refresh_tip"))
+        self.profile_card.setToolTip(self.t("switch_character"))
         self.min_btn.setToolTip(self.t("minimize"))
         self.close_btn.setToolTip(self.t("close_chat").replace("F9", self.settings["hotkey_toggle"]))
         self.mic_btn.setToolTip(self.t("mic_tip", key=hk_voice))
@@ -264,6 +269,46 @@ class Overlay(QWidget):
         self.profile_card.setVisible(c is not None)
         if c:
             self.profile_card.show_character(c, self.profiles.avatar_path(c), self.kb, self.t.rtl)
+
+    def character_menu(self):
+        """Click the character card: pick another character or add one, right from the chat."""
+        menu = QMenu(self)
+        menu.setWindowFlags(menu.windowFlags() | Qt.FramelessWindowHint | Qt.NoDropShadowWindowHint)
+        menu.setAttribute(Qt.WA_TranslucentBackground)
+        menu.setLayoutDirection(Qt.RightToLeft if self.t.rtl else Qt.LeftToRight)
+        # mid-answer the reply still belongs to the current character
+        busy = self.busy or getattr(self, "_syncing", False)
+        active = self.profiles.active_id
+        for c in self.profiles.characters:
+            img = character_image(c, self.profiles.avatar_path(c), self.kb)
+            a = QAction(QIcon(str(img)) if img else QIcon(), bidi.plain(f"{c.name}  ·  Lv. {c.level} {c.job}",
+                                                                           self.t.rtl), menu)
+            a.setCheckable(True)
+            a.setChecked(c.id == active)
+            if c.id == active:      # the portrait takes the check mark's place: bold marks the current one
+                f = a.font()
+                f.setBold(True)
+                a.setFont(f)
+            a.setEnabled(not busy or c.id == active)
+            a.triggered.connect(lambda _=False, cid=c.id: self.switch_character(cid))
+            menu.addAction(a)
+        menu.addSeparator()
+        add = QAction(bidi.plain("＋  " + self.t("add_character"), self.t.rtl), menu)
+        add.setEnabled(not busy)
+        add.triggered.connect(self.add_character_requested.emit)
+        menu.addAction(add)
+        card = self.profile_card
+        menu.setMinimumWidth(card.width())
+        menu.exec(card.mapToGlobal(QPoint(0, card.height() + 4)))
+
+    def switch_character(self, cid: str):
+        if cid == self.profiles.active_id:
+            return
+        self.profiles.set_active(cid)
+        self.refresh_profile_chip()
+        c = self.profiles.active
+        if c:
+            self.add_system(self.t("switched_character", name=c.name))
 
     def _on_text(self, text: str):
         """The field follows what is being typed; send lights up only when there is something to send."""

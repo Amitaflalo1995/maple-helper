@@ -122,6 +122,8 @@ STRINGS = {
     "clear_history": {"he": "נקה היסטוריה", "en": "Clear history"},
     "characters": {"he": "דמויות", "en": "Characters"},
     "add_character": {"he": "הוסף דמות", "en": "Add character"},
+    "switch_character": {"he": "החלפת דמות", "en": "Switch character"},
+    "switched_character": {"he": "✓ עכשיו משחקים עם {name}", "en": "✓ Now playing as {name}"},
     "about": {"he": "אודות וקרדיטים", "en": "About & credits"},
     "credits": {"he": "המידע והתמונות באדיבות NiaMeowDB (meowdb.com).",
                 "en": "Data and images courtesy of NiaMeowDB (meowdb.com)."},
