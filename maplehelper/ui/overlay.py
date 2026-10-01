@@ -86,6 +86,7 @@ class FocusLineEdit(QLineEdit):
 
 
 class Overlay(QWidget):
+    saver_requested = Signal()
     wishlist_requested = Signal()
     closed = Signal()
     update_requested = Signal()
@@ -168,6 +169,9 @@ class Overlay(QWidget):
         self.version_label = QLabel(f"v{__version__}", objectName="Version")
         self.version_label.setLayoutDirection(Qt.LeftToRight)
         tb.addWidget(self.version_label)
+        self.saver_badge = QLabel(objectName="SaverBadge")
+        self.saver_badge.hide()
+        tb.addWidget(self.saver_badge)
         tb.addStretch(1)
         self.wish_btn = self._icon_button(theme.ICON["star"])
         self.wish_btn.clicked.connect(self.wishlist_requested.emit)
@@ -284,6 +288,8 @@ class Overlay(QWidget):
         self.input.setPlaceholderText(bidi.plain(self._placeholder, self.t.rtl))
         self.recapture_btn.setToolTip(self.t("recapture"))
         self.settings_btn.setToolTip(self.t("settings"))
+        self.saver_badge.setText("🍃 " + self.t("saver_on_badge"))
+        self.saver_badge.setToolTip(self.t("saver_hint"))
         self.wish_btn.setToolTip(self.t("wishlist"))
         self.profile_card.refresh.setToolTip(self.t("refresh_tip"))
         self.profile_card.setToolTip(self.t("switch_character"))
@@ -660,6 +666,27 @@ class Overlay(QWidget):
         self._worker.done.connect(self._thread.quit)
         self._thread.start()
 
+    def _note_usage(self, limits: dict | None):
+        """Remember the plan usage; when the 5-hour window runs low, say so once (with the way to save)."""
+        from .. import usage
+        if not limits:
+            return
+        usage.record(self.settings, limits)
+        lvl = usage.level(self.settings)
+        w = usage.current(self.settings).get("five_hour", {})
+        if lvl == "ok" or self.settings["usage_warned"] == [w.get("resets"), lvl]:
+            return
+        self.settings["usage_warned"] = [w.get("resets"), lvl]
+        text = self.t("usage_high" if lvl == "high" else "usage_critical", pct=round(w["used"] * 100),
+                      at=usage.reset_clock(w.get("resets")))
+        if self.settings["saver_mode"]:
+            self.add_system(text)
+        else:
+            self.add_notice(text, self.t("saver_turn_on"), self.saver_requested.emit)
+
+    def show_saver_badge(self, on: bool):
+        self.saver_badge.setVisible(on)
+
     def _show_quick(self, qa, question: str, history):
         """An instant answer from the KB, with the way to Claude one tap away."""
         self._anchor = None
@@ -759,6 +786,7 @@ class Overlay(QWidget):
     def _on_done(self, ans: Answer, history: History | None):
         self.busy = False
         self._on_text(self.input.text())
+        self._note_usage(ans.limits)
         if ans.error:
             import logging
             logging.getLogger(__name__).warning("answer failed: %s", ans.error)

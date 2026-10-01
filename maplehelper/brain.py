@@ -19,6 +19,7 @@ import threading
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from . import usage
 from .kb import KnowledgeBase
 from .store import Character, History
 
@@ -127,6 +128,7 @@ class Answer:
     drop_groups: list = field(default_factory=list)
     error: str | None = None
     cost_usd: float | None = None
+    limits: dict | None = None          # plan usage (usage.parse of Claude Code's rate_limit_event)
 
 
 REPLY_RULES = """<reply_rules>
@@ -340,6 +342,7 @@ class Brain:
 
         current = ""       # text of the assistant message being streamed
         result = None
+        limits = None
         for line in self._proc.stdout:
             try:
                 ev = json.loads(line)
@@ -356,9 +359,13 @@ class Brain:
                         on_delta(current.split(META)[0].strip())
             elif t == "result":
                 result = ev
+            elif t == "rate_limit_event":
+                limits = usage.parse(ev.get("rate_limit_info"))
         self._proc.wait()
         stderr = self._proc.stderr.read().decode("utf-8", errors="replace")
         if not result:
+            if limits:
+                return Answer(error=classify_error(stderr) or "no_result", limits=limits)
             log.warning("no result from Claude Code (exit %s): %s", self._proc.returncode, stderr[-1500:])
             return Answer(error=classify_error(stderr) or "no_result")
         if result.get("is_error"):
@@ -399,7 +406,8 @@ class Brain:
         if not (isinstance(box, list) and len(box) == 4 and all(isinstance(v, (int, float)) for v in box)):
             box = None
         return Answer(text=text, entities=entities[:12], drop_groups=groups[:8], profile_update=meta.get("profile_update") or {},
-                      avatar_box=box if screenshot_jpeg else None, cost_usd=result.get("total_cost_usd"))
+                      avatar_box=box if screenshot_jpeg else None, cost_usd=result.get("total_cost_usd"),
+                      limits=limits)
 
     def summarize(self, transcript: str) -> str | None:
         """One-paragraph summary of a finished session, kept as long-term context."""

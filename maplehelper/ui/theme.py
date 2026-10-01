@@ -91,6 +91,8 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     * {{ font-family: "{font_family}"; font-size: {s}px; color: {c['text']}; }}
     QWidget#Overlay, QWidget#Feed {{ background: transparent; }}
     #Title {{ font-size: {s + 1}px; font-weight: 600; letter-spacing: -0.2px; color: {c['text']}; }}
+    #SaverBadge {{ font-size: {s - 4}px; font-weight: 600; color: #2E9E5B; background: rgba(52,199,89,0.14);
+                   border-radius: 8px; padding: 1px 7px; }}
     #Version {{ font-size: {s - 3}px; font-weight: 300; color: {c['muted']}; background: transparent; }}
     #ProfilePill {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 12px;
                     min-height: 24px; max-height: 24px; padding: 0 11px; font-size: {s - 2}px; font-weight: 500; color: {c['text']}; }}

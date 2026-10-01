@@ -91,12 +91,15 @@ class MapleHelperApp:
             Onboarding(self.settings, self.profiles, self.kb, self.style, only_character=True).exec()
         api_key = claude_setup.load_api_key() if self.settings["api_key_fallback"] else None
         self.brain = Brain(self.kb, model=self.settings["model"], length=self.settings["answer_length"], api_key=api_key)
+        self.apply_saver_mode()
         threading.Thread(target=self.brain.prewarm, daemon=True).start()   # first answer without startup delay
         self.overlay = Overlay(self.settings, self.profiles, self.kb, self.brain)
         self.overlay.setStyleSheet(self.style())
         self.overlay.setWindowOpacity(1.0)
         self.overlay.shot_provider = self.capture
         self.overlay.settings_requested.connect(self.open_settings)
+        self.overlay.saver_requested.connect(self.turn_on_saver)
+        self.overlay.show_saver_badge(self.settings["saver_mode"])
         self.overlay.wishlist_requested.connect(self.show_wishlist)
         self.overlay.closed.connect(self.maybe_summarize_later)
         self.overlay.update_requested.connect(self.update_now)
@@ -295,11 +298,26 @@ class MapleHelperApp:
         self.overlay.clear_feed()
         self.toast(I18n(self.settings["language"])("history_cleared"))
 
+    def apply_saver_mode(self):
+        """Saver mode: short answers on the lighter model. The warm process is respawned on the next prewarm."""
+        from . import usage
+        saver = self.settings["saver_mode"]
+        self.brain.model = usage.SAVER_MODEL if saver else self.settings["model"]
+        self.brain.length = "short" if saver else self.settings["answer_length"]
+
+    def turn_on_saver(self):
+        self.settings["saver_mode"] = True
+        self.apply_saver_mode()
+        self.overlay.show_saver_badge(True)
+        self.overlay.add_system(I18n(self.settings["language"])("saver_turned_on"))
+        threading.Thread(target=self.brain.prewarm, daemon=True).start()
+
     def on_settings_changed(self):
         self.overlay.apply_language()
         self.overlay.setStyleSheet(self.style())
         self.overlay.apply_capture_mode()
-        self.brain.length = self.settings["answer_length"]
+        self.apply_saver_mode()
+        self.overlay.show_saver_badge(self.settings["saver_mode"])
         threading.Thread(target=self.brain.prewarm, daemon=True).start()
         self.voice.set_key(self.settings["hotkey_voice"])
         self.register_hotkeys()
