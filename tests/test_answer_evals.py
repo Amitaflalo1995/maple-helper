@@ -82,7 +82,8 @@ def test_quick_mode_on_the_fixture_kb(kb):
 
 def test_reports_compare_with_the_previous_one(tmp_path):
     old = [{"id": "a", "ok": True}, {"id": "b", "ok": False}, {"id": "c", "ok": True}]
-    (tmp_path / "20261001-090000.json").write_text(json.dumps({"results": old}), encoding="utf-8")
+    # dated in the past: a report written "now" must count as newer whatever the time of day
+    (tmp_path / "20000101-000000.json").write_text(json.dumps({"results": old}), encoding="utf-8")
     new = [{"id": "a", "lang": "he", "kind": "stats", "ok": False, "problems": ["missing 'x'"]},
            {"id": "b", "lang": "he", "kind": "stats", "ok": True, "problems": []},
            {"id": "d", "lang": "en", "kind": "guide", "ok": False, "problems": ["missing 'y'"]}]
