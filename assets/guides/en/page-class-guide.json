@@ -1,0 +1,1177 @@
+{
+ "title": "MapleStory Classic Page Build and Leveling Guide: Lv 30-70",
+ "intro": "Pages are MapleStory's stubborn front-line knights. They carry swords or blunt weapons, slow mobs with Threaten, and can pair a one-handed weapon with a shield. Their second job has more control and defensive choices than the other Warrior branches.",
+ "hero": "9e23d32005be5a.png",
+ "minutes": null,
+ "blocks": [
+  {
+   "p": "This guide is based off of a realistic lv 70 Page build by Grummash."
+  },
+  {
+   "p": "**Pros**"
+  },
+  {
+   "ul": [
+    "#2 Damage/MP at level 70: excellent damage for each point of MP spent.",
+    "Threaten slows up to four mobs and lowers their WDEF for physical attackers.",
+    "One-handed builds can use a shield and fully block eligible physical hits with Guard.",
+    "Sword and blunt weapon both work, with one-handed and two-handed options."
+   ]
+  },
+  {
+   "p": "**Cons**"
+  },
+  {
+   "ul": [
+    "Short reach and low mobility; constantly face tanking.",
+    "Threaten needs frequent recasts and only affects four mobs.",
+    "Mastery, Booster, and Final Attack lock SP to one weapon family.",
+    "Power Strike and Slash Blast remain the main DPS skills until level 70+ third job."
+   ]
+  },
+  {
+   "h2": "Starting at level 30"
+  },
+  {
+   "p": "New Warrior? Finish the Warrior level 1-30 guide first. The Accuracy formula, first-job SP allocation, early equipment, citizenship, and training maps are on there."
+  },
+  {
+   "img": "b0a8e841238821.png",
+   "w": 130,
+   "h": 196
+  },
+  {
+   "p": "**First-job endpoint**"
+  },
+  {
+   "p": "Power Strike 20, Slash Blast 20, Precise Strikes 15, Improved HP Recovery 3, and Max HP Increase 3."
+  },
+  {
+   "p": "**Reference level 30 stats**"
+  },
+  {
+   "p": "135 base STR / 27 base DEX\n138 STR / 30 DEX / 73 ACC with the sample gear"
+  },
+  {
+   "p": "**After the job advancement**"
+  },
+  {
+   "p": "Put the first Page SP into Rush."
+  },
+  {
+   "p": "[[img:edc429428fd504.png]]Mithril Maul"
+  },
+  {
+   "p": "52 W.ATK before scrolling."
+  },
+  {
+   "h2": "Accuracy after level 30"
+  },
+  {
+   "p": "These totals assume your level matches the mob. Fighting a mob above your level raises the ACC requirement. The 100% column means every attack connects."
+  },
+  {
+   "img": "72b47aaa6e9cab.png",
+   "w": 130,
+   "h": 173
+  },
+  {
+   "table": [
+    [
+     "Mob",
+     "Level",
+     "Avoidability",
+     "90% hit",
+     "100% hit"
+    ],
+    [
+     "Jr. Wraith",
+     "34",
+     "24",
+     "75 ACC",
+     "79 ACC"
+    ],
+    [
+     "Lorang",
+     "38",
+     "23",
+     "72 ACC",
+     "76 ACC"
+    ],
+    [
+     "Zombie Lupin",
+     "41",
+     "28",
+     "88 ACC",
+     "92 ACC"
+    ],
+    [
+     "Wraith",
+     "48",
+     "31",
+     "97 ACC",
+     "101 ACC"
+    ],
+    [
+     "Croco",
+     "52",
+     "30",
+     "94 ACC",
+     "98 ACC"
+    ],
+    [
+     "Rotten Mushroom",
+     "56",
+     "33",
+     "103 ACC",
+     "108 ACC"
+    ],
+    [
+     "Wild Kargo",
+     "62",
+     "35",
+     "109 ACC",
+     "114 ACC"
+    ],
+    [
+     "Tauromacis",
+     "70",
+     "39",
+     "121 ACC",
+     "126 ACC"
+    ]
+   ]
+  },
+  {
+   "guide": "warrior-class-guide",
+   "text": "Read the full Warrior Accuracy explanation"
+  },
+  {
+   "h2": "Levels 30-70: Page Skill Build and Leveling"
+  },
+  {
+   "p": "The main SP order follows the two-handed blunt weapon build used for Grummash's realistic level 70 Page. Sword players can use the same order with Sword Mastery, Final Attack: Sword, and Sword Booster."
+  },
+  {
+   "img": "54d8726e8005d1.png",
+   "w": 130,
+   "h": 142
+  },
+  {
+   "h3": "Level 30 Page job advancement"
+  },
+  {
+   "p": "Return to Dances with Balrog in Perion and begin the Warrior's second-job advancement. Complete the instructor's test, bring back the Proof of a Hero, and choose Page."
+  },
+  {
+   "note": "**Put the first second-job SP into Rush.** Rush 1 moves you through mobs and pushes up to four of them. It costs 40 MP, so use it when grouping mobs saves more time than the potion cost."
+  },
+  {
+   "h3": "Level 70 Page skill target"
+  },
+  {
+   "table": [
+    [
+     "",
+     "Skill",
+     "SP",
+     "Result"
+    ],
+    [
+     "[[img:c2a580341fae33.png]]",
+     "Sword Mastery",
+     "1 / 20",
+     "Saved spare point. The blunt weapon build does not use its stats."
+    ],
+    [
+     "[[img:cc5bdc005b9d34.png]]",
+     "Blunt Weapon Mastery",
+     "20 / 20",
+     "Mastery 10 and a 20% chance to ignore enemy WDEF."
+    ],
+    [
+     "[[img:5265fbea5cefa5.png]]",
+     "Final Attack: Blunt Weapon",
+     "30 / 30",
+     "50% proc rate and 270% damage against one target."
+    ],
+    [
+     "[[img:3fdeef3a620b91.png]]",
+     "Blunt Weapon Booster",
+     "20 / 20",
+     "Two Attack Speed stages for 300 seconds, costing 10 HP and 10 MP."
+    ],
+    [
+     "[[img:0a983f5b724846.png]]",
+     "Threaten",
+     "30 / 30",
+     "Up to four mobs lose 35 Speed and 10 WDEF for 30 seconds."
+    ],
+    [
+     "[[img:64ce7da549278c.png]]",
+     "Rush",
+     "20 / 20",
+     "150 movement distance, 80% damage, four mobs, and 20 MP."
+    ]
+   ]
+  },
+  {
+   "h3": "Page SP allocation: levels 30-70"
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Spend",
+     "Running total",
+     "Why now"
+    ],
+    [
+     "30",
+     "Rush +1",
+     "Rush 1",
+     "Movement and mob control immediately."
+    ],
+    [
+     "31",
+     "Blunt Weapon Mastery +3",
+     "Mastery 3",
+     "Unlock Final Attack."
+    ],
+    [
+     "32",
+     "Blunt Weapon Mastery +2, Booster +1",
+     "Mastery 5 / Booster 1",
+     "Unlock Booster and get the full two-stage speed increase."
+    ],
+    [
+     "33",
+     "Threaten +1, Blunt Weapon Mastery +2",
+     "Threaten 1 / Mastery 7",
+     "One point gives a cheap early slow and WDEF debuff."
+    ],
+    [
+     "34-37",
+     "Blunt Weapon Mastery +12",
+     "Mastery 19",
+     "Raise minimum damage and the WDEF-ignore chance."
+    ],
+    [
+     "38",
+     "Blunt Weapon Mastery +1, Final Attack +2",
+     "Mastery 20 / Final Attack 2",
+     "Max Mastery."
+    ],
+    [
+     "39-47",
+     "Final Attack +27",
+     "Final Attack 29",
+     "Build the proc rate and follow-up damage."
+    ],
+    [
+     "48",
+     "Final Attack +1, Threaten +2",
+     "Final Attack 30 / Threaten 3",
+     "Max Final Attack and return to Threaten."
+    ],
+    [
+     "49-57",
+     "Threaten +27",
+     "Threaten 30",
+     "Max the slow, WDEF debuff, duration, and target count."
+    ],
+    [
+     "58",
+     "Blunt Weapon Booster +3",
+     "Booster 4",
+     "Start extending Booster uptime."
+    ],
+    [
+     "59-63",
+     "Blunt Weapon Booster +15",
+     "Booster 19",
+     "Longer duration and cheaper recasts."
+    ],
+    [
+     "64",
+     "Blunt Weapon Booster +1, Rush +2",
+     "Booster 20 / Rush 3",
+     "Max Booster and return to Rush."
+    ],
+    [
+     "65-69",
+     "Rush +15",
+     "Rush 18",
+     "Raise movement distance, damage, and MP efficiency."
+    ],
+    [
+     "70",
+     "Rush +2, Sword Mastery +1",
+     "Rush 20 / Sword Mastery 1",
+     "Max Rush and park the final spare SP."
+    ]
+   ]
+  },
+  {
+   "p": "Second-job SP cannot be spent on first-job skills, so finish the first-job plan by level 30. Character Builder flags any build that breaks it."
+  },
+  {
+   "h3": "Possible changes to the default order"
+  },
+  {
+   "h3": "Sword build"
+  },
+  {
+   "p": "Replace every blunt weapon skill with its sword version. Keep Rush and Threaten at the listed levels."
+  },
+  {
+   "h3": "Threaten earlier"
+  },
+  {
+   "p": "Raise Threaten after max Mastery when a reliable slow helps you control busy platforms. Final Attack reaches max later."
+  },
+  {
+   "h3": "Booster 10 earlier"
+  },
+  {
+   "p": "Booster 1 already gives the full speed increase. More SP extends the duration and lowers each recast from 30 HP and MP."
+  },
+  {
+   "h3": "Rush 10 earlier"
+  },
+  {
+   "p": "Rush reaches 150 movement distance at skill Lv10. Put more SP here after max Mastery when movement and mob control matter more than Final Attack."
+  },
+  {
+   "h3": "Page AP allocation: levels 30-70"
+  },
+  {
+   "p": "Keep total DEX at the minimum your next weapon needs, subtract DEX supplied by other gear, and put the rest into STR. This sample reaches 60 base DEX and 302 base STR at level 70; its equipment adds the final 10 DEX for Gigantic Sledge."
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "AP each level",
+     "Base AP at the end"
+    ],
+    [
+     "31-36",
+     "STR +3 / DEX +2",
+     "153 STR / 39 DEX"
+    ],
+    [
+     "37-57",
+     "STR +4 / DEX +1",
+     "237 STR / 60 DEX"
+    ],
+    [
+     "58-70",
+     "STR +5",
+     "302 STR / 60 DEX"
+    ]
+   ]
+  },
+  {
+   "p": "Equipment DEX can replace base DEX for the weapon requirement. Accuracy gear and potions can remove misses, but they do not count as DEX. Check both requirements separately before adding AP."
+  },
+  {
+   "h3": "Recommended equipment: levels 30-70"
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "One-handed blunt",
+     "Two-handed blunt",
+     "What matters"
+    ],
+    [
+     "30",
+     "[[img:b275bf6b8642fb.png]]War Hammer 49 W.ATK, Speed 5",
+     "[[img:edc429428fd504.png]]Mithril Maul 52 W.ATK, Speed 6",
+     "One-handed can equip Red Cross Shield. Two-handed deals more damage."
+    ],
+    [
+     "35",
+     "[[img:79d637020e09b3.png]]Heavy Hammer 54 W.ATK, Speed 5",
+     "[[img:fe21a6a94d5450.png]]Sledgehammer 60 W.ATK, Speed 7",
+     "Check the item pages for drops and crafting."
+    ],
+    [
+     "40",
+     "[[img:80485bd44f4fe0.png]]Jacker 59 W.ATK, Speed 5",
+     "[[img:6f277195e85fbe.png]]Titan 65 W.ATK, Speed 7",
+     "Compare scrolls and the Free Market price before replacing a strong weapon."
+    ],
+    [
+     "50",
+     "[[img:34808ca35f3ab7.png]]Knuckle Mace 69 W.ATK, Speed 5",
+     "[[img:69ea7151e5e303.png]]Golden Mole 75 W.ATK, Speed 7",
+     "Use the weapon that reaches the better guaranteed kill on your map."
+    ],
+    [
+     "60",
+     "[[img:2327ea77971a64.png]]Tamus 77 W.ATK, Speed 5",
+     "[[img:984d0b12bef6af.png]]The Blessing 85 W.ATK, Speed 7",
+     "High-level drops or the Free Market."
+    ],
+    [
+     "70",
+     "[[img:b0ff1b5bb48e0e.png]]The Judgement 87 W.ATK, Speed 5",
+     "[[img:8a0e732444dec8.png]]Gigantic Sledge 95 W.ATK, Speed 7",
+     "The saved level 70 build uses Gigantic Sledge with seven Lesser Attack scrolls."
+    ]
+   ]
+  },
+  {
+   "p": "**Sword players have the same level checkpoints.** Use the one- or two-handed sword available at that level, then compare its W.ATK, Attack Speed, scroll cost, and shield option in Character Builder. The level 70 examples are Red Katana for one-handed and Doombringer for two-handed."
+  },
+  {
+   "p": "**Blunt weapons have the clearer level 40-50 upgrade path:** Weaponcrafting offers Titan at skill level 8 and Golden Mole at 10. The current catalog has no matching level 40 or 50 sword recipe."
+  },
+  {
+   "h3": "Training maps: levels 30-70"
+  },
+  {
+   "p": "These results come from Training Advisor using the sample two-handed blunt build. Every listed map has 100% hit rate, and every spawn dies within two Power Strikes using the weakest possible hit."
+  },
+  {
+   "note": "**Your weakest hit is the lowest damage number your build can roll.** A guaranteed 2-hit means two of those weakest hits still kill the mob. Normal and high rolls may kill it sooner."
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "Best Advisor maps",
+     "Guaranteed kills",
+     "Danger and refill"
+    ],
+    [
+     "30-34",
+     "Line 1 <Area 1> Tree Dungeon, Forest Up North IV",
+     "Bubbling 2-hit; Green Mushroom 2-hit and Slime 1-hit",
+     "Safe at 4%, 3 portals to Dr. Faymus. Safe at 3%, 5 portals to Len."
+    ],
+    [
+     "35-39",
+     "Ant Tunnel II Ant Tunnel III",
+     "Zombie Mushroom 2-hit and Horny Mushroom 1-hit",
+     "Safe at 7%. Mr. Sweatbottom is 4 or 5 portals away."
+    ],
+    [
+     "40-44",
+     "Ant Tunnel Park Deep Ant Tunnel II",
+     "Evil Eye, Zombie Mushroom, and Horny Mushroom 1-hit",
+     "Safe at 9%. Mr. Sweatbottom is 11 or 10 portals away."
+    ],
+    [
+     "45-49",
+     "Ant Tunnel Park Deep Ant Tunnel II",
+     "Evil Eye, Zombie Mushroom, and Horny Mushroom 1-hit",
+     "Safe at 8%. Mr. Sweatbottom is 11 or 10 portals away."
+    ],
+    [
+     "50-54",
+     "Tree Dungeon, Forest Up North IX Tree Dungeon, Forest Up North VIII",
+     "Curse Eye 2-hit",
+     "Safe at 10%. Both are 5 portals from Len."
+    ],
+    [
+     "55-59",
+     "Monkey Forest II Tree Dungeon, Forest Up North IX",
+     "Zombie Lupin 2-hit and Lupin 1-hit; Curse Eye 1-hit",
+     "Monkey Forest is Caution at 15%, 5 portals to Len. Tree Dungeon is Safe at 9%, 5 portals to Len."
+    ],
+    [
+     "60-64",
+     "The Forest of Evil II Forgotten Entrance III",
+     "Malady and Zombie Lupin 2-hit; Raffle 2-hit, Glowshroom and Curse Eye 1-hit",
+     "Forest of Evil is Caution at 18%, 7 portals to Len. Forgotten Entrance is Safe at 10%, 6 portals to Len."
+    ],
+    [
+     "65-69",
+     "Tree Dungeon, Monkey Forest II Monkey Forest II",
+     "Zombie Lupin 2-hit; Curse Eye and Lupin 1-hit",
+     "Caution at 13%. Len is 6 or 5 portals away."
+    ],
+    [
+     "70",
+     "The End of Fleeting Light Collision of Ice and Fire",
+     "Rafflesia, Duskmander, and Aqumander 2-hit; Glowshroom 1-hit",
+     "Safe at 9%. Luma is 2 or 4 portals away."
+    ]
+   ]
+  },
+  {
+   "h3": "Level 50 example build"
+  },
+  {
+   "p": "**209 base STR / 53 base DEX**"
+  },
+  {
+   "p": "**240 STR / 60 DEX / 87 W.ATK / 121 ACC with gear**"
+  },
+  {
+   "p": "**Skills:** Blunt Weapon Mastery 20, Final Attack: Blunt Weapon 30, Threaten 9, Blunt Weapon Booster 1, Rush 1."
+  },
+  {
+   "p": "[[img:69ea7151e5e303.png]]Golden Mole with the same level 50 armor standard used in the other Warrior guides."
+  },
+  {
+   "p": "**Best 100% hit targets by EXP per required hit** Fire Boar: guaranteed 1-hit, 62 EXP per hit Ligator: guaranteed 1-hit, 59 EXP per hit Tree Dungeon, Forest Up North IX wins after Danger is included."
+  },
+  {
+   "h3": "Level 70 example build"
+  },
+  {
+   "p": "**302 base STR / 60 base DEX**"
+  },
+  {
+   "p": "**337 STR / 70 DEX / 107 W.ATK / 140 ACC with gear**"
+  },
+  {
+   "p": "**Skills:** Blunt Weapon Mastery 20, Final Attack: Blunt Weapon 30, Blunt Weapon Booster 20, Threaten 30, Rush 20, Sword Mastery 1."
+  },
+  {
+   "p": "[[img:8a0e732444dec8.png]]Gigantic Sledge with seven Lesser Attack scrolls and Grummash's realistic armor."
+  },
+  {
+   "p": "**Best 100% hit targets by EXP per required hit** Zombie Lupin: guaranteed 1-hit, 99 EXP per hit Cold Eye: guaranteed 1-hit, 94 EXP per hit The End of Fleeting Light wins after Danger is included."
+  },
+  {
+   "h2": "Threaten Explained"
+  },
+  {
+   "p": "Threaten is Page's second-job debuff. It slows nearby mobs and lowers their WDEF. Every physical attacker deals more damage to those mobs."
+  },
+  {
+   "img": "c319a2aa7fa2ba.png",
+   "w": 130,
+   "h": 157
+  },
+  {
+   "p": "**4** Maximum targets"
+  },
+  {
+   "p": "**-35** Enemy Speed"
+  },
+  {
+   "p": "**-10** Enemy WDEF"
+  },
+  {
+   "p": "**30 sec** Maximum duration"
+  },
+  {
+   "p": "Threaten 1 costs 10 MP and applies -5 Speed and -2 WDEF for 15 seconds. Max Threaten costs 25 MP. The range grows at level 16. From then on, it reaches 300 px left and right, 90 px above the Page's feet, and 10 px below."
+  },
+  {
+   "img": "8ea44ba66a1c56.png",
+   "w": 43,
+   "h": 70,
+   "cap": "Threaten range at levels 16-30600 x 100 px"
+  },
+  {
+   "p": "The WDEF reduction affects physical damage. It does not raise Magic Attack or improve magic damage. The Speed reduction is the larger day-to-day benefit against moving mobs because they stay grouped longer and reach you more slowly."
+  },
+  {
+   "p": "Threaten lowers WDEF first, then Blunt Weapon Mastery's proc can ignore what remains. If Threaten already reduces a mob to 0 WDEF, the Mastery proc has no defense left to ignore."
+  },
+  {
+   "h3": "Max Threaten against Jr. Balrog"
+  },
+  {
+   "p": "Jr. Balrog is level 80 and has 325,400 HP. Its combat stats include 15 WDEF and 43 Avoidability. Max Threaten lowers its WDEF from 15 to 5."
+  },
+  {
+   "p": "This example uses Grummash's realistic level 70 Page: 337 STR, 70 DEX, 107 W.ATK, 140 ACC, max Blunt Weapon Mastery, max Power Strike, and 14% Critical Rate. Final Attack is off. The average includes critical hits and Blunt Weapon Mastery's 20% chance to ignore WDEF."
+  },
+  {
+   "table": [
+    [
+     "Jr. Balrog",
+     "WDEF",
+     "Average Power Strike when it hits",
+     "Average per attempt after misses"
+    ],
+    [
+     "Without Threaten",
+     "15",
+     "1,693",
+     "558"
+    ],
+    [
+     "With max Threaten",
+     "5",
+     "1,819",
+     "599"
+    ],
+    [
+     "Gain",
+     "-10",
+     "+126 damage",
+     "+41 damage"
+    ]
+   ]
+  },
+  {
+   "p": "**Max Threaten raises average Power Strike damage against Jr. Balrog by about 7.4%.** At 140 ACC, this Page has a 32.9% hit rate against Jr. Balrog. The 10-level gap and 43 Avoidability both matter. Threaten does not improve Accuracy, so a miss still deals 0 damage and costs 12 MP."
+  },
+  {
+   "img": "70d9d8126828a4.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Threaten: up to four mobs in a wide area around the Page."
+  },
+  {
+   "h2": "Mastery, Booster, and Final Attack"
+  },
+  {
+   "p": "These three skills commit the build to sword or blunt weapon. A matching set gives steadier damage, faster attacks, and a free follow-up attack."
+  },
+  {
+   "img": "ad3f3758135a71.png",
+   "w": 130,
+   "h": 160
+  },
+  {
+   "h3": "Mastery"
+  },
+  {
+   "p": "Both Page Masteries reach Mastery level 10. This raises the weakest damage rolls and helps reach guaranteed one-hit and two-hit kills. Sword Mastery also gives 90 WDEF. Blunt Weapon Mastery gives a 20% chance for the hit to ignore enemy WDEF."
+  },
+  {
+   "h3": "Booster"
+  },
+  {
+   "p": "Booster gives the full two-stage Attack Speed increase from skill Lv1. Higher skill levels extend the duration and lower the HP and MP cost. At max skill level it lasts 300 seconds and costs 10 HP and 10 MP."
+  },
+  {
+   "h3": "Final Attack"
+  },
+  {
+   "p": "Final Attack is a toggle. At max skill level, it has a 50% chance to add a 270% single-target hit after an attack skill when a target remains in range. It can finish a mob after Power Strike or add damage to a tougher target. Turn it off when Power Strike already guarantees the kill and the extra animation only slows movement to the next mob."
+  },
+  {
+   "p": "Each FA proc has its own attack animation, and you can't attack again until it ends: about 0.7 seconds with Booster. Page's Final Attack: Sword and Final Attack: Blunt Weapon only hit 1 mob and are always a damage boost if you're using Power Strike. They may be a damage boost when using Slash Blast, depending on the number of targets."
+  },
+  {
+   "table": [
+    [
+     "You attack with",
+     "Mobs in front",
+     "Final Attack on vs off"
+    ],
+    [
+     "[[img:7700d0a87ede5e.png]]Power Strike",
+     "any",
+     "4% more"
+    ],
+    [
+     "[[img:b5a4eaed502bda.png]]Slash Blast",
+     "2",
+     "4% more"
+    ],
+    [
+     "[[img:b5a4eaed502bda.png]]Slash Blast",
+     "3",
+     "7% less"
+    ],
+    [
+     "[[img:b5a4eaed502bda.png]]Slash Blast",
+     "4",
+     "13% less"
+    ]
+   ]
+  },
+  {
+   "p": "Final Attack costs no MP, so it also saves potions: about 50% more damage per MP against one mob and 25% against four. Keep it on when MP is your limit, even against groups."
+  },
+  {
+   "img": "6bb602ecfc4268.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Blunt Weapon Booster: skill Lv1 already grants two Attack Speed stages."
+  },
+  {
+   "img": "95d81b7361b564.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Final Attack: Blunt Weapon: a single-target follow-up with a 50% proc rate at max."
+  },
+  {
+   "h2": "Sword or Blunt Weapon? Should You Use a Shield?"
+  },
+  {
+   "p": "Page has four real weapon choices: one-handed sword, two-handed sword, one-handed blunt, and two-handed blunt. Each family needs its own Mastery, Booster, and Final Attack SP."
+  },
+  {
+   "img": "706e13ffbefe55.png",
+   "w": 130,
+   "h": 198
+  },
+  {
+   "h3": "Level 30 blunt weapon comparison"
+  },
+  {
+   "p": "This comparison uses 138 STR, 30 DEX, max Power Strike, no Mastery, no Booster, and a target with 0 WDEF."
+  },
+  {
+   "table": [
+    [
+     "Weapon",
+     "W.ATK / Speed",
+     "Power Strike range",
+     "Expected per cast",
+     "Casts/min",
+     "Damage/min",
+     "Shield"
+    ],
+    [
+     "[[img:b275bf6b8642fb.png]]War Hammer",
+     "49 / 5",
+     "157-587",
+     "344",
+     "80",
+     "27,508",
+     "Yes"
+    ],
+    [
+     "[[img:edc429428fd504.png]]Mithril Maul",
+     "52 / 6",
+     "178-735",
+     "435",
+     "74",
+     "32,206",
+     "No"
+    ]
+   ]
+  },
+  {
+   "p": "**Mithril Maul deals about 17.1% more damage per minute in this comparison.** War Hammer attacks faster and can use a shield. The two-handed weapon also has the stronger minimum hit, which can reach guaranteed kill breakpoints sooner."
+  },
+  {
+   "h3": "Level 70 weapon comparison"
+  },
+  {
+   "p": "This uses 337 STR, 70 DEX, 14% Critical Rate, max matching Mastery and Booster, seven Lesser weapon scrolls, 5 W.ATK from gloves, and a target with 0 WDEF."
+  },
+  {
+   "table": [
+    [
+     "Path",
+     "Weapon",
+     "Total W.ATK / boosted Speed",
+     "Power Strike range",
+     "Expected per cast",
+     "Casts/min",
+     "Damage/min"
+    ],
+    [
+     "1H Blunt",
+     "[[img:b0ff1b5bb48e0e.png]]The Judgement",
+     "99 / 3",
+     "1,302 - 2,519",
+     "2,049",
+     "90",
+     "184,444"
+    ],
+    [
+     "2H Blunt",
+     "[[img:8a0e732444dec8.png]]Gigantic Sledge",
+     "107 / 5",
+     "2,067 - 3,285",
+     "2,836",
+     "80",
+     "226,887"
+    ],
+    [
+     "1H Sword",
+     "[[img:109cc1da15d1e0.png]]Red Katana",
+     "99 / 2",
+     "1,760-1,998",
+     "1,948",
+     "100",
+     "194,792"
+    ],
+    [
+     "2H Sword",
+     "[[img:e22c72fcba0f4d.png]]Doombringer",
+     "105 / 4",
+     "2,433-2,764",
+     "2,693",
+     "83",
+     "223,552"
+    ]
+   ]
+  },
+  {
+   "p": "Gigantic Sledge leads the 0 WDEF minute by about 1.5%. Gigantic Sledge gains more against armored mobs because max Blunt Weapon Mastery has a 20% chance to ignore their WDEF. Sword gives a tighter damage range, making the weakest hit easier to predict, and Sword Mastery adds 90 WDEF."
+  },
+  {
+   "h3": "One-handed with shield"
+  },
+  {
+   "p": "A shield can Guard and fully block eligible physical hits. Red Cross Shield has 110 WDEF, seven slots, and 18.0% Guard chance before scrolling. Gold Ancient Shield has 192 WDEF, +35 HP, seven slots, and 27.7% Guard chance before scrolling. Shield WDEF also lowers physical hits that get through."
+  },
+  {
+   "p": "Magic attacks cannot trigger Shield Guard, and some special attacks can bypass it."
+  },
+  {
+   "h3": "Two-handed"
+  },
+  {
+   "p": "Two-handed weapons carry more W.ATK and stronger multipliers. They make high minimum damage and guaranteed kills easier to reach. You lose the shield slot and its Guard chance."
+  },
+  {
+   "h3": "Shield scrolling"
+  },
+  {
+   "p": "Shield DEF Scroll: Lesser has a 100% success rate and adds 2 WDEF per slot. The extra WDEF also raises Guard chance."
+  },
+  {
+   "table": [
+    [
+     "Shield",
+     "Clean",
+     "7x DEF Lesser"
+    ],
+    [
+     "[[img:f928ecd64f1813.png]]Red Cross Shield",
+     "110 WDEF 18.0% Guard",
+     "124 WDEF 19.9% Guard"
+    ],
+    [
+     "[[img:79cbcfb2d0d6ba.png]]Gold Ancient Shield",
+     "192 WDEF +35 HP 27.7% Guard",
+     "206 WDEF 29.2% Guard"
+    ]
+   ]
+  },
+  {
+   "p": "**Use Shield DEF Scroll: Lesser.** At level 70, seven Shield Accuracy Scrolls: Lesser add +7 ACC, but the realistic one-handed Page build gains no new 100%-hit mob, one- or two-hit map, or better Training Advisor map."
+  },
+  {
+   "h3": "Sword vs. blunt weapon"
+  },
+  {
+   "p": "**Sword gives consistent damage and extra defense.** Swing and stab use the same sword multiplier. Sword Mastery adds 90 WDEF at max."
+  },
+  {
+   "p": "**Blunt weapon has wider rolls and an armor-piercing proc.** Swinging is the strong blunt action and happens more often than stabbing. Max Blunt Weapon Mastery can ignore enemy WDEF on 20% of hits."
+  },
+  {
+   "p": "Pick blunt weapon for the WDEF-ignore proc and craftable level 40-50 upgrades. Sword gives predictable minimum damage and +90 WDEF. Its Mastery also lets you swap between two-handed damage and a one-handed sword with shield. A well-scrolled Free Market bargain can still outweigh the small formula gap."
+  },
+  {
+   "img": "23160444ef8bb4.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Sword Booster: the same two-stage speed increase as the blunt version."
+  },
+  {
+   "img": "fd9211d0ef8741.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Final Attack: Sword: sword builds use their matching toggle."
+  },
+  {
+   "note": "**Simple grinding loop:** Keep Booster active and Final Attack toggled on when it improves your clear speed. Use Threaten on fresh mobs, Rush into position, then Power Strike one target or Slash Blast several. Recast Threaten when its 30 seconds expire or you move to untouched mobs."
+  },
+  {
+   "p": "Ducky Duck Gaming's Page overview also covers the sword-versus-blunt choice and this Threaten-first setup."
+  },
+  {
+   "h2": "Weapon Reach (Hitbox)"
+  },
+  {
+   "p": "A Page's reach comes from the sword or blunt weapon in hand. Every melee hit lands inside a box in front of you, called the hitbox. Each weapon has five basic attacks, three swings and two thrusts, with a box for each. Each attack uses one at random. The numbers below are the average reach of one basic attack."
+  },
+  {
+   "img": "09df13c8fce141.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Mithril Maul, Swing 1. Any monster whose body touches the blue box gets hit: 51-99 px in front of you, from 18 px below your feet to 90 px above them."
+  },
+  {
+   "p": "Two-handed weapons reach a little farther. Two-handed blunt weapons average 90 px per basic attack, against 81 px for one-handed blunt weapons. Scimitar, Lion's Fang, Sparta, and Doombringer average 102 px, and other swords average 74-87 px. Reach has a direct effect on DPS in practice. Longer reach makes mobs easier to hit from a distance and keeps them from getting close enough to hit you. Compare every weapon family in the weapon reach guide."
+  },
+  {
+   "p": "**102 px avg reach**"
+  },
+  {
+   "p": "[[img:b43c1d79c94b3e.png]]Scimitar (Lv 30) [[img:a0a2dd24550ef7.png]]Lion's Fang (Lv 50) [[img:a8b1170ad9d628.png]]Sparta (Lv 60) [[img:e22c72fcba0f4d.png]]Doombringer (Lv 70)"
+  },
+  {
+   "p": "**90 px avg reach**"
+  },
+  {
+   "p": "[[img:edc429428fd504.png]]Mithril Maul (Lv 30) [[img:fe21a6a94d5450.png]]Sledgehammer (Lv 35) [[img:6f277195e85fbe.png]]Titan (Lv 40) [[img:69ea7151e5e303.png]]Golden Mole (Lv 50) [[img:984d0b12bef6af.png]]The Blessing (Lv 60) [[img:8a0e732444dec8.png]]Gigantic Sledge (Lv 70)"
+  },
+  {
+   "p": "**87 px avg reach**"
+  },
+  {
+   "p": "[[img:08e8b94eec0dfd.png]]Lionheart (Lv 35) [[img:f45d6f8f5cc020.png]]Zard (Lv 40)"
+  },
+  {
+   "p": "**86 px avg reach**"
+  },
+  {
+   "p": "[[img:12aa794558f1c2.png]]Cutlus (Lv 35) [[img:7586a4219a7b91.png]]Neocora (Lv 60) [[img:109cc1da15d1e0.png]]Red Katana (Lv 70)"
+  },
+  {
+   "p": "**81 px avg reach**"
+  },
+  {
+   "p": "[[img:b275bf6b8642fb.png]]War Hammer (Lv 30) [[img:79d637020e09b3.png]]Heavy Hammer (Lv 35) [[img:80485bd44f4fe0.png]]Jacker (Lv 40) [[img:34808ca35f3ab7.png]]Knuckle Mace (Lv 50) [[img:2327ea77971a64.png]]Tamus (Lv 60) [[img:b0ff1b5bb48e0e.png]]The Judgement (Lv 70)"
+  },
+  {
+   "p": "**74 px avg reach**"
+  },
+  {
+   "p": "[[img:cf5a1d2beefd9e.png]]Gladius (Lv 30) [[img:d4cc0dbdbd964a.png]]Traus (Lv 40) [[img:b68b630c156937.png]]Hero's Gladius (Lv 45) [[img:c9bcc1b0224cb3.png]]Jeweled Katar (Lv 50)"
+  },
+  {
+   "h3": "Which Page skills use weapon reach?"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Uses weapon reach?",
+     "Hitbox"
+    ],
+    [
+     "[[img:edc429428fd504.png]]Basic attack",
+     "Yes",
+     "One of your weapon's five attacks, picked at random."
+    ],
+    [
+     "[[img:7700d0a87ede5e.png]]Power Strike",
+     "Yes",
+     "The same five attacks and boxes as your basic attack."
+    ],
+    [
+     "[[img:b5a4eaed502bda.png]]Slash Blast",
+     "Yes",
+     "The same five attacks and boxes as your basic attack. Once a monster is inside that box, Slash Blast's additional hits can reach mobs 130 px in front, or 150 px from skill Lv 11, with any weapon."
+    ],
+    [
+     "[[img:64ce7da549278c.png]]Rush",
+     "No",
+     "Rush has its own box: 200 px in front of you and 50 px tall, or 220 px from skill Lv 11."
+    ],
+    [
+     "[[img:0a983f5b724846.png]]Threaten",
+     "No",
+     "Threaten has its own box: 250 px to each side, 90 px above your feet, and 10 px below. It grows to 300 px from skill Lv 16."
+    ],
+    [
+     "[[img:6a54ca547f3e7f.png]]Final Attack",
+     "Yes, its own two attacks",
+     "A Final Attack hit uses a wide swing or a deep thrust, picked at random, and each has its own box. They reach 92-135 px, depending on the weapon. It picks its own target inside that box, up to 1 monster."
+    ]
+   ]
+  },
+  {
+   "h2": "W.ATK or Critical Rate on gloves?"
+  },
+  {
+   "p": "These numbers use Grummash's realistic level 70 Page build and five successful Lesser glove scrolls. Both options use the same five slots."
+  },
+  {
+   "h3": "5x Gloves Attack Scroll: Lesser"
+  },
+  {
+   "p": "**+5 W.ATK**\n102 to 107 total W.ATK\nAbout 4.9% more expected damage."
+  },
+  {
+   "h3": "5x Gloves Crit. Rate Scroll: Lesser"
+  },
+  {
+   "p": "**+5% Critical Rate**\n14% to 19% Critical Rate\nAbout 1.25% more expected damage."
+  },
+  {
+   "note": "**Pick Attack.** The five-scroll Attack setup deals about 3.6% more expected damage than the Critical Rate setup on this build."
+  },
+  {
+   "p": "Page has 26% Critical Damage in this build. W.ATK has a much larger effect on Power Strike and Slash Blast."
+  },
+  {
+   "p": "**The ratio is the same at every grade.** Lesser gives +1 W.ATK or +1% Critical Rate (+2 M.ATK), Intermediate +2/+2% (+4 M.ATK), Greater +3/+3% (+6 M.ATK), and Chaos +4/+4% (+8 M.ATK). Matching grades have the same success and destruction rates."
+  },
+  {
+   "p": "**W.ATK also helps guaranteed kills.** It raises every physical hit, including your weakest normal roll and every critical hit. Critical Rate changes how often a critical occurs, so it cannot improve the weakest non-critical roll."
+  },
+  {
+   "h2": "Find Your Build's Best Training Map with Training Advisor"
+  },
+  {
+   "p": "**Danger measures how hard a mob hits you for: under 10% of your HP is Safe, 10-24% is Caution, 25-49% is Danger, and 50%+ is Lethal.**"
+  },
+  {
+   "p": "The example builds above use Power Strike with Final Attack off. Their short lists include 100% hit targets that the weakest hit kills in one or two attacks, ranked by EXP per required hit."
+  },
+  {
+   "note": "**Guaranteed Power Strike kills**\nGuaranteed 1-shot: Minimum damage per hit ≥ Mob HP\nGuaranteed 2-shot: 2 × Minimum damage per hit ≥ Mob HP\nMinimum damage is your weakest possible hit. A guarantee also requires 100% hit rate because a miss deals no damage."
+  },
+  {
+   "ol": [
+    "Open your saved build in Character Builder and enter your real level, AP, equipment, scrolls, skill levels, HP, MP, WDEF, and MDEF.",
+    "Choose **Power Strike**. Turn Final Attack on only when you plan to train with it.",
+    "Open **By mob** and enable **Show min damage per hit**. Check Hit Rate, Min / hit, Hits / kill, and MP / kill.",
+    "Open **By map** and compare EXP, Danger, and the walk to the nearest potion shop."
+   ]
+  },
+  {
+   "p": "Use temporary potion and buff scenarios to compare no potion, Accuracy potions, Attack Power potions, sword, blunt weapon, shield, and Final Attack without changing the saved build."
+  },
+  {
+   "img": "ee866e6a5224c2.png",
+   "w": 360,
+   "h": 367,
+   "cap": "Grummash's Page in Training Advisor: personalized hit rate, damage, kills, MP use, and EXP for the equipped build."
+  },
+  {
+   "h2": "Recommended potions"
+  },
+  {
+   "p": "Pages are MP efficient, but Power Strike, Slash Blast, Booster, Threaten, and Rush still drain a new player's wallet. Buy the most cost-efficient potions."
+  },
+  {
+   "img": "e41722e3945813.png",
+   "w": 130,
+   "h": 202
+  },
+  {
+   "p": "**BEST TO BUY** Best HP or MP recovered per meso"
+  },
+  {
+   "p": "[[img:be80aa4791c684.png]] **Red Potion** 50 mesos · 100 HP 2 HP per meso [[img:39a28ad40190a6.png]] **Fried Chicken** 60 mesos · 120 HP 2 HP per meso [[img:51e2250795d8f6.png]] **Meat** 80 mesos · 160 HP 2 HP per meso [[img:da1e5c881a1df6.png]] **Orange** 50 mesos · 50 MP 1 MP per meso [[img:d59bc967011b87.png]] **Lemon** 150 mesos · 150 MP 1 MP per meso"
+  },
+  {
+   "p": "**Situational** Buy only when the buff reaches a useful breakpoint"
+  },
+  {
+   "p": "[[img:4e15182d2a8a6e.png]] **Sniper Potion** 500 mesos · +5 ACC for 10 min Use to remove misses [[img:e18fe0a27cd32a.png]] **Supreme Sniper Potion** 600 mesos · +7 ACC for 15 min Best shop ACC buff [[img:8d7b05272e3e8b.png]] **Warrior Potion** 500 mesos · +10 Attack Power for 10 min Use for a damage breakpoint"
+  },
+  {
+   "p": "**DON'T BUY** Worse recovery per meso than the choices above"
+  },
+  {
+   "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 mesos · 500 HP 1.43 HP per meso [[img:d19cbf8225851d.png]] **Blue Potion** 220 mesos · 200 MP 0.91 MP per meso"
+  },
+  {
+   "p": "Lemon was the most-purchased item in both CoT1 and CoT2 for good reason. It matches Orange at 1 MP per meso, restores three times as much MP per use, and is sold in every major training region."
+  },
+  {
+   "note": "**Level 70 cost example:** Grummash's Gigantic Sledge build uses about 80 Power Strikes per minute. At 12 MP each, that is 960 MP, or 6.4 Lemons and 960 mesos per minute before Threaten, Booster, Rush, HP food, or misses."
+  },
+  {
+   "p": "Accuracy potions pay for themselves when they remove misses or unlock a faster map. Test the potion in Training Advisor first. If your hit rate stays at 100% without it, spend the mesos elsewhere."
+  },
+  {
+   "guide": "best-buy-shop-efficiency",
+   "text": "Compare shop potion efficiency"
+  },
+  {
+   "h2": "Common Page Mistakes"
+  },
+  {
+   "ol": [
+    "**Splitting SP across sword and blunt weapon.** Mastery, Booster, and Final Attack only work with their matching family.",
+    "**Assuming Threaten lowers enemy Attack Power.** CoT2 Threaten lowers Speed and WDEF.",
+    "**Spamming Rush 1.** The 40 MP cost can wipe out the mesos saved by Power Strike's efficiency.",
+    "**Leaving Final Attack on for guaranteed one-shots.** Test the clear with the toggle on and off.",
+    "**Ignoring the shield's Guard chance.** Shield WDEF can fully block eligible physical hits and scrolling more shield WDEF raises the proc rate.",
+    "**Adding DEX for damage.** STR gives Pages more damage. Add DEX only when total DEX or ACC is short of an equipment or hit-rate breakpoint."
+   ]
+  },
+  {
+   "img": "7e276858dee8ef.png",
+   "w": 130,
+   "h": 175
+  },
+  {
+   "h2": "Sample Level 70 Page Build by Grummash"
+  },
+  {
+   "p": "This is the realistic Page benchmark used for the tier list and the examples above. Every scroll slot uses a successful Lesser scroll."
+  },
+  {
+   "img": "db595b48987d42.png",
+   "w": 130,
+   "h": 177
+  },
+  {
+   "h3": "Equipment and scrolls"
+  },
+  {
+   "p": "[[img:8a0e732444dec8.png]]Gigantic Sledge\n+7 W.ATK [[img:0798a9c454e6a7.png]]Mithril Planet\n+7 Accuracy [[img:4493a9a6e2d173.png]]Bronze Platine\n+70 HP [[img:1725335df5c70a.png]]Bronze Platine Pants\n+70 HP [[img:8c222e88833d66.png]]Bronze Husk\n+5 W.ATK [[img:f0a3dc005937f7.png]]Blue Carzen Boots\n+5 Speed [[img:fcb432c862ec89.png]]Red Gaia Cape\n+5 STR [[img:ea67f3099d0314.png]]Metal Silver Earrings\n+5 STR"
+  },
+  {
+   "h3": "Final stats"
+  },
+  {
+   "p": "**337** STR"
+  },
+  {
+   "p": "**70** DEX"
+  },
+  {
+   "p": "**107** W.ATK"
+  },
+  {
+   "p": "**140** Accuracy"
+  },
+  {
+   "h3": "Damage and MP"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Expected damage/use",
+     "Uses/min",
+     "Damage/min",
+     "MP/min",
+     "Damage/MP"
+    ],
+    [
+     "Power Strike",
+     "2,836",
+     "80",
+     "226,887",
+     "960",
+     "236.34"
+    ],
+    [
+     "Slash Blast, four mobs",
+     "5,672",
+     "80",
+     "453,766",
+     "960",
+     "472.67"
+    ]
+   ]
+  },
+  {
+   "p": "**With Final Attack on:** Power Strike reaches 237,178 damage per minute on one target, from 55.2 casts and 662 MP. Each proc adds its own swing before your next attack, so you cast less and spend less MP. This is the number the level 70 DPS rankings use."
+  },
+  {
+   "h2": "At Level 70: Become a White Knight"
+  },
+  {
+   "p": "Page advances to White Knight through Tylus in El Nath. Third job and El Nath are not in the launch build. This guide stops before third-job SP. Finish the second-job build, then plan around the White Knight skill book."
+  },
+  {
+   "img": "d37fbeb8a0f8f7.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Rush: the Page version carries into the White Knight advancement."
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/page-class-guide",
+ "hash": "829748b32740"
+}

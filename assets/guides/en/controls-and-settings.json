@@ -1,0 +1,119 @@
+{
+ "title": "MapleStory Classic Controls and Settings",
+ "intro": "Set up MapleStory Classic key bindings and Quick Slots. Learn the controller, HP/MP warning, graphics, screenshot and chat options shown in COT2.",
+ "hero": null,
+ "minutes": 5,
+ "blocks": [
+  {
+   "p": "[[img:60193dfb38529f.png]] MapleStory Classic World gives you much more control over the interface than old MapleStory did. You can rebind movement and save three keyboard layouts. Quick Slots can grow to twelve, and the game supports controller input. You can also decide how much combat information stays on screen."
+  },
+  {
+   "p": "**COT2 menu snapshot:** These controls were visible in the August 2026 test client. Option names and defaults can change before launch. Controller support can change too."
+  },
+  {
+   "h2": "Five settings to check first"
+  },
+  {
+   "ul": [
+    "**HP Warning and MP Warning:** choose the percentage where the resource bar starts flashing. Set these before a long training session so low HP or MP is harder to miss.",
+    "**Enemy Info:** choose among no extra display; name only; HP only; or name and HP. In the COT2 footage, the name and HP label also places the monster's level before its name. Name and HP is the most useful starting point when learning unfamiliar mobs.",
+    "**Screenshots:** choose a file format and save location. Burst Screenshot takes 2 to 10 shots, and Auto Screenshot can capture every level-up.",
+    "**Graphics and interface:** set the resolution and windowed mode. VSync, UI size and UI Fade are separate options. UI Fade makes windows transparent when combat begins.",
+    "**Combat visibility:** adjust your skill opacity and other players' skill opacity. You can also choose a damage skin, change the damage-number size and place pets behind characters."
+   ]
+  },
+  {
+   "img": "fab02716b988a7.png",
+   "w": 360,
+   "h": 203,
+   "cap": "The Game options panel has HP and MP warning controls. Enemy Info and screenshot settings are also visible. Footage: Ducky Duck Gaming, 0:13."
+  },
+  {
+   "h2": "Keyboard layouts and presets"
+  },
+  {
+   "p": "Movement keys can be rebound, including a WASD setup. The COT2 client also had three saved binding pages. `Switch Preset` can be assigned to a key, so you can move between those pages without reopening the settings window."
+  },
+  {
+   "h3": "The three default layouts"
+  },
+  {
+   "ul": [
+    "**Classic Style:** the traditional layout, with Quick Slots on the Insert/Delete/Home/End/Page Up/Page Down cluster.",
+    "**Modern Style:** Quick Slots move to QWER and 1 through 4.",
+    "**Compact Style:** a laptop layout that removes the dependency on the Insert, Delete, and Home cluster."
+   ]
+  },
+  {
+   "img": "0b0d61da6745ae.png",
+   "w": 360,
+   "h": 203,
+   "cap": "The keyboard screen has three saved presets and a row of actions ready to assign. Footage: Ducky Duck Gaming, 2:53."
+  },
+  {
+   "h2": "Quick Slots: eight or twelve"
+  },
+  {
+   "p": "The compact Quick Slot panel shown in COT2 has eight cells. Turn on `Enable 3 Rows` in Quick Slot Keys to expand it to twelve. Controller mode replaces the keyboard-style row with grouped controller slots, so set the keyboard and controller layouts separately."
+  },
+  {
+   "img": "e041ead2694ff5.png",
+   "w": 360,
+   "h": 203,
+   "cap": "Enable 3 Rows adds a third Quick Slot row. Footage: Ducky Duck Gaming, 3:44."
+  },
+  {
+   "h2": "Controller setup"
+  },
+  {
+   "img": "45825e79074cc1.png",
+   "w": 360,
+   "h": 166,
+   "cap": "Quick Slot bindings surround the controller diagram in three groups: left, D-pad and right. Footage: Ducky Duck Gaming, 4:42."
+  },
+  {
+   "ul": [
+    "Turn on **Enable Controller Support**, then adjust Stick Sensitivity.",
+    "The default diagram assigns movement to the left stick and mouse-cursor control to the right stick.",
+    "Controller bindings include menu actions such as OK and Cancel, alongside combat, inventory, and shortcut actions.",
+    "D-pad Slots has three modes: **Auto-Switch** / **Always Standard** / **Always Cross-Style**. Auto-Switch changes how the D-pad behaves with the active Quick Slot group."
+   ]
+  },
+  {
+   "img": "fe5ea2ba7dd339.png",
+   "w": 360,
+   "h": 191,
+   "cap": "The Controller tab has a support toggle and sensitivity slider. The D-pad menu has three modes. Footage: Ducky Duck Gaming, 5:13."
+  },
+  {
+   "p": "**Keep a keyboard nearby for setup and text chat.** The COT2 footage shows movement and cursor controls plus menu and combat bindings. Nexon's September 29 FAQ lists DualSense, DualShock, and Xbox controllers as officially supported, over USB or Bluetooth. Other controllers are not officially supported, and the footage does not show the full login and typing flow without a keyboard."
+  },
+  {
+   "h2": "Social and chat controls"
+  },
+  {
+   "ul": [
+    "Allow or block whispers, chat invites, friend chat, party invites, trade requests, and friend requests separately.",
+    "Choose whether friend-login notices appear.",
+    "Show message times and adjust the chat-box font size if the default is hard to read."
+   ]
+  },
+  {
+   "p": "The menu details above come from Ducky Duck Gaming's COT2 settings walkthrough, including key bindings, Quick Slots and the controller UI, and D-pad modes. The labels were visible in the test client. xBucc's COT2 review also shows the level-and-name enemy label. Tell us on Discord if a launch menu changes."
+  },
+  {
+   "guide": "beginners-guide-first-steps-in-maple-world",
+   "text": "Beginner's Guide: MapleStory Classic World"
+  },
+  {
+   "guide": "what-is-maplestory-classic-worlds",
+   "text": "What is MapleStory Classic World?"
+  },
+  {
+   "guide": "maplestory-classic-worlds-release-date",
+   "text": "MapleStory Classic World Release Date"
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/controls-and-settings",
+ "hash": "7351807015f1"
+}

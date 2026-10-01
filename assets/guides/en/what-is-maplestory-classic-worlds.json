@@ -1,0 +1,110 @@
+{
+ "title": "What is MapleStory Classic World?",
+ "intro": "MapleStory Classic World is Nexon's new world built around early MapleStory, with slower leveling, manual builds, scroll-based gear, and original content.",
+ "hero": null,
+ "minutes": 7,
+ "blocks": [
+  {
+   "p": "[[img:fc8a87617e5660.png]] MapleStory Classic World is Nexon's new world built around early MapleStory. It uses manual AP and SP, scroll-based gear, slower leveling, and a separate economy. It also adds new areas and crafting. Current mechanics on this site follow COT2 evidence. An older regional version cannot settle them."
+  },
+  {
+   "p": "Our current catalog covers **422 maps** and **43 NPC shops**. Browse the item database or NPC shop list while planning a character."
+  },
+  {
+   "h2": "Returning features"
+  },
+  {
+   "p": "Combat is slower. Monsters can take several hits, potions matter, maps are crossed on foot, and death costs EXP. The EXP table shows each level's cost, while best grind maps covers where to train."
+  },
+  {
+   "p": "The base roster is Warrior, Magician, Bowman, Thief, and Beginner. The four advancing classes choose a first job at level 10 and one of ten second-job branches at level 30. Initial launch covers first and second job; the release date guide tracks later additions."
+  },
+  {
+   "p": "You place every AP and SP by hand. A misplaced stat stays there until you use a cash-shop AP Reset. Full skill tables are in the classes hub, and the class comparison covers the ten second-job branches."
+  },
+  {
+   "p": "Gear upgrades use four scroll grades: **Lesser** at 100%, **Intermediate** at 60%, **Greater** at 10%, and **Chaos** at 10% with a bigger fixed bonus. Only Chaos can destroy an item when it fails."
+  },
+  {
+   "h2": "Differences from modern MapleStory"
+  },
+  {
+   "p": "Classic World starts every character at level 1 in its own economy. Characters, items, and IGNs stay separate from modern MapleStory. Your NX balance is the only item the two share. Modern MapleStory has over 40 classes; Classic World begins with the original four plus Beginner."
+  },
+  {
+   "ul": [
+    "**COT2 scope warning.** The August test did not show these modern progression systems. That confirms the test build only; launch omissions still need a current Nexon source.",
+    "**Star Force, Arcane Force, and Authentic Force.** Gear power comes from scrolls and base stats.",
+    "**Cubes and potential lines.** Item value comes from scroll slots, attack speed, and base stats.",
+    "**Familiars, Link Skills, and Legion.** Characters do not share those progression systems.",
+    "**Auto Battle, Mu Lung Dojo, Monster Park, and Maple Tour.** Modern daily-reset activities are absent.",
+    "**Pet auto-buff and auto-potion macros.** Pets follow the older ruleset."
+   ]
+  },
+  {
+   "p": "Classic World suits players who want to build characters by hand and take their time leveling. Boss runs also lean on parties. Modern MapleStory has the larger class roster and its current progression systems. The games run separately on one Nexon account, so you can play both, one at a time. A ban in either game applies to both."
+  },
+  {
+   "h2": "New areas and crafting"
+  },
+  {
+   "p": "Classic World adds content that old MapleStory never had. Forgotten Hollow is a new cave for levels 39 to 60 with ten new regular monsters, Rotten Mushmom, new NPCs, and its own questline. The Forgotten Hollow guide has the full breakdown."
+  },
+  {
+   "p": "Crafting adds six professions: Smithing, Weaponcrafting, Tailoring, Woodcrafting, Leatherworking, and Arcforge. Each has its own NPC on Victoria Island."
+  },
+  {
+   "p": "Ore drops from monsters, can be refined into ingots, and then becomes crafted gear. Crafting Catalysts change the finished stats, with separate types for one-handed weapons, two-handed weapons, armor, and scrolls. Every known recipe is in the crafting database."
+  },
+  {
+   "h2": "Who is Classic World for?"
+  },
+  {
+   "ul": [
+    "Veterans who want the early MapleStory pace they remember.",
+    "New players who want to try that older style through an official release."
+   ]
+  },
+  {
+   "p": "Fast progression and daily-reset routines are a poor fit here. Expect to plan your build and spend time on each level. Parties matter too."
+  },
+  {
+   "h2": "When can you play?"
+  },
+  {
+   "p": "**Current launch plan:**\n• **Founder's Access begins October 6, 2026.** A Founder's Package is required.\n• **Grand Launch is October 21.** Everyone can play from this date.\n• **Your Founder's Access character and progression carry over.**"
+  },
+  {
+   "p": "The dates and launch scope come from Nexon's Ossyria Exploration Report. The release date guide tracks package details, opening time, client instructions, platforms, and rewards. Spot something out of date? Tell us on Discord."
+  },
+  {
+   "h2": "Frequently asked questions"
+  },
+  {
+   "h3": "Is Classic World free to play?"
+  },
+  {
+   "p": "Yes. Classic World opens free to everyone on October 21. The optional Founder's Packages cost $29.99, $59.99, or $79.99 and are on sale through October 14. The $59.99 and $79.99 tiers include Founder's Access on October 6. Nexon says the cash shop will focus mainly on cosmetics and convenience. Its full launch catalog remains unannounced."
+  },
+  {
+   "h3": "What is the launch level cap?"
+  },
+  {
+   "p": "Nexon has not published the launch cap. The first closed test stopped at level 50, and COT2 let testers reach at least level 100. Those were test settings. Nexon's August 21 report confirms that third job is outside the initial launch."
+  },
+  {
+   "h3": "Is Classic World the same as MapleLegends or MapleRoyals?"
+  },
+  {
+   "p": "No. MapleLegends and MapleRoyals are fan-run private servers. Classic World is Nexon's release, with Nexon accounts, anti-cheat, and official support."
+  },
+  {
+   "h3": "Why can't I find an item or monster?"
+  },
+  {
+   "p": "This database follows the current COT2 snapshot. Old regional catalogs do not determine its contents. A missing item or monster can be absent from that test build, outside the initial launch, or listed under a different name. Try a shorter search term, or browse the item database and monster database directly."
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/what-is-maplestory-classic-worlds",
+ "hash": "20a44a6014e4"
+}

@@ -211,8 +211,139 @@ def localized(key: str, page: str, lang: str) -> tuple[Guide, bool, bool]:
 
 
 def title(key: str, fallback: str, lang: str) -> str:
+    b = book(key, lang)
+    if b and b.get("title") and (lang == "en" or b.get("lang") == lang):
+        return b["title"]
     tr = translation(key, lang)
     return (tr or {}).get("title") or fallback
+
+
+# the full guides (headings, tables, pictures), built by tools/build_guides.py ---------------------
+
+IMAGES = TRANSLATIONS / "img"
+_ICON = re.compile(r"\[\[img:([\w.-]+)\]\]")
+NOTE_COLORS = {"light": {"note": "#FFF4E6", "head": "#F2F2F7", "line": "#E5E5EA", "link": "#F07A12"},
+               "dark": {"note": "#3A2C1E", "head": "#2C2C2E", "line": "#3A3A3C", "link": "#FF9F43"}}
+
+
+def _load(path) -> dict | None:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def book(key: str, lang: str) -> dict | None:
+    """The full guide in the player's language (English when there's no translation), or None when
+    this guide wasn't built. Adds "lang" (the language of the text) and "stale" (the English changed
+    since the translation)."""
+    slug = key.split("/", 1)[1]
+    en = _load(TRANSLATIONS / "en" / f"{slug}.json")
+    if not en:
+        return None
+    if lang != "en":
+        tr = _load(TRANSLATIONS / lang / f"{slug}.json")
+        if tr and tr.get("blocks"):
+            return {**en, **tr, "hero": en.get("hero"), "minutes": en.get("minutes"), "lang": lang,
+                    "stale": tr.get("source_hash") != en.get("hash")}
+    return {**en, "lang": "en", "stale": False}
+
+
+def book_text(b: dict) -> str:
+    """Every word of a guide, for search."""
+    parts = [b.get("title", ""), b.get("intro", "")]
+    for blk in b.get("blocks", []):
+        for k, v in blk.items():
+            if k in ("img", "w", "h", "guide"):
+                continue
+            if isinstance(v, str):
+                parts.append(v)
+            elif k == "table":
+                parts += [c for row in v for c in row]
+            elif isinstance(v, list):
+                parts += v
+    return _ICON.sub(" ", " ".join(parts))
+
+
+def _rich(text: str, rtl: bool, icon_px: int = 22) -> str:
+    """Guide text -> HTML: **bold**, inline icons, line breaks; in a Hebrew guide, English names
+    and numbers stay whole blocks (bidi)."""
+    icons: list[str] = []
+
+    def keep(m):
+        icons.append(m.group(1))
+        return chr(0xE000 + len(icons) - 1)     # a neutral private character the bidi pass leaves alone
+    text = _ICON.sub(keep, text)
+    if rtl:
+        text = "\n".join(bidi.isolate_ltr_runs(ln) for ln in text.split("\n"))
+    out = html.escape(text)
+    out = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", out)
+    out = out.replace("\n", "<br>")
+    for i, name in enumerate(icons):
+        src = (IMAGES / name).as_uri()
+        out = out.replace(chr(0xE000 + i), f"<img src='{src}' height='{icon_px}' style='vertical-align: middle'> ")
+    return out
+
+
+def book_html(b: dict, mode: str = "light", rtl_ui: bool = False) -> str:
+    """The reader's HTML (QTextBrowser): headings, paragraphs, notes, lists, tables, pictures,
+    links to other guides (href="guide:<slug>")."""
+    he = b.get("lang") != "en"
+    col = NOTE_COLORS.get(mode, NOTE_COLORS["light"])
+
+    def rtl_of(text: str) -> bool:
+        return he and bool(bidi._RTL.search(text))
+
+    def para(text: str, tag: str = "p", style: str = "margin: 4px 0 8px 0;") -> str:
+        r = rtl_of(text)
+        side = "dir='rtl' align='right'" if r else "dir='ltr' align='left'"
+        return f"<{tag} {side} style='{style}'>{_rich(text, r)}</{tag}>"
+
+    side = "dir='rtl' align='right'" if he else ""
+    out = []
+    if b.get("hero"):
+        out.append(f"<img src='{(IMAGES / b['hero']).as_uri()}' align='{'left' if he else 'right'}' height='120'>")
+    if b.get("intro"):
+        r = rtl_of(b["intro"])
+        out.append(f"<p {'dir=rtl align=right' if r else ''}><i>{_rich(b['intro'], r)}</i></p>")
+    for blk in b.get("blocks", []):
+        if "h2" in blk:
+            out.append(para(blk["h2"], "h2", "margin: 18px 0 6px 0;"))
+        elif "h3" in blk:
+            out.append(para(blk["h3"], "h3", "margin: 12px 0 4px 0;"))
+        elif "p" in blk:
+            out.append(para(blk["p"]))
+        elif "note" in blk:
+            r = rtl_of(blk["note"])
+            out.append(f"<table width='100%' cellpadding='10' cellspacing='0' style='margin: 6px 0 10px 0;'>"
+                       f"<tr><td bgcolor='{col['note']}'><p {'dir=rtl align=right' if r else ''} style='margin:0'>"
+                       f"{_rich(blk['note'], r)}</p></td></tr></table>")
+        elif "ul" in blk or "ol" in blk:
+            tag = "ul" if "ul" in blk else "ol"
+            items = "".join(f"<li {'dir=rtl align=right' if rtl_of(i) else ''}>{_rich(i, rtl_of(i))}</li>"
+                            for i in blk[tag])
+            out.append(f"<{tag} {side} style='margin: 2px 0 8px 0;'>{items}</{tag}>")
+        elif "table" in blk:
+            rows = blk["table"]
+            cells = []
+            for n, row in enumerate(rows):
+                tag, bg = ("th", f" bgcolor='{col['head']}'") if n == 0 else ("td", "")
+                cells.append("<tr>" + "".join(
+                    f"<{tag}{bg}><p {'dir=rtl align=right' if rtl_of(c) else ''} style='margin:0'>{_rich(c, rtl_of(c), 18)}</p></{tag}>"
+                    for c in row) + "</tr>")
+            out.append(f"<table {side} cellspacing='0' cellpadding='5' border='1' style='border-color: {col['line']};"
+                       f" border-style: solid; margin: 4px 0 10px 0;'>{''.join(cells)}</table>")
+        elif "img" in blk:
+            cap = f"<br><span style='font-size: small;'>{_rich(blk['cap'], rtl_of(blk['cap']))}</span>" if blk.get("cap") else ""
+            out.append(f"<p align='center' style='margin: 6px 0 10px 0;'><img src='{(IMAGES / blk['img']).as_uri()}'"
+                       f" width='{blk.get('w', 0)}' height='{blk.get('h', 0)}'>{cap}</p>")
+        elif "guide" in blk:
+            r = rtl_of(blk["text"])
+            arrow = "←" if he else "→"
+            out.append(f"<p {'dir=rtl align=right' if r else ''} style='margin: 4px 0;'>"
+                       f"<a href='guide:{html.escape(blk['guide'])}' style='color: {col['link']}; text-decoration: none;'>"
+                       f"<b>{_rich(blk['text'], r)} {arrow}</b></a></p>")
+    return "\n".join(out)
 
 
 def text_of(key: str, lang: str) -> str:

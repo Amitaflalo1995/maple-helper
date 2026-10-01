@@ -1,324 +1,658 @@
 {
- "key": "guide/best-grind-maps-every-level",
- "source_hash": "b221c43a90b8",
- "lang": "he",
- "title": "MapleStory Classic: מקומות אימון ומפות גרינד",
+ "title": "מפות הגרינד הכי טובות לכל לבל 1-70",
  "intro": "מקומות האימון ומפות הגרינד הטובות ביותר ב-MapleStory Classic World לכל לבל מ-1 עד 70, מדורגים לפי EXP לשעה ומסוננים למפלצות שמתאימות ללבל.",
- "pros": [],
- "cons": [],
- "sections": [
+ "blocks": [
   {
-   "heading": "שיטת הדירוג",
-   "lines": [
-    "Max EXP/hr הוא הכי הרבה EXP שמפה מספנת בשעה לשחקן אחד, אם כל מפלצת הייתה מתה ברגע שהיא מופיעה, כשמאגר הספאון בקצב סולו של 75%. אף אחד לא מגיע לזה, כי הולכים בין פלטפורמות ועוצרים למלא פוטים. תשתמשו בזה כדי להשוות מפות. כדי לדעת את הקצב האמיתי שלכם, תמדדו סשן עם ה-Grind Tracker .",
-    "ה-Training Advisor ממליץ על המפה הכי טובה לפי הלבל, הציוד ויעילות ה-EXP הצפויה. EXP צפוי הוא רק גורם אחד. דרופ שאתם צריכים יכול להיות חשוב יותר מ-EXP נוסף, וצ'אנל עמוס מאט כל מפה. ההמלצות לפארטי ולשלל בסוף הן מפות ששווה לבקר בהן עם פארטי או בשביל דרופ.",
-    "פורטלים לפוטים סופר את הפורטלים בדרך הכי קצרה מהמפה ל-NPC הכי קרוב שמוכר פוטים. Return Scrolls חוסכים את ההליכה לגמרי.",
-    "כל מספרי ה-Max EXP/hr מניחים משחק סולו בלי בונוס פארטי . בפארטי הקצב עולה: ב-COT2 יש 10% עם שני חברים, 20% עם שלושה, ו-30% מארבעה ומעלה. ראו את החלק Party bonus EXP במדריך טבלת ה-EXP ."
+   "p": "[[img:99e27e8c542fc6.png]] **Ant Tunnel לאורך שנות ה-20, Kerning Subway משנות ה-30, ואז Sleepy Dungeon V בסוף שנות ה-50.** הטבלאות מפרטות עד שלוש בחירות לכל טווח לבלים עם ה-Max EXP/hr שלהן. המוב העיקרי של כל מפה נמצא בטווח של עד שני לבלים מהברקט."
+  },
+  {
+   "h2": "שיטת הדירוג"
+  },
+  {
+   "p": "**Max EXP/hr** הוא הכי הרבה EXP שמפה מספנת בשעה לשחקן אחד, אם כל מפלצת הייתה מתה ברגע שהיא מופיעה, כשמאגר הספאון בקצב סולו של 75%. אף אחד לא מגיע לזה, כי הולכים בין פלטפורמות ועוצרים למלא פוטים. תשתמשו בזה כדי להשוות מפות. כדי לדעת את הקצב האמיתי שלכם, תמדדו סשן עם ה-Grind Tracker."
+  },
+  {
+   "p": "ה-Training Advisor ממליץ על המפה הכי טובה לפי הלבל, הציוד ויעילות ה-EXP הצפויה. EXP צפוי הוא רק גורם אחד. דרופ שאתם צריכים יכול להיות חשוב יותר מ-EXP נוסף, וצ'אנל עמוס מאט כל מפה. ההמלצות לפארטי ולשלל בסוף הן מפות ששווה לבקר בהן עם פארטי או בשביל דרופ."
+  },
+  {
+   "p": "**פורטלים לפוטים** סופר את הפורטלים בדרך הכי קצרה מהמפה ל-NPC הכי קרוב שמוכר פוטים. Return Scrolls חוסכים את ההליכה לגמרי."
+  },
+  {
+   "p": "**כל מספרי ה-Max EXP/hr מניחים משחק סולו** בלי בונוס פארטי. בפארטי הקצב עולה: ב-COT2 יש 10% עם שני חברים, 20% עם שלושה, ו-30% מארבעה ומעלה. ראו את החלק Party bonus EXP במדריך טבלת ה-EXP."
+  },
+  {
+   "h2": "לבל 1-10"
+  },
+  {
+   "p": "קווסטים של התחלה יכולים לכסות הרבה מהטווח הזה. אם אתם צריכים מפה ללבלים האחרונים, תשתמשו באפשרויות המדורגות למטה."
+  },
+  {
+   "table": [
+    [
+     "מפה",
+     "אזור",
+     "Max EXP/hr",
+     "מוב עיקרי",
+     "פורטלים לפוטים",
+     "למה"
+    ],
+    [
+     "[[img:fb3c8dc6aafe7d.png]] L Forest I",
+     "Victoria Road",
+     "333,525",
+     "Ribbon Pig (lv10)",
+     "3 (Kerning City Pharmacy)",
+     "מיקס רחב מ-Snails ועד Ribbon Pigs בלבל 10. הלבלים של המובים עולים איתכם, אז אין צורך להחליף מפה בלבל 5 או 8."
+    ],
+    [
+     "[[img:5acb77fec8ecc4.png]] The Tree That Grew II",
+     "Victoria Road",
+     "318,571",
+     "Slime (lv6)",
+     "4 (Ellinia Department Store)",
+     "Slimes ו-Stumps עם כמה Dark Stumps בקצה העליון. הגרינד הכי נקי ללבל 5-11 בטווח הזה, בלי מובים נמוכים מדי שאוכלים זמן."
+    ],
+    [
+     "[[img:40abaabb515908.png]] Construction Site North of Kerning City",
+     "Victoria Road",
+     "297,499",
+     "Dark Stump (lv11)",
+     "3 (Kerning City Pharmacy)",
+     "פיזור רחב של לבל 4-19, עם Red Snails לקילים בהתחלה ו-Dark Stumps בהמשך."
+    ]
    ]
   },
   {
-   "heading": "לבל 1-10",
-   "lines": [
-    "קווסטים של התחלה יכולים לכסות הרבה מהטווח הזה. אם אתם צריכים מפה ללבלים האחרונים, תשתמשו באפשרויות המדורגות למטה.",
-    "L Forest I",
-    "אזור Victoria Road Max EXP/hr 333,525 מוב עיקרי Ribbon Pig (lv10) פורטלים לפוטים 3 (Kerning City Pharmacy)",
-    "מיקס רחב מ-Snails ועד Ribbon Pigs בלבל 10. הלבלים של המובים עולים איתכם, אז אין צורך להחליף מפה בלבל 5 או 8.",
-    "The Tree That Grew II",
-    "אזור Victoria Road Max EXP/hr 318,571 מוב עיקרי Slime (lv6) פורטלים לפוטים 4 (Ellinia Department Store)",
-    "Slimes ו-Stumps עם כמה Dark Stumps בקצה העליון. הגרינד הכי נקי ללבל 5-11 בטווח הזה, בלי מובים נמוכים מדי שאוכלים זמן.",
-    "Construction Site North of Kerning City",
-    "אזור Victoria Road Max EXP/hr 297,499 מוב עיקרי Dark Stump (lv11) פורטלים לפוטים 3 (Kerning City Pharmacy)",
-    "פיזור רחב של לבל 4-19, עם Red Snails לקילים בהתחלה ו-Dark Stumps בהמשך.",
-    "מפה | אזור | Max EXP/hr | מוב עיקרי | פורטלים לפוטים | למה",
-    "L Forest I | Victoria Road | 333,525 | Ribbon Pig (lv10) | 3 (Kerning City Pharmacy) | מיקס רחב מ-Snails ועד Ribbon Pigs בלבל 10. הלבלים של המובים עולים איתכם, אז אין צורך להחליף מפה בלבל 5 או 8.",
-    "The Tree That Grew II | Victoria Road | 318,571 | Slime (lv6) | 4 (Ellinia Department Store) | Slimes ו-Stumps עם כמה Dark Stumps בקצה העליון. הגרינד הכי נקי ללבל 5-11 בטווח הזה, בלי מובים נמוכים מדי שאוכלים זמן.",
-    "Construction Site North of Kerning City | Victoria Road | 297,499 | Dark Stump (lv11) | 3 (Kerning City Pharmacy) | פיזור רחב של לבל 4-19, עם Red Snails לקילים בהתחלה ו-Dark Stumps בהמשך."
+   "h2": "לבל 11-15"
+  },
+  {
+   "p": "המפות האלה מוציאות אתכם מאזורי ההתחלה אל שטחי הציד הייעודיים של Victoria Island. אם נשארו לכם קווסטים מתאימים, תעשו אותם במקביל."
+  },
+  {
+   "table": [
+    [
+     "מפה",
+     "אזור",
+     "Max EXP/hr",
+     "מוב עיקרי",
+     "פורטלים לפוטים",
+     "למה"
+    ],
+    [
+     "[[img:34dcba7b3807fe.png]] Line 1 <Area 1>",
+     "Kerning City Subway",
+     "640,000",
+     "Bubbling (lv15)",
+     "3 (Kerning City Pharmacy)",
+     "מפה עם מוב אחד בדיוק בלבל 15, אחד הגרינדים הכי נקיים בטווח. הצפיפות של הסאבוויי מנצחת."
+    ],
+    [
+     "[[img:b62ded95656118.png]] West Rocky Mountain III",
+     "Victoria Road",
+     "572,857",
+     "Green Mushroom (lv14)",
+     "5 (Perion Department Store)",
+     "בעיקר Green Mushroom, עם כמה Axe Stumps ו-Dark Axe Stumps. בערך פי 2 EXP/hr מהמפה המקבילה בצד המזרחי, בזכות ספאון צפוף יותר של Green Mushroom."
+    ],
+    [
+     "[[img:b62ded95656118.png]] Tree Dungeon, Forest Up North IV",
+     "Victoria Road",
+     "343,571",
+     "Green Mushroom (lv14)",
+     "5 (Ellinia Department Store)",
+     "חווה של Green Mushroom עם כמה Slimes בלבל נמוך."
+    ]
    ]
   },
   {
-   "heading": "לבל 11-15",
-   "lines": [
-    "המפות האלה מוציאות אתכם מאזורי ההתחלה אל שטחי הציד הייעודיים של Victoria Island. אם נשארו לכם קווסטים מתאימים, תעשו אותם במקביל.",
-    "Line 1 <Area 1>",
-    "אזור Kerning City Subway Max EXP/hr 640,000 מוב עיקרי Bubbling (lv15) פורטלים לפוטים 3 (Kerning City Pharmacy)",
-    "מפה עם מוב אחד בדיוק בלבל 15, אחד הגרינדים הכי נקיים בטווח. הצפיפות של הסאבוויי מנצחת.",
-    "West Rocky Mountain III",
-    "אזור Victoria Road Max EXP/hr 572,857 מוב עיקרי Green Mushroom (lv14) פורטלים לפוטים 5 (Perion Department Store)",
-    "בעיקר Green Mushroom, עם כמה Axe Stumps ו-Dark Axe Stumps. בערך פי 2 EXP/hr מהמפה המקבילה בצד המזרחי, בזכות ספאון צפוף יותר של Green Mushroom.",
-    "Tree Dungeon, Forest Up North IV",
-    "אזור Victoria Road Max EXP/hr 343,571 מוב עיקרי Green Mushroom (lv14) פורטלים לפוטים 5 (Ellinia Department Store)",
-    "חווה של Green Mushroom עם כמה Slimes בלבל נמוך.",
-    "מפה | אזור | Max EXP/hr | מוב עיקרי | פורטלים לפוטים | למה",
-    "Line 1 <Area 1> | Kerning City Subway | 640,000 | Bubbling (lv15) | 3 (Kerning City Pharmacy) | מפה עם מוב אחד בדיוק בלבל 15, אחד הגרינדים הכי נקיים בטווח. הצפיפות של הסאבוויי מנצחת.",
-    "West Rocky Mountain III | Victoria Road | 572,857 | Green Mushroom (lv14) | 5 (Perion Department Store) | בעיקר Green Mushroom, עם כמה Axe Stumps ו-Dark Axe Stumps. בערך פי 2 EXP/hr מהמפה המקבילה בצד המזרחי, בזכות ספאון צפוף יותר של Green Mushroom.",
-    "Tree Dungeon, Forest Up North IV | Victoria Road | 343,571 | Green Mushroom (lv14) | 5 (Ellinia Department Store) | חווה של Green Mushroom עם כמה Slimes בלבל נמוך."
+   "h2": "לבל 16-20"
+  },
+  {
+   "p": "ל-Dangerous Steam יש את ה-Max EXP/hr הכי גבוה בטווח הזה, ומפת ה-Stirge בסאבוויי קרובה מאחוריה."
+  },
+  {
+   "table": [
+    [
+     "מפה",
+     "אזור",
+     "Max EXP/hr",
+     "מוב עיקרי",
+     "פורטלים לפוטים",
+     "למה"
+    ],
+    [
+     "[[img:ae64823f427bc0.png]] Dangerous Steam",
+     "Dungeon",
+     "671,786",
+     "Stirge (lv20)",
+     "3 (Ant Tunnel Park)",
+     "קומבו של Stirge, Horny Mushroom ו-Zombie Mushroom לשחקנים בלבל 20-24, קצת יותר מגוון."
+    ],
+    [
+     "[[img:ae64823f427bc0.png]] Transfer Area",
+     "Kerning City Subway",
+     "502,143",
+     "Stirge (lv20)",
+     "4 (Kerning City Pharmacy)",
+     "מפה של Stirge בלבד עם מבנה צפוף מאוד, בחירה קלה למג'ים ולקשתים."
+    ],
+    [
+     "[[img:059caff41683e8.png]] Tree Dungeon, Forest Up North III",
+     "Victoria Road",
+     "434,286",
+     "Horny Mushroom (lv22)",
+     "5 (Ellinia Department Store)",
+     "Horny ו-Green Mushrooms עם כמה Slimes. הבחירה כששתי המפות ב-Kerning עמוסות."
+    ]
    ]
   },
   {
-   "heading": "לבל 16-20",
-   "lines": [
-    "ל-Dangerous Steam יש את ה-Max EXP/hr הכי גבוה בטווח הזה, ומפת ה-Stirge בסאבוויי קרובה מאחוריה.",
-    "Dangerous Steam",
-    "אזור Dungeon Max EXP/hr 671,786 מוב עיקרי Stirge (lv20) פורטלים לפוטים 3 (Ant Tunnel Park)",
-    "קומבו של Stirge, Horny Mushroom ו-Zombie Mushroom לשחקנים בלבל 20-24, קצת יותר מגוון.",
-    "Transfer Area",
-    "אזור Kerning City Subway Max EXP/hr 502,143 מוב עיקרי Stirge (lv20) פורטלים לפוטים 4 (Kerning City Pharmacy)",
-    "מפה של Stirge בלבד עם מבנה צפוף מאוד, בחירה קלה למג'ים ולקשתים.",
-    "Tree Dungeon, Forest Up North III",
-    "אזור Victoria Road Max EXP/hr 434,286 מוב עיקרי Horny Mushroom (lv22) פורטלים לפוטים 5 (Ellinia Department Store)",
-    "Horny ו-Green Mushrooms עם כמה Slimes. הבחירה כששתי המפות ב-Kerning עמוסות.",
-    "מפה | אזור | Max EXP/hr | מוב עיקרי | פורטלים לפוטים | למה",
-    "Dangerous Steam | Dungeon | 671,786 | Stirge (lv20) | 3 (Ant Tunnel Park) | קומבו של Stirge, Horny Mushroom ו-Zombie Mushroom לשחקנים בלבל 20-24, קצת יותר מגוון.",
-    "Transfer Area | Kerning City Subway | 502,143 | Stirge (lv20) | 4 (Kerning City Pharmacy) | מפה של Stirge בלבד עם מבנה צפוף מאוד, בחירה קלה למג'ים ולקשתים.",
-    "Tree Dungeon, Forest Up North III | Victoria Road | 434,286 | Horny Mushroom (lv22) | 5 (Ellinia Department Store) | Horny ו-Green Mushrooms עם כמה Slimes. הבחירה כששתי המפות ב-Kerning עמוסות.",
-    "Kerning Party Quest נפתח בלבל 21. תעשו אותו בשביל Squishy Shoes או חדר הבונוס; מדריך ה-KPQ מכסה כל שלב."
+   "p": "**Kerning Party Quest נפתח בלבל 21.** תעשו אותו בשביל Squishy Shoes או חדר הבונוס; מדריך ה-KPQ מכסה כל שלב."
+  },
+  {
+   "h2": "לבל 21-25"
+  },
+  {
+   "p": "כמעט כל מה ששווה לגרנד בטווח הזה נמצא בתוך ה-Ant Tunnel. כמה מפות עם Horny Mushroom, Zombie Mushroom ו-Evil Eye בטווחי לבל חופפים."
+  },
+  {
+   "table": [
+    [
+     "מפה",
+     "אזור",
+     "Max EXP/hr",
+     "מוב עיקרי",
+     "פורטלים לפוטים",
+     "למה"
+    ],
+    [
+     "[[img:36750484773e65.png]] Ant Tunnel III",
+     "Dungeon",
+     "1,536,786",
+     "Zombie Mushroom (lv24)",
+     "6 (Ant Tunnel Park)",
+     "Horny ו-Zombie Mushroom ותו לא. אידיאלי ללבל 22-25."
+    ],
+    [
+     "[[img:36750484773e65.png]] Deep Ant Tunnel I",
+     "Dungeon",
+     "1,078,256",
+     "Zombie Mushroom (lv24)",
+     "2 (Ant Tunnel Park)",
+     "המפה הכי עמוקה ב-Ant Tunnel, עם פיזור רחב יותר עד Jr. Boogie. שלב ביניים למערות של Evil Eye."
+    ],
+    [
+     "[[img:a951e586bae69f.png]] Ant Tunnel Park",
+     "Dungeon",
+     "981,785",
+     "Evil Eye (lv27)",
+     "0 (Ant Tunnel Park)",
+     "מושלם לשחקנים בלבל 23-27. מוסיף Evil Eye למיקס של Ant Tunnel, קפיצה גדולה ב-EXP/hr."
+    ]
    ]
   },
   {
-   "heading": "לבל 21-25",
-   "lines": [
-    "כמעט כל מה ששווה לגרנד בטווח הזה נמצא בתוך ה-Ant Tunnel. כמה מפות עם Horny Mushroom, Zombie Mushroom ו-Evil Eye בטווחי לבל חופפים.",
-    "Ant Tunnel III",
-    "אזור Dungeon Max EXP/hr 1,536,786 מוב עיקרי Zombie Mushroom (lv24) פורטלים לפוטים 6 (Ant Tunnel Park)",
-    "Horny ו-Zombie Mushroom ותו לא. אידיאלי ללבל 22-25.",
-    "Deep Ant Tunnel I",
-    "אזור Dungeon Max EXP/hr 1,078,256 מוב עיקרי Zombie Mushroom (lv24) פורטלים לפוטים 2 (Ant Tunnel Park)",
-    "המפה הכי עמוקה ב-Ant Tunnel, עם פיזור רחב יותר עד Jr. Boogie. שלב ביניים למערות של Evil Eye.",
-    "Ant Tunnel Park",
-    "אזור Dungeon Max EXP/hr 981,785 מוב עיקרי Evil Eye (lv27) פורטלים לפוטים 0 (Ant Tunnel Park)",
-    "מושלם לשחקנים בלבל 23-27. מוסיף Evil Eye למיקס של Ant Tunnel, קפיצה גדולה ב-EXP/hr.",
-    "מפה | אזור | Max EXP/hr | מוב עיקרי | פורטלים לפוטים | למה",
-    "Ant Tunnel III | Dungeon | 1,536,786 | Zombie Mushroom (lv24) | 6 (Ant Tunnel Park) | Horny ו-Zombie Mushroom ותו לא. אידיאלי ללבל 22-25.",
-    "Deep Ant Tunnel I | Dungeon | 1,078,256 | Zombie Mushroom (lv24) | 2 (Ant Tunnel Park) | המפה הכי עמוקה ב-Ant Tunnel, עם פיזור רחב יותר עד Jr. Boogie. שלב ביניים למערות של Evil Eye.",
-    "Ant Tunnel Park | Dungeon | 981,785 | Evil Eye (lv27) | 0 (Ant Tunnel Park) | מושלם לשחקנים בלבל 23-27. מוסיף Evil Eye למיקס של Ant Tunnel, קפיצה גדולה ב-EXP/hr."
+   "h2": "לבל 26-30"
+  },
+  {
+   "p": "Evil Eye הוא המשיכה העיקרית בטווח הזה, אבל המפות של Ant Tunnel עוקפות את המערות הייעודיות של Evil Eye בזכות צפיפות נקודות הספאון. תסיימו גם את הקווסטים של Sleepywood, טווחי הלבל מתאימים."
+  },
+  {
+   "table": [
+    [
+     "מפה",
+     "אזור",
+     "Max EXP/hr",
+     "מוב עיקרי",
+     "פורטלים לפוטים",
+     "למה"
+    ],
+    [
+     "[[img:36750484773e65.png]] Deep Ant Tunnel I",
+     "Dungeon",
+     "1,078,256",
+     "Zombie Mushroom (lv24)",
+     "2 (Ant Tunnel Park)",
+     "הפיזור הכי רחב באזור: Horny ו-Zombie Mushroom, Evil Eye וכמה Jr. Boogies בלבל 35. הכי טוב אם אתם מתכננים להישאר באותה מפה עד 30."
+    ],
+    [
+     "[[img:a951e586bae69f.png]] Ant Tunnel Park",
+     "Dungeon",
+     "981,785",
+     "Evil Eye (lv27)",
+     "0 (Ant Tunnel Park)",
+     "בעיקר Evil Eye, עם Horny Mushroom ו-Zombie Mushroom בקצה הנמוך. סך EXP/hr גבוה יותר מהמערות הייעודיות של Evil Eye כשמחשבים את צפיפות נקודות הספאון."
+    ],
+    [
+     "[[img:a951e586bae69f.png]] The Cave of Evil Eye III",
+     "Dungeon",
+     "680,325",
+     "Evil Eye (lv27)",
+     "3 (Ant Tunnel Park)",
+     "כמעט רק Evil Eye בלבל 27, עם Jr. Boogie 2 נדיר בלבל 35 על ספאון מתוזמן. סך EXP/hr נמוך יותר מהמפות של Ant Tunnel, אבל אם אתם רוצים גרינד של כמעט מוב אחד בלי ספאונים אחרים להתחמק מהם, זו המערה."
+    ]
    ]
   },
   {
-   "heading": "לבל 26-30",
-   "lines": [
-    "Evil Eye הוא המשיכה העיקרית בטווח הזה, אבל המפות של Ant Tunnel עוקפות את המערות הייעודיות של Evil Eye בזכות צפיפות נקודות הספאון. תסיימו גם את הקווסטים של Sleepywood, טווחי הלבל מתאימים.",
-    "Deep Ant Tunnel I",
-    "אזור Dungeon Max EXP/hr 1,078,256 מוב עיקרי Zombie Mushroom (lv24) פורטלים לפוטים 2 (Ant Tunnel Park)",
-    "הפיזור הכי רחב באזור: Horny ו-Zombie Mushroom, Evil Eye וכמה Jr. Boogies בלבל 35. הכי טוב אם אתם מתכננים להישאר באותה מפה עד 30.",
-    "Ant Tunnel Park",
-    "אזור Dungeon Max EXP/hr 981,785 מוב עיקרי Evil Eye (lv27) פורטלים לפוטים 0 (Ant Tunnel Park)",
-    "בעיקר Evil Eye, עם Horny Mushroom ו-Zombie Mushroom בקצה הנמוך. סך EXP/hr גבוה יותר מהמערות הייעודיות של Evil Eye כשמחשבים את צפיפות נקודות הספאון.",
-    "The Cave of Evil Eye III",
-    "אזור Dungeon Max EXP/hr 680,325 מוב עיקרי Evil Eye (lv27) פורטלים לפוטים 3 (Ant Tunnel Park)",
-    "כמעט רק Evil Eye בלבל 27, עם Jr. Boogie 2 נדיר בלבל 35 על ספאון מתוזמן. סך EXP/hr נמוך יותר מהמפות של Ant Tunnel, אבל אם אתם רוצים גרינד של כמעט מוב אחד בלי ספאונים אחרים להתחמק מהם, זו המערה.",
-    "מפה | אזור | Max EXP/hr | מוב עיקרי | פורטלים לפוטים | למה",
-    "Deep Ant Tunnel I | Dungeon | 1,078,256 | Zombie Mushroom (lv24) | 2 (Ant Tunnel Park) | הפיזור הכי רחב באזור: Horny ו-Zombie Mushroom, Evil Eye וכמה Jr. Boogies בלבל 35. הכי טוב אם אתם מתכננים להישאר באותה מפה עד 30.",
-    "Ant Tunnel Park | Dungeon | 981,785 | Evil Eye (lv27) | 0 (Ant Tunnel Park) | בעיקר Evil Eye, עם Horny Mushroom ו-Zombie Mushroom בקצה הנמוך. סך EXP/hr גבוה יותר מהמערות הייעודיות של Evil Eye כשמחשבים את צפיפות נקודות הספאון.",
-    "The Cave of Evil Eye III | Dungeon | 680,325 | Evil Eye (lv27) | 3 (Ant Tunnel Park) | כמעט רק Evil Eye בלבל 27, עם Jr. Boogie 2 נדיר בלבל 35 על ספאון מתוזמן. סך EXP/hr נמוך יותר מהמפות של Ant Tunnel, אבל אם אתם רוצים גרינד של כמעט מוב אחד בלי ספאונים אחרים להתחמק מהם, זו המערה."
+   "h2": "לבל 31-35"
+  },
+  {
+   "p": "האזור של Kerning Subway Line 2 מתחיל להשתלם כאן, בזכות הצפיפות של Jr. Wraith. The Burnt Land V היא האלטרנטיבה מחוץ לסאבוויי לווריורים ולקשתים שרוצים Fire Boar בלבל 32 במקום."
+  },
+  {
+   "table": [
+    [
+     "מפה",
+     "אזור",
+     "Max EXP/hr",
+     "מוב עיקרי",
+     "פורטלים לפוטים",
+     "למה"
+    ],
+    [
+     "[[img:777ced8b4048a6.png]] Line 2 <Area 1>",
+     "Kerning City Subway",
+     "2,270,000",
+     "Jr. Wraith (lv34)",
+     "5 (Kerning City Pharmacy)",
+     "הגרינד של Jr. Wraith מתחיל. צפיפות של סאבוויי פלוס התאמת לבל מושלמת לשחקנים בלבל 32-34."
+    ],
+    [
+     "[[img:777ced8b4048a6.png]] Line 1 <Area 2>",
+     "Kerning City Subway",
+     "2,002,500",
+     "Jr. Wraith (lv34)",
+     "5 (Kerning City Pharmacy)",
+     "מפת סאבוויי חלופית ל-Jr. Wraith. פחות פופולרית מ-Line 2, אז אולי תהיה שקטה יותר."
+    ],
+    [
+     "[[img:762bddf50eb031.png]] The Burnt Land V",
+     "Warning Street",
+     "1,080,714",
+     "Fire Boar (lv32)",
+     "8 (Perion Department Store)",
+     "גרינד של Fire Boar עם כמה Lupins ו-Dark Axe Stumps לגיוון. האפשרות הכי טובה מחוץ לסאבוויי בטווח, וגם הקווסטים פה נותנים EXP."
+    ]
    ]
   },
   {
-   "heading": "לבל 31-35",
-   "lines": [
-    "האזור של Kerning Subway Line 2 מתחיל להשתלם כאן, בזכות הצפיפות של Jr. Wraith. The Burnt Land V היא האלטרנטיבה מחוץ לסאבוויי לווריורים ולקשתים שרוצים Fire Boar בלבל 32 במקום.",
-    "Line 2 <Area 1>",
-    "אזור Kerning City Subway Max EXP/hr 2,270,000 מוב עיקרי Jr. Wraith (lv34) פורטלים לפוטים 5 (Kerning City Pharmacy)",
-    "הגרינד של Jr. Wraith מתחיל. צפיפות של סאבוויי פלוס התאמת לבל מושלמת לשחקנים בלבל 32-34.",
-    "Line 1 <Area 2>",
-    "אזור Kerning City Subway Max EXP/hr 2,002,500 מוב עיקרי Jr. Wraith (lv34) פורטלים לפוטים 5 (Kerning City Pharmacy)",
-    "מפת סאבוויי חלופית ל-Jr. Wraith. פחות פופולרית מ-Line 2, אז אולי תהיה שקטה יותר.",
-    "The Burnt Land V",
-    "אזור Warning Street Max EXP/hr 1,080,714 מוב עיקרי Fire Boar (lv32) פורטלים לפוטים 8 (Perion Department Store)",
-    "גרינד של Fire Boar עם כמה Lupins ו-Dark Axe Stumps לגיוון. האפשרות הכי טובה מחוץ לסאבוויי בטווח, וגם הקווסטים פה נותנים EXP.",
-    "מפה | אזור | Max EXP/hr | מוב עיקרי | פורטלים לפוטים | למה",
-    "Line 2 <Area 1> | Kerning City Subway | 2,270,000 | Jr. Wraith (lv34) | 5 (Kerning City Pharmacy) | הגרינד של Jr. Wraith מתחיל. צפיפות של סאבוויי פלוס התאמת לבל מושלמת לשחקנים בלבל 32-34.",
-    "Line 1 <Area 2> | Kerning City Subway | 2,002,500 | Jr. Wraith (lv34) | 5 (Kerning City Pharmacy) | מפת סאבוויי חלופית ל-Jr. Wraith. פחות פופולרית מ-Line 2, אז אולי תהיה שקטה יותר.",
-    "The Burnt Land V | Warning Street | 1,080,714 | Fire Boar (lv32) | 8 (Perion Department Store) | גרינד של Fire Boar עם כמה Lupins ו-Dark Axe Stumps לגיוון. האפשרות הכי טובה מחוץ לסאבוויי בטווח, וגם הקווסטים פה נותנים EXP."
+   "h2": "לבל 36-40"
+  },
+  {
+   "p": "מפות הסרטנים של Florina Beach בולטות בסוף שנות ה-30. PDEF נמוך, צפיפות גבוהה, בלי בעיות נוקבק. Monkey Forest היא האלטרנטיבה בג'ונגל לכל מי שמגרנד Lupin ו-Zombie Lupin."
+  },
+  {
+   "table": [
+    [
+     "מפה",
+     "אזור",
+     "Max EXP/hr",
+     "מוב עיקרי",
+     "פורטלים לפוטים",
+     "למה"
+    ],
+    [
+     "[[img:2a5d75bf6e3634.png]] A Look-Out Shed Around the Beach",
+     "Florina Road",
+     "1,279,996",
+     "Lorang (lv38)",
+     "1 (Florina Beach)",
+     "צפיפות של Lorang עם תוספת Lupin. אחת המפות עם ה-EXP/hr הכי גבוה במשחק ללבל הזה."
+    ],
+    [
+     "[[img:2a5d75bf6e3634.png]] Lorang Lorang",
+     "Florina Road",
+     "1,221,429",
+     "Lorang (lv38)",
+     "2 (Florina Beach)",
+     "מפת Lorang חלופית, קצת יותר קטנה. יכולה להיות שקטה יותר כשמקום ה-Lorang הראשי מפוצץ."
+    ],
+    [
+     "[[img:3934c93d7d4444.png]] Monkey Forest II",
+     "Victoria Road",
+     "1,176,786",
+     "Zombie Lupin (lv41)",
+     "5 (Ellinia Department Store)",
+     "מיקס של Lupin ו-Zombie Lupin, נותן לכם להימתח לטריטוריה של לבל 40+ תוך כדי שאתם עולים לבלים."
+    ]
    ]
   },
   {
-   "heading": "לבל 36-40",
-   "lines": [
-    "מפות הסרטנים של Florina Beach בולטות בסוף שנות ה-30. PDEF נמוך, צפיפות גבוהה, בלי בעיות נוקבק. Monkey Forest היא האלטרנטיבה בג'ונגל לכל מי שמגרנד Lupin ו-Zombie Lupin.",
-    "A Look-Out Shed Around the Beach",
-    "אזור Florina Road Max EXP/hr 1,279,996 מוב עיקרי Lorang (lv38) פורטלים לפוטים 1 (Florina Beach)",
-    "צפיפות של Lorang עם תוספת Lupin. אחת המפות עם ה-EXP/hr הכי גבוה במשחק ללבל הזה.",
-    "Lorang Lorang",
-    "אזור Florina Road Max EXP/hr 1,221,429 מוב עיקרי Lorang (lv38) פורטלים לפוטים 2 (Florina Beach)",
-    "מפת Lorang חלופית, קצת יותר קטנה. יכולה להיות שקטה יותר כשמקום ה-Lorang הראשי מפוצץ.",
-    "Monkey Forest II",
-    "אזור Victoria Road Max EXP/hr 1,176,786 מוב עיקרי Zombie Lupin (lv41) פורטלים לפוטים 5 (Ellinia Department Store)",
-    "מיקס של Lupin ו-Zombie Lupin, נותן לכם להימתח לטריטוריה של לבל 40+ תוך כדי שאתם עולים לבלים .",
-    "מפה | אזור | Max EXP/hr | מוב עיקרי | פורטלים לפוטים | למה",
-    "A Look-Out Shed Around the Beach | Florina Road | 1,279,996 | Lorang (lv38) | 1 (Florina Beach) | צפיפות של Lorang עם תוספת Lupin. אחת המפות עם ה-EXP/hr הכי גבוה במשחק ללבל הזה.",
-    "Lorang Lorang | Florina Road | 1,221,429 | Lorang (lv38) | 2 (Florina Beach) | מפת Lorang חלופית, קצת יותר קטנה. יכולה להיות שקטה יותר כשמקום ה-Lorang הראשי מפוצץ.",
-    "Monkey Forest II | Victoria Road | 1,176,786 | Zombie Lupin (lv41) | 5 (Ellinia Department Store) | מיקס של Lupin ו-Zombie Lupin, נותן לכם להימתח לטריטוריה של לבל 40+ תוך כדי שאתם עולים לבלים."
+   "h2": "לבל 41-45"
+  },
+  {
+   "p": "זה הטווח הכי קשה לגרינד; הציוד מתחיל לקבוע את מהירות הקלירינג. המפות של Monkey Swamp הן האפשרות הסלחנית: ההגנה הנמוכה של Zombie Lupin שומרת על דמג' סביר גם אם הציוד שלכם מפגר. Forgotten Entrance III, שמוחבאת מעבר ליער שצפונית ל-Ellinia, היא האפשרות אם אתם רוצים Glowshroom ו-Raffle בטווח לבל 33-40."
+  },
+  {
+   "table": [
+    [
+     "מפה",
+     "אזור",
+     "Max EXP/hr",
+     "מוב עיקרי",
+     "פורטלים לפוטים",
+     "למה"
+    ],
+    [
+     "[[img:3ddc9bfe06aade.png]] Forgotten Entrance III",
+     "Shallow Passage",
+     "1,340,000",
+     "Glowshroom (lv39)",
+     "7 (Cave Fairy Department Store)",
+     "Glowshroom, Raffle ו-Curse Eye בטווח לבל 33-40. שלושתם בהישג יד לשחקן בלבל 41-45, וצפיפות המובים הכוללת עוקפת את אזור ה-Drake ב-Sleepywood."
+    ],
+    [
+     "[[img:3934c93d7d4444.png]] Monkey Swamp III",
+     "Hidden Street",
+     "1,291,071",
+     "Zombie Lupin (lv41)",
+     "9 (Kerning City Pharmacy)",
+     "צפיפות של Zombie Lupin לשחקנים שעברו את לבל 41. תמשיכו לזוז ותוכלו לדלג לגמרי על ה-Jr. Neckis."
+    ],
+    [
+     "[[img:3934c93d7d4444.png]] Tree Dungeon, Monkey Forest II",
+     "Hidden Street",
+     "1,013,572",
+     "Zombie Lupin (lv41)",
+     "6 (Ellinia Department Store)",
+     "אלטרנטיבה ב-Hidden Street שפחות שחקנים מכירים."
+    ]
    ]
   },
   {
-   "heading": "לבל 41-45",
-   "lines": [
-    "זה הטווח הכי קשה לגרינד; הציוד מתחיל לקבוע את מהירות הקלירינג. המפות של Monkey Swamp הן האפשרות הסלחנית: ההגנה הנמוכה של Zombie Lupin שומרת על דמג' סביר גם אם הציוד שלכם מפגר. Forgotten Entrance III, שמוחבאת מעבר ליער שצפונית ל-Ellinia, היא האפשרות אם אתם רוצים Glowshroom ו-Raffle בטווח לבל 33-40.",
-    "Forgotten Entrance III",
-    "אזור Shallow Passage Max EXP/hr 1,340,000 מוב עיקרי Glowshroom (lv39) פורטלים לפוטים 7 (Cave Fairy Department Store)",
-    "Glowshroom, Raffle ו-Curse Eye בטווח לבל 33-40. שלושתם בהישג יד לשחקן בלבל 41-45, וצפיפות המובים הכוללת עוקפת את אזור ה-Drake ב-Sleepywood.",
-    "Monkey Swamp III",
-    "אזור Hidden Street Max EXP/hr 1,291,071 מוב עיקרי Zombie Lupin (lv41) פורטלים לפוטים 9 (Kerning City Pharmacy)",
-    "צפיפות של Zombie Lupin לשחקנים שעברו את לבל 41. תמשיכו לזוז ותוכלו לדלג לגמרי על ה-Jr. Neckis.",
-    "Tree Dungeon, Monkey Forest II",
-    "אזור Hidden Street Max EXP/hr 1,013,572 מוב עיקרי Zombie Lupin (lv41) פורטלים לפוטים 6 (Ellinia Department Store)",
-    "אלטרנטיבה ב-Hidden Street שפחות שחקנים מכירים.",
-    "מפה | אזור | Max EXP/hr | מוב עיקרי | פורטלים לפוטים | למה",
-    "Forgotten Entrance III | Shallow Passage | 1,340,000 | Glowshroom (lv39) | 7 (Cave Fairy Department Store) | Glowshroom, Raffle ו-Curse Eye בטווח לבל 33-40. שלושתם בהישג יד לשחקן בלבל 41-45, וצפיפות המובים הכוללת עוקפת את אזור ה-Drake ב-Sleepywood.",
-    "Monkey Swamp III | Hidden Street | 1,291,071 | Zombie Lupin (lv41) | 9 (Kerning City Pharmacy) | צפיפות של Zombie Lupin לשחקנים שעברו את לבל 41. תמשיכו לזוז ותוכלו לדלג לגמרי על ה-Jr. Neckis.",
-    "Tree Dungeon, Monkey Forest II | Hidden Street | 1,013,572 | Zombie Lupin (lv41) | 6 (Ellinia Department Store) | אלטרנטיבה ב-Hidden Street שפחות שחקנים מכירים."
+   "h2": "לבל 46-50"
+  },
+  {
+   "p": "מפות ה-Wraith ב-Kerning Subway שולטות בטווח הזה. Line 2 Area 2 מגיעה ל-3.7M Max EXP/hr, הכי גבוה מכל מפה ב-Victoria Island. Hot Sand ב-Florina Road היא האלטרנטיבה עם Tortie ו-Clang. מג'י Lightning מקבלים בונוס אלמנטלי על ה-Clangs; ל-Torties, שיש מהם יותר, אין חולשה."
+  },
+  {
+   "table": [
+    [
+     "מפה",
+     "אזור",
+     "Max EXP/hr",
+     "מוב עיקרי",
+     "פורטלים לפוטים",
+     "למה"
+    ],
+    [
+     "[[img:0386eea7010d4c.png]] Line 2 <Area 2>",
+     "Kerning City Subway",
+     "3,737,857",
+     "Wraith (lv48)",
+     "6 (Kerning City Pharmacy)",
+     "מיקס של Jr. Wraith ו-Wraith עם כמה ספאונים של Jr. Necki שאפשר להתעלם מהם. הבחירה הכי טובה כשאתם בלבל 47-48 ויכולים להרוג Wraith בשתי מכות."
+    ],
+    [
+     "[[img:0386eea7010d4c.png]] Line 2 <Area 3>",
+     "Kerning City Subway",
+     "3,205,714",
+     "Wraith (lv48)",
+     "7 (Kerning City Pharmacy)",
+     "רק Wraith בלבל 48, שום דבר אחר לא מספן. מג'י Lightning יאהבו את המבנה. קצת פחות EXP גולמי מ-Area 2, אבל כל קיל בלבל שלכם."
+    ],
+    [
+     "[[img:0386eea7010d4c.png]] Line 1 <Area 4>",
+     "Kerning City Subway",
+     "2,781,429",
+     "Wraith (lv48)",
+     "7 (Kerning City Pharmacy)",
+     "הסאבוויי השני עם Wraith בלבד. קצת יותר קטן מ-Line 2 Area 3 (59 מול 68 נקודות ספאון), אבל משחק בדיוק אותו דבר. תבחרו את זה שפחות עמוס."
+    ]
    ]
   },
   {
-   "heading": "לבל 46-50",
-   "lines": [
-    "מפות ה-Wraith ב-Kerning Subway שולטות בטווח הזה. Line 2 Area 2 מגיעה ל-3.7M Max EXP/hr, הכי גבוה מכל מפה ב-Victoria Island. Hot Sand ב-Florina Road היא האלטרנטיבה עם Tortie ו-Clang. מג'י Lightning מקבלים בונוס אלמנטלי על ה-Clangs; ל-Torties, שיש מהם יותר, אין חולשה.",
-    "Line 2 <Area 2>",
-    "אזור Kerning City Subway Max EXP/hr 3,737,857 מוב עיקרי Wraith (lv48) פורטלים לפוטים 6 (Kerning City Pharmacy)",
-    "מיקס של Jr. Wraith ו-Wraith עם כמה ספאונים של Jr. Necki שאפשר להתעלם מהם. הבחירה הכי טובה כשאתם בלבל 47-48 ויכולים להרוג Wraith בשתי מכות.",
-    "Line 2 <Area 3>",
-    "אזור Kerning City Subway Max EXP/hr 3,205,714 מוב עיקרי Wraith (lv48) פורטלים לפוטים 7 (Kerning City Pharmacy)",
-    "רק Wraith בלבל 48, שום דבר אחר לא מספן. מג'י Lightning יאהבו את המבנה. קצת פחות EXP גולמי מ-Area 2, אבל כל קיל בלבל שלכם.",
-    "Line 1 <Area 4>",
-    "אזור Kerning City Subway Max EXP/hr 2,781,429 מוב עיקרי Wraith (lv48) פורטלים לפוטים 7 (Kerning City Pharmacy)",
-    "הסאבוויי השני עם Wraith בלבד. קצת יותר קטן מ-Line 2 Area 3 (59 מול 68 נקודות ספאון), אבל משחק בדיוק אותו דבר. תבחרו את זה שפחות עמוס.",
-    "מפה | אזור | Max EXP/hr | מוב עיקרי | פורטלים לפוטים | למה",
-    "Line 2 <Area 2> | Kerning City Subway | 3,737,857 | Wraith (lv48) | 6 (Kerning City Pharmacy) | מיקס של Jr. Wraith ו-Wraith עם כמה ספאונים של Jr. Necki שאפשר להתעלם מהם. הבחירה הכי טובה כשאתם בלבל 47-48 ויכולים להרוג Wraith בשתי מכות.",
-    "Line 2 <Area 3> | Kerning City Subway | 3,205,714 | Wraith (lv48) | 7 (Kerning City Pharmacy) | רק Wraith בלבל 48, שום דבר אחר לא מספן. מג'י Lightning יאהבו את המבנה. קצת פחות EXP גולמי מ-Area 2, אבל כל קיל בלבל שלכם.",
-    "Line 1 <Area 4> | Kerning City Subway | 2,781,429 | Wraith (lv48) | 7 (Kerning City Pharmacy) | הסאבוויי השני עם Wraith בלבד. קצת יותר קטן מ-Line 2 Area 3 (59 מול 68 נקודות ספאון), אבל משחק בדיוק אותו דבר. תבחרו את זה שפחות עמוס."
+   "h2": "לבל 51-55"
+  },
+  {
+   "p": "לפי החישובים שלנו, מפות ה-Wraith בסאבוויי עדיין מעל כל מפה בטווח הזה, אז להישאר ב-Line 2 Area 2 זו בחירה טובה. למובים בלבל שלכם, מפת ה-Clang בחוף וביצת ה-Croco מובילות. Forbidden Entrance היא האפשרות ב-Forgotten Hollow."
+  },
+  {
+   "table": [
+    [
+     "מפה",
+     "אזור",
+     "Max EXP/hr",
+     "מוב עיקרי",
+     "פורטלים לפוטים",
+     "למה"
+    ],
+    [
+     "[[img:6623dcb448bb87.png]] Lorang and Clang",
+     "Florina Road",
+     "1,971,786",
+     "Clang (lv49)",
+     "3 (Florina Beach)",
+     "ה-Clangs נותנים בערך 70% מה-EXP, עם Lorangs באמצע. אותו חוף כמו מפות הסרטנים של לבל 36-40."
+    ],
+    [
+     "[[img:0058915bf9763c.png]] Dangerous Croko II",
+     "Warning Street",
+     "1,659,642",
+     "Croco (lv52)",
+     "6 (Kerning City Pharmacy)",
+     "ה-Crocos נותנים ארבע חמישיות מה-EXP. ה-Jr. Neckis וה-Slimes הם מילוי שמנקים בדרך."
+    ],
+    [
+     "[[img:8d3453e377c2eb.png]] Forbidden Entrance",
+     "Shallow Passage",
+     "1,372,857",
+     "Duskmander (lv50)",
+     "3 (Cave Fairy Department Store)",
+     "Rafflesia ו-Duskmander מתחלקים ב-EXP כמעט שווה בשווה. Rafflesia חלש לאש ו-Duskmander לקרח."
+    ]
    ]
   },
   {
-   "heading": "לבל 51-55",
-   "lines": [
-    "לפי החישובים שלנו, מפות ה-Wraith בסאבוויי עדיין מעל כל מפה בטווח הזה, אז להישאר ב-Line 2 Area 2 זו בחירה טובה. למובים בלבל שלכם, מפת ה-Clang בחוף וביצת ה-Croco מובילות. Forbidden Entrance היא האפשרות ב-Forgotten Hollow.",
-    "Lorang and Clang",
-    "אזור Florina Road Max EXP/hr 1,971,786 מוב עיקרי Clang (lv49) פורטלים לפוטים 3 (Florina Beach)",
-    "ה-Clangs נותנים בערך 70% מה-EXP, עם Lorangs באמצע. אותו חוף כמו מפות הסרטנים של לבל 36-40.",
-    "Dangerous Croko II",
-    "אזור Warning Street Max EXP/hr 1,659,642 מוב עיקרי Croco (lv52) פורטלים לפוטים 6 (Kerning City Pharmacy)",
-    "ה-Crocos נותנים ארבע חמישיות מה-EXP. ה-Jr. Neckis וה-Slimes הם מילוי שמנקים בדרך.",
-    "Forbidden Entrance",
-    "אזור Shallow Passage Max EXP/hr 1,372,857 מוב עיקרי Duskmander (lv50) פורטלים לפוטים 3 (Cave Fairy Department Store)",
-    "Rafflesia ו-Duskmander מתחלקים ב-EXP כמעט שווה בשווה. Rafflesia חלש לאש ו-Duskmander לקרח.",
-    "מפה | אזור | Max EXP/hr | מוב עיקרי | פורטלים לפוטים | למה",
-    "Lorang and Clang | Florina Road | 1,971,786 | Clang (lv49) | 3 (Florina Beach) | ה-Clangs נותנים בערך 70% מה-EXP, עם Lorangs באמצע. אותו חוף כמו מפות הסרטנים של לבל 36-40.",
-    "Dangerous Croko II | Warning Street | 1,659,642 | Croco (lv52) | 6 (Kerning City Pharmacy) | ה-Crocos נותנים ארבע חמישיות מה-EXP. ה-Jr. Neckis וה-Slimes הם מילוי שמנקים בדרך.",
-    "Forbidden Entrance | Shallow Passage | 1,372,857 | Duskmander (lv50) | 3 (Cave Fairy Department Store) | Rafflesia ו-Duskmander מתחלקים ב-EXP כמעט שווה בשווה. Rafflesia חלש לאש ו-Duskmander לקרח."
+   "h2": "לבל 56-60"
+  },
+  {
+   "p": "Sleepy Dungeon V היא המפה הכי חזקה ב-Victoria Island אחרי לבל 55 לפי המודל שלנו, בזכות 19 ספאונים של Dark Stone Golem. Another Sanctuary היא הבחירה ב-Forgotten Hollow."
+  },
+  {
+   "table": [
+    [
+     "מפה",
+     "אזור",
+     "Max EXP/hr",
+     "מוב עיקרי",
+     "פורטלים לפוטים",
+     "למה"
+    ],
+    [
+     "[[img:bf98edf794b720.png]] Sleepy Dungeon V",
+     "Dungeon",
+     "2,725,162",
+     "Dark Stone Golem (lv58)",
+     "5 (Cave Fairy Department Store)",
+     "89 נקודות ספאון, הכי הרבה בטווח הזה: Dark Stone Golems פלוס הרבה Lupins ו-Curse Eyes."
+    ],
+    [
+     "[[img:bf98edf794b720.png]] Sleepy Dungeon III",
+     "Dungeon",
+     "1,488,239",
+     "Dark Stone Golem (lv58)",
+     "7 (Cave Fairy Department Store)",
+     "מיקס דומה בחצי מהגודל, 45 נקודות ספאון. תלכו לפה כש-V עמוסה."
+    ],
+    [
+     "[[img:d2be579f09f89b.png]] Another Sanctuary",
+     "Deep Passage",
+     "1,301,428",
+     "Rotten Mushroom (lv56)",
+     "13 (Cave Fairy Department Store)",
+     "Rotten Mushrooms ו-Sporewoods, שניהם אנדד וחלשים ל-holy. תביאו פוטים נוספים: החנות הכי קרובה במרחק 13 פורטלים."
+    ]
    ]
   },
   {
-   "heading": "לבל 56-60",
-   "lines": [
-    "Sleepy Dungeon V היא המפה הכי חזקה ב-Victoria Island אחרי לבל 55 לפי המודל שלנו, בזכות 19 ספאונים של Dark Stone Golem. Another Sanctuary היא הבחירה ב-Forgotten Hollow.",
-    "Sleepy Dungeon V",
-    "אזור Dungeon Max EXP/hr 2,725,162 מוב עיקרי Dark Stone Golem (lv58) פורטלים לפוטים 5 (Cave Fairy Department Store)",
-    "89 נקודות ספאון, הכי הרבה בטווח הזה: Dark Stone Golems פלוס הרבה Lupins ו-Curse Eyes.",
-    "Sleepy Dungeon III",
-    "אזור Dungeon Max EXP/hr 1,488,239 מוב עיקרי Dark Stone Golem (lv58) פורטלים לפוטים 7 (Cave Fairy Department Store)",
-    "מיקס דומה בחצי מהגודל, 45 נקודות ספאון. תלכו לפה כש-V עמוסה.",
-    "Another Sanctuary",
-    "אזור Deep Passage Max EXP/hr 1,301,428 מוב עיקרי Rotten Mushroom (lv56) פורטלים לפוטים 13 (Cave Fairy Department Store)",
-    "Rotten Mushrooms ו-Sporewoods, שניהם אנדד וחלשים ל-holy. תביאו פוטים נוספים: החנות הכי קרובה במרחק 13 פורטלים.",
-    "מפה | אזור | Max EXP/hr | מוב עיקרי | פורטלים לפוטים | למה",
-    "Sleepy Dungeon V | Dungeon | 2,725,162 | Dark Stone Golem (lv58) | 5 (Cave Fairy Department Store) | 89 נקודות ספאון, הכי הרבה בטווח הזה: Dark Stone Golems פלוס הרבה Lupins ו-Curse Eyes.",
-    "Sleepy Dungeon III | Dungeon | 1,488,239 | Dark Stone Golem (lv58) | 7 (Cave Fairy Department Store) | מיקס דומה בחצי מהגודל, 45 נקודות ספאון. תלכו לפה כש-V עמוסה.",
-    "Another Sanctuary | Deep Passage | 1,301,428 | Rotten Mushroom (lv56) | 13 (Cave Fairy Department Store) | Rotten Mushrooms ו-Sporewoods, שניהם אנדד וחלשים ל-holy. תביאו פוטים נוספים: החנות הכי קרובה במרחק 13 פורטלים."
+   "h2": "לבל 61-70"
+  },
+  {
+   "p": "ל-Victoria Island אין מפה חזקה לשנות ה-60. Dangerous Valley II היא היחידה שבנויה סביב מוב בלבל 60, עם 703,825 Max EXP/hr, פחות מחמישית מ-Line 2 Area 2. המובים הגבוהים יותר באי (Wild Kargo בלבל 62, Tauromacis בלבל 70, Taurospear בלבל 75) כולם על ריספון מתוזמן. בשביל EXP, תישארו ב-Sleepy Dungeon V או במפות ה-Wraith."
+  },
+  {
+   "table": [
+    [
+     "מפה",
+     "אזור",
+     "Max EXP/hr",
+     "מוב עיקרי",
+     "פורטלים לפוטים",
+     "למה"
+    ],
+    [
+     "[[img:af1d4d2ecd28da.png]] Dangerous Valley II",
+     "Hidden Street",
+     "703,825",
+     "Red Drake (lv60)",
+     "4 (Perion Department Store)",
+     "Red Drakes מפילים Steely Throwing Knives. Fire Boars ו-Copper Drakes ממלאים את שאר המפה."
+    ]
    ]
   },
   {
-   "heading": "לבל 61-70",
-   "lines": [
-    "ל-Victoria Island אין מפה חזקה לשנות ה-60. Dangerous Valley II היא היחידה שבנויה סביב מוב בלבל 60, עם 703,825 Max EXP/hr, פחות מחמישית מ-Line 2 Area 2. המובים הגבוהים יותר באי (Wild Kargo בלבל 62, Tauromacis בלבל 70, Taurospear בלבל 75) כולם על ריספון מתוזמן. בשביל EXP, תישארו ב-Sleepy Dungeon V או במפות ה-Wraith.",
-    "Dangerous Valley II",
-    "אזור Hidden Street Max EXP/hr 703,825 מוב עיקרי Red Drake (lv60) פורטלים לפוטים 4 (Perion Department Store)",
-    "Red Drakes מפילים Steely Throwing Knives. Fire Boars ו-Copper Drakes ממלאים את שאר המפה.",
-    "מפה | אזור | Max EXP/hr | מוב עיקרי | פורטלים לפוטים | למה",
-    "Dangerous Valley II | Hidden Street | 703,825 | Red Drake (lv60) | 4 (Perion Department Store) | Red Drakes מפילים Steely Throwing Knives. Fire Boars ו-Copper Drakes ממלאים את שאר המפה."
+   "h2": "המלצות לפארטי ולשלל"
+  },
+  {
+   "p": "תבחרו את אלה בשביל דרופ שאתם צריכים או מקום לפארטי גדול יותר. אנחנו לא מספקים אחוזי דרופ."
+  },
+  {
+   "table": [
+    [
+     "מפה",
+     "לבלי מובים",
+     "Max EXP/hr",
+     "פורטלים לפוטים",
+     "למה לבחור"
+    ],
+    [
+     "[[img:b62ded95656118.png]] Henesys Hunting Ground I",
+     "2-14",
+     "153,216",
+     "2 (Henesys Town Hall)",
+     "שבעה סוגי מובים, מ-Blue Snails ועד Green Mushrooms, במפה אחת. אפשר להישאר פה מהלבל הראשון ב-Victoria ועד בערך 15."
+    ],
+    [
+     "[[img:5acb77fec8ecc4.png]] Dungeon, Southern Forest I",
+     "6",
+     "90,000",
+     "5 (Ellinia Department Store)",
+     "21 ספאונים של Slime ותו לא, אז כל קיל לוקח אותו מספר מכות. Slimes מפילים Slime Bubbles."
+    ],
+    [
+     "[[img:fb3c8dc6aafe7d.png]] The Pig Beach",
+     "2-28",
+     "105,767",
+     "6 (Lith Harbor)",
+     "Pigs ו-Ribbon Pigs מפילים Leather, Stiff Feathers ו-Pig's Heads. ה-Iron Hog היחיד עושה ריספון פעם בשעה."
+    ],
+    [
+     "[[img:d0e60eb9c0eb2c.png]] Damp Forest",
+     "6-21",
+     "284,999",
+     "7 (Henesys Town Hall)",
+     "11 ספאונים של Jr. Necki מעורבבים עם Octopuses. תפרמו פה Jr. Necki Skins."
+    ],
+    [
+     "[[img:57b1519e827743.png]] Land of Wild Boar",
+     "23-35",
+     "472,884",
+     "3 (Perion Department Store)",
+     "Wild Boars מפילים Leather ו-Animal Fur Bundles. Dark Axe Stumps מפילים Wooden Tops ו-Sap of Ancient Tree. ה-Jr. Boogies עושים ריספון כל 5 עד 10 דקות."
+    ],
+    [
+     "[[img:762bddf50eb031.png]] The Burnt Land II",
+     "23-32",
+     "605,000",
+     "5 (Perion Department Store)",
+     "Fire Boars מפילים Arwen's Glass Shoe, Diamond Ore ו-Wolbi Throwing Stars. Dark Axe Stumps מוסיפים Wooden Tops."
+    ],
+    [
+     "[[img:3b0aac86470550.png]] Dangerous Valley",
+     "32-45",
+     "1,008,214",
+     "3 (Perion Department Store)",
+     "Fire Boars ו-Copper Drakes, שניהם חלשים לקרח. מפה חזקה ל-I/L Wizard בתחילת שנות ה-40."
+    ],
+    [
+     "[[img:ab7412e282fc07.png]] The Valley of Death",
+     "24-47",
+     "864,999",
+     "5 (Cave Fairy Department Store)",
+     "Rafflesia מפיל את Earring LUK Scroll: Intermediate. Zombie Lupins מפילים Black Napoleon (בסיס 3 LUK) ואת ה-Cursed Dolls לקווסטי הכובעים של Rowen the Fairy."
+    ],
+    [
+     "[[img:415ed0ee975fe3.png]] Drake Hunting Ground",
+     "22-50",
+     "943,897",
+     "5 (Ant Tunnel Park)",
+     "Drakes מפילים Dragon Skin ו-Drake's Blood. Dragon Skin נכנס ל-23 מתכוני קראפטינג, בעיקר נעליים וכפפות."
+    ],
+    [
+     "[[img:fa554ceb1468b9.png]] The End of Fleeting Light",
+     "43-50",
+     "1,201,072",
+     "2 (Cave Fairy Department Store)",
+     "Aqumander חלש לברק, Rafflesia לאש ו-Duskmander לקרח. פארטי של מג'ים עם אלמנטים שונים מכסה את שלושתם."
+    ],
+    [
+     "[[img:0386eea7010d4c.png]] Line 2 <Area 3>",
+     "48",
+     "3,205,714",
+     "7 (Kerning City Pharmacy)",
+     "Wraiths מפילים את Red Whip, חרב ביד אחת ל-Lv 35 עם 15 Speed."
+    ],
+    [
+     "[[img:3e5429938ed2d5.png]] The Entrance of Golem's Temple",
+     "19-56",
+     "740,437",
+     "5 (Henesys Town Hall)",
+     "Stone Golems מפילים Tobi Throwing Stars."
+    ]
    ]
   },
   {
-   "heading": "המלצות לפארטי ולשלל",
-   "lines": [
-    "תבחרו את אלה בשביל דרופ שאתם צריכים או מקום לפארטי גדול יותר. אנחנו לא מספקים אחוזי דרופ.",
-    "Henesys Hunting Ground I",
-    "לבלי מובים 2-14 Max EXP/hr 153,216 פורטלים לפוטים 2 (Henesys Town Hall)",
-    "שבעה סוגי מובים, מ-Blue Snails ועד Green Mushrooms, במפה אחת. אפשר להישאר פה מהלבל הראשון ב-Victoria ועד בערך 15.",
-    "Dungeon, Southern Forest I",
-    "לבלי מובים 6 Max EXP/hr 90,000 פורטלים לפוטים 5 (Ellinia Department Store)",
-    "21 ספאונים של Slime ותו לא, אז כל קיל לוקח אותו מספר מכות. Slimes מפילים Slime Bubbles.",
-    "The Pig Beach",
-    "לבלי מובים 2-28 Max EXP/hr 105,767 פורטלים לפוטים 6 (Lith Harbor)",
-    "Pigs ו-Ribbon Pigs מפילים Leather, Stiff Feathers ו-Pig's Heads. ה-Iron Hog היחיד עושה ריספון פעם בשעה.",
-    "Damp Forest",
-    "לבלי מובים 6-21 Max EXP/hr 284,999 פורטלים לפוטים 7 (Henesys Town Hall)",
-    "11 ספאונים של Jr. Necki מעורבבים עם Octopuses. תפרמו פה Jr. Necki Skins.",
-    "Land of Wild Boar",
-    "לבלי מובים 23-35 Max EXP/hr 472,884 פורטלים לפוטים 3 (Perion Department Store)",
-    "Wild Boars מפילים Leather ו-Animal Fur Bundles. Dark Axe Stumps מפילים Wooden Tops ו-Sap of Ancient Tree. ה-Jr. Boogies עושים ריספון כל 5 עד 10 דקות.",
-    "The Burnt Land II",
-    "לבלי מובים 23-32 Max EXP/hr 605,000 פורטלים לפוטים 5 (Perion Department Store)",
-    "Fire Boars מפילים Arwen's Glass Shoe, Diamond Ore ו-Wolbi Throwing Stars. Dark Axe Stumps מוסיפים Wooden Tops.",
-    "Dangerous Valley",
-    "לבלי מובים 32-45 Max EXP/hr 1,008,214 פורטלים לפוטים 3 (Perion Department Store)",
-    "Fire Boars ו-Copper Drakes, שניהם חלשים לקרח. מפה חזקה ל-I/L Wizard בתחילת שנות ה-40.",
-    "The Valley of Death",
-    "לבלי מובים 24-47 Max EXP/hr 864,999 פורטלים לפוטים 5 (Cave Fairy Department Store)",
-    "Rafflesia מפיל את Earring LUK Scroll : Intermediate. Zombie Lupins מפילים Black Napoleon (בסיס 3 LUK) ואת ה-Cursed Dolls לקווסטי הכובעים של Rowen the Fairy.",
-    "Drake Hunting Ground",
-    "לבלי מובים 22-50 Max EXP/hr 943,897 פורטלים לפוטים 5 (Ant Tunnel Park)",
-    "Drakes מפילים Dragon Skin ו-Drake's Blood. Dragon Skin נכנס ל-23 מתכוני קראפטינג, בעיקר נעליים וכפפות.",
-    "The End of Fleeting Light",
-    "לבלי מובים 43-50 Max EXP/hr 1,201,072 פורטלים לפוטים 2 (Cave Fairy Department Store)",
-    "Aqumander חלש לברק, Rafflesia לאש ו-Duskmander לקרח. פארטי של מג'ים עם אלמנטים שונים מכסה את שלושתם.",
-    "Line 2 <Area 3>",
-    "לבלי מובים 48 Max EXP/hr 3,205,714 פורטלים לפוטים 7 (Kerning City Pharmacy)",
-    "Wraiths מפילים את Red Whip, חרב ביד אחת ל-Lv 35 עם 15 Speed.",
-    "The Entrance of Golem's Temple",
-    "לבלי מובים 19-56 Max EXP/hr 740,437 פורטלים לפוטים 5 (Henesys Town Hall)",
-    "Stone Golems מפילים Tobi Throwing Stars.",
-    "מפה | לבלי מובים | Max EXP/hr | פורטלים לפוטים | למה לבחור",
-    "Henesys Hunting Ground I | 2-14 | 153,216 | 2 (Henesys Town Hall) | שבעה סוגי מובים, מ-Blue Snails ועד Green Mushrooms, במפה אחת. אפשר להישאר פה מהלבל הראשון ב-Victoria ועד בערך 15.",
-    "Dungeon, Southern Forest I | 6 | 90,000 | 5 (Ellinia Department Store) | 21 ספאונים של Slime ותו לא, אז כל קיל לוקח אותו מספר מכות. Slimes מפילים Slime Bubbles.",
-    "The Pig Beach | 2-28 | 105,767 | 6 (Lith Harbor) | Pigs ו-Ribbon Pigs מפילים Leather, Stiff Feathers ו-Pig's Heads. ה-Iron Hog היחיד עושה ריספון פעם בשעה.",
-    "Damp Forest | 6-21 | 284,999 | 7 (Henesys Town Hall) | 11 ספאונים של Jr. Necki מעורבבים עם Octopuses. תפרמו פה Jr. Necki Skins.",
-    "Land of Wild Boar | 23-35 | 472,884 | 3 (Perion Department Store) | Wild Boars מפילים Leather ו-Animal Fur Bundles. Dark Axe Stumps מפילים Wooden Tops ו-Sap of Ancient Tree. ה-Jr. Boogies עושים ריספון כל 5 עד 10 דקות.",
-    "The Burnt Land II | 23-32 | 605,000 | 5 (Perion Department Store) | Fire Boars מפילים Arwen's Glass Shoe, Diamond Ore ו-Wolbi Throwing Stars. Dark Axe Stumps מוסיפים Wooden Tops.",
-    "Dangerous Valley | 32-45 | 1,008,214 | 3 (Perion Department Store) | Fire Boars ו-Copper Drakes, שניהם חלשים לקרח. מפה חזקה ל-I/L Wizard בתחילת שנות ה-40.",
-    "The Valley of Death | 24-47 | 864,999 | 5 (Cave Fairy Department Store) | Rafflesia מפיל את Earring LUK Scroll: Intermediate. Zombie Lupins מפילים Black Napoleon (בסיס 3 LUK) ואת ה-Cursed Dolls לקווסטי הכובעים של Rowen the Fairy.",
-    "Drake Hunting Ground | 22-50 | 943,897 | 5 (Ant Tunnel Park) | Drakes מפילים Dragon Skin ו-Drake's Blood. Dragon Skin נכנס ל-23 מתכוני קראפטינג, בעיקר נעליים וכפפות.",
-    "The End of Fleeting Light | 43-50 | 1,201,072 | 2 (Cave Fairy Department Store) | Aqumander חלש לברק, Rafflesia לאש ו-Duskmander לקרח. פארטי של מג'ים עם אלמנטים שונים מכסה את שלושתם.",
-    "Line 2 <Area 3> | 48 | 3,205,714 | 7 (Kerning City Pharmacy) | Wraiths מפילים את Red Whip, חרב ביד אחת ל-Lv 35 עם 15 Speed.",
-    "The Entrance of Golem's Temple | 19-56 | 740,437 | 5 (Henesys Town Hall) | Stone Golems מפילים Tobi Throwing Stars."
-   ]
+   "h2": "אזכור מכובד: PQ ובונוס פארטי"
   },
   {
-   "heading": "אזכור מכובד: PQ ובונוס פארטי",
-   "lines": [
-    "Kerning Party Quest נפתח בלבל 21 . פארטי גם משנה את הקיבולת של המפה ומקבל 10% בונוס EXP עם שני חברים, 20% עם שלושה, ו-30% מארבעה ומעלה. תשוו את הריצות שמדדתם בעצמכם לדירוגי הסולו למעלה. בחדר הבונוס אחרי King Slime, 1st Accompaniment <Bonus> , יש 24 Horny Mushrooms ו-12 Green Mushrooms ל-462,858 Max EXP/hr. ה-Green Mushrooms שלו מפילים Pan Lid ו-Claw Attack Scroll: Intermediate.",
-    "הקלאס, הציוד, ה-mastery , גודל הפארטי, התנועה בין פלטפורמות והזמן בין קבוצות מובים משנים כולם את התוצאה האמיתית. מדדתם לופ טוב יותר? ספרו לנו ב-Discord של MeowDB .",
-    "מדריך למתחילים: MapleStory Classic World",
-    "השעות הראשונות שלכם ב-MapleStory Classic World, מ-Maple Island ועד לבל 10. בחירת ג'וב, כללים לחלוקת AP, ומה לגרנד בדרך.",
-    "MapleStory Classic: מדריך בילד ולבלים ל-Warrior, Lv 1-30",
-    "מדריך Warrior ל-MapleStory Classic ללבלים 1-30, עם AP, Accuracy, סקילים, ציוד, מפות מ-Training Advisor ובחירות לג'וב השני.",
-    "MapleStory Classic: מדריך בילד ולבלים ל-Magician, Lv 1-30",
-    "מדריך Magician ללבלים 1-30 עם חלוקת AP ו-SP, Energy Bolt מול Magic Claw, ציוד, מגנים, פוטים ומפות מ-Training Advisor.",
-    "MapleStory Classic: מדריך בילד ולבלים ל-Bowman, Lv 1-30",
-    "מדריך Bowman ללבלים 1-30 עם חלוקת AP ו-SP, Arrow Blow מול Double Shot, קשתות, קרוסבואים, חצים, ציוד ומפות מ-Training Advisor.",
-    "MapleStory Classic: מדריך בילד ולבלים ל-Thief, Lv 1-30",
-    "מדריך Thief ל-MapleStory Classic ללבלים 1-30 עם SP ל-Lucky Seven, AP, Accuracy, ציוד, טיפים ל-Sindit ומפות מ-Training Advisor.",
-    "נוסחת הדמג' של MapleStory Classic",
-    "נוסחאות דמג' פיזי ומג'יק ל-MapleStory Classic, עם דף עזר קומפקטי. אפשר לפתוח את חוקי הקרב המדויקים כשצריך.",
-    "טבלת EXP ל-Lv 1-100: נתונים נוכחיים והיסטוריים",
-    "דרישות EXP ללבלים 1-100, כשלבלים 1-49 מאושרים במשחק הנוכחי ולבלים 50-99 מסומנים כנתון היסטורי.",
-    "מילון מונחים של MapleStory Classic World",
-    "כל ראשי התיבות, הסלנג והמכניקות שצריך להכיר ב-MapleStory Classic World, מחולקים לפי קטגוריות מעליית לבלים ועד כלכלה.",
-    "מאגר מפות (כל מפה עם Base Rates) →",
-    "מאגר מפלצות (סטטים מלאים, EXP, דרופים) →",
-    "טבלת EXP ל-Lv 1-100 (אבני דרך מצטברות) →",
-    "טבלת דירוג קלאסים (לבחור את הגריינדר הכי טוב לטווח שלכם) →",
-    "מעקב קווסטים (ה-EXP הכי טוב מגיע מקווסטים לפני 30) →"
-   ]
+   "p": "**Kerning Party Quest** נפתח ב**לבל 21**. פארטי גם משנה את הקיבולת של המפה ומקבל 10% בונוס EXP עם שני חברים, 20% עם שלושה, ו-30% מארבעה ומעלה. תשוו את הריצות שמדדתם בעצמכם לדירוגי הסולו למעלה. בחדר הבונוס אחרי King Slime, 1st Accompaniment <Bonus>, יש 24 Horny Mushrooms ו-12 Green Mushrooms ל-462,858 Max EXP/hr. ה-Green Mushrooms שלו מפילים Pan Lid ו-Claw Attack Scroll: Intermediate."
+  },
+  {
+   "p": "הקלאס, הציוד, ה-mastery, גודל הפארטי, התנועה בין פלטפורמות והזמן בין קבוצות מובים משנים כולם את התוצאה האמיתית. מדדתם לופ טוב יותר? ספרו לנו ב-Discord של MeowDB."
+  },
+  {
+   "guide": "beginners-guide-first-steps-in-maple-world",
+   "text": "מדריך למתחילים: MapleStory Classic World"
+  },
+  {
+   "guide": "warrior-class-guide",
+   "text": "MapleStory Classic: מדריך בילד ולבלים ל-Warrior, Lv 1-30"
+  },
+  {
+   "guide": "magician-class-guide",
+   "text": "MapleStory Classic: מדריך בילד ולבלים ל-Magician, Lv 1-30"
+  },
+  {
+   "guide": "bowman-class-guide",
+   "text": "MapleStory Classic: מדריך בילד ולבלים ל-Bowman, Lv 1-30"
+  },
+  {
+   "guide": "thief-class-guide",
+   "text": "MapleStory Classic: מדריך בילד ולבלים ל-Thief, Lv 1-30"
+  },
+  {
+   "guide": "explaining-the-damage-formula",
+   "text": "נוסחת הדמג' של MapleStory Classic"
+  },
+  {
+   "guide": "exp-table-level-1-to-100",
+   "text": "טבלת EXP ל-Lv 1-100: נתונים נוכחיים והיסטוריים"
+  },
+  {
+   "guide": "maplestory-classic-glossary",
+   "text": "מילון מונחים של MapleStory Classic World"
   }
- ]
+ ],
+ "source_hash": "4dcd21d7064b"
 }

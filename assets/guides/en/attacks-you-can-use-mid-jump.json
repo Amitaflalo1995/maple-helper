@@ -1,0 +1,225 @@
+{
+ "title": "Attacks You Can Use Mid-Jump",
+ "intro": "Every MapleStory Classic attack you can use while jumping, sorted by class, with third job listed separately. Checked against the game's own files.",
+ "hero": null,
+ "minutes": 3,
+ "blocks": [
+  {
+   "p": "[[img:eead4ba441ad89.png]] Every thief attack in MapleStory Classic World can be used mid-jump, and so can both first-job warrior attacks. Bowmen's only mid-jump attack is Power Knockback. Magicians get Heal."
+  },
+  {
+   "p": "We checked all 116 active skills from the second Closed Online Test (August 2026) and the August 11 balance update."
+  },
+  {
+   "h2": "Which attacks can you use while jumping?"
+  },
+  {
+   "p": "Every first and second job attack you can start in the air, sorted by class. Jump first, then press the skill."
+  },
+  {
+   "table": [
+    [
+     "",
+     "Skill",
+     "Class",
+     "At max level"
+    ],
+    [
+     "[[img:7700d0a87ede5e.png]]",
+     "Power Strike",
+     "Warrior, 1st job",
+     "260% damage to one monster"
+    ],
+    [
+     "[[img:b5a4eaed502bda.png]]",
+     "Slash Blast",
+     "Warrior, 1st job",
+     "130% damage to up to 4 monsters around you; costs 8 HP"
+    ],
+    [
+     "[[img:0a983f5b724846.png]]",
+     "Threaten",
+     "Page, 2nd job",
+     "Lowers Speed and Weapon DEF of up to 4 monsters for 30 sec"
+    ],
+    [
+     "[[img:94ac0043dcd64d.png]]",
+     "Heal",
+     "Cleric, 2nd job",
+     "Heals you and nearby party members; solo, damages up to 5 undead monsters"
+    ],
+    [
+     "[[img:d7a9b8872c5972.png]]",
+     "Power Knockback",
+     "Bowman, 1st job",
+     "180% damage to up to 4 monsters and knocks them back; always a critical hit"
+    ],
+    [
+     "[[img:8b4eddf653e003.png]]",
+     "Lucky Seven",
+     "Thief, 1st job",
+     "Throws 2 stars for 140% damage, based on LUK"
+    ],
+    [
+     "[[img:3c37dc4ebd42ec.png]]",
+     "Double Stab",
+     "Thief, 1st job",
+     "Stabs twice for 160% damage"
+    ],
+    [
+     "[[img:15c4a6d43a4751.png]]",
+     "Disorder",
+     "Thief, 1st job",
+     "Lowers one monster's Attack and Weapon DEF for 30 sec; deals 100% weapon damage"
+    ],
+    [
+     "[[img:2f9d27b70bb6fc.png]]",
+     "Drain",
+     "Assassin, 2nd job",
+     "240% damage; 12% chance to absorb 15% of it as HP"
+    ],
+    [
+     "[[img:c1aec993cbf747.png]]",
+     "Savage Blow",
+     "Bandit, 2nd job",
+     "Up to 6 hits at 75% damage each"
+    ],
+    [
+     "[[img:28d2a0ad93474f.png]]",
+     "Steal",
+     "Bandit, 2nd job",
+     "180% damage to up to 2 monsters; 90% chance to steal an item"
+    ]
+   ]
+  },
+  {
+   "h2": "Third job skills"
+  },
+  {
+   "p": "Third job isn't available at launch. Nexon's August 21 report says it won't be in Founder's Access or the Grand Launch (release date guide). Everything in this section comes from the test build and is subject to change."
+  },
+  {
+   "p": "In the test build, these third job skills could be used mid-jump:"
+  },
+  {
+   "table": [
+    [
+     "",
+     "Skill",
+     "Class",
+     "At max level"
+    ],
+    [
+     "[[img:d2d352ea5baa35.png]]",
+     "Panic",
+     "Crusader, 3rd job",
+     "320% damage to one monster; spends combos"
+    ],
+    [
+     "[[img:51d9dfda6d8016.png]]",
+     "Coma",
+     "Crusader, 3rd job",
+     "160% damage to up to 4 monsters; spends combos; chance to bleed"
+    ],
+    [
+     "[[img:02c9e99f288b32.png]]",
+     "Shout",
+     "Crusader, 3rd job",
+     "50% damage to up to 6 monsters; lowers Evasion"
+    ],
+    [
+     "[[img:18d8bf6b0e9a88.png]]",
+     "Armor Crash",
+     "Crusader, 3rd job",
+     "Sets Physical Defense of 4 monsters to 0 for 15 sec"
+    ],
+    [
+     "[[img:d94f48c0b05c29.png]]",
+     "Charged Blow",
+     "White Knight, 3rd job",
+     "210% damage to up to 4 monsters; spends your charge"
+    ],
+    [
+     "[[img:64178537d5d290.png]]",
+     "Elemental Crash",
+     "White Knight, 3rd job",
+     "Removes Fire, Lightning, and Ice resistance from 4 monsters for 15 sec"
+    ],
+    [
+     "[[img:93000e8b526500.png]]",
+     "Piercing Crusher",
+     "Dragon Knight, 3rd job",
+     "Hits 3 monsters 3 times for 120% damage"
+    ],
+    [
+     "[[img:119f995c46fc4e.png]]",
+     "Dragon Fury",
+     "Dragon Knight, 3rd job",
+     "240% damage to up to 4 monsters; costs 24 HP"
+    ],
+    [
+     "[[img:29ff59eba95bdb.png]]",
+     "Power Crash",
+     "Dragon Knight, 3rd job",
+     "Cuts Attack of 4 monsters by 25% for 15 sec"
+    ],
+    [
+     "[[img:d0f32da1c231d8.png]]",
+     "Explosion",
+     "F/P Mage, 3rd job",
+     "Fire damage to up to 4 monsters; detonates Poison"
+    ],
+    [
+     "[[img:85b65ae712b6f6.png]]",
+     "Seal",
+     "F/P Mage, 3rd job",
+     "Stops up to 6 monsters from using skills for 20 sec"
+    ],
+    [
+     "[[img:9bda8a30a40a9d.png]]",
+     "Seal",
+     "I/L Mage, 3rd job",
+     "Stops up to 6 monsters from using skills for 20 sec"
+    ],
+    [
+     "[[img:f1842cda9924fb.png]]",
+     "Doom",
+     "Priest, 3rd job",
+     "Turns up to 6 monsters into Blue Snails for 30 sec"
+    ],
+    [
+     "[[img:c72936ad1b6a61.png]]",
+     "Avenger",
+     "Hermit, 3rd job",
+     "150% damage; the star pierces up to 4 monsters"
+    ],
+    [
+     "[[img:5872ec27c9a773.png]]",
+     "Shadow Web",
+     "Hermit, 3rd job",
+     "Snares up to 4 monsters for 5 sec"
+    ],
+    [
+     "[[img:a55de236e7d985.png]]",
+     "Shadow Meso",
+     "Hermit, 3rd job",
+     "Throws 500 mesos for 8x damage"
+    ],
+    [
+     "[[img:ae6ce6f97066ae.png]]",
+     "Assaulter",
+     "Chief Bandit, 3rd job",
+     "600% damage to one monster, dashes behind it, stuns for 2 sec; usable mid-jump since the Aug 11 update"
+    ],
+    [
+     "[[img:274d877d47f5a0.png]]",
+     "Band of Thieves",
+     "Chief Bandit, 3rd job",
+     "220% damage to monsters in front of you"
+    ]
+   ]
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/attacks-you-can-use-mid-jump",
+ "hash": "e380b4187768"
+}

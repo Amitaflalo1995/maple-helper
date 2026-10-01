@@ -1,0 +1,821 @@
+{
+ "title": "MapleStory Classic Magician Build and Leveling Guide: Lv 1-30",
+ "intro": "Magicians train under Grendel the Really Old in Ellinia. They fight with ranged attacks, spend MP on nearly everything, and can choose between cheaper training and stronger emergency protection.",
+ "hero": "c39490d54e4a2c.png",
+ "minutes": null,
+ "blocks": [
+  {
+   "p": "**Pros**"
+  },
+  {
+   "ul": [
+    "Energy Bolt reaches 350 px and is extremely MP efficient.",
+    "Magic Armor lowers physical touch damage.",
+    "Both wands and staves let you equip a shield.",
+    "Surprisingly good base Accuracy."
+   ]
+  },
+  {
+   "p": "**Cons**"
+  },
+  {
+   "ul": [
+    "No first-job mobbing skill.",
+    "Full Magic Guard is expensive to refill.",
+    "MP potions cost twice as much as HP potions per point recovered."
+   ]
+  },
+  {
+   "note": "**Fun fact:** Grendel the Really Old has trained Ellinia's Magicians since 2003. Classic World brings him into the Forgotten Hollow questline."
+  },
+  {
+   "h2": "Understanding Magician Accuracy"
+  },
+  {
+   "p": "Understanding Accuracy is the core of any class guide and training recommendation. A miss still consumes MP, gives no EXP, and wastes the full casting animation. Early Magicians do not have enough mesos to throw attacks away."
+  },
+  {
+   "note": "**Magician Base Accuracy**\nLevel, INT, LUK, and direct Accuracy all add to your total ACC.\n**+0.39** ACC per level\n**+0.24** ACC per INT\n**+0.12** ACC per LUK\n**+1.00** ACC per direct ACC"
+  },
+  {
+   "p": "**INT is both your main damage stat and your strongest AP source of Accuracy.** Level also closes the penalty for fighting higher-level mobs. A map can become reliable after one or two levels without changing gear."
+  },
+  {
+   "table": [
+    [
+     "Mob",
+     "Mob level",
+     "Mob Avoid",
+     "Your level",
+     "ACC for 100% hit",
+     "Example build"
+    ],
+    [
+     "[[img:34dcba7b3807fe.png]]Bubbling",
+     "15",
+     "9",
+     "15",
+     "31 ACC",
+     "46 ACC (87 INT / 5 LUK)"
+    ],
+    [
+     "[[img:ae64823f427bc0.png]]Stirge",
+     "20",
+     "13",
+     "20",
+     "44 ACC",
+     "54 ACC (108 INT / 12 LUK)"
+    ],
+    [
+     "[[img:36750484773e65.png]]Zombie Mushroom",
+     "24",
+     "14",
+     "20",
+     "54 ACC",
+     "54 ACC (108 INT / 12 LUK)"
+    ],
+    [
+     "[[img:36750484773e65.png]]Zombie Mushroom",
+     "24",
+     "14",
+     "25",
+     "47 ACC",
+     "62 ACC (130 INT / 16 LUK)"
+    ]
+   ]
+  },
+  {
+   "h2": "Levels 1-10: Beginner to Magician"
+  },
+  {
+   "p": "Finish the Maple Island quests, sail to Victoria Island, and enter the Library in Ellinia. Grendel the Really Old handles the first-job advancement. MSClassic World has no stat requirement for first job."
+  },
+  {
+   "img": "6e7d52572951d5.png",
+   "w": 67,
+   "h": 87
+  },
+  {
+   "h3": "Beginner skill build"
+  },
+  {
+   "p": "[[img:efe346ff3ac88e.png]] **Three Snails 3**\nRanged shell attack"
+  },
+  {
+   "p": "[[img:d1b8185bc6bf24.png]] **Recovery 3**\nShort HP recovery"
+  },
+  {
+   "p": "[[img:edc2244a5bda10.png]] **Nimble Feet 3**\nShort Speed buff"
+  },
+  {
+   "p": "All three Beginner skills can be maxed by level 10. Level them in whichever order you prefer."
+  },
+  {
+   "note": "**Use the Club through level 4, then switch to the Razor at level 5.** The Club has the best chance of defeating early Maple Island mobs with 1-hit less than the Sword and Hand Axe. Razor is the better weapon once you can equip it."
+  },
+  {
+   "h3": "Magician AP allocation: levels 1-10"
+  },
+  {
+   "p": "The best starting spread for a future Magician is 4 STR / 4 DEX / 12 INT / 5 LUK. Put all 45 AP from levels 2-10 into INT. You do not need LUK for job advancement."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Spend",
+     "Base stats"
+    ],
+    [
+     "1",
+     "Starting stats",
+     "4 STR / 4 DEX / 12 INT / 5 LUK"
+    ],
+    [
+     "2-9",
+     "INT +40",
+     "4 STR / 4 DEX / 52 INT / 5 LUK"
+    ],
+    [
+     "10",
+     "INT +5",
+     "**4 STR / 4 DEX / 57 INT / 5 LUK**"
+    ]
+   ]
+  },
+  {
+   "h3": "Level 10 Magician example build"
+  },
+  {
+   "p": "4 base STR / 4 base DEX / 57 base INT / 5 base LUK\n60 INT / 5 LUK / 27 M.ATK / 38 ACC / 344 HP / 463 MP with gear"
+  },
+  {
+   "p": "**Skills:** Energy Bolt 1. Three Snails, Recovery, and Nimble Feet 3."
+  },
+  {
+   "p": "[[img:0bd13d592bcd59.png]]Wooden Wand[[img:1e36506ff912a6.png]]Brown Apprentice Hat[[img:97f5870a716402.png]]Stolen Fence"
+  },
+  {
+   "note": "You receive the Beginner's Wooden Wand for free when you become a Magician. It has 26 M.ATK, only one less than the Wooden Wand sold by Flora the Fairy in Ellinia."
+  },
+  {
+   "p": "**Best guaranteed Energy Bolt targets**"
+  },
+  {
+   "p": "[[img:2884cdb372bd03.png]] **Blue Snail** 100% hit · guaranteed 1-cast · 4 EXP/cast [[img:ca2dec0d81316e.png]] **Red Snail** 100% hit · guaranteed 2-cast · 4 EXP/cast"
+  },
+  {
+   "h2": "Levels 10-30: Magician skill build and leveling"
+  },
+  {
+   "p": "Max Energy Bolt or Magic Claw, take Magic Guard 3 to unlock Magic Armor, and build Armor before finishing Max MP Increase. The default endpoint favors lower potion spending. Players who need more protection can move 12 points from Magic Armor into Magic Guard."
+  },
+  {
+   "h3": "Recommended citizenship at level 12"
+  },
+  {
+   "p": "**Kerning City is the best citizenship for a Magician.** The scroll shop later unlocks Overall Armor INT and Gloves Magic Attack scrolls. Sign with Roxy in the Civic Center once citizenship opens at level 12."
+  },
+  {
+   "h3": "Energy Bolt or Magic Claw?"
+  },
+  {
+   "p": "Both skills reach 130 total Basic Attack with the same 810 ms cast time. Energy Bolt delivers it as one 130-power line. Magic Claw splits it into two separate 65-power lines. Average damage is the same, but Magic Claw has lower damage variance: its two hits give more stable total damage from cast to cast."
+  },
+  {
+   "p": "An eligible monster is pushed back when one damage line reaches its Knockback value. Energy Bolt's larger line therefore has a better chance to push an enemy away when either Magic Claw line would fall short. Magic Claw also has a terrain advantage: its two hits can reach through walls and platforms."
+  },
+  {
+   "table": [
+    [
+     "At max level",
+     "[[img:24dcca787059a4.png]]Energy Bolt",
+     "[[img:5370722a856bb9.png]]Magic Claw"
+    ],
+    [
+     "Damage",
+     "130 x 1",
+     "65 x 2"
+    ],
+    [
+     "MP",
+     "16",
+     "20"
+    ],
+    [
+     "SP needed",
+     "20",
+     "21, including Energy Bolt 1"
+    ],
+    [
+     "Range",
+     "350 px",
+     "300 px"
+    ],
+    [
+     "Pros",
+     "Better Knockback potential; 1 SP saved",
+     "More stable damage; hits through terrain"
+    ]
+   ]
+  },
+  {
+   "note": "**Energy Bolt deals the same expected damage for 20% less MP per cast, can improve Knockback odds, and saves one first-job SP.** Magic Claw offers more stable damage. It costs 4 more MP and loses 50 px of range, but hitting through terrain can save more time on the right map."
+  },
+  {
+   "img": "d67276803f86e8.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Energy Bolt: one larger hit, 350 px, and 16 MP."
+  },
+  {
+   "img": "fbfd01caa28980.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Magic Claw: two smaller hits and terrain reach."
+  },
+  {
+   "p": "Energy Bolt saves 1 SP because Magic Claw requires Energy Bolt 1 before you can invest in it. You can put that spare point into Max MP Increase or Improved MP Recovery, depending on your build and which skill is not yet maxed."
+  },
+  {
+   "p": "For a matched Armor 19 build, Energy Bolt can finish at EB 20 / MG 3 / IMR 4 / MMI 15 / MA 19. Magic Claw needs EB 1 / MC 20 / MG 3 / IMR 3 / MMI 15 / MA 19. That spare Energy Bolt point raises item MP recovery from +7% to +8%. The Armor-first default below spends it on MA 20 instead."
+  },
+  {
+   "h3": "Guard or Armor? What about MP Recovery?"
+  },
+  {
+   "p": "**Use the Armor-first build for cheaper first-job training.** Magic Guard moves damage from HP to MP, and the cheapest shop MP recovery costs twice as much per point as HP recovery. Full Guard is still the safer choice when a death would cost more than the potions."
+  },
+  {
+   "p": "**Where the last points on each buff land.** Magic Guard 13 sends 74% of an incoming hit to MP and Magic Guard 15 raises that to 80%. Magic Armor 14 is +92 Weapon and Magic Defense for 495 seconds, and Magic Armor 16 is +100 for 525 seconds. Keep Armor ahead of Guard while mobs still need three or more touches to kill you. Once two touches can do it, the bigger Guard pool is what buys you time to react."
+  },
+  {
+   "p": "**Take the first Improved MP Recovery point at level 11.** Improved MP Recovery 1 raises MP from items by 5%, so a 150 MP Lemon gives back 7 more MP. The cost is one Energy Bolt level from level 11 to 16. Energy Bolt still maxes at level 17, and Magic Guard catches up at level 18."
+  },
+  {
+   "note": "**What 100 post-defense damage costs to refill**\nGuard off: 100 HP x 0.5 = 50 mesos\nMagic Guard 3: 64 HP x 0.5 + 36 MP x 1 = 68 mesos\nMagic Guard 15: 20 HP x 0.5 + 80 MP x 1 = 90 mesos\nUses Red Potion HP value and Orange or Lemon MP value. Drops and passive recovery change your actual bill. Potion waste and shop discounts do too."
+  },
+  {
+   "p": "Magic Armor reduces the hit before Magic Guard splits it. At level 25, the sample gear has 83 WDEF. Magic Armor 18 raises that to 191 WDEF and lowers a Horny Mushroom's strongest physical touch from 142 to 120 damage."
+  },
+  {
+   "table": [
+    [
+     "Level 25 choice",
+     "First-job skills after attack",
+     "Max Horny Mushroom touch",
+     "Where it wins"
+    ],
+    [
+     "**Armor first**",
+     "MG 3 / IMR 3 / MMI 2 / MA 18",
+     "120",
+     "Cheaper when you take several hard touches per minute"
+    ],
+    [
+     "**MP Recovery first**",
+     "MG 3 / IMR 15 / MMI 8 / MA 0",
+     "142",
+     "Cheaper when you position well and cast constantly"
+    ],
+    [
+     "**Full Guard first**",
+     "MG 15 / IMR 3 / MMI 8 / MA 0",
+     "142",
+     "Largest emergency survival pool"
+    ]
+   ]
+  },
+  {
+   "p": "For that level 25 comparison, casting once every two seconds makes full Improved MP Recovery save about 49 mesos per minute with Energy Bolt or 61 with Magic Claw. Armor 18 catches up at about three to six hard touches per minute, depending on the spell and whether Guard is active. That cutoff belongs to this Horny Mushroom example. It moves with your level and gear. Mob choice and cast rate also matter, along with your potion source."
+  },
+  {
+   "h3": "Budget default"
+  },
+  {
+   "p": "MG 3 / IMR 3 / MMI 15 / MA 20. Cheapest after contact."
+  },
+  {
+   "h3": "Safety option"
+  },
+  {
+   "p": "MG 15 / IMR 3 / MMI 15 / MA 8. More burst protection. Each hit costs more to refill."
+  },
+  {
+   "h3": "Low-contact option"
+  },
+  {
+   "p": "MG 3 / IMR 15 / MMI 15 / MA 8. Best when you rarely get touched and spend most of your MP on attacks."
+  },
+  {
+   "h3": "Level 30 Magician skill target"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Skill Lv",
+     "Level 30 result"
+    ],
+    [
+     "[[img:24dcca787059a4.png]]Energy Bolt",
+     "20 / 20",
+     "130 Basic Attack, 10 Mastery, 16 MP"
+    ],
+    [
+     "[[img:211a115f0a6318.png]]Magic Guard",
+     "3 / 15",
+     "36% of incoming HP damage moves to MP"
+    ],
+    [
+     "[[img:664c530d20bba5.png]]Improved MP Recovery",
+     "3 / 15",
+     "1% Max MP every 10 seconds; +7% MP from items"
+    ],
+    [
+     "[[img:d0a2f30f9abf2b.png]]Max MP Increase",
+     "15 / 15",
+     "+25% Max MP"
+    ],
+    [
+     "[[img:32b086d39a1fbe.png]]Magic Armor",
+     "20 / 20",
+     "+120 WDEF and MDEF for 600 seconds"
+    ],
+    [
+     "[[img:5370722a856bb9.png]]Magic Claw",
+     "0 / 20",
+     "Skipped in the Energy Bolt build"
+    ]
+   ]
+  },
+  {
+   "h3": "How Max MP Increase works"
+  },
+  {
+   "p": "Max MP Increase adds a flat percentage to your base MP. Taking it later reaches the same final Max MP, so there is no permanent MP loss from building Magic Armor first. This build catches Max MP Increase up by level 30."
+  },
+  {
+   "h3": "Magician SP allocation: levels 10-30"
+  },
+  {
+   "note": "Running result: EB = Energy Bolt, MG = Magic Guard, IMR = Improved MP Recovery, MMI = Max MP Increase, MA = Magic Armor."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Spend",
+     "Running result",
+     "Reason"
+    ],
+    [
+     "10",
+     "Energy Bolt +1",
+     "EB 1",
+     "Starts ranged training."
+    ],
+    [
+     "11",
+     "Energy Bolt +2, Improved MP Recovery +1",
+     "EB 3, IMR 1",
+     "Improved MP Recovery 1 adds 5% to MP from items: 7 more MP per 150 MP Lemon."
+    ],
+    [
+     "12",
+     "Energy Bolt +3",
+     "EB 6, IMR 1",
+     "Raise damage first."
+    ],
+    [
+     "13",
+     "Energy Bolt +3",
+     "EB 9, IMR 1",
+     "Raise damage first."
+    ],
+    [
+     "14",
+     "Energy Bolt +3",
+     "EB 12, IMR 1",
+     "Raise damage first."
+    ],
+    [
+     "15",
+     "Energy Bolt +3",
+     "EB 15, IMR 1",
+     "Raise damage first."
+    ],
+    [
+     "16",
+     "Energy Bolt +3",
+     "EB 18, IMR 1",
+     "Two points from max."
+    ],
+    [
+     "17",
+     "Energy Bolt +2, Magic Guard +1",
+     "EB 20, MG 1, IMR 1",
+     "Max damage and start protection."
+    ],
+    [
+     "18",
+     "Magic Guard +2, Improved MP Recovery +1",
+     "EB 20, MG 3, IMR 2",
+     "Reach the Armor prerequisite."
+    ],
+    [
+     "19",
+     "Improved MP Recovery +1, Max MP Increase +2",
+     "EB 20, MG 3, IMR 3, MMI 2",
+     "Open Max MP Increase."
+    ],
+    [
+     "20",
+     "Magic Armor +3",
+     "EB 20, MG 3, IMR 3, MMI 2, MA 3",
+     "+48 WDEF and MDEF."
+    ],
+    [
+     "21",
+     "Magic Armor +3",
+     "EB 20, MG 3, IMR 3, MMI 2, MA 6",
+     "+60 WDEF and MDEF."
+    ],
+    [
+     "22",
+     "Magic Armor +3",
+     "EB 20, MG 3, IMR 3, MMI 2, MA 9",
+     "+72 WDEF and MDEF."
+    ],
+    [
+     "23",
+     "Magic Armor +3",
+     "EB 20, MG 3, IMR 3, MMI 2, MA 12",
+     "+84 WDEF and MDEF."
+    ],
+    [
+     "24",
+     "Magic Armor +3",
+     "EB 20, MG 3, IMR 3, MMI 2, MA 15",
+     "+96 WDEF and MDEF."
+    ],
+    [
+     "25",
+     "Magic Armor +3",
+     "EB 20, MG 3, IMR 3, MMI 2, MA 18",
+     "+108 WDEF and MDEF."
+    ],
+    [
+     "26",
+     "Magic Armor +2, Max MP Increase +1",
+     "EB 20, MG 3, IMR 3, MMI 3, MA 20",
+     "Max Armor and resume Max MP."
+    ],
+    [
+     "27",
+     "Max MP Increase +3",
+     "EB 20, MG 3, IMR 3, MMI 6, MA 20",
+     "15% more Max MP."
+    ],
+    [
+     "28",
+     "Max MP Increase +3",
+     "EB 20, MG 3, IMR 3, MMI 9, MA 20",
+     "18% more Max MP."
+    ],
+    [
+     "29",
+     "Max MP Increase +3",
+     "EB 20, MG 3, IMR 3, MMI 12, MA 20",
+     "21% more Max MP."
+    ],
+    [
+     "30",
+     "Max MP Increase +3",
+     "EB 20, MG 3, IMR 3, MMI 15, MA 20",
+     "+25% Max MP and +120 defense."
+    ]
+   ]
+  },
+  {
+   "p": "Second-job SP cannot be spent on first-job skills, so finish the first-job plan by level 30. Character Builder flags any build that breaks it."
+  },
+  {
+   "h3": "Magician AP allocation: levels 10-30"
+  },
+  {
+   "p": "Raise LUK only for the next wand, then put everything else into INT. In practice, all 5 AP go into LUK at levels 20, 25, and 30, and every other level goes into INT. Equipment LUK can replace base LUK once that gear is already equipped."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Base INT",
+     "Base LUK",
+     "Next wand requirement"
+    ],
+    [
+     "10",
+     "57",
+     "5",
+     "Wooden Wand: 20 INT"
+    ],
+    [
+     "15",
+     "82",
+     "5",
+     "Hardwood Wand: 30 INT"
+    ],
+    [
+     "20",
+     "102",
+     "10",
+     "Metal Wand: 40 INT / 10 LUK"
+    ],
+    [
+     "25",
+     "122",
+     "15",
+     "Ice Wand: 50 INT / 15 LUK"
+    ],
+    [
+     "30",
+     "142",
+     "20",
+     "Mithril Wand: 60 INT / 20 LUK"
+    ]
+   ]
+  },
+  {
+   "h3": "Recommended equipment: levels 10-30"
+  },
+  {
+   "p": "Buy the wand first. M.ATK directly raises spell damage, while W.ATK on a wand only affects physical swings."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Weapon",
+     "Useful armor",
+     "Source"
+    ],
+    [
+     "10",
+     "[[img:0bd13d592bcd59.png]]Wooden Wand 27 M.ATK",
+     "[[img:1e36506ff912a6.png]]Brown Apprentice Hat",
+     "Flora the Fairy and Serabi the Fairy in Ellinia"
+    ],
+    [
+     "15",
+     "[[img:b8e7401b5626da.png]]Hardwood Wand 34 M.ATK",
+     "[[img:f17cd152cb8c9e.png]]Blue Plain Robe +3 INT, male [[img:3d57a6a58ad57f.png]]Yellow Arianne + [[img:15b990e216a32b.png]]Yellow Arianne Skirt +1 INT each, female",
+     "Flora the Fairy and Serabi the Fairy in Ellinia"
+    ],
+    [
+     "20",
+     "[[img:06916dd07d6043.png]]Metal Wand 41 M.ATK",
+     "[[img:4811fccd43d379.png]]Blue Morrican +2 INT, +1% Crit",
+     "Metal Wand: Flora the Fairy"
+    ],
+    [
+     "25",
+     "[[img:ab2b399177dae9.png]]Ice Wand 48 M.ATK",
+     "[[img:cc32edb0e377c6.png]]Blue Doros Robe +5 INT, male [[img:4df809ed803d00.png]]Brown Doroness Robe +5 INT, female",
+     "Flora the Fairy and Serabi the Fairy"
+    ],
+    [
+     "30",
+     "[[img:2e8d2c65bd2aec.png]]Mithril Wand 55 M.ATK",
+     "[[img:9bb0c142cdc0c7.png]]Blue Wizard Robe +6 INT, male [[img:14da1a348301c5.png]]Blue Fairy Top + [[img:bfd615e03195ec.png]]Blue Fairy Skirt +3 INT each, female",
+     "Flora the Fairy and Serabi the Fairy"
+    ]
+   ]
+  },
+  {
+   "h3": "Mage overalls and scrolling"
+  },
+  {
+   "p": "Mage overalls are strong early upgrades, but the blue robes are male-only. Blue Plain Robe has +3 INT at level 15, Blue Doros Robe has +5 INT at level 25, and Blue Wizard Robe has +6 INT at level 30. Female Magicians get Brown Doroness Robe with +5 INT at level 25. At levels 15 and 30, their best option is a top and bottom: Yellow Arianne and Yellow Arianne Skirt for +2 INT, then Blue Fairy Top and Blue Fairy Skirt for +6 INT. Serabi the Fairy in Ellinia sells all of them. Each overall has 10 upgrade slots."
+  },
+  {
+   "note": "**Overall INT scrolls have no equivalent for Mage tops or bottoms.** The Lesser scroll is guaranteed +1 INT. The Intermediate scroll has a 60% success rate and gives +2 INT. Ben in Kerning City Civic Center sells the Lesser scroll for 35,000 mesos at Distinguished Citizen."
+  },
+  {
+   "p": "El Moth in The Tree That Grew III sells Lesser Wand and Staff Magic Attack scrolls for 25,000 mesos. Scroll the weapon you expect to keep long enough to recover that cost."
+  },
+  {
+   "h3": "Wand or staff?"
+  },
+  {
+   "p": "Use wands from level 10-30. Every comparable wand has 3 more M.ATK and equal or lower LUK requirements. Staves add only 1-2% Critical Damage in this range. However, if you get a lucky Staff drop from a mob, then use it. Weapons are so expensive... beggars can't be choosers."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Wand",
+     "Staff",
+     "Difference"
+    ],
+    [
+     "10",
+     "[[img:0bd13d592bcd59.png]]Wooden Wand 27 M.ATK, Speed 6",
+     "[[img:ce09d7582d3fbc.png]]Wooden Staff 24 M.ATK, Speed 7, +1% Crit DMG",
+     "Wand +3 M.ATK"
+    ],
+    [
+     "15",
+     "[[img:b8e7401b5626da.png]]Hardwood Wand 34 M.ATK, Speed 6, 0 LUK",
+     "[[img:562154a53f9097.png]]Sapphire Staff or [[img:e6ff74d0dac2ba.png]]Emerald Staff 31 M.ATK, Speed 7, 10 LUK, +1% Crit DMG",
+     "Wand +3 M.ATK and -10 LUK"
+    ],
+    [
+     "20",
+     "[[img:06916dd07d6043.png]]Metal Wand 41 M.ATK, Speed 6, 10 LUK",
+     "[[img:c20e85bef2bc37.png]]Old Wooden Staff 38 M.ATK, Speed 7, 15 LUK, +2% Crit DMG",
+     "Wand +3 M.ATK and -5 LUK"
+    ],
+    [
+     "25",
+     "[[img:ab2b399177dae9.png]]Ice Wand 48 M.ATK, Speed 6, 15 LUK",
+     "[[img:a3d9641467e022.png]]Wizard Staff 45 M.ATK, Speed 7, 20 LUK, +2% Crit DMG",
+     "Wand +3 M.ATK and -5 LUK"
+    ]
+   ]
+  },
+  {
+   "p": "Weapon speed changes physical wand and staff swings. Energy Bolt and Magic Claw use fixed magic timing, so Speed 6 versus Speed 7 does not make either spell cast faster."
+  },
+  {
+   "h3": "Magician shields and Guard"
+  },
+  {
+   "p": "Wands and staves are one-handed, so every Magician should equip a shield. All shields have an innate Guard effect that can fully block an eligible physical hit. The proc chance is based on the shield's own WDEF, and Shield WDEF scrolls can raise it. Tulcus in The Swamp of Despair II sells the Lesser Shield DEF scroll for 15,000 mesos."
+  },
+  {
+   "note": "**MeowFact:** The Pan Lid may be the better shield for Mages than the Mystic Shield and Esther Shield due to higher PDEF and a higher Guard rate. MDEF does not affect Guard proc rate."
+  },
+  {
+   "h3": "Stolen Fence"
+  },
+  {
+   "p": "Level 5. 40 WDEF and 7.4% Guard. Silver sells it in Lith Harbor."
+  },
+  {
+   "h3": "Pan Lid"
+  },
+  {
+   "p": "Level 10. 44 WDEF and 8.1% Guard. Better physical block chance than Mystic Shield. [[img:b62ded95656118.png]]Green Mushrooms drop it."
+  },
+  {
+   "h3": "Mystic Shield"
+  },
+  {
+   "p": "Level 22. 20 WDEF, 42 MDEF, and 5.0% Guard. Requires 34 INT and 12 LUK."
+  },
+  {
+   "h3": "M.ATK or Critical Rate on gloves?"
+  },
+  {
+   "p": "On the level 30 example, five successful Lesser Magic Attack scrolls add 10 M.ATK and raise expected Energy Bolt damage from 428 to 460, a 7.6% gain. Five Critical Rate scrolls add 5% Crit and raise it to 432, a 1.0% gain."
+  },
+  {
+   "note": "**Use Gloves Magic Attack Scrolls.** W.ATK scrolls do not improve spell damage."
+  },
+  {
+   "h3": "Training maps: levels 10-30"
+  },
+  {
+   "p": "NiaMeowDB's Training Advisor uses the sample's current damage, Accuracy, HP, MP, defense, active Magic Guard, mob spawns, and attack timing. Every level 15-30 row below has a 100% hit rate and kills every spawn within two Energy Bolts using the weakest possible damage. The level 20 sample rates its two maps Caution; the later Armor levels bring the listed maps back to Safe. Level 10 has no Victoria Island map that passes the two-cast check."
+  },
+  {
+   "p": "**What does weakest damage mean?** Spell damage changes from cast to cast. This is the lowest normal hit the build can roll. A guaranteed 2-cast kill still works when both casts roll that lowest value."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Sample",
+     "Best Training Advisor maps",
+     "Refill"
+    ],
+    [
+     "10",
+     "60 INT / 27 M.ATK / EB 1",
+     "**The Rain-Forest East of Henesys**: 456 EXP/min; Pig 3-cast, Ribbon Pig 4-cast. **A Hill West of Henesys**: 393 EXP/min; Pig, Stump, and Slime 3-cast, Ribbon Pig 4-cast, Red Snail 2-cast, Blue Snail 1-cast.",
+     "Henesys; both walks are short."
+    ],
+    [
+     "15",
+     "87 INT / 34 M.ATK / EB 12",
+     "**The Rain-Forest East of Henesys**: 811 EXP/min; Pig 1-cast, Ribbon Pig 2-cast. **A Hill West of Henesys**: 742 EXP/min; Pig and both snails 1-cast, Ribbon Pig, Stump, and Slime 2-cast.",
+     "Henesys potion and equipment shops."
+    ],
+    [
+     "20",
+     "108 INT / 41 M.ATK / EB 20 / MG 3 / MA 3",
+     "**Transfer Area**: 1,370 EXP/min; Stirge 2-cast. **Tree Dungeon, Forest Up North I**: 1,299 EXP/min; Horny Mushroom 2-cast, Slime 1-cast.",
+     "Kerning City for Transfer Area; Ellinia for Forest Up North."
+    ],
+    [
+     "25",
+     "130 INT / 48 M.ATK / EB 20 / MG 3 / MA 18",
+     "**Line 1 <Area 1>**: 2,074 EXP/min; Bubbling 1-cast. **Tree Dungeon, Forest Up North IV**: 1,620 EXP/min; Green Mushroom and Slime 1-cast.",
+     "Line 1 has the shorter Kerning refill."
+    ],
+    [
+     "30",
+     "155 INT / 55 M.ATK / EB 20 / MG 3 / MA 20",
+     "**Transfer Area**: 2,741 EXP/min; Stirge 1-cast. **Dungeon, Southern Forest IV**: 2,435 EXP/min; Blue Mushroom 2-cast and the other spawns 1-cast.",
+     "Kerning City for Transfer Area; Ellinia for Southern Forest."
+    ]
+   ]
+  },
+  {
+   "h3": "Level 30 Magician example build"
+  },
+  {
+   "p": "4 base STR / 4 base DEX / 142 base INT / 20 base LUK\n155 INT / 20 LUK / 55 M.ATK / 71 ACC / 814 HP / 1,566 MP with gear"
+  },
+  {
+   "p": "**Skills:** EB 20, MG 3, IMR 3, MMI 15, MA 20."
+  },
+  {
+   "p": "[[img:2e8d2c65bd2aec.png]]Mithril Wand[[img:865f68bdf44e7c.png]]Brown Jester[[img:9bb0c142cdc0c7.png]]Blue Wizard Robe[[img:0355c8bcbf7d6b.png]]Mystic Shield"
+  },
+  {
+   "h2": "Recommended potions"
+  },
+  {
+   "p": "Energy Bolt is efficient, but every point of damage moved through Magic Guard competes with your attack MP. Buy the most cost-efficient potions, use Armor to reduce incoming damage, and refill before either bar becomes dangerous."
+  },
+  {
+   "p": "**BEST TO BUY** Best shop recovery per meso"
+  },
+  {
+   "p": "[[img:be80aa4791c684.png]] **Red Potion** 100 HP for 50 mesos 0.5 meso per HP [[img:39a28ad40190a6.png]] **Fried Chicken** 120 HP for 60 mesos 0.5 meso per HP [[img:51e2250795d8f6.png]] **Meat** 160 HP for 80 mesos 0.5 meso per HP [[img:da1e5c881a1df6.png]] **Orange** 50 MP for 50 mesos 1 meso per MP [[img:d59bc967011b87.png]] **Lemon** 150 MP for 150 mesos 1 meso per MP"
+  },
+  {
+   "p": "**SITUATIONAL** Buy for a damage or Accuracy breakpoint"
+  },
+  {
+   "p": "[[img:01a2e09235af46.png]] **Magic Potion** +10 M.ATK for 10 min Raises magic damage [[img:4e15182d2a8a6e.png]] **Sniper Potion** +5 Accuracy for 10 min Fixes a small hit-rate gap [[img:e18fe0a27cd32a.png]] **Supreme Sniper Potion** +7 Accuracy for 15 min Sold by Raymond in Henesys"
+  },
+  {
+   "p": "**DON'T BUY FOR VALUE** More recovery per use, worse recovery per meso"
+  },
+  {
+   "p": "[[img:a699b6aea354d7.png]] **White Potion** 500 HP for 350 mesos 0.7 meso per HP [[img:d19cbf8225851d.png]] **Blue Potion** 200 MP for 220 mesos 1.1 mesos per MP"
+  },
+  {
+   "h2": "Common Magician mistakes"
+  },
+  {
+   "ol": [
+    "**Maxing Magic Claw from old habit.** As of COT2, both Energy Bolt and Magic Claw deal the same average damage. Energy Bolt costs less MP, reaches farther, has better Knockback potential, and saves 1 SP for Max MP Increase or Improved MP Recovery. Magic Claw has more stable damage and can bypass terrain. Make your decision after learning their pros and cons.",
+    "**Adding LUK for first-job advancement.** There is no stat requirement. Add LUK only when your weapon needs it.",
+    "**Leaving full Magic Guard on for easy training.** At basic shop prices, every 100 damage costs about 90 mesos to refill through MG 15, compared with 50 mesos when it stays on HP.",
+    "**Letting Magic Guard drain the last MP.** Empty MP means no spell and no transfer pool.",
+    "**Not using a staff because of its slower attack speed.** Spells don't care about a weapon's attack speed.",
+    "**Leaving the shield slot empty.** Common shields can have more WDEF and Guard chance than early Mage shields.",
+    "**Ignoring the refill walk.** A map with nearly equal EXP/min is worse when every potion run takes much longer."
+   ]
+  },
+  {
+   "h2": "At level 30: choose your second job"
+  },
+  {
+   "h3": "Fire/Poison Wizard"
+  },
+  {
+   "p": "Fire Arrow gives strong elemental single-target damage. Poison Breath adds damage over time."
+  },
+  {
+   "guide": "fp-wizard-class-guide",
+   "text": "F/P Wizard Lv 30-70 guide"
+  },
+  {
+   "h3": "Ice/Lightning Wizard"
+  },
+  {
+   "p": "Cold Beam handles single targets and weaknesses. Thunder Bolt clears up to six mobs."
+  },
+  {
+   "guide": "il-wizard-class-guide",
+   "text": "I/L Wizard Lv 30-70 guide"
+  },
+  {
+   "h3": "Cleric"
+  },
+  {
+   "p": "Heal, Bless, and Invincible make Cleric the party-support Magician."
+  },
+  {
+   "guide": "cleric-class-guide",
+   "text": "Cleric Lv 30-70 guide"
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/magician-class-guide",
+ "hash": "dd782bd95e5d"
+}

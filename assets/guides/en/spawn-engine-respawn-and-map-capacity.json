@@ -1,0 +1,122 @@
+{
+ "title": "Spawn Rate and Map Capacity",
+ "intro": "How MapleStory Classic mobs respawn: 7.56s server tick, 5s per-point cooldown, and the player-count scaling that decides how many mobs fill a map.",
+ "hero": null,
+ "minutes": 3,
+ "blocks": [
+  {
+   "p": "[[img:fc8a87617e5660.png]] Our spawn model uses three rules: a global server tick, a per-spawn-point cooldown, and a map capacity that changes with player count. The exact player-count curve still needs direct confirmation in current live play."
+  },
+  {
+   "h2": "The 7.56-second server tick"
+  },
+  {
+   "p": "The server runs one respawn check every **7.56 seconds**, globally. That pass walks every loaded map and asks each empty spawn point whether it is ready to refill. The tick is a **synchronization gate**: a mob whose cooldown ended 1 second ago still has to wait for the next tick before it appears. Think of it as a bus that stops every 7.56s; mobs queue up between buses and all board at once."
+  },
+  {
+   "p": "When many mobs die in a short window (an AoE clear), they all respawn at the next tick together. The map looks empty for a few seconds, then refills in one wave."
+  },
+  {
+   "h2": "Per-spawn-point cooldown"
+  },
+  {
+   "p": "Each spawn point has its own post-death cooldown that runs in parallel with the global tick. The cooldown depends on whether the spawn is wave-pool or timed:"
+  },
+  {
+   "table": [
+    [
+     "Spawn type",
+     "Cooldown",
+     "Source"
+    ],
+    [
+     "Wave-pool spawn (default)",
+     "5 seconds",
+     "Default for every point"
+    ],
+    [
+     "Timed spawn (the point has its own timer)",
+     "That point's timer (60s, 180s, 300s, 1800s, etc.)",
+     "Replaces the 5s default"
+    ]
+   ]
+  },
+  {
+   "p": "Effective respawn = the **first 7.56s tick at or after (death + cooldown)**. Wave cooldowns are shorter than the tick, so a freshly-cleared wave point cycles roughly every 7.56s in active grinding. A timed boss on a 300s timer cycles in 300s plus up to 7.56s of tick slop, so closer to 304s on average."
+  },
+  {
+   "h2": "Map capacity scales with player count"
+  },
+  {
+   "p": "The model sets maximum concurrent mobs to **map spawn points multiplied by a player-count scalar**: 75% for one player, then +5% per extra player, up to 100% at six. This curve powers the map calculators, but every live player-count step has not been measured yet."
+  },
+  {
+   "table": [
+    [
+     "Players on map",
+     "Capacity scalar",
+     "Cap on a 50-spawn map"
+    ],
+    [
+     "1",
+     "75%",
+     "37"
+    ],
+    [
+     "2",
+     "80%",
+     "40"
+    ],
+    [
+     "3",
+     "85%",
+     "42"
+    ],
+    [
+     "4",
+     "90%",
+     "45"
+    ],
+    [
+     "5",
+     "95%",
+     "47"
+    ],
+    [
+     "6+",
+     "100%",
+     "50"
+    ]
+   ]
+  },
+  {
+   "h2": "Spawns per hour"
+  },
+  {
+   "p": "For a wave-pool spawn point that always has someone clearing it, the upper ceiling is **3600 / 7.56 ≈ 476 spawns per hour**. Apply the player-count scalar above: ~357/hr solo, ~476/hr in a full party. For a timed spawn on a 60-second timer, the per-point rate is **3600 / (60 + ~3.78) ≈ 56 spawns per hour**; the tick adds an average half-tick (~3.78s) of slop on every cycle. The player-count scalar does not apply to timed spawns."
+  },
+  {
+   "h2": "About the map spawn-rate multiplier"
+  },
+  {
+   "p": "Each map's data carries a spawn-rate multiplier, typically between 0.8 and 2.0. Other MapleStory servers multiplied map capacity by it. **MSC does not.** The live game ignores it; capacity comes only from spawn-point count and the player scalar."
+  },
+  {
+   "h2": "Putting it together"
+  },
+  {
+   "p": "**Solo grinders:** the best grind maps guide already uses the 75% solo baseline. Do not reduce those listed ceilings again.\n**Party grinders:** the model gives a full six-player map about 33% more spawn capacity than a solo map, before the EXP party bonus.\n**Timed bosses ignore player count.** The current map record gives Mushmom a 60-minute base timer. Two independent in-game reports put its return near 90 minutes, so use an unconfirmed 60 to 90 minute window."
+  },
+  {
+   "h2": "Notes on accuracy"
+  },
+  {
+   "p": "Still unverified in current live play: whether the player-count curve is exactly linear at every step, whether timed spawn points sit outside the wave-pool cap, and whether the 7.56-second tick can slip under load. Until those checks are complete, the calculator is for comparisons only."
+  },
+  {
+   "p": "Special thanks to Cody (OSMS) for documenting the spawn system used as the model's starting point."
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/spawn-engine-respawn-and-map-capacity",
+ "hash": "2a89085ddf17"
+}

@@ -1,0 +1,137 @@
+{
+ "title": "HP/MP Gain Explained for MapleStory Classic World",
+ "intro": "Per-level HP and MP gains for every class in MapleStory Classic World, plus first, second, and third-job advancement bonuses.",
+ "hero": null,
+ "minutes": 3,
+ "blocks": [
+  {
+   "p": "[[img:eead4ba441ad89.png]] Per-level HP/MP gain is a flat number based on your class. First, second, and third job advancements grant the same class bonus. Every figure below is measured from COT2, including a level 11 Warrior catch-up and Grummash's level 100 third-job characters."
+  },
+  {
+   "h2": "Per-level HP/MP gain"
+  },
+  {
+   "table": [
+    [
+     "Class",
+     "Max HP per level",
+     "Max MP per level"
+    ],
+    [
+     "Beginner",
+     "+16",
+     "+12"
+    ],
+    [
+     "Warrior",
+     "+28",
+     "+12"
+    ],
+    [
+     "Bowman",
+     "+22",
+     "+17"
+    ],
+    [
+     "Thief",
+     "+22",
+     "+17"
+    ],
+    [
+     "Magician",
+     "+16",
+     "+22"
+    ]
+   ]
+  },
+  {
+   "p": "All five classes are confirmed. Sampled level-ups showed zero variance. Grummash's level 100 third-job totals also match the same per-level gains after adding the third advancement bonus."
+  },
+  {
+   "p": "**Branches use their base class rates.** Hunter and Crossbowman take the Bowman numbers, Bandit and Assassin take the Thief numbers."
+  },
+  {
+   "p": "**HP washing is dead in MSCW.** INT does not give additional MP here."
+  },
+  {
+   "h2": "Job advancement HP/MP gain"
+  },
+  {
+   "table": [
+    [
+     "Class",
+     "Max HP per advancement",
+     "Max MP per advancement",
+     "Total",
+     "Measured at"
+    ],
+    [
+     "Warrior",
+     "+350",
+     "+150",
+     "500",
+     "1st and 3rd job"
+    ],
+    [
+     "Bowman",
+     "+250",
+     "+250",
+     "500",
+     "2nd and 3rd job"
+    ],
+    [
+     "Thief",
+     "+250",
+     "+250",
+     "500",
+     "1st, 2nd, and 3rd job"
+    ],
+    [
+     "Magician",
+     "+150",
+     "+350",
+     "500",
+     "1st and 3rd job"
+    ]
+   ]
+  },
+  {
+   "p": "Each job advancement grants 500 points with the same class split at first, second, and third job. Grummash's level 100 totals confirmed the third-job bonuses across all ten branches."
+  },
+  {
+   "p": "**Meow Fact:** Unlike leveling up, job advancing does not heal you. It only raises your max HP and MP."
+  },
+  {
+   "h2": "Starting HP and MP"
+  },
+  {
+   "p": "A character starts with **50 base HP and 5 base MP**. A Beginner at level 10 has 194 HP and 113 MP."
+  },
+  {
+   "h2": "Sources of HP and MP"
+  },
+  {
+   "p": "Equipment can provide additional HP and MP. Warriors and magicians carry a skill: Max HP Increase and Max MP Increase each reach +25% (of your base) at max level."
+  },
+  {
+   "h2": "Late job advancement"
+  },
+  {
+   "p": "**One late Warrior level is caught up.** A level 11 Beginner advanced to Warrior with 572 Max HP, 275 Max MP, all Warrior skills at rank 0, and 4 unspent SP. Those are the same base pools and first-job SP as an on-time level 11 Warrior. This directly confirms level 11 Warrior catch-up; later levels and other classes still need direct tests."
+  },
+  {
+   "h2": "Sources and methodology"
+  },
+  {
+   "p": "Max HP and Max MP were read from COT2 status bars frame by frame. The late-advance screenshot shows a level 11 Warrior at 572/275 with Max HP Increase at rank 0 and 4 unspent SP."
+  },
+  {
+   "p": "Grummash provided level 100 Max HP and Max MP totals for all ten third jobs. After accounting for Max HP Increase and Max MP Increase, every branch matches one additional class advancement bonus. The percentage skill applies after the flat bonus, then the result rounds down."
+  },
+  {
+   "p": "Got a clip that reads Max HP and Max MP either side of an advancement? Drop it in the MeowDB Discord and we will check it against the table."
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/hp-mp-gain-explained",
+ "hash": "aa569808e6b2"
+}

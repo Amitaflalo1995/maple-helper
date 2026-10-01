@@ -1,0 +1,841 @@
+{
+ "title": "EXP Table Lv 1-100: Current and Historical Reference",
+ "intro": "EXP requirements for levels 1-100, with levels 1-49 confirmed in the current game and levels 50-99 marked as a historical reference.",
+ "hero": null,
+ "minutes": 5,
+ "blocks": [
+  {
+   "p": "[[img:0fb3ffe2173e43.png]] Every EXP requirement in MapleStory Classic World. Did you know the rates are the exact same as that of pre-Big-Bang MapleStory?"
+  },
+  {
+   "h2": "Per-level EXP requirement"
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "EXP to next",
+     "Cumulative from lv 1",
+     "Milestone"
+    ],
+    [
+     "1",
+     "15",
+     "15",
+     ""
+    ],
+    [
+     "2",
+     "34",
+     "49",
+     ""
+    ],
+    [
+     "3",
+     "57",
+     "106",
+     ""
+    ],
+    [
+     "4",
+     "92",
+     "198",
+     ""
+    ],
+    [
+     "5",
+     "135",
+     "333",
+     ""
+    ],
+    [
+     "6",
+     "372",
+     "705",
+     ""
+    ],
+    [
+     "7",
+     "560",
+     "1,265",
+     ""
+    ],
+    [
+     "8",
+     "840",
+     "2,105",
+     "First Victoria Island quests become available."
+    ],
+    [
+     "9",
+     "1,242",
+     "3,347",
+     ""
+    ],
+    [
+     "10",
+     "1,716",
+     "5,063",
+     "**1st job** advancement. **Crafting** unlocks."
+    ],
+    [
+     "11",
+     "2,360",
+     "7,423",
+     ""
+    ],
+    [
+     "12",
+     "3,216",
+     "10,639",
+     "**Citizenship** opens. 80 quests gate here."
+    ],
+    [
+     "13",
+     "4,200",
+     "14,839",
+     ""
+    ],
+    [
+     "14",
+     "5,460",
+     "20,299",
+     ""
+    ],
+    [
+     "15",
+     "7,050",
+     "27,349",
+     "**Mages and Warriors** get access to Overalls."
+    ],
+    [
+     "16",
+     "8,840",
+     "36,189",
+     ""
+    ],
+    [
+     "17",
+     "11,040",
+     "47,229",
+     "The fossil research chain (6 quests) and 10 more Citizenship quests become available."
+    ],
+    [
+     "18",
+     "13,716",
+     "60,945",
+     ""
+    ],
+    [
+     "19",
+     "16,680",
+     "77,625",
+     ""
+    ],
+    [
+     "20",
+     "20,216",
+     "97,841",
+     ""
+    ],
+    [
+     "21",
+     "24,402",
+     "122,243",
+     "**Kerning PQ**, First Time Together."
+    ],
+    [
+     "22",
+     "28,980",
+     "151,223",
+     ""
+    ],
+    [
+     "23",
+     "34,320",
+     "185,543",
+     ""
+    ],
+    [
+     "24",
+     "40,512",
+     "226,055",
+     ""
+    ],
+    [
+     "25",
+     "47,216",
+     "273,271",
+     "First Sleepywood quests become available."
+    ],
+    [
+     "26",
+     "54,900",
+     "328,171",
+     ""
+    ],
+    [
+     "27",
+     "63,666",
+     "391,837",
+     ""
+    ],
+    [
+     "28",
+     "73,080",
+     "464,917",
+     ""
+    ],
+    [
+     "29",
+     "83,720",
+     "548,637",
+     ""
+    ],
+    [
+     "30",
+     "95,700",
+     "644,337",
+     "**2nd job** advancement. **Bowman and Thief** get their first Overalls."
+    ],
+    [
+     "31",
+     "108,480",
+     "752,817",
+     ""
+    ],
+    [
+     "32",
+     "122,760",
+     "875,577",
+     ""
+    ],
+    [
+     "33",
+     "138,666",
+     "1,014,243",
+     "Cumulative EXP passes **1 million**."
+    ],
+    [
+     "34",
+     "155,540",
+     "1,169,783",
+     ""
+    ],
+    [
+     "35",
+     "174,216",
+     "1,343,999",
+     ""
+    ],
+    [
+     "36",
+     "194,832",
+     "1,538,831",
+     ""
+    ],
+    [
+     "37",
+     "216,600",
+     "1,755,431",
+     "First Florina Beach quests become available."
+    ],
+    [
+     "38",
+     "240,500",
+     "1,995,931",
+     ""
+    ],
+    [
+     "39",
+     "266,682",
+     "2,262,613",
+     "**Forgotten Hollow** content opens up."
+    ],
+    [
+     "40",
+     "294,216",
+     "2,556,829",
+     ""
+    ],
+    [
+     "41",
+     "324,240",
+     "2,881,069",
+     ""
+    ],
+    [
+     "42",
+     "356,916",
+     "3,237,985",
+     ""
+    ],
+    [
+     "43",
+     "391,160",
+     "3,629,145",
+     ""
+    ],
+    [
+     "44",
+     "428,280",
+     "4,057,425",
+     ""
+    ],
+    [
+     "45",
+     "468,450",
+     "4,525,875",
+     ""
+    ],
+    [
+     "46",
+     "510,420",
+     "5,036,295",
+     ""
+    ],
+    [
+     "47",
+     "555,680",
+     "5,591,975",
+     ""
+    ],
+    [
+     "48",
+     "604,416",
+     "6,196,391",
+     ""
+    ],
+    [
+     "49",
+     "655,200",
+     "6,851,591",
+     "**Level 50** reached. **Crafting Lv 10** becomes available, the current maximum. Still under 4% of the climb to 100."
+    ],
+    [
+     "50",
+     "709,716",
+     "7,561,307",
+     ""
+    ],
+    [
+     "51",
+     "748,608",
+     "8,309,915",
+     ""
+    ],
+    [
+     "52",
+     "789,631",
+     "9,099,546",
+     ""
+    ],
+    [
+     "53",
+     "832,902",
+     "9,932,448",
+     ""
+    ],
+    [
+     "54",
+     "878,545",
+     "10,810,993",
+     ""
+    ],
+    [
+     "55",
+     "926,689",
+     "11,737,682",
+     ""
+    ],
+    [
+     "56",
+     "977,471",
+     "12,715,153",
+     ""
+    ],
+    [
+     "57",
+     "1,031,036",
+     "13,746,189",
+     "First level requiring more than **1 million EXP**."
+    ],
+    [
+     "58",
+     "1,087,536",
+     "14,833,725",
+     ""
+    ],
+    [
+     "59",
+     "1,147,132",
+     "15,980,857",
+     ""
+    ],
+    [
+     "60",
+     "1,209,994",
+     "17,190,851",
+     ""
+    ],
+    [
+     "61",
+     "1,276,301",
+     "18,467,152",
+     "Cumulative EXP passes **10%** of the Lv 1-100 total."
+    ],
+    [
+     "62",
+     "1,346,242",
+     "19,813,394",
+     ""
+    ],
+    [
+     "63",
+     "1,420,016",
+     "21,233,410",
+     ""
+    ],
+    [
+     "64",
+     "1,497,832",
+     "22,731,242",
+     ""
+    ],
+    [
+     "65",
+     "1,579,913",
+     "24,311,155",
+     ""
+    ],
+    [
+     "66",
+     "1,666,492",
+     "25,977,647",
+     ""
+    ],
+    [
+     "67",
+     "1,757,815",
+     "27,735,462",
+     ""
+    ],
+    [
+     "68",
+     "1,854,143",
+     "29,589,605",
+     ""
+    ],
+    [
+     "69",
+     "1,955,750",
+     "31,545,355",
+     ""
+    ],
+    [
+     "70",
+     "2,062,925",
+     "33,608,280",
+     "**3rd job** advancement, confirmed for a later update."
+    ],
+    [
+     "71",
+     "2,175,973",
+     "35,784,253",
+     ""
+    ],
+    [
+     "72",
+     "2,295,216",
+     "38,079,469",
+     ""
+    ],
+    [
+     "73",
+     "2,420,993",
+     "40,500,462",
+     ""
+    ],
+    [
+     "74",
+     "2,553,663",
+     "43,054,125",
+     ""
+    ],
+    [
+     "75",
+     "2,693,603",
+     "45,747,728",
+     "Cumulative EXP passes **25%** of the Lv 1-100 total."
+    ],
+    [
+     "76",
+     "2,841,212",
+     "48,588,940",
+     ""
+    ],
+    [
+     "77",
+     "2,996,910",
+     "51,585,850",
+     ""
+    ],
+    [
+     "78",
+     "3,161,140",
+     "54,746,990",
+     ""
+    ],
+    [
+     "79",
+     "3,334,370",
+     "58,081,360",
+     ""
+    ],
+    [
+     "80",
+     "3,517,093",
+     "61,598,453",
+     ""
+    ],
+    [
+     "81",
+     "3,709,829",
+     "65,308,282",
+     ""
+    ],
+    [
+     "82",
+     "3,913,127",
+     "69,221,409",
+     ""
+    ],
+    [
+     "83",
+     "4,127,566",
+     "73,348,975",
+     ""
+    ],
+    [
+     "84",
+     "4,353,756",
+     "77,702,731",
+     ""
+    ],
+    [
+     "85",
+     "4,592,341",
+     "82,295,072",
+     ""
+    ],
+    [
+     "86",
+     "4,844,001",
+     "87,139,073",
+     ""
+    ],
+    [
+     "87",
+     "5,109,452",
+     "92,248,525",
+     "First level requiring more than **5 million EXP**. Cumulative EXP passes **50%**."
+    ],
+    [
+     "88",
+     "5,389,449",
+     "97,637,974",
+     ""
+    ],
+    [
+     "89",
+     "5,684,790",
+     "103,322,764",
+     ""
+    ],
+    [
+     "90",
+     "5,996,316",
+     "109,319,080",
+     ""
+    ],
+    [
+     "91",
+     "6,324,914",
+     "115,643,994",
+     ""
+    ],
+    [
+     "92",
+     "6,671,519",
+     "122,315,513",
+     ""
+    ],
+    [
+     "93",
+     "7,037,118",
+     "129,352,631",
+     ""
+    ],
+    [
+     "94",
+     "7,422,752",
+     "136,775,383",
+     "Cumulative EXP passes **75%** of the Lv 1-100 total."
+    ],
+    [
+     "95",
+     "7,829,518",
+     "144,604,901",
+     ""
+    ],
+    [
+     "96",
+     "8,258,575",
+     "152,863,476",
+     ""
+    ],
+    [
+     "97",
+     "8,711,144",
+     "161,574,620",
+     ""
+    ],
+    [
+     "98",
+     "9,188,514",
+     "170,763,134",
+     ""
+    ],
+    [
+     "99",
+     "9,692,044",
+     "**180,455,178**",
+     "**Level 100** reached, the highest level anyone got to in COT2."
+    ]
+   ]
+  },
+  {
+   "p": "**Confidence boundary:** Levels 1 to 49 are confirmed in the current game. Levels 50 to 99 reproduce a historical reference table and remain planning estimates until they are verified in current play."
+  },
+  {
+   "p": "**Nexon has never announced a level cap for Classic.** Level 100 is where our table stops and where COT2's testers topped out."
+  },
+  {
+   "p": "**Ossyria and 3rd job are not in the initial launch.** Nexon's August 21 report confirms that Orbis, El Nath, and 3rd Job Advancement will not be included in Founder's Access or Grand Launch. They are being reworked and will be introduced gradually later."
+  },
+  {
+   "h2": "The EXP Formula"
+  },
+  {
+   "p": "Three formulas represent every level from 1 to 100."
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "Formula",
+     "Worked example"
+    ],
+    [
+     "1 to 5",
+     "`(floor(level² / 2) + 15) × level`",
+     "Level 5: (12 + 15) × 5 = **135**"
+    ],
+    [
+     "6 to 50",
+     "`q = floor(level² / 3)`, then `(q + 19) × q`",
+     "Level 49: (800 + 19) × 800 = **655,200**"
+    ],
+    [
+     "51 to 99",
+     "`trunc(previous level's EXP × 1.0548)`",
+     "Level 51: trunc(709,716 × 1.0548) = **748,608**"
+    ]
+   ]
+  },
+  {
+   "p": "In the historical reference, every level from 51 onward costs 5.48% more than the one before it."
+  },
+  {
+   "h2": "EXP magnitude at a glance"
+  },
+  {
+   "p": "Raw numbers hide how steep the back half is. Each bar below is scaled against level 99, the most expensive level in the table."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "EXP to next",
+     "Relative cost"
+    ],
+    [
+     "1",
+     "15",
+     ""
+    ],
+    [
+     "10",
+     "1,716",
+     ""
+    ],
+    [
+     "20",
+     "20,216",
+     ""
+    ],
+    [
+     "30",
+     "95,700",
+     ""
+    ],
+    [
+     "40",
+     "294,216",
+     "█"
+    ],
+    [
+     "50",
+     "709,716",
+     "███"
+    ],
+    [
+     "60",
+     "1,209,994",
+     "█████"
+    ],
+    [
+     "70",
+     "2,062,925",
+     "█████████"
+    ],
+    [
+     "80",
+     "3,517,093",
+     "███████████████"
+    ],
+    [
+     "90",
+     "5,996,316",
+     "█████████████████████████"
+    ],
+    [
+     "99",
+     "9,692,044",
+     "████████████████████████████████████████"
+    ]
+   ]
+  },
+  {
+   "p": "**Everything below level 40 is invisible at this scale.** Level 1 to 50 costs 6,851,591 EXP in total. Level 99 costs 9,692,044 on its own, which is more than your first fifty levels put together."
+  },
+  {
+   "h2": "Observations about the curve"
+  },
+  {
+   "ul": [
+    "**The level 10 advancement is cheap.** 3,347 total EXP to hit 10. The Maple Island questline rewards 680 EXP, enough for level 6 on quests alone, and the rest falls quickly from the mobs around you.",
+    "**Level 50 is under 4% of the way to 100.** 6,851,591 total to reach 50, against 180,455,178 to reach 100. Hitting 50 feels like an achievement and is worth about a twenty-fifth of the road.",
+    "**Four fifths of the climb sits above level 70.** Reaching 3rd job costs 31,545,355, which is 17% of the total. The remaining 83% is levels 70 to 100.",
+    "**The curve stops accelerating at 51.** Below 50 each level costs between 1.08 and 2.76 times the one before it. From 51 onward the multiplier locks at 1.0548 and never moves again, so the grind pain grows smoothly rather than unpredictably."
+   ]
+  },
+  {
+   "h2": "Party bonus EXP"
+  },
+  {
+   "p": "Party bonus EXP by party size, measured in COT2 by Ryan."
+  },
+  {
+   "table": [
+    [
+     "Party size",
+     "Bonus EXP"
+    ],
+    [
+     "2",
+     "10%"
+    ],
+    [
+     "3",
+     "20%"
+    ],
+    [
+     "4",
+     "30%"
+    ],
+    [
+     "5",
+     "30%"
+    ],
+    [
+     "6",
+     "30%"
+    ]
+   ]
+  },
+  {
+   "p": "**The bonus caps at four members.** Four, five and six all give 30%. A fifth and sixth player can still help by clearing a map faster, they just add no bonus rate."
+  },
+  {
+   "h2": "Practical grind numbers"
+  },
+  {
+   "p": "Translating the table into on-the-ground decisions. All mob EXP values below are taken straight from the monster database and assume **solo EXP**."
+  },
+  {
+   "ul": [
+    "**Ribbon Pig** (lv 10, **19 EXP**). Going from 10 to 11 needs 1,716 EXP, which is about **91 kills**.",
+    "**Stirge** (lv 20, **37 EXP**). Going from 20 to 21 needs 20,216 EXP, which is about **547 kills**.",
+    "**Ligator** (lv 31, **59 EXP**). Going from 30 to 31 needs 95,700 EXP, about **1,622 kills**.",
+    "**Cold Eye** (lv 40, **94 EXP**). Going from 40 to 41 needs 294,216 EXP, about **3,130 kills**.",
+    "**Clang** (lv 49, **137 EXP**). The last level before 50 costs 655,200 EXP, about **4,783 kills** solo.",
+    "**Tauromacis** (lv 70, **300 EXP**). In the historical reference, the 3rd job level costs 2,062,925 EXP, about **6,877 kills**.",
+    "**Death EXP loss.** LUK lowers the EXP lost when your character dies."
+   ]
+  },
+  {
+   "h2": "Frequently asked questions"
+  },
+  {
+   "h3": "How long does it take to reach level 20 or 30?"
+  },
+  {
+   "p": "In the closed online tests, testers clocked about 3 to 4 hours from level 10 to 20 and about 8 to 9 hours from 20 to 30. The first character to reach level 30 in the second closed test took 14 hours in total. Your own pace moves with class, map and party size, so measure it with the grind tracker."
+  },
+  {
+   "guide": "beginners-guide-first-steps-in-maple-world",
+   "text": "Beginner's Guide: MapleStory Classic World"
+  },
+  {
+   "guide": "warrior-class-guide",
+   "text": "MapleStory Classic Warrior Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "magician-class-guide",
+   "text": "MapleStory Classic Magician Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "bowman-class-guide",
+   "text": "MapleStory Classic Bowman Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "thief-class-guide",
+   "text": "MapleStory Classic Thief Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "explaining-the-damage-formula",
+   "text": "MapleStory Classic Damage Formula"
+  },
+  {
+   "guide": "best-grind-maps-every-level",
+   "text": "Best Grind Maps for Every Level 1-70"
+  },
+  {
+   "guide": "maplestory-classic-glossary",
+   "text": "MapleStory Classic World Glossary"
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/exp-table-level-1-to-100",
+ "hash": "d20665949252"
+}

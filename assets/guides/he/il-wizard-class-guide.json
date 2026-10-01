@@ -1,348 +1,703 @@
 {
- "key": "guide/il-wizard-class-guide",
- "source_hash": "d694f43650df",
- "lang": "he",
  "title": "MapleStory Classic: מדריך I/L Wizard, לבל 30-70",
- "intro": "מדריך I/L Wizard ללבלים 30-70 עם חלוקת SP ואימון לפי אלמנטים. כולל ציוד, פוטים ומפות של COT2 Training Advisor.",
- "pros": [
-  "מקום 4 בדמג' AoE בלבל 70 בבנצ'מרק הנוכחי של COT2.",
-  "מקום 1 (בתיקו) ב-Magic EHP בלבל 70; טנקי נגד מובים שמרביצים מאגיה!",
-  "Thunder Bolt תוקף עד שישה מובים מסביב לקאסטר, ההתקפה היחידה בג'וב השני שפוגעת בשישה מובים מכל סוג.",
-  "Cold Beam עושה 25% יותר דמג' למובים חלשים לקרח ומאט אותם.",
-  "Meditation נותן לחברי פארטי קרובים 25 Magic Attack.",
-  "Teleport שומר אותך בתנועה בין פלטפורמות."
- ],
- "cons": [
-  "Thunder Bolt מקסימלי עולה 40 MP לכל קאסט.",
-  "מובים עמידים לקרח או לברק מורידים את הדמג' של הספל המתאים.",
-  "HP נמוך הופך באף Magic Guard שנשכח למסוכן."
- ],
- "sections": [
+ "intro": "I/L Wizards הם הקלאס הכי מהיר בהריגת מובים, עם Thunder Bolt שפוגע בעד שישה מובים קרובים. Cold Beam מטפל בטרגטים קשים יותר ויכול לפגוע דרך שטח, ו-Teleport שומר אתכם בתנועה בין פלטפורמות.",
+ "blocks": [
   {
-   "heading": "מתחילים בלבל 30",
-   "lines": [
-    "המדריך הזה ממשיך מהמדריך שלנו ל-Magician לבל 1 עד 30 , שמשווה בין הבילדים של הג'וב הראשון לפי עלות במסוס. כל אחד מהם עובד ל-I/L Wizard.",
-    "סקיל ג'וב ראשון | חסכוני | בטוח יותר | לבל 70 של Grummash",
-    "Energy Bolt | 20 | 20 | 1",
-    "Magic Claw | 0 | 0 | 20",
-    "Improved MP Recovery | 3 | 3 | 10",
-    "Max MP Increase | 15 | 15 | 15",
-    "Magic Guard | 3 | 15 | 15",
-    "Magic Armor | 20 | 8 | 0",
-    "הבטוח יותר מעביר 12 SP מ-Magic Armor ל-Magic Guard. הבילד של Grummash צריך SP reset; המחיר שלו ב-Cash Shop לא מאומת."
+   "p": "המדריך הזה מבוסס על בילד ריאלי של I/L Wizard בלבל 70 מאת Grummash."
+  },
+  {
+   "p": "**יתרונות**"
+  },
+  {
+   "ul": [
+    "מקום 4 בדמג' AoE בלבל 70 בבנצ'מרק הנוכחי של COT2.",
+    "מקום 1 (בתיקו) ב-Magic EHP בלבל 70; טנקי נגד מובים שמרביצים מאגיה!",
+    "Thunder Bolt תוקף עד שישה מובים מסביב לקאסטר, ההתקפה היחידה בג'וב השני שפוגעת בשישה מובים מכל סוג.",
+    "Cold Beam עושה 25% יותר דמג' למובים חלשים לקרח ומאט אותם.",
+    "Meditation נותן לחברי פארטי קרובים 25 Magic Attack.",
+    "Teleport שומר אותך בתנועה בין פלטפורמות."
    ]
   },
   {
-   "heading": "אזרחות מומלצת",
-   "lines": [
-    "תשאירו את האזרחות של Kerning City שבחרתם בג'וב הראשון. פרסי סקרולי הרובה שלה בהמשך מוסיפים LUK או INT, ששניהם שימושיים כשמתכוננים לסטאפ של Angel Wings בלבל 70.",
-    "השוו פרסי אזרחות"
+   "p": "**חסרונות**"
+  },
+  {
+   "ul": [
+    "Thunder Bolt מקסימלי עולה 40 MP לכל קאסט.",
+    "מובים עמידים לקרח או לברק מורידים את הדמג' של הספל המתאים.",
+    "HP נמוך הופך באף Magic Guard שנשכח למסוכן."
    ]
   },
   {
-   "heading": "Accuracy אחרי לבל 30",
-   "lines": [
-    "מפת אימון עובדת רק כשההתקפות שלך פוגעות. כל מיס שורף MP, מבזבז את אנימציית ההתקפה ומוריד EXP לדקה.",
-    "Magician Base Accuracy: לבל, INT, LUK ו-Accuracy ישיר מתווספים כולם ל-ACC הכולל.",
-    "+0.39 ACC לכל לבל",
-    "+0.24 ACC לכל INT",
-    "+0.12 ACC לכל LUK",
-    "+1.00 ACC לכל ACC ישיר",
-    "לכל מוב יש Avoidability. להילחם מעל הלבל שלך מעלה את ה-ACC שצריך כדי לפגוע, ועליית לבלים סוגרת את הקנס הזה. בגלל זה מפה בלבל נמוך יותר עם הריגות נקיות במכה אחת או שתיים יכולה לנצח מפה בלבל גבוה יותר עם מיסים.",
-    "מוב | לבל המוב | Avoid של המוב | ACC כדי לא לפספס אף פעם בלבל שווה",
-    "Jr. Wraith | 34 | 24 | 79 ACC",
-    "Lorang | 38 | 23 | 76 ACC",
-    "Zombie Lupin | 41 | 28 | 92 ACC",
-    "Wraith | 48 | 31 | 101 ACC",
-    "קראו את ההסבר המלא על Accuracy של Magician פתחו את Accuracy Simulator"
+   "h2": "מתחילים בלבל 30"
+  },
+  {
+   "p": "המדריך הזה ממשיך מהמדריך שלנו ל-Magician לבל 1 עד 30, שמשווה בין הבילדים של הג'וב הראשון לפי עלות במסוס. כל אחד מהם עובד ל-I/L Wizard."
+  },
+  {
+   "img": "b5fa0ec4a04551.png",
+   "w": 130,
+   "h": 164
+  },
+  {
+   "table": [
+    [
+     "סקיל ג'וב ראשון",
+     "חסכוני",
+     "בטוח יותר",
+     "לבל 70 של Grummash"
+    ],
+    [
+     "[[img:24dcca787059a4.png]]Energy Bolt",
+     "20",
+     "20",
+     "1"
+    ],
+    [
+     "[[img:5370722a856bb9.png]]Magic Claw",
+     "0",
+     "0",
+     "20"
+    ],
+    [
+     "[[img:664c530d20bba5.png]]Improved MP Recovery",
+     "3",
+     "3",
+     "10"
+    ],
+    [
+     "[[img:d0a2f30f9abf2b.png]]Max MP Increase",
+     "15",
+     "15",
+     "15"
+    ],
+    [
+     "[[img:211a115f0a6318.png]]Magic Guard",
+     "3",
+     "15",
+     "15"
+    ],
+    [
+     "[[img:32b086d39a1fbe.png]]Magic Armor",
+     "20",
+     "8",
+     "0"
+    ]
    ]
   },
   {
-   "heading": "לבלים 30-70: בילד סקילים ולבלינג ל-I/L Wizard",
-   "lines": []
+   "p": "הבטוח יותר מעביר 12 SP מ-Magic Armor ל-Magic Guard. הבילד של Grummash צריך SP reset; המחיר שלו ב-Cash Shop לא מאומת."
   },
   {
-   "heading": "התקדמות ג'וב ל-I/L Wizard בלבל 30",
-   "lines": [
+   "h3": "אזרחות מומלצת"
+  },
+  {
+   "p": "תשאירו את האזרחות של Kerning City שבחרתם בג'וב הראשון. פרסי סקרולי הרובה שלה בהמשך מוסיפים LUK או INT, ששניהם שימושיים כשמתכוננים לסטאפ של Angel Wings בלבל 70."
+  },
+  {
+   "h2": "Accuracy אחרי לבל 30"
+  },
+  {
+   "p": "מפת אימון עובדת רק כשההתקפות שלך פוגעות. כל מיס שורף MP, מבזבז את אנימציית ההתקפה ומוריד EXP לדקה."
+  },
+  {
+   "img": "d6a9e8d928c736.png",
+   "w": 130,
+   "h": 179
+  },
+  {
+   "note": "**Magician Base Accuracy**\nלבל, INT, LUK ו-Accuracy ישיר מתווספים כולם ל-ACC הכולל.\n**+0.39** ACC לכל לבל\n**+0.24** ACC לכל INT\n**+0.12** ACC לכל LUK\n**+1.00** ACC לכל ACC ישיר"
+  },
+  {
+   "p": "לכל מוב יש Avoidability. להילחם מעל הלבל שלכם מעלה את ה-ACC שצריך כדי לפגוע, ועליית לבלים סוגרת את הקנס הזה. בגלל זה מפה בלבל נמוך יותר עם הריגות נקיות במכה אחת או שתיים יכולה לנצח מפה בלבל גבוה יותר עם מיסים."
+  },
+  {
+   "table": [
+    [
+     "מוב",
+     "לבל המוב",
+     "Avoid של המוב",
+     "ACC כדי לא לפספס אף פעם בלבל שווה"
+    ],
+    [
+     "[[img:777ced8b4048a6.png]]Jr. Wraith",
+     "34",
+     "24",
+     "79 ACC"
+    ],
+    [
+     "[[img:2a5d75bf6e3634.png]]Lorang",
+     "38",
+     "23",
+     "76 ACC"
+    ],
+    [
+     "[[img:3934c93d7d4444.png]]Zombie Lupin",
+     "41",
+     "28",
+     "92 ACC"
+    ],
+    [
+     "[[img:0386eea7010d4c.png]]Wraith",
+     "48",
+     "31",
+     "101 ACC"
+    ]
+   ]
+  },
+  {
+   "guide": "magician-class-guide",
+   "text": "קראו את ההסבר המלא על Accuracy של Magician"
+  },
+  {
+   "h2": "לבלים 30-70: בילד סקילים ולבלינג ל-I/L Wizard"
+  },
+  {
+   "img": "617f8e4cf5ecf9.png",
+   "w": 130,
+   "h": 139
+  },
+  {
+   "h3": "התקדמות ג'וב ל-I/L Wizard בלבל 30"
+  },
+  {
+   "ol": [
     "מתחילים את ההתקדמות לג'וב השני בשיחה עם Grendel the Really Old ב-Ellinia.",
     "קחו את המכתב שלו צפונה ל-Magician Job Instructor ב-The Forest North of Ellinia.",
     "תהרגו את מובי המבחן, תאספו 30 Dark Marbles, ותקבלו את The Proof of a Hero.",
-    "תחזירו את ההוכחה ל-Grendel ותבחרו I/L Wizard.",
-    "Grendel the Really Old מתחיל ומסיים את ההתקדמות ל-I/L Wizard ב-Ellinia.",
-    "Magician Job Instructor מריץ את מבחן ה-Dark Marble צפונית ל-Ellinia.",
-    "ה-SP הראשון של I/L Wizard: Teleport 1. הנקודה הראשונה נותנת תנועה מיידית בין פלטפורמות ב-55 MP. תשתמשו בזה בזהירות עד שלבלים גבוהים יותר של הסקיל יורידו את העלות."
+    "תחזירו את ההוכחה ל-Grendel ותבחרו I/L Wizard."
    ]
   },
   {
-   "heading": "יעד הסקילים בלבל 70",
-   "lines": [
-    "סקיל | SP | התוצאה בלבל הסקיל השמור",
-    "MP Eater | 20 / 20 | בכל התקפה, 50% סיכוי הצלחה, סופג 50% מה-Max MP של האויב",
-    "Meditation | 20 / 20 | MP -25; Magic Attack של הפארטי +25 למשך 300 שניות",
-    "Teleport | 20 / 20 | MP -15; Teleport למרחק 150",
-    "Slow | 1 / 20 | MP -15; Speed של האויב -10, Evasion -1 למשך 10 שניות",
-    "Cold Beam | 30 / 30 | MP -22; Basic Attack 170, Mastery לבל 10; מואט ל-3 שניות",
-    "Thunder Bolt | 30 / 30 | MP -40; Basic Attack 70, Mastery לבל 10; 25% סיכוי להתחשמל"
+   "p": "[[img:fb4af958a97eb5.png]] **Grendel the Really Old** מתחיל ומסיים את ההתקדמות ל-I/L Wizard ב-Ellinia."
+  },
+  {
+   "p": "[[img:9a7face47a910e.png]] **Magician Job Instructor** מריץ את מבחן ה-Dark Marble צפונית ל-Ellinia."
+  },
+  {
+   "note": "**ה-SP הראשון של I/L Wizard: Teleport 1.** הנקודה הראשונה נותנת תנועה מיידית בין פלטפורמות ב-55 MP. תשתמשו בזה בזהירות עד שלבלים גבוהים יותר של הסקיל יורידו את העלות."
+  },
+  {
+   "h3": "יעד הסקילים בלבל 70"
+  },
+  {
+   "table": [
+    [
+     "סקיל",
+     "SP",
+     "התוצאה בלבל הסקיל השמור"
+    ],
+    [
+     "[[img:3a965ce996a17b.png]]MP Eater",
+     "20 / 20",
+     "בכל התקפה, 50% סיכוי הצלחה, סופג 50% מה-Max MP של האויב"
+    ],
+    [
+     "[[img:36e4e076321665.png]]Meditation",
+     "20 / 20",
+     "MP -25; Magic Attack של הפארטי +25 למשך 300 שניות"
+    ],
+    [
+     "[[img:9e60bf77fd346c.png]]Teleport",
+     "20 / 20",
+     "MP -15; Teleport למרחק 150"
+    ],
+    [
+     "[[img:6fa403b487f879.png]]Slow",
+     "1 / 20",
+     "MP -15; Speed של האויב -10, Evasion -1 למשך 10 שניות"
+    ],
+    [
+     "[[img:f8415b5b8d7c08.png]]Cold Beam",
+     "30 / 30",
+     "MP -22; Basic Attack 170, Mastery לבל 10; מואט ל-3 שניות"
+    ],
+    [
+     "[[img:e28909e5386b42.png]]Thunder Bolt",
+     "30 / 30",
+     "MP -40; Basic Attack 70, Mastery לבל 10; 25% סיכוי להתחשמל"
+    ]
    ]
   },
   {
-   "heading": "חלוקת SP ל-I/L Wizard: לבלים 30-70",
-   "lines": [
-    "לבלים | להשקיע | סה\"כ מצטבר | סיבה",
-    "30 | Teleport +1 | Teleport 1 | תנועה מיידית במפה.",
-    "31-39 | Cold Beam +27 | Cold Beam 27 | בונים את ספל הקרח לטרגט יחיד. הוא עובד בכל מפה.",
-    "40 | Cold Beam +3 | Cold Beam 30 | מקסום הדמג' וה-Mastery שלו.",
-    "41-50 | Thunder Bolt +30 | Thunder Bolt 30 | מוסיפים את הספל לשישה טרגטים למפות צפופות.",
-    "51 | MP Eater +3 | MP Eater 3 | פותח את Meditation.",
-    "52-57 | Meditation +18 | Meditation 18 | מעלים את ה-Magic Attack של הפארטי.",
-    "58 | Meditation +2, MP Eater +1 | Meditation 20 / Eater 4 | מקסום Meditation.",
-    "59-63 | MP Eater +15 | MP Eater 19 | בונים את הפסיבי שחוסך פוטים.",
-    "64 | MP Eater +1, Teleport +2 | Eater 20 / Teleport 3 | מקסום MP Eater.",
-    "65-69 | Teleport +15 | Teleport 18 | מורידים עלות MP ומגדילים מרחק.",
-    "70 | Teleport +2, Slow +1 | Teleport 20 / Slow 1 | מסיימים את נקודת הסיום של Grummash.",
-    "אי אפשר להשקיע SP של ג'וב שני בסקילים של ג'וב ראשון, אז תסיימו את התוכנית של הג'וב הראשון עד לבל 30. Character Builder מסמן כל בילד ששובר את זה."
+   "h3": "חלוקת SP ל-I/L Wizard: לבלים 30-70"
+  },
+  {
+   "table": [
+    [
+     "לבלים",
+     "להשקיע",
+     "סה\"כ מצטבר",
+     "סיבה"
+    ],
+    [
+     "30",
+     "Teleport +1",
+     "Teleport 1",
+     "תנועה מיידית במפה."
+    ],
+    [
+     "31-39",
+     "Cold Beam +27",
+     "Cold Beam 27",
+     "בונים את ספל הקרח לטרגט יחיד. הוא עובד בכל מפה."
+    ],
+    [
+     "40",
+     "Cold Beam +3",
+     "Cold Beam 30",
+     "מקסום הדמג' וה-Mastery שלו."
+    ],
+    [
+     "41-50",
+     "Thunder Bolt +30",
+     "Thunder Bolt 30",
+     "מוסיפים את הספל לשישה טרגטים למפות צפופות."
+    ],
+    [
+     "51",
+     "MP Eater +3",
+     "MP Eater 3",
+     "פותח את Meditation."
+    ],
+    [
+     "52-57",
+     "Meditation +18",
+     "Meditation 18",
+     "מעלים את ה-Magic Attack של הפארטי."
+    ],
+    [
+     "58",
+     "Meditation +2, MP Eater +1",
+     "Meditation 20 / Eater 4",
+     "מקסום Meditation."
+    ],
+    [
+     "59-63",
+     "MP Eater +15",
+     "MP Eater 19",
+     "בונים את הפסיבי שחוסך פוטים."
+    ],
+    [
+     "64",
+     "MP Eater +1, Teleport +2",
+     "Eater 20 / Teleport 3",
+     "מקסום MP Eater."
+    ],
+    [
+     "65-69",
+     "Teleport +15",
+     "Teleport 18",
+     "מורידים עלות MP ומגדילים מרחק."
+    ],
+    [
+     "70",
+     "Teleport +2, Slow +1",
+     "Teleport 20 / Slow 1",
+     "מסיימים את נקודת הסיום של Grummash."
+    ]
    ]
   },
   {
-   "heading": "Cold Beam או Thunder Bolt קודם?",
-   "lines": [
-    "Cold Beam מרביץ חזק למוב אחד. Thunder Bolt פוגע בעד שישה מובים, אבל עושה הרבה פחות דמג' לכל אחד. מה למקסם קודם תלוי בכמה מובים כל Thunder Bolt באמת פוגע.",
-    "מובים שנפגעים בכל Thunder Bolt | Cold Beam קודם | Thunder Bolt קודם",
-    "1 | 4,199 | 3,239",
-    "2 | 4,199 | 4,148",
-    "3 | 4,199 | 6,222",
-    "4 | 4,199 | 8,296",
-    "EXP לדקה בלבל 40 במפת ההתחלה הכי טובה ב-Training Advisor. על מוב אחד, Energy Bolt / Magic Claw 20 מרביץ חזק יותר מ-Thunder Bolt 30, אז העמודה של Thunder Bolt קודם חוזרת אליו.",
-    "נקודת האיזון היא 2 מובים לקאסט. אנחנו ממקסמים Cold Beam קודם כי רוב הקאסטים לא פוגעים ב-2+ מובים כשהם מפוזרים, בזמן ש-Cold Beam עובד בכל מפה. Thunder Bolt עוקף את Cold Beam אם אתם מצליחים לפגוע באופן קבוע ב-3 מובים או יותר בכל קאסט.",
-    "נגד מובים ניטרליים לאלמנטים, תמשיכו להשתמש ב-Energy Bolt או ב-Magic Claw כהתקפה הראשית עד ש-Cold Beam מגיע לסקיל Lv24 בלבל 38. נגד מובים חלשים ל-Ice, Cold Beam הוא הסקיל הטוב יותר מסקיל Lv18 בלבל 36."
+   "p": "אי אפשר להשקיע SP של ג'וב שני בסקילים של ג'וב ראשון, אז תסיימו את התוכנית של הג'וב הראשון עד לבל 30. Character Builder מסמן כל בילד ששובר את זה."
+  },
+  {
+   "h3": "Cold Beam או Thunder Bolt קודם?"
+  },
+  {
+   "p": "[[img:f8415b5b8d7c08.png]]Cold Beam מרביץ חזק למוב אחד. [[img:e28909e5386b42.png]]Thunder Bolt פוגע בעד שישה מובים, אבל עושה הרבה פחות דמג' לכל אחד. מה למקסם קודם תלוי בכמה מובים כל Thunder Bolt באמת פוגע."
+  },
+  {
+   "table": [
+    [
+     "מובים שנפגעים בכל Thunder Bolt",
+     "Cold Beam קודם",
+     "Thunder Bolt קודם"
+    ],
+    [
+     "1",
+     "4,199",
+     "3,239"
+    ],
+    [
+     "2",
+     "4,199",
+     "4,148"
+    ],
+    [
+     "3",
+     "4,199",
+     "6,222"
+    ],
+    [
+     "4",
+     "4,199",
+     "8,296"
+    ]
    ]
   },
   {
-   "heading": "שינויים אפשריים בסדר ברירת המחדל",
-   "lines": [
-    "Thunder Bolt קודם",
-    "אם אתם פוגעים באופן קבוע ב-3 מובים או יותר בכל קאסט, תחליפו בין לבלים 31-40 ל-41-50: קודם מקסום Thunder Bolt, אחר כך Cold Beam. ב-3 מובים לקאסט הוא מגיע לבערך 6,222 EXP/min בלבל 40, לעומת 4,199 של Cold Beam.",
-    "Meditation לפני Thunder Bolt",
-    "בעיקר נלחמים במוב אחד בכל פעם? אחרי Cold Beam 30, קחו MP Eater 3 בלבל 41 ומקסמו Meditation לפני Thunder Bolt. Thunder Bolt כמעט לא מוסיף כלום על טרגט יחיד, בזמן ש-Meditation מעלה כל ספל, עד 12% יותר דמג' לטרגט יחיד בין לבלים 42 ל-55.",
-    "Teleport 10 מוקדם יותר",
-    "תעלו את Teleport אחרי מקסום ההתקפה הראשונה כשתנועה במפה חוסכת יותר זמן מהספל השני."
+   "p": "EXP לדקה בלבל 40 במפת ההתחלה הכי טובה ב-Training Advisor. על מוב אחד, [[img:24dcca787059a4.png]]Energy Bolt/[[img:5370722a856bb9.png]]Magic Claw 20 מרביץ חזק יותר מ-Thunder Bolt 30, אז העמודה של Thunder Bolt קודם חוזרת אליו."
+  },
+  {
+   "p": "נקודת האיזון היא 2 מובים לקאסט. אנחנו ממקסמים Cold Beam קודם כי רוב הקאסטים לא פוגעים ב-2+ מובים כשהם מפוזרים, בזמן ש-Cold Beam עובד בכל מפה. Thunder Bolt עוקף את Cold Beam אם אתם מצליחים לפגוע באופן קבוע ב-3 מובים או יותר בכל קאסט."
+  },
+  {
+   "p": "נגד מובים ניטרליים לאלמנטים, תמשיכו להשתמש ב-Energy Bolt או ב-Magic Claw כהתקפה הראשית עד ש-Cold Beam מגיע לסקיל Lv24 בלבל 38. נגד מובים חלשים ל-Ice, [[img:f8415b5b8d7c08.png]]Cold Beam הוא הסקיל הטוב יותר מסקיל Lv18 בלבל 36."
+  },
+  {
+   "h3": "שינויים אפשריים בסדר ברירת המחדל"
+  },
+  {
+   "h3": "Thunder Bolt קודם"
+  },
+  {
+   "p": "אם אתם פוגעים באופן קבוע ב-3 מובים או יותר בכל קאסט, תחליפו בין לבלים 31-40 ל-41-50: קודם מקסום Thunder Bolt, אחר כך Cold Beam. ב-3 מובים לקאסט הוא מגיע לבערך 6,222 EXP/min בלבל 40, לעומת 4,199 של Cold Beam."
+  },
+  {
+   "h3": "Meditation לפני Thunder Bolt"
+  },
+  {
+   "p": "בעיקר נלחמים במוב אחד בכל פעם? אחרי Cold Beam 30, קחו MP Eater 3 בלבל 41 ומקסמו Meditation לפני Thunder Bolt. Thunder Bolt כמעט לא מוסיף כלום על טרגט יחיד, בזמן ש-Meditation מעלה כל ספל, עד 12% יותר דמג' לטרגט יחיד בין לבלים 42 ל-55."
+  },
+  {
+   "h3": "Teleport 10 מוקדם יותר"
+  },
+  {
+   "p": "תעלו את Teleport אחרי מקסום ההתקפה הראשונה כשתנועה במפה חוסכת יותר זמן מהספל השני."
+  },
+  {
+   "h2": "חלוקת AP ל-I/L Wizard: לבלים 30-70"
+  },
+  {
+   "p": "Grummash מסיים עם 299 INT בסיסי ו-63 LUK בסיסי, ואז מקבל עוד שני LUK מהציוד כדי ללבוש Angel Wings. אל תוסיפו LUK בסיסי אוטומטית אחרי שהדרישה הכוללת מכוסה; ה-AP שנשאר הולך ל-INT."
+  },
+  {
+   "table": [
+    [
+     "לבלים",
+     "AP בכל לבל",
+     "AP בסיסי בסוף"
+    ],
+    [
+     "31-40",
+     "INT +3 / LUK +2",
+     "172 INT / 40 LUK"
+    ],
+    [
+     "41-63",
+     "INT +4 / LUK +1",
+     "264 INT / 63 LUK"
+    ],
+    [
+     "64-70",
+     "INT +5",
+     "299 INT / 63 LUK"
+    ]
    ]
   },
   {
-   "heading": "חלוקת AP ל-I/L Wizard: לבלים 30-70",
-   "lines": [
-    "Grummash מסיים עם 299 INT בסיסי ו-63 LUK בסיסי, ואז מקבל עוד שני LUK מהציוד כדי ללבוש Angel Wings. אל תוסיפו LUK בסיסי אוטומטית אחרי שהדרישה הכוללת מכוסה; ה-AP שנשאר הולך ל-INT.",
-    "לבלים | AP בכל לבל | AP בסיסי בסוף",
-    "31-40 | INT +3 / LUK +2 | 172 INT / 40 LUK",
-    "41-63 | INT +4 / LUK +1 | 264 INT / 63 LUK",
-    "64-70 | INT +5 | 299 INT / 63 LUK"
+   "h2": "ציוד מומלץ"
+  },
+  {
+   "img": "a205a5472151ec.png",
+   "w": 130,
+   "h": 185
+  },
+  {
+   "table": [
+    [
+     "לבל",
+     "פריט",
+     "למה זה חשוב"
+    ],
+    [
+     "10",
+     "[[img:50988435f40c62.png]]Pan Lid",
+     "כל קלאס. 44 WDEF נותנים 8.09% סיכוי Guard, אחוז החסימה הכי טוב למג'."
+    ],
+    [
+     "30",
+     "[[img:2e8d2c65bd2aec.png]]Mithril Wand",
+     "55 M.ATK. דורש 60 INT ו-20 LUK."
+    ],
+    [
+     "35",
+     "[[img:eb1d5689fc40fb.png]]Esther Shield",
+     "מגן מג' עם 28 WDEF ו-55 MDEF. סיכוי ה-Guard שלו, 5.30%, נמוך משל Pan Lid. דורש 60 INT ו-25 LUK."
+    ],
+    [
+     "40",
+     "[[img:512b9623061125.png]]Fairy Wand",
+     "69 M.ATK. דורש 80 INT ו-30 LUK."
+    ],
+    [
+     "45",
+     "[[img:8fb958a3a2bb3e.png]]Arc Staff",
+     "73 M.ATK. דורש 90 INT ו-40 LUK."
+    ],
+    [
+     "50",
+     "[[img:07f049cea846d4.png]]Cromi",
+     "83 M.ATK לפני סקרולים. דורש 100 INT ו-40 LUK."
+    ],
+    [
+     "55",
+     "[[img:3d68bcb0a089c0.png]]Thorns",
+     "87 M.ATK. דורש 110 INT ו-50 LUK."
+    ],
+    [
+     "60",
+     "[[img:cad3048cc1d6cd.png]]Evil Tale",
+     "97 M.ATK. דורש 120 INT ו-55 LUK."
+    ],
+    [
+     "65",
+     "[[img:b2c74841227fe5.png]]Evil Wings",
+     "101 M.ATK. דורש 130 INT ו-60 LUK."
+    ],
+    [
+     "70",
+     "[[img:e4a7a0c9e9a042.png]]Angel Wings",
+     "111 M.ATK לפני סקרולים. דורש 140 INT ו-65 LUK."
+    ]
    ]
   },
   {
-   "heading": "ציוד מומלץ",
-   "lines": [
-    "לבל | פריט | למה זה חשוב",
-    "10 | Pan Lid | כל קלאס. 44 WDEF נותנים 8.09% סיכוי Guard, אחוז החסימה הכי טוב למג'.",
-    "30 | Mithril Wand | 55 M.ATK. דורש 60 INT ו-20 LUK.",
-    "35 | Esther Shield | מגן מג' עם 28 WDEF ו-55 MDEF. סיכוי ה-Guard שלו, 5.30%, נמוך משל Pan Lid. דורש 60 INT ו-25 LUK.",
-    "40 | Fairy Wand | 69 M.ATK. דורש 80 INT ו-30 LUK.",
-    "45 | Arc Staff | 73 M.ATK. דורש 90 INT ו-40 LUK.",
-    "50 | Cromi | 83 M.ATK לפני סקרולים. דורש 100 INT ו-40 LUK.",
-    "55 | Thorns | 87 M.ATK. דורש 110 INT ו-50 LUK.",
-    "60 | Evil Tale | 97 M.ATK. דורש 120 INT ו-55 LUK.",
-    "65 | Evil Wings | 101 M.ATK. דורש 130 INT ו-60 LUK.",
-    "70 | Angel Wings | 111 M.ATK לפני סקרולים. דורש 140 INT ו-65 LUK.",
-    "I/L Wizards יכולים להחזיק מגן גם עם wand וגם עם staff. זמן הקאסט של ספלים לא משתנה לפי מהירות הנשק, אז קחו את ה-M.ATK הכי גבוה שאתם יכולים ללבוש. Pan Lid חוסם יותר פעמים מ-Esther Shield (8.09% מול 5.30% סיכוי Guard), בזמן ש-Esther Shield מוסיף 55 MDEF נגד התקפות מאגיה. כל סקרול WDEF על המגן מעלה עוד את סיכוי ה-Guard."
+   "p": "I/L Wizards יכולים להחזיק מגן גם עם wand וגם עם staff. זמן הקאסט של ספלים לא משתנה לפי מהירות הנשק, אז קחו את ה-M.ATK הכי גבוה שאתם יכולים ללבוש. Pan Lid חוסם יותר פעמים מ-Esther Shield (8.09% מול 5.30% סיכוי Guard), בזמן ש-Esther Shield מוסיף 55 MDEF נגד התקפות מאגיה. כל סקרול WDEF על המגן מעלה עוד את סיכוי ה-Guard."
+  },
+  {
+   "h3": "נקודות ציון לשריון"
+  },
+  {
+   "p": "[[img:865f68bdf44e7c.png]]Brown Jester[[img:9bb0c142cdc0c7.png]]Blue Wizard Robe[[img:5ca31d9e7d020a.png]]White Guiltian[[img:78d839fcd323e4.png]]Brown Starlight[[img:8d8a46fa3d576a.png]]Flame Golden Circlet[[img:47590281c2f8ba.png]]Red Calas[[img:ccef521f33304a.png]]Red Seraphis[[img:f4a44340286672.png]]Blue Anakamoon"
+  },
+  {
+   "p": "אלה נקודות ציון נקיות של כובע ורובה בלבלים 30, 40, 50 ו-60 ממאגר הפריטים הנוכחי. פתחו את העמוד של כל פריט כדי לראות את מקורות הדרופ, הקראפט או החנות העדכניים. רובה זולה יותר עם INT או LUK שימושיים יכולה להיות טובה יותר מלהתעקש על כל דרגה."
+  },
+  {
+   "h2": "M.ATK או Critical Rate על הכפפות?"
+  },
+  {
+   "p": "המספרים האלה משתמשים בבילד הריאלי של Grummash ל-I/L Wizard בלבל 70 ובחמישה סקרולי כפפות Lesser מוצלחים. שתי האפשרויות משתמשות באותם חמישה סלוטים."
+  },
+  {
+   "h3": "5x Gloves Magic Attack Scroll: Lesser"
+  },
+  {
+   "p": "**+10 M.ATK**\n326 עד 336 M.ATK כולל\nבערך 3.07% יותר דמג' צפוי."
+  },
+  {
+   "h3": "5x Gloves Crit. Rate Scroll: Lesser"
+  },
+  {
+   "p": "**+5% Critical Rate**\n9% עד 14% Critical Rate\nבערך 1.27% יותר דמג' צפוי."
+  },
+  {
+   "note": "**תבחרו Magic Attack.** הסטאפ של חמישה סקרולי Magic Attack עושה בערך 1.77% יותר דמג' צפוי מהסטאפ של Critical Rate בבילד הזה."
+  },
+  {
+   "p": "W.ATK לא מעלה את הדמג' של ספלים. סקרול ה-Magic Attack המקביל נותן פי שניים M.ATK ממה שסקרול ה-Critical Rate נותן Critical Rate."
+  },
+  {
+   "p": "**היחס זהה בכל דרגה.** Lesser נותן +1 W.ATK או +1% Critical Rate (+2 M.ATK), Intermediate +2/+2% (+4 M.ATK), Greater +3/+3% (+6 M.ATK), ו-Chaos +4/+4% (+8 M.ATK). לדרגות מקבילות יש אותם אחוזי הצלחה והשמדה."
+  },
+  {
+   "h2": "בילדים לדוגמה ומפות Training Advisor"
+  },
+  {
+   "img": "3d5574fb5dc942.png",
+   "w": 130,
+   "h": 179
+  },
+  {
+   "p": "Thunder Bolt מתמודד עם מפות צפופות, בזמן ש-Cold Beam נותן דמג' חזק יותר לטרגט יחיד. כרטיס הבילד החסכוני של Jimmy משתמש בציוד זול ונקי: Energy Bolt עם Meditation מוקדם, ואז Cold Beam אחרי SP reset. הריגה מובטחת עדיין עובדת גם על רול הדמג' הרגיל הכי חלש עם 100% פגיעה. כל בחירה מראה גם Danger ואת מילוי הפוטים הקרוב, כי יתרון קטן ב-EXP יכול להיעלם כשההליכה חזרה ארוכה בהרבה."
+  },
+  {
+   "note": "לבל 30\nEnergy Bolt 20 / MG 3 / MA 20 / 71 ACC / 155 INT\n[[img:ae64823f427bc0.png]] **Transfer Area** Energy Bolt: Stirge בקאסט אחד, Safe ב-7%; מילוי אצל Dr. Faymus במרחק 4 פורטלים; בערך 2,741 EXP/min [[img:059caff41683e8.png]] **Dungeon, Southern Forest IV** Energy Bolt: Blue Mushroom בשני קאסטים ושאר הספאונים בקאסט אחד, Safe ב-9%; מילוי אצל Len the Fairy במרחק 5 פורטלים; בערך 2,435 EXP/min\nהבילד החסכוני של Jimmy: קודם Energy Bolt, Cold Beam אחרי reset\n177 INT בסיסי / 10 LUK בסיסי בלבל 35, כל ה-AP ל-INT\n[[img:bbcd27e94f27bb.png]]White Bandana [[img:f17cd152cb8c9e.png]]Blue Plain Robe [[img:06916dd07d6043.png]]Metal Wand (נקי)\nלבלים 30-31: תשאירו Energy Bolt 20 ותשימו את ה-SP החדש ב-MP Eater 3, ואז Meditation.\nלבל 32: תעברו ל-Metal Wand. עם Meditation 4, Energy Bolt הורג Stirges במכה אחת ו-Fire Boars בשתיים (422 למכה ברול הכי חלש מול 842 HP).\nלפני לבל 40: תעשו reset ל-SP לתוך Cold Beam. בלבל 40, Cold Beam 30 הורג Fire Boars במכה אחת עם אותו Metal Wand (860 ברול הכי חלש).\nלבל 50: להרוג Copper Drakes (2,595 HP) בשתי מכות דורש בערך 125 M.ATK מהציוד, או Meditation 20 של חבר פארטי. הבילד של לבל 50 למטה (107 M.ATK) צריך 3 קאסטים.\n[[img:ae64823f427bc0.png]] **Transfer Area** לבל 32 Energy Bolt: Stirge מובטח בקאסט אחד, Safe ב-5%; מילוי אצל Dr. Faymus במרחק 4 פורטלים; בערך 2,741 EXP/min [[img:762bddf50eb031.png]] **The Burnt Land III** לבל 32 Energy Bolt: Fire Boar ו-Dark Axe Stump מובטחים בשני קאסטים, Caution ב-11%; מילוי אצל Arturo במרחק 6 פורטלים; בערך 2,049 EXP/min\nלבל 40\nCold Beam 30, 83 ACC, 182 INT\n[[img:762bddf50eb031.png]] **The Burnt Land I** Fire Boar ו-Dark Axe Stump מובטחים בקאסט אחד, Safe ב-9%; מילוי אצל Arturo במרחק 4 פורטלים; בערך 4,199 EXP/min [[img:a951e586bae69f.png]] **Ant Tunnel Park** Evil Eye ושתי הפטריות מובטחים בקאסט אחד, Safe ב-8%; מילוי אצל Mr. Sweatbottom במרחק 11 פורטלים; בערך 3,511 EXP/min\nלבל 50\nThunder Bolt 30, Cold Beam 30, 225 INT\n[[img:059caff41683e8.png]] **Ant Tunnel IV** Horny Mushroom בקאסט אחד ו-Zombie Mushroom בשניים, Safe ב-6%; מילוי אצל Mr. Sweatbottom במרחק 6 פורטלים; בערך 14,023 EXP/min [[img:1d6ce5099450d1.png]] **Tree Dungeon, Forest Up North IX** Cold Beam: Curse Eye מובטח בקאסט אחד, Safe ב-9%; מילוי אצל Len the Fairy במרחק 5 פורטלים; בערך 4,889 EXP/min\nלבל 60\nThunder Bolt 30, Cold Beam 30, Meditation מקסימלי, 270 INT\n[[img:36750484773e65.png]] **Ant Tunnel III** שתי הפטריות מובטחות בקאסט אחד, Safe ב-5%; מילוי אצל Mr. Sweatbottom במרחק 5 פורטלים; בערך 19,318 EXP/min [[img:8d3453e377c2eb.png]] **Perilous Descent III** Cold Beam: Duskmander ו-Echopus מובטחים בשני קאסטים, Safe ב-9%; מילוי אצל Luma במרחק 6 פורטלים; בערך 4,929 EXP/min\nלבל 70\nהבילד של Grummash, 352 INT, 336 M.ATK עם Meditation\n[[img:777ced8b4048a6.png]] **Line 1 <Area 2>** Jr. Wraith בשני קאסטים ו-Stirge בקאסט אחד, Safe ב-6%; מילוי אצל Dr. Faymus במרחק 5 פורטלים; בערך 24,777 EXP/min [[img:0386eea7010d4c.png]] **Line 2 <Area 3>** Cold Beam מבטיח שני קאסטים על Wraith, Safe ב-8%; מילוי אצל Dr. Faymus במרחק 7 פורטלים; בערך 9,455 EXP/min"
+  },
+  {
+   "p": "**לפני שאתם מתמקמים:** הבחירות של Thunder Bolt מניחות שכל קאסט פוגע בכל המובים בטווח. תבדקו בכמה אתם באמת פוגעים בתנועה רגילה. אם זה אחד לקאסט, תשתמשו בבחירה של Cold Beam. תשמרו את הספל ואת ההתאמה האלמנטית בבילד השמור שלכם מעודכנים."
+  },
+  {
+   "h2": "מכניקות חשובות של סקילים ל-I/L Wizard"
+  },
+  {
+   "h3": "Thunder Bolt"
+  },
+  {
+   "img": "9d6a45a5275bc1.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "ל-Thunder Bolt מקסימלי יש 70 Basic Attack עם Mastery 10. הוא יכול לפגוע בשישה מובים ב-40 MP. נתוני הסקיל מציינים 25% סיכוי להתחשמלות ו-2 שניות של סטאן. מובים עמידים לברק לא נכנסים לסטאן."
+  },
+  {
+   "p": "**בלבל 70, הבנצ'מרק עושה בערך 6,223 דמג' כולל צפוי לשישה טרגטים ניטרליים ו-7,779 כשכל השישה חלשים לברק.**"
+  },
+  {
+   "h3": "Cold Beam"
+  },
+  {
+   "img": "f7f882cce46a04.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "ל-Cold Beam מקסימלי יש 170 Basic Attack ו-Mastery 10 ב-22 MP. הוא מאט ל-3 שניות, יכול לפגוע דרך השטח, ועושה 25% יותר דמג' למובים חלשים לקרח. מובים עמידים לקרח לא מואטים."
+  },
+  {
+   "p": "**הבנצ'מרק בלבל 70 עושה בערך 2,519 דמג' צפוי לטרגט ניטרלי ו-3,148 לטרגט חלש לקרח.**"
+  },
+  {
+   "h3": "Meditation"
+  },
+  {
+   "img": "7a2c42f9540c23.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "Meditation מקסימלי נותן 25 Magic Attack לחברי פארטי קרובים למשך 300 שניות. הוא מחזק התקפות מאגיה ולא משפיע על Attack Power פיזי."
+  },
+  {
+   "note": "**בדיקת דמג' בלבל 70:** בלבל 70, Cold Beam מגיע לבערך 3,148 דמג' צפוי נגד טרגט חלש לקרח ב-22 MP. Thunder Bolt מגיע לבערך 7,779 דמג' כולל צפוי כששישה טרגטים חלשים לברק."
+  },
+  {
+   "h3": "קרח וברק ב-Victoria Island"
+  },
+  {
+   "p": "ל-Cold Beam יש שלושה מובים חלשים לקרח ב-Victoria Island ושמונה שעמידים לו. ל-Thunder Bolt יש חמישה מובים חלשים לברק, ורק ארבעה עמידים לו."
+  },
+  {
+   "p": "מובים חלשים חוטפים 25% יותר דמג'. מובים עמידים חוטפים 25% פחות ומתעלמים מההאטה או מהסטאן של הספל הזה. הטבלה מכסה ספאונים רגילים מלבל 20 ומעלה."
+  },
+  {
+   "table": [
+    [
+     "אלמנט",
+     "חלש",
+     "עמיד"
+    ],
+    [
+     "קרח",
+     "[[img:762bddf50eb031.png]]Fire Boar (Lv 32), [[img:3b0aac86470550.png]]Copper Drake (Lv 45), [[img:8d3453e377c2eb.png]]Duskmander (Lv 50)",
+     "[[img:b6569c0a7fdae3.png]]Ligator (Lv 31), [[img:b13145852aee23.png]]Cold Eye (Lv 40), [[img:2ba29b3aeef67c.png]]Raffle (Lv 40), [[img:fa554ceb1468b9.png]]Aqumander (Lv 43), [[img:ab7412e282fc07.png]]Rafflesia (Lv 47), [[img:415ed0ee975fe3.png]]Drake (Lv 50), [[img:0058915bf9763c.png]]Croco (Lv 52), [[img:fc715623e4983d.png]]Malady (Lv 55)"
+    ],
+    [
+     "ברק",
+     "[[img:bf8dadc930baba.png]]Iron Hog (Lv 28), [[img:2a5d75bf6e3634.png]]Lorang (Lv 38), [[img:fa554ceb1468b9.png]]Aqumander (Lv 43), [[img:2e195968c99a6e.png]]Echopus (Lv 45), [[img:6623dcb448bb87.png]]Clang (Lv 49)",
+     "[[img:e56a0489f87f41.png]]Fairy 2, [[img:2860bcb742fed0.png]]Fairy 3, [[img:413278152c7ddf.png]]Fairy 4 (Lv 29), [[img:9581b138675a2f.png]]Myewood (Lv 54)"
+    ]
    ]
   },
   {
-   "heading": "נקודות ציון לשריון",
-   "lines": [
-    "Brown Jester Blue Wizard Robe White Guiltian Brown Starlight Flame Golden Circlet Red Calas Red Seraphis Blue Anakamoon",
-    "אלה נקודות ציון נקיות של כובע ורובה בלבלים 30, 40, 50 ו-60 ממאגר הפריטים הנוכחי. פתחו את העמוד של כל פריט כדי לראות את מקורות הדרופ, הקראפט או החנות העדכניים. רובה זולה יותר עם INT או LUK שימושיים יכולה להיות טובה יותר מלהתעקש על כל דרגה."
-   ]
+   "p": "Aqumander עמיד לקרח אבל חלש לברק. תעברו שם ל-Thunder Bolt. Myewood עמיד לברק וחוטף דמג' קרח רגיל, אז Cold Beam הוא הספל הטוב יותר עליו."
   },
   {
-   "heading": "M.ATK או Critical Rate על הכפפות?",
-   "lines": [
-    "המספרים האלה משתמשים בבילד הריאלי של Grummash ל-I/L Wizard בלבל 70 ובחמישה סקרולי כפפות Lesser מוצלחים. שתי האפשרויות משתמשות באותם חמישה סלוטים.",
-    "5x Gloves Magic Attack Scroll: Lesser",
-    "+10 M.ATK",
-    "326 עד 336 M.ATK כולל",
-    "בערך 3.07% יותר דמג' צפוי.",
-    "5x Gloves Crit. Rate Scroll: Lesser",
-    "+5% Critical Rate",
-    "9% עד 14% Critical Rate",
-    "בערך 1.27% יותר דמג' צפוי.",
-    "תבחרו Magic Attack. הסטאפ של חמישה סקרולי Magic Attack עושה בערך 1.77% יותר דמג' צפוי מהסטאפ של Critical Rate בבילד הזה.",
-    "W.ATK לא מעלה את הדמג' של ספלים. סקרול ה-Magic Attack המקביל נותן פי שניים M.ATK ממה שסקרול ה-Critical Rate נותן Critical Rate.",
-    "היחס זהה בכל דרגה. Lesser נותן +1 W.ATK או +1% Critical Rate (+2 M.ATK), Intermediate +2/+2% (+4 M.ATK), Greater +3/+3% (+6 M.ATK), ו-Chaos +4/+4% (+8 M.ATK). לדרגות מקבילות יש אותם אחוזי הצלחה והשמדה."
-   ]
+   "p": "MP Eater שואב לכל היותר פעם ב-5 שניות, והוא לא מקבל כלום ממובים עם 0 MP. ב-Victoria Island זה אומר Pig, Ribbon Pig, Wild Boar, Ligator ו-Fire Boar. תביאו פוטי MP נוספים בשביל ה-Fire Boars החלשים לקרח ב-The Burnt Land."
   },
   {
-   "heading": "בילדים לדוגמה ומפות Training Advisor",
-   "lines": [
-    "Thunder Bolt מתמודד עם מפות צפופות, בזמן ש-Cold Beam נותן דמג' חזק יותר לטרגט יחיד. כרטיס הבילד החסכוני של Jimmy משתמש בציוד זול ונקי: Energy Bolt עם Meditation מוקדם, ואז Cold Beam אחרי SP reset. הריגה מובטחת עדיין עובדת גם על רול הדמג' הרגיל הכי חלש עם 100% פגיעה. כל בחירה מראה גם Danger ואת מילוי הפוטים הקרוב, כי יתרון קטן ב-EXP יכול להיעלם כשההליכה חזרה ארוכה בהרבה."
-   ]
+   "h2": "מצאו את מפת האימון הכי טובה לבילד שלכם עם Training Advisor"
   },
   {
-   "heading": "לבל 30",
-   "lines": [
-    "Energy Bolt 20 / MG 3 / MA 20 / 71 ACC / 155 INT",
-    "Transfer Area Energy Bolt: Stirge בקאסט אחד, Safe ב-7%; מילוי אצל Dr. Faymus במרחק 4 פורטלים; בערך 2,741 EXP/min",
-    "Dungeon, Southern Forest IV Energy Bolt: Blue Mushroom בשני קאסטים ושאר הספאונים בקאסט אחד, Safe ב-9%; מילוי אצל Len the Fairy במרחק 5 פורטלים; בערך 2,435 EXP/min",
-    "הבילד החסכוני של Jimmy: קודם Energy Bolt, Cold Beam אחרי reset",
-    "177 INT בסיסי / 10 LUK בסיסי בלבל 35, כל ה-AP ל-INT",
-    "White Bandana",
-    "Blue Plain Robe",
-    "Metal Wand (נקי)",
-    "לבלים 30-31: תשאירו Energy Bolt 20 ותשימו את ה-SP החדש ב-MP Eater 3, ואז Meditation.",
-    "לבל 32: תעברו ל-Metal Wand. עם Meditation 4, Energy Bolt הורג Stirges במכה אחת ו-Fire Boars בשתיים (422 למכה ברול הכי חלש מול 842 HP).",
-    "לפני לבל 40: תעשו reset ל-SP לתוך Cold Beam. בלבל 40, Cold Beam 30 הורג Fire Boars במכה אחת עם אותו Metal Wand (860 ברול הכי חלש).",
-    "לבל 50: להרוג Copper Drakes (2,595 HP) בשתי מכות דורש בערך 125 M.ATK מהציוד, או Meditation 20 של חבר פארטי. הבילד של לבל 50 למטה (107 M.ATK) צריך 3 קאסטים.",
-    "Transfer Area לבל 32 Energy Bolt: Stirge מובטח בקאסט אחד, Safe ב-5%; מילוי אצל Dr. Faymus במרחק 4 פורטלים; בערך 2,741 EXP/min",
-    "The Burnt Land III לבל 32 Energy Bolt: Fire Boar ו-Dark Axe Stump מובטחים בשני קאסטים, Caution ב-11%; מילוי אצל Arturo במרחק 6 פורטלים; בערך 2,049 EXP/min"
-   ]
+   "p": "**Danger מודד כמה חזק מוב מרביץ לך: פחות מ-10% מה-HP שלך זה Safe, 10-24% זה Caution, 25-49% זה Danger, ו-50%+ זה Lethal.**"
   },
   {
-   "heading": "לבל 40",
-   "lines": [
-    "Cold Beam 30, 83 ACC, 182 INT",
-    "The Burnt Land I Fire Boar ו-Dark Axe Stump מובטחים בקאסט אחד, Safe ב-9%; מילוי אצל Arturo במרחק 4 פורטלים; בערך 4,199 EXP/min",
-    "Ant Tunnel Park Evil Eye ושתי הפטריות מובטחים בקאסט אחד, Safe ב-8%; מילוי אצל Mr. Sweatbottom במרחק 11 פורטלים; בערך 3,511 EXP/min"
-   ]
+   "p": "Thunder Bolt בדרך כלל מנצח ב-EXP גולמי במפות צפופות. Cold Beam יכול להיות נקי יותר נגד טרגט יחיד שחלש לקרח. הוא גם עובד טוב יותר כשפלטפורמה מונעת כיסוי של שישה מובים."
   },
   {
-   "heading": "לבל 50",
-   "lines": [
-    "Thunder Bolt 30, Cold Beam 30, 225 INT",
-    "Ant Tunnel IV Horny Mushroom בקאסט אחד ו-Zombie Mushroom בשניים, Safe ב-6%; מילוי אצל Mr. Sweatbottom במרחק 6 פורטלים; בערך 14,023 EXP/min",
-    "Tree Dungeon, Forest Up North IX Cold Beam: Curse Eye מובטח בקאסט אחד, Safe ב-9%; מילוי אצל Len the Fairy במרחק 5 פורטלים; בערך 4,889 EXP/min"
-   ]
-  },
-  {
-   "heading": "לבל 60",
-   "lines": [
-    "Thunder Bolt 30, Cold Beam 30, Meditation מקסימלי, 270 INT",
-    "Ant Tunnel III שתי הפטריות מובטחות בקאסט אחד, Safe ב-5%; מילוי אצל Mr. Sweatbottom במרחק 5 פורטלים; בערך 19,318 EXP/min",
-    "Perilous Descent III Cold Beam: Duskmander ו-Echopus מובטחים בשני קאסטים, Safe ב-9%; מילוי אצל Luma במרחק 6 פורטלים; בערך 4,929 EXP/min"
-   ]
-  },
-  {
-   "heading": "לבל 70",
-   "lines": [
-    "הבילד של Grummash, 352 INT, 336 M.ATK עם Meditation",
-    "Line 1 <Area 2> Jr. Wraith בשני קאסטים ו-Stirge בקאסט אחד, Safe ב-6%; מילוי אצל Dr. Faymus במרחק 5 פורטלים; בערך 24,777 EXP/min",
-    "Line 2 <Area 3> Cold Beam מבטיח שני קאסטים על Wraith, Safe ב-8%; מילוי אצל Dr. Faymus במרחק 7 פורטלים; בערך 9,455 EXP/min",
-    "לפני שאתם מתמקמים: הבחירות של Thunder Bolt מניחות שכל קאסט פוגע בכל המובים בטווח. תבדקו בכמה אתם באמת פוגעים בתנועה רגילה. אם זה אחד לקאסט, תשתמשו בבחירה של Cold Beam. תשמרו את הספל ואת ההתאמה האלמנטית בבילד השמור שלכם מעודכנים."
-   ]
-  },
-  {
-   "heading": "מכניקות חשובות של סקילים ל-I/L Wizard",
-   "lines": []
-  },
-  {
-   "heading": "Thunder Bolt",
-   "lines": [
-    "ל-Thunder Bolt מקסימלי יש 70 Basic Attack עם Mastery 10. הוא יכול לפגוע בשישה מובים ב-40 MP. נתוני הסקיל מציינים 25% סיכוי להתחשמלות ו-2 שניות של סטאן. מובים עמידים לברק לא נכנסים לסטאן.",
-    "בלבל 70, הבנצ'מרק עושה בערך 6,223 דמג' כולל צפוי לשישה טרגטים ניטרליים ו-7,779 כשכל השישה חלשים לברק."
-   ]
-  },
-  {
-   "heading": "Cold Beam",
-   "lines": [
-    "ל-Cold Beam מקסימלי יש 170 Basic Attack ו-Mastery 10 ב-22 MP. הוא מאט ל-3 שניות, יכול לפגוע דרך השטח, ועושה 25% יותר דמג' למובים חלשים לקרח. מובים עמידים לקרח לא מואטים.",
-    "הבנצ'מרק בלבל 70 עושה בערך 2,519 דמג' צפוי לטרגט ניטרלי ו-3,148 לטרגט חלש לקרח."
-   ]
-  },
-  {
-   "heading": "Meditation",
-   "lines": [
-    "Meditation מקסימלי נותן 25 Magic Attack לחברי פארטי קרובים למשך 300 שניות. הוא מחזק התקפות מאגיה ולא משפיע על Attack Power פיזי.",
-    "בדיקת דמג' בלבל 70: בלבל 70, Cold Beam מגיע לבערך 3,148 דמג' צפוי נגד טרגט חלש לקרח ב-22 MP. Thunder Bolt מגיע לבערך 7,779 דמג' כולל צפוי כששישה טרגטים חלשים לברק."
-   ]
-  },
-  {
-   "heading": "קרח וברק ב-Victoria Island",
-   "lines": [
-    "ל-Cold Beam יש שלושה מובים חלשים לקרח ב-Victoria Island ושמונה שעמידים לו. ל-Thunder Bolt יש חמישה מובים חלשים לברק, ורק ארבעה עמידים לו.",
-    "מובים חלשים חוטפים 25% יותר דמג'. מובים עמידים חוטפים 25% פחות ומתעלמים מההאטה או מהסטאן של הספל הזה. הטבלה מכסה ספאונים רגילים מלבל 20 ומעלה.",
-    "אלמנט | חלש | עמיד",
-    "קרח | Fire Boar (Lv 32), Copper Drake (Lv 45), Duskmander (Lv 50) | Ligator (Lv 31), Cold Eye (Lv 40), Raffle (Lv 40), Aqumander (Lv 43), Rafflesia (Lv 47), Drake (Lv 50), Croco (Lv 52), Malady (Lv 55)",
-    "ברק | Iron Hog (Lv 28), Lorang (Lv 38), Aqumander (Lv 43), Echopus (Lv 45), Clang (Lv 49) | Fairy 2 , Fairy 3 , Fairy 4 (Lv 29), Myewood (Lv 54)",
-    "Aqumander עמיד לקרח אבל חלש לברק. תעברו שם ל-Thunder Bolt. Myewood עמיד לברק וחוטף דמג' קרח רגיל, אז Cold Beam הוא הספל הטוב יותר עליו.",
-    "MP Eater שואב לכל היותר פעם ב-5 שניות, והוא לא מקבל כלום ממובים עם 0 MP. ב-Victoria Island זה אומר Pig, Ribbon Pig, Wild Boar, Ligator ו-Fire Boar. תביאו פוטי MP נוספים בשביל ה-Fire Boars החלשים לקרח ב-The Burnt Land."
-   ]
-  },
-  {
-   "heading": "מצאו את מפת האימון הכי טובה לבילד שלכם עם Training Advisor",
-   "lines": [
-    "Danger מודד כמה חזק מוב מרביץ לך: פחות מ-10% מה-HP שלך זה Safe, 10-24% זה Caution, 25-49% זה Danger, ו-50%+ זה Lethal.",
-    "Thunder Bolt בדרך כלל מנצח ב-EXP גולמי במפות צפופות. Cold Beam יכול להיות נקי יותר נגד טרגט יחיד שחלש לקרח. הוא גם עובד טוב יותר כשפלטפורמה מונעת כיסוי של שישה מובים.",
+   "ol": [
     "תכניסו את ה-AP וה-Magic Attack האמיתיים של ה-I/L Wizard. תוסיפו את הציוד, המגן, הסקילים הנוכחיים והבאפים הפעילים.",
     "תבדקו את Thunder Bolt ב-100% אמינות למובים מקובצים, ואז תריצו שוב עם Cold Beam לטרגטים בודדים.",
     "תקראו את מקדם הקרח והברק של כל מוב; חולשה מוסיפה 25% ועמידות מורידה 25%.",
     "תשאירו את Factor Danger into recommendations מופעל. מפה קצת יותר מהירה בגולמי יכולה לפגר כשהדמג' שנכנס בה לא בטוח.",
     "תבחרו את המפה של קאסט אחד או שניים שהפלטפורמות שלה מאפשרות לספל שבחרתם להגיע למספר הטרגטים הרגיל שלו.",
-    "תשוו את סבב המילוי. סקרול לעיר הקרובה מחזיר אתכם לעיר, אבל עדיין צריך ללכת חזרה למפה. כשה-EXP/min קרוב, תעדיפו את המפה עם ההליכה הקצרה יותר לחנויות הפוטים.",
-    "הבילד השמור של I/L Wizard ב-Training Advisor: אחוז פגיעה נוכחי, Danger, דמג' ו-EXP לשעה לדמות עם הציוד. פתחו את ה-I/L Wizard הזה ב-Training Advisor"
+    "תשוו את סבב המילוי. סקרול לעיר הקרובה מחזיר אתכם לעיר, אבל עדיין צריך ללכת חזרה למפה. כשה-EXP/min קרוב, תעדיפו את המפה עם ההליכה הקצרה יותר לחנויות הפוטים."
    ]
   },
   {
-   "heading": "פוטים מומלצים",
-   "lines": [
-    "Thunder Bolt מקסימלי עולה 40 MP, אז Lemons נעלמים מהר במפות של שישה מובים. Magic Guard מלא מוסיף עוד הוצאת MP גדולה כשמובים נוגעים בך: במחירי החנות הבסיסיים, כל 100 דמג' נכנס עולה בערך 90 מסוס למילוי דרך MG 15, לעומת 50 מסוס כשהוא נשאר על ה-HP. תשתמשו בלבל ה-Guard שהמפה שלכם באמת צריכה. תקנו ריפוי משתלם. תשמרו את ה-Magic Potions לנקודת שבירה של קאסטים.",
-    "הכי משתלם לקנות הכי הרבה HP או MP לכל מסו",
-    "Red Potion 50 מסוס · 100 HP 2 HP לכל מסו",
-    "Fried Chicken 60 מסוס · 120 HP 2 HP לכל מסו",
-    "Meat 80 מסוס · 160 HP 2 HP לכל מסו",
-    "Orange 50 מסוס · 50 MP 1 MP לכל מסו",
-    "Lemon 150 מסוס · 150 MP 1 MP לכל מסו",
-    "לפי מצב לקנות רק כשהבאף מגיע לנקודת שבירה שימושית",
-    "Magic Potion 500 מסוס · +10 M.ATK ל-10 דקות להשתמש לנקודת שבירה של דמג'",
-    "Sniper Potion 500 מסוס · +5 ACC ל-10 דקות להשתמש כדי להעלים מיסים",
-    "Supreme Sniper Potion 600 מסוס · +7 ACC ל-15 דקות באף ה-ACC הכי טוב בחנות",
-    "לא לקנות ריפוי פחות משתלם לכל מסו מהאפשרויות למעלה",
-    "White Potion 350 מסוס · 500 HP 1.43 HP לכל מסו",
-    "Blue Potion 220 מסוס · 200 MP 0.91 MP לכל מסו",
-    "השוו את המשתלמות של פוטים בחנות"
+   "img": "a81d7277027ac0.png",
+   "w": 360,
+   "h": 402,
+   "cap": "הבילד השמור של I/L Wizard ב-Training Advisor: אחוז פגיעה נוכחי, Danger, דמג' ו-EXP לשעה לדמות עם הציוד."
+  },
+  {
+   "h2": "פוטים מומלצים"
+  },
+  {
+   "p": "Thunder Bolt מקסימלי עולה 40 MP, אז Lemons נעלמים מהר במפות של שישה מובים. Magic Guard מלא מוסיף עוד הוצאת MP גדולה כשמובים נוגעים בך: במחירי החנות הבסיסיים, כל 100 דמג' נכנס עולה בערך 90 מסוס למילוי דרך MG 15, לעומת 50 מסוס כשהוא נשאר על ה-HP. תשתמשו בלבל ה-Guard שהמפה שלכם באמת צריכה. תקנו ריפוי משתלם. תשמרו את ה-Magic Potions לנקודת שבירה של קאסטים."
+  },
+  {
+   "img": "35179a6062c574.png",
+   "w": 130,
+   "h": 139
+  },
+  {
+   "p": "**הכי משתלם לקנות** הכי הרבה HP או MP לכל מסו"
+  },
+  {
+   "p": "[[img:be80aa4791c684.png]] **Red Potion** 50 מסוס · 100 HP 2 HP לכל מסו [[img:39a28ad40190a6.png]] **Fried Chicken** 60 מסוס · 120 HP 2 HP לכל מסו [[img:51e2250795d8f6.png]] **Meat** 80 מסוס · 160 HP 2 HP לכל מסו [[img:da1e5c881a1df6.png]] **Orange** 50 מסוס · 50 MP 1 MP לכל מסו [[img:d59bc967011b87.png]] **Lemon** 150 מסוס · 150 MP 1 MP לכל מסו"
+  },
+  {
+   "p": "**לפי מצב** לקנות רק כשהבאף מגיע לנקודת שבירה שימושית"
+  },
+  {
+   "p": "[[img:01a2e09235af46.png]] **Magic Potion** 500 מסוס · +10 M.ATK ל-10 דקות להשתמש לנקודת שבירה של דמג' [[img:4e15182d2a8a6e.png]] **Sniper Potion** 500 מסוס · +5 ACC ל-10 דקות להשתמש כדי להעלים מיסים [[img:e18fe0a27cd32a.png]] **Supreme Sniper Potion** 600 מסוס · +7 ACC ל-15 דקות באף ה-ACC הכי טוב בחנות"
+  },
+  {
+   "p": "**לא לקנות** ריפוי פחות משתלם לכל מסו מהאפשרויות למעלה"
+  },
+  {
+   "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 מסוס · 500 HP 1.43 HP לכל מסו [[img:d19cbf8225851d.png]] **Blue Potion** 220 מסוס · 200 MP 0.91 MP לכל מסו"
+  },
+  {
+   "guide": "best-buy-shop-efficiency",
+   "text": "השוו את המשתלמות של פוטים בחנות"
+  },
+  {
+   "h2": "טעויות נפוצות של I/L Wizard"
+  },
+  {
+   "img": "acc7dfa25a0407.png",
+   "w": 130,
+   "h": 178
+  },
+  {
+   "ol": [
+    "**להטיל Thunder Bolt על מוב אחד.** Cold Beam נותן דמג' לטרגט יחיד וניצול MP הרבה יותר טובים.",
+    "**להתעלם מאלמנטים.** תבדקו עמידות לקרח ולברק לפני שבוחרים ספל ומפה.",
+    "**לספאם Teleport 1.** סקיל Lv1 עולה 55 MP.",
+    "**להוסיף LUK אחרי שה-LUK הכולל כבר עומד בדרישה של הנשק הבא.** INT נוסף מעלה דמג' ותורם יותר Accuracy למג'."
    ]
   },
   {
-   "heading": "טעויות נפוצות של I/L Wizard",
-   "lines": [
-    "להטיל Thunder Bolt על מוב אחד. Cold Beam נותן דמג' לטרגט יחיד וניצול MP הרבה יותר טובים.",
-    "להתעלם מאלמנטים. תבדקו עמידות לקרח ולברק לפני שבוחרים ספל ומפה.",
-    "לספאם Teleport 1. סקיל Lv1 עולה 55 MP.",
-    "להוסיף LUK אחרי שה-LUK הכולל כבר עומד בדרישה של הנשק הבא. INT נוסף מעלה דמג' ותורם יותר Accuracy למג'."
-   ]
+   "h2": "בילד לדוגמה של I/L Wizard בלבל 70 מאת Grummash"
   },
   {
-   "heading": "בילד לדוגמה של I/L Wizard בלבל 70 מאת Grummash",
-   "lines": [
-    "ה-I/L Wizard בלבל 70 של Grummash מספק את הסטטים לשתי בדיקות הדמג' האלמנטי. בציוד השמור יש סקרולי Lesser מוצלחים בכל סלוט זמין.",
-    "Angel Wings",
-    "Blue Infinium Circlet",
-    "Blue Requiem",
-    "Blue Lorin",
-    "Brown Lapiz Sandals",
-    "Blue Gaia Cape",
-    "Metal Silver Earrings",
-    "Esther Shield",
-    "352 INT / 65 LUK / 336 M.ATK",
-    "9% Critical Rate",
-    "26% Critical Damage",
-    "210 WDEF",
-    "372 MDEF"
-   ]
+   "img": "f129f781e04eca.png",
+   "w": 130,
+   "h": 184
   },
   {
-   "heading": "בלבל 70: הופכים ל-I/L Mage",
-   "lines": [
-    "Robeira מטפלת בהתקדמות ל-I/L Mage ב-El Nath.",
-    "I/L Wizards הופכים ל-I/L Mages דרך Robeira ב-El Nath. ג'וב שלישי ו-El Nath לא נמצאים בגרסת ההשקה.",
-    "ראו את הסקילים של I/L Mage ב-COT2"
-   ]
+   "p": "ה-I/L Wizard בלבל 70 של Grummash מספק את הסטטים לשתי בדיקות הדמג' האלמנטי. בציוד השמור יש סקרולי Lesser מוצלחים בכל סלוט זמין."
+  },
+  {
+   "p": "[[img:e4a7a0c9e9a042.png]]Angel Wings [[img:14ffcc59b9e65c.png]]Blue Infinium Circlet [[img:ad758043440bc3.png]]Blue Requiem [[img:3da7555f720bf1.png]]Blue Lorin [[img:de7702418eb057.png]]Brown Lapiz Sandals [[img:cc230a8d46e614.png]]Blue Gaia Cape [[img:ea67f3099d0314.png]]Metal Silver Earrings [[img:eb1d5689fc40fb.png]]Esther Shield"
+  },
+  {
+   "note": "352 INT / 65 LUK / 336 M.ATK\n**9%** Critical Rate\n**26%** Critical Damage\n**210** WDEF\n**372** MDEF"
+  },
+  {
+   "h2": "בלבל 70: הופכים ל-I/L Mage"
+  },
+  {
+   "p": "[[img:c1522d01da4202.png]] **Robeira** מטפלת בהתקדמות ל-I/L Mage ב-El Nath."
+  },
+  {
+   "p": "I/L Wizards הופכים ל-I/L Mages דרך Robeira ב-El Nath. ג'וב שלישי ו-El Nath לא נמצאים בגרסת ההשקה."
   }
- ]
+ ],
+ "source_hash": "360cbec0569a"
 }

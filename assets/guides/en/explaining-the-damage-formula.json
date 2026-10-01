@@ -1,0 +1,802 @@
+{
+ "title": "MapleStory Classic Damage Formula",
+ "intro": "Physical and magic damage formulas for MapleStory Classic, with a compact cheat sheet. Expand the exact combat rules when you need them.",
+ "hero": null,
+ "minutes": 16,
+ "blocks": [
+  {
+   "p": "[[img:6d94d9509cb4c4.png]] Quick reference"
+  },
+  {
+   "h2": "Damage formula cheat sheet"
+  },
+  {
+   "p": "Use the physical card for weapon attacks and the magic card for spells. Full exceptions and supporting formulas can be found below."
+  },
+  {
+   "p": "Physical"
+  },
+  {
+   "h3": "Weapon attacks"
+  },
+  {
+   "p": "K = SkillDamage / 100 m = (MasteryLevel / 10 + 0.1) × 0.8MIN = K × TotalWATK × (0.8 + (P × m × W + Q + 2A) / 100)MAX = K × TotalWATK × (1.0 + (P × W + Q + 2A) / 100)"
+  },
+  {
+   "p": "K"
+  },
+  {
+   "p": "skill damage / 100"
+  },
+  {
+   "p": "m"
+  },
+  {
+   "p": "mastery factor"
+  },
+  {
+   "p": "P"
+  },
+  {
+   "p": "primary stat"
+  },
+  {
+   "p": "Q"
+  },
+  {
+   "p": "secondary stat"
+  },
+  {
+   "p": "W"
+  },
+  {
+   "p": "weapon action multiplier"
+  },
+  {
+   "p": "A"
+  },
+  {
+   "p": "Attack Power"
+  },
+  {
+   "p": "TotalWATK"
+  },
+  {
+   "p": "all equipped Weapon Attack"
+  },
+  {
+   "p": "Weapon Attack multiplies the whole result. Mastery raises MIN only."
+  },
+  {
+   "p": "Magic"
+  },
+  {
+   "h3": "Spells"
+  },
+  {
+   "p": "K = SkillPower / 100 m = (SpellMastery / 10 + 0.1) × 0.8MagicTotal = floor(TotalINT / 2) + EquipmentMATK + ScrollMATK + BuffMATKMIN = K × MagicTotal × (1 + TotalINT × m / 100)MAX = K × MagicTotal × (1 + TotalINT / 100)"
+  },
+  {
+   "p": "K"
+  },
+  {
+   "p": "skill power / 100"
+  },
+  {
+   "p": "m"
+  },
+  {
+   "p": "mastery factor"
+  },
+  {
+   "p": "TotalINT"
+  },
+  {
+   "p": "INT after gear and effects"
+  },
+  {
+   "p": "MagicTotal"
+  },
+  {
+   "p": "derived INT plus all Magic Attack"
+  },
+  {
+   "p": "INT raises MagicTotal and the INT term. Mastery raises MIN only."
+  },
+  {
+   "p": "After the raw roll"
+  },
+  {
+   "ol": [
+    "1 Hit check",
+    "2 Raw roll",
+    "3 Defense",
+    "4 Element",
+    "5 Level gap",
+    "6 Critical",
+    "7 Final clamp"
+   ]
+  },
+  {
+   "p": "These cover the common branches. Separate rules apply to Lucky Seven and prone attacks. Heal and damage over time also use the expandable reference."
+  },
+  {
+   "h2": "Worked example: level 30 Warrior"
+  },
+  {
+   "p": "This example uses the typical AP plan produced by current level-30 Warrior weapon requirements: **132 STR and 30 DEX**, with **4 INT and 4 LUK**. The weapon is a clean Gladius with 47 W.ATK. No other gear is equipped. There are no skill bonuses or buffs."
+  },
+  {
+   "table": [
+    [
+     "Result",
+     "Math",
+     "Final"
+    ],
+    [
+     "Available AP",
+     "25 + (29 × 5)",
+     "170"
+    ],
+    [
+     "AP plan",
+     "132 STR + 30 DEX + 4 INT + 4 LUK",
+     "170"
+    ],
+    [
+     "Warrior ACC",
+     "floor((1.2 × 30 + 2 × 30 + 0.6 × 4) / 2.5 + 10)",
+     "49"
+    ],
+    [
+     "EVA",
+     "floor(4 / 3) + floor(30 / 6) + 5",
+     "11"
+    ],
+    [
+     "Magic",
+     "floor(4 / 2)",
+     "2"
+    ],
+    [
+     "WDEF",
+     "floor(132 / 4)",
+     "33"
+    ],
+    [
+     "MDEF",
+     "floor(4 / 4)",
+     "1"
+    ]
+   ]
+  },
+  {
+   "p": "Those are the derived values before equipment or skill bonuses. The Gladius adds 47 W.ATK. It does not add any of the derived values above. HP and MP are not estimated here. Their current totals are supplied separately from these equations."
+  },
+  {
+   "h3": "The stat window damage range"
+  },
+  {
+   "p": "**Derived combat stats and damage range are different things.** Derived combat stats include ACC and EVA, plus Magic, WDEF and MDEF. The character stat window's damage range is a separate summary. It predicts the lowest and highest damage from one ordinary basic physical attack. The formula uses your current stats plus Total W.ATK, Attack Power, the weapon multiplier and mastery. This range is calculated before the target's defenses and elements. It also excludes level-difference scaling, critical hits and a skill's damage value. MeowDB mirrors split-action weapons by using the lowest MIN and highest MAX across their possible ordinary actions."
+  },
+  {
+   "p": "**Mastery at Lv 0** = (0 / 10 + 0.1) × 0.8 = 0.08\n**1H Sword multiplier** = 1.8\n**Basic attack MIN** = trunc(47 × (0.8 + (132 × 0.08 × 1.8 + 30) / 100)) = **60Basic attack MAX** = trunc(47 × (1.0 + (132 × 1.8 + 30) / 100)) = **172Character-window damage range: 60-172**"
+  },
+  {
+   "p": "A skill applies its own damage value on top. Max-level Power Strike uses `S = 2.60`, so this same clean example becomes **157-449** before target modifiers. This is a skill result, so it sits outside the character-window range. The window also excludes critical rolls and monster-specific modifiers."
+  },
+  {
+   "h2": "Physical damage"
+  },
+  {
+   "p": "This calculates weapon-based attack damage before defense and other target modifiers."
+  },
+  {
+   "p": "**S** = SkillDamage / 100\n**M** = (MasteryLevel / 10 + 0.1) × 0.8\n**B** = uniform(0.8, 1.0)\n**Q** = uniform(Primary × M, Primary)\nB and Q are independent random draws.\n**Raw** = S × TotalWATK × (B + (Q × WeaponMult + Secondary) / StatDiv + AttackPower / APDiv)\n**MIN** = S × TotalWATK × (0.8 + (Primary × M × WeaponMult + Secondary) / StatDiv + AttackPower / APDiv)\n**MAX** = S × TotalWATK × (1.0 + (Primary × WeaponMult + Secondary) / StatDiv + AttackPower / APDiv)\n**Exact pre-truncation average** = S × TotalWATK × (0.9 + (Primary × (M + 1) / 2 × WeaponMult + Secondary) / StatDiv + AttackPower / APDiv)"
+  },
+  {
+   "p": "For ordinary melee and fired attacks, `StatDiv = 100` and `APDiv = 50`. MIN and MAX are the opposite corners of two independent rolls, so the distribution is concentrated toward the middle instead of being uniform across the displayed range. MasteryLevel is clamped to 0-10 for this base term."
+  },
+  {
+   "table": [
+    [
+     "Weapon family",
+     "Primary",
+     "Secondary"
+    ],
+    [
+     "Sword, Axe, Blunt, Spear, Polearm",
+     "STR",
+     "DEX"
+    ],
+    [
+     "Bow, Crossbow",
+     "DEX",
+     "STR"
+    ],
+    [
+     "Dagger, Claw",
+     "LUK",
+     "STR + DEX"
+    ],
+    [
+     "Wand, Staff physical hit",
+     "STR",
+     "DEX"
+    ]
+   ]
+  },
+  {
+   "h2": "Weapon actions and multipliers"
+  },
+  {
+   "p": "Swinging, stabbing, or firing a weapon changes how strongly its primary stat scales."
+  },
+  {
+   "table": [
+    [
+     "Weapon",
+     "Swing",
+     "Stab",
+     "Shoot",
+     "Mixed"
+    ],
+    [
+     "1H Sword",
+     "1.8",
+     "1.8",
+     "1.8",
+     "1.8"
+    ],
+    [
+     "2H Sword",
+     "2.5",
+     "2.5",
+     "2.5",
+     "2.5"
+    ],
+    [
+     "1H Axe / Blunt",
+     "2.4",
+     "1.2",
+     "Not used",
+     "1.8"
+    ],
+    [
+     "2H Axe / Blunt",
+     "3.0",
+     "2.0",
+     "Not used",
+     "2.5"
+    ],
+    [
+     "Spear",
+     "1.5",
+     "3.5",
+     "Not used",
+     "2.5"
+    ],
+    [
+     "Polearm",
+     "3.5",
+     "1.5",
+     "Not used",
+     "2.5"
+    ],
+    [
+     "Dagger",
+     "1.0",
+     "2.0",
+     "Not used",
+     "1.5"
+    ],
+    [
+     "Bow / Crossbow / Claw",
+     "1.0",
+     "1.0",
+     "2.5",
+     "1.0"
+    ],
+    [
+     "Wand / Staff physical hit",
+     "1.8",
+     "1.8",
+     "1.8",
+     "1.8"
+    ]
+   ]
+  },
+  {
+   "p": "An explicit `Mixed` action uses the table's arithmetic midpoint. An **inherited ordinary melee action** follows the current standing pool of three swing entries and two stab entries: 60% swing and 40% stab. That gives expected multipliers of 1.92 for 1H Axe/Blunt, 2.60 for 2H Axe/Blunt, 2.30 for Spear, 2.70 for Polearm, and 1.40 for Dagger. The full swing and stab envelopes remain separate because their damage and duration can differ together. `Not used` means that action and weapon combination has no valid multiplier path. Ordinary play should never produce it."
+  },
+  {
+   "p": "**Special physical branches**\n- Lucky Seven forces `WeaponMult = 3.0` and `M = 0.5`.\n- Drain uses the claw's ordinary projectile multiplier of `2.5`.\n- A Bow, Crossbow, or Claw projectile uses `WeaponMult = 2.5`, `StatDiv = 100`, and `APDiv = 50`.\n- A close-range hit with those ranged weapons uses `WeaponMult = 1.0` and `StatDiv = 300`. A close-range swing uses `APDiv = 150`, and a close-range stab keeps `APDiv = 50`. A Bow always swings, a Crossbow swings or stabs at 50% each, and a Claw always stabs.\n- Crouched attack also uses `WeaponMult = 1.0`, `StatDiv = 300`, `APDiv = 150`, and replaces the base `0.8-1.0` roll with `0.2-0.3`.\n- Magic skills never use a weapon action multiplier. Wand and Staff `1.8` applies only to a physical whack."
+  },
+  {
+   "h2": "Magic damage"
+  },
+  {
+   "p": "This calculates ordinary spell damage from skill power, Magic, INT, and mastery."
+  },
+  {
+   "p": "**S** = SkillPower / 100\n**M** = (SpellMastery / 10 + 0.1) × 0.8\n**MIN** = S × MagicTotal × (1 + TotalINT × M / 100)\n**MAX** = S × MagicTotal × (1 + TotalINT / 100)\n**Average** = (MIN + MAX) / 2\n**MagicTotal** = floor(TotalINT / 2) + EquipmentMATK + ScrollMATK + BuffMATK"
+  },
+  {
+   "p": "Ordinary magic uses one uniform roll between MIN and MAX. Total LUK and physical Weapon Attack do not enter this branch. A wand, staff, sword, or umbrella's displayed weapon speed also does not change a magic action; magician actions resolve from the fixed magic timing category, with eligible Spell Booster applied separately."
+  },
+  {
+   "h2": "Defense, elements, levels, and criticals"
+  },
+  {
+   "p": "These modifiers turn raw damage into the final number shown on the target."
+  },
+  {
+   "table": [
+    [
+     "Order",
+     "Operation"
+    ],
+    [
+     "1",
+     "Raw × 100 / (EffectiveDEF + 100)"
+    ],
+    [
+     "2",
+     "Multiply by elemental result"
+    ],
+    [
+     "3",
+     "Multiply by higher-level target scale"
+    ],
+    [
+     "4",
+     "Multiply by critical result"
+    ],
+    [
+     "5",
+     "Apply Iron Arrow target falloff when relevant"
+    ],
+    [
+     "6",
+     "trunc(clamp(value, 1, 99,999))"
+    ]
+   ]
+  },
+  {
+   "h3": "Defense"
+  },
+  {
+   "p": "**EffectiveDEF** = max(0, FlatBonus + trunc((1 + PercentBonus / 100) × BaseDEF))\n**Normal defended hit** = Raw × 100 / (EffectiveDEF + 100)\nFor a full-defense-bypass proc with rate `g`:\n**Expected defended hit** = Raw × ((1 - g) × 100 / (EffectiveDEF + 100) + g)"
+  },
+  {
+   "p": "Physical and magic defense use the same curve with different stats. A bypass proc produces either a defended hit or a full bypass; the last line is its expected value."
+  },
+  {
+   "h3": "Elements"
+  },
+  {
+   "table": [
+    [
+     "Result",
+     "Multiplier"
+    ],
+    [
+     "Immune",
+     "0.00"
+    ],
+    [
+     "Quarter",
+     "0.25"
+    ],
+    [
+     "Half",
+     "0.50"
+    ],
+    [
+     "Resistant",
+     "0.75"
+    ],
+    [
+     "Neutral",
+     "1.00"
+    ],
+    [
+     "Weak",
+     "1.25"
+    ],
+    [
+     "Enhanced weak",
+     "1.50"
+    ]
+   ]
+  },
+  {
+   "p": "For Element Composition, rate each of its two elements as `0 = immune`, `1 = resistant`, `2 = neutral`, or `3 = weak`. Then `Composition multiplier = 0.25 × (first rating + second rating)`. This produces all seven values from 0.00 through 1.50 and prevents one element from silently replacing the other."
+  },
+  {
+   "h3": "Higher-level targets and criticals"
+  },
+  {
+   "p": "**Gap** = MobLevel - PlayerLevel\nGap ≤ 0: `LevelScale = 1`\nGap 1-9: `LevelScale = 1 / (1 + Gap² × 0.005)`\nGap ≥ 10: `LevelScale = 1 / (1 + Gap × 0.05)`\nLet `c` be critical rate as a decimal and `d` be critical damage as a decimal:\n**Critical hit** = Normal × (1 + d)\n**Expected hit with crit** = Normal × (1 - c) + Critical × c\n= Normal × (1 + c × d)\nBase values before gear and passives: `c = 0.05`, `d = 0.20`."
+  },
+  {
+   "h2": "Frequently asked questions"
+  },
+  {
+   "h3": "Is dexless or statless still viable?"
+  },
+  {
+   "p": "Low DEX works. Both the weapon requirement and your accuracy read total DEX, base plus gear, so every base point you skip has to come from equipment. A level-70 Warrior needs 70 total DEX to swing Chrono, and at 4 total DEX the same character has 68 accuracy against 100 at 70 total DEX, same LUK. The accuracy simulator carries the full per-class formula and shows what that gap does against the monsters you train on. Trim DEX to the weapon requirement and stop there."
+  },
+  {
+   "h3": "How much is 1 Attack Power worth against 1 Weapon Attack?"
+  },
+  {
+   "p": "At our level-70 Fighter benchmark (Chrono, 337 STR, 70 DEX, 105 Total W.ATK, 40 Attack Power, mastery 10, Power Strike on the 2.60 inherited melee action), 1 Attack Power is worth 2 points of secondary stat, or about 0.8 STR, and 1 Weapon Attack is worth about 5 Attack Power, which is about 4 STR. Those ratios move with your own stats and weapon, so price a buff against a scroll on your build in the damage simulator."
+  },
+  {
+   "h2": "More combat formulas"
+  },
+  {
+   "p": "Open a section when you need its exact rule. The main path skips accuracy and special skills. Timing and incoming damage stay here too."
+  },
+  {
+   "p": "Derived combat stats Combat stats are the final values built from your level, base stats, gear, and active effects."
+  },
+  {
+   "p": "**Common** = 1.2 × DEX + 2 × Level + 0.6 × LUK\n**Beginner ACC** = floor(Common / 2.5 + 5)\n**Warrior ACC** = floor(Common / 2.5 + 10)\n**Bowman ACC** = floor(Common / 4.8 + 20)\n**Thief ACC** = floor(Common / 4 + 15)\n**Magician ACC** = floor((1.2 × INT + 2 × Level + 0.6 × LUK) / 5.1 + 20)\n**EVA** = floor(LUK / 3) + floor(DEX / 6) + 5\n**Derived Magic** = floor(INT / 2)\n**Derived WDEF** = floor(STR / 4)\n**Derived MDEF** = floor(INT / 4)"
+  },
+  {
+   "p": "Each floor is applied exactly where shown. Equipment and skill bonuses are added to the matching derived stat afterward. Every equipped W.ATK line, including weapon, projectile, shield, glove, and future equipment sources, joins one **Total Weapon Attack** pool. **Attack Power** is a separate stat supplied only by effects explicitly identified as Attack Power, such as skills, passives, and consumables."
+  },
+  {
+   "p": "STR, DEX, INT, and LUK effects These four base stats determine your damage, accuracy, defense, and avoidability; `W` is the weapon action multiplier used below."
+  },
+  {
+   "p": "**How to read these tables:** A primary stat gets multiplied by `W`. A secondary stat is added directly. A larger `W` makes each point of the primary stat worth more damage."
+  },
+  {
+   "h3": "STR"
+  },
+  {
+   "table": [
+    [
+     "Role",
+     "Used by",
+     "Formula"
+    ],
+    [
+     "Primary",
+     "Sword, Axe, Blunt Weapon, Spear, Polearm",
+     "(STR × W + DEX) / 100"
+    ],
+    [
+     "Primary",
+     "Physical Wand or Staff hit",
+     "(STR × 1.8 + DEX) / 100"
+    ],
+    [
+     "Secondary",
+     "Bow or Crossbow projectile",
+     "(DEX × 2.5 + STR) / 100"
+    ],
+    [
+     "Secondary",
+     "Dagger or fired Claw",
+     "(LUK × W + STR + DEX) / 100"
+    ],
+    [
+     "Weapon Defense",
+     "Every character",
+     "floor(STR / 4) WDEF"
+    ]
+   ]
+  },
+  {
+   "p": "One STR adds the same `STR / 100` amount in the Bow/Crossbow and Dagger/Claw formulas. Daggers and claws also add DEX. LUK is their main damage stat because LUK gets `W`."
+  },
+  {
+   "h3": "DEX"
+  },
+  {
+   "table": [
+    [
+     "Role",
+     "Used by",
+     "Formula"
+    ],
+    [
+     "Primary",
+     "Bow or Crossbow projectile",
+     "(DEX × 2.5 + STR) / 100"
+    ],
+    [
+     "Secondary",
+     "Sword, Axe, Blunt Weapon, Spear, Polearm",
+     "(STR × W + DEX) / 100"
+    ],
+    [
+     "Secondary",
+     "Physical Wand or Staff hit",
+     "(STR × 1.8 + DEX) / 100"
+    ],
+    [
+     "Secondary",
+     "Dagger or fired Claw",
+     "(LUK × W + STR + DEX) / 100"
+    ],
+    [
+     "Accuracy",
+     "Beginner, Warrior, Bowman, Thief",
+     "Common = 1.2 × DEX + 2 × Level + 0.6 × LUK"
+    ],
+    [
+     "Avoidability",
+     "Every character",
+     "floor(DEX / 6) EVA"
+    ]
+   ]
+  },
+  {
+   "h3": "INT"
+  },
+  {
+   "table": [
+    [
+     "Role",
+     "Used by",
+     "Formula"
+    ],
+    [
+     "Primary",
+     "Ordinary magic, maximum roll",
+     "MAX = S × MagicTotal × (1 + INT / 100)"
+    ],
+    [
+     "Primary",
+     "Heal",
+     "Pool = ((INT × r + LUK) / 200 + 3) × MagicTotal × S"
+    ],
+    [
+     "Primary",
+     "Damage over time",
+     "Core total = (ConfiguredDoT / 100) × MagicTotal × (INT / 125 + 1)"
+    ],
+    [
+     "Magic",
+     "Every character",
+     "MagicTotal includes floor(INT / 2)"
+    ],
+    [
+     "Magic Defense",
+     "Every character",
+     "floor(INT / 4) MDEF"
+    ],
+    [
+     "Accuracy",
+     "Magician",
+     "floor((1.2 × INT + 2 × Level + 0.6 × LUK) / 5.1 + 20)"
+    ]
+   ]
+  },
+  {
+   "h3": "LUK"
+  },
+  {
+   "table": [
+    [
+     "Role",
+     "Used by",
+     "Formula"
+    ],
+    [
+     "Primary",
+     "Dagger or fired Claw",
+     "(LUK × W + STR + DEX) / 100"
+    ],
+    [
+     "Secondary",
+     "Heal",
+     "Pool = ((INT × r + LUK) / 200 + 3) × MagicTotal × S"
+    ],
+    [
+     "Accuracy",
+     "Every job",
+     "Every ACC numerator includes 0.6 × LUK"
+    ],
+    [
+     "Avoidability",
+     "Every character",
+     "floor(LUK / 3) EVA"
+    ],
+    [
+     "No direct role",
+     "Ordinary magic",
+     "No LUK term"
+    ],
+    [
+     "Death EXP loss",
+     "Every character",
+     "LUK lowers the loss."
+    ]
+   ]
+  },
+  {
+   "p": "Total stats include assigned Ability Points, equipment, and active effects. Equipment requirements only decide whether you can equip an item."
+  },
+  {
+   "p": "Outgoing hit chance This is the chance that your attack lands instead of missing."
+  },
+  {
+   "p": "**L** = max(0, MobLevel - PlayerLevel)\n**A** = TotalACC × 100 / (10 × L + 255)\n**D** = A - MobEVA\n**f** = 0.15 + 0.20 / (1 + exp(D / 12))\n**R** = uniform(1 - f, 1 + f)\n**Hit** when A × R ≥ MobEVA\nLet q = MobEVA / A:\n- P(hit) = 1 when q ≤ 1 - f\n- P(hit) = 0 when q ≥ 1 + f\n- P(hit) = (1 + f - q) / (2 × f) otherwise\n**Automatic hit threshold**: D ≥ 25 + L × (0.5 × PlayerLevel + 15)"
+  },
+  {
+   "p": "Every offensive Magician spell can miss. Physical attacks and offensive spells use this shared target hit check. Some status actions disable the automatic-hit shortcut and still perform the same roll."
+  },
+  {
+   "p": "Heal and damage over time Heal and damage-over-time skills use separate formulas instead of an ordinary damage roll."
+  },
+  {
+   "h3": "Heal"
+  },
+  {
+   "p": "**r** = uniform(0.8, 1.0)\n**S** = RecoveryRate / 100\n**Pool** = ((TotalINT × r + TotalLUK) / 200 + 3) × MagicTotal × S\n**t** = max(2, every character and undead mob touched)\n**Undead damage per mob** = Pool × (1 + 0.1 × t) / t × 0.5"
+  },
+  {
+   "table": [
+    [
+     "Combined targets t",
+     "Per-mob multiplier",
+     "Versus t = 2"
+    ],
+    [
+     "2",
+     "0.300 × Pool",
+     "100%"
+    ],
+    [
+     "3",
+     "0.217 × Pool",
+     "72%"
+    ],
+    [
+     "4",
+     "0.175 × Pool",
+     "58%"
+    ],
+    [
+     "5",
+     "0.150 × Pool",
+     "50%"
+    ],
+    [
+     "6",
+     "0.133 × Pool",
+     "44%"
+    ]
+   ]
+  },
+  {
+   "p": "Heal has 6 target slots, and characters and undead mobs share them. Every character Heal reaches, you included, takes a slot before any undead mob does. That leaves 5 undead mobs when you are solo, 4 when Heal reaches you and one party member, 3 with two party members, and none when it reaches a full party of six. The pool grows by 10% for every target, then the division by `t` wins, so each mob receives less as the cast touches more targets. This is the confirmed outgoing undead-damage branch; ally HP recovery can have additional receiver-side rules."
+  },
+  {
+   "h3": "Damage over time"
+  },
+  {
+   "p": "**Confirmed core total** = (ConfiguredDoT / 100) × MagicTotal × (TotalINT / 125 + 1)\nDoT ignores WDEF and MDEF. Against a higher-level target, its confirmed penalty uses the linear branch: `1 / (1 + LevelGap × 0.05)`. Element, critical, and final clamping follow in the later shared steps. The configured value is not divided by DoT duration in this arithmetic. Tick delivery and secondary-effect timing remain outside the public calculators, so no per-tick amount is claimed here."
+  },
+  {
+   "p": "Skill-specific modifiers Some skills add their own rule after the base damage formula."
+  },
+  {
+   "table": [
+    [
+     "Mechanic",
+     "Current calculator rule"
+    ],
+    [
+     "[[img:0ae4a4874dd951.png]] Combo Attack",
+     "Ordinary multiplier = 1 + (5 + floor(ComboLevel / 2)) / 100, while at least one orb is active."
+    ],
+    [
+     "[[img:d2d352ea5baa35.png]][[img:51d9dfda6d8016.png]] Panic / Coma",
+     "Finisher multiplier = 1 + 5 × Orbs × (Orbs - 1) / 100. Orb cap: 3 at Lv 1-10, 4 at Lv 11-20, 5 at Lv 21-30."
+    ],
+    [
+     "[[img:a4c2624f4a2447.png]][[img:827ad8d41d2f20.png]][[img:f8646e8430ce87.png]] Fire / Ice / Lightning Charge",
+     "Damage factor = 1 + ChargeBonus / 100. ChargeBonus: Lv 1-8 uses Lv + 1; Lv 9 uses 9; Lv 10-30 uses 5 + floor(Lv / 2)."
+    ],
+    [
+     "[[img:cfc76afcacff5d.png]][[img:ddee911211aab8.png]] Element Amplification",
+     "Magic factor: (104 + Lv)% for Lv 1-29, 135% at Lv 30. MP factor: (119 + Lv)% for Lv 1-29, 150% at Lv 30."
+    ],
+    [
+     "[[img:b88cfd4a865108.png]] Shadow Partner",
+     "Configured throwing-star total: (109 + Lv)% for Lv 1-29, 140% at Lv 30. Each partner hit uses (total - 100)% as a separately truncated and capped instance."
+    ],
+    [
+     "[[img:a56f556b3a9db2.png]] Iron Arrow",
+     "Target index i starts at 0. Multiplier = max(0, 1 - 0.2 × i), giving 1.00, 0.80, 0.60, 0.40 across four targets."
+    ],
+    [
+     "[[img:194a152be08102.png]][[img:fdb7f350782baa.png]][[img:6a54ca547f3e7f.png]][[img:5265fbea5cefa5.png]][[img:04935bdb2eab63.png]][[img:759c279631ef65.png]][[img:097752a2c7ffbb.png]][[img:3aa1776b9e3849.png]] Final Attack",
+     "Expected payload = proc rate × payload damage. The payload keeps its own weapon action, hits, targets, and truncation."
+    ],
+    [
+     "[[img:6bac7afcaa94ac.png]][[img:f4ca5d43b924f2.png]] Mortal Blow",
+     "Direct-hit expectation = activation rate × direct-hit damage. The below-HP execute chance is a separate defeat event and is used only where target HP is modeled."
+    ],
+    [
+     "[[img:2d78a7191a24e5.png]] Dragon Roar",
+     "Effective repeat interval = max(animation duration, self-stun). Self-stun: 4 seconds at Lv 1-9, 3 seconds at Lv 10-20, and 2 seconds at Lv 21-30. Max level is capped at 30 completed uses in 60 seconds."
+    ]
+   ]
+  },
+  {
+   "p": "Animation timing and one-minute damage This determines how long attacks take and how many complete attacks fit into 60 seconds."
+  },
+  {
+   "p": "**For ordinary positive-delay actions:timingTier** = clamp(resolvedTier, 0, 10)\n**ScaledFrame** = truncTowardZero(FrameDelay × (10 + timingTier) / 16)\n**nativeMs** = sum(ScaledFrame for every resolved frame)\n**Player-facing Animation Time (best-supported model)** = 30 × ceil(nativeMs / 30)\nWeapon Booster shifts a matching weapon by 2 speed stages. Spell Booster shifts eligible F/P and I/L magic actions by 1 stage at Lv 1-10 and 2 stages at Lv 11-20."
+  },
+  {
+   "p": "The frame durations and their attack-speed conversion are confirmed for ordinary COT2 characters, including Savage Blow. Explosion includes both its preparation and release. We still round displayed times up to 30 ms steps; that final rounding remains a model."
+  },
+  {
+   "h3": "Animation examples from the skill database"
+  },
+  {
+   "p": "These clips show the action sequence stored on each skill page. The label gives the base action frame total. This is not a fixed cast time for every build. Weapon speed and the timing formula above determine the modeled in-play duration."
+  },
+  {
+   "p": "[[img:e360104d4ff79a.png]]\nMagic Claw · 800 ms base action"
+  },
+  {
+   "p": "[[img:9425746aa9d88c.png]]\nSavage Blow · 960 ms base action"
+  },
+  {
+   "p": "[[img:8ed1ef9ca67a8f.png]]\nExplosion · 1,800 ms two-phase base action"
+  },
+  {
+   "p": "For one fixed branch with duration `d` and expected reward `w`:\n**Effective cycle d** = max(animation duration, skill-specific lockout)\n**Completed casts in 60 s** = floor(60,000 / d)\n**One-minute damage** = CompletedCasts × w\nFor random branches i with probability `pᵢ`, duration `dᵢ`, and reward `wᵢ`:\n**F(t)** = Σ pᵢ × (wᵢ + F(t - dᵢ)) for every dᵢ ≤ t\n**F(t)** = 0 when no branch fits\n**Exact one-minute expectation** = F(60,000)\n**Long-run DPS** = Σ(pᵢ × wᵢ) / Σ(pᵢ × dᵢ / 1000)"
+  },
+  {
+   "p": "Dragon Roar is a skill-level exception. Its self-stun imposes a minimum repeat interval: 4 seconds at Lv 1-9, 3 seconds at Lv 10-20, and 2 seconds at Lv 21-30. At max level, the 60-second model therefore allows no more than 30 completed uses. Weapon Booster cannot shorten this lockout."
+  },
+  {
+   "p": "The recurrence preserves the fact that an inherited swing can have both different damage and a different duration from a stab. `floor(60,000 / average duration) × average damage` is not exact for a finite random sequence. Skill pages display the 30 ms player-facing Animation Time; current simulator throughput uses its resolved branch-completion durations before that display-only rounding, so the two values should not be substituted for one another."
+  },
+  {
+   "p": "Incoming hits, guards, and damage This calculates whether a monster hits you, whether you guard it, and how much damage you take."
+  },
+  {
+   "p": "**G** = max(0, PlayerLevel - MobLevel)\n**A** = MobACC × 100 / (5 × (G + 51))\n**E** = PlayerEVA / (1 + PlayerEVA / 80) / (1 + G / 40)\n**D** = A - E\n**f** = 0.15 + 0.20 / (1 + exp(D / 12))\n**R** = uniform(1 - f, 1 + f)\n**CandidateChance** = P(A × R ≥ E)\nIf E > A × (1 + f), replace CandidateChance with:\n`clamp(exp((A - E) / 18) × 0.03, 0.02, 0.03)`\nAfter a candidate miss, apply the independent 8% minimum-hit rescue:\n**FinalHitChance** = CandidateChance + (1 - CandidateChance) × 0.08"
+  },
+  {
+   "p": "**ShieldGuardChance** = 0 when ShieldWDEF ≤ 0\nOtherwise: max(0.05, ShieldWDEF / (ShieldWDEF + 500))\n**ClawGuardChance** = 3% at Lv 1-6, 4% at Lv 7-13, 5% at Lv 14-20, for a Hermit who has learned Claw Guard\nWhen both are available, use the larger chance. A successful guard fully negates an eligible regular physical hit."
+  },
+  {
+   "p": "**U** = uniform(0, 1)\n**Roll** = 1.1 + 0.4 × U\n**Raw** = EffectiveMobAttack × Roll\n**Taken** = Raw × (1 - DEF / (DEF + 5 × (PlayerLevel + 40) + 1.2 × Raw))\n**FinalTaken** = trunc(clamp(Taken, 1, 50,000,000))\nPhysical uses WDEF after physical evasion and guard. Magic uses MDEF and bypasses the physical evasion and guard path."
+  },
+  {
+   "p": "The calculator's middle damage value uses `U = 0.5`, or a `1.3` attack roll. Its per-attempt figure is therefore a **midpoint estimate**: `MidpointTaken × PhysicalHitChance × (1 - GuardChance)`. Monster magic attacks use their magic attack value and the MDEF curve without the physical miss roll."
+  },
+  {
+   "guide": "weapon-reach",
+   "text": "MapleStory Classic Weapon Reach and Attack Distance"
+  },
+  {
+   "guide": "attack-speed-and-animation-times",
+   "text": "Attack Speed and Animation Times"
+  },
+  {
+   "guide": "class-dps-rankings",
+   "text": "Second-Job DPS Rankings at Lv 70: Single-Target and AoE"
+  },
+  {
+   "guide": "hp-mp-gain-explained",
+   "text": "HP/MP Gain Explained for MapleStory Classic World"
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/explaining-the-damage-formula",
+ "hash": "9d64ee09175b"
+}

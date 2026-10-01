@@ -1,0 +1,706 @@
+{
+ "title": "MapleStory Classic I/L Wizard Build and Leveling Guide: Lv 30-70",
+ "intro": "Ice/Lightning Wizards are the fastest mobbing class, with Thunder Bolt hitting up to six nearby mobs. Cold Beam handles tougher targets and can hit through terrain, and Teleport keeps you moving between platforms.",
+ "hero": "a8b552bf0d96ac.png",
+ "minutes": null,
+ "blocks": [
+  {
+   "p": "This guide is based off of a realistic lv 70 I/L Wizard build by Grummash."
+  },
+  {
+   "p": "**Pros**"
+  },
+  {
+   "ul": [
+    "#4 AoE damage at level 70 in the current COT2 benchmark.",
+    "Tied #1 Magic EHP at level 70; tanky against magic-dealing mobs!",
+    "Thunder Bolt attacks up to six mobs around the caster, the only 2nd job attack that hits six of any mob.",
+    "Cold Beam deals 25% more damage to ice-weak mobs and slows them.",
+    "Meditation gives nearby party members 25 Magic Attack.",
+    "Teleport keeps you moving between platforms."
+   ]
+  },
+  {
+   "p": "**Cons**"
+  },
+  {
+   "ul": [
+    "Max Thunder Bolt costs 40 MP per cast.",
+    "Ice- or lightning-resistant mobs cut the matching spell damage.",
+    "Low HP makes a missed Magic Guard buff dangerous."
+   ]
+  },
+  {
+   "h2": "Starting at level 30"
+  },
+  {
+   "p": "This guide picks up from our Magician level 1 to 30 guide, which compares these first-job builds by meso cost. Any of them works for an I/L Wizard."
+  },
+  {
+   "img": "b5fa0ec4a04551.png",
+   "w": 130,
+   "h": 164
+  },
+  {
+   "table": [
+    [
+     "First-job skill",
+     "Budget",
+     "Safer",
+     "Grummash's level 70"
+    ],
+    [
+     "[[img:24dcca787059a4.png]]Energy Bolt",
+     "20",
+     "20",
+     "1"
+    ],
+    [
+     "[[img:5370722a856bb9.png]]Magic Claw",
+     "0",
+     "0",
+     "20"
+    ],
+    [
+     "[[img:664c530d20bba5.png]]Improved MP Recovery",
+     "3",
+     "3",
+     "10"
+    ],
+    [
+     "[[img:d0a2f30f9abf2b.png]]Max MP Increase",
+     "15",
+     "15",
+     "15"
+    ],
+    [
+     "[[img:211a115f0a6318.png]]Magic Guard",
+     "3",
+     "15",
+     "15"
+    ],
+    [
+     "[[img:32b086d39a1fbe.png]]Magic Armor",
+     "20",
+     "8",
+     "0"
+    ]
+   ]
+  },
+  {
+   "p": "Safer moves 12 SP from Magic Armor to Magic Guard. Grummash's build needs an SP reset; its Cash Shop price is unconfirmed."
+  },
+  {
+   "h3": "Recommended citizenship"
+  },
+  {
+   "p": "Keep the Kerning City citizenship chosen in first job. Its later robe-scroll rewards add LUK or INT, both useful when preparing the level-70 Angel Wings setup."
+  },
+  {
+   "h2": "Accuracy after level 30"
+  },
+  {
+   "p": "A training map only works when your attacks connect. Every miss spends MP, wastes the attack animation, and lowers EXP per minute."
+  },
+  {
+   "img": "d6a9e8d928c736.png",
+   "w": 130,
+   "h": 179
+  },
+  {
+   "note": "**Magician Base Accuracy**\nLevel, INT, LUK, and direct Accuracy all add to total ACC.\n**+0.39** ACC per level\n**+0.24** ACC per INT\n**+0.12** ACC per LUK\n**+1.00** ACC per direct ACC"
+  },
+  {
+   "p": "Every mob has Avoidability. Fighting above your level raises the ACC needed to hit, while gaining levels closes that penalty. This is why a lower-level map with clean one- or two-attack kills can beat a higher-level map with misses."
+  },
+  {
+   "table": [
+    [
+     "Mob",
+     "Mob level",
+     "Mob Avoid",
+     "ACC to never miss at equal level"
+    ],
+    [
+     "[[img:777ced8b4048a6.png]]Jr. Wraith",
+     "34",
+     "24",
+     "79 ACC"
+    ],
+    [
+     "[[img:2a5d75bf6e3634.png]]Lorang",
+     "38",
+     "23",
+     "76 ACC"
+    ],
+    [
+     "[[img:3934c93d7d4444.png]]Zombie Lupin",
+     "41",
+     "28",
+     "92 ACC"
+    ],
+    [
+     "[[img:0386eea7010d4c.png]]Wraith",
+     "48",
+     "31",
+     "101 ACC"
+    ]
+   ]
+  },
+  {
+   "guide": "magician-class-guide",
+   "text": "Read the full Magician Accuracy explanation"
+  },
+  {
+   "h2": "Levels 30-70: I/L Wizard skill build and leveling"
+  },
+  {
+   "img": "617f8e4cf5ecf9.png",
+   "w": 130,
+   "h": 139
+  },
+  {
+   "h3": "Level 30 I/L Wizard job advancement"
+  },
+  {
+   "ol": [
+    "Start the second-job advancement by speaking with Grendel the Really Old in Ellinia.",
+    "Take his letter north to the Magician Job Instructor at The Forest North of Ellinia.",
+    "Defeat the trial mobs, collect 30 Dark Marbles, and claim The Proof of a Hero.",
+    "Return the proof to Grendel and choose I/L Wizard."
+   ]
+  },
+  {
+   "p": "[[img:fb4af958a97eb5.png]] **Grendel the Really Old** Starts and finishes the I/L Wizard advancement in Ellinia."
+  },
+  {
+   "p": "[[img:9a7face47a910e.png]] **Magician Job Instructor** Runs the Dark Marble test north of Ellinia."
+  },
+  {
+   "note": "**First I/L Wizard SP: Teleport 1.** The first point gives immediate platform movement for 55 MP. Use it carefully until later skill levels lower the cost."
+  },
+  {
+   "h3": "Level 70 skill target"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "SP",
+     "Result at the saved skill level"
+    ],
+    [
+     "[[img:3a965ce996a17b.png]]MP Eater",
+     "20 / 20",
+     "For every attack, 50% success rate, absorb 50% of the enemy's Max MP"
+    ],
+    [
+     "[[img:36e4e076321665.png]]Meditation",
+     "20 / 20",
+     "MP -25; Party's Magic Attack +25 for 300 sec"
+    ],
+    [
+     "[[img:9e60bf77fd346c.png]]Teleport",
+     "20 / 20",
+     "MP -15; Teleport, with 150 in distance"
+    ],
+    [
+     "[[img:6fa403b487f879.png]]Slow",
+     "1 / 20",
+     "MP -15; Enemy Speed -10, Evasion -1 for 10 sec"
+    ],
+    [
+     "[[img:f8415b5b8d7c08.png]]Cold Beam",
+     "30 / 30",
+     "MP -22; Basic Attack 170, Mastery level 10; Slowed for 3 sec"
+    ],
+    [
+     "[[img:e28909e5386b42.png]]Thunder Bolt",
+     "30 / 30",
+     "MP -40; Basic Attack 70, Mastery level 10; 25% chance to be electrocuted"
+    ]
+   ]
+  },
+  {
+   "h3": "I/L Wizard SP allocation: levels 30-70"
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "Spend",
+     "Running total",
+     "Reason"
+    ],
+    [
+     "30",
+     "Teleport +1",
+     "Teleport 1",
+     "Immediate map movement."
+    ],
+    [
+     "31-39",
+     "Cold Beam +27",
+     "Cold Beam 27",
+     "Build the single-target ice spell. It works on every map."
+    ],
+    [
+     "40",
+     "Cold Beam +3",
+     "Cold Beam 30",
+     "Max its damage and Mastery."
+    ],
+    [
+     "41-50",
+     "Thunder Bolt +30",
+     "Thunder Bolt 30",
+     "Add the six-target spell for packed maps."
+    ],
+    [
+     "51",
+     "MP Eater +3",
+     "MP Eater 3",
+     "Unlock Meditation."
+    ],
+    [
+     "52-57",
+     "Meditation +18",
+     "Meditation 18",
+     "Raise party Magic Attack."
+    ],
+    [
+     "58",
+     "Meditation +2, MP Eater +1",
+     "Meditation 20 / Eater 4",
+     "Max Meditation."
+    ],
+    [
+     "59-63",
+     "MP Eater +15",
+     "MP Eater 19",
+     "Build the potion-saving passive."
+    ],
+    [
+     "64",
+     "MP Eater +1, Teleport +2",
+     "Eater 20 / Teleport 3",
+     "Max MP Eater."
+    ],
+    [
+     "65-69",
+     "Teleport +15",
+     "Teleport 18",
+     "Lower MP cost and raise distance."
+    ],
+    [
+     "70",
+     "Teleport +2, Slow +1",
+     "Teleport 20 / Slow 1",
+     "Finish Grummash's endpoint."
+    ]
+   ]
+  },
+  {
+   "p": "Second-job SP cannot be spent on first-job skills, so finish the first-job plan by level 30. Character Builder flags any build that breaks it."
+  },
+  {
+   "h3": "Cold Beam or Thunder Bolt first?"
+  },
+  {
+   "p": "[[img:f8415b5b8d7c08.png]]Cold Beam hits one mob hard. [[img:e28909e5386b42.png]]Thunder Bolt hits up to six mobs, but deals far less damage to each one. Which to max first depends on how many mobs each Thunder Bolt actually hits."
+  },
+  {
+   "table": [
+    [
+     "Mobs hit per Thunder Bolt",
+     "Cold Beam first",
+     "Thunder Bolt first"
+    ],
+    [
+     "1",
+     "4,199",
+     "3,239"
+    ],
+    [
+     "2",
+     "4,199",
+     "4,148"
+    ],
+    [
+     "3",
+     "4,199",
+     "6,222"
+    ],
+    [
+     "4",
+     "4,199",
+     "8,296"
+    ]
+   ]
+  },
+  {
+   "p": "EXP per minute at level 40 on the best launch map in Training Advisor. On one mob, [[img:24dcca787059a4.png]]Energy Bolt/[[img:5370722a856bb9.png]]Magic Claw 20 hits harder than Thunder Bolt 30, so the Thunder Bolt first column falls back to it."
+  },
+  {
+   "p": "The break-even is 2 mobs per cast. We max Cold Beam first because most casts do not hit 2+ mobs when they are spread out, while Cold Beam works on every map. Thunder Bolt pulls ahead of Cold Beam if you can consistently hit 3 or more mobs every cast."
+  },
+  {
+   "p": "Against elemental-neutral mobs, keep using Energy Bolt or Magic Claw as your main attack until Cold Beam reaches skill Lv24 at level 38. Against mobs weak to Ice, [[img:f8415b5b8d7c08.png]]Cold Beam is the better skill from skill Lv18 at level 36."
+  },
+  {
+   "h3": "Possible changes to the default order"
+  },
+  {
+   "h3": "Thunder Bolt first"
+  },
+  {
+   "p": "If you consistently hit 3 or more mobs per cast, swap levels 31-40 and 41-50: max Thunder Bolt first, then Cold Beam. At 3 mobs per cast it reaches about 6,222 EXP/min at level 40, against 4,199 for Cold Beam."
+  },
+  {
+   "h3": "Meditation before Thunder Bolt"
+  },
+  {
+   "p": "Mostly fighting one mob at a time? After Cold Beam 30, take MP Eater 3 at level 41 and max Meditation before Thunder Bolt. Thunder Bolt adds almost nothing on a single target, while Meditation raises every spell, for up to 12% more single-target damage between levels 42 and 55."
+  },
+  {
+   "h3": "Teleport 10 sooner"
+  },
+  {
+   "p": "Raise Teleport after the first max attack when map movement saves more time than the second spell."
+  },
+  {
+   "h2": "I/L Wizard AP allocation: levels 30-70"
+  },
+  {
+   "p": "Grummash ends at 299 base INT and 63 base LUK, then gets two more LUK from gear to equip Angel Wings. Do not add base LUK automatically after the total requirement is covered; the leftover AP belongs in INT."
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "AP each level",
+     "Base AP at the end"
+    ],
+    [
+     "31-40",
+     "INT +3 / LUK +2",
+     "172 INT / 40 LUK"
+    ],
+    [
+     "41-63",
+     "INT +4 / LUK +1",
+     "264 INT / 63 LUK"
+    ],
+    [
+     "64-70",
+     "INT +5",
+     "299 INT / 63 LUK"
+    ]
+   ]
+  },
+  {
+   "h2": "Recommended equipment"
+  },
+  {
+   "img": "a205a5472151ec.png",
+   "w": 130,
+   "h": 185
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Item",
+     "Why it matters"
+    ],
+    [
+     "10",
+     "[[img:50988435f40c62.png]]Pan Lid",
+     "Any class. 44 WDEF gives an 8.09% Guard chance, the best block rate for a mage."
+    ],
+    [
+     "30",
+     "[[img:2e8d2c65bd2aec.png]]Mithril Wand",
+     "55 M.ATK. Requires 60 INT and 20 LUK."
+    ],
+    [
+     "35",
+     "[[img:eb1d5689fc40fb.png]]Esther Shield",
+     "Mage shield with 28 WDEF and 55 MDEF. Its 5.30% Guard chance is lower than Pan Lid's. Requires 60 INT and 25 LUK."
+    ],
+    [
+     "40",
+     "[[img:512b9623061125.png]]Fairy Wand",
+     "69 M.ATK. Requires 80 INT and 30 LUK."
+    ],
+    [
+     "45",
+     "[[img:8fb958a3a2bb3e.png]]Arc Staff",
+     "73 M.ATK. Requires 90 INT and 40 LUK."
+    ],
+    [
+     "50",
+     "[[img:07f049cea846d4.png]]Cromi",
+     "83 M.ATK before scrolling. Requires 100 INT and 40 LUK."
+    ],
+    [
+     "55",
+     "[[img:3d68bcb0a089c0.png]]Thorns",
+     "87 M.ATK. Requires 110 INT and 50 LUK."
+    ],
+    [
+     "60",
+     "[[img:cad3048cc1d6cd.png]]Evil Tale",
+     "97 M.ATK. Requires 120 INT and 55 LUK."
+    ],
+    [
+     "65",
+     "[[img:b2c74841227fe5.png]]Evil Wings",
+     "101 M.ATK. Requires 130 INT and 60 LUK."
+    ],
+    [
+     "70",
+     "[[img:e4a7a0c9e9a042.png]]Angel Wings",
+     "111 M.ATK before scrolling. Requires 140 INT and 65 LUK."
+    ]
+   ]
+  },
+  {
+   "p": "I/L Wizards can hold a shield with either a wand or a staff. Spell cast time does not change with weapon speed, so take the highest M.ATK you can equip. Pan Lid blocks more often than Esther Shield (8.09% against 5.30% Guard chance), while Esther Shield adds 55 MDEF against magic attacks. Every WDEF scroll on the shield raises Guard chance further."
+  },
+  {
+   "h3": "Armor checkpoints"
+  },
+  {
+   "p": "[[img:865f68bdf44e7c.png]]Brown Jester[[img:9bb0c142cdc0c7.png]]Blue Wizard Robe[[img:5ca31d9e7d020a.png]]White Guiltian[[img:78d839fcd323e4.png]]Brown Starlight[[img:8d8a46fa3d576a.png]]Flame Golden Circlet[[img:47590281c2f8ba.png]]Red Calas[[img:ccef521f33304a.png]]Red Seraphis[[img:f4a44340286672.png]]Blue Anakamoon"
+  },
+  {
+   "p": "These are clean level 30, 40, 50, and 60 hat-and-robe checkpoints from the current item database. Open each item page for its current drop, craft, or shop sources. A cheaper robe with useful INT or LUK can be better than forcing every tier."
+  },
+  {
+   "h2": "M.ATK or Critical Rate on gloves?"
+  },
+  {
+   "p": "These numbers use Grummash's realistic level 70 I/L Wizard build and five successful Lesser glove scrolls. Both options use the same five slots."
+  },
+  {
+   "h3": "5x Gloves Magic Attack Scroll: Lesser"
+  },
+  {
+   "p": "**+10 M.ATK**\n326 to 336 total M.ATK\nAbout 3.07% more expected damage."
+  },
+  {
+   "h3": "5x Gloves Crit. Rate Scroll: Lesser"
+  },
+  {
+   "p": "**+5% Critical Rate**\n9% to 14% Critical Rate\nAbout 1.27% more expected damage."
+  },
+  {
+   "note": "**Pick Magic Attack.** The five-scroll Magic Attack setup deals about 1.77% more expected damage than the Critical Rate setup on this build."
+  },
+  {
+   "p": "W.ATK does not increase spell damage. The matching Magic Attack scroll gives twice as much M.ATK as the Critical Rate scroll gives Critical Rate."
+  },
+  {
+   "p": "**The ratio is the same at every grade.** Lesser gives +1 W.ATK or +1% Critical Rate (+2 M.ATK), Intermediate +2/+2% (+4 M.ATK), Greater +3/+3% (+6 M.ATK), and Chaos +4/+4% (+8 M.ATK). Matching grades have the same success and destruction rates."
+  },
+  {
+   "h2": "Example builds and Training Advisor maps"
+  },
+  {
+   "img": "3d5574fb5dc942.png",
+   "w": 130,
+   "h": 179
+  },
+  {
+   "p": "Thunder Bolt handles packed maps, while Cold Beam gives stronger single-target damage. Jimmy's budget card uses cheap, clean gear: Energy Bolt with early Meditation, then Cold Beam after an SP reset. A guaranteed kill still works on the weakest normal damage roll with 100% hit rate. Each pick also shows Danger and the nearest potion refill because a small EXP lead can disappear when the walk back is much longer."
+  },
+  {
+   "note": "Level 30\nEnergy Bolt 20 / MG 3 / MA 20 / 71 ACC / 155 INT\n[[img:ae64823f427bc0.png]] **Transfer Area** Energy Bolt: Stirge 1-cast, Safe at 7%; Dr. Faymus refill in 4 portals; about 2,741 EXP/min [[img:059caff41683e8.png]] **Dungeon, Southern Forest IV** Energy Bolt: Blue Mushroom 2-cast and other spawns 1-cast, Safe at 9%; Len the Fairy refill in 5 portals; about 2,435 EXP/min\nJimmy's budget build: Energy Bolt first, Cold Beam after a reset\n177 base INT / 10 base LUK at level 35, every AP in INT\n[[img:bbcd27e94f27bb.png]]White Bandana [[img:f17cd152cb8c9e.png]]Blue Plain Robe [[img:06916dd07d6043.png]]Metal Wand (clean)\nLevels 30-31: keep Energy Bolt 20 and put the new SP into MP Eater 3, then Meditation.\nLevel 32: switch to a Metal Wand. With Meditation 4, Energy Bolt one-shots Stirges and two-shots Fire Boars (422 per hit on the weakest roll against 842 HP).\nBefore level 40: reset your SP into Cold Beam. At level 40, Cold Beam 30 one-shots Fire Boars on the same Metal Wand (860 on the weakest roll).\nLevel 50: two-shotting Copper Drakes (2,595 HP) takes about 125 M.ATK from gear, or a party member's Meditation 20. The level 50 build below (107 M.ATK) needs 3 casts.\n[[img:ae64823f427bc0.png]] **Transfer Area** Level 32 Energy Bolt: Stirge is guaranteed 1-cast, Safe at 5%; Dr. Faymus refill in 4 portals; about 2,741 EXP/min [[img:762bddf50eb031.png]] **The Burnt Land III** Level 32 Energy Bolt: Fire Boar and Dark Axe Stump are guaranteed 2-cast, Caution at 11%; Arturo refill in 6 portals; about 2,049 EXP/min\nLevel 40\nCold Beam 30, 83 ACC, 182 INT\n[[img:762bddf50eb031.png]] **The Burnt Land I** Fire Boar and Dark Axe Stump are guaranteed 1-cast, Safe at 9%; Arturo refill in 4 portals; about 4,199 EXP/min [[img:a951e586bae69f.png]] **Ant Tunnel Park** Evil Eye and both mushrooms are guaranteed 1-cast, Safe at 8%; Mr. Sweatbottom refill in 11 portals; about 3,511 EXP/min\nLevel 50\nThunder Bolt 30, Cold Beam 30, 225 INT\n[[img:059caff41683e8.png]] **Ant Tunnel IV** Horny Mushroom is 1-cast and Zombie Mushroom 2-cast, Safe at 6%; Mr. Sweatbottom refill in 6 portals; about 14,023 EXP/min [[img:1d6ce5099450d1.png]] **Tree Dungeon, Forest Up North IX** Cold Beam: Curse Eye is guaranteed 1-cast, Safe at 9%; Len the Fairy refill in 5 portals; about 4,889 EXP/min\nLevel 60\nThunder Bolt 30, Cold Beam 30, max Meditation, 270 INT\n[[img:36750484773e65.png]] **Ant Tunnel III** Both mushrooms are guaranteed 1-cast, Safe at 5%; Mr. Sweatbottom refill in 5 portals; about 19,318 EXP/min [[img:8d3453e377c2eb.png]] **Perilous Descent III** Cold Beam: Duskmander and Echopus are guaranteed 2-cast, Safe at 9%; Luma refill in 6 portals; about 4,929 EXP/min\nLevel 70\nGrummash build, 352 INT, 336 M.ATK with Meditation\n[[img:777ced8b4048a6.png]] **Line 1 <Area 2>** Jr. Wraith is 2-cast and Stirge 1-cast, Safe at 6%; Dr. Faymus refill in 5 portals; about 24,777 EXP/min [[img:0386eea7010d4c.png]] **Line 2 <Area 3>** Cold Beam guarantees a 2-cast on Wraith, Safe at 8%; Dr. Faymus refill in 7 portals; about 9,455 EXP/min"
+  },
+  {
+   "p": "**Before you settle in:** The Thunder Bolt picks assume each cast hits every mob in range. Check how many you actually hit during normal movement. If it is one per cast, use the Cold Beam pick. Keep the spell and elemental matchup in your saved build current."
+  },
+  {
+   "h2": "Important I/L Wizard skill mechanics"
+  },
+  {
+   "h3": "Thunder Bolt"
+  },
+  {
+   "img": "9d6a45a5275bc1.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "Max Thunder Bolt has 70 Basic Attack with Mastery 10. It can hit six mobs for 40 MP. The skill data lists a 25% electrocute chance and a 2-second stun duration. Lightning-resistant mobs can't be stunned."
+  },
+  {
+   "p": "**At level 70, the benchmark deals about 6,223 expected total damage to six neutral targets and 7,779 when all six are lightning-weak.**"
+  },
+  {
+   "h3": "Cold Beam"
+  },
+  {
+   "img": "f7f882cce46a04.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "Max Cold Beam has 170 Basic Attack and Mastery 10 for 22 MP. It slows for 3 seconds, can hit through terrain, and deals 25% more damage to ice-weak mobs. Ice-resistant mobs are not slowed."
+  },
+  {
+   "p": "**The level 70 benchmark deals about 2,519 expected damage to a neutral target and 3,148 to an ice-weak target.**"
+  },
+  {
+   "h3": "Meditation"
+  },
+  {
+   "img": "7a2c42f9540c23.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "Max Meditation gives 25 Magic Attack to nearby party members for 300 seconds. It boosts magical attacks and has no effect on physical Attack Power."
+  },
+  {
+   "note": "**Level 70 damage check:** At level 70, Cold Beam reaches about 3,148 expected damage against an ice-weak target for 22 MP. Thunder Bolt reaches about 7,779 expected total damage when six targets are lightning-weak."
+  },
+  {
+   "h3": "Ice and lightning on Victoria Island"
+  },
+  {
+   "p": "Cold Beam has three ice-weak mobs on Victoria Island and eight that resist it. Thunder Bolt has five lightning-weak mobs, and only four resist it."
+  },
+  {
+   "p": "Weak mobs take 25% more damage. Resistant mobs take 25% less and ignore that spell's slow or stun. The table covers regular spawns from level 20 up."
+  },
+  {
+   "table": [
+    [
+     "Element",
+     "Weak",
+     "Resistant"
+    ],
+    [
+     "Ice",
+     "[[img:762bddf50eb031.png]]Fire Boar (Lv 32), [[img:3b0aac86470550.png]]Copper Drake (Lv 45), [[img:8d3453e377c2eb.png]]Duskmander (Lv 50)",
+     "[[img:b6569c0a7fdae3.png]]Ligator (Lv 31), [[img:b13145852aee23.png]]Cold Eye (Lv 40), [[img:2ba29b3aeef67c.png]]Raffle (Lv 40), [[img:fa554ceb1468b9.png]]Aqumander (Lv 43), [[img:ab7412e282fc07.png]]Rafflesia (Lv 47), [[img:415ed0ee975fe3.png]]Drake (Lv 50), [[img:0058915bf9763c.png]]Croco (Lv 52), [[img:fc715623e4983d.png]]Malady (Lv 55)"
+    ],
+    [
+     "Lightning",
+     "[[img:bf8dadc930baba.png]]Iron Hog (Lv 28), [[img:2a5d75bf6e3634.png]]Lorang (Lv 38), [[img:fa554ceb1468b9.png]]Aqumander (Lv 43), [[img:2e195968c99a6e.png]]Echopus (Lv 45), [[img:6623dcb448bb87.png]]Clang (Lv 49)",
+     "[[img:e56a0489f87f41.png]]Fairy 2, [[img:2860bcb742fed0.png]]Fairy 3, [[img:413278152c7ddf.png]]Fairy 4 (Lv 29), [[img:9581b138675a2f.png]]Myewood (Lv 54)"
+    ]
+   ]
+  },
+  {
+   "p": "Aqumander resists ice but is weak to lightning. Switch to Thunder Bolt there. Myewood resists lightning and takes normal ice damage, so Cold Beam is the better spell on it."
+  },
+  {
+   "p": "MP Eater drains at most once every 5 seconds, and it gets nothing from mobs with 0 MP. On Victoria Island that means Pig, Ribbon Pig, Wild Boar, Ligator, and Fire Boar. Bring extra MP potions for the ice-weak Fire Boars in The Burnt Land."
+  },
+  {
+   "h2": "Find Your Build's Best Training Map with Training Advisor"
+  },
+  {
+   "p": "**Danger measures how hard a mob hits you for: under 10% of your HP is Safe, 10-24% is Caution, 25-49% is Danger, and 50%+ is Lethal.**"
+  },
+  {
+   "p": "Thunder Bolt usually wins raw EXP on crowded maps. Cold Beam can be cleaner against one ice-weak target. It also works better when a platform prevents six-mob coverage."
+  },
+  {
+   "ol": [
+    "Enter the I/L Wizard's real AP and Magic Attack. Add the equipment, shield, current skills, and active buffs.",
+    "Check Thunder Bolt at 100% reliability for grouped mobs, then rerun with Cold Beam for single targets.",
+    "Read each mob's ice and lightning modifier; weakness adds 25% and resistance removes 25%.",
+    "Leave Factor Danger into recommendations enabled. A slightly faster raw map can fall behind when its incoming damage is unsafe.",
+    "Choose the one- or two-cast map whose platforms let the selected spell reach its normal target count.",
+    "Compare the refill loop. A nearest-town scroll gets you back to town, but you still have to walk back to the map. When EXP/min is close, prefer the map with the shorter walk to potion shops."
+   ]
+  },
+  {
+   "img": "a81d7277027ac0.png",
+   "w": 360,
+   "h": 402,
+   "cap": "The saved I/L Wizard build in Training Advisor: current hit rate, danger, damage, and EXP per hour for the equipped character."
+  },
+  {
+   "h2": "Recommended potions"
+  },
+  {
+   "p": "Max Thunder Bolt costs 40 MP, so Lemons disappear quickly on six-mob maps. Full Magic Guard adds another large MP expense when mobs touch you: at the basic shop rates, every 100 incoming damage costs about 90 mesos to refill through MG 15, compared with 50 mesos when it stays on HP. Use the Guard level your map actually needs. Buy efficient recovery. Save Magic Potions for a cast breakpoint."
+  },
+  {
+   "img": "35179a6062c574.png",
+   "w": 130,
+   "h": 139
+  },
+  {
+   "p": "**BEST TO BUY** Best HP or MP recovered per meso"
+  },
+  {
+   "p": "[[img:be80aa4791c684.png]] **Red Potion** 50 mesos · 100 HP 2 HP per meso [[img:39a28ad40190a6.png]] **Fried Chicken** 60 mesos · 120 HP 2 HP per meso [[img:51e2250795d8f6.png]] **Meat** 80 mesos · 160 HP 2 HP per meso [[img:da1e5c881a1df6.png]] **Orange** 50 mesos · 50 MP 1 MP per meso [[img:d59bc967011b87.png]] **Lemon** 150 mesos · 150 MP 1 MP per meso"
+  },
+  {
+   "p": "**Situational** Buy only when the buff reaches a useful breakpoint"
+  },
+  {
+   "p": "[[img:01a2e09235af46.png]] **Magic Potion** 500 mesos · +10 M.ATK for 10 min Use for a damage breakpoint [[img:4e15182d2a8a6e.png]] **Sniper Potion** 500 mesos · +5 ACC for 10 min Use to remove misses [[img:e18fe0a27cd32a.png]] **Supreme Sniper Potion** 600 mesos · +7 ACC for 15 min Best shop ACC buff"
+  },
+  {
+   "p": "**DON'T BUY** Worse recovery per meso than the choices above"
+  },
+  {
+   "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 mesos · 500 HP 1.43 HP per meso [[img:d19cbf8225851d.png]] **Blue Potion** 220 mesos · 200 MP 0.91 MP per meso"
+  },
+  {
+   "guide": "best-buy-shop-efficiency",
+   "text": "Compare shop potion efficiency"
+  },
+  {
+   "h2": "Common I/L Wizard mistakes"
+  },
+  {
+   "img": "acc7dfa25a0407.png",
+   "w": 130,
+   "h": 178
+  },
+  {
+   "ol": [
+    "**Casting Thunder Bolt on one mob.** Cold Beam gives much better single-target damage and MP use.",
+    "**Ignoring elements.** Check ice and lightning resistance before choosing the spell and map.",
+    "**Spamming Teleport 1.** Skill Lv1 costs 55 MP.",
+    "**Adding LUK after your Total LUK already meets the next weapon requirement.** Extra INT raises damage and contributes more magician Accuracy."
+   ]
+  },
+  {
+   "h2": "Sample level 70 I/L Wizard build by Grummash"
+  },
+  {
+   "img": "f129f781e04eca.png",
+   "w": 130,
+   "h": 184
+  },
+  {
+   "p": "Grummash's level-70 I/L Wizard provides the stats for both elemental damage checks. The saved gear has successful Lesser scrolls in every available slot."
+  },
+  {
+   "p": "[[img:e4a7a0c9e9a042.png]]Angel Wings [[img:14ffcc59b9e65c.png]]Blue Infinium Circlet [[img:ad758043440bc3.png]]Blue Requiem [[img:3da7555f720bf1.png]]Blue Lorin [[img:de7702418eb057.png]]Brown Lapiz Sandals [[img:cc230a8d46e614.png]]Blue Gaia Cape [[img:ea67f3099d0314.png]]Metal Silver Earrings [[img:eb1d5689fc40fb.png]]Esther Shield"
+  },
+  {
+   "note": "352 INT / 65 LUK / 336 M.ATK\n**9%** Critical Rate\n**26%** Critical Damage\n**210** WDEF\n**372** MDEF"
+  },
+  {
+   "h2": "At level 70: become an I/L Mage"
+  },
+  {
+   "p": "[[img:c1522d01da4202.png]] **Robeira** Handles the I/L Mage advancement in El Nath."
+  },
+  {
+   "p": "I/L Wizards become I/L Mages through Robeira in El Nath. Third job and El Nath are not in the launch build."
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/il-wizard-class-guide",
+ "hash": "360cbec0569a"
+}

@@ -1,0 +1,835 @@
+{
+ "title": "MapleStory Classic Warrior Build and Leveling Guide: Lv 1-30",
+ "intro": "Warriors are MapleStory's front-line melee class. They train under Dances with Balrog in Perion, build around STR, and spend their first 30 levels learning Power Strike and Slash Blast before choosing Fighter, Page, or Spearman.",
+ "hero": "68a9aaf13ab9ed.png",
+ "minutes": null,
+ "blocks": [
+  {
+   "p": "**Pros**"
+  },
+  {
+   "ul": [
+    "Slash Blast hits up to four mobs from its first point.",
+    "High HP and strong physical armor.",
+    "Power Strike and Slash Blast are extremely DMG/MP efficient.",
+    "Access to the widest variety of weapon families."
+   ]
+  },
+  {
+   "p": "**Cons**"
+  },
+  {
+   "ul": [
+    "Short melee reach and limited mobility.",
+    "Frequently getting hit by mobs.",
+    "Likely to get KS'd."
+   ]
+  },
+  {
+   "h2": "Understanding Warrior's Accuracy & How Much Dex You Need"
+  },
+  {
+   "p": "Before any build guide, we need to understand how Warrior Accuracy works in MapleStory Classic World. It affects every build and every recommended training spot."
+  },
+  {
+   "img": "4337dbf87ad50d.png",
+   "w": 130,
+   "h": 143
+  },
+  {
+   "note": "**Base Accuracy**\nfloor((1.2 x Total DEX + 2 x Level + 0.6 x Total LUK) / 2.5 + 10)\nTotal Accuracy is Base Accuracy plus direct Accuracy from equipment, scrolls, skills, and potions."
+  },
+  {
+   "p": "**+0.80** Base ACC per level"
+  },
+  {
+   "p": "**+0.48** Base ACC per DEX"
+  },
+  {
+   "p": "**+0.24** Base ACC per LUK"
+  },
+  {
+   "p": "**+1.00** Total ACC per direct ACC"
+  },
+  {
+   "p": "Warrior Accuracy comes from character level, DEX, LUK, direct Accuracy, and their passive Precise Strikes. **Character level contributes more Accuracy for Warriors than for any other advancing class.** COT2 players welcomed this change because a Warrior's Accuracy now scales strongly with level."
+  },
+  {
+   "p": "One character level adds as much Base Accuracy as about 1.67 DEX. Level also closes the penalty for fighting a higher-level mob. This is why gaining a few levels can fix a \"bad map\" faster than adding more base DEX."
+  },
+  {
+   "note": "**Hit rate: level gap and mob Avoidability**\nL = max(0, Mob Level - Your Level)\nA = Total Accuracy x 100 / (10 x L + 255)\nD = A - Mob Avoidability\nEvery mob has its own Avoidability value, which is its evasion stat. Your level gap adjusts Total Accuracy first, then the result is compared against the mob's Avoidability. A higher mob Avoidability or a mob above your level both raise the Accuracy you need."
+  },
+  {
+   "h3": "Zombie Mushroom example"
+  },
+  {
+   "p": "Zombie Mushroom is level 24 with 14 Avoidability. Your hit rate changes with the level difference between you and the mob."
+  },
+  {
+   "table": [
+    [
+     "Your level",
+     "Level difference",
+     "Mob Avoidability",
+     "Total ACC for 100% hit rate"
+    ],
+    [
+     "19",
+     "5 levels below the mob",
+     "14",
+     "56 ACC"
+    ],
+    [
+     "24",
+     "Same level",
+     "14",
+     "47 ACC"
+    ],
+    [
+     "29",
+     "5 levels above the mob",
+     "14",
+     "47 ACC"
+    ]
+   ]
+  },
+  {
+   "note": "**Max Precise Strikes adds 20 direct Accuracy and 5% Critical Rate.** Check your level, gear, and Accuracy potion before committing more AP to DEX. STR gives Warriors much more damage."
+  },
+  {
+   "h3": "Real Accuracy targets"
+  },
+  {
+   "p": "These targets use each mob's Avoidability and the player level shown. The 100% column means you never miss. Fighting at a lower level raises the ACC requirement to hit."
+  },
+  {
+   "table": [
+    [
+     "Mob",
+     "Mob level",
+     "Mob Avoidability",
+     "Your level",
+     "90% hit",
+     "100% hit"
+    ],
+    [
+     "Green Mushroom",
+     "14",
+     "8",
+     "14",
+     "26 ACC",
+     "27 ACC"
+    ],
+    [
+     "Horny Mushroom",
+     "22",
+     "13",
+     "22",
+     "41 ACC",
+     "44 ACC"
+    ]
+   ]
+  },
+  {
+   "h2": "Levels 1-10: Beginner to Warrior"
+  },
+  {
+   "p": "Follow the Maple Island quests, equip the strongest weapon they give you, and leave for Victoria Island at level 10. Go to Perion and talk to Dances with Balrog for the Warrior advancement."
+  },
+  {
+   "img": "4ae130ab043e4e.png",
+   "w": 130,
+   "h": 136
+  },
+  {
+   "note": "**Fun fact:** The Club is the best starting weapon for levels 1-4 because it is more likely than the Sword or Hand Axe to kill Maple Island mobs with one fewer hit on average. At level 5, switch to the Razor."
+  },
+  {
+   "h3": "Beginner skill build"
+  },
+  {
+   "p": "[[img:efe346ff3ac88e.png]] **Three Snails 3**\nRanged shell attack"
+  },
+  {
+   "p": "[[img:d1b8185bc6bf24.png]] **Recovery 3**\nShort HP recovery"
+  },
+  {
+   "p": "[[img:edc2244a5bda10.png]] **Nimble Feet 3**\nShort Speed buff"
+  },
+  {
+   "p": "You get 9 Beginner SP by level 10, enough to max all three skills at 3/3/3. Level them in whichever order you prefer."
+  },
+  {
+   "h3": "AP allocation: levels 1-10"
+  },
+  {
+   "p": "Fresh characters start with 12 STR / 5 DEX / 4 INT / 4 LUK. Put all 5 AP into STR every level through level 10. This reaches 57 STR / 5 DEX at level 10. You can only lower the starting 5 DEX to 4 later with an AP Reset."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "AP gained",
+     "Spend",
+     "Base stats after spending",
+     "Total AP"
+    ],
+    [
+     "1",
+     "25 starting AP",
+     "STR +8, DEX +1",
+     "12 STR / 5 DEX / 4 INT / 4 LUK",
+     "25"
+    ],
+    [
+     "2",
+     "+5",
+     "STR +5",
+     "17 STR / 5 DEX / 4 INT / 4 LUK",
+     "30"
+    ],
+    [
+     "3",
+     "+5",
+     "STR +5",
+     "22 STR / 5 DEX / 4 INT / 4 LUK",
+     "35"
+    ],
+    [
+     "4",
+     "+5",
+     "STR +5",
+     "27 STR / 5 DEX / 4 INT / 4 LUK",
+     "40"
+    ],
+    [
+     "5",
+     "+5",
+     "STR +5",
+     "32 STR / 5 DEX / 4 INT / 4 LUK",
+     "45"
+    ],
+    [
+     "6",
+     "+5",
+     "STR +5",
+     "37 STR / 5 DEX / 4 INT / 4 LUK",
+     "50"
+    ],
+    [
+     "7",
+     "+5",
+     "STR +5",
+     "42 STR / 5 DEX / 4 INT / 4 LUK",
+     "55"
+    ],
+    [
+     "8",
+     "+5",
+     "STR +5",
+     "47 STR / 5 DEX / 4 INT / 4 LUK",
+     "60"
+    ],
+    [
+     "9",
+     "+5",
+     "STR +5",
+     "52 STR / 5 DEX / 4 INT / 4 LUK",
+     "65"
+    ],
+    [
+     "10",
+     "+5",
+     "STR +5",
+     "**57 STR / 5 DEX / 4 INT / 4 LUK**",
+     "**70**"
+    ]
+   ]
+  },
+  {
+   "h3": "Level 10 Warrior example build"
+  },
+  {
+   "p": "57 base STR / 5 base DEX\n57 STR / 6 DEX / 30 W.ATK / 24 ACC with gear"
+  },
+  {
+   "p": "**Skills:** Power Strike 1. Three Snails, Recovery, and Nimble Feet 3."
+  },
+  {
+   "p": "[[img:45b1997932fe5e.png]]Wooden Sword [[img:f6e2a441572942.png]]Metal Koif [[img:356474d273c074.png]]Juno"
+  },
+  {
+   "note": "River sells Wooden Sword in Perion. Metal Koif is a Smithing 1 craft. Juno drops from Stump or can be crafted at Smithing 2."
+  },
+  {
+   "p": "**Best guaranteed Power Strike targets**"
+  },
+  {
+   "p": "[[img:ca2dec0d81316e.png]] **Red Snail** 100% hit · guaranteed 2-hit · 4 EXP/hit [[img:3c33bf918e3b1b.png]] **Shroom** 100% hit · guaranteed 2-hit · 3 EXP/hit"
+  },
+  {
+   "h2": "Levels 10-30: Warrior skill build and leveling"
+  },
+  {
+   "p": "Build Power Strike first for reliable kills, then finish Slash Blast and Precise Strikes."
+  },
+  {
+   "img": "5b1b4d1c9a2e02.png",
+   "w": 130,
+   "h": 106
+  },
+  {
+   "h3": "Recommended citizenship at level 12"
+  },
+  {
+   "p": "**Henesys is the best general citizenship for a Warrior.** Citizenship opens at level 12. Go to Henesys Town Hall and sign with Arthur. Raymond sells Supreme Sniper Potion for +7 Accuracy over 15 minutes. Flint's later shop ranks add Overall Armor STR Scroll: Lesser and Gloves Attack Scroll: Lesser."
+  },
+  {
+   "p": "Kerning City favors evasion, crit damage, LUK, and INT. Citizenship discounts apply to eligible prices in your active town, so the discount does not reduce every shop item in the game."
+  },
+  {
+   "h3": "Power Strike or Slash Blast?"
+  },
+  {
+   "p": "Both skills cost 12 MP at max. Slash Blast also costs 8 HP. Use Slash Blast when you can hit at least three mobs."
+  },
+  {
+   "note": "**Slash Blast gets a small range increase at skill level 11.** Its reach changes from 130 px to 150 px. It already targets up to four mobs at skill Lv1."
+  },
+  {
+   "h3": "Level 30 Warrior skill target"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Target",
+     "Result"
+    ],
+    [
+     "[[img:372c657914dd3b.png]]Improved HP Recovery",
+     "3 / 15",
+     "Opens Max HP Increase; item HP recovery +7%."
+    ],
+    [
+     "[[img:2074af2cc049f3.png]]Max HP Increase",
+     "3 / 15",
+     "+12% Max HP."
+    ],
+    [
+     "[[img:ddb44a08bba0fc.png]]Precise Strikes",
+     "15 / 15",
+     "+20 Accuracy and +5% Critical Rate."
+    ],
+    [
+     "[[img:5a87eac438f1c6.png]]Iron Body",
+     "0 / 20",
+     "Skipped."
+    ],
+    [
+     "[[img:7700d0a87ede5e.png]]Power Strike",
+     "20 / 20",
+     "260% damage for 12 MP."
+    ],
+    [
+     "[[img:b5a4eaed502bda.png]]Slash Blast",
+     "20 / 20",
+     "130% damage to four mobs for 8 HP and 12 MP."
+    ]
+   ]
+  },
+  {
+   "h3": "How Max HP Increase changed in MSClassic"
+  },
+  {
+   "p": "In pre-Big-Bang MapleStory, Max HP Increase added bonus Max HP every time a Warrior leveled. Taking it late meant permanently missing HP, so Warriors maxed it as early as possible."
+  },
+  {
+   "p": "MapleStory Classic World changed the skill to an immediate percentage of base Max HP. Skill Lv3 gives +12% Max HP and skill Lv15 gives +25%. Delaying it no longer costs HP from earlier levels. Classic World also raised base HP for every class, and Warriors receive the largest HP bonus from job advancements. Max HP Increase is still \"a tad\" useful, but maxing it is no longer recommended given limited SP in 1st job."
+  },
+  {
+   "h3": "Warrior SP allocation: levels 10-30"
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Spend",
+     "Running result",
+     "Reason"
+    ],
+    [
+     "10",
+     "Power Strike +1",
+     "Power Strike 1",
+     "Opens Slash Blast."
+    ],
+    [
+     "11",
+     "Power Strike +2, Slash Blast +1",
+     "PS 3, SB 1",
+     "Gets four-target mobbing immediately."
+    ],
+    [
+     "12",
+     "Power Strike +1, Slash Blast +2",
+     "PS 4, SB 3",
+     "Keeps both attacks useful."
+    ],
+    [
+     "13",
+     "Slash Blast +1, Precise Strikes +2",
+     "SB 4, Precise 2",
+     "Starts the Accuracy passive."
+    ],
+    [
+     "14",
+     "Precise Strikes +3",
+     "Precise 5",
+     "Helps with early hit rate."
+    ],
+    [
+     "15-19",
+     "Power Strike +15",
+     "Power Strike 19",
+     "Raises one-target damage."
+    ],
+    [
+     "20",
+     "Power Strike +1, Slash Blast +2",
+     "PS 20, SB 6",
+     "Finishes Power Strike."
+    ],
+    [
+     "21-24",
+     "Slash Blast +12",
+     "Slash Blast 18",
+     "Raises damage against grouped mobs."
+    ],
+    [
+     "25",
+     "Slash Blast +2, Precise Strikes +1",
+     "SB 20, Precise 6",
+     "Finishes Slash Blast."
+    ],
+    [
+     "26-28",
+     "Precise Strikes +9",
+     "Precise Strikes 15",
+     "Finishes Accuracy and Critical Rate."
+    ],
+    [
+     "29",
+     "Improved HP Recovery +3",
+     "Improved HP Recovery 3",
+     "Opens Max HP Increase."
+    ],
+    [
+     "30",
+     "Max HP Increase +3",
+     "Max HP Increase 3",
+     "Uses the final 3 SP for +12% Max HP."
+    ]
+   ]
+  },
+  {
+   "p": "Second-job SP cannot be spent on first-job skills, so finish the first-job plan by level 30. Character Builder flags any build that breaks it."
+  },
+  {
+   "p": "Raise Precise Strikes earlier if accuracy issues are hurting your preferred grind map. MP potions cost real money and you can't afford to waste MP on missed hits. A mob-heavy party grind can also move Slash Blast ahead of Power Strike."
+  },
+  {
+   "p": "**Levels 10 to 30 hand you 61 SP and the six first-job skills cost 105 to max.** Power Strike and Precise Strikes earn their points on every map. Slash Blast is the one to trim when you train where mobs rarely clump. Max HP Increase gives +10% of base Max HP for a single point and 25% for all fifteen, so spend one point early and put whatever is left of the 61 first-job SP into it once Power Strike and Precise Strikes are done."
+  },
+  {
+   "img": "e8418617141dc4.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Power Strike: your 260% one-target skill from level 10 through 70."
+  },
+  {
+   "img": "e5a968178ece70.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Slash Blast: hits up to four from lv 1; small range increase at lv 11."
+  },
+  {
+   "h3": "Warrior AP allocation: levels 10-30"
+  },
+  {
+   "p": "Keep 5 base DEX through level 10, then raise DEX at the checkpoints below. At level 15, the sample Sabre, Metal Koif, and Steel Fitted Mail give you 14 total DEX. Two of your weakest Power Strikes will always kill Slime. INT and LUK remain at 4."
+  },
+  {
+   "note": "**The level 30 Blue Axe needs 30 total DEX, including equipment.** This example uses 27 base DEX and +3 DEX from Jousting Helmet. If your gear gives less DEX, add only enough base DEX to reach 30 total."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Base STR",
+     "Base DEX",
+     "AP plan"
+    ],
+    [
+     "10",
+     "57",
+     "5",
+     "All STR through level 10"
+    ],
+    [
+     "12",
+     "65",
+     "7",
+     "Levels 11-12: 4 STR, 1 DEX"
+    ],
+    [
+     "14",
+     "71",
+     "11",
+     "Levels 13-14: 3 STR, 2 DEX"
+    ],
+    [
+     "15",
+     "75",
+     "12",
+     "4 STR, 1 DEX; Slime 2-hit breakpoint with the sample gear"
+    ],
+    [
+     "19",
+     "91",
+     "16",
+     "Levels 16-19: 4 STR, 1 DEX"
+    ],
+    [
+     "20",
+     "94",
+     "18",
+     "3 STR, 2 DEX; 20 total DEX with Iron Viking Helm"
+    ],
+    [
+     "25",
+     "114",
+     "23",
+     "Levels 21-25: 4 STR, 1 DEX"
+    ],
+    [
+     "29",
+     "130",
+     "27",
+     "Levels 26-29: 4 STR, 1 DEX"
+    ],
+    [
+     "30",
+     "135",
+     "27",
+     "STR +5; 30 total DEX with Jousting Helmet"
+    ]
+   ]
+  },
+  {
+   "h3": "Recommended equipment: levels 10-30"
+  },
+  {
+   "p": "Weapon upgrades matter most. Buy Accuracy gear or use ACC potions only when it helps you grind a better map / reduce misses. Expensive armor upgrades can wait."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Weapon choices",
+     "Useful gear",
+     "Where to get it"
+    ],
+    [
+     "10-14",
+     "[[img:561ddd599e1045.png]]Long Sword 27 W.ATK, Speed 4 [[img:45b1997932fe5e.png]]Wooden Sword 30 W.ATK, Speed 5 [[img:4dcc2d13aa3641.png]]Metal Axe 30 W.ATK, Speed 5",
+     "[[img:f6e2a441572942.png]]Metal Koif +1 DEX, +2 ACC, +10 HP [[img:356474d273c074.png]]Juno +1 ACC, +1% Critical Rate",
+     "River in Perion sells the weapons. Craft Metal Koif with Smithing 1. Juno drops from Stump or can be crafted with Smithing 2."
+    ],
+    [
+     "15",
+     "[[img:08a3c438d25095.png]]Sabre 32 W.ATK, Speed 4 [[img:6e4c99c80b9569.png]]Battle Axe 32 W.ATK, Speed 4",
+     "[[img:f831f6d0ed2dab.png]]Steel Fitted Mail +2 STR, +1 DEX",
+     "River and Harry sell all three in Perion."
+    ],
+    [
+     "20",
+     "[[img:9ffeb1b885c005.png]]Viking Sword 37 W.ATK, Speed 4 [[img:080e962b77c6b3.png]]Two-Handed Sword 40 W.ATK, Speed 5 [[img:7aceff9c0fa88a.png]]Iron Axe 35 W.ATK, Speed 5",
+     "[[img:812c9950fd88bf.png]]Red Kendo Robe +4 STR [[img:45ae963953a3f5.png]]Iron Viking Helm +2 DEX, +3 ACC",
+     "River sells the weapons and Harry sells the robe in Perion. Craft the helmet with Smithing 4."
+    ],
+    [
+     "25",
+     "[[img:75298b29a32a56.png]]Mithril Axe 45 W.ATK [[img:6234c294e02d46.png]]Broadsword 45 W.ATK [[img:dc256b437bf7ef.png]]Two-Handed Axe 45 W.ATK",
+     "[[img:fbff150f1ca4ce.png]]White Fingerless Gloves +2 ACC, +1% Critical Rate",
+     "River sells the weapons in Perion. Craft the gloves with Smithing 5."
+    ],
+    [
+     "30",
+     "[[img:cf5a1d2beefd9e.png]]Gladius 47 W.ATK, Speed 4 [[img:5d2179f9cd3575.png]]Fireman's Axe 47 W.ATK, Speed 4 [[img:b43c1d79c94b3e.png]]Scimitar 53 W.ATK, Speed 6 [[img:2b7a3e9204d15f.png]]Blue Axe 50 W.ATK, Speed 5",
+     "[[img:f928ecd64f1813.png]]Red Cross Shield 110 WDEF, 18.0% guard [[img:4e969b6336abff.png]]Jousting Helmet +3 DEX, +3 ACC [[img:41c86855fafd40.png]]Steel Missel +3 STR, +1 ACC, +2% Critical Rate",
+     "River sells all four weapons and the shield in Perion. Harry sells the helmet. Craft Steel Missel with Smithing 6."
+    ]
+   ]
+  },
+  {
+   "h3": "Gender and early Warrior overalls"
+  },
+  {
+   "p": "Female Warriors can equip Steel Fitted Mail at level 15. Male Warriors get their first class overalls at level 20 with the Kendo Robe line. That gives female Warriors five extra levels with an overall that can take STR or DEX scrolls."
+  },
+  {
+   "note": "**Why overalls matter:** Lesser Overall STR, DEX, INT, and LUK scrolls give +1 at 100%. Intermediate scrolls give +2 at 60%. There are no STR, DEX, INT, or LUK scrolls for tops or bottoms in the current item data."
+  },
+  {
+   "p": "Every job can equip a Sauna Robe at level 30: Blue Sauna Robe for male characters and Red Sauna Robe for female characters. Warriors already have class overalls before then, so compare the base stats and scroll result before switching."
+  },
+  {
+   "h3": "Training maps: levels 10-30"
+  },
+  {
+   "p": "NiaMeowDB has an amazing tool called the Training Advisor (Recommended Training), personalized to your character and build on the Character Builder page. It helps you find the best mobs and maps to train on, ranked by EXP/hit or skill cast."
+  },
+  {
+   "p": "Every row requires a 100% hit rate. From level 15 onward, every spawn dies within two Power Strikes using your weakest possible damage roll. The level 10 picks allow up to four casts because Power Strike has only one skill Lv."
+  },
+  {
+   "note": "**What does minimum roll mean?** Your damage changes from hit to hit. The minimum roll is the weakest hit your current build can deal. A guaranteed 2-hit means even two of your weakest Power Strikes will kill the mob. Normal and high rolls may kill it sooner."
+  },
+  {
+   "note": "The EXP/min figures are Training Advisor estimates for the sample build shown in each row with Final Attack off. They compare maps under the same model; movement, looting, crowding, and your actual gear will change the result. Stirges and Flyeyes are excluded because Warriors will have a terrible time there."
+  },
+  {
+   "table": [
+    [
+     "Level check",
+     "Sample build",
+     "Training Advisor picks",
+     "Kills using your weakest damage",
+     "Danger and refill walk"
+    ],
+    [
+     "**Lv 10**",
+     "57 STR / 6 DEX 24 ACC / 30 W.ATK Power Strike 1",
+     "The Rain-Forest East of Henesys ~551 modeled EXP/min Mushroom Garden ~516 modeled EXP/min",
+     "Rain-Forest: Pig 3-hit; Ribbon Pig 4-hit Mushroom Garden: Red Snail and Shroom 2-hit; Orange Mushroom 4-hit",
+     "Safe. Henesys: 2 portals to Rain-Forest, 3 to Mushroom Garden."
+    ],
+    [
+     "**Lv 15**",
+     "77 STR / 14 DEX 41 ACC / 32 W.ATK Power Strike 7",
+     "Dungeon, Southern Forest I ~592 modeled EXP/min Right Around Lith Harbor ~507 modeled EXP/min",
+     "Slime and Red Snail: 2-hit Blue Snail: 1-hit",
+     "Safe. Ellinia: 4 portals to Southern Forest I. Lith Harbor: 1 portal to Right Around Lith Harbor."
+    ],
+    [
+     "**Lv 20**",
+     "98 STR / 20 DEX 48 ACC / 40 W.ATK Power Strike 20",
+     "Tree Dungeon, Forest Up North IV ~1,367 modeled EXP/min Dungeon, Southern Forest III ~1,326 modeled EXP/min",
+     "Green Mushroom and Slime: 2-hit",
+     "Safe. Ellinia: 4 portals to either map."
+    ],
+    [
+     "**Lv 25**",
+     "118 STR / 25 DEX 57 ACC / 45 W.ATK Power Strike 20",
+     "Tree Dungeon, Forest Up North IV ~1,396 modeled EXP/min Dungeon, Southern Forest III ~1,351 modeled EXP/min",
+     "Green Mushroom: 2-hit Slime: 1-hit",
+     "Safe. Ellinia: 4 portals to either map."
+    ],
+    [
+     "**Lv 30**",
+     "138 STR / 30 DEX 73 ACC / 50 W.ATK Power Strike 20",
+     "Line 1 <Area 1> ~1,762 modeled EXP/min Tree Dungeon, Forest Up North IV ~1,650 modeled EXP/min",
+     "Bubbling and Green Mushroom: 2-hit Slime: 1-hit",
+     "Safe. Kerning City: 2 portals to Area 1. Ellinia: 4 portals to Forest Up North IV."
+    ]
+   ]
+  },
+  {
+   "h3": "Level 30 Warrior example build"
+  },
+  {
+   "p": "135 base STR / 27 base DEX\n138 STR / 30 DEX / 50 W.ATK / 73 ACC with gear"
+  },
+  {
+   "p": "**Skills:** Power Strike 20, Slash Blast 20, Precise Strikes 15, Improved HP Recovery 3, and Max HP Increase 3."
+  },
+  {
+   "p": "[[img:2b7a3e9204d15f.png]]Blue Axe [[img:4e969b6336abff.png]]Jousting Helmet [[img:41c86855fafd40.png]]Steel Missel"
+  },
+  {
+   "note": "River sells Blue Axe and Harry sells Jousting Helmet in Perion. Steel Missel is a Smithing 6 craft."
+  },
+  {
+   "p": "**Best guaranteed Power Strike targets**"
+  },
+  {
+   "p": "[[img:34dcba7b3807fe.png]] **Bubbling** 100% hit · guaranteed 2-hit · 14 EXP/hit [[img:b62ded95656118.png]] **Green Mushroom** 100% hit · guaranteed 2-hit · 13 EXP/hit"
+  },
+  {
+   "note": "**Running out of mesos is a real progression problem.** Max Power Strike costs 12 MP per cast. Use normal attacks when they finish a low-HP mob, use Slash Blast only when enough mobs are in range, and compare your EXP gain with the number of Lemons you burn."
+  },
+  {
+   "h2": "Weapon Reach (Hitbox)"
+  },
+  {
+   "p": "Your hitbox is the box in front of your character where a melee attack lands. Weapon reach is how far forward that box goes. Every Warrior weapon has five basic attacks, three swings and two thrusts, and each one has its own box. The game picks one of the five at random for every attack. The numbers below are the average reach of one basic attack."
+  },
+  {
+   "img": "569ea5c4557720.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Sword, Swing 1. Any monster whose body touches the blue box gets hit: 18-88 px in front of you, from 6 to 62 px above your feet."
+  },
+  {
+   "p": "Two-handed weapons reach a little farther. Scimitar averages 102 px per basic attack. The other two-handed swords and axes average 87-90 px, most one-handed swords and axes 86 px, and Long Sword and Gladius 74 px. Reach has a direct effect on DPS in practice. Longer reach makes mobs easier to hit from a distance and keeps them from getting close enough to hit you. Compare every weapon family in the weapon reach guide."
+  },
+  {
+   "p": "**122 px avg reach**"
+  },
+  {
+   "p": "[[img:16f46c1d3f0634.png]]Pole Arm (Lv 10) [[img:5ff1190b10b2c6.png]]Spear (Lv 10) [[img:7d5a02e83fcf73.png]]Fork on a Stick (Lv 15) [[img:09239f1e09b0d7.png]]Iron Ball (Lv 15) [[img:1d913ab6eaa622.png]]Studded Polearm (Lv 20) [[img:b1483e52cf82af.png]]Janitor's Mop (Lv 25) [[img:f3869975932f3f.png]]Forked Spear (Lv 30) [[img:f247063d20f5c3.png]]Mithril Pole Arm (Lv 30)"
+  },
+  {
+   "p": "**102 px avg reach**"
+  },
+  {
+   "p": "[[img:b43c1d79c94b3e.png]]Scimitar (Lv 30)"
+  },
+  {
+   "p": "**90 px avg reach**"
+  },
+  {
+   "p": "[[img:4dcc2d13aa3641.png]]Metal Axe (Lv 10) [[img:466bfb272de160.png]]Wooden Mallet (Lv 10) [[img:3134e9aa8548fe.png]]Heavy Mace (Lv 15) [[img:7aceff9c0fa88a.png]]Iron Axe (Lv 20) [[img:0f729ec6a10e21.png]]Pickaxe (Lv 20) [[img:e1976a9851c7c5.png]]Square Hammer (Lv 20) [[img:8518ea78963721.png]]Monkey Wrench (Lv 25) [[img:dc256b437bf7ef.png]]Two-Handed Axe (Lv 25) [[img:2b7a3e9204d15f.png]]Blue Axe (Lv 30) [[img:edc429428fd504.png]]Mithril Maul (Lv 30)"
+  },
+  {
+   "p": "**87 px avg reach**"
+  },
+  {
+   "p": "[[img:45b1997932fe5e.png]]Wooden Sword (Lv 10) [[img:080e962b77c6b3.png]]Two-Handed Sword (Lv 20) [[img:6234c294e02d46.png]]Broadsword (Lv 25)"
+  },
+  {
+   "p": "**86 px avg reach**"
+  },
+  {
+   "p": "[[img:965078a4a03c2a.png]]Hand Axe (Lv 0) [[img:a09b689ea0f78f.png]]Sword (Lv 0) [[img:6e4c99c80b9569.png]]Battle Axe (Lv 15) [[img:08a3c438d25095.png]]Sabre (Lv 15) [[img:c4d1cdbdb2d0af.png]]Machete (Lv 20) [[img:9ffeb1b885c005.png]]Viking Sword (Lv 20) [[img:ec8922da233af9.png]]Eloon (Lv 25) [[img:75298b29a32a56.png]]Mithril Axe (Lv 25) [[img:5d2179f9cd3575.png]]Fireman's Axe (Lv 30)"
+  },
+  {
+   "p": "**81 px avg reach**"
+  },
+  {
+   "p": "[[img:9eab57ead0d224.png]]Wooden Club (Lv 0) [[img:dbd70aeabe6f59.png]]Mace (Lv 15) [[img:7c8a5cd6d20556.png]]Square Shovel (Lv 17) [[img:988f904317ef69.png]]Iron Mace (Lv 20) [[img:879d1b9dec7d3a.png]]Pointed Shovel (Lv 22) [[img:9a4ea1e80776c6.png]]Fusion Mace (Lv 25) [[img:b275bf6b8642fb.png]]War Hammer (Lv 30)"
+  },
+  {
+   "p": "**74 px avg reach**"
+  },
+  {
+   "p": "[[img:561ddd599e1045.png]]Long Sword (Lv 10) [[img:cf5a1d2beefd9e.png]]Gladius (Lv 30)"
+  },
+  {
+   "h3": "Which Warrior skills use weapon reach?"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Uses weapon reach?",
+     "Hitbox"
+    ],
+    [
+     "[[img:a09b689ea0f78f.png]]Basic attack",
+     "Yes",
+     "One of your weapon's five attacks, picked at random."
+    ],
+    [
+     "[[img:7700d0a87ede5e.png]]Power Strike",
+     "Yes",
+     "The same five attacks and boxes as your basic attack."
+    ],
+    [
+     "[[img:b5a4eaed502bda.png]]Slash Blast",
+     "Yes",
+     "The same five attacks and boxes as your basic attack. Once a monster is inside that box, Slash Blast's additional hits can reach mobs 130 px in front, or 150 px from skill Lv 11, with any weapon."
+    ]
+   ]
+  },
+  {
+   "h2": "Recommended potions"
+  },
+  {
+   "p": "Power Strike and Slash Blast are MP efficient. Misses still burn the full MP cost. Buy the most cost-efficient potions and keep Accuracy potions for maps that need them."
+  },
+  {
+   "p": "**BEST TO BUY** Best shop recovery per meso"
+  },
+  {
+   "p": "[[img:be80aa4791c684.png]] **Red Potion** 100 HP for 50 mesos 0.5 meso per HP [[img:39a28ad40190a6.png]] **Fried Chicken** 120 HP for 60 mesos 0.5 meso per HP [[img:51e2250795d8f6.png]] **Meat** 160 HP for 80 mesos 0.5 meso per HP [[img:da1e5c881a1df6.png]] **Orange** 50 MP for 50 mesos 1 meso per MP [[img:d59bc967011b87.png]] **Lemon** 150 MP for 150 mesos 1 meso per MP"
+  },
+  {
+   "p": "**SITUATIONAL** Buy for a damage or Accuracy breakpoint"
+  },
+  {
+   "p": "[[img:4e15182d2a8a6e.png]] **Sniper Potion** +5 Accuracy for 10 min Fixes a small hit-rate gap [[img:e18fe0a27cd32a.png]] **Supreme Sniper Potion** +7 Accuracy for 15 min Sold by Raymond in Henesys [[img:8d7b05272e3e8b.png]] **Warrior Potion** +10 Attack Power for 10 min Physical damage buff"
+  },
+  {
+   "p": "**DON'T BUY FOR VALUE** More recovery per use, worse recovery per meso"
+  },
+  {
+   "p": "[[img:a699b6aea354d7.png]] **White Potion** 500 HP for 350 mesos 0.7 meso per HP [[img:d19cbf8225851d.png]] **Blue Potion** 200 MP for 220 mesos 1.1 mesos per MP"
+  },
+  {
+   "guide": "best-buy-shop-efficiency",
+   "text": "Compare shop potion efficiency"
+  },
+  {
+   "h2": "Common Warrior mistakes"
+  },
+  {
+   "ol": [
+    "**Adding DEX for first-job advancement.** MSClassic World has no stat requirement. Add DEX when equipment or a real Accuracy breakpoint needs it.",
+    "**Maxing Max HP Increase early from old habit.** It now gives a flat percentage of base HP. Delaying it does not permanently lose HP.",
+    "**Moving to a map where Power Strike misses.** A miss spends the same MP and deals no damage.",
+    "**Ignoring danger and the refill walk.** Warriors face tank often. A slightly lower EXP estimate can be better when the map is safer and much closer to town."
+   ]
+  },
+  {
+   "h2": "Choose your second job at level 30"
+  },
+  {
+   "p": "Return to Dances with Balrog in Perion after finishing the Warrior test. Your first-job AP and SP stay with you."
+  },
+  {
+   "h3": "Fighter"
+  },
+  {
+   "p": "Swords or axes, Rage for nearby party members, and the highest Damage/MP result among Grummash's realistic level 70 builds."
+  },
+  {
+   "guide": "fighter-class-guide",
+   "text": "Continue with the Fighter level 30-70 guide"
+  },
+  {
+   "h3": "Page"
+  },
+  {
+   "p": "Swords or blunt weapons, Threaten for enemy Speed and WDEF, plus the option to use a shield with one-handed weapons."
+  },
+  {
+   "guide": "page-class-guide",
+   "text": "Continue with the Page level 30-70 guide"
+  },
+  {
+   "h3": "Spearman"
+  },
+  {
+   "p": "Spears or polearms, Iron Will for personal defense, long weapon reach, and no shield slot."
+  },
+  {
+   "guide": "spearman-class-guide",
+   "text": "Continue with the Spearman level 30-70 guide"
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/warrior-class-guide",
+ "hash": "4aa24af45f1b"
+}

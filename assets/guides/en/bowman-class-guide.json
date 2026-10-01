@@ -1,0 +1,845 @@
+{
+ "title": "MapleStory Classic Bowman Build and Leveling Guide: Lv 1-30",
+ "intro": "Bowmen train under Athena Pierce in Henesys. They shoot arrows from a very long range, keep mobs out of their face with bow whack, and have the highest accuracy in the game.",
+ "hero": null,
+ "minutes": null,
+ "blocks": [
+  {
+   "img": "5a35a9da0881a5.png",
+   "w": 150,
+   "h": 183
+  },
+  {
+   "p": "**Pros**"
+  },
+  {
+   "ul": [
+    "Furthest attack range in the game, extended by up to 120 px with The Eye of Amazon.",
+    "DEX and character level give Bowmen huge Accuracy. Focus adds even more.",
+    "Critical Shot gives 20% Critical Rate and 15% Critical Damage."
+   ]
+  },
+  {
+   "p": "**Cons**"
+  },
+  {
+   "ul": [
+    "Limited mobbing before second job. Double Shot can hit two mobs, but splits its damage between them.",
+    "Bow whacking replaces ranged attacks when a mob gets too close.",
+    "Arrows are a constant expense.",
+    "Low HP punishes bad positioning."
+   ]
+  },
+  {
+   "h2": "Understanding Bowman Accuracy"
+  },
+  {
+   "img": "7c6f59ef380c9a.png",
+   "w": 110,
+   "h": 165
+  },
+  {
+   "p": "Understanding Accuracy is the core of any class guide and training recommendation. A miss still consumes MP and an arrow."
+  },
+  {
+   "note": "**Bowman Base Accuracy**\nfloor((1.2 x DEX + 2 x level + 0.6 x LUK) / 4.8 + 20)\n**+0.42** ACC per level\n**+0.25** ACC per DEX\n**+0.13** ACC per LUK\n**+1.00** ACC per direct ACC"
+  },
+  {
+   "p": "**DEX raises both damage and Accuracy.** Character level also closes the penalty for fighting higher-level mobs."
+  },
+  {
+   "table": [
+    [
+     "Mob",
+     "Mob level",
+     "Mob Avoid",
+     "Your level",
+     "ACC for 100% hit",
+     "Example build"
+    ],
+    [
+     "[[img:34dcba7b3807fe.png]]Bubbling",
+     "15",
+     "9",
+     "15",
+     "31 ACC",
+     "45 ACC (15 STR / 76 DEX)"
+    ],
+    [
+     "[[img:ae64823f427bc0.png]]Stirge",
+     "20",
+     "13",
+     "20",
+     "44 ACC",
+     "53 ACC (23 STR / 99 DEX)"
+    ],
+    [
+     "[[img:36750484773e65.png]]Zombie Mushroom",
+     "24",
+     "14",
+     "20",
+     "54 ACC",
+     "53 ACC (23 STR / 99 DEX)"
+    ],
+    [
+     "[[img:36750484773e65.png]]Zombie Mushroom",
+     "24",
+     "14",
+     "25",
+     "47 ACC",
+     "60 ACC (26 STR / 120 DEX)"
+    ]
+   ]
+  },
+  {
+   "p": "The level 20 example has 53 ACC, which gives a 97.2% hit rate against Zombie Mushroom. The level 25 example has 60 ACC and never misses."
+  },
+  {
+   "h2": "Levels 1-10: Beginner to Bowman"
+  },
+  {
+   "p": "Finish the Maple Island quests, sail to Victoria Island, and meet Athena Pierce in Henesys. MSClassic World removed the stat requirement for job advancements."
+  },
+  {
+   "img": "e7992aba7c6b56.png",
+   "w": 55,
+   "h": 81
+  },
+  {
+   "h3": "Beginner skill build"
+  },
+  {
+   "p": "[[img:efe346ff3ac88e.png]] **Three Snails 3**\nRanged shell attack"
+  },
+  {
+   "p": "[[img:d1b8185bc6bf24.png]] **Recovery 3**\nShort HP recovery"
+  },
+  {
+   "p": "[[img:edc2244a5bda10.png]] **Nimble Feet 3**\nShort Speed buff"
+  },
+  {
+   "p": "All three Beginner skills can be maxed by level 10. Level them in whichever order you prefer."
+  },
+  {
+   "note": "**Use the Club through level 4, then switch to Razor at level 5.** The Club has the best chance of saving a basic attack against early Maple Island mobs. Razor is the better weapon once you can equip it."
+  },
+  {
+   "h3": "Bowman AP allocation: levels 1-10"
+  },
+  {
+   "p": "The sample starts at 5 STR / 12 DEX / 4 INT / 4 LUK. Put all 45 AP from levels 2-10 into DEX. You do not need STR or DEX for the job advancement itself."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Spend",
+     "Base stats"
+    ],
+    [
+     "1",
+     "Starting stats",
+     "5 STR / 12 DEX / 4 INT / 4 LUK"
+    ],
+    [
+     "2-9",
+     "DEX +40",
+     "5 STR / 52 DEX / 4 INT / 4 LUK"
+    ],
+    [
+     "10",
+     "DEX +5",
+     "**5 STR / 57 DEX / 4 INT / 4 LUK**"
+    ]
+   ]
+  },
+  {
+   "h3": "Level 10 Bowman example build"
+  },
+  {
+   "img": "a1b504f83f390a.png",
+   "w": 110,
+   "h": 188
+  },
+  {
+   "p": "5 base STR / 57 base DEX\n5 STR / 60 DEX / 30 W.ATK / 39 ACC / 444 HP / 363 MP with gear"
+  },
+  {
+   "p": "**Skills:** AB 1. Three Snails, Recovery, and Nimble Feet 3."
+  },
+  {
+   "p": "[[img:9f335dcd7ddc12.png]]War Bow[[img:05bc2e762fe7a7.png]]Arrows for Bows[[img:9ce3b100f1297d.png]]Green Winter Hat"
+  },
+  {
+   "p": "**Best guaranteed Arrow Blow targets**"
+  },
+  {
+   "p": "[[img:ca2dec0d81316e.png]] **Red Snail** 100% hit · guaranteed 2-cast [[img:3c33bf918e3b1b.png]] **Shroom** 100% hit · guaranteed 2-cast"
+  },
+  {
+   "h2": "Levels 10-30: Bowman skill build and leveling"
+  },
+  {
+   "p": "The main SP order raises Arrow Blow while taking one point in Eye at level 12 and reaching Eye 3 at level 15. That gives you +60 px range early, maxes Arrow Blow at level 18, and catches the pure damage-first order at level 23. At level 30, one point goes into Power Knockback for close-range utility."
+  },
+  {
+   "img": "b7fa9955fa417c.png",
+   "w": 110,
+   "h": 86
+  },
+  {
+   "h3": "Recommended citizenship at level 12"
+  },
+  {
+   "p": "**Pick Henesys citizenship.** Sign with Arthur in Henesys Town Hall. Raymond sells Supreme Sniper Potion for +7 Accuracy. Bronze Arrows for 2 mesos each unlock at Helpful Stranger, grade 3, which needs level 22 and 2,000 citizenship contribution. Later grades add Overall Armor DEX and Gloves Attack scrolls."
+  },
+  {
+   "h3": "Arrow Blow or Double Shot?"
+  },
+  {
+   "p": "Both attacks reach 240% total damage at max skill level and use your equipped weapon's shooting speed. Arrow Blow puts it all into one hit. Double Shot fires two 120% arrows with lower damage variance, giving more stable total damage when both hit the same mob. Both are projectiles, and terrain can block either one."
+  },
+  {
+   "p": "This guide maxes Arrow Blow for its lower MP and arrow cost, longer range, and better Knockback potential. Its larger single hit can reach a mob's Knockback threshold when either of Double Shot's smaller hits falls short."
+  },
+  {
+   "p": "Against a group, Double Shot can hit two mobs once each instead of hitting one mob twice. Some players like spreading the damage; others prefer to focus on one mob. If the first arrow kills a mob, the second arrow can travel to another target instead of being wasted as overkill."
+  },
+  {
+   "p": "Double Shot can pull another mob toward you before you've finished the first. On a small platform, that extra aggro can leave you with less room to shoot."
+  },
+  {
+   "p": "It becomes more MP-efficient when each arrow kills a separate mob: two kills for 16 MP, or 8 MP per kill, compared with Arrow Blow's 14 MP per kill. This can be useful when farming weaker mobs for drops."
+  },
+  {
+   "table": [
+    [
+     "At max level",
+     "[[img:ea717b79c3487d.png]]Arrow Blow",
+     "[[img:d1760c2a999abe.png]]Double Shot"
+    ],
+    [
+     "Damage",
+     "240% x 1",
+     "120% x 2"
+    ],
+    [
+     "MP",
+     "14",
+     "16"
+    ],
+    [
+     "Arrows",
+     "1",
+     "2"
+    ],
+    [
+     "Range with max Eye",
+     "470 px",
+     "420 px"
+    ],
+    [
+     "Hits",
+     "One hit on one mob",
+     "Two hits on one mob, or one hit each on two mobs"
+    ],
+    [
+     "Pros",
+     "Better Knockback potential; lower MP and arrow cost",
+     "More stable total damage; can spread hits across mobs"
+    ]
+   ]
+  },
+  {
+   "note": "**Arrow Blow costs less and has better Knockback potential. Double Shot has more stable damage.** Double Shot costs 2 more MP and uses 2 arrows per cast, one more arrow than Arrow Blow. It also reaches 50 px less far. Its split targeting can be useful or frustrating, depending on whether you want to hit two mobs or finish one."
+  },
+  {
+   "img": "532de8c2049f6d.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Arrow Blow: one 240% hit."
+  },
+  {
+   "img": "d1e3b1910f72fb.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Double Shot: two 120% arrows that can hit one mob twice or two mobs once each."
+  },
+  {
+   "h3": "Level 30 Bowman skill target"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Skill Lv",
+     "Result"
+    ],
+    [
+     "[[img:ea717b79c3487d.png]]Arrow Blow",
+     "20",
+     "240% damage for 14 MP and one arrow."
+    ],
+    [
+     "[[img:56be42ad4a2092.png]]Critical Shot",
+     "15",
+     "+20% Critical Rate and +15% Critical Damage."
+    ],
+    [
+     "[[img:1016e8438d9db2.png]]The Eye of Amazon",
+     "15",
+     "+120 px bow and crossbow range."
+    ],
+    [
+     "[[img:e5feb019a4aea9.png]]Focus",
+     "10",
+     "+10 Accuracy and +14 Evasion for 170 seconds, costing 10 MP."
+    ],
+    [
+     "[[img:d7a9b8872c5972.png]]Power Knockback",
+     "1",
+     "105% critical damage and knocks up to two enemies back by 130 px."
+    ],
+    [
+     "[[img:d1760c2a999abe.png]]Double Shot",
+     "0",
+     "Left empty because Arrow Blow costs less MP, uses one fewer arrow, and reaches 50 px farther."
+    ]
+   ]
+  },
+  {
+   "note": "**Prefer more knockback over Focus?** Keep Arrow Blow, Critical Shot, and Eye of Amazon maxed, then put 8 points into Power Knockback and 3 into Focus.\nPower Knockback reaches three targets at level 8, compared with two at level 1. Choose this split if pushing mobs away helps you keep shooting. Keep the default Focus 10 / Power Knockback 1 build if the extra Accuracy removes misses against the mobs you train on."
+  },
+  {
+   "h3": "Bowman SP allocation: levels 10-30"
+  },
+  {
+   "note": "Running result: AB = Arrow Blow, CS = Critical Shot, EYE = The Eye of Amazon, FOC = Focus, PKB = Power Knockback."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Spend",
+     "Running result",
+     "Reason"
+    ],
+    [
+     "10",
+     "Arrow Blow +1",
+     "AB 1",
+     "Starts ranged training."
+    ],
+    [
+     "11",
+     "Arrow Blow +3",
+     "AB 4",
+     "Raise the main attack."
+    ],
+    [
+     "12",
+     "Arrow Blow +2, Eye +1",
+     "AB 6 / EYE 1",
+     "Gain 50 px range without stalling Arrow Blow."
+    ],
+    [
+     "13-14",
+     "Arrow Blow +6",
+     "AB 12 / EYE 1",
+     "Keep raising damage."
+    ],
+    [
+     "15",
+     "Arrow Blow +1, Eye +2",
+     "AB 13 / EYE 3",
+     "Reach +60 px range and unlock Focus."
+    ],
+    [
+     "16-17",
+     "Arrow Blow +6",
+     "AB 19 / EYE 3",
+     "Return to the main attack."
+    ],
+    [
+     "18",
+     "Arrow Blow +1, Critical Shot +2",
+     "AB 20 / CS 2 / EYE 3",
+     "Max Arrow Blow and start Critical Shot."
+    ],
+    [
+     "19-22",
+     "Critical Shot +12",
+     "AB 20 / CS 14 / EYE 3",
+     "Raise expected damage."
+    ],
+    [
+     "23",
+     "Critical Shot +1, Eye +2",
+     "AB 20 / CS 15 / EYE 5",
+     "Max Critical Shot and resume range."
+    ],
+    [
+     "24-26",
+     "Eye +9",
+     "AB 20 / CS 15 / EYE 14",
+     "Extend bow and crossbow range."
+    ],
+    [
+     "27",
+     "Eye +1, Focus +2",
+     "AB 20 / CS 15 / EYE 15 / FOC 2",
+     "Max Eye and start Focus."
+    ],
+    [
+     "28-29",
+     "Focus +6",
+     "AB 20 / CS 15 / EYE 15 / FOC 8",
+     "Raise Accuracy and Evasion."
+    ],
+    [
+     "30",
+     "Focus +2, Power Knockback +1",
+     "AB 20 / CS 15 / EYE 15 / FOC 10 / PKB 1",
+     "Reach the MP-efficient Focus breakpoint and add close-range utility."
+    ]
+   ]
+  },
+  {
+   "p": "Second-job SP cannot be spent on first-job skills, so finish the first-job plan by level 30. Character Builder flags any build that breaks it."
+  },
+  {
+   "p": "**Getting crowded before level 30?** Take one point in Power Knockback at level 11. You give up a little early damage to unlock the push sooner. Arrow Blow still reaches max level at 18."
+  },
+  {
+   "p": "For the default Focus 10 / PKB 1 build, change these rows; all other rows stay the same:"
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Spend"
+    ],
+    [
+     "11",
+     "Arrow Blow +2, Power Knockback +1"
+    ],
+    [
+     "18",
+     "Arrow Blow +2, Critical Shot +1"
+    ],
+    [
+     "23",
+     "Critical Shot +2, Eye of Amazon +1"
+    ],
+    [
+     "27",
+     "Eye of Amazon +2, Focus +1"
+    ],
+    [
+     "30",
+     "Focus +3"
+    ]
+   ]
+  },
+  {
+   "p": "The level-30 totals stay unchanged."
+  },
+  {
+   "h3": "Why take Eye of Amazon early?"
+  },
+  {
+   "p": "A pure damage-first order deals more damage per cast until level 23. This guide gives up a small amount of early damage for longer range and better MP efficiency at the level 15 checkpoint."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "This guide",
+     "Damage-first alternative",
+     "Difference"
+    ],
+    [
+     "12",
+     "AB 6 / EYE 1 180% for 7 MP 400 px",
+     "AB 7 184% for 7 MP 350 px",
+     "This guide: +50 px range. Damage first: +2.2% expected damage and DPS."
+    ],
+    [
+     "15",
+     "AB 13 / EYE 3 208% for 10 MP 410 px",
+     "AB 16 220% for 12 MP 350 px",
+     "This guide: +60 px range and 13.5% more damage per MP. Damage first: +5.7% expected damage and DPS."
+    ],
+    [
+     "20",
+     "AB 20 / CS 8 / EYE 3 410 px",
+     "AB 20 / CS 11 350 px",
+     "This guide: +60 px range. Damage first: +1.4% expected damage and DPS."
+    ],
+    [
+     "23",
+     "AB 20 / CS 15 / EYE 5",
+     "AB 20 / CS 15 / EYE 5",
+     "The builds are identical from here."
+    ]
+   ]
+  },
+  {
+   "note": "**Want pure damage first?** Kiwi's community Bowman guide maxes Arrow Blow, Critical Shot, then Eye. This guide's early-Eye order reaches the same AB 20 / CS 15 / EYE 5 result at level 23."
+  },
+  {
+   "h3": "Optional level 30 Hunter SP reset"
+  },
+  {
+   "p": "After becoming a Hunter, put the new second-job point into Arrow Bomb. Once Arrow Bomb can replace Arrow Blow on the mobs you are farming, an SP Reset Coupon can move the first-job points into utility. One max-utility result is **CS 15 / EYE 15 / FOC 20 / PKB 11**. Power Knockback 11 deals 155% damage to up to three mobs, pushes them 140 px, and costs 9 MP."
+  },
+  {
+   "p": "Crossbowmen should check Iron Arrow before removing Arrow Blow. The launch price of an SP Reset Coupon is not confirmed."
+  },
+  {
+   "h3": "Bowman AP allocation: levels 10-30"
+  },
+  {
+   "p": "Equipment depends on what you find and can afford. The table below uses the current bow and crossbow requirements. DEX is the main damage stat. STR is the secondary stat for Bowman weapon requirements and damage."
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "Bow AP spend",
+     "Bow base STR / DEX",
+     "Crossbow AP spend",
+     "Crossbow base STR / DEX"
+    ],
+    [
+     "10",
+     "Starting checkpoint",
+     "5 / 57",
+     "Starting checkpoint",
+     "5 / 57"
+    ],
+    [
+     "11-15",
+     "+10 STR / +15 DEX",
+     "15 / 72",
+     "+25 DEX",
+     "5 / 82"
+    ],
+    [
+     "16-20",
+     "+5 STR / +20 DEX",
+     "20 / 92",
+     "+5 STR / +20 DEX",
+     "10 / 102"
+    ],
+    [
+     "21-25",
+     "+5 STR / +20 DEX",
+     "25 / 112",
+     "+5 STR / +20 DEX",
+     "15 / 122"
+    ],
+    [
+     "26-30",
+     "+5 STR / +20 DEX",
+     "30 / 132",
+     "+5 STR / +20 DEX",
+     "20 / 142"
+    ]
+   ]
+  },
+  {
+   "p": "Equipment stats can meet a requirement. The stats on the weapon itself cannot help equip that weapon."
+  },
+  {
+   "h3": "Bow or crossbow?"
+  },
+  {
+   "p": "Pick whichever weapon you get for free from mob drops. Bows attack faster but have less WATK. Crossbows require less STR, hit harder per arrow so more DMG/MP efficient, but attacks slower."
+  },
+  {
+   "table": [
+    [
+     "Clean level 30 setup",
+     "Total stats",
+     "W.ATK / speed",
+     "Expected damage",
+     "DPS",
+     "Damage/MP"
+    ],
+    [
+     "[[img:4c7f277b730140.png]]Ryden + Bronze Arrows",
+     "33 STR / 145 DEX",
+     "51 / Normal 6",
+     "427",
+     "527",
+     "30.5"
+    ],
+    [
+     "[[img:42d59b983f0af4.png]]Eagle Crow + Bronze Arrows",
+     "22 STR / 156 DEX",
+     "53 / Slow 7",
+     "449",
+     "509",
+     "32.1"
+    ]
+   ]
+  },
+  {
+   "p": "In this Arrow Blow comparison, the bow deals about 3.5% more DPS. The crossbow deals about 5.2% more damage per cast and 5.2% more damage per MP."
+  },
+  {
+   "h3": "Recommended equipment: levels 10-30"
+  },
+  {
+   "p": "Karl sells the level 10-30 bows and crossbows in Henesys. Sam sells the hats and body armor shown below. The gloves are Leatherworking crafts at skill Lv 3, 4, 5, and 6. Shop gear is enough for these checkpoints, so do not burn your mesos chasing tiny early upgrades in the Free Market."
+  },
+  {
+   "img": "0e0ad7f75f00b3.png",
+   "w": 110,
+   "h": 190
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Bow",
+     "Crossbow",
+     "Useful armor"
+    ],
+    [
+     "10",
+     "[[img:9f335dcd7ddc12.png]]War Bow 30 W.ATK",
+     "[[img:09c088d60de095.png]]Crossbow 32 W.ATK",
+     "[[img:9ce3b100f1297d.png]]Green Winter Hat [[img:6c6ab7a27142c3.png]]Green Archer Top"
+    ],
+    [
+     "15",
+     "[[img:462818b2a91ace.png]]Composite Bow 35 W.ATK",
+     "[[img:cfcdf27bb4708d.png]]Battle Crossbow 37 W.ATK",
+     "[[img:08eccc0fb1ee5a.png]]Green Feather Hat [[img:fc1029e0d3d180.png]]Basic Archer Gloves"
+    ],
+    [
+     "20",
+     "[[img:4e32a2f5736663.png]]Hunter's Bow 42 W.ATK",
+     "[[img:7a2455841c80bf.png]]Balanche 39 W.ATK, Normal 6",
+     "[[img:7072fc1c6af18a.png]]Green Robin Hat [[img:8aa598ba3f0f98.png]]Blue Diros"
+    ],
+    [
+     "25",
+     "[[img:624e43e384a68c.png]]Battle Bow 44 W.ATK, Fast 5",
+     "[[img:9f5ffe874222fe.png]]Mountain Crossbow 47 W.ATK",
+     "[[img:5adfeeddc82f65.png]]Green Hunter [[img:373127f9d12ee0.png]]Blue Savata"
+    ],
+    [
+     "30",
+     "[[img:4c7f277b730140.png]]Ryden 50 W.ATK, +1 STR",
+     "[[img:42d59b983f0af4.png]]Eagle Crow 52 W.ATK, +1 DEX",
+     "[[img:b0355e799d609f.png]]Green Hawkeye [[img:19b5abd79d0e4f.png]]Green Marker"
+    ]
+   ]
+  },
+  {
+   "h3": "Arrows and refills"
+  },
+  {
+   "p": "Plain arrows cost 1 meso each and stack to 1,000. Raymond's Bronze arrows cost 2 mesos each, stack to 800, and add 1 W.ATK. Arrow Blow consumes one arrow per cast; Double Shot consumes two."
+  },
+  {
+   "h3": "Bow arrows"
+  },
+  {
+   "p": "[[img:05bc2e762fe7a7.png]]Arrows for Bows[[img:7891e7a84384c4.png]]Bronze Arrows for Bows"
+  },
+  {
+   "p": "Use plain arrows from level 10 until Bronze Arrows unlock at Helpful Stranger, which needs level 22 and 2,000 citizenship contribution."
+  },
+  {
+   "h3": "Crossbow arrows"
+  },
+  {
+   "p": "[[img:984d475639fe5f.png]]Arrows for Crossbows[[img:fd2321e4f5ab8c.png]]Bronze Arrows for Crossbows"
+  },
+  {
+   "p": "Carry several stacks. A nearest-town scroll fixes the trip to town, but you still have to walk back to the map."
+  },
+  {
+   "h3": "W.ATK or Critical Rate on gloves?"
+  },
+  {
+   "p": "This comparison uses the level 30 bow build and five successful Lesser glove scrolls. Both options fill the Green Marker's five slots."
+  },
+  {
+   "h3": "5x Gloves Attack Scroll: Lesser"
+  },
+  {
+   "p": "**+5 W.ATK**\nExpected Arrow Blow damage rises from 427 to 469, a 9.8% gain."
+  },
+  {
+   "h3": "5x Gloves Crit. Rate Scroll: Lesser"
+  },
+  {
+   "p": "**+5% Critical Rate**\nExpected Arrow Blow damage rises from 427 to 434, a 1.6% gain."
+  },
+  {
+   "note": "**Use Gloves Attack Scrolls.** The Attack setup deals about 8.1% more expected damage than the Critical Rate setup. W.ATK also raises the weakest non-critical hit, which helps guaranteed kills."
+  },
+  {
+   "h3": "Level 30 Sauna Robes"
+  },
+  {
+   "p": "Bowmen do not get a class overall by level 30. Every Bowman can equip a [[img:ce6353bc3a96de.png]]Blue Sauna Robe or [[img:28e63130664b1b.png]]Red Sauna Robe at level 30. Both start with +1 to every AP stat and 10 upgrade slots."
+  },
+  {
+   "p": "Lesser Overall DEX scrolls add +1 DEX at 100%. Intermediate scrolls add +2 DEX at 60%. Tops and bottoms do not have STR, DEX, INT, or LUK scrolls, so a scrolled Sauna Robe can become the better damage piece."
+  },
+  {
+   "h3": "Training maps: levels 10-30"
+  },
+  {
+   "p": "NiaMeowDB's Training Advisor uses the sample's damage, Accuracy, HP, defense, mob spawns, and attack timing. Every listed target has a 100% hit rate, and every spawn dies within two Arrow Blows using the weakest possible damage."
+  },
+  {
+   "p": "**What does weakest damage mean?** Your damage changes from attack to attack. This is the lowest normal hit the build can deal. A guaranteed 2-cast kill still works when both attacks roll that low value."
+  },
+  {
+   "p": "Danger is included in the ranking. Ranged classes receive a smaller danger penalty than melee classes, but an unsafe map still loses score. The refill column starts from the map's nearest town because a nearest-town scroll only handles the trip back to town."
+  },
+  {
+   "p": "**Give yourself room to shoot.** Fast moving mobs and small platforms can make you bow whack often."
+  },
+  {
+   "p": "If you spend more time backing away than shooting, try a platform with more room or slower mobs. A lower-level map can work better for you if you can shoot consistently."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Sample",
+     "Best Training Advisor maps",
+     "Danger and refill walk"
+    ],
+    [
+     "15",
+     "76 DEX / 36 W.ATK AB 13 / EYE 3",
+     "**Dungeon, Southern Forest I**: 703 EXP/min; Slime 2-cast. **Mushroom Garden**: 671 EXP/min; Orange Mushroom 2-cast, Red Snail and Shroom 1-cast.",
+     "Safe. Ellinia: 4 portals. Henesys: 3 portals."
+    ],
+    [
+     "20",
+     "99 DEX / 43 W.ATK AB 20 / CS 8 / EYE 3",
+     "**Tree Dungeon, Forest Up North IV**: 1,294 EXP/min; Green Mushroom 2-cast, Slime 1-cast. **Dungeon, Southern Forest III**: 1,252 EXP/min; Green Mushroom 2-cast, Slime 1-cast.",
+     "Safe. Ellinia: 4 portals back."
+    ],
+    [
+     "25",
+     "120 DEX / 45 W.ATK AB 20 / CS 15 / EYE 11",
+     "**Tree Dungeon, Forest Up North IV**: 1,515 EXP/min. **Dungeon, Southern Forest III**: 1,453 EXP/min.",
+     "Safe. Ellinia: 4 portals back."
+    ],
+    [
+     "30",
+     "145 DEX / 51 W.ATK AB 20 / CS 15 / EYE 15 / FOC 10 / PKB 1",
+     "**Transfer Area**: 2,251 EXP/min; Stirge 2-cast. **Line 1 <Area 1>**: 1,663 EXP/min; Bubbling 2-cast.",
+     "Safe. Kerning City: 3 portals to Transfer Area, 2 to Area 1."
+    ]
+   ]
+  },
+  {
+   "h3": "Level 30 Bowman example build"
+  },
+  {
+   "p": "30 base STR / 132 base DEX\n33 STR / 145 DEX / 51 W.ATK / 79 ACC / 1,134 HP / 953 MP with gear"
+  },
+  {
+   "p": "**Skills:** AB 20 / EYE 15 / CS 15 / FOC 10 / PKB 1."
+  },
+  {
+   "p": "[[img:4c7f277b730140.png]]Ryden[[img:7891e7a84384c4.png]]Bronze Arrows for Bows[[img:b0355e799d609f.png]]Green Hawkeye[[img:2e84d2b21f6e5e.png]]Green Hunter's Armor[[img:aac503e8e6a29c.png]]Green Hunter's Pants[[img:205ce562d81ade.png]]Black Hunter Boots[[img:19b5abd79d0e4f.png]]Green Marker"
+  },
+  {
+   "h2": "Recommended potions"
+  },
+  {
+   "p": "Arrow Blow is MP efficient, but attacks, Focus, and Power Knockback still drain a new player's wallet. Buy the most cost-efficient potions."
+  },
+  {
+   "img": "c3d223810be424.png",
+   "w": 110,
+   "h": 118
+  },
+  {
+   "p": "**BEST TO BUY** Best shop recovery per meso"
+  },
+  {
+   "p": "[[img:be80aa4791c684.png]] **Red Potion** 100 HP for 50 mesos 0.5 meso per HP [[img:39a28ad40190a6.png]] **Fried Chicken** 120 HP for 60 mesos 0.5 meso per HP [[img:51e2250795d8f6.png]] **Meat** 160 HP for 80 mesos 0.5 meso per HP [[img:da1e5c881a1df6.png]] **Orange** 50 MP for 50 mesos 1 meso per MP [[img:d59bc967011b87.png]] **Lemon** 150 MP for 150 mesos 1 meso per MP"
+  },
+  {
+   "p": "**SITUATIONAL** Buy for a breakpoint or longer buff"
+  },
+  {
+   "p": "[[img:4e15182d2a8a6e.png]] **Sniper Potion** +5 Accuracy for 10 min Fixes a small hit-rate gap [[img:e18fe0a27cd32a.png]] **Supreme Sniper Potion** +7 Accuracy for 15 min Sold by Raymond in Henesys [[img:8d7b05272e3e8b.png]] **Warrior Potion** +10 Attack Power for 10 min Physical damage buff"
+  },
+  {
+   "p": "**DON'T BUY FOR VALUE** More recovery per use, worse recovery per meso"
+  },
+  {
+   "p": "[[img:a699b6aea354d7.png]] **White Potion** 500 HP for 350 mesos 0.7 meso per HP [[img:d19cbf8225851d.png]] **Blue Potion** 200 MP for 220 mesos 1.1 mesos per MP"
+  },
+  {
+   "guide": "best-buy-shop-efficiency",
+   "text": "Compare shop potion efficiency"
+  },
+  {
+   "h2": "Common Bowman mistakes"
+  },
+  {
+   "img": "f25e3bb8b36c8d.png",
+   "w": 110,
+   "h": 160
+  },
+  {
+   "ol": [
+    "**Adding STR for first-job advancement.** There is no stat requirement. Add STR only when the next weapon needs it.",
+    "**Following bow STR requirements on a crossbow build.** Crossbows need less STR. Put the saved AP into DEX.",
+    "**Standing inside bow whack range.** Use platforms and Eye's extra range to keep space. Your bow whacks at close range by design, and Power Knockback is a first-job skill for pushing mobs back out of it.",
+    "**Assuming Double Shot deals more single-target damage.** Both attacks reach 240% total damage at max skill Lv. Double Shot has more stable damage when both arrows hit one mob, but it can split its hits across two mobs. Arrow Blow costs less MP and one fewer arrow, with better Knockback potential.",
+    "**Running out of arrows. You become chopped liver when you got no ammo.**",
+    "**Building Critical Rate with scrolls.** W.ATK is much better than Crit Rate and wins the level 30 comparison."
+   ]
+  },
+  {
+   "h2": "At level 30: choose your second job"
+  },
+  {
+   "ol": [
+    "Start the second-job advancement with Athena Pierce in Henesys.",
+    "Take Athena's letter to the Bowman Job Instructor at The Road to the Dungeon.",
+    "Kill the test mobs until you have 30 Dark Marbles, then exchange them for The Proof of a Hero.",
+    "Return to Athena Pierce and choose Hunter or Crossbowman."
+   ]
+  },
+  {
+   "h3": "Hunter"
+  },
+  {
+   "p": "Uses bows. Bow Mastery adds Evasion, Bow Booster raises attack speed, and Arrow Bomb attacks groups of mobs and can stun them."
+  },
+  {
+   "guide": "hunter-class-guide",
+   "text": "Hunter Lv 30-70 guide"
+  },
+  {
+   "h3": "Crossbowman"
+  },
+  {
+   "p": "Uses crossbows. Crossbow Mastery can ignore WDEF, and Iron Arrow pierces a horizontal line."
+  },
+  {
+   "guide": "crossbowman-class-guide",
+   "text": "Crossbowman Lv 30-70 guide"
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/bowman-class-guide",
+ "hash": "3cc0b0b94d52"
+}

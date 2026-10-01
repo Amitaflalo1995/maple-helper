@@ -1,0 +1,594 @@
+{
+ "title": "MapleStory Classic World Glossary",
+ "intro": "Every acronym, slang term, and game mechanic you need to know for MapleStory Classic World, grouped by category from leveling to economy.",
+ "hero": null,
+ "minutes": 6,
+ "blocks": [
+  {
+   "p": "[[img:99e27e8c542fc6.png]] If you're reading Discord or YouTube guides for **MapleStory Classic World** and stumbling over acronyms like **kPQ**, **AP**, or **pure DEX**, this glossary explains them. Terms are grouped by category and sorted alphabetically within each group. Where a term has a whole guide attached, we link to it."
+  },
+  {
+   "h2": "General and meta"
+  },
+  {
+   "table": [
+    [
+     "Term",
+     "Meaning"
+    ],
+    [
+     "**MS**",
+     "MapleStory."
+    ],
+    [
+     "**MSCW** / **MS Classic**",
+     "MapleStory Classic World, Nexon's separate world built around early MapleStory. Founder's Access begins October 6, 2026, and Grand Launch opens to everyone on October 21. It is separate from fan-run private servers."
+    ],
+    [
+     "**pre-BB**",
+     "Pre-Big Bang. A historical label for MapleStory before the 2010 Big Bang update. Classic World draws from early MapleStory but changes mechanics and adds original content, so the label is not mechanics evidence."
+    ],
+    [
+     "**GMS / KMS / JMS / EMS**",
+     "Global / Korea / Japan / Europe MapleStory. Different regional versions. Classic World is a new world. It does not replicate any one historical regional build."
+    ],
+    [
+     "**Big Bang**",
+     "The 2010 update commonly used to divide MapleStory history into pre-BB and post-BB. Current Classic World facts still need current game data or an official announcement."
+    ],
+    [
+     "**OSMS / Old School MS**",
+     "Slang for older MapleStory. Classic World uses that style but changes mechanics and adds original content, so OSMS behavior does not prove Classic World behavior."
+    ]
+   ]
+  },
+  {
+   "h2": "Leveling and EXP"
+  },
+  {
+   "table": [
+    [
+     "Term",
+     "Meaning"
+    ],
+    [
+     "**EXP**",
+     "Experience points. Earned by killing mobs and turning in quests. See the EXP table Lv 1 to 100."
+    ],
+    [
+     "**grind**",
+     "Killing mobs repeatedly to gain EXP. The bulk of leveling past lv 30."
+    ],
+    [
+     "**level up** / **ding**",
+     "Hitting the next level. Resets your EXP bar to 0."
+    ],
+    [
+     "**train**",
+     "A group of players killing mobs together on the same map. Also called a \"grind group.\""
+    ],
+    [
+     "**leech**",
+     "When a low-level player joins a party on a map way above their level and collects EXP from the party bonus while a higher-level carry does the work."
+    ],
+    [
+     "**power level** / **PL**",
+     "Being leveled quickly, usually by a high-level friend pulling mobs for you."
+    ],
+    [
+     "**party bonus**",
+     "EXP bonus for being in a party. COT2 gives 10 / 20 / 30 / 30 / 30% for 2 / 3 / 4 / 5 / 6 members, so the bonus stops growing after the fourth player."
+    ],
+    [
+     "**mob rate**",
+     "How many mobs a map keeps alive at once. Set by the map's spawn-point count scaled by party size (about 75% of the points filled solo, rising to 100% in a full six-player party). There is no separate map-wide multiplier or fixed 40-mob cap."
+    ],
+    [
+     "**respawn wave**",
+     "The 7.56-second tick on which most mobs repopulate. Not all mobs use the wave, some have their own timers."
+    ]
+   ]
+  },
+  {
+   "h2": "Classes and jobs"
+  },
+  {
+   "table": [
+    [
+     "Term",
+     "Meaning"
+    ],
+    [
+     "**Beginner**",
+     "The starting class for every character. You stay a Beginner until lv 10 when you advance to your 1st job."
+    ],
+    [
+     "**1st job**",
+     "The first real job you pick at level 10: Warrior, Magician, Bowman, Thief. See the class tier list."
+    ],
+    [
+     "**2nd job**",
+     "Branch chosen at level 30 inside your 1st-job family. E.g. Warrior → Fighter/Page/Spearman, Magician → Fire-Poison / Ice-Lightning / Cleric."
+    ],
+    [
+     "**3rd job** / **4th job**",
+     "Later-game advancements. 3rd job is taken at level 70. It was in the second Closed Online Test, with all ten branches, but it is not part of the initial launch. 4th job has not been announced."
+    ],
+    [
+     "**branch**",
+     "The specific 2nd-job path inside a class family (e.g. Fighter is a Warrior branch)."
+    ],
+    [
+     "**job advancement**",
+     "The NPC interaction that unlocks your next job at lv 10 / 30 / 70."
+    ],
+    [
+     "**pure** / **pure stat**",
+     "A build that puts every AP point into the class's primary stat and ignores secondary stat requirements. \"Pure INT mage\", \"pure LUK bandit\"."
+    ],
+    [
+     "**dexless** / **strless** / **lukless**",
+     "Skipping the secondary stat that gear would normally require. E.g. a dexless assassin never adds DEX, just relies on gear bonuses to meet claw requirements."
+    ],
+    [
+     "**hybrid**",
+     "A build that splits AP between primary and secondary stats to unlock better gear earlier."
+    ],
+    [
+     "**STR / DEX / INT / LUK**",
+     "The four primary combat stats. Warriors use STR, Bowmen DEX, Magicians INT, Thieves LUK."
+    ]
+   ]
+  },
+  {
+   "h2": "Stats and AP"
+  },
+  {
+   "table": [
+    [
+     "Term",
+     "Meaning"
+    ],
+    [
+     "**AP** (Ability Points)",
+     "Earned at every level up. You get 5 per level. Used to raise STR / DEX / INT / LUK / HP / MP."
+    ],
+    [
+     "**AP Reset**",
+     "Cash Shop item that refunds one AP from a stat so you can reassign it. Classic World sells these, including full AP Reset scrolls in the Cash Shop, so bad AP decisions are fully recoverable."
+    ],
+    [
+     "**SP** (Skill Points)",
+     "Earned at level 10 and every level after. Spent on class skills. 3 SP per level, plus 1 bonus SP at lv 10 advancement. That gives you exactly 61 SP by level 30. See the Character Builder."
+    ],
+    [
+     "**SP Reset**",
+     "Cash Shop item that unspends one SP. Classic World sells full SP Reset scrolls in the Cash Shop, letting you respec every point. Especially useful after 2nd job when your 1st-job attack becomes obsolete (e.g. Magician, Bandit)."
+    ],
+    [
+     "**secondary stat**",
+     "The off-primary stat. Warriors' secondary is DEX, Bowmen's is STR, Thieves' is DEX, Magicians' is LUK."
+    ]
+   ]
+  },
+  {
+   "h2": "Skills and SP"
+  },
+  {
+   "table": [
+    [
+     "Term",
+     "Meaning"
+    ],
+    [
+     "**prereq**",
+     "A skill dependency. You can't put SP into skill B until skill A is at a required level. Example: Magic Claw requires Energy Bolt lv 1."
+    ],
+    [
+     "**max level**",
+     "The SP cap on a single skill. First job damage skills usually cap at 20, passives at 15."
+    ],
+    [
+     "**active skill**",
+     "A skill you press a key to use. Costs MP."
+    ],
+    [
+     "**passive skill**",
+     "A skill that affects you without being activated. Masteries and stat boosts are passives."
+    ],
+    [
+     "**buff**",
+     "A self or party skill that boosts stats temporarily. Rage, Meditation, Iron Body, etc."
+    ],
+    [
+     "**booster**",
+     "A 2nd-job buff that raises attack speed by 2 stages. Sword/Axe Booster, Blunt Weapon Booster, Spear/Polearm Booster, Bow/Crossbow Booster, Claw Booster, Dagger Booster."
+    ],
+    [
+     "**mastery**",
+     "A 2nd-job passive that raises your weapon's minimum damage floor. Sword Mastery, Spear Mastery, Claw Mastery, etc."
+    ]
+   ]
+  },
+  {
+   "h2": "Combat and damage"
+  },
+  {
+   "table": [
+    [
+     "Term",
+     "Meaning"
+    ],
+    [
+     "**HP / MP**",
+     "Health Points / Mana Points. Max HP/MP goes up with level, plus a small AP contribution."
+    ],
+    [
+     "**WATK / W.ATK**",
+     "Weapon Attack. The raw attack number on your weapon. See the damage formula guide."
+    ],
+    [
+     "**Magic / MATK**",
+     "Magic Attack. Wands, staves, gear, and Meditation can add it; spell damage estimates use the final total."
+    ],
+    [
+     "**ATK Power**",
+     "A separate attack bonus from buffs and passives. Supported effects are included by the damage calculator."
+    ],
+    [
+     "**PDEF / MDEF**",
+     "Physical / Magic Defense. Gear, total stats, and supported buffs feed the landed-hit estimate."
+    ],
+    [
+     "**ACC / AVOID**",
+     "Accuracy depends on total ACC, level difference, attack type, and the target's AVOID. Use the Accuracy Simulator for the current per-monster estimate."
+    ],
+    [
+     "**range**",
+     "The MIN-MAX damage window shown in your character stat window. Every hit rolls somewhere inside."
+    ],
+    [
+     "**one-shot**",
+     "Killing a mob in a single hit. Efficiency goal on grind maps."
+    ],
+    [
+     "**KB** (Knockback)",
+     "Being pushed backward when hit. Also the knockback resistance stat on mobs: a mob with 500 KB needs 500+ damage to stagger."
+    ],
+    [
+     "**mastery floor**",
+     "Your weapon mastery lifts your minimum damage roll. Higher mastery = less variance."
+    ],
+    [
+     "**crit**",
+     "Critical hit. Every class has a base critical rate; Bowmen, Assassins and Lukless Bandits get passive boosts on top. The Damage Simulator returns the current values."
+    ],
+    [
+     "**elemental advantage**",
+     "Hitting a mob weak to your skill's element raises your damage. Fire/Ice/Lightning/Poison/Holy. The Damage Simulator applies the current matchup modifier."
+    ],
+    [
+     "**status**",
+     "Stun / freeze / slow / poison / curse. Procced by specific skills on specific mobs."
+    ]
+   ]
+  },
+  {
+   "h2": "Gear and scrolling"
+  },
+  {
+   "table": [
+    [
+     "Term",
+     "Meaning"
+    ],
+    [
+     "**slots**",
+     "Number of upgrade slots on a piece of gear. Each scroll uses one slot."
+    ],
+    [
+     "**clean**",
+     "An item with no scrolls applied yet. Has all its slots open."
+    ],
+    [
+     "**scroll**",
+     "Consumable that upgrades an item's stats. Four grades: Lesser, Intermediate, Greater, Chaos. Try the scroll simulator."
+    ],
+    [
+     "**Lesser scroll**",
+     "100% success, smaller stat gain. Safest option."
+    ],
+    [
+     "**Intermediate scroll**",
+     "60% success, medium stat gain. Doesn't destroy on fail."
+    ],
+    [
+     "**Greater scroll**",
+     "10% success, bigger stat gain than Intermediate. Doesn't destroy on fail."
+    ],
+    [
+     "**Chaos scroll**",
+     "10% success, with a fixed bonus one step above Greater (an earring STR scroll gives +3 at Greater and +4 at Chaos). **A failed Chaos scroll has a 50% chance to destroy the item.** The only scroll that can brick your gear."
+    ],
+    [
+     "**slot fest** / **scroll fest**",
+     "The ritual of applying scrolls to a fresh item, usually on a stream or with witnesses."
+    ],
+    [
+     "**god roll**",
+     "An item that hit lucky on every scroll applied. Rare, expensive, chef's kiss."
+    ],
+    [
+     "**brick** / **boomed**",
+     "An item destroyed by a Chaos scroll fail. Unrecoverable."
+    ],
+    [
+     "**overall** / **overalls**",
+     "A single armor piece that covers the top AND bottom slots, freeing a gear slot. E.g. Sauna Robe."
+    ],
+    [
+     "**Sauna Robe**",
+     "A level 30 universal overall, 10 slots, no class or stat requirement. It comes from the last step of Mr. Wetbottom's Secret Book chain in Sleepywood, which opens at level 32."
+    ],
+    [
+     "**untradeable**",
+     "An item locked to the character that picked it up. Can't be traded or put in the storage/FM."
+    ]
+   ]
+  },
+  {
+   "h2": "Parties and PQs"
+  },
+  {
+   "table": [
+    [
+     "Term",
+     "Meaning"
+    ],
+    [
+     "**party**",
+     "Group of up to 6 players that share EXP and loot on the same map."
+    ],
+    [
+     "**leader**",
+     "The party creator. Invites/kicks party members."
+    ],
+    [
+     "**PQ** (Party Quest)",
+     "A multi-stage party-only dungeon that rewards strong EXP and unique items at specific level ranges."
+    ],
+    [
+     "**kPQ** / **Kerning PQ**",
+     "The Kerning City Party Quest. Lv 21+, a party of four, unlocks at level 21 with no max level. The staple pre-BB leveling activity."
+    ],
+    [
+     "**LPQ** / **Ludi PQ**",
+     "Ludibrium Party Quest. Not in Classic World yet. The second test added Ludibrium travel tickets and an NPC who sells them, but no Ludibrium maps to go with them, so it looks planned."
+    ],
+    [
+     "**KS** / **kill steal**",
+     "Taking a kill another player had already tagged. Generally considered rude, sometimes unavoidable on crowded maps."
+    ],
+    [
+     "**lurk**",
+     "Sitting on a boss spawn waiting for it to respawn so you can tag it first."
+    ],
+    [
+     "**train** (party)",
+     "A grinding group at a high-mob-density map."
+    ],
+    [
+     "**carry**",
+     "A strong player doing the heavy lifting in a party. Paired with leechers."
+    ],
+    [
+     "**loot** / **party loot**",
+     "Whether item drops go free-for-all or rotate by party member."
+    ],
+    [
+     "**ninja loot**",
+     "Picking up an item someone else was meant to get without asking. Socially bad."
+    ]
+   ]
+  },
+  {
+   "h2": "Economy and trading"
+  },
+  {
+   "table": [
+    [
+     "Term",
+     "Meaning"
+    ],
+    [
+     "**mesos**",
+     "The in-game currency. Dropped by mobs, earned from NPC sells and trades."
+    ],
+    [
+     "**NX**",
+     "Nexon Cash. Real-money-purchased Cash Shop currency."
+    ],
+    [
+     "**Cash Shop**",
+     "The in-game real-money store for cosmetic equips, pet slots, AP/SP resets, storage permits, etc."
+    ],
+    [
+     "**FM** / **Free Market**",
+     "The player-to-player marketplace, accessed through Free Market Entrance portals in each major town. Where serious trading happens."
+    ],
+    [
+     "**merchant** / **merching**",
+     "A player who makes mesos by buying low in the FM and selling high."
+    ],
+    [
+     "**store permit** (Owl)",
+     "A Cash Shop item that lets you set up a personal shop in the FM even when offline."
+    ],
+    [
+     "**gacha** / **gachapon**",
+     "A Cash Shop lottery machine that has the potential to give you random rare items for NX tickets."
+    ],
+    [
+     "**trade**",
+     "Direct player-to-player item+meso swap. Trade taxes apply to mesos."
+    ]
+   ]
+  },
+  {
+   "h2": "Content and bosses"
+  },
+  {
+   "table": [
+    [
+     "Term",
+     "Meaning"
+    ],
+    [
+     "**Forgotten Hollow**",
+     "The brand new area unique to Classic World, added by Nexon. Lv 39-60. Grendel the Really Old in Ellinia starts its questline, which hands you to Nyroth inside the Hollow. See Forgotten Hollow guide."
+    ],
+    [
+     "**Zelya**",
+     "The cave fairy NPC in Cave Fairy Sanctuary, reached from the Forgotten Hollow map. Gives the map-fragment questline after Welcome to the Hollow."
+    ],
+    [
+     "**boss**",
+     "A big mob with much higher HP and longer respawn timers. Bosses have dedicated spawn maps and usually require camping."
+    ],
+    [
+     "**mini-boss** / **rare**",
+     "A mid-sized mob with a long respawn timer and rare drops. Not technically a boss but hunted similarly."
+    ],
+    [
+     "**Mushmom**",
+     "A lv 40 boss that spawns periodically in Mushmom maps. Classic pre-BB landmark fight."
+    ],
+    [
+     "**Jr. Balrog**",
+     "The Sleepywood Dungeon boss at level 80."
+    ],
+    [
+     "**Zakum**",
+     "Not in Classic World yet. Check the Zakum Helmet page for drop sources."
+    ],
+    [
+     "**hidden street**",
+     "A map not visible on the world map, accessed through a hidden portal on a regular map."
+    ],
+    [
+     "**dungeon**",
+     "A multi-map area usually with stronger mobs and longer portal paths. Sleepywood Dungeon, Ant Tunnel, etc."
+    ],
+    [
+     "**subway**",
+     "The Kerning City Subway maps, infamous for dense Wraith spawns and top-tier grinding EXP."
+    ]
+   ]
+  },
+  {
+   "h2": "Community slang"
+  },
+  {
+   "table": [
+    [
+     "Term",
+     "Meaning"
+    ],
+    [
+     "**noob** / **newb**",
+     "A new player. Often used playfully, sometimes pejoratively."
+    ],
+    [
+     "**vet** / **veteran**",
+     "A returning player who played pre-BB in the 2000s."
+    ],
+    [
+     "**afk**",
+     "Away from keyboard. Parked character in town or on a safe ledge."
+    ],
+    [
+     "**brb**",
+     "Be right back. Typically stepped away mid-party."
+    ],
+    [
+     "**gg**",
+     "Good game. Said after a successful run or big drop."
+    ],
+    [
+     "**rip**",
+     "\"Rest in peace.\" Said after a scroll destroy, a bad death, or a missed drop."
+    ],
+    [
+     "**sniping**",
+     "Killing a rare mob someone else was trying to tag. Worse than KS because the mob is rare."
+    ],
+    [
+     "**gach / gachapon'd**",
+     "Got lucky (or unlucky) on the Cash Shop lottery."
+    ],
+    [
+     "**cc** (change channel)",
+     "Switching instances of a map to find a quieter spawn or free ledge. Typed as \"/cc\" in-game."
+    ],
+    [
+     "**@@** / **guide me**",
+     "\"I am lost, please help\" in Discord."
+    ],
+    [
+     "**boomed**",
+     "Had a Chaos scroll destroy an item. Verb and adjective."
+    ],
+    [
+     "**B>**",
+     "Buying. Shouted in the Free Market or smega to signal a buy order. E.g. \"B> Fame\", \"B> 10 slot cape\"."
+    ],
+    [
+     "**S>**",
+     "Selling. The seller-side counterpart to B>. E.g. \"S> Fame\", \"S> clean Zhelm\"."
+    ],
+    [
+     "**J>**",
+     "Joining. Used to find an existing party or PQ run. E.g. \"J> kPQ\", \"J> Zak\"."
+    ],
+    [
+     "**R>**",
+     "Recruiting. Used by a party leader filling spots. E.g. \"RPQ\" (recruiting party quest), \"R> 2 more kPQ\"."
+    ]
+   ]
+  },
+  {
+   "guide": "beginners-guide-first-steps-in-maple-world",
+   "text": "Beginner's Guide: MapleStory Classic World"
+  },
+  {
+   "guide": "warrior-class-guide",
+   "text": "MapleStory Classic Warrior Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "magician-class-guide",
+   "text": "MapleStory Classic Magician Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "bowman-class-guide",
+   "text": "MapleStory Classic Bowman Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "thief-class-guide",
+   "text": "MapleStory Classic Thief Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "explaining-the-damage-formula",
+   "text": "MapleStory Classic Damage Formula"
+  },
+  {
+   "guide": "best-grind-maps-every-level",
+   "text": "Best Grind Maps for Every Level 1-70"
+  },
+  {
+   "guide": "exp-table-level-1-to-100",
+   "text": "EXP Table Lv 1-100: Current and Historical Reference"
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/maplestory-classic-glossary",
+ "hash": "039ae70c2488"
+}

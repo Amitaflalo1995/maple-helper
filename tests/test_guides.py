@@ -65,12 +65,79 @@ def test_picks_for_a_character_start_with_their_job():
     assert all(g.sections for g in (guides.parse(x["key"], kb.page(x["key"])) for x in guides.all_guides(kb)))
 
 
-def test_every_shipped_translation_matches_its_guide_structure():
+def test_every_guide_ships_whole_and_translated():
+    """Each built guide has its pictures on disk and a Hebrew translation with the same blocks."""
     import json
-    folder = guides.TRANSLATIONS / "he"
-    files = sorted(folder.glob("*.json"))
-    assert files, "Hebrew guide translations are missing"
-    for f in files:
-        tr = json.loads(f.read_text(encoding="utf-8"))
-        assert tr["key"] == f"guide/{f.stem}" and tr.get("lang") == "he" and tr.get("title")
-        assert all(isinstance(s.get("lines"), list) for s in tr["sections"])
+    en_files = sorted((guides.TRANSLATIONS / "en").glob("*.json"))
+    assert len(en_files) >= 30, "run tools/build_guides.py"
+    for f in en_files:
+        en = json.loads(f.read_text(encoding="utf-8"))
+        names = set(guides._ICON.findall(json.dumps(en))) | {b["img"] for b in en["blocks"] if "img" in b}
+        assert all((guides.IMAGES / n).exists() for n in names), f.stem
+        he = json.loads((guides.TRANSLATIONS / "he" / f.name).read_text(encoding="utf-8"))
+        assert [next(iter(b)) for b in he["blocks"]] == [next(iter(b)) for b in en["blocks"]], f.stem
+        assert he["source_hash"] == en["hash"], f"{f.stem}: translation is stale"
+
+
+ARTICLE = """<html><head><meta name="description" content="Short summary."></head><body><nav>Menu</nav><main>
+<div><a href="/msclassic/guides">All guides</a><span>8 min read</span></div>
+<header><p>Level 1 to 30 class guide</p><h1>Warrior Guide</h1><p>Warriors hit hard.</p>
+<div><img src="/msclassic/classes/renders/warrior.png" width="130" height="160"></div></header>
+<div data-nitro-ad="true"><p>Ad blocked? Fair.</p></div>
+<nav aria-labelledby="contents-heading"><strong>Contents</strong><ol><li>Accuracy</li></ol></nav>
+<section id="accuracy"><h2 id="accuracy">Accuracy
+</h2><p>Your hit rate depends on <strong>level</strong>.</p>
+<div class="callout"><strong>Fun fact:</strong> The <a href="/item/1">Club</a> is best.</div>
+<div class="table-wrap"><table><thead><tr>
+<th>Skill</th>
+<th>Max</th></tr></thead><tbody><tr>
+<td><img src="/icons/1.png">Power Strike</td>
+<td>20</td>
+</tr></tbody></table></div>
+<div class="sm:hidden"><p>Phone copy</p></div>
+<div class="link-row"><a class="button-link" href="/msclassic/tools/acc">Open Accuracy Simulator</a>
+<a class="button-link" href="/msclassic/guides/fighter-class-guide">Continue with Fighter</a></div>
+</section>
+<div class="correction-loop"><strong>Spot a mistake?</strong></div>
+<div><p>More guides</p><a href="/msclassic/guides/x"><h3>Other</h3></a></div>
+</main></body></html>"""
+
+
+def test_build_keeps_the_article_with_its_structure(monkeypatch, tmp_path):
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
+    import build_guides as bg
+    images = bg.Images(tmp_path)
+    monkeypatch.setattr(images, "get", lambda src, max_w=360: (Path(src).stem + ".png", 32, 32) if "icons" in src
+                        else (Path(src).stem + ".png", 130, 160))
+    g = bg.convert(ARTICLE, images)
+    assert g["title"] == "Warrior Guide" and g["intro"] == "Warriors hit hard." and g["hero"] == "warrior.png"
+    assert g["blocks"] == [
+        {"h2": "Accuracy"},
+        {"p": "Your hit rate depends on **level**."},
+        {"note": "**Fun fact:** The Club is best."},
+        {"table": [["Skill", "Max"], ["[[img:1.png]]Power Strike", "20"]]},
+        {"guide": "fighter-class-guide", "text": "Continue with Fighter"},
+    ]
+
+
+def test_translation_round_trip_keeps_blocks():
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
+    import translate_guides as tg
+    en = {"title": "Guide", "intro": "Hi.", "hash": "h1",
+          "blocks": [{"h2": "Skills"}, {"table": [["Skill", "Max"], ["Power Strike", "20"]]}, {"ul": ["Hit **hard**."]}]}
+    assert tg.strings(en) == ["Guide", "Hi.", "Skills", "Skill", "Max", "Power Strike", "Hit **hard**."]
+    he = tg.translate(en, {"Skills": "סקילים", "Hit **hard**.": "להכות **חזק**."})
+    assert he["blocks"][0] == {"h2": "סקילים"} and he["blocks"][1]["table"][1] == ["Power Strike", "20"]
+    assert he["blocks"][2] == {"ul": ["להכות **חזק**."]}
+
+
+def test_reader_html_for_a_hebrew_guide():
+    b = {"lang": "he", "title": "מדריך", "intro": "", "hero": "x.png",
+         "blocks": [{"h2": "סקילים של Warrior"}, {"p": "[[img:a.png]] **Power Strike** פוגע ב-2 מובים"},
+                    {"note": "הערה"}, {"guide": "fighter-class-guide", "text": "להמשיך ל-Fighter"},
+                    {"table": [["סקיל", "Max"], ["Power Strike", "20"]]}, {"img": "y.png", "w": 100, "h": 50}]}
+    h = guides.book_html(b, "dark")
+    assert "dir='rtl'" in h and "<b>" in h and "a.png" in h and "href='guide:fighter-class-guide'" in h
+    assert "[[img:" not in h and guides.NOTE_COLORS["dark"]["note"] in h and "y.png" in h and "<table" in h

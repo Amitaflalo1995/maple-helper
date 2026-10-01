@@ -1,0 +1,1211 @@
+{
+ "title": "MapleStory Classic Spearman Build and Leveling Guide: Lv 30-70",
+ "intro": "Spearmen fight with the longest Warrior weapons. Spears and polearms reach farther than swords or axes, Rush groups mobs, and Final Attack can add a heavy second hit that restores HP.",
+ "hero": "421a52146b3201.png",
+ "minutes": null,
+ "blocks": [
+  {
+   "p": "This guide is based off of a realistic lv 70 Spearman build by Grummash."
+  },
+  {
+   "p": "**Pros**"
+  },
+  {
+   "ul": [
+    "#3 Damage/MP at level 70: excellent damage per point of MP spent.",
+    "Highest physical EHP among the realistic level 70 Warrior builds.",
+    "Spear and polearm give Warriors their longest basic melee reach.",
+    "Polearm Mastery adds +20 Movement Speed without using a gear slot."
+   ]
+  },
+  {
+   "p": "**Cons**"
+  },
+  {
+   "ul": [
+    "The spear path gets no passive Speed; Polearm fixes mobility only after Mastery investment.",
+    "No party buff or debuff before third job: Hyper Body is a Dragon Knight skill in CoT2.",
+    "No shield option; Spearmen do not get the Guard passive that can negate physical attacks.",
+    "Mastery, Booster, and Final Attack lock SP to spear or polearm.",
+    "Power Strike and Slash Blast remain the main DPS skills until level 70+ third job."
+   ]
+  },
+  {
+   "h2": "Starting at level 30"
+  },
+  {
+   "p": "New Warrior? Finish the Warrior level 1-30 guide first. The Accuracy formula, first-job SP allocation, early equipment, citizenship, and training maps are on there."
+  },
+  {
+   "img": "de3b39e8cc3b0b.png",
+   "w": 130,
+   "h": 92
+  },
+  {
+   "p": "**First-job endpoint**"
+  },
+  {
+   "p": "Power Strike 20, Slash Blast 20, Precise Strikes 15, Improved HP Recovery 3, and Max HP Increase 3."
+  },
+  {
+   "p": "**Reference level 30 stats**"
+  },
+  {
+   "p": "135 base STR / 27 base DEX\n138 STR / 30 DEX / 73 ACC with the sample gear"
+  },
+  {
+   "p": "**After the job advancement**"
+  },
+  {
+   "p": "Put the first Spearman SP into Rush."
+  },
+  {
+   "p": "[[img:f3869975932f3f.png]]Forked Spear"
+  },
+  {
+   "p": "52 W.ATK before scrolling."
+  },
+  {
+   "h2": "Accuracy after level 30"
+  },
+  {
+   "p": "These totals assume your level matches the mob. Fighting a mob above your level raises the ACC requirement. The 100% column means every attack connects."
+  },
+  {
+   "img": "82c680595d5426.png",
+   "w": 130,
+   "h": 106
+  },
+  {
+   "table": [
+    [
+     "Mob",
+     "Level",
+     "Avoidability",
+     "90% hit",
+     "100% hit"
+    ],
+    [
+     "Jr. Wraith",
+     "34",
+     "24",
+     "75 ACC",
+     "79 ACC"
+    ],
+    [
+     "Lorang",
+     "38",
+     "23",
+     "72 ACC",
+     "76 ACC"
+    ],
+    [
+     "Zombie Lupin",
+     "41",
+     "28",
+     "88 ACC",
+     "92 ACC"
+    ],
+    [
+     "Wraith",
+     "48",
+     "31",
+     "97 ACC",
+     "101 ACC"
+    ],
+    [
+     "Croco",
+     "52",
+     "30",
+     "94 ACC",
+     "98 ACC"
+    ],
+    [
+     "Rotten Mushroom",
+     "56",
+     "33",
+     "103 ACC",
+     "108 ACC"
+    ],
+    [
+     "Wild Kargo",
+     "62",
+     "35",
+     "109 ACC",
+     "114 ACC"
+    ],
+    [
+     "Tauromacis",
+     "70",
+     "39",
+     "121 ACC",
+     "126 ACC"
+    ]
+   ]
+  },
+  {
+   "guide": "warrior-class-guide",
+   "text": "Read the full Warrior Accuracy explanation"
+  },
+  {
+   "h2": "Levels 30-70: Spearman Skill Build and Leveling"
+  },
+  {
+   "p": "Polearm is the easier second-job default, but the detailed order uses Spear to match Grummash's realistic level 70 build. For Polearm, replace Spear Mastery, Final Attack: Spear, and Spear Booster with their Polearm versions at the same levels."
+  },
+  {
+   "img": "bfec6341ae8cff.png",
+   "w": 129,
+   "h": 210
+  },
+  {
+   "h3": "Level 30 Spearman job advancement"
+  },
+  {
+   "p": "Return to Dances with Balrog in Perion and begin the Warrior's second-job advancement. Complete the instructor's test, bring back the Proof of a Hero, and choose Spearman."
+  },
+  {
+   "note": "**Put the first second-job SP into Rush.** Rush 1 gives immediate movement and crowd control. It costs 40 MP, so use it sparingly and to group mobs together."
+  },
+  {
+   "h3": "Level 70 Spear sample skill target"
+  },
+  {
+   "table": [
+    [
+     "",
+     "Skill",
+     "SP",
+     "Max result"
+    ],
+    [
+     "[[img:146f7c3b361eb4.png]]",
+     "Spear Mastery",
+     "20 / 20",
+     "Mastery 10 and +20% Critical Rate."
+    ],
+    [
+     "[[img:23f659f6b36fa1.png]]",
+     "Polearm Mastery",
+     "1 / 20",
+     "Saved spare point. The Spear build does not use its stats."
+    ],
+    [
+     "[[img:04935bdb2eab63.png]]",
+     "Final Attack: Spear",
+     "30 / 30",
+     "50% proc, 260% damage, absorbs 10% as HP."
+    ],
+    [
+     "[[img:edd734cb7ad2f5.png]]",
+     "Spear Booster",
+     "20 / 20",
+     "+2 Attack Speed stages for 300 seconds."
+    ],
+    [
+     "[[img:75c59b77f65d23.png]]",
+     "Iron Will",
+     "30 / 30",
+     "+50 WDEF and 35% chance to ignore knockback for 300 seconds."
+    ],
+    [
+     "[[img:b08982d8aef82c.png]]",
+     "Rush",
+     "20 / 20",
+     "150 distance, 80% damage, up to four mobs, 20 MP."
+    ]
+   ]
+  },
+  {
+   "h3": "Spearman SP allocation: levels 30-70"
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Spend",
+     "Running total",
+     "Reason"
+    ],
+    [
+     "30",
+     "Rush +1",
+     "Rush 1",
+     "Movement and mob control immediately."
+    ],
+    [
+     "31",
+     "Spear Mastery +3",
+     "Mastery 3",
+     "Unlock Final Attack."
+    ],
+    [
+     "32",
+     "Spear Mastery +2, Spear Booster +1",
+     "Mastery 5 / Booster 1",
+     "Unlock Booster and take one point for QoL."
+    ],
+    [
+     "33",
+     "Spear Mastery +1, Final Attack +2",
+     "M 6 / FA 2",
+     "Keep building the two damage skills."
+    ],
+    [
+     "34-37",
+     "Spear Mastery +12",
+     "Mastery 18",
+     "Raise minimum damage and crit rate."
+    ],
+    [
+     "38",
+     "Spear Mastery +2, Final Attack +1",
+     "Mastery 20 / FA 3",
+     "Max Mastery."
+    ],
+    [
+     "39-47",
+     "Final Attack +27",
+     "Final Attack 30",
+     "Max the proc rate, damage, and HP recovery."
+    ],
+    [
+     "48",
+     "Spear Booster +3",
+     "Booster 4",
+     "Extend the speed buff."
+    ],
+    [
+     "49-53",
+     "Spear Booster +15",
+     "Booster 19",
+     "Longer duration and cheaper recasts."
+    ],
+    [
+     "54",
+     "Spear Booster +1, Rush +2",
+     "Booster 20 / Rush 3",
+     "Max Booster and return to Rush."
+    ],
+    [
+     "55-59",
+     "Rush +15",
+     "Rush 18",
+     "Raise distance, damage, and MP efficiency."
+    ],
+    [
+     "60",
+     "Rush +2, Iron Will +1",
+     "Rush 20 / IW 1",
+     "Max Rush, then unlock Iron Will."
+    ],
+    [
+     "61-69",
+     "Iron Will +27",
+     "Iron Will 28",
+     "Spend the remaining utility SP."
+    ],
+    [
+     "70",
+     "Iron Will +2, Polearm Mastery +1",
+     "IW 30 / Polearm Mastery 1",
+     "Finish Iron Will; park the final spare SP."
+    ]
+   ]
+  },
+  {
+   "p": "Second-job SP cannot be spent on first-job skills, so finish the first-job plan by level 30. Character Builder flags any build that breaks it."
+  },
+  {
+   "note": "**Final Attack restores HP:** At max, it has a 50% chance to add a 260% spear hit and absorbs 10% of the damage as HP. The heal cannot exceed 25% of the Spearman's Max HP or the mob's Max HP."
+  },
+  {
+   "h3": "Possible changes to the default order"
+  },
+  {
+   "h3": "Booster 10 earlier"
+  },
+  {
+   "p": "Take more Booster after max Mastery if the shorter uptime annoys you. Lv 10 lasts 190 seconds but still costs 21 HP and 21 MP. This delays Final Attack damage and healing."
+  },
+  {
+   "h3": "Rush 10 earlier"
+  },
+  {
+   "p": "Rush reaches its full 150 movement distance at lv 10 and drops to 31 MP. Raise it after max Mastery when map layout and mob control matter more to you than Final Attack."
+  },
+  {
+   "h3": "Polearm path"
+  },
+  {
+   "p": "Use Polearm Mastery, Final Attack: Polearm, and Polearm Booster in the same slots. Polearm Mastery adds +20 Speed, and Weaponcrafting gives you four polearm upgrades through level 50. Put the spare level 70 point in Spear Mastery."
+  },
+  {
+   "h3": "Spearman AP allocation: levels 30-70"
+  },
+  {
+   "p": "Keep total DEX at the minimum your next weapon needs and put the rest into STR. Every level 30-70 spear and polearm listed below needs DEX equal to its level, and DEX from gear reduces how much base DEX you need. This sample reaches 60 base DEX and 302 base STR at level 70; Grummash's equipment supplies the final 10 DEX for Redemption."
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "AP each level",
+     "Base AP at the end"
+    ],
+    [
+     "31-36",
+     "STR +3 / DEX +2",
+     "153 STR / 39 DEX"
+    ],
+    [
+     "37-57",
+     "STR +4 / DEX +1",
+     "237 STR / 60 DEX"
+    ],
+    [
+     "58-70",
+     "STR +5",
+     "302 STR / 60 DEX"
+    ]
+   ]
+  },
+  {
+   "h3": "Recommended equipment: levels 30-70"
+  },
+  {
+   "p": "Use the weapon that reaches the better guaranteed kill until your Spearman SP commits you to a family. After Mastery starts, swapping families turns off Mastery, Booster, and Final Attack. Weaponcrafting offers polearms at skill levels 5, 7, 8, and 10, but no spear recipe."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Spear",
+     "Polearm",
+     "Where to look"
+    ],
+    [
+     "30",
+     "[[img:f3869975932f3f.png]]Forked Spear 52 W.ATK, Speed 7",
+     "[[img:f247063d20f5c3.png]]Mithril Pole Arm 55 W.ATK, Speed 8",
+     "River or Scott."
+    ],
+    [
+     "35",
+     "[[img:c010785d5c46c8.png]]Nakamaki 57 W.ATK, Speed 7",
+     "[[img:860097d842222a.png]]Axe Pole Arm 60 W.ATK, Speed 8",
+     "Scott; Axe Pole Arm is also Weaponcrafting 7."
+    ],
+    [
+     "40",
+     "[[img:b27daec6a576cf.png]]Zeco 59 W.ATK, Speed 6",
+     "[[img:3761e9c40455d6.png]]Crescent Polearm 65 W.ATK, Speed 8",
+     "Check item drops; Crescent is Weaponcrafting 8."
+    ],
+    [
+     "50",
+     "[[img:368118a25bc187.png]]Serpent's Tongue 69 W.ATK, Speed 6",
+     "[[img:b921ea3c374aeb.png]]The Nine Dragons 75 W.ATK, Speed 8",
+     "Check item drops; Nine Dragons is Weaponcrafting 10."
+    ],
+    [
+     "60",
+     "[[img:d0afc047639736.png]]Holy Spear 82 W.ATK, Speed 6",
+     "[[img:b93771c52d1c4b.png]]Skylar 85 W.ATK, Speed 8",
+     "Check the item pages and Free Market."
+    ],
+    [
+     "70",
+     "[[img:d209a6d4305377.png]]Redemption 95 W.ATK, Speed 7",
+     "[[img:6ab7ced992a737.png]]The Gold Dragon 95 W.ATK, Speed 8",
+     "High-level drops or Free Market."
+    ]
+   ]
+  },
+  {
+   "h3": "Training maps: levels 30-70"
+  },
+  {
+   "p": "These Training Advisor results use the sample Spear build, 100% hit rate, and guaranteed one-hit or two-hit Power Strike kills. Danger uses the build's real HP and defenses. Refill counts the portals to the nearest connected potion shop."
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "Best Advisor maps",
+     "Guaranteed kills",
+     "Danger and refill"
+    ],
+    [
+     "30-34",
+     "Line 1 <Area 1> Tree Dungeon, Forest Up North IV",
+     "Bubbling 2-hit; Green Mushroom 2-hit and Slime 1-hit",
+     "Safe at 4%, 3 portals to Dr. Faymus. Safe at 3%, 5 portals to Len."
+    ],
+    [
+     "35-39",
+     "Ant Tunnel IV Ant Tunnel I",
+     "Horny Mushroom and Zombie Mushroom 2-hit",
+     "Safe at 7%. Mr. Sweatbottom is 6 or 3 portals away."
+    ],
+    [
+     "40-44",
+     "Ant Tunnel II Ant Tunnel III",
+     "Zombie Mushroom and Horny Mushroom 1-hit",
+     "Safe at 7%. Mr. Sweatbottom is 4 or 5 portals away."
+    ],
+    [
+     "45-49",
+     "Ant Tunnel II Ant Tunnel III",
+     "Zombie Mushroom and Horny Mushroom 1-hit",
+     "Safe at 6%. Mr. Sweatbottom is 4 or 5 portals away."
+    ],
+    [
+     "50-54",
+     "The Burnt Land I The Burnt Land III",
+     "Fire Boar and Dark Axe Stump 1-hit",
+     "Safe at 8%. Arturo is 4 or 6 portals away."
+    ],
+    [
+     "55-59",
+     "The Burnt Land I The Burnt Land III",
+     "Fire Boar and Dark Axe Stump 1-hit",
+     "Safe at 8%. Arturo is 4 or 6 portals away."
+    ],
+    [
+     "60-64",
+     "The Faded Canopy Perilous Descent I",
+     "Glowshroom, Echopus, and Raffle 2-hit; Echopus 2-hit and Zombie Mushroom 1-hit",
+     "Safe at 10%. Luma is 3 or 4 portals away."
+    ],
+    [
+     "65-69",
+     "Perilous Descent III Perilous Descent II",
+     "Duskmander and Echopus 2-hit; Zombie Mushroom 1-hit",
+     "Safe at 9%. Luma is 6 or 5 portals away."
+    ],
+    [
+     "70",
+     "The Forest of Evil II Perilous Descent III",
+     "Malady and Zombie Lupin 2-hit; Duskmander and Echopus 2-hit",
+     "Forest of Evil is Caution at 14%, 7 portals to Len. Perilous Descent is Safe at 8%, 6 portals to Luma."
+    ]
+   ]
+  },
+  {
+   "h3": "Level 50 example build"
+  },
+  {
+   "p": "**209 base STR / 53 base DEX**"
+  },
+  {
+   "p": "**240 STR / 60 DEX / 81 W.ATK / 121 ACC with gear**"
+  },
+  {
+   "p": "**Skills:** Spear Mastery 20, Final Attack: Spear 30, Spear Booster 10, Rush 1."
+  },
+  {
+   "p": "[[img:368118a25bc187.png]]Serpent's Tongue, [[img:6b76d9e7e4295c.png]]Mithril Crusader Helm, [[img:b8ab03e35a7fa4.png]]Dark Crusader Chainmail, and [[img:f87e4c7470595f.png]]Steel Brist. The armor and gloves list their drops and crafts on the item pages."
+  },
+  {
+   "p": "**Best 100% hit targets by EXP per required hit** Fire Boar: guaranteed 1-hit, 62 EXP per hit Ligator: guaranteed 1-hit, 59 EXP per hit The Burnt Land I is the top full-map estimate."
+  },
+  {
+   "h3": "Level 70 example build"
+  },
+  {
+   "p": "**302 base STR / 60 base DEX**"
+  },
+  {
+   "p": "**337 STR / 70 DEX / 107 W.ATK / 140 ACC with gear**"
+  },
+  {
+   "p": "**Skills:** Spear Mastery 20, Final Attack: Spear 30, Spear Booster 20, Iron Will 30, Rush 20, Polearm Mastery 1."
+  },
+  {
+   "p": "[[img:d209a6d4305377.png]]Redemption with Grummash's realistic armor and Lesser scrolls."
+  },
+  {
+   "p": "**Best 100% hit targets by EXP per required hit** Glowshroom: guaranteed 1-hit, 90 EXP per hit Malady: guaranteed 2-hit, 87.5 EXP per hit The Forest of Evil II wins the full-map estimate with guaranteed two-hit Malady and Zombie Lupin kills."
+  },
+  {
+   "h2": "Spear vs. Polearm: Which One Is Best?"
+  },
+  {
+   "p": "**Polearm can deal slightly more Power Strike and Slash Blast damage from levels 10-70.** Polearm Mastery also gives +20 Movement Speed. Spear has faster weapons at several levels and gains +20% Critical Rate from Spear Mastery, so the damage gap becomes small by level 70."
+  },
+  {
+   "img": "8d0bdf710a51a5.png",
+   "w": 130,
+   "h": 159
+  },
+  {
+   "h3": "The 60/40 swing and stab split"
+  },
+  {
+   "p": "Power Strike and Slash Blast use the ordinary Warrior attack split: **60% of attacks swing and 40% stab.** Spear is stronger when it stabs. Polearm is stronger when it swings."
+  },
+  {
+   "p": "**60%** Swing chance"
+  },
+  {
+   "p": "**40%** Stab chance"
+  },
+  {
+   "p": "**2.30×** Spear average"
+  },
+  {
+   "p": "**2.70×** Polearm average"
+  },
+  {
+   "table": [
+    [
+     "Weapon",
+     "60% swing",
+     "40% stab",
+     "Weighted average",
+     "Max Mastery bonus"
+    ],
+    [
+     "Spear",
+     "1.5× weak roll",
+     "3.5× strong roll",
+     "2.30×",
+     "+20% Critical Rate"
+    ],
+    [
+     "Polearm",
+     "3.5× strong roll",
+     "1.5× weak roll",
+     "2.70×",
+     "+20 Movement Speed"
+    ]
+   ]
+  },
+  {
+   "note": "**Weighted action multipliers**\nSpear: (60% × 1.5) + (40% × 3.5) = 2.30\nPolearm: (60% × 3.5) + (40% × 1.5) = 2.70\nPolearm gets its strong action more often because swings are more common than stabs."
+  },
+  {
+   "p": "**Polearm's average STR multiplier is about 17.4% higher.** That does not mean 17.4% more total damage. W.ATK, DEX, the base damage roll, Critical Rate, weapon speed, enemy WDEF, and guaranteed kill breakpoints still affect the final result."
+  },
+  {
+   "guide": "explaining-the-damage-formula",
+   "text": "See the full Warrior damage formula"
+  },
+  {
+   "h3": "Polearm vs. Spear: Levels 10-70"
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "The case for Polearms",
+     "The case for Spears"
+    ],
+    [
+     "10-29",
+     "The 3.5× strong roll happens on 60% of attacks, and the listed polearms usually carry more W.ATK.",
+     "The spears in this level range are usually faster. Fish Spear also gives +1 ACC."
+    ],
+    [
+     "30-69",
+     "The guide's polearms carry 3-6 more W.ATK at most listed tiers, on top of the 2.70× average multiplier. Polearm Mastery also gives +20 Movement Speed.",
+     "Spear Mastery adds +20% Critical Rate, and several spears remain faster."
+    ],
+    [
+     "70",
+     "The sample Polearm build still leads Power Strike damage per minute by about 2.0%.",
+     "Redemption is one Attack Speed stage faster, Spear Mastery keeps its +20% Critical Rate, and CoT2 third-job attacks remove Polearm's normal swing advantage."
+    ]
+   ]
+  },
+  {
+   "p": "**Three questions settle the choice for most players:**"
+  },
+  {
+   "ol": [
+    "**Do you want +20 Movement Speed or +20% Critical Rate?** Choose Polearm for movement or Spear for crit.",
+    "**Do you prefer faster attacks?** Spear spends less time in each attack animation, which can reduce the hits you take while face tanking.",
+    "**How easy is the next weapon to get?** Weaponcrafting offers Janitor's Mop at skill level 5, Axe Pole Arm at 7, Crescent Polearm at 8, and The Nine Dragons at 10. It has no spear recipe, but a cheap scrolled spear from the Free Market can still flip the decision."
+   ]
+  },
+  {
+   "note": "**What +20 Speed means:** Blue Carzen Boots add 4 Speed, five Lesser Speed scrolls add 5, and White Napoleon adds 3. That is +12 from both gear slots, while Polearm Mastery gives +20 without using either slot."
+  },
+  {
+   "h3": "Level 30 comparison"
+  },
+  {
+   "p": "This uses 138 STR, 30 DEX, an equal-level target with 0 WDEF, max Power Strike, and no second-job Mastery or Booster yet."
+  },
+  {
+   "table": [
+    [
+     "Weapon",
+     "W.ATK / Speed",
+     "Power Strike damage",
+     "Average cast",
+     "Casts per minute",
+     "Damage per minute"
+    ],
+    [
+     "Forked Spear",
+     "52 / 7",
+     "171-828",
+     "406",
+     "70.4",
+     "About 28,600"
+    ],
+    [
+     "Mithril Pole Arm",
+     "55 / 8",
+     "180-876",
+     "474",
+     "67.0",
+     "About 31,700"
+    ]
+   ]
+  },
+  {
+   "p": "**Polearm is about 11% ahead at level 30 with these shop weapons.** It has 3 more W.ATK and gets the stronger action more often. Your result changes with scrolls and whether your weakest hit reaches a one-shot or two-shot breakpoint."
+  },
+  {
+   "h3": "Level 70 comparison"
+  },
+  {
+   "p": "This gives both families 337 STR, 70 DEX, 107 total W.ATK, max matching Mastery and Booster, and the same Lesser-scroll standard."
+  },
+  {
+   "table": [
+    [
+     "Weapon path",
+     "Mastery bonus",
+     "Power Strike damage",
+     "Average cast",
+     "Casts per minute",
+     "Damage per minute"
+    ],
+    [
+     "Redemption Spear",
+     "+20% Critical Rate",
+     "1,654 - 3,754",
+     "2,691",
+     "81.0",
+     "217,852"
+    ],
+    [
+     "The Gold Dragon Polearm",
+     "+20 Speed",
+     "1,654-3,754",
+     "2,927",
+     "75.9",
+     "About 222,200"
+    ]
+   ]
+  },
+  {
+   "p": "**Polearm is only about 2.0% ahead in this level 70 Power Strike test.** Spear Mastery's crit and Redemption's faster speed erase most of the swing advantage. Piercing Crusher uses the same 2.5× multiplier for spear and polearm. Grummash's saved build finishes on Spear."
+  },
+  {
+   "img": "ffb4b913ac8eed.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Spear thrust: Spears and polearms share this hit zone. Spear gets its stronger damage roll on this action."
+  },
+  {
+   "img": "643d2ef9dd6ab3.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Polearm swing: Polearm gets its stronger damage roll on this action."
+  },
+  {
+   "h2": "Weapon Reach (Hitbox)"
+  },
+  {
+   "p": "A melee hit lands inside a box in front of you. That box is the hitbox, and weapon reach is how far forward it goes. Spears and polearms have five basic attacks, three swings and two thrusts, each with its own box. Each attack uses one of the five at random, so the number below is the average reach of one basic attack."
+  },
+  {
+   "img": "b3ffb566b69f1e.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Forked Spear, Overhead swing. Any monster whose body touches the blue box gets hit: 51-133 px in front of you, from 24 px below your feet to 120 px above them."
+  },
+  {
+   "p": "**Spears and polearms have the longest melee reach of any weapon.** They average 122 px per basic attack. Scimitar, Lion's Fang, Sparta, and Doombringer come next at 102 px, and two-handed axes and blunt weapons average 90 px. Spear and polearm share the same hit zones, so reach does not change which one you pick. Reach has a direct effect on DPS in practice. Longer reach makes mobs easier to hit from a distance and keeps them from getting close enough to hit you. See the full comparison in the weapon reach guide."
+  },
+  {
+   "p": "**122 px avg reach**"
+  },
+  {
+   "p": "[[img:f3869975932f3f.png]]Forked Spear (Lv 30) [[img:f247063d20f5c3.png]]Mithril Pole Arm (Lv 30) [[img:860097d842222a.png]]Axe Pole Arm (Lv 35) [[img:c010785d5c46c8.png]]Nakamaki (Lv 35) [[img:3761e9c40455d6.png]]Crescent Polearm (Lv 40) [[img:b27daec6a576cf.png]]Zeco (Lv 40) [[img:368118a25bc187.png]]Serpent's Tongue (Lv 50) [[img:b921ea3c374aeb.png]]The Nine Dragons (Lv 50) [[img:d0afc047639736.png]]Holy Spear (Lv 60) [[img:b93771c52d1c4b.png]]Skylar (Lv 60) [[img:d209a6d4305377.png]]Redemption (Lv 70) [[img:6ab7ced992a737.png]]The Gold Dragon (Lv 70)"
+  },
+  {
+   "h3": "Which Spearman skills use weapon reach?"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Uses weapon reach?",
+     "Hitbox"
+    ],
+    [
+     "[[img:f3869975932f3f.png]]Basic attack",
+     "Yes",
+     "One of your weapon's five attacks, picked at random."
+    ],
+    [
+     "[[img:7700d0a87ede5e.png]]Power Strike",
+     "Yes",
+     "The same five attacks and boxes as your basic attack."
+    ],
+    [
+     "[[img:b5a4eaed502bda.png]]Slash Blast",
+     "Yes",
+     "The same five attacks and boxes as your basic attack. Once a monster is inside that box, Slash Blast's additional hits can reach mobs 130 px in front, or 150 px from skill Lv 11, with any weapon."
+    ],
+    [
+     "[[img:b08982d8aef82c.png]]Rush",
+     "No",
+     "Rush has its own box: 200 px in front of you and 50 px tall, or 220 px from skill Lv 11."
+    ],
+    [
+     "[[img:04935bdb2eab63.png]]Final Attack",
+     "Yes, its own two attacks",
+     "A Final Attack hit uses a wide swing or a deep thrust, picked at random, and each has its own box. They reach 124-144 px, depending on the weapon. It picks its own target inside that box, up to 1 monster."
+    ]
+   ]
+  },
+  {
+   "h2": "Mastery and Booster Explained"
+  },
+  {
+   "p": "Mastery raises your minimum damage. Booster makes you attack faster. Both only work with their matching weapon family."
+  },
+  {
+   "img": "b3584d87d68f35.png",
+   "w": 130,
+   "h": 143
+  },
+  {
+   "p": "At max, both Masteries raise the weapon's Mastery level to 10. This lifts the STR term used by the weakest damage roll, so your minimum hit rises much more than your maximum. That is exactly what a guaranteed one-shot or two-shot build wants."
+  },
+  {
+   "p": "Booster shifts the matching weapon two Attack Speed stages from skill Lv1. Higher skill levels increase the duration and lower the HP and MP cost."
+  },
+  {
+   "note": "**Level 70 Booster example:** Grummash's Redemption build uses 70.4 Power Strikes per minute without Booster and 81.0 with Booster. That is 15.1 % more attacks. Average damage per cast stays at 2,691, while one-minute damage rises from about 189,439 to 217,852."
+  },
+  {
+   "img": "98f228a63d1a10.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Spear Booster: Shamana's skill animation. Skill Lv1 already gives the full two-stage speed increase."
+  },
+  {
+   "h2": "Final Attack Explained"
+  },
+  {
+   "p": "Final Attack is a toggle. When it is active and an attack skill leaves a target in range, the matching weapon version can add a second attack."
+  },
+  {
+   "img": "bde9757987cb75.png",
+   "w": 130,
+   "h": 90
+  },
+  {
+   "p": "**50%** Proc chance"
+  },
+  {
+   "p": "**260%** Single-target damage"
+  },
+  {
+   "p": "**10%** Damage absorbed as HP"
+  },
+  {
+   "p": "**25%** Max-HP absorption cap"
+  },
+  {
+   "p": "At max, the follow-up deals 260% damage to one mob and absorbs 10% of the damage dealt as HP. The HP gained per proc cannot exceed 25% of your Max HP or the enemy's Max HP. Unlike Fighter Final Attack, Spearman Final Attack does not mob."
+  },
+  {
+   "p": "Leave it on when the extra hit removes a Power Strike or Slash Blast from the kill. Turn it off when your first skill already guarantees the kill, because an unnecessary follow-up costs animation time even though the proc itself does not consume more MP."
+  },
+  {
+   "p": "Each FA proc has its own attack animation, and you can't attack again until it ends: about 0.7 seconds with Booster. Spearman's Final Attack: Spear and Final Attack: Polearm only hit 1 mob and are always a damage boost if you're using Power Strike. They may be a damage boost when using Slash Blast, depending on the number of targets. Spearman's FA is also unique: each proc heals you for 10% of the damage it deals."
+  },
+  {
+   "table": [
+    [
+     "You attack with",
+     "Mobs in front",
+     "Max Final Attack on vs off"
+    ],
+    [
+     "[[img:7700d0a87ede5e.png]]Power Strike",
+     "any",
+     "3% more"
+    ],
+    [
+     "[[img:b5a4eaed502bda.png]]Slash Blast",
+     "2",
+     "3% more"
+    ],
+    [
+     "[[img:b5a4eaed502bda.png]]Slash Blast",
+     "3",
+     "8% less"
+    ],
+    [
+     "[[img:b5a4eaed502bda.png]]Slash Blast",
+     "4",
+     "14% less"
+    ]
+   ]
+  },
+  {
+   "p": "Final Attack costs no MP, so it also saves potions: about 50 % more damage per MP against one mob and 25 % against four. Keep it on when MP is your limit, even against groups."
+  },
+  {
+   "img": "a4a7c63ad71701.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Final Attack: Spear: one target, heavy follow-up damage, and HP absorption."
+  },
+  {
+   "h2": "Iron Will and Rush Explained"
+  },
+  {
+   "p": "These are Spearman's survivability and map-control tools. Neither one replaces good HP potions or 100% hit rate."
+  },
+  {
+   "img": "27b4e7875ea182.png",
+   "w": 130,
+   "h": 110
+  },
+  {
+   "h3": "Iron Will"
+  },
+  {
+   "p": "Iron Will is self-only in CoT2. At max skill level it gives +50 WDEF and a 35% chance to ignore knockback for 300 seconds. The WDEF lowers eligible physical damage; it does nothing against magic damage. Ignoring knockback keeps you planted close enough to continue swinging. Level it after Rush because it is the weakest part of the Spearman build."
+  },
+  {
+   "h3": "Rush"
+  },
+  {
+   "p": "Rush 1 moves 130 distance, attacks and knocks back up to four mobs, costs 40 MP, and has a 1-second cooldown. Rush reaches 150 distance at skill Lv10. At max skill level it deals 80% damage and costs 20 MP. You cannot be knocked back during the Rush itself."
+  },
+  {
+   "note": "**Simple grinding loop:** Max Booster and Iron Will both last 300 seconds, so recast them together. Final Attack is a toggle. Rush groups mobs, then Power Strike handles one target and Slash Blast handles several."
+  },
+  {
+   "img": "9dd8dc91c7f1c6.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Iron Will: +50 WDEF and 35% knockback ignore at max."
+  },
+  {
+   "img": "85e444839580cf.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Rush: Shamana pushes mobs forward with the Spearman version of the skill."
+  },
+  {
+   "h2": "W.ATK or Critical Rate on gloves?"
+  },
+  {
+   "p": "These numbers use Grummash's realistic level 70 Spearman build and five successful Lesser glove scrolls. Both options use the same five slots."
+  },
+  {
+   "h3": "5x Gloves Attack Scroll: Lesser"
+  },
+  {
+   "p": "**+5 W.ATK**\n102 to 107 total W.ATK\nAbout 4.9% more expected damage."
+  },
+  {
+   "h3": "5x Gloves Crit. Rate Scroll: Lesser"
+  },
+  {
+   "p": "**+5% Critical Rate**\n34% to 39% Critical Rate\nAbout 1.19% more expected damage."
+  },
+  {
+   "note": "**Pick Attack.** The five-scroll Attack setup deals about 3.66% more expected damage than the Critical Rate setup on this build."
+  },
+  {
+   "p": "Spear Mastery raises this build to 34% Critical Rate, but its Critical Damage is still 26%. More Critical Rate has a small effect."
+  },
+  {
+   "p": "**The ratio is the same at every grade.** Lesser gives +1 W.ATK or +1% Critical Rate (+2 M.ATK), Intermediate +2/+2% (+4 M.ATK), Greater +3/+3% (+6 M.ATK), and Chaos +4/+4% (+8 M.ATK). Matching grades have the same success and destruction rates."
+  },
+  {
+   "p": "**W.ATK also helps guaranteed kills.** It raises every physical hit, including your weakest normal roll and every critical hit. Critical Rate changes how often a critical occurs, so it cannot improve the weakest non-critical roll."
+  },
+  {
+   "h2": "Find Your Build's Best Training Map with Training Advisor"
+  },
+  {
+   "p": "**Danger measures how hard a mob hits you for: under 10% of your HP is Safe, 10-24% is Caution, 25-49% is Danger, and 50%+ is Lethal.**"
+  },
+  {
+   "p": "The example builds above use Power Strike with Final Attack off. Their short lists include only 100% hit targets that the minimum damage roll kills in one or two hits, ranked by EXP per required hit."
+  },
+  {
+   "note": "**Guaranteed Power Strike kills**\nGuaranteed 1-shot: Minimum damage per hit ≥ Mob HP\nGuaranteed 2-shot: 2 × Minimum damage per hit ≥ Mob HP\n**Minimum damage is your weakest possible hit.** If it is at least the mob's HP, every Power Strike kills in one hit, even when the game gives you the lowest damage roll. A guarantee also requires 100% hit rate because a miss deals no damage."
+  },
+  {
+   "ol": [
+    "Open your saved build in Character Builder and enter your real level, AP, equipment, scrolls, skill levels, HP, MP, WDEF, and MDEF.",
+    "Choose **Power Strike**. Turn Final Attack on only when you plan to train with it.",
+    "Open **By mob** and enable **Show min damage per hit**. Check Hit Rate, Min / hit, Hits / kill, and MP / kill.",
+    "Open **By map** and compare EXP, Danger, and the walk to the nearest potion shop."
+   ]
+  },
+  {
+   "p": "Temporary potion and buff scenarios change the calculation without changing the saved build. This makes it easy to compare no potion, Accuracy potion, Attack Power potion, Spear, Polearm, and Final Attack results."
+  },
+  {
+   "img": "d00113d6418e16.png",
+   "w": 360,
+   "h": 367,
+   "cap": "Grummash's Spearman in Training Advisor: personalized hit rate, damage, kills, MP use, and EXP per hour for the equipped build."
+  },
+  {
+   "h2": "Recommended Potions"
+  },
+  {
+   "p": "Spearmen are MP efficient, but Power Strike, Slash Blast, Booster, and Rush still drain a new player's wallet. Buy the most cost-efficient potions."
+  },
+  {
+   "img": "f29e9421ae47e5.png",
+   "w": 130,
+   "h": 147
+  },
+  {
+   "p": "**BEST TO BUY** Best HP or MP recovered per meso"
+  },
+  {
+   "p": "[[img:be80aa4791c684.png]] **Red Potion** 50 mesos · 100 HP 2 HP per meso [[img:39a28ad40190a6.png]] **Fried Chicken** 60 mesos · 120 HP 2 HP per meso [[img:51e2250795d8f6.png]] **Meat** 80 mesos · 160 HP 2 HP per meso [[img:da1e5c881a1df6.png]] **Orange** 50 mesos · 50 MP 1 MP per meso [[img:d59bc967011b87.png]] **Lemon** 150 mesos · 150 MP 1 MP per meso"
+  },
+  {
+   "p": "**Situational** Buy when the buff reaches a useful breakpoint"
+  },
+  {
+   "p": "[[img:4e15182d2a8a6e.png]] **Sniper Potion** 500 mesos · +5 ACC for 10 min Use to remove misses [[img:e18fe0a27cd32a.png]] **Supreme Sniper Potion** 600 mesos · +7 ACC for 15 min Best shop ACC buff [[img:8d7b05272e3e8b.png]] **Warrior Potion** 500 mesos · +10 Attack Power for 10 min Use for a damage breakpoint"
+  },
+  {
+   "p": "**DON'T BUY** Worse recovery per meso than the choices above"
+  },
+  {
+   "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 mesos · 500 HP 1.43 HP per meso [[img:d19cbf8225851d.png]] **Blue Potion** 220 mesos · 200 MP 0.91 MP per meso"
+  },
+  {
+   "p": "Lemon was the most-purchased item in both CoT1 and CoT2 for good reason. It matches Orange at 1 MP per meso, restores three times as much MP per use, and is sold in every major training region."
+  },
+  {
+   "note": "**Level 70 cost example:** Grummash's Redemption build uses about 81 Power Strikes per minute. At 12 MP each, that is about 972 MP, or 6.5 Lemons and 972 mesos per minute before Booster, Iron Will, Rush, HP food, or misses."
+  },
+  {
+   "p": "Accuracy potions pay for themselves when they remove misses or unlock a faster map. Test the potion in Training Advisor first. If your hit rate stays at 100% without it, spend the mesos elsewhere."
+  },
+  {
+   "guide": "best-buy-shop-efficiency",
+   "text": "Compare shop potion efficiency"
+  },
+  {
+   "h2": "Common Spearman Mistakes"
+  },
+  {
+   "p": "Most bad Spearman builds come from splitting weapon SP, trusting average damage instead of weak hits, or burning mesos on Rush and potions without checking the map result."
+  },
+  {
+   "img": "038a60ab262953.png",
+   "w": 130,
+   "h": 126
+  },
+  {
+   "ol": [
+    "**Splitting SP between Spear and Polearm.** Mastery, Booster, and Final Attack only work with the matching family. Pick one main path.",
+    "**Assuming Polearm always wins because its average multiplier is higher.** Weapon speed, crit, scrolls, and guaranteed kill breakpoints can change the result. Compare both weapons in Character Builder.",
+    "**Moving to a higher-level map with poor hit rate.** A miss still consumes the attack's HP and MP. Look for mobs where you can keep 90% to 100% hit rate.",
+    "**Spamming Rush.** Rush 1 is useful, but it costs 40 MP. Early spam can empty your MP bar and wallet.",
+    "**Leaving Final Attack on without testing it.** The follow-up helps when it finishes a mob and wastes animation time when the first hit already guarantees the kill.",
+    "**Expecting Iron Will to buff the party.** It only buffs the Spearman. Hyper Body is not available until third job.",
+    "**Buying every armor upgrade while short on potions.** A weapon or Accuracy breakpoint matters more than a small WDEF increase. Keep enough mesos for HP food and Lemons."
+   ]
+  },
+  {
+   "h2": "Sample Level 70 Spearman Build by Grummash"
+  },
+  {
+   "p": "This is a realistic Spear endpoint with every equipment slot filled and scrolled with Lesser scrolls. It shows what the guide's AP and SP path is building toward."
+  },
+  {
+   "img": "2b4add3c43f3bf.png",
+   "w": 130,
+   "h": 134
+  },
+  {
+   "h3": "Equipment and scrolls"
+  },
+  {
+   "table": [
+    [
+     "Slot",
+     "Item",
+     "Useful base stats",
+     "Scrolls",
+     "Source example"
+    ],
+    [
+     "Hat",
+     "[[img:0798a9c454e6a7.png]]Mithril Planet",
+     "+7 DEX, +7 ACC, 70 WDEF, 29 MDEF, +10 MP",
+     "Hat Accuracy Scroll: Lesser ×7",
+     "Check the item page"
+    ],
+    [
+     "Earrings",
+     "[[img:ea67f3099d0314.png]]Metal Silver Earrings",
+     "+6% Critical Damage, 49 MDEF",
+     "Earring STR Scroll: Lesser ×5",
+     "Check the item page"
+    ],
+    [
+     "Cape",
+     "[[img:fcb432c862ec89.png]]Red Gaia Cape",
+     "+4 STR, +5 ACC",
+     "Cape STR Scroll: Lesser ×5",
+     "Free Market"
+    ],
+    [
+     "Top",
+     "[[img:4493a9a6e2d173.png]]Bronze Platine",
+     "+7 STR, 95 WDEF",
+     "Topwear HP Scroll: Lesser ×7",
+     "Check the item page"
+    ],
+    [
+     "Weapon",
+     "[[img:d209a6d4305377.png]]Redemption",
+     "95 W.ATK, Speed 7",
+     "Spear Attack Scroll: Lesser ×7",
+     "Check the item page or Free Market"
+    ],
+    [
+     "Gloves",
+     "[[img:8c222e88833d66.png]]Bronze Husk",
+     "+7 STR, +1 ACC, +4% Critical Rate",
+     "Gloves Attack Scroll: Lesser ×5",
+     "Check the item page"
+    ],
+    [
+     "Bottom",
+     "[[img:1725335df5c70a.png]]Bronze Platine Pants",
+     "+7 STR, 73 WDEF",
+     "Bottomwear HP Scroll: Lesser ×7",
+     "Check the item page"
+    ],
+    [
+     "Shoes",
+     "[[img:f0a3dc005937f7.png]]Blue Carzen Boots",
+     "+3 DEX, +7 Avoidability, +4 Speed",
+     "Shoes Speed Scroll: Lesser ×5",
+     "Free Market"
+    ]
+   ]
+  },
+  {
+   "h3": "Final stats"
+  },
+  {
+   "p": "**337** Total STR"
+  },
+  {
+   "p": "**70** Total DEX"
+  },
+  {
+   "p": "**140** Total Accuracy"
+  },
+  {
+   "p": "**107** Total W.ATK"
+  },
+  {
+   "table": [
+    [
+     "Category",
+     "Final value"
+    ],
+    [
+     "Base AP",
+     "302 STR / 60 DEX / 4 INT / 4 LUK"
+    ],
+    [
+     "Total stats",
+     "337 STR / 70 DEX / 4 INT / 4 LUK"
+    ],
+    [
+     "Offense",
+     "107 W.ATK, 140 ACC, 34 % Critical Rate, + 26 % Critical Damage"
+    ],
+    [
+     "HP and MP",
+     "3,022 HP / 1,143 MP"
+    ],
+    [
+     "Defense",
+     "496 WDEF with Iron Will, 92 MDEF, 24 Avoidability"
+    ],
+    [
+     "Physical EHP",
+     "4,330 against the tier-list physical reference"
+    ],
+    [
+     "Redemption speed",
+     "Speed 7 before Booster; Speed 5 while Spear Booster is active"
+    ]
+   ]
+  },
+  {
+   "h3": "Damage and MP"
+  },
+  {
+   "p": "These are raw equal-level, 0 WDEF results with max Spear Mastery and Booster. Final Attack is excluded so its random follow-up does not inflate the baseline."
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Raw hit range",
+     "Expected damage per cast",
+     "One-minute baseline",
+     "Damage/MP"
+    ],
+    [
+     "Power Strike",
+     "1,654 - 3,754",
+     "2,691 with crit",
+     "81.0 casts, 217,852 damage",
+     "224.2"
+    ],
+    [
+     "Slash Blast, four targets",
+     "827 - 1,877 per target",
+     "5,381 across four targets",
+     "About 435,700 damage",
+     "448.4"
+    ]
+   ]
+  },
+  {
+   "p": "**With Final Attack on:** Power Strike reaches 224,676 damage per minute on one target, from 55.8 casts and 670 MP. Each proc adds its own swing before your next attack, so you cast less and spend less MP. This is the number the level 70 DPS rankings use."
+  },
+  {
+   "h2": "At Level 70: Become a Dragon Knight"
+  },
+  {
+   "p": "Spearman advances to Dragon Knight through Tylus in El Nath. Third job and El Nath are not in the launch build. This guide stops before third-job SP. Finish the second-job build, then plan around the Dragon Knight skill book."
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/spearman-class-guide",
+ "hash": "222f75ab1b01"
+}

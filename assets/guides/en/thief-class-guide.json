@@ -1,0 +1,903 @@
+{
+ "title": "MapleStory Classic Thief Build and Leveling Guide: Lv 1-30",
+ "intro": "Thieves train under the Dark Lord beneath Kerning City. Lucky Seven is the faster level 10-30 build for future Assassins and Bandits. Many Bandits will play as Sindits, then move their first-job SP into dagger skills after the second-job advancement with SP reset.",
+ "hero": "78d0c432fdee54.png",
+ "minutes": null,
+ "blocks": [
+  {
+   "p": "**Pros**"
+  },
+  {
+   "ul": [
+    "Lucky Seven: innate skill mastery, long range, can jump and attack.",
+    "Excellent at KS-ing due to ranged attacks.",
+    "High Evasion from LUK and Nimble Body."
+   ]
+  },
+  {
+   "p": "**Cons**"
+  },
+  {
+   "ul": [
+    "No mobbing skill until 3rd job realistically.",
+    "Claw punching stays in Classic World, requiring you to position yourself further from mobs.",
+    "Stronger throwing stars are expensive; Tobis/Steelys are not a realistic early purchase.",
+    "Likely super expensive scrolled Claws in FM."
+   ]
+  },
+  {
+   "h2": "Understanding Thief Accuracy"
+  },
+  {
+   "img": "bc5910faf54af0.png",
+   "w": 110,
+   "h": 166
+  },
+  {
+   "p": "Understanding accuracy is the core of any class guide and training recommendation. A miss still consumes MP and throwing stars... and you can't afford that with an intense lack of potions and mesos in the early game."
+  },
+  {
+   "note": "**Base Accuracy**\nfloor((1.2 x Total DEX + 2 x Level + 0.6 x Total LUK) x 0.25 + 15)\nTotal Accuracy is Base Accuracy plus direct Accuracy from Nimble Body, gear, or potions."
+  },
+  {
+   "p": "**+0.50** Base ACC per level"
+  },
+  {
+   "p": "**+0.30** Base ACC per DEX"
+  },
+  {
+   "p": "**+0.15** Base ACC per LUK"
+  },
+  {
+   "p": "**+1.00** Total ACC per direct ACC"
+  },
+  {
+   "p": "**DEX is not your only Accuracy stat.** Character level and LUK also raise Base Accuracy, while max Nimble Body adds 15 direct Accuracy. Every mob has Avoidability, and fighting mobs above your level raises the Accuracy requirement further. A \"bad\" training map can turn good simply by leveling up or raising more LUK."
+  },
+  {
+   "note": "**Hit rate: level gap and mob Avoidability**\nL = max(0, Mob Level - Your Level)\nA = Total Accuracy x 100 / (10 x L + 255)\nD = A - Mob Avoidability\nA mob with higher Avoidability is harder to hit. A positive level gap also reduces the value of your Accuracy before the game checks the mob's Avoidability."
+  },
+  {
+   "h3": "Real Accuracy examples"
+  },
+  {
+   "p": "These examples use the current mob Avoidability values. The 100% column means every attack connects."
+  },
+  {
+   "table": [
+    [
+     "Mob",
+     "Mob level",
+     "Mob Avoid",
+     "Your level",
+     "100% hit",
+     "Sample build totals"
+    ],
+    [
+     "[[img:34dcba7b3807fe.png]]Bubbling",
+     "15",
+     "9",
+     "15",
+     "31 ACC",
+     "41 ACC (15 DEX / 76 LUK)"
+    ],
+    [
+     "[[img:ae64823f427bc0.png]]Stirge",
+     "20",
+     "13",
+     "20",
+     "44 ACC",
+     "49 ACC (21 DEX / 99 LUK)"
+    ],
+    [
+     "[[img:36750484773e65.png]]Zombie Mushroom",
+     "24",
+     "14",
+     "20",
+     "54 ACC",
+     "49 ACC: not enough (21 DEX / 99 LUK)"
+    ],
+    [
+     "[[img:36750484773e65.png]]Zombie Mushroom",
+     "24",
+     "14",
+     "25",
+     "47 ACC",
+     "65 ACC (27 DEX / 120 LUK)"
+    ]
+   ]
+  },
+  {
+   "p": "That Zombie Mushroom comparison shows the difference level makes. The level 20 example build can miss even though its build is fine for Stirges. Five levels later, the same mob needs seven less ACC and Nimble Body has gained another eight skill levels."
+  },
+  {
+   "h2": "Levels 1-10: Beginner to Thief"
+  },
+  {
+   "p": "Follow the Maple Island quests through level 10, take the ship to Victoria Island, and go to the Dark Lord beneath the Fusion Jazz Bar in Kerning City. MSClassic World removed every stat requirement for first-job advancement."
+  },
+  {
+   "img": "fbe95061f04380.png",
+   "w": 105,
+   "h": 117
+  },
+  {
+   "h3": "Beginner skill build"
+  },
+  {
+   "p": "[[img:efe346ff3ac88e.png]] **Three Snails 3**\nRanged shell attack"
+  },
+  {
+   "p": "[[img:d1b8185bc6bf24.png]] **Recovery 3**\nShort HP recovery"
+  },
+  {
+   "p": "[[img:edc2244a5bda10.png]] **Nimble Feet 3**\nShort Speed buff"
+  },
+  {
+   "p": "You get 9 Beginner SP by level 10, enough to max all three skills at 3/3/3. Level them in whichever order you prefer."
+  },
+  {
+   "note": "**Use the Club through level 4, then switch to Razor at level 5.** The Club has the best chance of saving a basic attack against early Maple Island mobs. Razor is the better weapon once you can equip it. After becoming a Thief, equip Beginner's Garnier and Subi Throwing-Stars."
+  },
+  {
+   "h3": "AP allocation: levels 1-10"
+  },
+  {
+   "p": "The sample below starts at 4 STR / 5 DEX / 4 INT / 12 LUK. Put every AP gained from levels 2-10 into LUK. You do not need DEX to become a Thief."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "AP gained",
+     "Spend",
+     "Base stats after spending",
+     "Total AP"
+    ],
+    [
+     "1",
+     "25 starting AP",
+     "Starting stats",
+     "4 STR / 5 DEX / 4 INT / 12 LUK",
+     "25"
+    ],
+    [
+     "2",
+     "+5",
+     "LUK +5",
+     "4 STR / 5 DEX / 4 INT / 17 LUK",
+     "30"
+    ],
+    [
+     "3",
+     "+5",
+     "LUK +5",
+     "4 STR / 5 DEX / 4 INT / 22 LUK",
+     "35"
+    ],
+    [
+     "4",
+     "+5",
+     "LUK +5",
+     "4 STR / 5 DEX / 4 INT / 27 LUK",
+     "40"
+    ],
+    [
+     "5",
+     "+5",
+     "LUK +5",
+     "4 STR / 5 DEX / 4 INT / 32 LUK",
+     "45"
+    ],
+    [
+     "6",
+     "+5",
+     "LUK +5",
+     "4 STR / 5 DEX / 4 INT / 37 LUK",
+     "50"
+    ],
+    [
+     "7",
+     "+5",
+     "LUK +5",
+     "4 STR / 5 DEX / 4 INT / 42 LUK",
+     "55"
+    ],
+    [
+     "8",
+     "+5",
+     "LUK +5",
+     "4 STR / 5 DEX / 4 INT / 47 LUK",
+     "60"
+    ],
+    [
+     "9",
+     "+5",
+     "LUK +5",
+     "4 STR / 5 DEX / 4 INT / 52 LUK",
+     "65"
+    ],
+    [
+     "10",
+     "+5",
+     "LUK +5",
+     "**4 STR / 5 DEX / 4 INT / 57 LUK**",
+     "**70**"
+    ]
+   ]
+  },
+  {
+   "h3": "Level 10 Thief example build"
+  },
+  {
+   "img": "7288dd21424dd4.png",
+   "w": 110,
+   "h": 173
+  },
+  {
+   "p": "4 base STR / 5 base DEX / 4 base INT / 57 base LUK\n4 STR / 5 DEX / 4 INT / 60 LUK / 25 total W.ATK / 30 ACC with gear"
+  },
+  {
+   "p": "**Skills:** Lucky Seven 1. Three Snails, Recovery, and Nimble Feet 3."
+  },
+  {
+   "p": "[[img:0b5577c5eb5bd4.png]]Beginner's Garnier [[img:49136f0c4908d9.png]]Subi Throwing-Stars [[img:3ffd417559f412.png]]Black Ghetto Beanie [[img:2832fe6032f890.png]]Black Cloth Vest [[img:b28464f5d1c174.png]]Black Cloth Pants [[img:0d868cf83e4f11.png]]Blue Gidder Shoes"
+  },
+  {
+   "note": "Use Beginner's Garnier with Subis. Dr. Faymus sells Subis, and Don Hwang sells the level 10 Thief armor in Kerning City."
+  },
+  {
+   "p": "**Best guaranteed Lucky Seven targets**"
+  },
+  {
+   "p": "[[img:2884cdb372bd03.png]] **Blue Snail** 100% hit · guaranteed 1-cast · 4 EXP/cast [[img:ca2dec0d81316e.png]] **Red Snail** 100% hit · guaranteed 2-cast · 4 EXP/cast"
+  },
+  {
+   "h2": "Levels 10-30: Thief skill build and leveling"
+  },
+  {
+   "img": "d46094244fa2cd.png",
+   "w": 110,
+   "h": 187
+  },
+  {
+   "p": "Use Lucky Seven for the fast path. One point in Keen Eyes gives +50 throwing range early, then max Lucky Seven before finishing range and Accuracy."
+  },
+  {
+   "h3": "Recommended citizenship at level 12"
+  },
+  {
+   "p": "**Kerning City is the best citizenship for a Thief.** Citizenship opens at level 12. Sign up in Kerning City Civic Center so your contribution starts building early."
+  },
+  {
+   "p": "At level 22 and Helpful Stranger, Max sells Wolbi Throwing-Stars with +17 W.ATK for 1,000 mesos. Helpful Stranger is the third citizenship grade and asks for 2,000 contribution, which the Kerning City board awards over about two weeks of dailies and weekly donations. Later citizenship grades add Overall Armor LUK Scroll: Lesser and Gloves Attack Scroll: Lesser. Citizenship discounts apply to eligible prices in your active town."
+  },
+  {
+   "h3": "Level 30 Thief skill target"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Target",
+     "Result"
+    ],
+    [
+     "[[img:54aa93a576b0b5.png]]Nimble Body",
+     "15 / 15",
+     "+15 Accuracy and +15 Evasion."
+    ],
+    [
+     "[[img:59ede824adb859.png]]Keen Eyes",
+     "15 / 15",
+     "+200 throwing range; 400 px total."
+    ],
+    [
+     "[[img:15c4a6d43a4751.png]]Disorder",
+     "3 / 20",
+     "Opens Dark Sight; enemy Attack Power -7 and WDEF -1 for 12 sec."
+    ],
+    [
+     "[[img:f5ea045c9461a9.png]]Dark Sight",
+     "8 / 20",
+     "Travel utility; 43 MP and -13 Speed while active."
+    ],
+    [
+     "[[img:3c37dc4ebd42ec.png]]Double Stab",
+     "0 / 20",
+     "Skipped on the Lucky Seven / Sindit build."
+    ],
+    [
+     "[[img:8b4eddf653e003.png]]Lucky Seven",
+     "20 / 20",
+     "Two 140% lines for 16 MP and two stars."
+    ]
+   ]
+  },
+  {
+   "h3": "Thief SP allocation: levels 10-30"
+  },
+  {
+   "note": "Running result: L7 = Lucky Seven, NB = Nimble Body, KE = Keen Eyes, DIS = Disorder, DS = Dark Sight."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Spend",
+     "Running result",
+     "Reason"
+    ],
+    [
+     "10",
+     "Lucky Seven +1",
+     "L7 1",
+     "Starts ranged training."
+    ],
+    [
+     "11",
+     "Nimble Body +3",
+     "L7 1, NB 3",
+     "Opens Keen Eyes."
+    ],
+    [
+     "12",
+     "Keen Eyes +1, Lucky Seven +2",
+     "L7 3, NB 3, KE 1",
+     "+50 range is immediate QoL."
+    ],
+    [
+     "13-17",
+     "Lucky Seven +15",
+     "L7 18, NB 3, KE 1",
+     "Raises one-target damage."
+    ],
+    [
+     "18",
+     "Lucky Seven +2, Keen Eyes +1",
+     "L7 20, NB 3, KE 2",
+     "Finishes Lucky Seven."
+    ],
+    [
+     "19-22",
+     "Keen Eyes +12",
+     "L7 20, NB 3, KE 14",
+     "Extends throwing range."
+    ],
+    [
+     "23",
+     "Keen Eyes +1, Nimble Body +2",
+     "L7 20, NB 5, KE 15",
+     "Finishes range."
+    ],
+    [
+     "24-26",
+     "Nimble Body +9",
+     "L7 20, NB 14, KE 15",
+     "Raises Accuracy and Evasion."
+    ],
+    [
+     "27",
+     "Nimble Body +1, Disorder +2",
+     "L7 20, NB 15, KE 15, DIS 2",
+     "Finishes the passive."
+    ],
+    [
+     "28",
+     "Disorder +1, Dark Sight +2",
+     "L7 20, NB 15, KE 15, DIS 3, DS 2",
+     "Opens Dark Sight."
+    ],
+    [
+     "29-30",
+     "Dark Sight +6",
+     "L7 20, NB 15, KE 15, DIS 3, DS 8",
+     "Uses the remaining SP on travel utility."
+    ]
+   ]
+  },
+  {
+   "p": "Second-job SP cannot be spent on first-job skills, so finish the first-job plan by level 30. Character Builder flags any build that breaks it."
+  },
+  {
+   "note": "The table above is the Lucky Seven order used by Assassins and Sindits. True dagger Bandits can max Dark Sight and Double Stab instead."
+  },
+  {
+   "h3": "Thief AP allocation: levels 10-30"
+  },
+  {
+   "p": "Raise DEX only when the next claw needs it, then put the rest into LUK. The clean sample uses 15 base DEX for Steel Titans, 20 for Steel Igor, 25 for Meba, and 30 for Adamantium Guards. DEX from equipment can lower your base DEX if that equipment is already on."
+  },
+  {
+   "note": "**An item's own stats cannot satisfy its requirement.** You must meet a claw's DEX and LUK requirements before the claw is equipped."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Base STR",
+     "Base DEX",
+     "Base LUK",
+     "AP plan"
+    ],
+    [
+     "10",
+     "4",
+     "5",
+     "57",
+     "No DEX needed for advancement"
+    ],
+    [
+     "15",
+     "4",
+     "15",
+     "72",
+     "DEX +10, LUK +15"
+    ],
+    [
+     "20",
+     "4",
+     "20",
+     "92",
+     "DEX +5, LUK +20"
+    ],
+    [
+     "25",
+     "4",
+     "25",
+     "112",
+     "DEX +5, LUK +20"
+    ],
+    [
+     "30",
+     "4",
+     "30",
+     "132",
+     "DEX +5, LUK +20"
+    ]
+   ]
+  },
+  {
+   "h3": "Why every Thief should level with Lucky Seven"
+  },
+  {
+   "p": "Max Lucky Seven deals two 140% lines for 16 MP and two stars. Max Keen Eyes raises throwing range to 400 px. The extra distance keeps you safer and lets you farm Stirges efficiently. Lucky Seven is the clear level 10-30 skill for both future Assassins and Bandits."
+  },
+  {
+   "note": "**Future Bandit? Level as a Sindit.** Keep Lucky Seven through first job, put your first Bandit SP into Haste, and use Lucky Seven while Savage Blow grows. The live SP Reset price is unconfirmed."
+  },
+  {
+   "img": "0ee0648b915903.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Lucky Seven: the recommended ranged leveling skill for Assassins and Sindits."
+  },
+  {
+   "img": "7b2b8b4a3f84fd.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Double Stab: the melee option for a true dagger Bandit build."
+  },
+  {
+   "p": "A true dagger Bandit can max Double Stab instead if the goal is to finish first job with max Dark Sight. That endpoint is Double Stab 20, Nimble Body 15, Disorder 6, and Dark Sight 20. It gives up Lucky Seven and Keen Eyes, so the level 10-30 grind is slower and fully melee."
+  },
+  {
+   "p": "The other option is to level as a Sindit, become a Bandit, then reset first-job SP immediately or after Savage Blow is ready. Remove Lucky Seven and Keen Eyes, then finish Double Stab and Dark Sight."
+  },
+  {
+   "h3": "How Thief stats affect damage"
+  },
+  {
+   "p": "**LUK is the primary damage stat.** DEX and STR share the smaller secondary damage term. \"Secondary\" means the stat helps damage less than LUK and may be required to equip a weapon."
+  },
+  {
+   "ul": [
+    "**Claws:** later upgrades require LUK and DEX. STR adds secondary damage but is not a claw requirement.",
+    "**DEX daggers:** require LUK and DEX.",
+    "**STR daggers:** require LUK and STR. STR exists to meet the weapon requirement; it does not beat LUK for damage per AP."
+   ]
+  },
+  {
+   "note": "**Physical damage before defense**\nMAX = (1.0 + (LUK x W + STR + DEX) / 100 + Attack Power / 50) x Total W.ATK x Skill %\nMIN = (0.8 + (LUK x W x Mastery + STR + DEX) / 100 + Attack Power / 50) x Total W.ATK x Skill %\nLucky Seven forces W = 3.0 and Mastery = 0.5. Double Stab uses the dagger stab multiplier, W = 2.0. Total W.ATK includes the claw and throwing star for Lucky Seven."
+  },
+  {
+   "p": "For Lucky Seven, one LUK adds 125% more average raw stat damage than one STR or DEX before defense. For Double Stab without Dagger Mastery, one LUK adds about 8% more average raw stat damage than one STR or DEX. Max Dagger Mastery widens that advantage to about 88%."
+  },
+  {
+   "note": "**Do not add STR for a STR dagger unless the weapon upgrade is worth the lost LUK.** Check the exact dagger requirement in the Character Builder. Reef Claw is the strongest clean level 30 dagger. It uses DEX and has no STR requirement."
+  },
+  {
+   "h3": "Recommended equipment: levels 10-30"
+  },
+  {
+   "p": "Upgrade your weapon first. Lucky Seven uses claw W.ATK plus throwing-star W.ATK, so both matter. Armor is mainly for useful stats and surviving contact damage."
+  },
+  {
+   "img": "9ad1221e87a0c9.png",
+   "w": 110,
+   "h": 180
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "Claw and stars",
+     "Useful gear",
+     "Where to get it"
+    ],
+    [
+     "10-14",
+     "[[img:0b5577c5eb5bd4.png]]Beginner's Garnier 10 W.ATK [[img:49136f0c4908d9.png]]Subi +15 W.ATK",
+     "[[img:3ffd417559f412.png]]Black Ghetto Beanie +1 LUK",
+     "Buy Subis from Dr. Faymus and armor from Don Hwang."
+    ],
+    [
+     "15-19",
+     "[[img:6831a10a63590e.png]]Steel Titans 13 W.ATK [[img:49136f0c4908d9.png]]Subi +15 W.ATK",
+     "[[img:5ea2e42fd5d14d.png]]Black Duo +1 LUK, +1% Crit",
+     "Cutthroat Manny sells Steel Titans for 7,000 mesos."
+    ],
+    [
+     "20-24",
+     "[[img:4a161331a7f9b6.png]]Steel Igor 17 W.ATK, +1% Crit [[img:49136f0c4908d9.png]]Subi +15 W.ATK",
+     "[[img:7f56b5c588d585.png]]Black Loosecap +2 LUK",
+     "Manny sells Steel Igor. Don Hwang sells Black Loosecap."
+    ],
+    [
+     "25-29",
+     "[[img:9f75ae1583aa2f.png]]Meba 19 W.ATK, Speed 3 [[img:6b8e85bc094214.png]]Wolbi +17 W.ATK",
+     "[[img:0e98d2d64cb851.png]]Dark Wolfskin +2 LUK, +1% Crit",
+     "Manny sells Meba. Max sells Wolbi after Helpful Stranger."
+    ],
+    [
+     "30",
+     "[[img:7f4e91463e6782.png]]Adamantium Guards 23 W.ATK, +1% Crit DMG [[img:6b8e85bc094214.png]]Wolbi +17 W.ATK",
+     "[[img:b7bfab8434bc30.png]]Dark Guise +3 LUK [[img:b7809c05ccf52e.png]]Steel Sylvia +3 LUK, +2% Crit",
+     "Manny sells Adamantium Guards for 27,600 mesos. Don Hwang sells Dark Guise."
+    ]
+   ]
+  },
+  {
+   "h3": "How good is Meba?"
+  },
+  {
+   "p": "Meba is the only Speed 3 claw from levels 10-30. Adamantium Guards has 4 more W.ATK and +1% Critical Damage, but its Speed 4 attack animation gives Meba room to compete."
+  },
+  {
+   "p": "These results use the same level 30 example build, Wolbi Throwing-Stars, max Lucky Seven, and a target with 0 WDEF. A fully scrolled claw uses seven successful [[img:0082dba2f07247.png]]Claw Attack Scroll: Lesser, adding 7 W.ATK at 100% success."
+  },
+  {
+   "table": [
+    [
+     "Claw",
+     "Total W.ATK",
+     "Expected damage/cast",
+     "DPS",
+     "Damage/MP"
+    ],
+    [
+     "Clean Meba",
+     "36",
+     "451",
+     "677",
+     "28.2"
+    ],
+    [
+     "Meba +7 W.ATK",
+     "43",
+     "539",
+     "809",
+     "33.7"
+    ],
+    [
+     "Clean Adamantium Guards",
+     "40",
+     "502",
+     "695",
+     "31.4"
+    ],
+    [
+     "Adamantium Guards +7 W.ATK",
+     "47",
+     "590",
+     "816",
+     "36.9"
+    ]
+   ]
+  },
+  {
+   "p": "**Meba is much better than its 19 W.ATK suggests.** Clean Adamantium Guards deals only 2.7% more DPS. With seven Lesser scrolls on both claws, Adamantium Guards leads by only 0.9% DPS. Adamantium Guards still wins damage per cast and damage per MP, so it is better when each hit matters more than attack speed."
+  },
+  {
+   "note": "**Do not scroll both unless the scrolls are cheap.** Meba is strong enough to keep at level 30, while Adamantium Guards saves more MP and becomes the better base for heavier scrolling."
+  },
+  {
+   "h3": "Daggers and shields"
+  },
+  {
+   "p": "Daggers are one-handed, so a dagger Thief can equip a shield. Claws cannot. Guard fully blocks eligible physical hits, and its chance is based on the shield's own WDEF."
+  },
+  {
+   "h3": "Pan Lid"
+  },
+  {
+   "p": "44 WDEF and 8.1% Guard before scrolling. No stat requirement."
+  },
+  {
+   "h3": "Nimble Wristguard"
+  },
+  {
+   "p": "54 WDEF and 9.7% Guard before scrolling."
+  },
+  {
+   "h3": "Jurgen Wristguard"
+  },
+  {
+   "p": "54 WDEF, +1 DEX, and 9.7% Guard before scrolling."
+  },
+  {
+   "p": "Shield WDEF scrolls raise both defense and Guard chance. The Wristguards require 12 DEX and 34 LUK."
+  },
+  {
+   "h3": "W.ATK or Critical Rate on gloves?"
+  },
+  {
+   "p": "For the level 30 Lucky Seven sample, five successful Lesser glove scrolls give these expected results:"
+  },
+  {
+   "h3": "5x Gloves Attack Scroll: Lesser"
+  },
+  {
+   "p": "40 to 45 total W.ATK. About **12.5% more expected Lucky Seven damage**."
+  },
+  {
+   "h3": "5x Gloves Crit. Rate Scroll: Lesser"
+  },
+  {
+   "p": "7% to 12% Critical Rate. About **1.0% more expected Lucky Seven damage**."
+  },
+  {
+   "note": "**Pick W.ATK.** On this build, the five-scroll Attack setup deals about 11.3% more expected damage than the Critical Rate setup. W.ATK also improves your weakest hit, which helps guarantee one- and two-cast kills."
+  },
+  {
+   "h3": "Gender and Thief overalls"
+  },
+  {
+   "p": "At level 30, male characters can earn Blue Sauna Robe and female characters can earn Red Sauna Robe from Mr. Wetbottom's quest chain in Sleepywood. Both give +1 STR, DEX, INT, and LUK with 10 scroll slots."
+  },
+  {
+   "p": "[[img:ce6353bc3a96de.png]]Blue Sauna Robe [[img:28e63130664b1b.png]]Red Sauna Robe [[img:b5f669e7b60ead.png]]Overall Armor LUK Scroll: Lesser"
+  },
+  {
+   "p": "Lesser Overall LUK scrolls add +1 LUK at 100%. Intermediate scrolls add +2 LUK at 60%. Tops and bottoms do not have STR, DEX, INT, or LUK scrolls, so a 10-slot overall is much easier to build for damage."
+  },
+  {
+   "note": "**Female Thieves get a stronger class overall at level 35.** Dark Avenger starts with +6 LUK and 10 slots. A Sauna Robe starts with +1 LUK. Male Thieves do not get an equivalent Thief overall at that level."
+  },
+  {
+   "h3": "Training maps: levels 10-30"
+  },
+  {
+   "p": "NiaMeowDB's Training Advisor, called Recommended Training in the Character Builder, is personalized to your character and build. It ranks mobs and maps by EXP per hit or skill cast."
+  },
+  {
+   "p": "Every level 15-30 row below has a 100% hit rate, and every listed spawn dies within two Lucky Seven casts using the build's weakest possible damage. The level 10 build has no Victoria Island map where every spawn passes that check, so its row shows the Advisor's two best safe maps and the extra casts they need."
+  },
+  {
+   "p": "**What does weakest damage mean?** Your damage changes on every attack. The weakest damage is the lowest hit your build can roll. A guaranteed 2-cast means two unlucky Lucky Seven casts still kill the mob. Normal and high rolls may kill it sooner."
+  },
+  {
+   "p": "The EXP/min figures are Advisor estimates for the sample build in each row. They use current spawn data and apply a smaller danger penalty for ranged classes. Movement and crowding change the result. So do looting and your actual gear. Stirges are included because Lucky Seven can hit flying mobs efficiently."
+  },
+  {
+   "note": "**Expect heavy traffic at Kerning subway Stirges.** Stirge maps were by far the most popular Lucky Seven training spots in COT2. Transfer Area also leads the Training Advisor at levels 20, 25, and 30 below, so crowding and KS can erase its EXP advantage."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Build checked",
+     "Training Advisor picks",
+     "Kills using weakest damage"
+    ],
+    [
+     "**10**",
+     "L7 1 25 W.ATK / 30 ACC",
+     "The Rain-Forest East of Henesys 503 EXP/min · Safe Dungeon, Southern Forest I 469 EXP/min · Safe",
+     "Pig: 3 casts Ribbon Pig: 4 casts Slime: 3 casts No full map qualifies yet"
+    ],
+    [
+     "**15**",
+     "L7 12 28 W.ATK / 41 ACC",
+     "Tree Dungeon, Forest Up North IV 1,069 EXP/min · Caution Dungeon, Southern Forest III 1,063 EXP/min · Caution",
+     "Green Mushroom: 2 casts Slime: 2 casts"
+    ],
+    [
+     "**20**",
+     "L7 20 32 W.ATK / 49 ACC",
+     "Transfer Area 2,263 EXP/min · Caution Damp Forest 2,258 EXP/min · Caution",
+     "Stirge: 2 casts Jr. Necki: 2 casts Octopus and Slime: 1 cast"
+    ],
+    [
+     "**25**",
+     "L7 20 36 W.ATK / 65 ACC",
+     "Transfer Area 3,364 EXP/min · Caution Dangerous Steam 2,888 EXP/min · Caution",
+     "Stirge: 2 casts Zombie Mushroom: 2 casts Horny Mushroom: 2 casts"
+    ],
+    [
+     "**30**",
+     "L7 20 40 W.ATK / 77 ACC",
+     "Transfer Area 3,083 EXP/min · Safe Dangerous Steam 2,981 EXP/min · Caution",
+     "Stirge: 1 cast Zombie Mushroom: 2 casts Horny Mushroom: 2 casts"
+    ]
+   ]
+  },
+  {
+   "p": "**Refill time changes the best map.** Transfer Area is next to Kerning City for potions and star recharges. The Ellinia tree dungeons are a longer walk from Ellinia. Damp Forest is close to Sleepywood, while Dangerous Steam is farther inside the dungeon. A small EXP lead can disappear if every refill needs a long walk."
+  },
+  {
+   "h3": "Level 30 Thief example build"
+  },
+  {
+   "p": "4 base STR / 30 base DEX / 4 base INT / 132 base LUK\n5 STR / 34 DEX / 5 INT / 139 LUK / 40 total W.ATK / 77 ACC with gear"
+  },
+  {
+   "p": "**Skills:** Nimble Body 15, Keen Eyes 15, Disorder 3, Dark Sight 8, Lucky Seven 20."
+  },
+  {
+   "p": "**After second job advancement:** 1,134 base HP and 953 base MP before equipment. Lucky Seven deals 366-622 per cast against an equal-level target with 0 WDEF, averaging about 502 after the sample's 7% Critical Rate and 21% Critical Damage."
+  },
+  {
+   "p": "[[img:7f4e91463e6782.png]]Adamantium Guards [[img:6b8e85bc094214.png]]Wolbi [[img:b7bfab8434bc30.png]]Dark Guise [[img:b7809c05ccf52e.png]]Steel Sylvia [[img:ce6353bc3a96de.png]]Sauna Robe [[img:7016676a1496a2.png]]Bronze Chain Boots [[img:756539415b1d40.png]]Old Raggedy Cape"
+  },
+  {
+   "p": "**Best guaranteed Lucky Seven targets**"
+  },
+  {
+   "p": "[[img:d0e60eb9c0eb2c.png]] **Jr. Necki** 100% hit · guaranteed 1-cast · 39 EXP/cast [[img:ae64823f427bc0.png]] **Stirge** 100% hit · guaranteed 1-cast · 37 EXP/cast"
+  },
+  {
+   "h2": "Weapon Reach (Hitbox)"
+  },
+  {
+   "p": "Your hitbox is the box in front of your character where a melee hit lands. How far forward it goes depends on your dagger. Every dagger has five basic attacks, three swings and two thrusts, and the game picks one at random each time. The numbers below are the average reach of one basic attack."
+  },
+  {
+   "img": "01d9a8321fedca.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Razor, Swing 1. Any monster whose body touches the blue box gets hit: 11-85 px in front of you, from 11 to 51 px above your feet."
+  },
+  {
+   "p": "For a dagger Thief, reach depends on the dagger. The Zamadar daggers (from level 10), Forked Dagger (27), and Cass (30) average 86 px per basic attack. The rest of the daggers through level 30, from Razor to Reef Claw, average 74 px. Reach has a direct effect on DPS in practice. Longer reach makes mobs easier to hit from a distance and keeps them from getting close enough to hit you. Compare every weapon family in the weapon reach guide."
+  },
+  {
+   "p": "**86 px avg reach**"
+  },
+  {
+   "p": "[[img:eb88fa558d23de.png]]Triangular Zamadar (Lv 10) [[img:274fc3f78b78c2.png]]Triple-Tipped Zamadar (Lv 17) [[img:462e968cc06f2d.png]]Forked Dagger (Lv 27) [[img:3a36b47901a8a1.png]]Cass (Lv 30)"
+  },
+  {
+   "p": "**74 px avg reach**"
+  },
+  {
+   "p": "[[img:eb1de53f04fc53.png]]Razor (Lv 5) [[img:3fadf7e5b49bb6.png]]Fruit Knife (Lv 8) [[img:5ce73526b2d295.png]]Field Dagger (Lv 15) [[img:6e27577dc2958f.png]]Coconut Knife (Lv 20) [[img:f6e97a3bac26cc.png]]Stinger (Lv 22) [[img:8f491514c79e01.png]]Iron Dagger (Lv 25) [[img:a4f35b3221de6d.png]]Reef Claw (Lv 30)"
+  },
+  {
+   "h3": "Which Thief skills use weapon reach?"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Uses weapon reach?",
+     "Hitbox"
+    ],
+    [
+     "[[img:eb1de53f04fc53.png]]Basic attack",
+     "Yes",
+     "One of your weapon's five attacks, picked at random."
+    ],
+    [
+     "[[img:3c37dc4ebd42ec.png]]Double Stab",
+     "Yes, thrusts only",
+     "Double Stab always uses Thrust 1 or Thrust 2. They reach 84 and 83 px with the Zamadar daggers, Forked Dagger, and Cass, and 74 and 70 px with every other dagger through level 30."
+    ],
+    [
+     "[[img:15c4a6d43a4751.png]]Disorder",
+     "Yes",
+     "The same five attacks and boxes as your basic attack."
+    ],
+    [
+     "[[img:8b4eddf653e003.png]]Lucky Seven",
+     "No",
+     "Stars fly up to 200 px, or 400 px with max Keen Eyes. Inside 65 px your claw punches instead of throwing stars."
+    ]
+   ]
+  },
+  {
+   "h2": "Potions and throwing-star refills"
+  },
+  {
+   "p": "Lucky Seven is fast, but it burns MP and stars. Buy the most cost-efficient potions and carry multiple star stacks."
+  },
+  {
+   "img": "f551af2dba4a3e.png",
+   "w": 110,
+   "h": 125
+  },
+  {
+   "p": "**BEST TO BUY** Best shop recovery per meso"
+  },
+  {
+   "p": "[[img:be80aa4791c684.png]] **Red Potion** 100 HP for 50 mesos 0.5 meso per HP [[img:39a28ad40190a6.png]] **Fried Chicken** 120 HP for 60 mesos 0.5 meso per HP [[img:51e2250795d8f6.png]] **Meat** 160 HP for 80 mesos 0.5 meso per HP [[img:da1e5c881a1df6.png]] **Orange** 50 MP for 50 mesos 1 meso per MP [[img:d59bc967011b87.png]] **Lemon** 150 MP for 150 mesos 1 meso per MP"
+  },
+  {
+   "p": "**SITUATIONAL** Buy for a breakpoint or longer buff"
+  },
+  {
+   "p": "[[img:4e15182d2a8a6e.png]] **Sniper Potion** +5 Accuracy for 10 min Fixes a small hit-rate gap [[img:e18fe0a27cd32a.png]] **Supreme Sniper Potion** +7 Accuracy for 15 min Sold by Raymond in Henesys [[img:8d7b05272e3e8b.png]] **Warrior Potion** +10 Attack Power for 10 min Physical damage buff"
+  },
+  {
+   "p": "**DON'T BUY FOR VALUE** More recovery per use, worse recovery per meso"
+  },
+  {
+   "p": "[[img:a699b6aea354d7.png]] **White Potion** 500 HP for 350 mesos 0.7 meso per HP [[img:d19cbf8225851d.png]] **Blue Potion** 200 MP for 220 mesos 1.1 mesos per MP"
+  },
+  {
+   "p": "A Subi or Wolbi stack holds 500 stars, enough for 250 Lucky Seven casts. At skill Lv20, those casts also consume 4,000 MP. Carry several stacks and use a nearest-town scroll before you run dry."
+  },
+  {
+   "h2": "Common Thief mistakes"
+  },
+  {
+   "img": "b5b0c042af7c72.png",
+   "w": 110,
+   "h": 163
+  },
+  {
+   "ol": [
+    "**Adding DEX for first-job advancement.** MSClassic World removed the stat requirement for job advancements. Add DEX only when your next claw or armor needs it.",
+    "**Building Double Stab without committing to true dagger leveling.** Lucky Seven is the easier level 10-30 build for future Bandits. Double Stab belongs to the no-reset, max-Dark-Sight alternative.",
+    "**Adding DEX without checking equipment.** Meet the weapon requirement using total stats from other equipped gear, then put the rest into LUK.",
+    "**Buying rare stars before basic upgrades.** Buy a current claw and enough MP food first. Carry several rechargeable stacks before you spend on expensive throwing stars.",
+    "**Forgetting refill time.** A recommended training map can be less ideal if the map is far from potions and star recharge shops.",
+    "**Standing inside claw punch range.** Your claw punches at close range by design, and a jump attack carries you back out of it.",
+    "**And last but not least: picking Male instead of Female.** Only female Thieves get the Lv 35 Dark Avenger overall with +6 LUK and 10 upgrade slots."
+   ]
+  },
+  {
+   "h2": "Choose your second job at level 30"
+  },
+  {
+   "p": "Return to the Dark Lord in Kerning City, complete the advancement test, and choose Assassin or Bandit. Your first-job AP and SP stay with you."
+  },
+  {
+   "img": "ce016c35dd0f03.png",
+   "w": 59,
+   "h": 91
+  },
+  {
+   "h3": "Assassin"
+  },
+  {
+   "p": "Keep Lucky Seven, then add Claw Mastery and Critical Throw. Build Haste, Critical Recovery, and Claw Booster after that. Assassin is the direct ranged continuation."
+  },
+  {
+   "guide": "assassin-class-guide",
+   "text": "Continue with the Assassin level 30-70 guide"
+  },
+  {
+   "h3": "Bandit"
+  },
+  {
+   "p": "Put the first Bandit SP into Haste. A Sindit keeps Lucky Seven while Savage Blow grows. Once Savage Blow is ready, reset Lucky Seven and Keen Eyes into Double Stab and max Dark Sight."
+  },
+  {
+   "guide": "bandit-class-guide",
+   "text": "Continue with the Bandit level 30-70 guide"
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/thief-class-guide",
+ "hash": "66f35e287223"
+}

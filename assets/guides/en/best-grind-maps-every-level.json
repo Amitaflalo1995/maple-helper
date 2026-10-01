@@ -1,0 +1,661 @@
+{
+ "title": "Best Grind Maps for Every Level 1-70",
+ "intro": "The best training spots and grind maps in MapleStory Classic World for every level from 1 to 70, ranked by EXP per hour and filtered to level-appropriate mobs.",
+ "hero": null,
+ "minutes": 10,
+ "blocks": [
+  {
+   "p": "[[img:99e27e8c542fc6.png]] **Ant Tunnel through your 20s, the Kerning Subway from the 30s, then Sleepy Dungeon V in the late 50s.** The tables list up to three picks per level bracket with their max EXP/hr. Each map's main EXP mob sits within two levels of the bracket."
+  },
+  {
+   "h2": "Ranking method"
+  },
+  {
+   "p": "**Max EXP/hr** is the most EXP a map spawns in an hour for one player, if every monster died the moment it appeared, with the spawn pool at the 75% solo rate. Nobody reaches it, because you walk between platforms and stop to refill pots. Use it to compare maps. For your real rate, time a session with the Grind Tracker."
+  },
+  {
+   "p": "The Training Advisor recommends the best map based on your level, equipment, and expected EXP efficiency. Expected EXP is one factor. A drop you need can matter more than extra EXP, and a crowded channel slows any map. The party and loot picks near the end are maps worth a visit for a party or a drop."
+  },
+  {
+   "p": "**Portals to pots** counts the portals on the shortest walk from the map to the nearest NPC selling potions. Return Scrolls skip the walk entirely."
+  },
+  {
+   "p": "**All Max EXP/hr numbers assume solo play** with no party bonus. In a party the rate goes up: COT2 gives 10% at two members, 20% at three, and 30% from four onward. See the Party bonus EXP section of the EXP Table guide."
+  },
+  {
+   "h2": "Level 1-10"
+  },
+  {
+   "p": "Starter quests can cover much of this bracket. If you need a map for the last levels, use the ranked options below."
+  },
+  {
+   "table": [
+    [
+     "Map",
+     "Street",
+     "Max EXP/hr",
+     "Dominant mob",
+     "Portals to pots",
+     "Why"
+    ],
+    [
+     "[[img:fb3c8dc6aafe7d.png]] L Forest I",
+     "Victoria Road",
+     "333,525",
+     "Ribbon Pig (lv10)",
+     "3 (Kerning City Pharmacy)",
+     "Broad mix from Snails up through Ribbon Pigs at lv 10. The mob levels climb with you, so there is no map-hop at lv 5 or lv 8."
+    ],
+    [
+     "[[img:5acb77fec8ecc4.png]] The Tree That Grew II",
+     "Victoria Road",
+     "318,571",
+     "Slime (lv6)",
+     "4 (Ellinia Department Store)",
+     "Slimes and Stumps with a few Dark Stumps at the top end. Cleanest pure lv 5-11 grind in this bracket, no outleveled stragglers eating clear time."
+    ],
+    [
+     "[[img:40abaabb515908.png]] Construction Site North of Kerning City",
+     "Victoria Road",
+     "297,499",
+     "Dark Stump (lv11)",
+     "3 (Kerning City Pharmacy)",
+     "Broad lv 4-19 spread with Red Snails for early kills and Dark Stumps for late."
+    ]
+   ]
+  },
+  {
+   "h2": "Level 11-15"
+  },
+  {
+   "p": "These maps move you out of the starter zones and into Victoria Island's dedicated hunting grounds. Use matching quests alongside them when you have any left."
+  },
+  {
+   "table": [
+    [
+     "Map",
+     "Street",
+     "Max EXP/hr",
+     "Dominant mob",
+     "Portals to pots",
+     "Why"
+    ],
+    [
+     "[[img:34dcba7b3807fe.png]] Line 1 <Area 1>",
+     "Kerning City Subway",
+     "640,000",
+     "Bubbling (lv15)",
+     "3 (Kerning City Pharmacy)",
+     "Single-mob map at exactly lv 15, one of the cleanest grinds in the bracket. Subway density wins out."
+    ],
+    [
+     "[[img:b62ded95656118.png]] West Rocky Mountain III",
+     "Victoria Road",
+     "572,857",
+     "Green Mushroom (lv14)",
+     "5 (Perion Department Store)",
+     "Green Mushroom-heavy with a few Axe Stumps and Dark Axe Stumps mixed in. Roughly 2x the EXP/hr of the East-side equivalent thanks to denser Green Mushroom spawns."
+    ],
+    [
+     "[[img:b62ded95656118.png]] Tree Dungeon, Forest Up North IV",
+     "Victoria Road",
+     "343,571",
+     "Green Mushroom (lv14)",
+     "5 (Ellinia Department Store)",
+     "Green Mushroom farm with a few low-level Slimes mixed in."
+    ]
+   ]
+  },
+  {
+   "h2": "Level 16-20"
+  },
+  {
+   "p": "Dangerous Steam has the highest max EXP/hr in this bracket, with the subway Stirge map close behind."
+  },
+  {
+   "table": [
+    [
+     "Map",
+     "Street",
+     "Max EXP/hr",
+     "Dominant mob",
+     "Portals to pots",
+     "Why"
+    ],
+    [
+     "[[img:ae64823f427bc0.png]] Dangerous Steam",
+     "Dungeon",
+     "671,786",
+     "Stirge (lv20)",
+     "3 (Ant Tunnel Park)",
+     "Stirge + Horny Mushroom + Zombie Mushroom combo for lv 20-24 players, bit more variety."
+    ],
+    [
+     "[[img:ae64823f427bc0.png]] Transfer Area",
+     "Kerning City Subway",
+     "502,143",
+     "Stirge (lv20)",
+     "4 (Kerning City Pharmacy)",
+     "Single-mob Stirge map with a very tight layout, an easy pick for mages and bowmen."
+    ],
+    [
+     "[[img:059caff41683e8.png]] Tree Dungeon, Forest Up North III",
+     "Victoria Road",
+     "434,286",
+     "Horny Mushroom (lv22)",
+     "5 (Ellinia Department Store)",
+     "Horny and Green Mushrooms with a few Slimes. The pick when both Kerning maps are crowded."
+    ]
+   ]
+  },
+  {
+   "p": "**Kerning Party Quest unlocks at level 21.** Run it for Squishy Shoes or the bonus room; the KPQ guide covers every stage."
+  },
+  {
+   "h2": "Level 21-25"
+  },
+  {
+   "p": "Almost everything worth grinding in this bracket sits inside the Ant Tunnel. Multiple maps with Horny Mushroom, Zombie Mushroom, and Evil Eye in overlapping level ranges."
+  },
+  {
+   "table": [
+    [
+     "Map",
+     "Street",
+     "Max EXP/hr",
+     "Dominant mob",
+     "Portals to pots",
+     "Why"
+    ],
+    [
+     "[[img:36750484773e65.png]] Ant Tunnel III",
+     "Dungeon",
+     "1,536,786",
+     "Zombie Mushroom (lv24)",
+     "6 (Ant Tunnel Park)",
+     "Horny + Zombie Mushroom and nothing else. Ideal for lv 22-25."
+    ],
+    [
+     "[[img:36750484773e65.png]] Deep Ant Tunnel I",
+     "Dungeon",
+     "1,078,256",
+     "Zombie Mushroom (lv24)",
+     "2 (Ant Tunnel Park)",
+     "Deepest Ant Tunnel map, broader spread up to Jr. Boogie. Stepping stone to the Evil Eye caves."
+    ],
+    [
+     "[[img:a951e586bae69f.png]] Ant Tunnel Park",
+     "Dungeon",
+     "981,785",
+     "Evil Eye (lv27)",
+     "0 (Ant Tunnel Park)",
+     "Perfect for lv 23-27 players. Adds Evil Eye to the Ant Tunnel mix for a big EXP/hr bump."
+    ]
+   ]
+  },
+  {
+   "h2": "Level 26-30"
+  },
+  {
+   "p": "Evil Eye is the bracket's main draw, but the Ant Tunnel maps out-grind the dedicated Evil Eye caves on spawn-point density. Clear your Sleepywood quests too, the level ranges line up."
+  },
+  {
+   "table": [
+    [
+     "Map",
+     "Street",
+     "Max EXP/hr",
+     "Dominant mob",
+     "Portals to pots",
+     "Why"
+    ],
+    [
+     "[[img:36750484773e65.png]] Deep Ant Tunnel I",
+     "Dungeon",
+     "1,078,256",
+     "Zombie Mushroom (lv24)",
+     "2 (Ant Tunnel Park)",
+     "Broadest spread in the cluster: Horny + Zombie Mushroom + Evil Eye + a handful of Jr. Boogies at lv 35. Best if you plan to stay on the same map through 30."
+    ],
+    [
+     "[[img:a951e586bae69f.png]] Ant Tunnel Park",
+     "Dungeon",
+     "981,785",
+     "Evil Eye (lv27)",
+     "0 (Ant Tunnel Park)",
+     "Evil Eye dominant with Horny Mushroom and Zombie Mushroom carrying the lower end. Higher total EXP/hr than the dedicated Evil Eye caves once spawn-point density is in the math."
+    ],
+    [
+     "[[img:a951e586bae69f.png]] The Cave of Evil Eye III",
+     "Dungeon",
+     "680,325",
+     "Evil Eye (lv27)",
+     "3 (Ant Tunnel Park)",
+     "Near-pure Evil Eye at lv 27 with only a rare lv 35 Jr. Boogie 2 on a timed spawn. Lower total EXP/hr than the Ant Tunnel maps, but if you want an almost single-mob grind with no off-spawns to dodge, this is the cave."
+    ]
+   ]
+  },
+  {
+   "h2": "Level 31-35"
+  },
+  {
+   "p": "The Kerning Subway Line 2 area starts paying off here, thanks to its Jr. Wraith density. The Burnt Land V is the off-subway alternative for warriors and bowmen who want Fire Boar at lv 32 instead."
+  },
+  {
+   "table": [
+    [
+     "Map",
+     "Street",
+     "Max EXP/hr",
+     "Dominant mob",
+     "Portals to pots",
+     "Why"
+    ],
+    [
+     "[[img:777ced8b4048a6.png]] Line 2 <Area 1>",
+     "Kerning City Subway",
+     "2,270,000",
+     "Jr. Wraith (lv34)",
+     "5 (Kerning City Pharmacy)",
+     "Jr. Wraith grind kicks in. Subway density plus perfect lv match for 32-34 players."
+    ],
+    [
+     "[[img:777ced8b4048a6.png]] Line 1 <Area 2>",
+     "Kerning City Subway",
+     "2,002,500",
+     "Jr. Wraith (lv34)",
+     "5 (Kerning City Pharmacy)",
+     "Alternate subway map for Jr. Wraith. Less popular than Line 2, so it may be quieter."
+    ],
+    [
+     "[[img:762bddf50eb031.png]] The Burnt Land V",
+     "Warning Street",
+     "1,080,714",
+     "Fire Boar (lv32)",
+     "8 (Perion Department Store)",
+     "Fire Boar grind with a few Lupins and Dark Axe Stumps for variety. Best non-subway option in the bracket, and the quests out here pay EXP too."
+    ]
+   ]
+  },
+  {
+   "h2": "Level 36-40"
+  },
+  {
+   "p": "The Florina Beach crab maps are the late-30s standout. Low PDEF, high density, no knockback issues. Monkey Forest is the jungle alternative for anyone grinding Lupin + Zombie Lupin."
+  },
+  {
+   "table": [
+    [
+     "Map",
+     "Street",
+     "Max EXP/hr",
+     "Dominant mob",
+     "Portals to pots",
+     "Why"
+    ],
+    [
+     "[[img:2a5d75bf6e3634.png]] A Look-Out Shed Around the Beach",
+     "Florina Road",
+     "1,279,996",
+     "Lorang (lv38)",
+     "1 (Florina Beach)",
+     "Lorang density with Lupin support. One of the highest EXP/hr maps in the game for this level."
+    ],
+    [
+     "[[img:2a5d75bf6e3634.png]] Lorang Lorang",
+     "Florina Road",
+     "1,221,429",
+     "Lorang (lv38)",
+     "2 (Florina Beach)",
+     "Alternate Lorang map, slightly smaller. Can be quieter when the main Lorang spot is packed."
+    ],
+    [
+     "[[img:3934c93d7d4444.png]] Monkey Forest II",
+     "Victoria Road",
+     "1,176,786",
+     "Zombie Lupin (lv41)",
+     "5 (Ellinia Department Store)",
+     "Mixed Lupin + Zombie Lupin, lets you stretch into lv 40+ territory as you level up."
+    ]
+   ]
+  },
+  {
+   "h2": "Level 41-45"
+  },
+  {
+   "p": "This is the hardest bracket to grind; gear starts to decide your clear speed. The Monkey Swamp maps are the forgiving option: Zombie Lupin's low defense keeps your damage respectable even if your gear is behind. Forgotten Entrance III, tucked past the forest north of Ellinia, is the option if you want Glowshroom and Raffle in the lv 33-40 band."
+  },
+  {
+   "table": [
+    [
+     "Map",
+     "Street",
+     "Max EXP/hr",
+     "Dominant mob",
+     "Portals to pots",
+     "Why"
+    ],
+    [
+     "[[img:3ddc9bfe06aade.png]] Forgotten Entrance III",
+     "Shallow Passage",
+     "1,340,000",
+     "Glowshroom (lv39)",
+     "7 (Cave Fairy Department Store)",
+     "Glowshroom + Raffle + Curse Eye in the lv 33-40 band. All three are within reach for a lv 41-45 player and total mob density beats the Sleepywood Drake area."
+    ],
+    [
+     "[[img:3934c93d7d4444.png]] Monkey Swamp III",
+     "Hidden Street",
+     "1,291,071",
+     "Zombie Lupin (lv41)",
+     "9 (Kerning City Pharmacy)",
+     "Zombie Lupin density for players who broke into lv 41+. Keep moving and you can skip the Jr. Neckis entirely."
+    ],
+    [
+     "[[img:3934c93d7d4444.png]] Tree Dungeon, Monkey Forest II",
+     "Hidden Street",
+     "1,013,572",
+     "Zombie Lupin (lv41)",
+     "6 (Ellinia Department Store)",
+     "Hidden Street alternative that fewer players know about."
+    ]
+   ]
+  },
+  {
+   "h2": "Level 46-50"
+  },
+  {
+   "p": "The Kerning Subway Wraith maps own this bracket. Line 2 Area 2 clears 3.7M max EXP/hr, the highest of any Victoria Island map. Hot Sand on Florina Road is the Tortie + Clang alternative. Lightning mages get an elemental bonus on the Clangs; the more numerous Torties have no weakness."
+  },
+  {
+   "table": [
+    [
+     "Map",
+     "Street",
+     "Max EXP/hr",
+     "Dominant mob",
+     "Portals to pots",
+     "Why"
+    ],
+    [
+     "[[img:0386eea7010d4c.png]] Line 2 <Area 2>",
+     "Kerning City Subway",
+     "3,737,857",
+     "Wraith (lv48)",
+     "6 (Kerning City Pharmacy)",
+     "Mixed Jr. Wraith and Wraith pool with a few Jr. Necki spawns you can ignore. Best pick once you are lv 47-48 and can two-shot Wraiths."
+    ],
+    [
+     "[[img:0386eea7010d4c.png]] Line 2 <Area 3>",
+     "Kerning City Subway",
+     "3,205,714",
+     "Wraith (lv48)",
+     "7 (Kerning City Pharmacy)",
+     "Pure Wraith at lv 48, nothing else spawns. Lightning mages will love the layout. Slightly lower raw EXP than Area 2 but every kill is on-level."
+    ],
+    [
+     "[[img:0386eea7010d4c.png]] Line 1 <Area 4>",
+     "Kerning City Subway",
+     "2,781,429",
+     "Wraith (lv48)",
+     "7 (Kerning City Pharmacy)",
+     "The other pure Wraith subway. A bit smaller than Line 2 Area 3 (59 vs 68 spawn points), but plays identically. Pick whichever is less crowded."
+    ]
+   ]
+  },
+  {
+   "h2": "Level 51-55"
+  },
+  {
+   "p": "Our map rates still put the Wraith subway maps above every map in this bracket, so staying on Line 2 Area 2 is a fine choice. For on-level mobs, the Clang beach map and the Croco swamp lead. Forbidden Entrance is the Forgotten Hollow option."
+  },
+  {
+   "table": [
+    [
+     "Map",
+     "Street",
+     "Max EXP/hr",
+     "Dominant mob",
+     "Portals to pots",
+     "Why"
+    ],
+    [
+     "[[img:6623dcb448bb87.png]] Lorang and Clang",
+     "Florina Road",
+     "1,971,786",
+     "Clang (lv49)",
+     "3 (Florina Beach)",
+     "Clangs carry about 70% of the EXP, with Lorangs mixed in. Same beach as the lv 36-40 crab maps."
+    ],
+    [
+     "[[img:0058915bf9763c.png]] Dangerous Croko II",
+     "Warning Street",
+     "1,659,642",
+     "Croco (lv52)",
+     "6 (Kerning City Pharmacy)",
+     "Crocos carry four-fifths of the EXP. The Jr. Neckis and Slimes are filler you clear on the way."
+    ],
+    [
+     "[[img:8d3453e377c2eb.png]] Forbidden Entrance",
+     "Shallow Passage",
+     "1,372,857",
+     "Duskmander (lv50)",
+     "3 (Cave Fairy Department Store)",
+     "Rafflesia and Duskmander split the EXP almost evenly. Rafflesia is weak to fire and Duskmander to ice."
+    ]
+   ]
+  },
+  {
+   "h2": "Level 56-60"
+  },
+  {
+   "p": "Sleepy Dungeon V is the strongest map on Victoria Island past 55 on our model, carried by 19 Dark Stone Golem spawns. Another Sanctuary is the Forgotten Hollow pick."
+  },
+  {
+   "table": [
+    [
+     "Map",
+     "Street",
+     "Max EXP/hr",
+     "Dominant mob",
+     "Portals to pots",
+     "Why"
+    ],
+    [
+     "[[img:bf98edf794b720.png]] Sleepy Dungeon V",
+     "Dungeon",
+     "2,725,162",
+     "Dark Stone Golem (lv58)",
+     "5 (Cave Fairy Department Store)",
+     "89 spawn points, the most in this bracket: Dark Stone Golems plus a lot of Lupins and Curse Eyes."
+    ],
+    [
+     "[[img:bf98edf794b720.png]] Sleepy Dungeon III",
+     "Dungeon",
+     "1,488,239",
+     "Dark Stone Golem (lv58)",
+     "7 (Cave Fairy Department Store)",
+     "A similar mix at half the size, 45 spawn points. Go here when V is crowded."
+    ],
+    [
+     "[[img:d2be579f09f89b.png]] Another Sanctuary",
+     "Deep Passage",
+     "1,301,428",
+     "Rotten Mushroom (lv56)",
+     "13 (Cave Fairy Department Store)",
+     "Rotten Mushrooms and Sporewoods, both undead and weak to holy. Bring extra pots: the nearest shop is 13 portals away."
+    ]
+   ]
+  },
+  {
+   "h2": "Level 61-70"
+  },
+  {
+   "p": "Victoria Island has no strong map for the 60s. Dangerous Valley II is the only one built around a lv 60 mob, at 703,825 max EXP/hr, under a fifth of Line 2 Area 2. The higher mobs on the island (Wild Kargo at lv 62, Tauromacis at lv 70, Taurospear at lv 75) are all on timed respawns. For EXP, stay on Sleepy Dungeon V or the Wraith maps."
+  },
+  {
+   "table": [
+    [
+     "Map",
+     "Street",
+     "Max EXP/hr",
+     "Dominant mob",
+     "Portals to pots",
+     "Why"
+    ],
+    [
+     "[[img:af1d4d2ecd28da.png]] Dangerous Valley II",
+     "Hidden Street",
+     "703,825",
+     "Red Drake (lv60)",
+     "4 (Perion Department Store)",
+     "Red Drakes drop Steely Throwing Knives. Fire Boars and Copper Drakes fill the rest of the map."
+    ]
+   ]
+  },
+  {
+   "h2": "Party and loot picks"
+  },
+  {
+   "p": "Pick these for a drop you need or room for a bigger party. We do not provide drop rate %."
+  },
+  {
+   "table": [
+    [
+     "Map",
+     "Mob levels",
+     "Max EXP/hr",
+     "Portals to pots",
+     "Pick it for"
+    ],
+    [
+     "[[img:b62ded95656118.png]] Henesys Hunting Ground I",
+     "2-14",
+     "153,216",
+     "2 (Henesys Town Hall)",
+     "Seven mob types, from Blue Snails up to Green Mushrooms, in one map. You can stay here from your first Victoria level to about 15."
+    ],
+    [
+     "[[img:5acb77fec8ecc4.png]] Dungeon, Southern Forest I",
+     "6",
+     "90,000",
+     "5 (Ellinia Department Store)",
+     "21 Slime spawns and nothing else, so every kill takes the same hits. Slimes drop Slime Bubbles."
+    ],
+    [
+     "[[img:fb3c8dc6aafe7d.png]] The Pig Beach",
+     "2-28",
+     "105,767",
+     "6 (Lith Harbor)",
+     "Pigs and Ribbon Pigs drop Leather, Stiff Feathers, and Pig's Heads. The single Iron Hog respawns once an hour."
+    ],
+    [
+     "[[img:d0e60eb9c0eb2c.png]] Damp Forest",
+     "6-21",
+     "284,999",
+     "7 (Henesys Town Hall)",
+     "11 Jr. Necki spawns mixed with Octopuses. Farm Jr. Necki Skins here."
+    ],
+    [
+     "[[img:57b1519e827743.png]] Land of Wild Boar",
+     "23-35",
+     "472,884",
+     "3 (Perion Department Store)",
+     "Wild Boars drop Leather and Animal Fur Bundles. Dark Axe Stumps drop Wooden Tops and Sap of Ancient Tree. The Jr. Boogies respawn every 5 to 10 minutes."
+    ],
+    [
+     "[[img:762bddf50eb031.png]] The Burnt Land II",
+     "23-32",
+     "605,000",
+     "5 (Perion Department Store)",
+     "Fire Boars drop Arwen's Glass Shoe, Diamond Ore, and Wolbi Throwing Stars. Dark Axe Stumps add Wooden Tops."
+    ],
+    [
+     "[[img:3b0aac86470550.png]] Dangerous Valley",
+     "32-45",
+     "1,008,214",
+     "3 (Perion Department Store)",
+     "Fire Boars and Copper Drakes, both weak to ice. A strong I/L Wizard map in the early 40s."
+    ],
+    [
+     "[[img:ab7412e282fc07.png]] The Valley of Death",
+     "24-47",
+     "864,999",
+     "5 (Cave Fairy Department Store)",
+     "Rafflesia drops the Earring LUK Scroll: Intermediate. Zombie Lupins drop Black Napoleon (base 3 LUK) and the Cursed Dolls for Rowen the Fairy's hat quests."
+    ],
+    [
+     "[[img:415ed0ee975fe3.png]] Drake Hunting Ground",
+     "22-50",
+     "943,897",
+     "5 (Ant Tunnel Park)",
+     "Drakes drop Dragon Skin and Drake's Blood. Dragon Skin goes into 23 crafting recipes, mostly shoes and gloves."
+    ],
+    [
+     "[[img:fa554ceb1468b9.png]] The End of Fleeting Light",
+     "43-50",
+     "1,201,072",
+     "2 (Cave Fairy Department Store)",
+     "Aqumander is weak to lightning, Rafflesia to fire, and Duskmander to ice. A mage party with mixed elements covers all three."
+    ],
+    [
+     "[[img:0386eea7010d4c.png]] Line 2 <Area 3>",
+     "48",
+     "3,205,714",
+     "7 (Kerning City Pharmacy)",
+     "Wraiths drop the Red Whip, a Lv 35 one-handed sword with 15 Speed."
+    ],
+    [
+     "[[img:3e5429938ed2d5.png]] The Entrance of Golem's Temple",
+     "19-56",
+     "740,437",
+     "5 (Henesys Town Hall)",
+     "Stone Golems drop Tobi Throwing Stars."
+    ]
+   ]
+  },
+  {
+   "h2": "Honorable mention: PQs and party bonus"
+  },
+  {
+   "p": "**Kerning Party Quest** unlocks at **level 21**. Parties also change map capacity and receive 10% bonus EXP with two members, 20% with three, and 30% from four onward. Compare your own timed runs with the solo rankings above. The bonus room after King Slime, 1st Accompaniment <Bonus>, holds 24 Horny Mushrooms and 12 Green Mushrooms for 462,858 max EXP/hr. Its Green Mushrooms drop Pan Lid and the Claw Attack Scroll: Intermediate."
+  },
+  {
+   "p": "Your class, gear, mastery, party size, movement between platforms, and time between groups all change the real result. Timed a better loop? Tell us in the MeowDB Discord."
+  },
+  {
+   "guide": "beginners-guide-first-steps-in-maple-world",
+   "text": "Beginner's Guide: MapleStory Classic World"
+  },
+  {
+   "guide": "warrior-class-guide",
+   "text": "MapleStory Classic Warrior Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "magician-class-guide",
+   "text": "MapleStory Classic Magician Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "bowman-class-guide",
+   "text": "MapleStory Classic Bowman Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "thief-class-guide",
+   "text": "MapleStory Classic Thief Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "explaining-the-damage-formula",
+   "text": "MapleStory Classic Damage Formula"
+  },
+  {
+   "guide": "exp-table-level-1-to-100",
+   "text": "EXP Table Lv 1-100: Current and Historical Reference"
+  },
+  {
+   "guide": "maplestory-classic-glossary",
+   "text": "MapleStory Classic World Glossary"
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/best-grind-maps-every-level",
+ "hash": "4dcd21d7064b"
+}
