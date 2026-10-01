@@ -3,19 +3,24 @@ from __future__ import annotations
 
 STRINGS = {
     "app_tagline": {"he": "העוזר האישי שלכם ב-MapleStory", "en": "Your personal MapleStory assistant"},
+    "disclaimer": {"he": "Maple Helper רק רואה את המסך, כמו צילום מסך. הוא לא נוגע בקבצים או בזיכרון של המשחק, "
+                         "לא לוחץ על מקשים במקומכם ולא משחק בשבילכם. זה כלי לא רשמי, והשימוש בו באחריותכם.",
+                   "en": "Maple Helper only sees the screen, like a screenshot. It never touches the game's files or "
+                         "memory, never presses keys for you and never plays for you. It's unofficial; "
+                         "use it at your own risk."},
     "unofficial": {"he": "עוזר לא רשמי ל-MapleStory Classic · אין קשר ל-Nexon",
                    "en": "Unofficial companion for MapleStory Classic · Not affiliated with Nexon"},
     "input_placeholder": {"he": "שאלו אותי משהו… (Enter לשליחה, F10 לדיבור)",
-                          "en": "Ask me anything… (Enter to send, hold F10 to talk)"},
+                          "en": "Ask me anything… (Enter to send, F10 to talk)"},
     "thinking": {"he": "חושב…", "en": "Thinking…"},
     "slow": {"he": "לוקח יותר מהרגיל…", "en": "Taking longer than usual…"},
     "cancel": {"he": "ביטול", "en": "Cancel"},
     "retry": {"he": "נסה שוב", "en": "Try again"},
     "recaptured": {"he": "צילום מסך חדש נשמר ויישלח עם השאלה הבאה", "en": "New screenshot saved; it goes with your next question"},
     "recapture": {"he": "צלם מחדש את מסך המשחק", "en": "Retake the game screenshot"},
-    "mic_tip": {"he": "לחצו כדי לדבר, או החזיקו {key}", "en": "Click to talk, or hold {key}"},
-    "listening_click": {"he": "מקשיב… לחצו שוב על המיקרופון לסיום", "en": "Listening… click the mic again to finish"},
-    "listening": {"he": "מקשיב… שחרר את F10 לסיום", "en": "Listening… release F10 when done"},
+    "mic_tip": {"he": "לחצו כדי לדבר (או {key})", "en": "Click to talk (or {key})"},
+    "listening": {"he": "מקשיב… לחצו שוב על המיקרופון או {key} לסיום",
+                  "en": "Listening… click the mic or press {key} again when done"},
     "transcribing": {"he": "מתמלל…", "en": "Transcribing…"},
     "voice_loading": {"he": "מוריד את מודל הדיבור (פעם אחת, כ-1.6GB)…", "en": "Downloading the voice model (once, ~1.6GB)…"},
     "no_game": {"he": "חלון המשחק לא נמצא, שולח בלי צילום מסך.", "en": "Game window not found, sending without a screenshot."},
@@ -64,7 +69,7 @@ STRINGS = {
     "settings": {"he": "הגדרות", "en": "Settings"},
     "language": {"he": "שפה", "en": "Language"},
     "hotkey_toggle": {"he": "מקש פתיחה/סגירה", "en": "Open/close key"},
-    "hotkey_voice": {"he": "מקש דיבור (להחזיק)", "en": "Push-to-talk key (hold)"},
+    "hotkey_voice": {"he": "מקש דיבור (לחיצה להתחלה ולסיום)", "en": "Talk key (press to start and stop)"},
     "appearance": {"he": "מראה", "en": "Appearance"},
     "appearance_dark": {"he": "כהה (זכוכית שחורה)", "en": "Dark (black glass)"},
     "appearance_light": {"he": "בהיר (זכוכית לבנה)", "en": "Light (white glass)"},

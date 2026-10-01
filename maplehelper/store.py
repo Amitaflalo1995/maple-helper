@@ -56,7 +56,7 @@ DEFAULT_SETTINGS = {
     "language": None,             # "he" | "en"; None until onboarding
     "hotkey_toggle": "F9",
     "hotkey_voice": "F10",
-    "appearance": "dark",         # dark | light (opaque surfaces)
+    "appearance": "light",         # dark | light (opaque surfaces)
     "font_size": 14,
     "answer_length": "short",     # short | detailed
     "window": None,

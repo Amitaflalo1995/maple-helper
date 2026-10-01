@@ -1,7 +1,8 @@
 """Small Windows helpers: find the game window, capture it, focus handling, key state.
 
-Deliberately non-invasive: no keyboard hooks, no process access. The game window
-is found by its title and captured from the screen like any screenshot tool.
+Deliberately non-invasive: no keyboard hooks, no key-state polling, no process access, nothing hidden
+from screen capture. The game window is found by its title and captured from the screen like any
+screenshot tool; keys are ordinary Windows hotkeys (RegisterHotKey).
 """
 from __future__ import annotations
 
@@ -90,11 +91,6 @@ def focus_window(hwnd: int) -> None:
         user32.SetForegroundWindow(hwnd)
 
 
-def key_down(key_name: str) -> bool:
-    vk = VK.get(key_name)
-    return bool(vk and user32.GetAsyncKeyState(vk) & 0x8000)
-
-
 MOD_NOREPEAT = 0x4000
 WM_HOTKEY = 0x0312
 
@@ -177,19 +173,6 @@ def glass_window(hwnd: int, tint_rgba=(18, 14, 12, 70), shadow: bool = True) -> 
     except (AttributeError, OSError):
         return False
     return ok
-
-
-WDA_EXCLUDEFROMCAPTURE = 0x11
-
-
-def set_capture_visibility(hwnd: int, visible: bool) -> bool:
-    return bool(user32.SetWindowDisplayAffinity(wt.HWND(hwnd), 0 if visible else WDA_EXCLUDEFROMCAPTURE))
-
-
-def exclude_from_capture(hwnd: int) -> bool:
-    """Keep this window out of screen captures: our own backdrop sampling and the
-    screenshot sent to Claude then see the game underneath, not the chat."""
-    return bool(user32.SetWindowDisplayAffinity(wt.HWND(hwnd), WDA_EXCLUDEFROMCAPTURE))
 
 
 def grab_screen(x: int, y: int, w: int, h: int):

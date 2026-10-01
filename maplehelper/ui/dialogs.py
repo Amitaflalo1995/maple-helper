@@ -612,7 +612,8 @@ class SettingsDialog(GlassDialog):
         sec.add_widget(clear)
         lay.addWidget(sec)
 
-        credit = QLabel(bidi.plain(t("credits"), rtl) + "\n" + bidi.plain(t("unofficial"), rtl), objectName="RowHint")
+        credit = QLabel("\n".join(bidi.plain(t(k), rtl) for k in ("credits", "unofficial", "disclaimer")),
+                        objectName="RowHint")
         credit.setWordWrap(True)
         credit.setAlignment(Qt.AlignHCenter)
         lay.addWidget(credit)

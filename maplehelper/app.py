@@ -24,6 +24,7 @@ from .ui.toast import notify
 from .voice import VoiceController
 
 HOTKEY_TOGGLE = 1
+HOTKEY_VOICE = 2
 RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
 BACKGROUND_ARG = "--background"   # start in the tray only (Windows autostart, silent updates)
 
@@ -114,6 +115,7 @@ class MapleHelperApp:
         self.register_hotkeys()
 
         self.voice = VoiceController(self.settings["hotkey_voice"])
+        self.register_voice_hotkey()
         self.voice.started.connect(self.on_voice_start)
         self.voice.state.connect(lambda s: self.overlay.voice_state(s))
         self.voice.text.connect(self.on_voice_text)
@@ -139,6 +141,14 @@ class MapleHelperApp:
             t = I18n(self.settings["language"])
             self.toast(t("settings"), t("hotkey_taken", key=key), timeout_ms=9000)
 
+    def register_voice_hotkey(self):
+        hwnd = int(self.hotkey_host.winId())
+        winapi.unregister_hotkey(hwnd, HOTKEY_VOICE)
+        key = self.settings["hotkey_voice"]
+        if key != self.settings["hotkey_toggle"] and not winapi.register_hotkey(hwnd, HOTKEY_VOICE, key):
+            t = I18n(self.settings["language"])
+            self.toast(t("settings"), t("hotkey_taken", key=key), timeout_ms=9000)
+
     def toast(self, title: str, message: str = "", timeout_ms: int = 5000):
         notify(title, message, rtl=I18n(self.settings["language"]).rtl, font_family=self.font_family,
                timeout_ms=timeout_ms)
@@ -155,9 +165,11 @@ class MapleHelperApp:
                 self.maybe_summarize_later()
             else:
                 self.overlay.toggle(self.capture)   # also restores from the minimized bubble
+        elif hotkey_id == HOTKEY_VOICE:
+            self.voice.toggle()
 
     def on_voice_start(self):
-        # holding the voice key in game opens the chat (with a fresh screenshot)
+        # the talk key in game opens the chat (with a fresh screenshot)
         if not self.overlay.isVisible():
             self.overlay.toggle(self.capture)
 
@@ -252,6 +264,7 @@ class MapleHelperApp:
         threading.Thread(target=self.brain.prewarm, daemon=True).start()
         self.voice.set_key(self.settings["hotkey_voice"])
         self.register_hotkeys()
+        self.register_voice_hotkey()
         self.apply_autostart()
         self.tray.hide()
         self.make_tray()
@@ -332,6 +345,7 @@ class MapleHelperApp:
             pass
         try:
             winapi.unregister_hotkey(int(self.hotkey_host.winId()), HOTKEY_TOGGLE)
+            winapi.unregister_hotkey(int(self.hotkey_host.winId()), HOTKEY_VOICE)
         except Exception:
             pass
         if getattr(self, "pending_installer", None):

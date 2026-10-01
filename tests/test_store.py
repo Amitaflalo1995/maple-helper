@@ -13,7 +13,7 @@ def test_settings_defaults_and_persistence(isolated_store):
 def test_settings_keep_new_defaults_for_old_files(isolated_store):
     isolated_store.Settings.path.write_text('{"language": "he"}', encoding="utf-8")
     s = isolated_store.Settings()
-    assert s["language"] == "he" and s["appearance"] == "dark"
+    assert s["language"] == "he" and s["appearance"] == "light"
 
 
 def test_corrupt_settings_fall_back_to_defaults(isolated_store):
