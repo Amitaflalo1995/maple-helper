@@ -1,5 +1,26 @@
 [
  {
+  "version": "0.5.0",
+  "he": [
+   "התוכנית שלך בכרטיס הדמות: פס EXP עם כמה נשאר ללבל הבא, ו-≡ פותח איפה לאמן, הג'וב הבא וסטטים.",
+   "טיפ אחד בכל פעם מתחת לכרטיס: מתי הג'וב הבא מתקרב, ומתי כדאי לעבור למפה משתלמת יותר.",
+   "\"מה עכשיו?\" מצלם את המסך ושואל מה הכי כדאי לעשות כרגע.",
+   "ספריית מדריכים (📖): מדריכים מומלצים לדמות שלך, חיפוש, קריאה נקייה ותקציר בעברית.",
+   "שימוש במנוי Claude בהגדרות, התראה כשהמכסה של 5 השעות נגמרת, ומצב חיסכון.",
+   "נעיצת תשובות (📌), חיפוש בשיחות קודמות (🔍), והעתקת כרטיס הדמות כתמונה.",
+   "תשובות מהירות מדויקות יותר (מפות, הגנה, שאלות כפולות)."
+  ],
+  "en": [
+   "Your plan on the character card: an EXP bar with what's left to the next level, and ≡ opens where to train, your next job and stats.",
+   "One tip at a time under the card: when your next job is near, and when a better training map pays more.",
+   "\"What now?\" takes a screenshot and asks what's best to do right now.",
+   "Guides library (📖): guides picked for your character, search, a clean reader and a quick summary.",
+   "Claude plan usage in Settings, a heads-up when the 5-hour limit runs low, and saver mode.",
+   "Pin answers (📌), search past chats (🔍), and copy your character card as a picture.",
+   "More accurate instant answers (maps, defense, double questions)."
+  ]
+ },
+ {
   "version": "0.4.0",
   "he": [
    "כשיוצאת גרסה חדשה מופיע בראש הצ'אט פס \"עדכן עכשיו\": לחיצה אחת מעדכנת ופותחת את הגרסה החדשה.",
