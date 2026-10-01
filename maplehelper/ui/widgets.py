@@ -183,14 +183,40 @@ class EntityCard(Selectable, QFrame):
         credit = _label("NiaMeowDB (meowdb.com)", "CardCredit")
         col.addWidget(credit)
         row.addLayout(col, 1)
+        from PySide6.QtWidgets import QToolButton
+        from . import theme
+        from ..i18n import I18n
+        self._t = I18n(lang)
+        self._buttons = QWidget()
+        bl = QVBoxLayout(self._buttons)
+        bl.setContentsMargins(0, 0, 0, 0)
+        bl.setSpacing(2)
         if self.url:
-            from PySide6.QtWidgets import QToolButton
-            from . import theme
             link = QToolButton(objectName="Icon", text=theme.ICON["open"])
             link.setCursor(Qt.PointingHandCursor)
             link.setToolTip("NiaMeowDB")
             link.clicked.connect(lambda: webbrowser.open(self.url))
-            row.addWidget(link, 0, Qt.AlignTop)
+            bl.addWidget(link)
+        copy = QToolButton(objectName="Icon", text=theme.ICON["copy"])
+        copy.setCursor(Qt.PointingHandCursor)
+        copy.setToolTip(self._t("copy_card"))
+        copy.clicked.connect(self.copy_image)
+        bl.addWidget(copy)
+        bl.addStretch(1)
+        row.addWidget(self._buttons, 0, Qt.AlignTop)
+
+    def copy_image(self):
+        """The card as a picture on the clipboard, ready to paste in Discord or WhatsApp."""
+        from PySide6.QtGui import QCursor
+        from PySide6.QtWidgets import QApplication, QToolTip
+        self._buttons.setVisible(False)          # the picture shows the card, not its buttons
+        self.setProperty("selected", "false")
+        self.style().unpolish(self)
+        self.style().polish(self)
+        pm = self.grab()
+        self._buttons.setVisible(True)
+        QApplication.clipboard().setPixmap(pm)
+        QToolTip.showText(QCursor.pos(), self._t("copied"), self)
 
     @staticmethod
     def _stats(e: dict, he: bool) -> str:

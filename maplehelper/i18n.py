@@ -174,6 +174,9 @@ STRINGS = {
     "save": {"he": "שמור", "en": "Save"},
     "close": {"he": "סגור", "en": "Close"},
     "source": {"he": "מקור", "en": "Source"},
+    "copy_card": {"he": "העתקה כתמונה, לשיתוף עם חברים", "en": "Copy as a picture to share"},
+    "copied": {"he": "✓ הועתק. אפשר להדביק בדיסקורד או בוואטסאפ (Ctrl+V)",
+               "en": "✓ Copied. Paste it in Discord or WhatsApp (Ctrl+V)"},
     # onboarding
     "ob_welcome": {"he": "ברוכים הבאים ל-Maple Helper", "en": "Welcome to Maple Helper"},
     "ob_choose_lang": {"he": "בחרו שפה", "en": "Choose a language"},
