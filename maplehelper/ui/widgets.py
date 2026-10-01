@@ -42,6 +42,18 @@ class Bubble(QFrame):
     def set_text(self, text: str) -> None:
         self.label.setText(bidi.to_html(text) if text else "")
 
+    def add_pin(self, on_pin, tip: str) -> None:
+        """A small 📌 under a finished answer."""
+        from PySide6.QtWidgets import QToolButton
+        row = QHBoxLayout()
+        row.addStretch(1)
+        b = QToolButton(objectName="Icon", text="📌")
+        b.setCursor(Qt.PointingHandCursor)
+        b.setToolTip(tip)
+        b.clicked.connect(lambda: (on_pin(), b.setEnabled(False)))
+        row.addWidget(b)
+        self.layout().addLayout(row)
+
 
 class BubbleRow(QWidget):
     """iMessage convention: your messages sit on the trailing side (left in Hebrew), answers span the width."""

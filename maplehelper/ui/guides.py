@@ -125,6 +125,7 @@ class GuidesDialog(GlassDialog):
         while self.rows.count():
             item = self.rows.takeAt(0)
             if item.widget():
+                item.widget().hide()   # gone now, not at the next event loop
                 item.widget().deleteLater()
         q = self.search.text().strip().lower()
         cat = self.cats.checkedButton().property("cat")

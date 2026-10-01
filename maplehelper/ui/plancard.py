@@ -97,6 +97,7 @@ class PlanPanel(QFrame):
         while self.col.count():
             item = self.col.takeAt(0)
             if item.widget():
+                item.widget().hide()   # gone now, not at the next event loop
                 item.widget().deleteLater()
 
     def _label(self, text: str, name: str, rtl: bool) -> QLabel:

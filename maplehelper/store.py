@@ -78,6 +78,7 @@ DEFAULT_SETTINGS = {
     "model": "sonnet",
     "api_key_fallback": False,    # use an Anthropic API key (stored in Credential Manager / Keychain)
     "onboarding_done": False,
+    "pins": {},                   # character id -> pinned answers [{q, a, t}]
     "tips_dismissed": {},         # character id -> {tip kind: level it was hidden at}
     "usage": None,                # last known Claude plan usage (see usage.py)
     "saver_mode": False,          # short answers on a lighter model, so the plan lasts longer

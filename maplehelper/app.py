@@ -101,6 +101,7 @@ class MapleHelperApp:
         self.overlay.saver_requested.connect(self.turn_on_saver)
         self.overlay.show_saver_badge(self.settings["saver_mode"])
         self.overlay.wishlist_requested.connect(self.show_wishlist)
+        self.overlay.history_requested.connect(self.show_history)
         self.overlay.guides_requested.connect(lambda: self.show_guides())
         self.overlay.guide_requested.connect(lambda key: self.show_guides(key))
         self.overlay.closed.connect(self.maybe_summarize_later)
@@ -424,6 +425,18 @@ class MapleHelperApp:
             self.overlay.toggle(self.capture)
         self.overlay.set_tags([key])
         self.overlay.input.setFocus()
+
+    def show_history(self):
+        from . import pins
+        from .ui.pinsview import HistoryDialog
+        c = self.profiles.active
+        if not c:
+            return
+        pairs = pins.conversations(History(c.id).recent(100000))
+        dlg = HistoryDialog(pairs, c.name, self.settings["language"], self.style())
+        dlg.pin_requested.connect(self.overlay.pin_answer)
+        self.bring_dialogs_forward()
+        dlg.exec()
 
     def show_wishlist(self):
         from .ui.wishlist import WishlistDialog
