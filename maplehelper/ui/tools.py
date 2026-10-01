@@ -79,6 +79,8 @@ class EntityPicker(QLineEdit):
         comp.setFilterMode(Qt.MatchContains)
         comp.setMaxVisibleItems(9)
         comp.popup().setIconSize(QSize(icon, icon))
+        comp.popup().setTextElideMode(Qt.ElideNone)       # long map names stay whole (two lines, see map_rows)
+        comp.popup().setWordWrap(True)
         c = theme.P()
         bg = "#2C2C2E" if theme.MODE == "dark" else "#FFFFFF"
         comp.popup().setStyleSheet(
@@ -113,6 +115,7 @@ class EntityPicker(QLineEdit):
     def open_list(self):
         comp = self.completer()
         comp.setCompletionPrefix(self.text())
+        comp.popup().setMinimumWidth(max(self.width(), 440))
         comp.complete()
 
     def mousePressEvent(self, e):
@@ -151,8 +154,9 @@ def map_rows(kb) -> list[tuple[str, str, object]]:
             continue
         lv = re.search(r"\nMonster levels Lv (\d+)\s*[-–]\s*(\d+)", page)
         lo = int(lv.group(1)) if lv else 999
-        bits = [e["name"]] + ([f"Lv. {lv.group(1)}-{lv.group(2)}"] if lv else []) + ([place] if place else [])
-        rows.append((lo, e["name"], ("  ·  ".join(bits), e["name"], kb.picture(k))))
+        info = "  ·  ".join(([f"Lv. {lv.group(1)}-{lv.group(2)}"] if lv else []) + ([place] if place else []))
+        shown = f"{e['name']}\n{info}" if info else e["name"]          # the name on its own line, never cut
+        rows.append((lo, e["name"], (shown, e["name"], kb.picture(k))))
     rows.sort(key=lambda r: (r[0], r[1]))
     return [r[2] for r in rows]
 
