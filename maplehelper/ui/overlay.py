@@ -13,7 +13,7 @@ from .. import __version__, bidi, osapi, quick
 from ..brain import Answer, Brain
 from ..i18n import STRINGS, I18n
 from ..kb import KnowledgeBase
-from ..session import SessionStats, lines as session_lines
+from ..session import SessionStats, lines as session_lines, questions as session_questions
 from ..store import ASSETS, History, Profiles, Settings
 from . import theme
 from .glass import paint_glass
@@ -433,8 +433,15 @@ class Overlay(QWidget):
         if not last:
             return
         self.settings["last_session"] = None
+
+        def details():
+            rows = []
+            for name, asked in session_questions(last, History).items():
+                rows.append((self.t("sess_asked", name=name), "CardName"))
+                rows += [("• " + q, "CardStat") for q in asked]
+            return rows or [(self.t("sess_no_details"), "CardStat")]
         self._add_widget(SessionCard(self.t("sess_title", minutes=last["minutes"]), session_lines(last, self.t),
-                                     self.t.rtl))
+                                     self.t.rtl, details, self.t("sess_more"), self.t("sess_less")))
 
     def close_overlay(self):
         self.bubble.hide()

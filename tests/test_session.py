@@ -38,3 +38,14 @@ def test_deleted_character_is_left_out():
     s = session.SessionStats(now=0)
     s.question(char(cid="gone"))
     assert s.summary(SimpleNamespace(characters=[])) is None
+
+
+def test_the_summary_opens_to_the_questions_of_that_session():
+    kiwi = char()
+    s = session.SessionStats(now=100)
+    s.question(kiwi, now=200)
+    summary = s.summary(SimpleNamespace(characters=[kiwi]))
+    log = [{"role": "user", "text": "before", "t": 50}, {"role": "user", "text": "where is Mano?", "t": 150},
+           {"role": "assistant", "text": "In ...", "t": 160}, {"role": "user", "text": "after", "t": 999}]
+    got = session.questions(summary, lambda cid: SimpleNamespace(recent=lambda n: log))
+    assert got == {"Kiwi": ["where is Mano?"]}

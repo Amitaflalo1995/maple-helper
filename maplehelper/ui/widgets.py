@@ -90,23 +90,49 @@ class NoticeCard(QFrame):
 
 
 class SessionCard(QFrame):
-    """'Last session': levels gained, quests done, questions asked, per character."""
+    """'Last session': levels gained, quests done, questions asked, per character. Tap to see the questions."""
 
-    def __init__(self, title: str, lines: list[str], rtl: bool):
+    def __init__(self, title: str, lines: list[str], rtl: bool, details=None, more: str = "", less: str = ""):
         super().__init__(objectName="Card")
         self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
+        self._rtl, self._details, self._more, self._less = rtl, details, more, less
         col = QVBoxLayout(self)
         col.setContentsMargins(14, 10, 14, 10)
         col.setSpacing(3)
-        align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute
+        self._align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute
         head = QLabel(bidi.plain(title, rtl), objectName="CardName")
-        head.setAlignment(align)
+        head.setAlignment(self._align)
         col.addWidget(head)
         for ln in lines:
-            lb = QLabel(bidi.plain(ln, rtl), objectName="CardStat")
-            lb.setWordWrap(True)
-            lb.setAlignment(align)
-            col.addWidget(lb)
+            col.addWidget(self._line(ln))
+        self._extra = QWidget()
+        self._extra_lay = QVBoxLayout(self._extra)
+        self._extra_lay.setContentsMargins(0, 6, 0, 0)
+        self._extra_lay.setSpacing(3)
+        self._extra.hide()
+        col.addWidget(self._extra)
+        self._toggle = None
+        if details:
+            self.setCursor(Qt.PointingHandCursor)
+            self._toggle = QLabel(bidi.plain(more, rtl), objectName="CardSub")
+            self._toggle.setAlignment(self._align)
+            col.addWidget(self._toggle)
+
+    def _line(self, text: str, name: str = "CardStat") -> QLabel:
+        lb = QLabel(bidi.plain(text, self._rtl), objectName=name)
+        lb.setWordWrap(True)
+        lb.setAlignment(self._align)
+        return lb
+
+    def mouseReleaseEvent(self, e):
+        if not self._details or e.button() != Qt.LeftButton:
+            return
+        if self._extra.isHidden() and not self._extra_lay.count():
+            for text, name in self._details():
+                self._extra_lay.addWidget(self._line(text, name))
+        opening = self._extra.isHidden()
+        self._extra.setVisible(opening)
+        self._toggle.setText(bidi.plain(self._less if opening else self._more, self._rtl))
 
 
 # ------------------------------------------------------------------ entity cards

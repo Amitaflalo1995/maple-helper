@@ -59,6 +59,10 @@ STRINGS = {
     "sess_job": {"he": "ג'וב חדש: {job}", "en": "New job: {job}"},
     "sess_quests_done": {"he": "קווסטים שהושלמו ({n}): {names}", "en": "Quests completed ({n}): {names}"},
     "sess_quests_started": {"he": "קווסטים חדשים: {n}", "en": "New quests: {n}"},
+    "sess_more": {"he": "לחצו לפרטים ▾", "en": "Tap for details ▾"},
+    "sess_less": {"he": "הסתרה ▴", "en": "Hide ▴"},
+    "sess_asked": {"he": "השאלות של {name}:", "en": "{name}'s questions:"},
+    "sess_no_details": {"he": "אין פרטים נוספים לסשן הזה.", "en": "No more details for this session."},
     "sess_questions": {"he": "{n} שאלות", "en": "{n} questions"},
     # errors
     "err_offline": {"he": "אין חיבור לאינטרנט. נסה שוב.", "en": "No internet connection. Try again."},

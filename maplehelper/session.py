@@ -41,13 +41,30 @@ class SessionStats:
             c = next((c for c in profiles.characters if c.id == cid), None)
             if not c:
                 continue
-            row = {**e, "name": c.name, "end_level": c.level, "end_job": c.job}
+            row = {**e, "id": cid, "name": c.name, "end_level": c.level, "end_job": c.job}
             if row["questions"] or row["quests_done"] or row["quests_started"] or c.level != e["start_level"]:
                 rows.append(row)
         if not rows:
             return None
         minutes = max(1, round((self.last_active - self.started) / 60))
-        return {"ended": time.strftime("%Y-%m-%d %H:%M"), "minutes": minutes, "chars": rows}
+        return {"ended": time.strftime("%Y-%m-%d %H:%M"), "minutes": minutes, "chars": rows,
+                "from": self.started, "to": self.last_active}
+
+
+def questions(summary: dict, history_for, limit: int = 30) -> dict[str, list[str]]:
+    """The player's own questions in that session, per character name (history_for(id) -> History)."""
+    lo, hi = summary.get("from"), summary.get("to")
+    out: dict[str, list[str]] = {}
+    if lo is None or hi is None:
+        return out
+    for r in summary["chars"]:
+        if not r.get("id"):
+            continue
+        asked = [m["text"] for m in history_for(r["id"]).recent(400)
+                 if m.get("role") == "user" and lo - 1 <= m.get("t", 0) <= hi + 1]
+        if asked:
+            out[r["name"]] = asked[-limit:]
+    return out
 
 
 def lines(summary: dict, t) -> list[str]:
