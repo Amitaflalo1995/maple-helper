@@ -21,6 +21,7 @@ from .glass import GlassDialog
 
 PAGES = ("train", "calc", "build", "quests", "exp", "more")
 MAX_QUESTS = 40
+CURRENT_ROW = {"light": "#FFD3A3", "dark": "#7A4615"}     # the build table row for the player's level
 
 
 def clear(layout):
@@ -524,10 +525,13 @@ class ToolsDialog(GlassDialog):
             out.append(f"<h3 {side}>{guides._rich(tb.heading, he and bool(bidi._RTL.search(tb.heading)))}</h3>")
             cells = []
             for n, row in enumerate(tb.rows):
-                bg = f" bgcolor='{col['head']}'" if n == 0 else (f" bgcolor='{col['note']}'" if n == tb.current else "")
+                # the player's row: a clear orange, bold (the guides' cream note color was too faint here)
+                now = n == tb.current
+                bg = f" bgcolor='{col['head']}'" if n == 0 else (f" bgcolor='{CURRENT_ROW[theme.MODE]}'" if now else "")
                 tagname = "th" if n == 0 else "td"
+                weight = "font-weight:700;" if now else ""
                 cells.append("<tr>" + "".join(
-                    f"<{tagname}{bg}><p {'dir=rtl align=right' if he and bidi._RTL.search(x) else ''} style='margin:0'>"
+                    f"<{tagname}{bg}><p {'dir=rtl align=right' if he and bidi._RTL.search(x) else ''} style='margin:0;{weight}'>"
                     f"{self._with_skill_icon(x, icons) if tb.kind == 'sp' and n else ''}"
                     f"{guides._rich(x, he and bool(bidi._RTL.search(x)), 18)}</p></{tagname}>"
                     for i, x in enumerate(row)) + "</tr>")
