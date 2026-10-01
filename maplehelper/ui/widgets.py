@@ -114,6 +114,38 @@ class _Selection(QObject):
 SELECTION = _Selection()
 
 
+class _Wishlist(QObject):
+    """The active character's wished items, shared by every card (the overlay binds the store)."""
+
+    changed = Signal()
+
+    def __init__(self):
+        super().__init__()
+        self.settings = self.profiles = None
+
+    def bind(self, settings, profiles):
+        self.settings, self.profiles = settings, profiles
+        self.changed.emit()
+
+    def keys(self) -> list[str]:
+        from .. import wishlist
+        if not self.settings or not self.profiles:
+            return []
+        return wishlist.items(self.settings, self.profiles.active_id)
+
+    def has(self, key: str) -> bool:
+        return key in self.keys()
+
+    def toggle(self, key: str) -> None:
+        from .. import wishlist
+        if self.settings and self.profiles:
+            wishlist.toggle(self.settings, self.profiles.active_id, key)
+            self.changed.emit()
+
+
+WISHLIST = _Wishlist()
+
+
 class Selectable:
     """Mixin: a tap selects this entity (orange border); every selectable follows the shared selection."""
 
@@ -183,14 +215,56 @@ class EntityCard(Selectable, QFrame):
         credit = _label("NiaMeowDB (meowdb.com)", "CardCredit")
         col.addWidget(credit)
         row.addLayout(col, 1)
+        from PySide6.QtWidgets import QToolButton
+        from . import theme
+        from ..i18n import I18n
+        self._t = I18n(lang)
+        self._buttons = QWidget()
+        bl = QVBoxLayout(self._buttons)
+        bl.setContentsMargins(0, 0, 0, 0)
+        bl.setSpacing(2)
         if self.url:
-            from PySide6.QtWidgets import QToolButton
-            from . import theme
             link = QToolButton(objectName="Icon", text=theme.ICON["open"])
             link.setCursor(Qt.PointingHandCursor)
             link.setToolTip("NiaMeowDB")
             link.clicked.connect(lambda: webbrowser.open(self.url))
-            row.addWidget(link, 0, Qt.AlignTop)
+            bl.addWidget(link)
+        if key.startswith("item/"):
+            self._star = QToolButton(objectName="Icon")
+            self._star.setCursor(Qt.PointingHandCursor)
+            self._star.clicked.connect(lambda: WISHLIST.toggle(self.key))
+            WISHLIST.changed.connect(self._refresh_star)
+            self._refresh_star()
+            bl.addWidget(self._star)
+        copy = QToolButton(objectName="Icon", text=theme.ICON["copy"])
+        copy.setCursor(Qt.PointingHandCursor)
+        copy.setToolTip(self._t("copy_card"))
+        copy.clicked.connect(self.copy_image)
+        bl.addWidget(copy)
+        bl.addStretch(1)
+        row.addWidget(self._buttons, 0, Qt.AlignTop)
+
+    def _refresh_star(self):
+        from . import theme
+        on = WISHLIST.has(self.key)
+        self._star.setText(theme.ICON["star_on" if on else "star"])
+        self._star.setProperty("wished", "true" if on else "false")
+        self._star.style().unpolish(self._star)
+        self._star.style().polish(self._star)
+        self._star.setToolTip(self._t("wish_remove" if on else "wish_add"))
+
+    def copy_image(self):
+        """The card as a picture on the clipboard, ready to paste in Discord or WhatsApp."""
+        from PySide6.QtGui import QCursor
+        from PySide6.QtWidgets import QApplication, QToolTip
+        self._buttons.setVisible(False)          # the picture shows the card, not its buttons
+        self.setProperty("selected", "false")
+        self.style().unpolish(self)
+        self.style().polish(self)
+        pm = self.grab()
+        self._buttons.setVisible(True)
+        QApplication.clipboard().setPixmap(pm)
+        QToolTip.showText(QCursor.pos(), self._t("copied"), self)
 
     @staticmethod
     def _stats(e: dict, he: bool) -> str:

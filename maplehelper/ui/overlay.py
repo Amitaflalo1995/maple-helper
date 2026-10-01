@@ -17,7 +17,7 @@ from ..store import ASSETS, History, Profiles, Settings
 from . import theme
 from .glass import paint_glass
 from .minibubble import MiniBubble
-from .widgets import (SELECTION, Bubble, BubbleRow, DropGroupCard, EntityCard, NoticeCard, ProfileCard, SystemLine,
+from .widgets import (SELECTION, WISHLIST, Bubble, BubbleRow, DropGroupCard, EntityCard, NoticeCard, ProfileCard, SystemLine,
                       TileGrid, character_image)
 
 
@@ -85,6 +85,7 @@ class FocusLineEdit(QLineEdit):
 
 
 class Overlay(QWidget):
+    wishlist_requested = Signal()
     settings_requested = Signal()
     profile_requested = Signal()
     add_character_requested = Signal()
@@ -111,6 +112,7 @@ class Overlay(QWidget):
         self.bubble.moved.connect(lambda pt: self.settings.__setitem__("bubble_pos", {"x": pt.x(), "y": pt.y()}))
         self.shot_provider = None
         self._build()
+        WISHLIST.bind(settings, profiles)
         self.apply_language()
         self.restore_geometry()
 
@@ -163,6 +165,9 @@ class Overlay(QWidget):
         self.version_label.setLayoutDirection(Qt.LeftToRight)
         tb.addWidget(self.version_label)
         tb.addStretch(1)
+        self.wish_btn = self._icon_button(theme.ICON["star"])
+        self.wish_btn.clicked.connect(self.wishlist_requested.emit)
+        tb.addWidget(self.wish_btn)
         self.settings_btn = self._icon_button(theme.ICON["settings"])
         self.settings_btn.clicked.connect(self.settings_requested.emit)
         tb.addWidget(self.settings_btn)
@@ -260,6 +265,7 @@ class Overlay(QWidget):
         self.input.setPlaceholderText(bidi.plain(self._placeholder, self.t.rtl))
         self.recapture_btn.setToolTip(self.t("recapture"))
         self.settings_btn.setToolTip(self.t("settings"))
+        self.wish_btn.setToolTip(self.t("wishlist"))
         self.profile_card.refresh.setToolTip(self.t("refresh_tip"))
         self.profile_card.setToolTip(self.t("switch_character"))
         self.min_btn.setToolTip(self.t("minimize"))
@@ -269,6 +275,7 @@ class Overlay(QWidget):
         self.refresh_profile_chip()
 
     def refresh_profile_chip(self):
+        WISHLIST.changed.emit()          # the stars follow the active character
         c = self.profiles.active
         self.profile_card.setVisible(c is not None)
         if c:

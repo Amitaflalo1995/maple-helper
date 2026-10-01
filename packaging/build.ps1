@@ -6,7 +6,7 @@
 .EXAMPLE
   pwsh packaging/build.ps1                              # uses data/kb; skips the installer if Inno Setup is missing
   pwsh packaging/build.ps1 -KbDir tests/fixtures/kb     # build without a real knowledge base
-  pwsh packaging/build.ps1 -RequireKb -TestInstaller    # what CI and releases run
+  pwsh packaging/build.ps1 -RequireKb -TestInstaller    # what releases run (CI adds -FastInstaller)
 #>
 [CmdletBinding()]
 param(
@@ -14,6 +14,7 @@ param(
     [switch]$RequireKb,        # the self-test fails when the bundled KB is empty
     [switch]$SkipInstaller,
     [switch]$TestInstaller,    # silent install -> self-test the installed exe -> silent uninstall
+    [switch]$FastInstaller,    # lighter installer compression: same installer, bigger file, much quicker (CI)
     [switch]$Force             # allow -TestInstaller outside CI (it installs/uninstalls "Maple Helper" for real)
 )
 $ErrorActionPreference = "Stop"
@@ -92,7 +93,9 @@ if (-not $iscc) {
               "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
 }
 if (-not $iscc) { throw "Inno Setup 6 not found. Install it (choco install innosetup) or pass -SkipInstaller." }
-& $iscc /Q "/DAppVersion=$Version" packaging/installer.iss
+$isccArgs = @("/Q", "/DAppVersion=$Version")
+if ($FastInstaller) { $isccArgs += "/DCompression=lzma2/fast" }
+& $iscc @isccArgs packaging/installer.iss
 if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed" }
 # keep the unversioned name: the in-app updater downloads exactly "MapleHelper-Setup.exe"
 $setup = Join-Path $Release "MapleHelper-Setup.exe"

@@ -182,6 +182,21 @@ STRINGS = {
     "instant_answers": {"he": "תשובות מהירות מהמאגר", "en": "Instant answers from the database"},
     "instant_answers_hint": {"he": "שאלות פשוטות (HP, דרופים, מיקום) נענות מיד, בלי Claude",
                              "en": "Simple questions (HP, drops, location) are answered at once, without Claude"},
+    "wishlist": {"he": "פריטים שאני מחפש", "en": "Items I'm hunting"},
+    "wish_add": {"he": "הוספה לפריטים שאני מחפש", "en": "Add to items I'm hunting"},
+    "wish_remove": {"he": "הסרה מהפריטים שאני מחפש", "en": "Remove from items I'm hunting"},
+    "wishlist_empty": {"he": "עוד לא סימנתם פריטים. לחצו על ☆ בכרטיס של פריט כדי לעקוב אחריו: תראו כאן מי מפיל "
+                             "אותו ואיפה, ותקבלו הודעה כשעדכון מאגר משנה אותו.",
+                       "en": "No items yet. Tap ☆ on an item's card to follow it: see here who drops it and where, "
+                             "and get a note when a database update changes it."},
+    "wish_dropped_by": {"he": "מפילים:", "en": "Dropped by:"},
+    "wish_no_droppers": {"he": "לא ידוע על מפלצת שמפילה אותו (אולי הוא נקנה בחנות או מתקבל מקווסט).",
+                         "en": "No known monster drops it (it may come from a shop or a quest)."},
+    "wish_kb_hit": {"he": "⭐ עדכון מאגר נוגע בפריט שאתם מחפשים: {names}",
+                    "en": "⭐ A database update touches an item you're hunting: {names}"},
+    "copy_card": {"he": "העתקה כתמונה, לשיתוף עם חברים", "en": "Copy as a picture to share"},
+    "copied": {"he": "✓ הועתק. אפשר להדביק בדיסקורד או בוואטסאפ (Ctrl+V)",
+               "en": "✓ Copied. Paste it in Discord or WhatsApp (Ctrl+V)"},
     # onboarding
     "ob_welcome": {"he": "ברוכים הבאים ל-Maple Helper", "en": "Welcome to Maple Helper"},
     "ob_choose_lang": {"he": "בחרו שפה", "en": "Choose a language"},
