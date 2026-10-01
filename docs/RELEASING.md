@@ -4,8 +4,8 @@ Everything runs in GitHub Actions. You decide *when*; CI does the rest.
 
 | Workflow | Runs on | Does |
 |---|---|---|
-| **CI** (`ci.yml`) | every push to `main`, every PR | lint + tests, then a full Windows build: frozen-exe self-test, portable zip, installer install → self-test → uninstall. The build is downloadable from the run page (14 days). |
-| **Release** (`release.yml`) | pushing a tag `vX.Y.Z` | the same checks with the real knowledge base bundled, then publishes the GitHub Release. Installed apps update themselves to it. |
+| **CI** (`ci.yml`) | every push to `main`, every PR | lint + tests on Windows and macOS, then a full build on each. Windows: frozen-exe self-test, portable zip, installer install → self-test → uninstall. macOS: `.app` self-test, DMG mount → self-test. The builds are downloadable from the run page (14 days). |
+| **Release** (`release.yml`) | pushing a tag `vX.Y.Z` | the same checks with the real knowledge base bundled, then publishes the GitHub Release with the Windows installer + portable zip and the macOS DMG (both platforms or nothing). Installed Windows apps update themselves to it; Mac apps show a download notice. |
 | **Update knowledge base** (`kb-update.yml`) | nightly (changed pages), full refresh on Sundays, or the *Run workflow* button | scrapes NiaMeowDB politely, **validates**, and replaces `kb.zip` + `kb-manifest.json` on the latest release when content changed. |
 
 ## Cut a release
@@ -23,7 +23,7 @@ Everything runs in GitHub Actions. You decide *when*; CI does the rest.
 
 The release fails, and publishes nothing, when:
 - the tag doesn't match `__version__`, or the tagged commit isn't on `main`,
-- any lint rule, test, frozen-exe self-test or installer round trip fails,
+- any lint rule or test fails on either OS, or a frozen-app self-test, the installer round trip or the DMG round trip fails,
 - the knowledge base fails validation.
 
 To retry after fixing: delete the tag (`git push --delete origin v0.2.0; git tag -d v0.2.0`), then tag again.
@@ -51,6 +51,7 @@ gh release create kb-seed dist-kb/kb.zip dist-kb/kb-manifest.json --prerelease -
 | `SHA256SUMS.txt` | the auto-updater: **no matching hash, no update** |
 | `kb.zip` + `kb-manifest.json` | installed apps' KB updates (`releases/latest/download/kb-manifest.json`) |
 | `MapleHelper-X.Y.Z-portable.zip` | players who don't want an installer |
+| `MapleHelper-macOS.dmg` (unversioned name) | Mac players; the Mac app links to the release page when a newer version is out |
 
 Apps read these from whatever release is **latest**, so never publish a release by hand without them.
 The Release workflow carries the current KB forward automatically.
@@ -75,7 +76,8 @@ players who already have it. Fix forward:
 ## Owner setup (needs repository admin)
 
 1. **Branch protection** on `main` (Settings → Branches): require a pull request and the status
-   checks **`Test / Lint & test`** and **`Build & smoke test`** from CI.
+   checks **`Lint & test (windows-latest)`**, **`Lint & test (macos-latest)`**, **`Build & smoke test`** and
+   **`Build & smoke test (macOS)`** from CI.
 2. **Code signing (optional; removes the SmartScreen warning, and recommended now that updates
    install silently):** add a repository secret `MAPLEHELPER_SIGN` holding a sign command with a
    `{file}` placeholder. The build then signs `Maple Helper.exe` and the installer. For example:
@@ -93,6 +95,34 @@ pwsh packaging\build.ps1 -RequireKb                                # with data\k
 Output goes to `dist\release\`. Any build can check itself with
 `"dist\Maple Helper\Maple Helper.exe" --selftest report.txt` (exit code 0 = healthy; the report says why not).
 `-TestInstaller` really installs and uninstalls the app, so it only runs in CI unless you add `-Force`.
+
+On a Mac:
+
+```bash
+.venv/bin/pip install -r requirements-dev.txt
+packaging/build-macos.sh --kb-dir tests/fixtures/kb   # fast
+packaging/build-macos.sh --require-kb --test-dmg      # what a release runs (needs data/kb)
+```
+
+Output goes to `dist/release/MapleHelper-macOS.dmg`; `"dist/Maple Helper.app/Contents/MacOS/Maple Helper" --selftest report.txt`
+checks the app.
+
+## macOS notes
+
+- GitHub's `macos-latest` runner is Apple Silicon, so the DMG is `arm64` only. Intel Macs are not supported:
+  `numpy` and `ctranslate2` have no universal2 wheels to build a universal app from.
+- The app is a menu bar app (`LSUIElement`, no Dock icon). Hotkeys are Carbon `RegisterEventHotKey`, the Mac
+  counterpart of `RegisterHotKey`: no key-state polling, no event tap, no Input Monitoring grant. The only grant
+  is **Screen Recording** (game window title + screenshot).
+- No silent self-update on macOS (the installer is a Windows program): when a newer release is out, the app
+  shows a notice and a menu bar entry linking to it. KB updates work the same as on Windows.
+- **Signing (not set up yet):** the app is ad-hoc signed, so players click **Open Anyway** in System Settings →
+  Privacy & Security on first launch, and macOS may ask for Screen Recording again after an update. Fixing both
+  needs an Apple Developer account ($99/year): sign with a *Developer ID Application* certificate (hardened
+  runtime + the `com.apple.security.device.audio-input` entitlement), then notarize and staple the DMG with
+  `xcrun notarytool` / `xcrun stapler` in `packaging/build-macos.sh`.
+- `tools/release.py` (the manual release from a PC) publishes Windows assets only; use the Release workflow for
+  macOS.
 
 ## README snippet
 

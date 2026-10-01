@@ -188,3 +188,16 @@ def test_sums_line_with_binary_marker(app_env):
     _, _, publish = app_env
     publish(sums=f"{hashlib.sha256(SETUP).hexdigest()} *MapleHelper-Setup.exe\n")
     assert updater.download_app_update("0.1.0") is not None
+
+
+def test_mac_update_notice_names_the_new_release(app_env):
+    _, _, publish = app_env
+    publish(tag="v0.4.0", html_url="https://github.com/Amitaflalo1995/maple-helper/releases/tag/v0.4.0")
+    assert updater.newer_release("0.3.0") == ("0.4.0", "https://github.com/Amitaflalo1995/maple-helper/releases/tag/v0.4.0")
+
+
+@pytest.mark.parametrize("kwargs", [{"tag": "v0.3.0"}, {"tag": "v0.4.0", "prerelease": True}])
+def test_mac_update_notice_stays_quiet(app_env, kwargs):
+    _, _, publish = app_env
+    publish(**kwargs)
+    assert updater.newer_release("0.3.0") is None

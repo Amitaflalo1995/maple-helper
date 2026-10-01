@@ -1,5 +1,6 @@
-# Every push to main and every pull request: tests, then a full Windows build of the app
-# (frozen exe self-test, portable zip, installer round trip). Nothing is published.
+# Every push to main and every pull request: tests on Windows and macOS, then a full build on each
+# (Windows: frozen exe self-test, portable zip, installer round trip; macOS: .app self-test, DMG round trip).
+# Nothing is published.
 name: CI
 
 on:
@@ -51,5 +52,34 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: maplehelper-ci-${{ github.sha }}
+          path: dist/release/*
+          retention-days: 14
+
+  build-macos:
+    name: Build & smoke test (macOS)
+    needs: test
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Build, self-test, DMG round trip
+        env:
+          PYTHON: python
+        run: ./packaging/build-macos.sh --kb-dir tests/fixtures/kb --require-kb --test-dmg
+
+      - name: Upload build
+        uses: actions/upload-artifact@v7
+        with:
+          name: maplehelper-ci-macos-${{ github.sha }}
           path: dist/release/*
           retention-days: 14

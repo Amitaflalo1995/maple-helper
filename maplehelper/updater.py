@@ -116,24 +116,33 @@ def _published_sha256(rel: dict, name: str) -> str | None:
     return None
 
 
+def _latest_release() -> dict | None:
+    raw = _get(f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest", timeout=15) if GITHUB_REPO else None
+    try:
+        rel = json.loads(raw) if raw else None
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(rel, dict) or rel.get("draft") or rel.get("prerelease"):
+        return None
+    return rel
+
+
+def newer_release(current: str) -> tuple[str, str] | None:
+    """(version, release page URL) when GitHub has a newer release: macOS shows a notice instead of self-updating."""
+    rel = _latest_release()
+    if not rel or _version_tuple(rel.get("tag_name", "")) <= _version_tuple(current):
+        return None
+    return rel["tag_name"].lstrip("v"), rel.get("html_url") or f"https://github.com/{GITHUB_REPO}/releases/latest"
+
+
 def download_app_update(current: str) -> str | None:
     """If GitHub has a newer release, download its installer. Returns the installer path.
 
     The installer is only kept when its SHA-256 matches the release's SHA256SUMS.txt:
     it is executed on the player's PC, so a truncated or corrupted download must never run.
     """
-    if not GITHUB_REPO:
-        return None
-    raw = _get(f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest", timeout=15)
-    if not raw:
-        return None
-    try:
-        rel = json.loads(raw)
-    except json.JSONDecodeError:
-        return None
-    if not isinstance(rel, dict) or rel.get("draft") or rel.get("prerelease"):
-        return None
-    if _version_tuple(rel.get("tag_name", "")) <= _version_tuple(current):
+    rel = _latest_release()
+    if not rel or _version_tuple(rel.get("tag_name", "")) <= _version_tuple(current):
         return None
     asset = _asset(rel, SETUP_ASSET)
     want = _published_sha256(rel, SETUP_ASSET) if asset else None

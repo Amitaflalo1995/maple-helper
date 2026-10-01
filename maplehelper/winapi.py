@@ -1,26 +1,40 @@
-"""Small Windows helpers: find the game window, capture it, focus handling, key state.
+"""Small Windows helpers: find the game window, capture it, focus handling, hotkeys, autostart.
 
 Deliberately non-invasive: no keyboard hooks, no key-state polling, no process access, nothing hidden
 from screen capture. The game window is found by its title and captured from the screen like any
 screenshot tool; keys are ordinary Windows hotkeys (RegisterHotKey).
+Same interface as macapi.py; the app picks one through osapi.py.
 """
 from __future__ import annotations
 
 import ctypes
 import ctypes.wintypes as wt
-import io
+import sys
 
-import mss
-from PIL import Image
+from PySide6.QtCore import QAbstractNativeEventFilter, QObject, Signal
+from PySide6.QtWidgets import QApplication, QWidget
+
+from . import APP_NAME
+from .capture import grab_image, grab_jpeg
 
 user32 = ctypes.windll.user32
 dwmapi = ctypes.windll.dwmapi
 
 GAME_TITLES = ("MapleStory Classic", "MapleStory", "Classic World")
 VK = {f"F{i}": 0x6F + i for i in range(1, 13)}   # F1=0x70 ... F12=0x7B
-MAX_SIDE = 1280
+APP_ID = "MapleHelper.App"
+RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
 
 EnumWindowsProc = ctypes.WINFUNCTYPE(wt.BOOL, wt.HWND, wt.LPARAM)
+
+
+def prepare_process() -> None:
+    """Windows shows this identity (not "Python") for the taskbar and notifications."""
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APP_ID)
+
+
+def missing_permissions(request: bool = False) -> list[str]:
+    return []   # Windows needs no extra grant for screen capture or hotkeys
 
 
 def _title(hwnd) -> str:
@@ -61,16 +75,7 @@ def capture_game(hwnd: int | None = None) -> bytes | None:
     if not hwnd:
         return None
     rect = window_rect(hwnd)
-    if not rect:
-        return None
-    x, y, w, h = rect
-    with mss.MSS() if hasattr(mss, "MSS") else mss.mss() as s:
-        shot = s.grab({"left": x, "top": y, "width": w, "height": h})
-    img = Image.frombytes("RGB", shot.size, shot.rgb)
-    img.thumbnail((MAX_SIDE, MAX_SIDE))
-    buf = io.BytesIO()
-    img.save(buf, "JPEG", quality=82)
-    return buf.getvalue()
+    return grab_jpeg(rect) if rect else None
 
 
 def is_exclusive_fullscreen(hwnd: int | None) -> bool:
@@ -91,6 +96,15 @@ def focus_window(hwnd: int) -> None:
         user32.SetForegroundWindow(hwnd)
 
 
+def activate_self(win_id: int) -> None:
+    """Bring one of our own windows (Qt winId) to the front."""
+    focus_window(win_id)
+
+
+def float_over_fullscreen(win_id: int) -> None:
+    """Nothing to do: on Windows a topmost window already floats over a borderless game."""
+
+
 MOD_NOREPEAT = 0x4000
 WM_HOTKEY = 0x0312
 
@@ -102,6 +116,67 @@ def register_hotkey(hwnd: int, hotkey_id: int, key_name: str) -> bool:
 
 def unregister_hotkey(hwnd: int, hotkey_id: int) -> None:
     user32.UnregisterHotKey(wt.HWND(hwnd), hotkey_id)
+
+
+class _HotkeyFilter(QAbstractNativeEventFilter):
+    def __init__(self, on_hotkey):
+        super().__init__()
+        self.on_hotkey = on_hotkey
+
+    def nativeEventFilter(self, event_type, message):
+        if event_type == b"windows_generic_MSG":
+            msg = wt.MSG.from_address(int(message))
+            if msg.message == WM_HOTKEY:
+                self.on_hotkey(int(msg.wParam))
+                return True, 0
+        return False, 0
+
+
+class Hotkeys(QObject):
+    """System-wide hotkeys (RegisterHotKey on a hidden native window). Emits pressed(hotkey_id)."""
+
+    pressed = Signal(int)
+
+    def __init__(self):
+        super().__init__()
+        self._host = QWidget()        # hotkeys live on a hidden native window
+        self._host.winId()
+        self._ids: set[int] = set()
+        self._filter = _HotkeyFilter(self.pressed.emit)
+        QApplication.instance().installNativeEventFilter(self._filter)
+
+    def register(self, hotkey_id: int, key_name: str) -> bool:
+        """(Re)binds hotkey_id to key_name. False when another app already owns the key."""
+        self.unregister(hotkey_id)
+        ok = register_hotkey(int(self._host.winId()), hotkey_id, key_name)
+        if ok:
+            self._ids.add(hotkey_id)
+        return ok
+
+    def unregister(self, hotkey_id: int) -> None:
+        unregister_hotkey(int(self._host.winId()), hotkey_id)
+        self._ids.discard(hotkey_id)
+
+    def close(self) -> None:
+        for hid in list(self._ids):
+            self.unregister(hid)
+
+
+def set_autostart(enabled: bool, args: list[str]) -> None:
+    """Start at sign-in (HKCU Run key) with `args` appended to the app's command line."""
+    import winreg
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, RUN_KEY, 0, winreg.KEY_SET_VALUE) as k:
+            if enabled:
+                exe = f'"{sys.executable}"' if getattr(sys, "frozen", False) else f'"{sys.executable}" -m maplehelper'
+                winreg.SetValueEx(k, APP_NAME, 0, winreg.REG_SZ, " ".join([exe, *args]))
+            else:
+                try:
+                    winreg.DeleteValue(k, APP_NAME)
+                except FileNotFoundError:
+                    pass
+    except OSError:
+        pass
 
 
 # ---------------------------------------------------------------- glass material
@@ -175,8 +250,10 @@ def glass_window(hwnd: int, tint_rgba=(18, 14, 12, 70), shadow: bool = True) -> 
     return ok
 
 
+# mss on Windows takes physical pixels: callers scale Qt's logical coordinates by the device pixel ratio
+SCREEN_COORDS_ARE_PHYSICAL = True
+
+
 def grab_screen(x: int, y: int, w: int, h: int):
     """Raw RGB capture of a screen rectangle (physical pixels) → PIL image."""
-    with mss.MSS() if hasattr(mss, "MSS") else mss.mss() as s:
-        shot = s.grab({"left": x, "top": y, "width": max(1, w), "height": max(1, h)})
-    return Image.frombytes("RGB", shot.size, shot.rgb)
+    return grab_image(x, y, w, h)

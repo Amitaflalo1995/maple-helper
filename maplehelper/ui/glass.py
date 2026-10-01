@@ -1,4 +1,4 @@
-"""A liquid-glass backdrop that works even with Windows 'Transparency effects' off.
+"""A liquid-glass backdrop that works even with the system's transparency effects off.
 
 The overlay excludes itself from screen capture, samples what is behind it
 (the game), and repaints that as a frosted, color-saturated material a few
@@ -10,7 +10,7 @@ from PIL import ImageEnhance, ImageFilter
 from PySide6.QtCore import QObject, QTimer, Signal
 from PySide6.QtGui import QImage, QPixmap
 
-from .. import winapi
+from .. import osapi
 
 SCALE = 0.25          # sample at quarter resolution
 BLUR = 7              # at quarter scale ≈ 28px of real blur
@@ -39,10 +39,10 @@ class GlassBackdrop(QObject):
         w = self.widget
         if not w.isVisible():
             return
-        dpr = w.devicePixelRatioF()
+        dpr = w.devicePixelRatioF() if osapi.SCREEN_COORDS_ARE_PHYSICAL else 1.0
         g = w.geometry()
         try:
-            img = winapi.grab_screen(round(g.x() * dpr), round(g.y() * dpr), round(g.width() * dpr),
+            img = osapi.grab_screen(round(g.x() * dpr), round(g.y() * dpr), round(g.width() * dpr),
                                      round(g.height() * dpr))
         except Exception:
             return

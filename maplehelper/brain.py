@@ -13,6 +13,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import threading
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -23,7 +24,8 @@ from .store import Character, History
 META = "@@META@@"
 REVERSE_WORDS = re.compile(r"(מאיז[הו]|מאילו|איזה|אילו)\s+מפלצ|מי\s+מפיל|which\s+monsters?|who\s+drops|what\s+drops", re.I)
 DROP_WORDS = re.compile(r"דרופ|מפיל|נופל|שנופל|drops?\b|loot", re.I)
-CREATE_NO_WINDOW = 0x08000000
+# no console window flashing up on Windows; elsewhere creationflags must stay 0
+CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
 
 SYSTEM_PROMPT = """You are Maple Helper, a personal in-game assistant for MapleStory Classic World (MapleStory Classic), shown as a small chat window on top of the game.
 
@@ -71,7 +73,9 @@ LENGTH = {
 
 
 def find_claude() -> str | None:
-    """Locate the Claude Code executable (native install or npm)."""
+    """Locate the Claude Code executable (native install, npm or Homebrew)."""
+    if sys.platform != "win32":
+        return _find_claude_posix()
     for name in ("claude.exe", "claude"):
         p = shutil.which(name)
         if p and p.lower().endswith(".exe"):
@@ -85,6 +89,30 @@ def find_claude() -> str | None:
         if c.exists():
             return str(c)
     return shutil.which("claude")
+
+
+# An app opened from Finder gets PATH=/usr/bin:/bin:/usr/sbin:/sbin, so the usual install spots are listed here.
+POSIX_CLAUDE_DIRS = ["~/.local/bin", "~/.claude/local", "/opt/homebrew/bin", "/usr/local/bin", "~/.npm-global/bin"]
+
+
+def _find_claude_posix() -> str | None:
+    p = shutil.which("claude")
+    if p:
+        return p
+    for d in POSIX_CLAUDE_DIRS:
+        c = Path(d).expanduser() / "claude"
+        if c.is_file() and os.access(c, os.X_OK):
+            return str(c)
+    return None
+
+
+def child_env(env: dict | None = None) -> dict:
+    """Environment for Claude Code: on macOS the install folders join PATH (an npm install needs node)."""
+    env = dict(os.environ if env is None else env)
+    if sys.platform != "win32":
+        extra = [str(Path(d).expanduser()) for d in POSIX_CLAUDE_DIRS]
+        env["PATH"] = os.pathsep.join([env.get("PATH") or "/usr/bin:/bin"] + extra)
+    return env
 
 
 @dataclass
@@ -229,7 +257,7 @@ class Brain:
                "--include-partial-messages", "--restricted", "--strict-mcp-config", "--tools", "Read,Grep,Glob",
                "--model", self.model, "--no-session-persistence",
                "--system-prompt", SYSTEM_PROMPT.format(length=LENGTH.get(self.length, LENGTH["short"]))]
-        env = dict(os.environ)
+        env = child_env()
         if self.api_key:
             env["ANTHROPIC_API_KEY"] = self.api_key
         else:
@@ -377,7 +405,7 @@ class Brain:
                "what the player worked on, decisions, open goals. Same language as the conversation."]
         try:
             r = subprocess.run(cmd, input=transcript.encode("utf-8"), capture_output=True, timeout=90,
-                               creationflags=CREATE_NO_WINDOW)
+                               env=child_env(), creationflags=CREATE_NO_WINDOW)
             out = r.stdout.decode("utf-8", errors="replace").strip()
             return out or None
         except (OSError, subprocess.TimeoutExpired):

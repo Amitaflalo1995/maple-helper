@@ -5,6 +5,8 @@ Tokens follow Apple's system colors (label / secondaryLabel / fills) for each ap
 """
 from __future__ import annotations
 
+import sys
+
 from PySide6.QtGui import QFont, QFontDatabase
 
 from ..store import ASSETS
@@ -47,6 +49,9 @@ BORDER = "rgba(255,149,51,0.55)"
 FONT_FAMILY = "Rubik"
 ICON_FONT = "Segoe Fluent Icons"
 ICON = {"open": "\ue8a7", "refresh": "\ue72c", "info": "\ue946", "edit": "\ue70f", "delete": "\ue74d", "add": "\ue710", "minimize": "\ue921", "close": "\ue8bb", "settings": "\ue713", "camera": "\ue722", "mic": "\ue720", "send": "\ue74a", "stop": "\ue71a"}
+# the same keys without an icon font (a trailing U+FE0E asks for the plain glyph, not the color emoji)
+SYMBOL_ICONS = {"open": "\u2197", "refresh": "\u21bb", "info": "\u24d8", "edit": "\u270e", "delete": "\u232b", "add": "+", "minimize": "\u2013",
+                "close": "\u2715", "settings": "\u2699\ufe0e", "camera": "\ud83d\udcf7\ufe0e", "mic": "\ud83c\udf99\ufe0e", "send": "\u27a4", "stop": "\u25a0"}
 
 
 def set_mode(mode: str) -> None:
@@ -63,9 +68,14 @@ def load_fonts() -> str:
             fams = QFontDatabase.applicationFontFamilies(fid)
             fam = fams[0] if fams else None
     global ICON_FONT
-    if ICON_FONT not in QFontDatabase.families():
+    families = QFontDatabase.families()
+    if ICON_FONT not in families:
         ICON_FONT = "Segoe MDL2 Assets"
-    return fam or "Segoe UI"
+    if ICON_FONT not in families and sys.platform != "win32":
+        # macOS has no Segoe icon fonts: plain Unicode symbols, which the system fonts cover
+        ICON_FONT = "Helvetica Neue"
+        ICON.update(SYMBOL_ICONS)
+    return fam or ("Helvetica Neue" if sys.platform == "darwin" else "Segoe UI")
 
 
 def app_font(size: int = 14) -> QFont:
@@ -80,6 +90,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     * {{ font-family: "{font_family}"; font-size: {s}px; color: {c['text']}; }}
     QWidget#Overlay, QWidget#Feed {{ background: transparent; }}
     #Title {{ font-size: {s + 1}px; font-weight: 600; letter-spacing: -0.2px; color: {c['text']}; }}
+    #Version {{ font-size: {s - 3}px; font-weight: 300; color: {c['muted']}; background: transparent; }}
     #ProfilePill {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 12px;
                     min-height: 24px; max-height: 24px; padding: 0 11px; font-size: {s - 2}px; font-weight: 500; color: {c['text']}; }}
     #ProfilePill:hover {{ background: {c['fill3']}; }}

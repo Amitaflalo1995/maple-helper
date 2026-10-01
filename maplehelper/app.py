@@ -1,17 +1,15 @@
 """Maple Helper entry point: tray icon, global hotkeys, overlay, voice, onboarding."""
 from __future__ import annotations
 
-import ctypes
-import ctypes.wintypes as wt
 import sys
 import threading
-import winreg
+import webbrowser
 
-from PySide6.QtCore import QAbstractNativeEventFilter, QLockFile, QObject, Qt, QTimer, Signal
+from PySide6.QtCore import QLockFile, QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QAction, QIcon, QKeySequence
-from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon, QWidget
+from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
-from . import APP_NAME, __version__, claude_setup, updater, winapi
+from . import APP_NAME, __version__, claude_setup, osapi, updater
 from .brain import Brain
 from .i18n import I18n
 from .kb import KnowledgeBase
@@ -25,22 +23,9 @@ from .voice import VoiceController
 
 HOTKEY_TOGGLE = 1
 HOTKEY_VOICE = 2
-RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
-BACKGROUND_ARG = "--background"   # start in the tray only (Windows autostart, silent updates)
-
-
-class HotkeyFilter(QAbstractNativeEventFilter):
-    def __init__(self, on_hotkey):
-        super().__init__()
-        self.on_hotkey = on_hotkey
-
-    def nativeEventFilter(self, event_type, message):
-        if event_type == b"windows_generic_MSG":
-            msg = wt.MSG.from_address(int(message))
-            if msg.message == winapi.WM_HOTKEY:
-                self.on_hotkey(msg.wParam)
-                return True, 0
-        return False, 0
+BACKGROUND_ARG = "--background"   # start in the tray only (autostart at login, silent updates)
+# the .ico carries every Windows size; macOS draws the menu bar and Dock from a PNG
+APP_ICON = "app.ico" if sys.platform == "win32" else "icon-256.png"
 
 
 class _MainThread(QObject):
@@ -63,7 +48,7 @@ class MapleHelperApp:
         self.kb = KnowledgeBase()
         self.font_family = theme.load_fonts()
         theme.FONT_FAMILY = self.font_family
-        qapp.setWindowIcon(QIcon(str(ASSETS / "brand" / "app.ico")))
+        qapp.setWindowIcon(QIcon(str(ASSETS / "brand" / APP_ICON)))
         qapp.setQuitOnLastWindowClosed(False)
         self.main_thread = _MainThread()
 
@@ -76,12 +61,19 @@ class MapleHelperApp:
         self.qapp.setStyleSheet(css)
         return css
 
+    @staticmethod
+    def bring_dialogs_forward():
+        # a macOS menu bar app is never frontmost by itself, so its dialogs would open behind the game
+        if osapi.IS_MAC:
+            osapi.activate_self(0)
+
     def run_onboarding(self) -> bool:
         first = True
         while True:
             dlg = Onboarding(self.settings, self.profiles, self.kb, self.style)
             if not first:
                 dlg.restart_on_language()
+            self.bring_dialogs_forward()
             r = dlg.exec()
             if r == Onboarding.RESTART:
                 first = False
@@ -107,11 +99,8 @@ class MapleHelperApp:
         self.overlay.profile_requested.connect(self.open_settings)
         self.overlay.add_character_requested.connect(self.add_character)
 
-        # hotkeys live on a hidden native window
-        self.hotkey_host = QWidget()
-        self.hotkey_host.winId()
-        self.filter = HotkeyFilter(self.on_hotkey)
-        self.qapp.installNativeEventFilter(self.filter)
+        self.hotkeys = osapi.Hotkeys()
+        self.hotkeys.pressed.connect(self.on_hotkey)
         self.register_hotkeys()
 
         self.voice = VoiceController(self.settings["hotkey_voice"])
@@ -130,24 +119,28 @@ class MapleHelperApp:
             self.toast(t("app_tagline"), t("ob_done_hint").replace("F9", self.settings["hotkey_toggle"]))
         else:
             QTimer.singleShot(0, lambda: self.overlay.toggle(self.capture))
+        QTimer.singleShot(1500, self.check_permissions)
         self.qapp.aboutToQuit.connect(self.shutdown)
         return True
 
     def register_hotkeys(self):
-        hwnd = int(self.hotkey_host.winId())
-        winapi.unregister_hotkey(hwnd, HOTKEY_TOGGLE)
         key = self.settings["hotkey_toggle"]
-        if not winapi.register_hotkey(hwnd, HOTKEY_TOGGLE, key):
+        if not self.hotkeys.register(HOTKEY_TOGGLE, key):
             t = I18n(self.settings["language"])
             self.toast(t("settings"), t("hotkey_taken", key=key), timeout_ms=9000)
 
     def register_voice_hotkey(self):
-        hwnd = int(self.hotkey_host.winId())
-        winapi.unregister_hotkey(hwnd, HOTKEY_VOICE)
+        self.hotkeys.unregister(HOTKEY_VOICE)
         key = self.settings["hotkey_voice"]
-        if key != self.settings["hotkey_toggle"] and not winapi.register_hotkey(hwnd, HOTKEY_VOICE, key):
+        if key != self.settings["hotkey_toggle"] and not self.hotkeys.register(HOTKEY_VOICE, key):
             t = I18n(self.settings["language"])
             self.toast(t("settings"), t("hotkey_taken", key=key), timeout_ms=9000)
+
+    def check_permissions(self):
+        """macOS: ask once for Screen Recording (the screenshot), and say how to grant it when missing."""
+        if osapi.missing_permissions(request=True):
+            t = I18n(self.settings["language"])
+            self.toast(t("perm_title"), t("perm_screen_body"), timeout_ms=20000)
 
     def toast(self, title: str, message: str = "", timeout_ms: int = 5000):
         notify(title, message, rtl=I18n(self.settings["language"]).rtl, font_family=self.font_family,
@@ -156,7 +149,7 @@ class MapleHelperApp:
     # ------------------------------------------------------------------ events
 
     def capture(self, hwnd):
-        return winapi.capture_game(hwnd)
+        return osapi.capture_game(hwnd)
 
     def on_hotkey(self, hotkey_id: int):
         if hotkey_id == HOTKEY_TOGGLE:
@@ -201,7 +194,7 @@ class MapleHelperApp:
 
     def make_tray(self):
         t = I18n(self.settings["language"])
-        self.tray = QSystemTrayIcon(QIcon(str(ASSETS / "brand" / "app.ico")))
+        self.tray = QSystemTrayIcon(QIcon(str(ASSETS / "brand" / APP_ICON)))
         self.tray.setToolTip(f"{APP_NAME} · {t('app_tagline')}")
         menu = QMenu()
         # rounded, app-styled menu (the app-wide stylesheet paints it; the window must be see-through at the corners)
@@ -235,6 +228,7 @@ class MapleHelperApp:
         dlg.history_cleared.connect(self.on_history_cleared)
         dlg.account_changed.connect(self.on_account_changed)
         dlg.patch_notes_requested.connect(lambda: self.show_patch_notes())
+        self.bring_dialogs_forward()
         dlg.exec()
         self.overlay.refresh_profile_chip()
 
@@ -270,25 +264,21 @@ class MapleHelperApp:
         self.make_tray()
 
     def apply_autostart(self):
-        try:
-            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, RUN_KEY, 0, winreg.KEY_SET_VALUE) as k:
-                if self.settings["start_with_windows"]:
-                    exe = f'"{sys.executable}"' if getattr(sys, "frozen", False) else f'"{sys.executable}" -m maplehelper'
-                    exe += f" {BACKGROUND_ARG}"
-                    winreg.SetValueEx(k, APP_NAME, 0, winreg.REG_SZ, exe)
-                else:
-                    try:
-                        winreg.DeleteValue(k, APP_NAME)
-                    except FileNotFoundError:
-                        pass
-        except OSError:
-            pass
+        # the setting means "start at login" on macOS (named before macOS support)
+        osapi.set_autostart(self.settings["start_with_windows"], [BACKGROUND_ARG])
 
     # ------------------------------------------------------------------ knowledge base updates
 
     def check_kb_update_silently(self):
         self.pending_installer = None
-        if getattr(sys, "frozen", False):
+        if getattr(sys, "frozen", False) and osapi.IS_MAC:
+            # no silent self-update on macOS (the installer is a Windows .exe): point at the new DMG instead
+            def mac_update():
+                rel = updater.newer_release(__version__)
+                if rel:
+                    self.main_thread.call.emit(lambda: self.announce_update(*rel))
+            threading.Thread(target=mac_update, daemon=True).start()
+        elif getattr(sys, "frozen", False):
             def app_update():
                 path = updater.download_app_update(__version__)
                 if path:
@@ -302,6 +292,12 @@ class MapleHelperApp:
                 self.main_thread.call.emit(self.reload_kb)
                 self.main_thread.call.emit(lambda: self.kb_updated(before))
         threading.Thread(target=work, daemon=True).start()
+
+    def announce_update(self, version: str, url: str):
+        t = I18n(self.settings["language"])
+        self.toast(t("update_available", version=version), t("update_available_mac"), timeout_ms=20000)
+        a = QAction(t("update_available", version=version), self._tray_menu, triggered=lambda: webbrowser.open(url))
+        self._tray_menu.insertAction(self._tray_menu.actions()[2], a)   # right under the header
 
     def update_kb_interactive(self):
         t = I18n(self.settings["language"])
@@ -344,23 +340,19 @@ class MapleHelperApp:
         except Exception:
             pass
         try:
-            winapi.unregister_hotkey(int(self.hotkey_host.winId()), HOTKEY_TOGGLE)
-            winapi.unregister_hotkey(int(self.hotkey_host.winId()), HOTKEY_VOICE)
+            self.hotkeys.close()
         except Exception:
             pass
         if getattr(self, "pending_installer", None):
             updater.run_installer_silently(self.pending_installer)
 
 
-APP_ID = "MapleHelper.App"
-
 
 def main():
     if any(a.startswith("--selftest") for a in sys.argv[1:]):
         from . import selftest   # `Maple Helper.exe --selftest <report file>`, see selftest.py
         return selftest.main(sys.argv[1:])
-    # Windows shows this identity (not "Python") for the taskbar and notifications
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APP_ID)
+    osapi.prepare_process()
     qapp = QApplication(sys.argv)
     qapp.setStyle("Fusion")   # the native Windows 11 style ignores rounded corners on buttons
     qapp.setApplicationName(APP_NAME)

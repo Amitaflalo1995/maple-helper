@@ -9,7 +9,7 @@ from PySide6.QtGui import QAction, QGuiApplication, QIcon, QPainterPath, QPixmap
 from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QMenu, QPushButton,
                                QScrollArea, QSizeGrip, QToolButton, QVBoxLayout, QWidget)
 
-from .. import bidi, winapi
+from .. import __version__, bidi, osapi
 from ..brain import Answer, Brain
 from ..i18n import STRINGS, I18n
 from ..kb import KnowledgeBase
@@ -94,6 +94,7 @@ class Overlay(QWidget):
         super().__init__(None, Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
         self.setObjectName("Overlay")
         self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setAttribute(Qt.WA_MacAlwaysShowToolWindow)   # macOS hides tool windows of inactive apps
         self.setWindowTitle("Maple Helper")
         self.settings, self.profiles, self.kb, self.brain = settings, profiles, kb, brain
         self.t = I18n(settings["language"] or "he")
@@ -146,7 +147,7 @@ class Overlay(QWidget):
         lay.setContentsMargins(m + 14, m + 10, m + 14, m + 12)
         lay.setSpacing(10)
 
-        # header: app mark · name · profile pill · settings
+        # header: app mark · name · version · settings
         self.title_bar = TitleBar(self)
         tb = QHBoxLayout(self.title_bar)
         tb.setContentsMargins(2, 2, 0, 0)
@@ -158,6 +159,9 @@ class Overlay(QWidget):
         tb.addWidget(logo)
         self.title = QLabel("Maple Helper", objectName="Title")
         tb.addWidget(self.title)
+        self.version_label = QLabel(f"v{__version__}", objectName="Version")
+        self.version_label.setLayoutDirection(Qt.LeftToRight)
+        tb.addWidget(self.version_label)
         tb.addStretch(1)
         self.settings_btn = self._icon_button(theme.ICON["settings"])
         self.settings_btn.clicked.connect(self.settings_requested.emit)
@@ -332,7 +336,7 @@ class Overlay(QWidget):
     def place_default(self, near_hwnd: int | None = None):
         """Top-right corner of the game's screen (or the primary screen)."""
         screen = QGuiApplication.primaryScreen()
-        rect = winapi.window_rect(near_hwnd) if near_hwnd else None
+        rect = osapi.window_rect(near_hwnd) if near_hwnd else None
         if rect:
             s = QGuiApplication.screenAt(QPoint(rect[0] + rect[2] // 2, rect[1] + rect[3] // 2))
             screen = s or screen
@@ -384,7 +388,8 @@ class Overlay(QWidget):
         self.show()
         self.raise_()
         self.activateWindow()
-        winapi.focus_window(int(self.winId()))
+        osapi.float_over_fullscreen(int(self.winId()))
+        osapi.activate_self(int(self.winId()))
         self.input.setFocus()
         self._materialize(True)
 
@@ -397,7 +402,7 @@ class Overlay(QWidget):
             self.setWindowOpacity(1.0)
         self._materialize(False, done)
         if self.game_hwnd:
-            winapi.focus_window(self.game_hwnd)
+            osapi.focus_window(self.game_hwnd)
 
     def minimize(self):
         """Shrink to the bubble, which appears where the chat's header was."""
@@ -414,7 +419,7 @@ class Overlay(QWidget):
 
     def restore_from_bubble(self):
         self.bubble.hide()
-        hwnd = winapi.find_game_window()
+        hwnd = osapi.find_game_window()
         shot = self.shot_provider(hwnd) if self.shot_provider else None
         self.open_overlay(shot, hwnd)
 
@@ -424,7 +429,7 @@ class Overlay(QWidget):
             self.close_overlay()
         else:
             self.bubble.hide()
-            hwnd = winapi.find_game_window()
+            hwnd = osapi.find_game_window()
             self.open_overlay(shot_provider(hwnd), hwnd)
 
     def keyPressEvent(self, e):
@@ -439,8 +444,8 @@ class Overlay(QWidget):
         QTimer.singleShot(120, self._do_recapture)
 
     def _do_recapture(self):
-        hwnd = self.game_hwnd or winapi.find_game_window()
-        self.shot = winapi.capture_game(hwnd)
+        hwnd = self.game_hwnd or osapi.find_game_window()
+        self.shot = osapi.capture_game(hwnd)
         self.shot_used = False
         self.setWindowOpacity(1.0)
         self.add_system("✓ " + self.t("recaptured"))
@@ -631,8 +636,8 @@ class Overlay(QWidget):
         QTimer.singleShot(120, self._sync_capture)
 
     def _sync_capture(self):
-        hwnd = self.game_hwnd or winapi.find_game_window()
-        shot = winapi.capture_game(hwnd)
+        hwnd = self.game_hwnd or osapi.find_game_window()
+        shot = osapi.capture_game(hwnd)
         self.setWindowOpacity(1.0)
         if not shot:
             self._syncing = False

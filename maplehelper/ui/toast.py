@@ -23,6 +23,7 @@ class Toast(QWidget):
         super().__init__(None, Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool | Qt.WindowDoesNotAcceptFocus)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAttribute(Qt.WA_ShowWithoutActivating)
+        self.setAttribute(Qt.WA_MacAlwaysShowToolWindow)   # the app is never frontmost on macOS
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
         self.setFixedWidth(WIDTH + 2 * SHADOW)
