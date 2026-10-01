@@ -1,5 +1,14 @@
 [
  {
+  "version": "0.7.2",
+  "he": [
+   "החלפת שפה בהגדרות מחליפה עכשיו את הכל, גם את ההודעות בצ'אט ואת ההסבר על צילום המסך."
+  ],
+  "en": [
+   "Switching the language in Settings now changes everything, including notices in the chat and the screenshot hint."
+  ]
+ },
+ {
   "version": "0.7.1",
   "he": [
    "עדכון אמין יותר: פתיחת האפליקציה בזמן שעדכון מותקן מחכה שההתקנה תסתיים, במקום לקטוע אותה באמצע.",
