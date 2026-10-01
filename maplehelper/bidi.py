@@ -24,7 +24,7 @@ _RTL = re.compile(rf"[{RTL_CHARS}]")
 # may contain spaces and inner punctuation; ends with a letter, digit, % or ).
 _RUN = re.compile(
     r"(?:[+\-±]?\d|[A-Za-z])"                    # start
-    r"(?:(?:[A-Za-z0-9.'’:&/+\-–%#×_ ()]|,(?=\d{3}\b))*"   # body; "1,500" keeps its thousands comma
+    r"(?:(?:[A-Za-z0-9.'’:&/+\-–%#×_ ()@]|,(?=\d{3}\b))*"   # body; "1,500" keeps its comma, a@b.com its @
     r"[A-Za-z0-9%)])?"                           # end
 )
 
