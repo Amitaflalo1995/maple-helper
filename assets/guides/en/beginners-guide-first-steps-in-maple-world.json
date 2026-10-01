@@ -1,0 +1,358 @@
+{
+ "title": "Beginner's Guide: MapleStory Classic World",
+ "intro": "Your first hours in MapleStory Classic World, from Maple Island through level 10. Job choices, AP allocation rules, and what to grind on the way.",
+ "hero": null,
+ "minutes": 8,
+ "blocks": [
+  {
+   "p": "[[img:d6e564683a59cd.png]]"
+  },
+  {
+   "h2": "You start on Maple Island"
+  },
+  {
+   "p": "Your goals on Maple Island:"
+  },
+  {
+   "ul": [
+    "Talk to every NPC. Most hand out a one-quest, small-EXP-and-an-item reward.",
+    "**Grab the Green Relaxer chair.** It's the reward from Pio's quest below, and this is the only place you can get it.",
+    "By the time you finish all the beginner quests on Maple Island, you'll likely be lv 8. That's when you take the boat from Shanks at the dock to Lith Harbor and continue questing there."
+   ]
+  },
+  {
+   "p": "All 10 Maple Island quests (chains counted once, EXP summed across steps), straight from the quest tracker:"
+  },
+  {
+   "table": [
+    [
+     "Quest",
+     "From",
+     "Lv",
+     "EXP",
+     "Reward"
+    ],
+    [
+     "Sera's Mirror",
+     "Heena",
+     "1",
+     "2",
+     "-"
+    ],
+    [
+     "Roger's Apple",
+     "Roger",
+     "1",
+     "-",
+     "-"
+    ],
+    [
+     "Nina and Sen's Dinner Menu",
+     "Nina",
+     "1",
+     "3",
+     "-"
+    ],
+    [
+     "Todd's How-to-Hunt",
+     "Todd",
+     "1",
+     "10",
+     "-"
+    ],
+    [
+     "Sam's Suggestion",
+     "Sam",
+     "1",
+     "30",
+     "3x Egg"
+    ],
+    [
+     "Please bring this letter to Lucas",
+     "Maria",
+     "2",
+     "50",
+     "Random Skullcap or Headband"
+    ],
+    [
+     "Mai's Training",
+     "Mai",
+     "3",
+     "170",
+     "150 mesos, 15x Egg"
+    ],
+    [
+     "Biggs's Collection of Items",
+     "Biggs",
+     "3",
+     "70",
+     "Fruit Knife or Razor (random)"
+    ],
+    [
+     "Pio's Collecting Recycled Goods",
+     "Pio",
+     "5",
+     "100",
+     "150 mesos, **The Green Relaxer** chair"
+    ],
+    [
+     "Rain's Maple Quiz (7 parts)",
+     "Rain",
+     "5",
+     "245",
+     "10x Orange"
+    ]
+   ]
+  },
+  {
+   "p": "**Plan your AP for the job you want.** STR gives a Beginner stronger basic attacks than INT does. Putting AP into INT for Magician can mean slower kills before advancement, but your AP does not reset when you take your first job. Keep the points in your future job's primary stat."
+  },
+  {
+   "h2": "Pick Wooden Club, then Razor at level 5"
+  },
+  {
+   "p": "[[img:9eab57ead0d224.png]]Choose the Wooden Club at character creation. It has 19 W.ATK; the Sword and Hand Axe have 17. Club attacks one tier slower than Sword or Hand Axe, but across levels 1 to 4, the Club reaches the useful damage breakpoints more often."
+  },
+  {
+   "p": "Against a level 1 Snail with the fixed starting stats, the current COT2 damage model gives:"
+  },
+  {
+   "table": [
+    [
+     "Damage result",
+     "Sword",
+     "Hand Axe",
+     "Wooden Club"
+    ],
+    [
+     "Minimum damage",
+     "4 hits",
+     "4 hits",
+     "3 hits"
+    ],
+    [
+     "Average damage",
+     "3 hits",
+     "3 hits",
+     "3 hits"
+    ],
+    [
+     "Maximum damage",
+     "3 hits",
+     "3 hits",
+     "2 hits"
+    ]
+   ]
+  },
+  {
+   "p": "Club matches or beats both 17 W.ATK weapons on minimum, average, and maximum damage for **every class path**. Its higher damage can save a hit when it crosses a monster's HP threshold."
+  },
+  {
+   "p": "**At level 5, switch to Razor.** Its 23 W.ATK and faster speed give every class path higher minimum and average damage than Wooden Club."
+  },
+  {
+   "h2": "Max your Beginner skills by level 10"
+  },
+  {
+   "p": "You earn 9 SP by the time you hit level 10 (1 per level-up, 9 level-ups from 1 to 10). That's exactly enough to max all three Beginner skills (3 SP each, 9 total)."
+  },
+  {
+   "table": [
+    [
+     "",
+     "Skill",
+     "Max",
+     "What it does at max"
+    ],
+    [
+     "[[img:edc2244a5bda10.png]]",
+     "Nimble Feet",
+     "3",
+     "Speed +10 for 30s (MP -10). 3 min cooldown."
+    ],
+    [
+     "[[img:efe346ff3ac88e.png]]",
+     "Three Snails",
+     "3",
+     "40 fixed damage, ranged. Consumes 1 Red Snail Shell + 5 MP per cast."
+    ],
+    [
+     "[[img:d1b8185bc6bf24.png]]",
+     "Recovery",
+     "3",
+     "Heals 72 HP over 30s (MP -15). 2 min cooldown."
+    ]
+   ]
+  },
+  {
+   "ul": [
+    "**Nimble Feet**: use the short speed boost to travel between maps or reach monsters. It has a 3-minute cooldown.",
+    "**Three Snails**: ranged fixed damage. The shell and MP cost depend on skill level; at max level it uses a Red Snail Shell and 5 MP for 40 damage.",
+    "**Recovery**: activate it to recover HP over 30 seconds. At max level it restores 72 HP for 15 MP, with a 2-minute cooldown."
+   ]
+  },
+  {
+   "p": "Order matters for levels 1 to 9; by 10 they're all maxed anyway. Take Nimble Feet first, then Three Snails for ranged, Recovery last."
+  },
+  {
+   "h2": "First job advancement at level 10"
+  },
+  {
+   "p": "Stick to the Lith Harbor beginner quests until you hit level 10, then head to one of four towns:"
+  },
+  {
+   "ul": [
+    "Perion: Warriors (Dances With Balrog)",
+    "Ellinia: Magicians (Grendel the Really Old)",
+    "Henesys: Bowmen (Athena Pierce)",
+    "Kerning City: Thieves (Dark Lord)"
+   ]
+  },
+  {
+   "p": "**Don't spend AP on the wrong stat thinking advancement will fix it.** 1st job has no stat requirements (a 4-INT Beginner can advance to Warrior), but your AP does not reset on advancement. Every misallocated point follows you into your job. The only way to undo it is a cash-shop AP Reset."
+  },
+  {
+   "h2": "Ability Points allocation"
+  },
+  {
+   "p": "You get 5 AP per level for STR, DEX, INT, and LUK. Safe split for new players: 5 in your primary until level 10."
+  },
+  {
+   "ul": [
+    "Warrior: 5 STR",
+    "Magician: 5 INT",
+    "Bowman: 5 DEX",
+    "Thief: 5 LUK"
+   ]
+  },
+  {
+   "h2": "From level 10 to 30: follow your class guide"
+  },
+  {
+   "p": "Lv 10 to 30 is the long middle. The right path depends on the class you picked, so the rest is in the per-class guides:"
+  },
+  {
+   "guide": "warrior-class-guide",
+   "text": "MapleStory Classic Warrior Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "magician-class-guide",
+   "text": "MapleStory Classic Magician Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "bowman-class-guide",
+   "text": "MapleStory Classic Bowman Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "thief-class-guide",
+   "text": "MapleStory Classic Thief Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "p": "Lv 30 is 2nd job. Same town, same instructor, and you pick a branch:\n• **Warrior**: Fighter, Page, Spearman\n• **Magician**: Cleric, Ice/Lightning, Fire/Poison\n• **Bowman**: Hunter, Crossbowman\n• **Thief**: Assassin, Bandit\nThe class tier list breaks down each branch."
+  },
+  {
+   "h2": "Vendor early weapon drops"
+  },
+  {
+   "p": "COT2 cut many consumable and material sell-back values, so random equipment drops matter more than they look. These weapon prices come from the current COT2 items; the monster sources are community-confirmed in Classic."
+  },
+  {
+   "table": [
+    [
+     "Drop",
+     "Confirmed from",
+     "NPC sell-back"
+    ],
+    [
+     "Long Sword",
+     "Orange Mushroom",
+     "1,500"
+    ],
+    [
+     "Double Axe",
+     "Orange Mushroom",
+     "1,500"
+    ],
+    [
+     "Wooden Staff",
+     "Stump",
+     "1,500"
+    ],
+    [
+     "Wooden Sword",
+     "Red Snail",
+     "2,500"
+    ],
+    [
+     "Metal Axe",
+     "Slime",
+     "2,500"
+    ],
+    [
+     "Spear",
+     "Orange Mushroom",
+     "2,500"
+    ]
+   ]
+  },
+  {
+   "p": "**The number above is what the NPC pays you for the weapon.** Keep one upgrade you can use, then check duplicates in Safe to Sell? for quest and crafting uses before vendoring them."
+  },
+  {
+   "h2": "Party play"
+  },
+  {
+   "p": "Party kills pay a bonus on top of the EXP each member earns, and the bonus grows with party size up to four members. The same table sits in the EXP table guide."
+  },
+  {
+   "table": [
+    [
+     "Party size",
+     "Bonus EXP"
+    ],
+    [
+     "2",
+     "10%"
+    ],
+    [
+     "3",
+     "20%"
+    ],
+    [
+     "4",
+     "30%"
+    ],
+    [
+     "5",
+     "30%"
+    ],
+    [
+     "6",
+     "30%"
+    ]
+   ]
+  },
+  {
+   "ul": [
+    "**The bonus stops growing at four.** Four, five and six members all pay 30%. Extra members still add kill speed.",
+    "**Keep swinging.** A member who has not attacked for 15 seconds stops receiving party EXP until they attack again."
+   ]
+  },
+  {
+   "h2": "A few survival tips"
+  },
+  {
+   "ul": [
+    "**Party up.** Classic gives bonus EXP for party kills, and most early quests are faster with two or three people.",
+    "Don't sell quest items. The quest tracker lists which inventory items are needed for active quests so you can check before clearing junk.",
+    "Potions are scarce. Mobs drop them rarely, so expect to spend most of your mesos at NPCs.",
+    "**Buy smart at NPC shops.** The item efficiency tool ranks HP and MP potions by meso-per-point."
+   ]
+  },
+  {
+   "p": "Visit the same maps often enough and you'll start recognizing the other players doing the same. That's how parties form."
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/beginners-guide-first-steps-in-maple-world",
+ "hash": "5a55047bb580"
+}

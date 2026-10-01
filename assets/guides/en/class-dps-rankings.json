@@ -1,0 +1,1282 @@
+{
+ "title": "Second-Job DPS Rankings at Lv 70: Single-Target and AoE",
+ "intro": "Level 70 MapleStory Classic second-job builds ranked by one-minute damage. Compare damage per cast and MP efficiency.",
+ "hero": null,
+ "minutes": 12,
+ "blocks": [
+  {
+   "p": "[[img:eead4ba441ad89.png]] **Bandit** has the highest modeled single-target result at level 70 while maintaining Steal's short Attack Power buff. **Fighter** takes second in single-target damage and first against a full pack once Axe Mastery Bleed is included. Slash Blast rolls Bleed separately for every target it hits. All ten second-job builds below use their exact saved skill allocations against a stationary target with no weapon or magic defense."
+  },
+  {
+   "p": "We use twenty MeowDB-owned copies of **Grummash**'s builds, ten per tier, linked below. Each copy preserves the source equipment and skill allocation and links to Grummash's original. Direct attacks use the same damage model as the DMG Simulator. This level-70 benchmark adds Fighter's expected Axe Mastery Bleed uptime to Power Strike and Slash Blast, plus Poison Breath's sustained poison. Slash Blast gives every target its own Bleed application roll and refresh. **Realistic** uses Lesser scrolls (100% success, +1 each); **Max-Scrolled** uses each Chaos scroll's current listed bonus (10% success; usually +4, with +8 Magic Attack, +25 HP/MP, and +8/+6 defense exceptions). Every row uses the skill level saved in that build. Several paired builds also have different SP allocations, so the tier switch includes both gear and SP changes. Every allocated direct attack is in the full DPS table."
+  },
+  {
+   "ul": [
+    "**DPC, damage per cast.** One press of the skill, with every direct hit combined. Savage Blow's six hits count as one cast. Persistent ticks stay separate.",
+    "**DPM, damage per minute.** Everything that lands in 60 seconds of continuous casting, with a matching physical Booster where the saved build has one. Fighter's Power Strike and Slash Blast include expected Bleed refresh uptime. Slash Blast rolls Bleed separately on every target hit. Poison Breath includes one poison stream per target at full uptime. It assumes enough MP or HP to keep casting for the full minute.",
+    "**DPMP, damage per MP.** Damage bought per point of MP spent. Persistent damage is divided by that minute's casting cost after it is added to DPM. Level 1 attacks stay in the detailed build cards but are excluded from this level-70 efficiency benchmark."
+   ]
+  },
+  {
+   "h2": "Single-target DPS Rankings by Class"
+  },
+  {
+   "p": "DPM: damage per minute"
+  },
+  {
+   "p": "A full minute of casting with a matching physical Booster where the class has one. Bandit maintains Steal and pays its refresh time and MP. Fighter's Power Strike and Slash Blast include expected Axe Mastery Bleed uptime. Slash Blast rolls Bleed separately for every target hit. Poison Breath adds one full-uptime poison stream per target. F/P, I/L and Cleric have no booster at second job."
+  },
+  {
+   "p": "Target matchup"
+  },
+  {
+   "p": "Tap a bar for build details. Warrior Bowman Thief Magician"
+  },
+  {
+   "p": "Source: Realistic and Max-Scrolled builds from the meowdb.com Character Builder. Special thanks to Grummash for the builds."
+  },
+  {
+   "p": "DPC: damage per cast"
+  },
+  {
+   "p": "One press of the skill, every direct hit combined. A six-hit cast like Savage Blow counts once here, and so does Holy Arrow's three. Persistent ticks stay separate from DPC."
+  },
+  {
+   "p": "Target matchup"
+  },
+  {
+   "p": "Tap a bar for build details. Warrior Bowman Thief Magician"
+  },
+  {
+   "p": "Source: Realistic and Max-Scrolled builds from the meowdb.com Character Builder. Special thanks to Grummash for the builds."
+  },
+  {
+   "p": "DPMP: damage per point of MP"
+  },
+  {
+   "p": "Damage bought per MP spent. Bandit's maintained rotation includes Steal refresh costs, Fighter includes expected Bleed refresh uptime, and Poison Breath uses its full-uptime DPM. The order here looks nothing like the DPM chart."
+  },
+  {
+   "p": "Target matchup"
+  },
+  {
+   "p": "Tap a bar for build details. Warrior Bowman Thief Magician"
+  },
+  {
+   "p": "Source: Realistic and Max-Scrolled builds from the meowdb.com Character Builder. Special thanks to Grummash for the builds."
+  },
+  {
+   "table": [
+    [
+     "#",
+     "Class",
+     "Main skill",
+     "DPC",
+     "Casts in 1 min",
+     "DPM",
+     "DPS",
+     "MP spent",
+     "DPMP"
+    ],
+    [
+     "1",
+     "Bandit",
+     "Steal refresh + Savage Blow (Steal Lv 30 + Savage Blow Lv 30)",
+     "-",
+     "83.0",
+     "341,782",
+     "5,696",
+     "2,316",
+     "147.6"
+    ],
+    [
+     "2",
+     "Fighter (2H Axe)",
+     "Power Strike (Lv 20)",
+     "3,009",
+     "83.0",
+     "263,419",
+     "4,390",
+     "996",
+     "264.5"
+    ],
+    [
+     "3",
+     "Assassin",
+     "Lucky Seven (Lv 20)",
+     "2,560",
+     "100.0",
+     "255,978",
+     "4,266",
+     "1,600",
+     "160.0"
+    ],
+    [
+     "4",
+     "Hunter (Bow)",
+     "Double Shot (Lv 20)",
+     "2,664",
+     "57.5",
+     "238,919",
+     "3,982",
+     "920",
+     "166.5"
+    ],
+    [
+     "5",
+     "Page (2H Blunt)",
+     "Power Strike (Lv 20)",
+     "2,836",
+     "55.2",
+     "237,178",
+     "3,953",
+     "662",
+     "236.3"
+    ],
+    [
+     "6",
+     "Spearman (Spear)",
+     "Power Strike (Lv 20)",
+     "2,691",
+     "55.8",
+     "224,676",
+     "3,745",
+     "670",
+     "224.2"
+    ],
+    [
+     "7",
+     "Crossbowman",
+     "Double Shot (Lv 20)",
+     "2,787",
+     "76.0",
+     "211,778",
+     "3,530",
+     "1,216",
+     "174.2"
+    ],
+    [
+     "8",
+     "F/P Wizard",
+     "Fire Arrow (neutral) (Lv 30)",
+     "2,667",
+     "74.0",
+     "197,356",
+     "3,289",
+     "2,072",
+     "95.2"
+    ],
+    [
+     "9",
+     "I/L Wizard",
+     "Cold Beam (neutral) (Lv 30)",
+     "2,519",
+     "74.0",
+     "186,391",
+     "3,107",
+     "1,628",
+     "114.5"
+    ],
+    [
+     "10",
+     "Cleric",
+     "Holy Arrow (neutral) (Lv 30)",
+     "2,468",
+     "74.0",
+     "182,666",
+     "3,044",
+     "2,072",
+     "88.2"
+    ]
+   ]
+  },
+  {
+   "h2": "The 1-minute DPS calculation"
+  },
+  {
+   "p": "**DPC x casts per minute = direct DPM.** Fighter's Power Strike then adds one non-stacking Bleed stream at its expected refresh uptime. Slash Blast adds one independently refreshed stream per target. Poison Breath adds one active poison stream per target at full uptime."
+  },
+  {
+   "h2": "AoE DPS Rankings by Class"
+  },
+  {
+   "p": "Each skill is measured at its own target cap. Fighter's Slash Blast total includes one independently refreshed Bleed on each of four targets. Poison Breath assumes all four targets stay poisoned and tick once per second. Holy Arrow can split its three hits across up to three targets, so Cleric appears with the same fixed total it deals when all three hits land on one target. Assassin has no multi-target direct attack in the saved first-job and second-job allocation, so it does not appear."
+  },
+  {
+   "table": [
+    [
+     "Class",
+     "Skill",
+     "Target cap",
+     "Hits per cast"
+    ],
+    [
+     "I/L Wizard",
+     "Thunder Bolt (neutral) (Lv 30)",
+     "6",
+     "1"
+    ],
+    [
+     "Fighter (2H Axe)",
+     "Slash Blast (Lv 20)",
+     "4",
+     "1"
+    ],
+    [
+     "Hunter (Bow)",
+     "Arrow Bomb: Bow (Lv 30)",
+     "4",
+     "1"
+    ],
+    [
+     "F/P Wizard",
+     "Poison Breath (neutral) (Lv 30)",
+     "4",
+     "1"
+    ],
+    [
+     "Page (2H Blunt)",
+     "Slash Blast (Lv 20)",
+     "4",
+     "1"
+    ],
+    [
+     "Crossbowman",
+     "Iron Arrow: Crossbow (Lv 30)",
+     "4",
+     "1"
+    ],
+    [
+     "Spearman (Spear)",
+     "Slash Blast (Lv 20)",
+     "4",
+     "1"
+    ],
+    [
+     "Cleric",
+     "Holy Arrow (neutral) (Lv 30)",
+     "3",
+     "3"
+    ],
+    [
+     "Bandit",
+     "Steal spam (Steal Lv 30)",
+     "2",
+     "1"
+    ]
+   ]
+  },
+  {
+   "p": "DPM: damage per minute, at each skill's target cap"
+  },
+  {
+   "p": "A full minute of casting with a matching physical Booster where the class has one. Bandit maintains Steal and pays its refresh time and MP. Fighter's Power Strike and Slash Blast include expected Axe Mastery Bleed uptime. Slash Blast rolls Bleed separately for every target hit. Poison Breath adds one full-uptime poison stream per target. F/P, I/L and Cleric have no booster at second job."
+  },
+  {
+   "p": "Target matchup"
+  },
+  {
+   "p": "Tap a bar for build details. Warrior Bowman Thief Magician"
+  },
+  {
+   "p": "Source: Realistic and Max-Scrolled builds from the meowdb.com Character Builder. Special thanks to Grummash for the builds."
+  },
+  {
+   "p": "DPC: damage per cast, at each skill's target cap"
+  },
+  {
+   "p": "One press of the skill, every direct hit combined. A six-hit cast like Savage Blow counts once here, and so does Holy Arrow's three. Persistent ticks stay separate from DPC."
+  },
+  {
+   "p": "Target matchup"
+  },
+  {
+   "p": "Tap a bar for build details. Warrior Bowman Thief Magician"
+  },
+  {
+   "p": "Source: Realistic and Max-Scrolled builds from the meowdb.com Character Builder. Special thanks to Grummash for the builds."
+  },
+  {
+   "p": "DPMP: damage per point of MP"
+  },
+  {
+   "p": "Damage bought per MP spent. Bandit's maintained rotation includes Steal refresh costs, Fighter includes expected Bleed refresh uptime, and Poison Breath uses its full-uptime DPM. The order here looks nothing like the DPM chart."
+  },
+  {
+   "p": "Target matchup"
+  },
+  {
+   "p": "Tap a bar for build details. Warrior Bowman Thief Magician"
+  },
+  {
+   "p": "Source: Realistic and Max-Scrolled builds from the meowdb.com Character Builder. Special thanks to Grummash for the builds."
+  },
+  {
+   "table": [
+    [
+     "#",
+     "Class",
+     "Main skill",
+     "DPC",
+     "Casts in 1 min",
+     "DPM",
+     "DPS",
+     "MP spent",
+     "DPMP"
+    ],
+    [
+     "1",
+     "Fighter (2H Axe)",
+     "Slash Blast (Lv 20)",
+     "6,019",
+     "83.0",
+     "554,121",
+     "9,235",
+     "996",
+     "556.3"
+    ],
+    [
+     "2",
+     "Hunter (Bow)",
+     "Arrow Bomb: Bow (Lv 30)",
+     "6,217",
+     "83.0",
+     "516,019",
+     "8,600",
+     "2,324",
+     "222.0"
+    ],
+    [
+     "3",
+     "F/P Wizard",
+     "Poison Breath (neutral) (Lv 30)",
+     "4,741",
+     "74.0",
+     "476,623",
+     "7,944",
+     "2,960",
+     "161.0"
+    ],
+    [
+     "4",
+     "I/L Wizard",
+     "Thunder Bolt (neutral) (Lv 30)",
+     "6,223",
+     "74.0",
+     "460,479",
+     "7,675",
+     "2,960",
+     "155.6"
+    ],
+    [
+     "5",
+     "Page (2H Blunt)",
+     "Slash Blast (Lv 20)",
+     "5,672",
+     "80.0",
+     "453,766",
+     "7,563",
+     "960",
+     "472.7"
+    ],
+    [
+     "6",
+     "Crossbowman",
+     "Iron Arrow: Crossbow (Lv 30)",
+     "5,852",
+     "76.0",
+     "444,727",
+     "7,412",
+     "2,128",
+     "209.0"
+    ],
+    [
+     "7",
+     "Spearman (Spear)",
+     "Slash Blast (Lv 20)",
+     "5,381",
+     "81.0",
+     "435,703",
+     "7,262",
+     "972",
+     "448.4"
+    ],
+    [
+     "8",
+     "Bandit",
+     "Steal spam (Steal Lv 30)",
+     "-",
+     "100.0",
+     "213,183",
+     "3,553",
+     "2,400",
+     "88.8"
+    ],
+    [
+     "9",
+     "Cleric",
+     "Holy Arrow (neutral) (Lv 30)",
+     "2,468",
+     "74.0",
+     "182,666",
+     "3,044",
+     "2,072",
+     "88.2"
+    ]
+   ]
+  },
+  {
+   "h2": "Max-Scrolled Saved-Build DPS Ranking"
+  },
+  {
+   "p": "Each tier uses that saved build's best allocated neutral single-target skill. The difference includes both equipment and any SP-allocation changes between the two public builds, so it does not isolate Chaos scrolling."
+  },
+  {
+   "table": [
+    [
+     "#",
+     "Class",
+     "Main skill",
+     "Max-Scrolled DPS",
+     "Realistic DPS",
+     "Difference"
+    ],
+    [
+     "1",
+     "Bandit",
+     "Steal refresh + Savage Blow (Steal Lv 30 + Savage Blow Lv 30)",
+     "8,730",
+     "5,696",
+     "+53.3%"
+    ],
+    [
+     "2",
+     "Assassin",
+     "Lucky Seven (Lv 20)",
+     "7,333",
+     "4,266",
+     "+71.9%"
+    ],
+    [
+     "3",
+     "Fighter (2H Axe)",
+     "Power Strike (Lv 20)",
+     "6,677",
+     "4,390",
+     "+52.1%"
+    ],
+    [
+     "4",
+     "Hunter (Bow)",
+     "Double Shot (Lv 20)",
+     "6,224",
+     "3,982",
+     "+56.3%"
+    ],
+    [
+     "5",
+     "Page (2H Blunt)",
+     "Power Strike (Lv 20)",
+     "6,097",
+     "3,953",
+     "+54.2%"
+    ],
+    [
+     "6",
+     "Crossbowman",
+     "Double Shot (Lv 20)",
+     "5,454",
+     "3,530",
+     "+54.5%"
+    ],
+    [
+     "7",
+     "Spearman (Spear)",
+     "Power Strike (Lv 20)",
+     "5,450",
+     "3,745",
+     "+45.6%"
+    ],
+    [
+     "8",
+     "F/P Wizard",
+     "Fire Arrow (neutral) (Lv 30)",
+     "4,829",
+     "3,289",
+     "+46.8%"
+    ],
+    [
+     "9",
+     "I/L Wizard",
+     "Cold Beam (neutral) (Lv 30)",
+     "4,560",
+     "3,107",
+     "+46.8%"
+    ],
+    [
+     "10",
+     "Cleric",
+     "Holy Arrow (neutral) (Lv 30)",
+     "4,552",
+     "3,044",
+     "+49.5%"
+    ]
+   ]
+  },
+  {
+   "p": "This tier is a ceiling. The boomed weapons never show up in a chart like this."
+  },
+  {
+   "h2": "Attack Speed and the Rankings"
+  },
+  {
+   "p": "Booster moves a weapon two speed tiers. Magicians have none at second job. Cast rate is per skill, and some skills animate on their own frames instead of the weapon's, so two classes on equally fast weapons can cast at different rates."
+  },
+  {
+   "table": [
+    [
+     "Class",
+     "Weapon",
+     "Weapon speed",
+     "Skill",
+     "Casts in 1 min",
+     "Booster"
+    ],
+    [
+     "Assassin",
+     "Black Scarab",
+     "Fast",
+     "Lucky Seven (Lv 20)",
+     "100.0",
+     "Yes, -2 tiers"
+    ],
+    [
+     "Fighter (2H Axe)",
+     "Chrono",
+     "Normal",
+     "Power Strike (Lv 20)",
+     "83.0",
+     "Yes, -2 tiers"
+    ],
+    [
+     "Bandit",
+     "Kandine",
+     "Fast",
+     "Steal refresh + Savage Blow (Steal Lv 30 + Savage Blow Lv 30)",
+     "83.0",
+     "Yes, -2 tiers"
+    ],
+    [
+     "Crossbowman",
+     "Gross Jaeger",
+     "Slow",
+     "Double Shot (Lv 20)",
+     "76.0",
+     "Yes, -2 tiers"
+    ],
+    [
+     "F/P Wizard",
+     "Angel Wings",
+     "Normal",
+     "Fire Arrow (neutral) (Lv 30)",
+     "74.0",
+     "None at 2nd job"
+    ],
+    [
+     "I/L Wizard",
+     "Angel Wings",
+     "Normal",
+     "Cold Beam (neutral) (Lv 30)",
+     "74.0",
+     "None at 2nd job"
+    ],
+    [
+     "Cleric",
+     "Angel Wings",
+     "Normal",
+     "Holy Arrow (neutral) (Lv 30)",
+     "74.0",
+     "None at 2nd job"
+    ],
+    [
+     "Hunter (Bow)",
+     "Golden Hinkel",
+     "Normal",
+     "Double Shot (Lv 20)",
+     "57.5",
+     "Yes, -2 tiers"
+    ],
+    [
+     "Spearman (Spear)",
+     "Redemption",
+     "Slow",
+     "Power Strike (Lv 20)",
+     "55.8",
+     "Yes, -2 tiers"
+    ],
+    [
+     "Page (2H Blunt)",
+     "Gigantic Sledge",
+     "Slow",
+     "Power Strike (Lv 20)",
+     "55.2",
+     "Yes, -2 tiers"
+    ]
+   ]
+  },
+  {
+   "h2": "Build Cards: Every Class in Detail"
+  },
+  {
+   "p": "Every build below is public. Open one to change a scroll or skill level. The ACC shown on physical builds is a character-sheet value; use the Accuracy Simulator for a specific monster."
+  },
+  {
+   "h3": "Fighter (2H Axe)"
+  },
+  {
+   "ul": [
+    "**Realistic**: MeowDB Lv70 Fighter Realistic. Chrono, 337 primary and 70 secondary, 105 W.ATK, 40 attack power, mastery 10, 14% crit rate and +26% crit damage, 140 ACC.",
+    "**Max-Scrolled**: MeowDB Lv70 Fighter Max-Scrolled. Chrono, 392 primary, 141 W.ATK."
+   ]
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Type",
+     "DPC",
+     "Casts in 1 min",
+     "Realistic DPM",
+     "Max-Scrolled DPM",
+     "MP spent",
+     "DPMP"
+    ],
+    [
+     "Power Strike (Lv 20)",
+     "ST",
+     "3,009",
+     "83.0",
+     "263,419",
+     "400,646",
+     "996",
+     "264.5"
+    ],
+    [
+     "Slash Blast (Lv 20)",
+     "AoE",
+     "6,019",
+     "83.0",
+     "554,121",
+     "842,557",
+     "996",
+     "556.3"
+    ]
+   ]
+  },
+  {
+   "h3": "Page (2H Blunt)"
+  },
+  {
+   "ul": [
+    "**Realistic**: MeowDB Lv70 Page Realistic. Gigantic Sledge, 337 primary and 70 secondary, 107 W.ATK, 0 attack power, mastery 10, 14% crit rate and +26% crit damage, 140 ACC.",
+    "**Max-Scrolled**: MeowDB Lv70 Page Max-Scrolled. Gigantic Sledge, 399 primary, 143 W.ATK."
+   ]
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Type",
+     "DPC",
+     "Casts in 1 min",
+     "Realistic DPM",
+     "Max-Scrolled DPM",
+     "MP spent",
+     "DPMP"
+    ],
+    [
+     "Power Strike (Lv 20)",
+     "ST",
+     "2,836",
+     "55.2",
+     "237,178",
+     "365,804",
+     "662",
+     "236.3"
+    ],
+    [
+     "Slash Blast (Lv 20)",
+     "AoE",
+     "5,672",
+     "80.0",
+     "453,766",
+     "699,851",
+     "960",
+     "472.7"
+    ]
+   ]
+  },
+  {
+   "h3": "Spearman (Spear)"
+  },
+  {
+   "ul": [
+    "**Realistic**: MeowDB Lv70 Spearman Realistic. Redemption, 337 primary and 70 secondary, 107 W.ATK, 0 attack power, mastery 10, 34% crit rate and +26% crit damage, 140 ACC.",
+    "**Max-Scrolled**: MeowDB Lv70 Spearman Max-Scrolled. Redemption, 369 primary, 143 W.ATK."
+   ]
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Type",
+     "DPC",
+     "Casts in 1 min",
+     "Realistic DPM",
+     "Max-Scrolled DPM",
+     "MP spent",
+     "DPMP"
+    ],
+    [
+     "Power Strike (Lv 20)",
+     "ST",
+     "2,691",
+     "55.8",
+     "224,676",
+     "327,025",
+     "670",
+     "224.2"
+    ],
+    [
+     "Slash Blast (Lv 20)",
+     "AoE",
+     "5,381",
+     "81.0",
+     "435,703",
+     "634,184",
+     "972",
+     "448.4"
+    ]
+   ]
+  },
+  {
+   "h3": "Hunter (Bow)"
+  },
+  {
+   "ul": [
+    "**Realistic**: MeowDB Lv70 Hunter Realistic. Golden Hinkel, 338 primary and 72 secondary, 103 W.ATK, 0 attack power, mastery 10, 31% crit rate and +41% crit damage, 155 ACC.",
+    "**Max-Scrolled**: MeowDB Lv70 Hunter Max-Scrolled. Red Hinkel, 400 primary, 141 W.ATK."
+   ]
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Type",
+     "DPC",
+     "Casts in 1 min",
+     "Realistic DPM",
+     "Max-Scrolled DPM",
+     "MP spent",
+     "DPMP"
+    ],
+    [
+     "Arrow Blow (Lv 1)",
+     "ST",
+     "1,776",
+     "57.5",
+     "187,854",
+     "293,648",
+     "345",
+     "296.0"
+    ],
+    [
+     "Double Shot (Lv 20)",
+     "ST",
+     "2,664",
+     "57.5",
+     "238,919",
+     "373,469",
+     "920",
+     "166.5"
+    ],
+    [
+     "Power Knockback (Lv 1)",
+     "AoE",
+     "671",
+     "57.5",
+     "124,282",
+     "191,290",
+     "690",
+     "55.9"
+    ],
+    [
+     "Arrow Bomb: Bow (Lv 30)",
+     "AoE",
+     "6,217",
+     "83.0",
+     "516,019",
+     "806,623",
+     "2,324",
+     "222.0"
+    ]
+   ]
+  },
+  {
+   "h3": "Crossbowman"
+  },
+  {
+   "ul": [
+    "**Realistic**: MeowDB Lv70 Crossbowman Realistic. Gross Jaeger, 348 primary and 62 secondary, 107 W.ATK, 0 attack power, mastery 10, 29% crit rate and +41% crit damage, 157 ACC.",
+    "**Max-Scrolled**: MeowDB Lv70 Crossbowman Max-Scrolled. Gross Jaeger, 408 primary, 143 W.ATK."
+   ]
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Type",
+     "DPC",
+     "Casts in 1 min",
+     "Realistic DPM",
+     "Max-Scrolled DPM",
+     "MP spent",
+     "DPMP"
+    ],
+    [
+     "Arrow Blow (Lv 1)",
+     "ST",
+     "1,858",
+     "58.4",
+     "154,867",
+     "255,339",
+     "350",
+     "309.6"
+    ],
+    [
+     "Double Shot (Lv 20)",
+     "ST",
+     "2,787",
+     "76.0",
+     "211,778",
+     "327,219",
+     "1,216",
+     "174.2"
+    ],
+    [
+     "Power Knockback (Lv 1)",
+     "AoE",
+     "696",
+     "61.5",
+     "91,626",
+     "170,207",
+     "738",
+     "58.0"
+    ],
+    [
+     "Iron Arrow: Crossbow (Lv 30)",
+     "AoE",
+     "5,852",
+     "76.0",
+     "444,727",
+     "680,783",
+     "2,128",
+     "209.0"
+    ]
+   ]
+  },
+  {
+   "h3": "Assassin"
+  },
+  {
+   "ul": [
+    "**Realistic**: MeowDB Lv70 Assassin Realistic. Black Scarab, 337 primary and 74 secondary, 82 W.ATK, 20 attack power, mastery 10, 26% crit rate and +61% crit damage, 148 ACC.",
+    "**Max-Scrolled**: MeowDB Lv70 Assassin Max-Scrolled. Black Scarab, 395 primary, 124 W.ATK."
+   ]
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Type",
+     "DPC",
+     "Casts in 1 min",
+     "Realistic DPM",
+     "Max-Scrolled DPM",
+     "MP spent",
+     "DPMP"
+    ],
+    [
+     "Disorder (Lv 3)",
+     "ST",
+     "946",
+     "100.0",
+     "94,623",
+     "162,807",
+     "500",
+     "189.2"
+    ],
+    [
+     "Drain (Lv 30)",
+     "ST",
+     "2,271",
+     "100.0",
+     "227,086",
+     "390,747",
+     "2,800",
+     "81.1"
+    ],
+    [
+     "Lucky Seven (Lv 20)",
+     "ST",
+     "2,560",
+     "100.0",
+     "255,978",
+     "439,972",
+     "1,600",
+     "160.0"
+    ]
+   ]
+  },
+  {
+   "h3": "Bandit"
+  },
+  {
+   "ul": [
+    "**Realistic**: MeowDB Lv70 Bandit Realistic. Kandine, 343 primary and 69 secondary, 100 W.ATK, 0 attack power, mastery 10, 29% crit rate and +26% crit damage, 147 ACC.",
+    "**Max-Scrolled**: MeowDB Lv70 Bandit Max-Scrolled. Kandine, 401 primary, 136 W.ATK."
+   ]
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Type",
+     "DPC",
+     "Casts in 1 min",
+     "Realistic DPM",
+     "Max-Scrolled DPM",
+     "MP spent",
+     "DPMP"
+    ],
+    [
+     "Realistic: Double Stab (Lv 20) / Max-Scrolled: Double Stab (Lv 6)",
+     "ST",
+     "2,766",
+     "100.0",
+     "276,615",
+     "267,320",
+     "1,600",
+     "172.9"
+    ],
+    [
+     "Disorder (Lv 20)",
+     "ST",
+     "656",
+     "100.0",
+     "65,639",
+     "100,580",
+     "1,000",
+     "65.6"
+    ],
+    [
+     "Savage Blow (Lv 30)",
+     "ST",
+     "3,890",
+     "83.0",
+     "322,875",
+     "499,229",
+     "2,324",
+     "138.9"
+    ],
+    [
+     "Steal (Lv 30)",
+     "AoE",
+     "1,864",
+     "100.0",
+     "186,387",
+     "282,704",
+     "2,400",
+     "77.7"
+    ]
+   ]
+  },
+  {
+   "h3": "F/P Wizard"
+  },
+  {
+   "ul": [
+    "**Realistic**: MeowDB Lv70 F/P Wizard Realistic. Angel Wings, 352 primary and 65 secondary, 336 M.ATK, mastery 0, 9% crit rate and +26% crit damage.",
+    "**Max-Scrolled**: MeowDB Lv70 F/P Wizard Max-Scrolled. Angel Wings, 411 primary, 437 M.ATK."
+   ]
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Type",
+     "DPC",
+     "Casts in 1 min",
+     "Realistic DPM",
+     "Max-Scrolled DPM",
+     "MP spent",
+     "DPMP"
+    ],
+    [
+     "Realistic only: Energy Bolt (Lv 1)",
+     "ST",
+     "941",
+     "74.0",
+     "69,658",
+     "-",
+     "592",
+     "117.7"
+    ],
+    [
+     "Realistic only: Magic Claw (Lv 20)",
+     "ST",
+     "1,926",
+     "74.0",
+     "142,527",
+     "-",
+     "1,480",
+     "96.3"
+    ],
+    [
+     "Fire Arrow (neutral) (Lv 30)",
+     "ST",
+     "2,667",
+     "74.0",
+     "197,356",
+     "289,718",
+     "2,072",
+     "95.2"
+    ],
+    [
+     "Fire Arrow (vs weak) (Lv 30)",
+     "ST",
+     "3,334",
+     "74.0",
+     "246,695",
+     "362,141",
+     "2,072",
+     "119.1"
+    ],
+    [
+     "Poison Breath (neutral) (Lv 30)",
+     "AoE",
+     "4,741",
+     "74.0",
+     "476,623",
+     "699,009",
+     "2,960",
+     "161.0"
+    ],
+    [
+     "Poison Breath (vs weak) (Lv 30)",
+     "AoE",
+     "5,927",
+     "74.0",
+     "596,002",
+     "873,720",
+     "2,960",
+     "201.4"
+    ]
+   ]
+  },
+  {
+   "h3": "I/L Wizard"
+  },
+  {
+   "ul": [
+    "**Realistic**: MeowDB Lv70 I/L Wizard Realistic. Angel Wings, 352 primary and 65 secondary, 336 M.ATK, mastery 0, 9% crit rate and +26% crit damage.",
+    "**Max-Scrolled**: MeowDB Lv70 I/L Wizard Max-Scrolled. Angel Wings, 411 primary, 437 M.ATK."
+   ]
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Type",
+     "DPC",
+     "Casts in 1 min",
+     "Realistic DPM",
+     "Max-Scrolled DPM",
+     "MP spent",
+     "DPMP"
+    ],
+    [
+     "Realistic only: Energy Bolt (Lv 1)",
+     "ST",
+     "941",
+     "74.0",
+     "69,658",
+     "-",
+     "592",
+     "117.7"
+    ],
+    [
+     "Realistic only: Magic Claw (Lv 20)",
+     "ST",
+     "1,926",
+     "74.0",
+     "142,527",
+     "-",
+     "1,480",
+     "96.3"
+    ],
+    [
+     "Cold Beam (neutral) (Lv 30)",
+     "ST",
+     "2,519",
+     "74.0",
+     "186,391",
+     "273,618",
+     "1,628",
+     "114.5"
+    ],
+    [
+     "Cold Beam (vs weak) (Lv 30)",
+     "ST",
+     "3,148",
+     "74.0",
+     "232,988",
+     "342,026",
+     "1,628",
+     "143.1"
+    ],
+    [
+     "Thunder Bolt (neutral) (Lv 30)",
+     "AoE",
+     "6,223",
+     "74.0",
+     "460,479",
+     "675,995",
+     "2,960",
+     "155.6"
+    ],
+    [
+     "Thunder Bolt (vs weak) (Lv 30)",
+     "AoE",
+     "7,779",
+     "74.0",
+     "575,622",
+     "844,983",
+     "2,960",
+     "194.5"
+    ]
+   ]
+  },
+  {
+   "h3": "Cleric"
+  },
+  {
+   "ul": [
+    "**Realistic**: MeowDB Lv70 Cleric Realistic. Angel Wings, 352 primary and 65 secondary, 311 M.ATK, mastery 0, 9% crit rate and +26% crit damage.",
+    "**Max-Scrolled**: MeowDB Lv70 Cleric Max-Scrolled. Angel Wings, 411 primary, 412 M.ATK."
+   ]
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Type",
+     "DPC",
+     "Casts in 1 min",
+     "Realistic DPM",
+     "Max-Scrolled DPM",
+     "MP spent",
+     "DPMP"
+    ],
+    [
+     "Realistic only: Energy Bolt (Lv 1)",
+     "ST",
+     "871",
+     "74.0",
+     "64,471",
+     "-",
+     "592",
+     "108.9"
+    ],
+    [
+     "Realistic only: Magic Claw (Lv 20)",
+     "ST",
+     "1,783",
+     "74.0",
+     "131,925",
+     "-",
+     "1,480",
+     "89.1"
+    ],
+    [
+     "Holy Arrow (neutral) (Lv 30)",
+     "ST",
+     "2,468",
+     "74.0",
+     "182,666",
+     "273,134",
+     "2,072",
+     "88.2"
+    ],
+    [
+     "Holy Arrow (vs undead) (Lv 30)",
+     "ST",
+     "3,086",
+     "74.0",
+     "228,331",
+     "341,428",
+     "2,072",
+     "110.2"
+    ]
+   ]
+  },
+  {
+   "h2": "Limitations and Assumptions in our Calculations"
+  },
+  {
+   "ul": [
+    "**Every hit lands.** Accuracy is nowhere in these numbers. Each build card quotes its character sheet value, which says nothing about how often that build connects with a real monster. A build that whiffs a third of its swings does a third less than this page says, and this page will not warn you. Take the matchup to the Accuracy Simulator.",
+    "**The target has no defense, and it never moves.** No walking, no knockback, nothing to chase between casts. Over a real hour every class here does less, and by different amounts.",
+    "**Resources never run out.** DPM assumes the build can pay every MP or HP cost for the full minute. MP spent is shown so you can judge that burden separately.",
+    "**Bandit maintains Steal in the headline rotation.** The saved level 30 skill has a 90% chance to grant +35 Attack Power for 30 seconds. The 60-second single-target test casts Steal once per 41 Savage Blows, so it pays for 2.0 Steal attempts and their animation time instead of treating the buff as permanently active. Success-weighted buff uptime is 88.9%. Every Steal attempt assumes an eligible ordinary target, with no travel time. A monster can be stolen from successfully only once, so this refresh model requires new targets.",
+    "**Final Attack is on only where it helps.** It is a toggle, so a row keeps it on only when it raises that row's DPM. Each proc adds its own attack, and you can't attack again until it finishes. Rows count the saved level's proc chance and the follow-up time at Booster speed. It helps the single-target Page, Spearman and Hunter skills. It costs damage for Fighter Power Strike and Crossbowman Double Shot, and for Slash Blast, Arrow Bomb and Iron Arrow on a full group, so those rows leave it off. Spearman's HP absorption and the arrows each proc uses are not counted.",
+    "**AoE assumes a full cap.** Arrow Bomb starts on one monster, then the blast can damage up to four monsters total. If your map never gives you four, read the single-target chart instead.",
+    "**Axe Mastery Bleed starts inactive.** Power Strike uses the saved build's 25% proc chance and 67.9% expected uptime over one minute. It adds 13,641 damage, a 5.5% gain over direct DPM. A proc refreshes the 3-second duration. Bleed cannot stack on the same monster, and a stronger Bleed replaces a weaker one. Slash Blast rolls the same Bleed on all 4 targets it hits; Shout does the same, but is outside this second-job benchmark.",
+    "**Poison Breath keeps full poison uptime.** Its total includes the linked cloud hit plus one poison on each of four targets. The poison does not stack, and each recast refreshes its 5-second duration."
+   ]
+  },
+  {
+   "p": "Something here disagree with what you are seeing in game? Tell us, and bring the number. Corrections go straight to the top of this page."
+  },
+  {
+   "guide": "explaining-the-damage-formula",
+   "text": "MapleStory Classic Damage Formula"
+  },
+  {
+   "guide": "best-grind-maps-every-level",
+   "text": "Best Grind Maps for Every Level 1-70"
+  },
+  {
+   "guide": "exp-table-level-1-to-100",
+   "text": "EXP Table Lv 1-100: Current and Historical Reference"
+  },
+  {
+   "guide": "warrior-class-guide",
+   "text": "MapleStory Classic Warrior Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "magician-class-guide",
+   "text": "MapleStory Classic Magician Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "bowman-class-guide",
+   "text": "MapleStory Classic Bowman Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "thief-class-guide",
+   "text": "MapleStory Classic Thief Build and Leveling Guide: Lv 1-30"
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/class-dps-rankings",
+ "hash": "9165cc306f0c"
+}

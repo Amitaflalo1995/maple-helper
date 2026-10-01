@@ -1,306 +1,818 @@
 {
- "key": "guide/magician-class-guide",
- "source_hash": "6adadca656e8",
- "lang": "he",
- "title": "מדריך Magician ל-MapleStory Classic: לבל 1-30",
- "intro": "מדריך Magician ללבלים 1-30: חלוקת AP ו-SP, Energy Bolt מול Magic Claw, ציוד, מגנים, פוטים ומפות מ-Training Advisor.",
- "pros": [
-  "Energy Bolt מגיע ל-350 px והוא חסכוני במיוחד ב-MP.",
-  "Magic Armor מוריד דמג' פיזי ממגע.",
-  "גם עם Wand וגם עם Staff אפשר לצייד מגן.",
-  "Accuracy בסיסי טוב באופן מפתיע."
- ],
- "cons": [
-  "אין סקיל מובינג בג'וב הראשון.",
-  "Magic Guard מלא יקר למלא מחדש.",
-  "פוטי MP עולים פי שניים מפוטי HP לכל נקודה שמתמלאת.",
-  "עובדה מעניינת: Grendel the Really Old מאמן את ה-Magician של Ellinia מאז 2003. Classic World מכניס אותו לשרשרת הקווסטים של Forgotten Hollow."
- ],
- "sections": [
+ "title": "מדריך בילד ולבלינג ל-Magician ב-MapleStory Classic: לבל 1-30",
+ "intro": "Magician מתאמנים אצל Grendel the Really Old ב-Ellinia. הם נלחמים במתקפות מטווח, מוציאים MP על כמעט הכל, ויכולים לבחור בין אימון זול יותר להגנת חירום חזקה יותר.",
+ "blocks": [
   {
-   "heading": "להבין Accuracy של Magician",
-   "lines": [
-    "להבין Accuracy זה הבסיס של כל מדריך ג'וב והמלצת אימון. פספוס עדיין צורך MP, לא נותן EXP ומבזבז את כל אנימציית ההטלה. ל-Magician בהתחלה אין מספיק מסוס כדי לזרוק מתקפות לפח.",
-    "Accuracy בסיסי של Magician: לבל, INT, LUK ו-Accuracy ישיר מוסיפים כולם ל-ACC הכולל.",
-    "+0.39 ACC לכל לבל",
-    "+0.24 ACC לכל INT",
-    "+0.12 ACC לכל LUK",
-    "+1.00 ACC לכל ACC ישיר",
-    "INT הוא גם סטט הדמג' הראשי שלך וגם מקור ה-Accuracy הכי חזק מ-AP. הלבל גם סוגר את הקנס על לחימה במובים בלבל גבוה יותר. מפה יכולה להפוך לאמינה אחרי לבל או שניים בלי להחליף ציוד.",
-    "מוב | לבל המוב | Avoid של המוב | הלבל שלך | ACC ל-100% פגיעה | בילד לדוגמה",
-    "Bubbling | 15 | 9 | 15 | 31 ACC | 46 ACC",
-    "(87 INT / 5 LUK)",
-    "Stirge | 20 | 13 | 20 | 44 ACC | 54 ACC",
-    "(108 INT / 12 LUK)",
-    "Zombie Mushroom | 24 | 14 | 20 | 54 ACC | 54 ACC",
-    "(108 INT / 12 LUK)",
-    "Zombie Mushroom | 24 | 14 | 25 | 47 ACC | 62 ACC",
-    "(130 INT / 16 LUK)",
-    "פתח את Accuracy Simulator"
+   "p": "**יתרונות**"
+  },
+  {
+   "ul": [
+    "Energy Bolt מגיע ל-350 px והוא חסכוני במיוחד ב-MP.",
+    "Magic Armor מוריד דמג' פיזי ממגע.",
+    "גם עם Wand וגם עם Staff אפשר לצייד מגן.",
+    "Accuracy בסיסי טוב באופן מפתיע."
    ]
   },
   {
-   "heading": "לבל 1-10: מ-Beginner ל-Magician",
-   "lines": [
-    "תסיים את הקווסטים של Maple Island, תפליג ל-Victoria Island ותיכנס ל-Library ב-Ellinia. Grendel the Really Old מטפל בהתקדמות לג'וב הראשון. ב-MSClassic World אין דרישת סטטים לג'וב הראשון."
+   "p": "**חסרונות**"
+  },
+  {
+   "ul": [
+    "אין סקיל מובינג בג'וב הראשון.",
+    "Magic Guard מלא יקר למלא מחדש.",
+    "פוטי MP עולים פי שניים מפוטי HP לכל נקודה שמתמלאת."
    ]
   },
   {
-   "heading": "בילד סקילים של Beginner",
-   "lines": [
-    "Three Snails 3",
-    "מתקפת קונכייה מטווח",
-    "Recovery 3",
-    "ריקברי HP קצר",
-    "Nimble Feet 3",
-    "באף Speed קצר",
-    "אפשר למקסם את כל שלושת הסקילים של Beginner עד לבל 10. תעלה אותם באיזה סדר שבא לך.",
-    "תשתמש ב-Club עד לבל 4, ואז תעבור ל-Razor בלבל 5. ל-Club יש את הסיכוי הכי טוב להרוג את המובים המוקדמים של Maple Island במכה אחת פחות מ-Sword ו-Hand Axe. Razor הוא הנשק הטוב יותר ברגע שאפשר לצייד אותו."
+   "note": "**עובדה מעניינת:** Grendel the Really Old מאמן את ה-Magician של Ellinia מאז 2003. Classic World מכניס אותו לשרשרת הקווסטים של Forgotten Hollow."
+  },
+  {
+   "h2": "להבין Accuracy של Magician"
+  },
+  {
+   "p": "להבין Accuracy זה הבסיס של כל מדריך ג'וב והמלצת אימון. פספוס עדיין צורך MP, לא נותן EXP ומבזבז את כל אנימציית ההטלה. ל-Magician בהתחלה אין מספיק מסוס כדי לזרוק מתקפות לפח."
+  },
+  {
+   "note": "**Accuracy בסיסי של Magician**\nלבל, INT, LUK ו-Accuracy ישיר מוסיפים כולם ל-ACC הכולל שלך.\n**+0.39** ACC לכל לבל\n**+0.24** ACC לכל INT\n**+0.12** ACC לכל LUK\n**+1.00** ACC לכל ACC ישיר"
+  },
+  {
+   "p": "**INT הוא גם סטט הדמג' הראשי שלך וגם מקור ה-Accuracy הכי חזק מ-AP.** הלבל גם סוגר את הקנס על לחימה במובים בלבל גבוה יותר. מפה יכולה להפוך לאמינה אחרי לבל או שניים בלי להחליף ציוד."
+  },
+  {
+   "table": [
+    [
+     "מוב",
+     "לבל המוב",
+     "Avoid של המוב",
+     "הלבל שלך",
+     "ACC ל-100% פגיעה",
+     "בילד לדוגמה"
+    ],
+    [
+     "[[img:34dcba7b3807fe.png]]Bubbling",
+     "15",
+     "9",
+     "15",
+     "31 ACC",
+     "46 ACC (87 INT / 5 LUK)"
+    ],
+    [
+     "[[img:ae64823f427bc0.png]]Stirge",
+     "20",
+     "13",
+     "20",
+     "44 ACC",
+     "54 ACC (108 INT / 12 LUK)"
+    ],
+    [
+     "[[img:36750484773e65.png]]Zombie Mushroom",
+     "24",
+     "14",
+     "20",
+     "54 ACC",
+     "54 ACC (108 INT / 12 LUK)"
+    ],
+    [
+     "[[img:36750484773e65.png]]Zombie Mushroom",
+     "24",
+     "14",
+     "25",
+     "47 ACC",
+     "62 ACC (130 INT / 16 LUK)"
+    ]
    ]
   },
   {
-   "heading": "חלוקת AP ל-Magician: לבל 1-10",
-   "lines": [
-    "חלוקת הפתיחה הכי טובה ל-Magician עתידי היא 4 STR / 4 DEX / 12 INT / 5 LUK. את כל 45 ה-AP מלבל 2-10 שים ב-INT. לא צריך LUK להתקדמות הג'וב.",
-    "לבל | השקעה | סטטים בסיסיים",
-    "1 | סטטים התחלתיים | 4 STR / 4 DEX / 12 INT / 5 LUK",
-    "2-9 | INT +40 | 4 STR / 4 DEX / 52 INT / 5 LUK",
-    "10 | INT +5 | 4 STR / 4 DEX / 57 INT / 5 LUK",
-    "בילד Magician לדוגמה בלבל 10",
-    "4 STR בסיס / 4 DEX בסיס / 57 INT בסיס / 5 LUK בסיס",
-    "60 INT / 5 LUK / 27 M.ATK / 38 ACC / 344 HP / 463 MP עם ציוד",
-    "סקילים: Energy Bolt 1. Three Snails, Recovery ו-Nimble Feet 3.",
-    "Wooden Wand · Brown Apprentice Hat · Stolen Fence",
-    "אתה מקבל את ה-Beginner's Wooden Wand בחינם כשאתה הופך ל-Magician. יש לו 26 M.ATK, רק אחד פחות מה-Wooden Wand ש-Flora the Fairy מוכרת ב-Ellinia.",
-    "מטרות Energy Bolt מובטחות הכי טובות: Blue Snail 100% פגיעה · הטלה אחת מובטחת · 4 EXP להטלה. Red Snail 100% פגיעה · 2 הטלות מובטחות · 4 EXP להטלה"
+   "h2": "לבל 1-10: מ-Beginner ל-Magician"
+  },
+  {
+   "p": "תסיים את הקווסטים של Maple Island, תפליג ל-Victoria Island ותיכנס ל-Library ב-Ellinia. Grendel the Really Old מטפל בהתקדמות לג'וב הראשון. ב-MSClassic World אין דרישת סטטים לג'וב הראשון."
+  },
+  {
+   "img": "6e7d52572951d5.png",
+   "w": 67,
+   "h": 87
+  },
+  {
+   "h3": "בילד סקילים של Beginner"
+  },
+  {
+   "p": "[[img:efe346ff3ac88e.png]] **Three Snails 3**\nמתקפת קונכייה מטווח"
+  },
+  {
+   "p": "[[img:d1b8185bc6bf24.png]] **Recovery 3**\nריקברי HP קצר"
+  },
+  {
+   "p": "[[img:edc2244a5bda10.png]] **Nimble Feet 3**\nבאף Speed קצר"
+  },
+  {
+   "p": "אפשר למקסם את כל שלושת הסקילים של Beginner עד לבל 10. תעלה אותם באיזה סדר שבא לך."
+  },
+  {
+   "note": "**תשתמש ב-Club עד לבל 4, ואז תעבור ל-Razor בלבל 5.** ל-Club יש את הסיכוי הכי טוב להרוג את המובים המוקדמים של Maple Island במכה אחת פחות מ-Sword ו-Hand Axe. Razor הוא הנשק הטוב יותר ברגע שאפשר לצייד אותו."
+  },
+  {
+   "h3": "חלוקת AP ל-Magician: לבל 1-10"
+  },
+  {
+   "p": "חלוקת הפתיחה הכי טובה ל-Magician עתידי היא 4 STR / 4 DEX / 12 INT / 5 LUK. את כל 45 ה-AP מלבל 2-10 שים ב-INT. לא צריך LUK להתקדמות הג'וב."
+  },
+  {
+   "table": [
+    [
+     "לבל",
+     "השקעה",
+     "סטטים בסיסיים"
+    ],
+    [
+     "1",
+     "סטטים התחלתיים",
+     "4 STR / 4 DEX / 12 INT / 5 LUK"
+    ],
+    [
+     "2-9",
+     "INT +40",
+     "4 STR / 4 DEX / 52 INT / 5 LUK"
+    ],
+    [
+     "10",
+     "INT +5",
+     "**4 STR / 4 DEX / 57 INT / 5 LUK**"
+    ]
    ]
   },
   {
-   "heading": "לבל 10-30: בילד סקילים ולבלינג ל-Magician",
-   "lines": [
-    "תמקסם Energy Bolt או Magic Claw, קח Magic Guard 3 כדי לפתוח את Magic Armor, ותבנה Armor לפני שאתה מסיים את Max MP Increase. נקודת הסיום הדיפולטית מעדיפה הוצאה נמוכה יותר על פוטים. שחקנים שצריכים יותר הגנה יכולים להעביר 12 נקודות מ-Magic Armor ל-Magic Guard."
+   "h3": "בילד Magician לדוגמה בלבל 10"
+  },
+  {
+   "p": "4 STR בסיס / 4 DEX בסיס / 57 INT בסיס / 5 LUK בסיס\n60 INT / 5 LUK / 27 M.ATK / 38 ACC / 344 HP / 463 MP עם ציוד"
+  },
+  {
+   "p": "**סקילים:** Energy Bolt 1. Three Snails, Recovery ו-Nimble Feet 3."
+  },
+  {
+   "p": "[[img:0bd13d592bcd59.png]]Wooden Wand[[img:1e36506ff912a6.png]]Brown Apprentice Hat[[img:97f5870a716402.png]]Stolen Fence"
+  },
+  {
+   "note": "אתה מקבל את ה-Beginner's Wooden Wand בחינם כשאתה הופך ל-Magician. יש לו 26 M.ATK, רק אחד פחות מה-Wooden Wand ש-Flora the Fairy מוכרת ב-Ellinia."
+  },
+  {
+   "p": "**מטרות Energy Bolt מובטחות הכי טובות**"
+  },
+  {
+   "p": "[[img:2884cdb372bd03.png]] **Blue Snail** 100% פגיעה · הטלה אחת מובטחת · 4 EXP להטלה [[img:ca2dec0d81316e.png]] **Red Snail** 100% פגיעה · 2 הטלות מובטחות · 4 EXP להטלה"
+  },
+  {
+   "h2": "לבל 10-30: בילד סקילים ולבלינג ל-Magician"
+  },
+  {
+   "p": "תמקסם Energy Bolt או Magic Claw, קח Magic Guard 3 כדי לפתוח את Magic Armor, ותבנה Armor לפני שאתה מסיים את Max MP Increase. נקודת הסיום הדיפולטית מעדיפה הוצאה נמוכה יותר על פוטים. שחקנים שצריכים יותר הגנה יכולים להעביר 12 נקודות מ-Magic Armor ל-Magic Guard."
+  },
+  {
+   "h3": "אזרחות מומלצת בלבל 12"
+  },
+  {
+   "p": "**Kerning City היא האזרחות הכי טובה ל-Magician.** חנות הסקרולים פותחת בהמשך סקרולי Overall Armor INT ו-Gloves Magic Attack. תירשם אצל Roxy ב-Civic Center ברגע שהאזרחות נפתחת בלבל 12."
+  },
+  {
+   "h3": "Energy Bolt או Magic Claw?"
+  },
+  {
+   "p": "שני הסקילים מגיעים ל-130 Basic Attack כולל עם אותו זמן הטלה של 810 ms. Energy Bolt נותן את זה כשורת דמג' אחת של 130. Magic Claw מפצל את זה לשתי שורות נפרדות של 65. הדמג' הממוצע זהה, אבל ל-Magic Claw יש פחות פיזור בדמג': שתי המכות שלו נותנות דמג' כולל יציב יותר מהטלה להטלה."
+  },
+  {
+   "p": "מפלצת רלוונטית נדחפת אחורה כששורת דמג' אחת מגיעה לערך ה-Knockback שלה. לכן לשורה הגדולה של Energy Bolt יש סיכוי טוב יותר לדחוף אויב כששתי השורות של Magic Claw לא היו מגיעות. ל-Magic Claw יש גם יתרון שטח: שתי המכות שלו עוברות דרך קירות ופלטפורמות."
+  },
+  {
+   "table": [
+    [
+     "במקסימום",
+     "[[img:24dcca787059a4.png]]Energy Bolt",
+     "[[img:5370722a856bb9.png]]Magic Claw"
+    ],
+    [
+     "דמג'",
+     "130 x 1",
+     "65 x 2"
+    ],
+    [
+     "MP",
+     "16",
+     "20"
+    ],
+    [
+     "SP נדרש",
+     "20",
+     "21, כולל Energy Bolt 1"
+    ],
+    [
+     "טווח",
+     "350 px",
+     "300 px"
+    ],
+    [
+     "יתרונות",
+     "פוטנציאל Knockback טוב יותר; חיסכון של SP אחד",
+     "דמג' יציב יותר; פוגע דרך שטח"
+    ]
    ]
   },
   {
-   "heading": "אזרחות מומלצת בלבל 12",
-   "lines": [
-    "Kerning City היא האזרחות הכי טובה ל-Magician. חנות הסקרולים פותחת בהמשך סקרולי Overall Armor INT ו-Gloves Magic Attack. תירשם אצל Roxy ב-Civic Center ברגע שהאזרחות נפתחת בלבל 12.",
-    "השווה ערי אזרחות ודרגות"
+   "note": "**Energy Bolt עושה אותו דמג' צפוי ב-20% פחות MP להטלה, יכול לשפר את סיכויי ה-Knockback וחוסך SP אחד של הג'וב הראשון.** Magic Claw נותן דמג' יציב יותר. הוא עולה 4 MP יותר ומאבד 50 px טווח, אבל פגיעה דרך שטח יכולה לחסוך יותר זמן במפה המתאימה."
+  },
+  {
+   "img": "d67276803f86e8.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Energy Bolt: מכה אחת גדולה יותר, 350 px ו-16 MP."
+  },
+  {
+   "img": "fbfd01caa28980.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Magic Claw: שתי מכות קטנות יותר ופגיעה דרך שטח."
+  },
+  {
+   "p": "Energy Bolt חוסך SP אחד כי Magic Claw דורש Energy Bolt 1 לפני שאפשר להשקיע בו. את הנקודה הספייר אפשר לשים ב-Max MP Increase או ב-Improved MP Recovery, לפי הבילד שלך ולפי איזה סקיל עוד לא במקסימום."
+  },
+  {
+   "p": "בבילד מקביל של Armor 19, Energy Bolt יכול להסתיים ב-EB 20 / MG 3 / IMR 4 / MMI 15 / MA 19. Magic Claw צריך EB 1 / MC 20 / MG 3 / IMR 3 / MMI 15 / MA 19. נקודת ה-Energy Bolt הספייר מעלה את החזר ה-MP מאייטמים מ-+7% ל-+8%. הדיפולט עם Armor קודם למטה שם אותה במקום זה ב-MA 20."
+  },
+  {
+   "h3": "Guard או Armor? ומה עם MP Recovery?"
+  },
+  {
+   "p": "**תשתמש בבילד עם Armor קודם בשביל אימון זול יותר בג'וב הראשון.** Magic Guard מעביר דמג' מ-HP ל-MP, וריקברי ה-MP הכי זול בחנות עולה פי שניים לכל נקודה מריקברי HP. Guard מלא הוא עדיין הבחירה הבטוחה יותר כשמוות יעלה לך יותר מהפוטים."
+  },
+  {
+   "p": "**איפה הנקודות האחרונות בכל באף נוחתות.** Magic Guard 13 שולח 74% ממכה נכנסת ל-MP ו-Magic Guard 15 מעלה את זה ל-80%. Magic Armor 14 זה +92 Weapon ו-Magic Defense ל-495 שניות, ו-Magic Armor 16 זה +100 ל-525 שניות. תשאיר את Armor לפני Guard כל עוד מובים צריכים שלושה מגעים או יותר כדי להרוג אותך. ברגע ששני מגעים מספיקים, מאגר ה-Guard הגדול יותר הוא מה שנותן לך זמן להגיב."
+  },
+  {
+   "p": "**קח את נקודת ה-Improved MP Recovery הראשונה בלבל 11.** Improved MP Recovery 1 מעלה MP מאייטמים ב-5%, אז Lemon של 150 MP מחזיר 7 MP יותר. המחיר הוא לבל Energy Bolt אחד מלבל 11 עד 16. Energy Bolt עדיין מגיע למקסימום בלבל 17, ו-Magic Guard משיג בלבל 18."
+  },
+  {
+   "note": "**כמה עולה למלא 100 דמג' אחרי הגנה**\nGuard כבוי: 100 HP x 0.5 = 50 מסוס\nMagic Guard 3: 64 HP x 0.5 + 36 MP x 1 = 68 מסוס\nMagic Guard 15: 20 HP x 0.5 + 80 MP x 1 = 90 מסוס\nמשתמש בערך ה-HP של Red Potion ובערך ה-MP של Orange או Lemon. דרופים וריקברי פסיבי משנים את החשבון האמיתי שלך. גם בזבוז פוטים והנחות בחנות."
+  },
+  {
+   "p": "Magic Armor מוריד את המכה לפני ש-Magic Guard מפצל אותה. בלבל 25, לציוד לדוגמה יש 83 WDEF. Magic Armor 18 מעלה את זה ל-191 WDEF ומוריד את המגע הפיזי הכי חזק של Horny Mushroom מ-142 ל-120 דמג'."
+  },
+  {
+   "table": [
+    [
+     "בחירה בלבל 25",
+     "סקילי ג'וב ראשון אחרי מתקפה",
+     "מגע מקסימלי של Horny Mushroom",
+     "איפה זה מנצח"
+    ],
+    [
+     "**Armor קודם**",
+     "MG 3 / IMR 3 / MMI 2 / MA 18",
+     "120",
+     "זול יותר כשאתה חוטף כמה מגעים חזקים בדקה"
+    ],
+    [
+     "**MP Recovery קודם**",
+     "MG 3 / IMR 15 / MMI 8 / MA 0",
+     "142",
+     "זול יותר כשאתה ממוקם טוב ומטיל כל הזמן"
+    ],
+    [
+     "**Guard מלא קודם**",
+     "MG 15 / IMR 3 / MMI 8 / MA 0",
+     "142",
+     "מאגר ההישרדות הכי גדול לחירום"
+    ]
    ]
   },
   {
-   "heading": "Energy Bolt או Magic Claw?",
-   "lines": [
-    "שני הסקילים מגיעים ל-130 Basic Attack כולל עם אותו זמן הטלה של 810 ms. Energy Bolt נותן את זה כשורת דמג' אחת של 130. Magic Claw מפצל את זה לשתי שורות נפרדות של 65. הדמג' הממוצע זהה, אבל ל-Magic Claw יש פחות פיזור בדמג': שתי המכות שלו נותנות דמג' כולל יציב יותר מהטלה להטלה.",
-    "מפלצת רלוונטית נדחפת אחורה כששורת דמג' אחת מגיעה לערך ה-Knockback שלה. לכן לשורה הגדולה של Energy Bolt יש סיכוי טוב יותר לדחוף אויב כששתי השורות של Magic Claw לא היו מגיעות. ל-Magic Claw יש גם יתרון שטח: שתי המכות שלו עוברות דרך קירות ופלטפורמות.",
-    "במקסימום | Energy Bolt | Magic Claw",
-    "דמג' | 130 x 1 | 65 x 2",
-    "MP | 16 | 20",
-    "SP נדרש | 20 | 21, כולל Energy Bolt 1",
-    "טווח | 350 px | 300 px",
-    "יתרונות | פוטנציאל Knockback טוב יותר. חוסך 1 SP | דמג' יציב יותר. פוגע דרך שטח",
-    "Energy Bolt עושה אותו דמג' צפוי ב-20% פחות MP להטלה, יכול לשפר את סיכויי ה-Knockback וחוסך SP אחד של הג'וב הראשון. Magic Claw נותן דמג' יציב יותר. הוא עולה 4 MP יותר ומאבד 50 px טווח, אבל פגיעה דרך שטח יכולה לחסוך יותר זמן במפה המתאימה.",
-    "Energy Bolt: מכה אחת גדולה יותר, 350 px ו-16 MP. Magic Claw: שתי מכות קטנות יותר ופגיעה דרך שטח.",
-    "Energy Bolt חוסך SP אחד כי Magic Claw דורש Energy Bolt 1 לפני שאפשר להשקיע בו. את הנקודה הספייר אפשר לשים ב-Max MP Increase או ב-Improved MP Recovery, לפי הבילד שלך ולפי איזה סקיל עוד לא במקסימום.",
-    "בבילד מקביל של Armor 19, Energy Bolt יכול להסתיים ב-EB 20 / MG 3 / IMR 4 / MMI 15 / MA 19. Magic Claw צריך EB 1 / MC 20 / MG 3 / IMR 3 / MMI 15 / MA 19. נקודת ה-Energy Bolt הספייר מעלה את החזר ה-MP מאייטמים מ-+7% ל-+8%. הדיפולט עם Armor קודם למטה שם אותה במקום זה ב-MA 20."
+   "p": "בהשוואה של לבל 25, הטלה אחת כל שתי שניות גורמת ל-Improved MP Recovery מלא לחסוך בערך 49 מסוס לדקה עם Energy Bolt או 61 עם Magic Claw. Armor 18 משיג את זה בערך בשלושה עד שישה מגעים חזקים לדקה, תלוי בספל ובשאלה אם Guard פעיל. נקודת החיתוך הזאת שייכת לדוגמת ה-Horny Mushroom. היא זזה עם הלבל והציוד שלך. גם בחירת המוב וקצב ההטלה משנים, וגם מקור הפוטים שלך."
+  },
+  {
+   "h3": "דיפולט חסכוני"
+  },
+  {
+   "p": "MG 3 / IMR 3 / MMI 15 / MA 20. הכי זול אחרי מגע."
+  },
+  {
+   "h3": "אפשרות בטיחות"
+  },
+  {
+   "p": "MG 15 / IMR 3 / MMI 15 / MA 8. יותר הגנה מבורסט. כל מכה עולה יותר למלא."
+  },
+  {
+   "h3": "אפשרות מעט מגע"
+  },
+  {
+   "p": "MG 3 / IMR 15 / MMI 15 / MA 8. הכי טוב כשכמעט לא נוגעים בך ורוב ה-MP הולך על מתקפות."
+  },
+  {
+   "h3": "יעד סקילים ל-Magician בלבל 30"
+  },
+  {
+   "table": [
+    [
+     "סקיל",
+     "Skill Lv",
+     "תוצאה בלבל 30"
+    ],
+    [
+     "[[img:24dcca787059a4.png]]Energy Bolt",
+     "20 / 20",
+     "130 Basic Attack, 10 Mastery, 16 MP"
+    ],
+    [
+     "[[img:211a115f0a6318.png]]Magic Guard",
+     "3 / 15",
+     "36% מדמג' ה-HP הנכנס עובר ל-MP"
+    ],
+    [
+     "[[img:664c530d20bba5.png]]Improved MP Recovery",
+     "3 / 15",
+     "1% Max MP כל 10 שניות; +7% MP מאייטמים"
+    ],
+    [
+     "[[img:d0a2f30f9abf2b.png]]Max MP Increase",
+     "15 / 15",
+     "+25% Max MP"
+    ],
+    [
+     "[[img:32b086d39a1fbe.png]]Magic Armor",
+     "20 / 20",
+     "+120 WDEF ו-MDEF ל-600 שניות"
+    ],
+    [
+     "[[img:5370722a856bb9.png]]Magic Claw",
+     "0 / 20",
+     "מדלגים עליו בבילד ה-Energy Bolt"
+    ]
    ]
   },
   {
-   "heading": "Guard או Armor? ומה עם MP Recovery?",
-   "lines": [
-    "תשתמש בבילד עם Armor קודם בשביל אימון זול יותר בג'וב הראשון. Magic Guard מעביר דמג' מ-HP ל-MP, וריקברי ה-MP הכי זול בחנות עולה פי שניים לכל נקודה מריקברי HP. Guard מלא הוא עדיין הבחירה הבטוחה יותר כשמוות יעלה לך יותר מהפוטים.",
-    "איפה הנקודות האחרונות בכל באף נוחתות. Magic Guard 13 שולח 74% ממכה נכנסת ל-MP ו-Magic Guard 15 מעלה את זה ל-80%. Magic Armor 14 זה +92 Weapon ו-Magic Defense ל-495 שניות, ו-Magic Armor 16 זה +100 ל-525 שניות. תשאיר את Armor לפני Guard כל עוד מובים צריכים שלושה מגעים או יותר כדי להרוג אותך. ברגע ששני מגעים מספיקים, מאגר ה-Guard הגדול יותר הוא מה שנותן לך זמן להגיב.",
-    "קח את נקודת ה-Improved MP Recovery הראשונה בלבל 11. Improved MP Recovery 1 מעלה MP מאייטמים ב-5%, אז Lemon של 150 MP מחזיר 7 MP יותר. המחיר הוא לבל Energy Bolt אחד מלבל 11 עד 16. Energy Bolt עדיין מגיע למקסימום בלבל 17, ו-Magic Guard משיג בלבל 18.",
-    "כמה עולה למלא 100 דמג' אחרי הגנה. Guard כבוי: 100 HP x 0.5 = 50 מסוס",
-    "Magic Guard 3: 64 HP x 0.5 + 36 MP x 1 = 68 מסוס",
-    "Magic Guard 15: 20 HP x 0.5 + 80 MP x 1 = 90 מסוס",
-    "משתמש בערך ה-HP של Red Potion ובערך ה-MP של Orange או Lemon. דרופים וריקברי פסיבי משנים את החשבון האמיתי שלך. גם בזבוז פוטים והנחות בחנות.",
-    "Magic Armor מוריד את המכה לפני ש-Magic Guard מפצל אותה. בלבל 25, לציוד לדוגמה יש 83 WDEF. Magic Armor 18 מעלה את זה ל-191 WDEF ומוריד את המגע הפיזי הכי חזק של Horny Mushroom מ-142 ל-120 דמג'.",
-    "בחירה בלבל 25 | סקילי ג'וב ראשון אחרי מתקפה | מגע מקסימלי של Horny Mushroom | איפה זה מנצח",
-    "Armor קודם | MG 3 / IMR 3 / MMI 2 / MA 18 | 120 | זול יותר כשאתה חוטף כמה מגעים חזקים בדקה",
-    "MP Recovery קודם | MG 3 / IMR 15 / MMI 8 / MA 0 | 142 | זול יותר כשאתה ממוקם טוב ומטיל כל הזמן",
-    "Guard מלא קודם | MG 15 / IMR 3 / MMI 8 / MA 0 | 142 | מאגר ההישרדות הכי גדול לחירום",
-    "בהשוואה של לבל 25, הטלה אחת כל שתי שניות גורמת ל-Improved MP Recovery מלא לחסוך בערך 49 מסוס לדקה עם Energy Bolt או 61 עם Magic Claw. Armor 18 משיג את זה בערך בשלושה עד שישה מגעים חזקים לדקה, תלוי בספל ובשאלה אם Guard פעיל. נקודת החיתוך הזאת שייכת לדוגמת ה-Horny Mushroom. היא זזה עם הלבל והציוד שלך. גם בחירת המוב וקצב ההטלה משנים, וגם מקור הפוטים שלך.",
-    "דיפולט חסכוני",
-    "MG 3 / IMR 3 / MMI 15 / MA 20. הכי זול אחרי מגע.",
-    "אפשרות בטיחות",
-    "MG 15 / IMR 3 / MMI 15 / MA 8. יותר הגנה מבורסט. כל מכה עולה יותר למלא.",
-    "אפשרות מעט מגע",
-    "MG 3 / IMR 15 / MMI 15 / MA 8. הכי טוב כשכמעט לא נוגעים בך ורוב ה-MP הולך על מתקפות."
+   "h3": "איך Max MP Increase עובד"
+  },
+  {
+   "p": "Max MP Increase מוסיף אחוז קבוע ל-MP הבסיסי שלך. אם לוקחים אותו מאוחר יותר מגיעים לאותו Max MP סופי, אז אין איבוד MP קבוע מזה שבונים Magic Armor קודם. הבילד הזה משלים את Max MP Increase עד לבל 30."
+  },
+  {
+   "h3": "חלוקת SP ל-Magician: לבל 10-30"
+  },
+  {
+   "note": "מצב מצטבר: EB = Energy Bolt, MG = Magic Guard, IMR = Improved MP Recovery, MMI = Max MP Increase, MA = Magic Armor."
+  },
+  {
+   "table": [
+    [
+     "לבל",
+     "השקעה",
+     "מצב מצטבר",
+     "סיבה"
+    ],
+    [
+     "10",
+     "Energy Bolt +1",
+     "EB 1",
+     "מתחיל אימון מטווח."
+    ],
+    [
+     "11",
+     "Energy Bolt +2, Improved MP Recovery +1",
+     "EB 3, IMR 1",
+     "Improved MP Recovery 1 מוסיף 5% ל-MP מאייטמים: 7 MP יותר לכל Lemon של 150 MP."
+    ],
+    [
+     "12",
+     "Energy Bolt +3",
+     "EB 6, IMR 1",
+     "קודם מעלים דמג'."
+    ],
+    [
+     "13",
+     "Energy Bolt +3",
+     "EB 9, IMR 1",
+     "קודם מעלים דמג'."
+    ],
+    [
+     "14",
+     "Energy Bolt +3",
+     "EB 12, IMR 1",
+     "קודם מעלים דמג'."
+    ],
+    [
+     "15",
+     "Energy Bolt +3",
+     "EB 15, IMR 1",
+     "קודם מעלים דמג'."
+    ],
+    [
+     "16",
+     "Energy Bolt +3",
+     "EB 18, IMR 1",
+     "שתי נקודות מהמקסימום."
+    ],
+    [
+     "17",
+     "Energy Bolt +2, Magic Guard +1",
+     "EB 20, MG 1, IMR 1",
+     "דמג' מקסימלי ומתחילים הגנה."
+    ],
+    [
+     "18",
+     "Magic Guard +2, Improved MP Recovery +1",
+     "EB 20, MG 3, IMR 2",
+     "מגיעים לדרישה של Armor."
+    ],
+    [
+     "19",
+     "Improved MP Recovery +1, Max MP Increase +2",
+     "EB 20, MG 3, IMR 3, MMI 2",
+     "פותחים את Max MP Increase."
+    ],
+    [
+     "20",
+     "Magic Armor +3",
+     "EB 20, MG 3, IMR 3, MMI 2, MA 3",
+     "+48 WDEF ו-MDEF."
+    ],
+    [
+     "21",
+     "Magic Armor +3",
+     "EB 20, MG 3, IMR 3, MMI 2, MA 6",
+     "+60 WDEF ו-MDEF."
+    ],
+    [
+     "22",
+     "Magic Armor +3",
+     "EB 20, MG 3, IMR 3, MMI 2, MA 9",
+     "+72 WDEF ו-MDEF."
+    ],
+    [
+     "23",
+     "Magic Armor +3",
+     "EB 20, MG 3, IMR 3, MMI 2, MA 12",
+     "+84 WDEF ו-MDEF."
+    ],
+    [
+     "24",
+     "Magic Armor +3",
+     "EB 20, MG 3, IMR 3, MMI 2, MA 15",
+     "+96 WDEF ו-MDEF."
+    ],
+    [
+     "25",
+     "Magic Armor +3",
+     "EB 20, MG 3, IMR 3, MMI 2, MA 18",
+     "+108 WDEF ו-MDEF."
+    ],
+    [
+     "26",
+     "Magic Armor +2, Max MP Increase +1",
+     "EB 20, MG 3, IMR 3, MMI 3, MA 20",
+     "Armor במקסימום וחוזרים ל-Max MP."
+    ],
+    [
+     "27",
+     "Max MP Increase +3",
+     "EB 20, MG 3, IMR 3, MMI 6, MA 20",
+     "15% יותר Max MP."
+    ],
+    [
+     "28",
+     "Max MP Increase +3",
+     "EB 20, MG 3, IMR 3, MMI 9, MA 20",
+     "18% יותר Max MP."
+    ],
+    [
+     "29",
+     "Max MP Increase +3",
+     "EB 20, MG 3, IMR 3, MMI 12, MA 20",
+     "21% יותר Max MP."
+    ],
+    [
+     "30",
+     "Max MP Increase +3",
+     "EB 20, MG 3, IMR 3, MMI 15, MA 20",
+     "+25% Max MP ו-+120 הגנה."
+    ]
    ]
   },
   {
-   "heading": "יעד סקילים ל-Magician בלבל 30",
-   "lines": [
-    "סקיל | Skill Lv | תוצאה בלבל 30",
-    "Energy Bolt | 20 / 20 | 130 Basic Attack, 10 Mastery, 16 MP",
-    "Magic Guard | 3 / 15 | 36% מדמג' ה-HP הנכנס עובר ל-MP",
-    "Improved MP Recovery | 3 / 15 | 1% Max MP כל 10 שניות. +7% MP מאייטמים",
-    "Max MP Increase | 15 / 15 | +25% Max MP",
-    "Magic Armor | 20 / 20 | +120 WDEF ו-MDEF ל-600 שניות",
-    "Magic Claw | 0 / 20 | מדלגים עליו בבילד ה-Energy Bolt"
+   "p": "אי אפשר להשקיע SP של הג'וב השני בסקילים של הג'וב הראשון, אז תסיים את תוכנית הג'וב הראשון עד לבל 30. Character Builder מסמן כל בילד שמפר את זה."
+  },
+  {
+   "h3": "חלוקת AP ל-Magician: לבל 10-30"
+  },
+  {
+   "p": "תעלה LUK רק בשביל ה-Wand הבא, וכל השאר ל-INT. בפועל, כל 5 ה-AP הולכים ל-LUK בלבלים 20, 25 ו-30, וכל שאר הלבלים הולכים ל-INT. LUK מציוד יכול להחליף LUK בסיס ברגע שהציוד הזה כבר מצויד."
+  },
+  {
+   "table": [
+    [
+     "לבל",
+     "INT בסיס",
+     "LUK בסיס",
+     "דרישת ה-Wand הבא"
+    ],
+    [
+     "10",
+     "57",
+     "5",
+     "Wooden Wand: 20 INT"
+    ],
+    [
+     "15",
+     "82",
+     "5",
+     "Hardwood Wand: 30 INT"
+    ],
+    [
+     "20",
+     "102",
+     "10",
+     "Metal Wand: 40 INT / 10 LUK"
+    ],
+    [
+     "25",
+     "122",
+     "15",
+     "Ice Wand: 50 INT / 15 LUK"
+    ],
+    [
+     "30",
+     "142",
+     "20",
+     "Mithril Wand: 60 INT / 20 LUK"
+    ]
    ]
   },
   {
-   "heading": "איך Max MP Increase עובד",
-   "lines": [
-    "Max MP Increase מוסיף אחוז קבוע ל-MP הבסיסי שלך. אם לוקחים אותו מאוחר יותר מגיעים לאותו Max MP סופי, אז אין איבוד MP קבוע מזה שבונים Magic Armor קודם. הבילד הזה משלים את Max MP Increase עד לבל 30."
+   "h3": "ציוד מומלץ: לבל 10-30"
+  },
+  {
+   "p": "תקנה קודם את ה-Wand. M.ATK מעלה ישירות את דמג' הספלים, בזמן ש-W.ATK על Wand משפיע רק על הנפות פיזיות."
+  },
+  {
+   "table": [
+    [
+     "לבל",
+     "נשק",
+     "שריון שימושי",
+     "מקור"
+    ],
+    [
+     "10",
+     "[[img:0bd13d592bcd59.png]]Wooden Wand 27 M.ATK",
+     "[[img:1e36506ff912a6.png]]Brown Apprentice Hat",
+     "Flora the Fairy ו-Serabi the Fairy ב-Ellinia"
+    ],
+    [
+     "15",
+     "[[img:b8e7401b5626da.png]]Hardwood Wand 34 M.ATK",
+     "[[img:f17cd152cb8c9e.png]]Blue Plain Robe +3 INT, זכר [[img:3d57a6a58ad57f.png]]Yellow Arianne + [[img:15b990e216a32b.png]]Yellow Arianne Skirt +1 INT כל אחד, נקבה",
+     "Flora the Fairy ו-Serabi the Fairy ב-Ellinia"
+    ],
+    [
+     "20",
+     "[[img:06916dd07d6043.png]]Metal Wand 41 M.ATK",
+     "[[img:4811fccd43d379.png]]Blue Morrican +2 INT, +1% Crit",
+     "Metal Wand: Flora the Fairy"
+    ],
+    [
+     "25",
+     "[[img:ab2b399177dae9.png]]Ice Wand 48 M.ATK",
+     "[[img:cc32edb0e377c6.png]]Blue Doros Robe +5 INT, זכר [[img:4df809ed803d00.png]]Brown Doroness Robe +5 INT, נקבה",
+     "Flora the Fairy ו-Serabi the Fairy"
+    ],
+    [
+     "30",
+     "[[img:2e8d2c65bd2aec.png]]Mithril Wand 55 M.ATK",
+     "[[img:9bb0c142cdc0c7.png]]Blue Wizard Robe +6 INT, זכר [[img:14da1a348301c5.png]]Blue Fairy Top + [[img:bfd615e03195ec.png]]Blue Fairy Skirt +3 INT כל אחד, נקבה",
+     "Flora the Fairy ו-Serabi the Fairy"
+    ]
    ]
   },
   {
-   "heading": "חלוקת SP ל-Magician: לבל 10-30",
-   "lines": [
-    "מצב מצטבר: EB = Energy Bolt, MG = Magic Guard, IMR = Improved MP Recovery, MMI = Max MP Increase, MA = Magic Armor.",
-    "לבל | השקעה | מצב מצטבר | סיבה",
-    "10 | Energy Bolt +1 | EB 1 | מתחיל אימון מטווח.",
-    "11 | Energy Bolt +2, Improved MP Recovery +1 | EB 3, IMR 1 | Improved MP Recovery 1 מוסיף 5% ל-MP מאייטמים: 7 MP יותר לכל Lemon של 150 MP.",
-    "12 | Energy Bolt +3 | EB 6, IMR 1 | קודם מעלים דמג'.",
-    "13 | Energy Bolt +3 | EB 9, IMR 1 | קודם מעלים דמג'.",
-    "14 | Energy Bolt +3 | EB 12, IMR 1 | קודם מעלים דמג'.",
-    "15 | Energy Bolt +3 | EB 15, IMR 1 | קודם מעלים דמג'.",
-    "16 | Energy Bolt +3 | EB 18, IMR 1 | שתי נקודות מהמקסימום.",
-    "17 | Energy Bolt +2, Magic Guard +1 | EB 20, MG 1, IMR 1 | דמג' מקסימלי ומתחילים הגנה.",
-    "18 | Magic Guard +2, Improved MP Recovery +1 | EB 20, MG 3, IMR 2 | מגיעים לדרישה של Armor.",
-    "19 | Improved MP Recovery +1, Max MP Increase +2 | EB 20, MG 3, IMR 3, MMI 2 | פותחים את Max MP Increase.",
-    "20 | Magic Armor +3 | EB 20, MG 3, IMR 3, MMI 2, MA 3 | +48 WDEF ו-MDEF.",
-    "21 | Magic Armor +3 | EB 20, MG 3, IMR 3, MMI 2, MA 6 | +60 WDEF ו-MDEF.",
-    "22 | Magic Armor +3 | EB 20, MG 3, IMR 3, MMI 2, MA 9 | +72 WDEF ו-MDEF.",
-    "23 | Magic Armor +3 | EB 20, MG 3, IMR 3, MMI 2, MA 12 | +84 WDEF ו-MDEF.",
-    "24 | Magic Armor +3 | EB 20, MG 3, IMR 3, MMI 2, MA 15 | +96 WDEF ו-MDEF.",
-    "25 | Magic Armor +3 | EB 20, MG 3, IMR 3, MMI 2, MA 18 | +108 WDEF ו-MDEF.",
-    "26 | Magic Armor +2, Max MP Increase +1 | EB 20, MG 3, IMR 3, MMI 3, MA 20 | Armor במקסימום וחוזרים ל-Max MP.",
-    "27 | Max MP Increase +3 | EB 20, MG 3, IMR 3, MMI 6, MA 20 | 15% יותר Max MP.",
-    "28 | Max MP Increase +3 | EB 20, MG 3, IMR 3, MMI 9, MA 20 | 18% יותר Max MP.",
-    "29 | Max MP Increase +3 | EB 20, MG 3, IMR 3, MMI 12, MA 20 | 21% יותר Max MP.",
-    "30 | Max MP Increase +3 | EB 20, MG 3, IMR 3, MMI 15, MA 20 | +25% Max MP ו-+120 הגנה.",
-    "אי אפשר להשקיע SP של הג'וב השני בסקילים של הג'וב הראשון, אז תסיים את תוכנית הג'וב הראשון עד לבל 30. Character Builder מסמן כל בילד שמפר את זה."
+   "h3": "אוברולים של מג'ים וסקרולים"
+  },
+  {
+   "p": "אוברולים של מג'ים הם שדרוגים חזקים בהתחלה, אבל הגלימות הכחולות רק לזכרים. ל-Blue Plain Robe יש +3 INT בלבל 15, ל-Blue Doros Robe יש +5 INT בלבל 25, ול-Blue Wizard Robe יש +6 INT בלבל 30. Magician נקבה מקבלת Brown Doroness Robe עם +5 INT בלבל 25. בלבלים 15 ו-30, האפשרות הכי טובה שלה היא חולצה ומכנסיים: Yellow Arianne ו-Yellow Arianne Skirt בשביל +2 INT, ואז Blue Fairy Top ו-Blue Fairy Skirt בשביל +6 INT. Serabi the Fairy ב-Ellinia מוכרת את כולם. לכל אוברול יש 10 סלוטי שדרוג."
+  },
+  {
+   "note": "**לסקרולי Overall INT אין מקבילה לחולצות או מכנסיים של מג'ים.** סקרול ה-Lesser נותן +1 INT בוודאות. סקרול ה-Intermediate הוא 60% הצלחה ונותן +2 INT. Ben ב-Kerning City Civic Center מוכר את סקרול ה-Lesser ב-35,000 מסוס בדרגת Distinguished Citizen."
+  },
+  {
+   "p": "El Moth ב-The Tree That Grew III מוכר סקרולי Lesser Wand ו-Staff Magic Attack ב-25,000 מסוס. תסקרל את הנשק שאתה מצפה להחזיק מספיק זמן כדי להחזיר את העלות."
+  },
+  {
+   "h3": "Wand או Staff?"
+  },
+  {
+   "p": "תשתמש ב-Wand מלבל 10 עד 30. לכל Wand מקביל יש 3 M.ATK יותר ודרישת LUK שווה או נמוכה יותר. Staff מוסיף רק 1-2% Critical Damage בטווח הזה. ובכל זאת, אם נפל לך Staff ממוב במזל, תשתמש בו. נשקים כל כך יקרים... קבצנים לא בוחרים."
+  },
+  {
+   "table": [
+    [
+     "לבל",
+     "Wand",
+     "Staff",
+     "הבדל"
+    ],
+    [
+     "10",
+     "[[img:0bd13d592bcd59.png]]Wooden Wand 27 M.ATK, Speed 6",
+     "[[img:ce09d7582d3fbc.png]]Wooden Staff 24 M.ATK, Speed 7, +1% Crit DMG",
+     "Wand +3 M.ATK"
+    ],
+    [
+     "15",
+     "[[img:b8e7401b5626da.png]]Hardwood Wand 34 M.ATK, Speed 6, 0 LUK",
+     "[[img:562154a53f9097.png]]Sapphire Staff או [[img:e6ff74d0dac2ba.png]]Emerald Staff 31 M.ATK, Speed 7, 10 LUK, +1% Crit DMG",
+     "Wand +3 M.ATK ו-10 LUK פחות"
+    ],
+    [
+     "20",
+     "[[img:06916dd07d6043.png]]Metal Wand 41 M.ATK, Speed 6, 10 LUK",
+     "[[img:c20e85bef2bc37.png]]Old Wooden Staff 38 M.ATK, Speed 7, 15 LUK, +2% Crit DMG",
+     "Wand +3 M.ATK ו-5 LUK פחות"
+    ],
+    [
+     "25",
+     "[[img:ab2b399177dae9.png]]Ice Wand 48 M.ATK, Speed 6, 15 LUK",
+     "[[img:a3d9641467e022.png]]Wizard Staff 45 M.ATK, Speed 7, 20 LUK, +2% Crit DMG",
+     "Wand +3 M.ATK ו-5 LUK פחות"
+    ]
    ]
   },
   {
-   "heading": "חלוקת AP ל-Magician: לבל 10-30",
-   "lines": [
-    "תעלה LUK רק בשביל ה-Wand הבא, וכל השאר ל-INT. בפועל, כל 5 ה-AP הולכים ל-LUK בלבלים 20, 25 ו-30, וכל שאר הלבלים הולכים ל-INT. LUK מציוד יכול להחליף LUK בסיס ברגע שהציוד הזה כבר מצויד.",
-    "לבל | INT בסיס | LUK בסיס | דרישת ה-Wand הבא",
-    "10 | 57 | 5 | Wooden Wand: 20 INT",
-    "15 | 82 | 5 | Hardwood Wand: 30 INT",
-    "20 | 102 | 10 | Metal Wand: 40 INT / 10 LUK",
-    "25 | 122 | 15 | Ice Wand: 50 INT / 15 LUK",
-    "30 | 142 | 20 | Mithril Wand: 60 INT / 20 LUK",
-    "ציוד מומלץ: לבל 10-30",
-    "תקנה קודם את ה-Wand. M.ATK מעלה ישירות את דמג' הספלים, בזמן ש-W.ATK על Wand משפיע רק על הנפות פיזיות.",
-    "לבל | נשק | שריון שימושי | מקור",
-    "10 | Wooden Wand 27 M.ATK | Brown Apprentice Hat | Flora the Fairy ו-Serabi the Fairy ב-Ellinia",
-    "15 | Hardwood Wand 34 M.ATK | Blue Plain Robe +3 INT, זכר",
-    "Yellow Arianne + Yellow Arianne Skirt +1 INT כל אחד, נקבה | Flora the Fairy ו-Serabi the Fairy ב-Ellinia",
-    "20 | Metal Wand 41 M.ATK | Blue Morrican +2 INT, +1% Crit | Metal Wand: Flora the Fairy",
-    "25 | Ice Wand 48 M.ATK | Blue Doros Robe +5 INT, זכר",
-    "Brown Doroness Robe +5 INT, נקבה | Flora the Fairy ו-Serabi the Fairy",
-    "30 | Mithril Wand 55 M.ATK | Blue Wizard Robe +6 INT, זכר",
-    "Blue Fairy Top + Blue Fairy Skirt +3 INT כל אחד, נקבה | Flora the Fairy ו-Serabi the Fairy"
+   "p": "מהירות הנשק משנה הנפות פיזיות של Wand ו-Staff. Energy Bolt ו-Magic Claw משתמשים בתזמון מג'יק קבוע, אז Speed 6 מול Speed 7 לא גורם לאף ספל להיות מהיר יותר."
+  },
+  {
+   "h3": "מגנים ל-Magician ו-Guard"
+  },
+  {
+   "p": "Wand ו-Staff הם נשקים ביד אחת, אז כל Magician צריך לצייד מגן. לכל המגנים יש אפקט Guard מובנה שיכול לחסום לגמרי מכה פיזית רלוונטית. סיכוי הפרוק מבוסס על ה-WDEF של המגן עצמו, וסקרולי Shield WDEF יכולים להעלות אותו. Tulcus ב-The Swamp of Despair II מוכר את סקרול ה-Lesser Shield DEF ב-15,000 מסוס."
+  },
+  {
+   "note": "**MeowFact:** ה-Pan Lid אולי מגן טוב יותר למג'ים מ-Mystic Shield ו-Esther Shield, בגלל PDEF גבוה יותר ואחוז Guard גבוה יותר. MDEF לא משפיע על אחוז הפרוק של Guard."
+  },
+  {
+   "h3": "Stolen Fence"
+  },
+  {
+   "p": "לבל 5. 40 WDEF ו-7.4% Guard. Silver מוכר אותו ב-Lith Harbor."
+  },
+  {
+   "h3": "Pan Lid"
+  },
+  {
+   "p": "לבל 10. 44 WDEF ו-8.1% Guard. סיכוי חסימה פיזית טוב יותר מ-Mystic Shield. [[img:b62ded95656118.png]]Green Mushroom מפילים אותו."
+  },
+  {
+   "h3": "Mystic Shield"
+  },
+  {
+   "p": "לבל 22. 20 WDEF, 42 MDEF ו-5.0% Guard. דורש 34 INT ו-12 LUK."
+  },
+  {
+   "h3": "M.ATK או Critical Rate על הכפפות?"
+  },
+  {
+   "p": "בדוגמה של לבל 30, חמישה סקרולי Lesser Magic Attack שהצליחו מוסיפים 10 M.ATK ומעלים את הדמג' הצפוי של Energy Bolt מ-428 ל-460, עלייה של 7.6%. חמישה סקרולי Critical Rate מוסיפים 5% קריט ומעלים אותו ל-432, עלייה של 1.0%."
+  },
+  {
+   "note": "**תשתמש ב-Gloves Magic Attack Scrolls.** סקרולי W.ATK לא משפרים דמג' של ספלים."
+  },
+  {
+   "h3": "מפות אימון: לבל 10-30"
+  },
+  {
+   "p": "ה-Training Advisor של NiaMeowDB משתמש בדמג', Accuracy, HP, MP, הגנה, Magic Guard פעיל, ספאוני מובים ותזמון מתקפה העדכניים של הדוגמה. בכל שורה של לבל 15-30 למטה יש 100% פגיעה וכל ספאון מת בתוך שני Energy Bolt עם הדמג' הכי חלש האפשרי. הדוגמה של לבל 20 מדרגת את שתי המפות שלה כ-Caution; לבלי ה-Armor המאוחרים מחזירים את המפות ברשימה ל-Safe. בלבל 10 אין מפה ב-Victoria Island שעוברת את בדיקת שתי ההטלות."
+  },
+  {
+   "p": "**מה זה דמג' הכי חלש?** דמג' ספלים משתנה מהטלה להטלה. זאת המכה הרגילה הכי נמוכה שהבילד יכול לקבל. הריגה מובטחת בשתי הטלות עובדת גם כששתי ההטלות מקבלות את הערך הכי נמוך."
+  },
+  {
+   "table": [
+    [
+     "לבל",
+     "דוגמה",
+     "מפות Training Advisor הכי טובות",
+     "Refill"
+    ],
+    [
+     "10",
+     "60 INT / 27 M.ATK / EB 1",
+     "**The Rain-Forest East of Henesys**: 456 EXP לדקה; Pig ב-3 הטלות, Ribbon Pig ב-4 הטלות. **A Hill West of Henesys**: 393 EXP לדקה; Pig, Stump ו-Slime ב-3 הטלות, Ribbon Pig ב-4 הטלות, Red Snail ב-2 הטלות, Blue Snail בהטלה אחת.",
+     "Henesys; שתי ההליכות קצרות."
+    ],
+    [
+     "15",
+     "87 INT / 34 M.ATK / EB 12",
+     "**The Rain-Forest East of Henesys**: 811 EXP לדקה; Pig בהטלה אחת, Ribbon Pig ב-2 הטלות. **A Hill West of Henesys**: 742 EXP לדקה; Pig ושני השבלולים בהטלה אחת, Ribbon Pig, Stump ו-Slime ב-2 הטלות.",
+     "חנויות הפוטים והציוד של Henesys."
+    ],
+    [
+     "20",
+     "108 INT / 41 M.ATK / EB 20 / MG 3 / MA 3",
+     "**Transfer Area**: 1,370 EXP לדקה; Stirge ב-2 הטלות. **Tree Dungeon, Forest Up North I**: 1,299 EXP לדקה; Horny Mushroom ב-2 הטלות, Slime בהטלה אחת.",
+     "Kerning City בשביל Transfer Area; Ellinia בשביל Forest Up North."
+    ],
+    [
+     "25",
+     "130 INT / 48 M.ATK / EB 20 / MG 3 / MA 18",
+     "**Line 1 <Area 1>**: 2,074 EXP לדקה; Bubbling בהטלה אחת. **Tree Dungeon, Forest Up North IV**: 1,620 EXP לדקה; Green Mushroom ו-Slime בהטלה אחת.",
+     "ל-Line 1 יש את המילוי הקצר יותר ב-Kerning."
+    ],
+    [
+     "30",
+     "155 INT / 55 M.ATK / EB 20 / MG 3 / MA 20",
+     "**Transfer Area**: 2,741 EXP לדקה; Stirge בהטלה אחת. **Dungeon, Southern Forest IV**: 2,435 EXP לדקה; Blue Mushroom ב-2 הטלות ושאר הספאונים בהטלה אחת.",
+     "Kerning City בשביל Transfer Area; Ellinia בשביל Southern Forest."
+    ]
    ]
   },
   {
-   "heading": "אוברולים של מג'ים וסקרולים",
-   "lines": [
-    "אוברולים של מג'ים הם שדרוגים חזקים בהתחלה, אבל הגלימות הכחולות רק לזכרים. ל-Blue Plain Robe יש +3 INT בלבל 15, ל-Blue Doros Robe יש +5 INT בלבל 25, ול-Blue Wizard Robe יש +6 INT בלבל 30. Magician נקבה מקבלת Brown Doroness Robe עם +5 INT בלבל 25. בלבלים 15 ו-30, האפשרות הכי טובה שלה היא חולצה ומכנסיים: Yellow Arianne ו-Yellow Arianne Skirt בשביל +2 INT, ואז Blue Fairy Top ו-Blue Fairy Skirt בשביל +6 INT. Serabi the Fairy ב-Ellinia מוכרת את כולם. לכל אוברול יש 10 סלוטי שדרוג.",
-    "לסקרולי Overall INT אין מקבילה לחולצות או מכנסיים של מג'ים. סקרול ה-Lesser נותן +1 INT בוודאות. סקרול ה-Intermediate הוא 60% הצלחה ונותן +2 INT. Ben ב-Kerning City Civic Center מוכר את סקרול ה-Lesser ב-35,000 מסוס בדרגת Distinguished Citizen.",
-    "El Moth ב-The Tree That Grew III מוכר סקרולי Lesser Wand ו-Staff Magic Attack ב-25,000 מסוס. תסקרל את הנשק שאתה מצפה להחזיק מספיק זמן כדי להחזיר את העלות."
+   "h3": "בילד Magician לדוגמה בלבל 30"
+  },
+  {
+   "p": "4 STR בסיס / 4 DEX בסיס / 142 INT בסיס / 20 LUK בסיס\n155 INT / 20 LUK / 55 M.ATK / 71 ACC / 814 HP / 1,566 MP עם ציוד"
+  },
+  {
+   "p": "**סקילים:** EB 20, MG 3, IMR 3, MMI 15, MA 20."
+  },
+  {
+   "p": "[[img:2e8d2c65bd2aec.png]]Mithril Wand[[img:865f68bdf44e7c.png]]Brown Jester[[img:9bb0c142cdc0c7.png]]Blue Wizard Robe[[img:0355c8bcbf7d6b.png]]Mystic Shield"
+  },
+  {
+   "h2": "פוטים מומלצים"
+  },
+  {
+   "p": "Energy Bolt יעיל, אבל כל נקודת דמג' שעוברת דרך Magic Guard מתחרה ב-MP של המתקפות שלך. תקנה את הפוטים הכי משתלמים, תשתמש ב-Armor כדי להוריד דמג' נכנס, ותמלא לפני שאחד הברים נהיה מסוכן."
+  },
+  {
+   "p": "**הכי שווה לקנות** הכי הרבה החזר לכל מסו בחנות"
+  },
+  {
+   "p": "[[img:be80aa4791c684.png]] **Red Potion** 100 HP ב-50 מסוס · 0.5 מסו ל-HP [[img:39a28ad40190a6.png]] **Fried Chicken** 120 HP ב-60 מסוס · 0.5 מסו ל-HP [[img:51e2250795d8f6.png]] **Meat** 160 HP ב-80 מסוס · 0.5 מסו ל-HP [[img:da1e5c881a1df6.png]] **Orange** 50 MP ב-50 מסוס · 1 מסו ל-MP [[img:d59bc967011b87.png]] **Lemon** 150 MP ב-150 מסוס · 1 מסו ל-MP"
+  },
+  {
+   "p": "**לפי מצב** קנה בשביל נקודת שבירה של דמג' או Accuracy"
+  },
+  {
+   "p": "[[img:01a2e09235af46.png]] **Magic Potion** +10 M.ATK ל-10 דק' · מעלה דמג' מג'יק [[img:4e15182d2a8a6e.png]] **Sniper Potion** +5 Accuracy ל-10 דק' · סוגר פער קטן באחוז פגיעה [[img:e18fe0a27cd32a.png]] **Supreme Sniper Potion** +7 Accuracy ל-15 דק' · נמכר אצל Raymond ב-Henesys"
+  },
+  {
+   "p": "**לא לקנות בשביל משתלם** יותר החזר לשימוש, פחות החזר לכל מסו"
+  },
+  {
+   "p": "[[img:a699b6aea354d7.png]] **White Potion** 500 HP ב-350 מסוס · 0.7 מסו ל-HP [[img:d19cbf8225851d.png]] **Blue Potion** 200 MP ב-220 מסוס · 1.1 מסו ל-MP"
+  },
+  {
+   "h2": "טעויות נפוצות של Magician"
+  },
+  {
+   "ol": [
+    "**למקסם Magic Claw מהרגל ישן.** נכון ל-COT2, Energy Bolt ו-Magic Claw עושים אותו דמג' ממוצע. Energy Bolt עולה פחות MP, מגיע רחוק יותר, יש לו פוטנציאל Knockback טוב יותר וחוסך SP אחד ל-Max MP Increase או ל-Improved MP Recovery. ל-Magic Claw יש דמג' יציב יותר והוא עובר מכשולי שטח. תחליט אחרי שאתה מכיר את היתרונות והחסרונות של שניהם.",
+    "**להוסיף LUK בשביל התקדמות הג'וב הראשון.** אין דרישת סטטים. תוסיף LUK רק כשהנשק שלך צריך.",
+    "**להשאיר Magic Guard מלא דולק באימון קל.** במחירי חנות בסיסיים, כל 100 דמג' עולים בערך 90 מסוס למלא דרך MG 15, לעומת 50 מסוס כשזה נשאר על ה-HP.",
+    "**לתת ל-Magic Guard לרוקן את ה-MP האחרון.** MP ריק אומר בלי ספל ובלי מאגר להעברה.",
+    "**לא להשתמש ב-Staff בגלל מהירות המתקפה האיטית שלו.** לספלים לא אכפת ממהירות המתקפה של הנשק.",
+    "**להשאיר את סלוט המגן ריק.** למגנים רגילים יכול להיות יותר WDEF וסיכוי Guard מאשר למגני מג'ים מוקדמים.",
+    "**להתעלם מההליכה למילוי.** מפה עם EXP לדקה כמעט זהה גרועה יותר כשכל ריצת פוטים לוקחת הרבה יותר זמן."
    ]
   },
   {
-   "heading": "Wand או Staff?",
-   "lines": [
-    "תשתמש ב-Wand מלבל 10 עד 30. לכל Wand מקביל יש 3 M.ATK יותר ודרישת LUK שווה או נמוכה יותר. Staff מוסיף רק 1-2% Critical Damage בטווח הזה. ובכל זאת, אם נפל לך Staff ממוב במזל, תשתמש בו. נשקים כל כך יקרים... קבצנים לא בוחרים.",
-    "לבל | Wand | Staff | הבדל",
-    "10 | Wooden Wand",
-    "27 M.ATK, Speed 6 | Wooden Staff",
-    "24 M.ATK, Speed 7, +1% Crit DMG | Wand +3 M.ATK",
-    "15 | Hardwood Wand",
-    "34 M.ATK, Speed 6, 0 LUK | Sapphire Staff או Emerald Staff",
-    "31 M.ATK, Speed 7, 10 LUK, +1% Crit DMG | Wand +3 M.ATK ו-10 LUK פחות",
-    "20 | Metal Wand",
-    "41 M.ATK, Speed 6, 10 LUK | Old Wooden Staff",
-    "38 M.ATK, Speed 7, 15 LUK, +2% Crit DMG | Wand +3 M.ATK ו-5 LUK פחות",
-    "25 | Ice Wand",
-    "48 M.ATK, Speed 6, 15 LUK | Wizard Staff",
-    "45 M.ATK, Speed 7, 20 LUK, +2% Crit DMG | Wand +3 M.ATK ו-5 LUK פחות",
-    "מהירות הנשק משנה הנפות פיזיות של Wand ו-Staff. Energy Bolt ו-Magic Claw משתמשים בתזמון מג'יק קבוע, אז Speed 6 מול Speed 7 לא גורם לאף ספל להיות מהיר יותר."
-   ]
+   "h2": "בלבל 30: בחר את הג'וב השני שלך"
   },
   {
-   "heading": "מגנים ל-Magician ו-Guard",
-   "lines": [
-    "Wand ו-Staff הם נשקים ביד אחת, אז כל Magician צריך לצייד מגן. לכל המגנים יש אפקט Guard מובנה שיכול לחסום לגמרי מכה פיזית רלוונטית. סיכוי הפרוק מבוסס על ה-WDEF של המגן עצמו, וסקרולי Shield WDEF יכולים להעלות אותו. Tulcus ב-The Swamp of Despair II מוכר את סקרול ה-Lesser Shield DEF ב-15,000 מסוס.",
-    "MeowFact: ה-Pan Lid אולי מגן טוב יותר למג'ים מ-Mystic Shield ו-Esther Shield, בגלל PDEF גבוה יותר ואחוז Guard גבוה יותר. MDEF לא משפיע על אחוז הפרוק של Guard.",
-    "Stolen Fence",
-    "לבל 5. 40 WDEF ו-7.4% Guard. Silver מוכר אותו ב-Lith Harbor.",
-    "Pan Lid",
-    "לבל 10. 44 WDEF ו-8.1% Guard. סיכוי חסימה פיזית טוב יותר מ-Mystic Shield. Green Mushroom מפילים אותו.",
-    "Mystic Shield",
-    "לבל 22. 20 WDEF, 42 MDEF ו-5.0% Guard. דורש 34 INT ו-12 LUK.",
-    "M.ATK או Critical Rate על הכפפות?",
-    "בדוגמה של לבל 30, חמישה סקרולי Lesser Magic Attack שהצליחו מוסיפים 10 M.ATK ומעלים את הדמג' הצפוי של Energy Bolt מ-428 ל-460, עלייה של 7.6%. חמישה סקרולי Critical Rate מוסיפים 5% קריט ומעלים אותו ל-432, עלייה של 1.0%.",
-    "תשתמש ב-Gloves Magic Attack Scrolls. סקרולי W.ATK לא משפרים דמג' של ספלים.",
-    "מפות אימון: לבל 10-30",
-    "ה-Training Advisor של NiaMeowDB משתמש בדמג', Accuracy, HP, MP, הגנה, Magic Guard פעיל, ספאוני מובים ותזמון מתקפה העדכניים של הדוגמה. בכל שורה של לבל 15-30 למטה יש 100% פגיעה וכל ספאון מת בתוך שני Energy Bolt עם הדמג' הכי חלש האפשרי. הדוגמה של לבל 20 מדרגת את שתי המפות שלה כ-Caution. לבלי ה-Armor המאוחרים מחזירים את המפות ברשימה ל-Safe. בלבל 10 אין מפה ב-Victoria Island שעוברת את בדיקת שתי ההטלות.",
-    "מה זה דמג' הכי חלש? דמג' ספלים משתנה מהטלה להטלה. זאת המכה הרגילה הכי נמוכה שהבילד יכול לקבל. הריגה מובטחת בשתי הטלות עובדת גם כששתי ההטלות מקבלות את הערך הכי נמוך.",
-    "לבל | דוגמה | מפות Training Advisor הכי טובות | Refill",
-    "10 | 60 INT / 27 M.ATK / EB 1 | The Rain-Forest East of Henesys: 456 EXP לדקה. Pig ב-3 הטלות, Ribbon Pig ב-4 הטלות.",
-    "A Hill West of Henesys: 393 EXP לדקה. Pig, Stump ו-Slime ב-3 הטלות, Ribbon Pig ב-4 הטלות, Red Snail ב-2 הטלות, Blue Snail בהטלה אחת. | Henesys. שתי ההליכות קצרות.",
-    "15 | 87 INT / 34 M.ATK / EB 12 | The Rain-Forest East of Henesys: 811 EXP לדקה. Pig בהטלה אחת, Ribbon Pig ב-2 הטלות.",
-    "A Hill West of Henesys: 742 EXP לדקה. Pig ושני השבלולים בהטלה אחת, Ribbon Pig, Stump ו-Slime ב-2 הטלות. | חנויות הפוטים והציוד של Henesys.",
-    "20 | 108 INT / 41 M.ATK / EB 20 / MG 3 / MA 3 | Transfer Area: 1,370 EXP לדקה. Stirge ב-2 הטלות.",
-    "Tree Dungeon, Forest Up North I: 1,299 EXP לדקה. Horny Mushroom ב-2 הטלות, Slime בהטלה אחת. | Kerning City בשביל Transfer Area. Ellinia בשביל Forest Up North.",
-    "25 | 130 INT / 48 M.ATK / EB 20 / MG 3 / MA 18 | Line 1 <Area 1>: 2,074 EXP לדקה. Bubbling בהטלה אחת.",
-    "Tree Dungeon, Forest Up North IV: 1,620 EXP לדקה. Green Mushroom ו-Slime בהטלה אחת. | ל-Line 1 יש את המילוי הקצר יותר ב-Kerning.",
-    "30 | 155 INT / 55 M.ATK / EB 20 / MG 3 / MA 20 | Transfer Area: 2,741 EXP לדקה. Stirge בהטלה אחת.",
-    "Dungeon, Southern Forest IV: 2,435 EXP לדקה. Blue Mushroom ב-2 הטלות ושאר הספאונים בהטלה אחת. | Kerning City בשביל Transfer Area. Ellinia בשביל Southern Forest.",
-    "מצא מפות לבילד שלך",
-    "בילד Magician לדוגמה בלבל 30",
-    "4 STR בסיס / 4 DEX בסיס / 142 INT בסיס / 20 LUK בסיס",
-    "155 INT / 20 LUK / 55 M.ATK / 71 ACC / 814 HP / 1,566 MP עם ציוד",
-    "סקילים: EB 20, MG 3, IMR 3, MMI 15, MA 20.",
-    "Mithril Wand · Brown Jester · Blue Wizard Robe · Mystic Shield"
-   ]
+   "h3": "Fire/Poison Wizard"
   },
   {
-   "heading": "פוטים מומלצים",
-   "lines": [
-    "Energy Bolt יעיל, אבל כל נקודת דמג' שעוברת דרך Magic Guard מתחרה ב-MP של המתקפות שלך. תקנה את הפוטים הכי משתלמים, תשתמש ב-Armor כדי להוריד דמג' נכנס, ותמלא לפני שאחד הברים נהיה מסוכן.",
-    "הכי שווה לקנות: הכי הרבה החזר לכל מסו בחנות",
-    "Red Potion 100 HP ב-50 מסוס 0.5 מסו ל-HP",
-    "Fried Chicken 120 HP ב-60 מסוס 0.5 מסו ל-HP",
-    "Meat 160 HP ב-80 מסוס 0.5 מסו ל-HP",
-    "Orange 50 MP ב-50 מסוס 1 מסו ל-MP",
-    "Lemon 150 MP ב-150 מסוס 1 מסו ל-MP",
-    "לפי מצב: קנה בשביל נקודת שבירה של דמג' או Accuracy",
-    "Magic Potion +10 M.ATK ל-10 דק'. מעלה דמג' מג'יק",
-    "Sniper Potion +5 Accuracy ל-10 דק'. סוגר פער קטן באחוז פגיעה",
-    "Supreme Sniper Potion +7 Accuracy ל-15 דק'. נמכר אצל Raymond ב-Henesys",
-    "לא לקנות בשביל משתלם: יותר החזר לשימוש, פחות החזר לכל מסו",
-    "White Potion 500 HP ב-350 מסוס 0.7 מסו ל-HP",
-    "Blue Potion 200 MP ב-220 מסוס 1.1 מסוס ל-MP",
-    "טעויות נפוצות של Magician",
-    "למקסם Magic Claw מהרגל ישן. נכון ל-COT2, Energy Bolt ו-Magic Claw עושים אותו דמג' ממוצע. Energy Bolt עולה פחות MP, מגיע רחוק יותר, יש לו פוטנציאל Knockback טוב יותר וחוסך SP אחד ל-Max MP Increase או ל-Improved MP Recovery. ל-Magic Claw יש דמג' יציב יותר והוא עובר מכשולי שטח. תחליט אחרי שאתה מכיר את היתרונות והחסרונות של שניהם.",
-    "להוסיף LUK בשביל התקדמות הג'וב הראשון. אין דרישת סטטים. תוסיף LUK רק כשהנשק שלך צריך.",
-    "להשאיר Magic Guard מלא דולק באימון קל. במחירי חנות בסיסיים, כל 100 דמג' עולים בערך 90 מסוס למלא דרך MG 15, לעומת 50 מסוס כשזה נשאר על ה-HP.",
-    "לתת ל-Magic Guard לרוקן את ה-MP האחרון. MP ריק אומר בלי ספל ובלי מאגר להעברה.",
-    "לא להשתמש ב-Staff בגלל מהירות המתקפה האיטית שלו. לספלים לא אכפת ממהירות המתקפה של הנשק.",
-    "להשאיר את סלוט המגן ריק. למגנים רגילים יכול להיות יותר WDEF וסיכוי Guard מאשר למגני מג'ים מוקדמים.",
-    "להתעלם מההליכה למילוי. מפה עם EXP לדקה כמעט זהה גרועה יותר כשכל ריצת פוטים לוקחת הרבה יותר זמן.",
-    "בלבל 30: בחר את הג'וב השני שלך"
-   ]
+   "p": "Fire Arrow נותן דמג' אלמנטלי חזק על מטרה אחת. Poison Breath מוסיף דמג' לאורך זמן."
   },
   {
-   "heading": "Fire/Poison Wizard",
-   "lines": [
-    "Fire Arrow נותן דמג' אלמנטלי חזק על מטרה אחת. Poison Breath מוסיף דמג' לאורך זמן.",
-    "מדריך F/P Wizard ללבל 30-70 · Ice/Lightning Wizard",
-    "Cold Beam מטפל במטרות בודדות ובחולשות. Thunder Bolt מנקה עד שישה מובים.",
-    "מדריך I/L Wizard ללבל 30-70 · Cleric",
-    "Heal, Bless ו-Invincible הופכים את Cleric ל-Magician של תמיכה בפארטי.",
-    "מדריך Cleric ללבל 30-70"
-   ]
+   "guide": "fp-wizard-class-guide",
+   "text": "מדריך F/P Wizard ללבל 30-70"
+  },
+  {
+   "h3": "Ice/Lightning Wizard"
+  },
+  {
+   "p": "Cold Beam מטפל במטרות בודדות ובחולשות. Thunder Bolt מנקה עד שישה מובים."
+  },
+  {
+   "guide": "il-wizard-class-guide",
+   "text": "מדריך I/L Wizard ללבל 30-70"
+  },
+  {
+   "h3": "Cleric"
+  },
+  {
+   "p": "Heal, Bless ו-Invincible הופכים את Cleric ל-Magician של תמיכה בפארטי."
+  },
+  {
+   "guide": "cleric-class-guide",
+   "text": "מדריך Cleric ללבל 30-70"
   }
- ]
+ ],
+ "source_hash": "dd782bd95e5d"
 }

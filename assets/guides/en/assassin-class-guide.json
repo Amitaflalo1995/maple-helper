@@ -1,0 +1,953 @@
+{
+ "title": "MapleStory Classic Assassin Build and Leveling Guide: Lv 30-70",
+ "intro": "Assassins continue to use Lucky Seven to deal damage from afar, with Haste to get around the map faster. They are still one of the most popular jobs of all time, so expect pricey claws, scrolls, and throwing stars.",
+ "hero": "3b7e255f48e97c.png",
+ "minutes": null,
+ "blocks": [
+  {
+   "p": "**Pros**"
+  },
+  {
+   "ul": [
+    "#3 highest single-target damage at level 70; highest ranged damage.",
+    "Haste gives the party Speed and Jump for faster map clears.",
+    "Claw Mastery, Critical Recovery, and Drain reduce some star and potion costs.",
+    "More LUK means less EXP loss per death."
+   ]
+  },
+  {
+   "p": "**Cons**"
+  },
+  {
+   "ul": [
+    "No real mobbing attack until 3rd job.",
+    "Throwing stars cost mesos, need multiple inventory stacks, and must be recharged.",
+    "Low HP and basically no defense."
+   ]
+  },
+  {
+   "h2": "Starting at level 30"
+  },
+  {
+   "p": "This guide continues from the level 1 to 30 Thief guide. You should arrive with max Lucky Seven, Keen Eyes, and Nimble Body."
+  },
+  {
+   "img": "b1521dd4e37810.png",
+   "w": 130,
+   "h": 202
+  },
+  {
+   "h2": "Recommended citizenship: Kerning City"
+  },
+  {
+   "p": "Keep Kerning City citizenship from the first-job guide. Helpful Stranger unlocks Wolbi Throwing Stars from Max in the Civic Center (1,000 mesos for a set of 500), Distinguished Citizen unlocks the Lesser Overall LUK scroll, and Guardian of the Village unlocks the Lesser Glove Attack scroll. From level 17, Jake's Stirge Phobia quest line at the subway entrance gives contribution toward Kerning City citizenship."
+  },
+  {
+   "p": "[[img:9f0b2c3fcd68dd.png]]"
+  },
+  {
+   "h2": "ACC is still a decisive factor in optimal training spots"
+  },
+  {
+   "p": "Assassins gain Accuracy from character level, DEX, LUK, direct Accuracy, and max Nimble Body. A miss still uses two stars, 16 MP, and the full Lucky Seven animation. Check hit rate before moving to a map with better EXP on paper."
+  },
+  {
+   "img": "273e7df0ad2d08.png",
+   "w": 130,
+   "h": 134
+  },
+  {
+   "note": "Base ACC = floor((1.2 x DEX + 2 x Level + 0.6 x LUK) x 0.25 + 15)\nTotal ACC = Base ACC + direct Accuracy + Nimble Body\n**+0.50** Base ACC per level\n**+0.30** Base ACC per DEX\n**+0.15** Base ACC per LUK\n**+15** ACC from Nimble Body"
+  },
+  {
+   "p": "**Character level contributes more Accuracy than one point of DEX.** It also closes the hit-rate penalty against higher-level mobs. The mob's Avoidability remains part of the requirement."
+  },
+  {
+   "table": [
+    [
+     "Mob",
+     "Level",
+     "Mob Avoid",
+     "ACC for 100% hit at equal level"
+    ],
+    [
+     "[[img:777ced8b4048a6.png]]Jr. Wraith",
+     "34",
+     "24",
+     "79 ACC"
+    ],
+    [
+     "[[img:2a5d75bf6e3634.png]]Lorang",
+     "38",
+     "23",
+     "76 ACC"
+    ],
+    [
+     "[[img:3934c93d7d4444.png]]Zombie Lupin",
+     "41",
+     "28",
+     "92 ACC"
+    ],
+    [
+     "[[img:0386eea7010d4c.png]]Wraith",
+     "48",
+     "31",
+     "101 ACC"
+    ]
+   ]
+  },
+  {
+   "p": "The 100% column means every attack lands at the same character and mob level. Fighting at a lower level raises the ACC requirement."
+  },
+  {
+   "h2": "Assassin skill build and SP allocation"
+  },
+  {
+   "img": "7137cb8aeefd43.png",
+   "w": 117,
+   "h": 201
+  },
+  {
+   "h3": "Level 30 Assassin job advancement"
+  },
+  {
+   "ol": [
+    "Talk to **Dark Lord in Kerning City** and accept The Thief's Next Journey.",
+    "Deliver his letter to the **Thief Job Instructor** at Construction Site North of Kerning City.",
+    "Enter the test area, defeat the monsters, and collect 30 Dark Marbles.",
+    "Take The Proof of a Hero back to Dark Lord and choose **Assassin**."
+   ]
+  },
+  {
+   "p": "[[img:b6ff6ad9543a4d.png]] **Dark Lord** Start and finish the advancement in Kerning City. [[img:9bb96a2a6733f9.png]] **Thief Job Instructor** Runs the Dark Marble test north of Kerning City."
+  },
+  {
+   "note": "**First Assassin SP: Haste 1.** It immediately gives Speed +10 and Jump +1 for 100 seconds. Mastery starts at level 31 so the next level can unlock Booster cleanly."
+  },
+  {
+   "h3": "Level 70 Assassin skill target"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Level 70 target",
+     "What it does"
+    ],
+    [
+     "[[img:241207e049ebcc.png]]Claw Mastery",
+     "20 / 20",
+     "Mastery 10, Attack Power +20, and 25% star retrieval."
+    ],
+    [
+     "[[img:556ea90180980f.png]]Critical Throw",
+     "30 / 30",
+     "Critical Rate +15% and Critical Damage +35%."
+    ],
+    [
+     "[[img:93ebfa5f2b807e.png]]Critical Recovery",
+     "20 / 20",
+     "Every critical hit recovers 10% HP and MP once its 30-second lockout ends."
+    ],
+    [
+     "[[img:ef70a793f39d7e.png]]Claw Booster",
+     "20 / 20",
+     "Attack Speed +2 stages for 300 seconds. Costs 10 HP and 10 MP."
+    ],
+    [
+     "[[img:677d1f2e03928a.png]]Haste",
+     "20 / 20",
+     "Party Speed +30 and Jump +10 for 300 seconds."
+    ],
+    [
+     "[[img:2f9d27b70bb6fc.png]]Drain",
+     "11 / 30",
+     "200% ranged damage with a 5% chance to absorb 8% of damage as HP."
+    ]
+   ]
+  },
+  {
+   "h3": "Assassin SP allocation: levels 30-70"
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "Spend SP on",
+     "Result"
+    ],
+    [
+     "30",
+     "Haste +1",
+     "Haste 1"
+    ],
+    [
+     "31",
+     "Claw Mastery +3",
+     "Mastery 3"
+    ],
+    [
+     "32",
+     "Claw Mastery +2, Claw Booster +1",
+     "Mastery 5, Booster 1"
+    ],
+    [
+     "33-37",
+     "Claw Mastery +15",
+     "Claw Mastery 20 max"
+    ],
+    [
+     "38-47",
+     "Critical Throw +30",
+     "Critical Throw 30 max"
+    ],
+    [
+     "48-53",
+     "Haste +18",
+     "Haste 19"
+    ],
+    [
+     "54",
+     "Haste +1, Claw Booster +2",
+     "Haste 20 max, Booster 3"
+    ],
+    [
+     "55-56",
+     "Claw Booster +6",
+     "Booster 9"
+    ],
+    [
+     "57-62",
+     "Critical Recovery +18",
+     "Critical Recovery 18, Drain unlocked"
+    ],
+    [
+     "63",
+     "Critical Recovery +2, Claw Booster +1",
+     "Critical Recovery 20 max, Booster 10"
+    ],
+    [
+     "64-66",
+     "Claw Booster +9",
+     "Booster 19"
+    ],
+    [
+     "67",
+     "Claw Booster +1, Drain +2",
+     "Booster 20 max, Drain 2"
+    ],
+    [
+     "68-70",
+     "Drain +9",
+     "Drain 11"
+    ]
+   ]
+  },
+  {
+   "p": "Second-job SP cannot be spent on first-job skills, so finish the first-job plan by level 30. Character Builder flags any build that breaks it."
+  },
+  {
+   "p": "This order ends on our default level 70 skill build. It gets one-point Booster at level 32, maxes Mastery before Critical Throw, and puts the late SP into Critical Recovery and Booster before Drain."
+  },
+  {
+   "h3": "Why max Claw Mastery first over Critical Throw"
+  },
+  {
+   "p": "Claw Mastery boosts minimum damage for Lucky Seven because it gives you Attack Power, which helps with training recommendations and lets you more reliably 1-hit targets. By level 40, the two skills' average outputs are close, while Mastery-first gets a stronger low roll for guaranteed kills."
+  },
+  {
+   "h3": "Claw Booster"
+  },
+  {
+   "p": "Claw Booster raises attack speed by two stages at every skill level. Extra SP lowers the HP and MP cost and extends the duration. Skill Lv1 already gives the full speed increase. The default build reaches Lv20 at level 67, where it lasts 300 seconds for 10 HP and 10 MP, as long as max Haste, so you rebuff both together."
+  },
+  {
+   "h3": "Drain and Critical Recovery"
+  },
+  {
+   "p": "Critical Recovery needs critical hits. At skill Lv20 a critical hit recovers 10% HP and 10% MP once per 30 seconds. Lv12 gives 6% at a 64% chance. On Grummash's level 70 build (26% Critical Rate, 100 Lucky Sevens a minute), a critical lands within a second or two of the lockout ending, so it fires about twice a minute. With that build's 2,154 HP and 1,633 MP, that is about 430 HP and 330 MP a minute at Lv20, against 260 HP and 200 MP at Lv12. The extra MP alone is worth about 7,800 mesos of Lemons an hour."
+  },
+  {
+   "p": "Drain is more of an emergency recovery skill. Max Drain deals 240% damage for 28 MP and has a 12% chance to recover 15% of the damage as HP. One absorb cannot exceed 25% of your max HP or the target's max HP. However, if you want to max Drain over Critical Recovery, then by all means."
+  },
+  {
+   "table": [
+    [
+     "Level 70 attack",
+     "Expected damage/use",
+     "Uses/min",
+     "Damage/min",
+     "MP/use",
+     "Damage/MP"
+    ],
+    [
+     "Lucky Seven 20",
+     "2,560",
+     "100",
+     "255,978",
+     "16",
+     "159.99"
+    ],
+    [
+     "Drain 30",
+     "2,271",
+     "100",
+     "227,086",
+     "28",
+     "81.10"
+    ]
+   ]
+  },
+  {
+   "p": "Lucky Seven stays your main attack. Use Drain when the chance to recover HP has value. Spamming Drain for ordinary kills roughly halves damage per MP in this build."
+  },
+  {
+   "h3": "Possible changes to the default order"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Default plan",
+     "Swap"
+    ],
+    [
+     "**Longer Booster earlier.** Take it if recasting Booster every 100 seconds gets annoying."
+    ],
+    [
+     "[[img:ef70a793f39d7e.png]]Claw Booster",
+     "Lv1 through level 53, Lv9 at level 56 (180 seconds)",
+     "Lv9 at level 50 (180 seconds)"
+    ],
+    [
+     "[[img:677d1f2e03928a.png]]Haste",
+     "Lv20 at level 54",
+     "Lv20 at level 56"
+    ],
+    [
+     "**Max Drain instead of Critical Recovery.** Take it if you cast Drain to heal."
+    ],
+    [
+     "[[img:93ebfa5f2b807e.png]]Critical Recovery",
+     "Lv20: recovers 10% HP and MP, 100% chance",
+     "Lv12: recovers 6% HP and MP, 64% chance"
+    ],
+    [
+     "[[img:ef70a793f39d7e.png]]Claw Booster",
+     "Lv20: 300 seconds for 10 HP and 10 MP",
+     "Lv9: 180 seconds for 22 HP and 22 MP"
+    ],
+    [
+     "[[img:2f9d27b70bb6fc.png]]Drain",
+     "Lv11: 200% damage, 5% chance to absorb 8% of damage as HP",
+     "Lv30: 240% damage, 12% chance to absorb 15% of damage as HP"
+    ]
+   ]
+  },
+  {
+   "p": "Both swaps spend the same 121 SP. The Booster swap still ends on the default level 70 build. Critical Recovery triggers when you land a critical hit and keeps its 30-second lockout at every level."
+  },
+  {
+   "h2": "Assassin AP allocation: levels 30-70"
+  },
+  {
+   "p": "Add **1 DEX and 4 LUK every level** from 31 through 70. This reaches 70 base DEX for the level 70 claw line and puts every remaining point into LUK."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Base DEX",
+     "Base LUK",
+     "Equipment check"
+    ],
+    [
+     "30",
+     "30",
+     "132",
+     "Adamantium Guards need 30 DEX and 65 LUK."
+    ],
+    [
+     "40",
+     "40",
+     "172",
+     "Dark Guardian needs 35 DEX and 75 LUK."
+    ],
+    [
+     "50",
+     "50",
+     "212",
+     "Dark Slain needs 50 DEX and 105 LUK."
+    ],
+    [
+     "60",
+     "60",
+     "252",
+     "Dark Gigantic needs 60 DEX and 125 LUK."
+    ],
+    [
+     "70",
+     "70",
+     "292",
+     "Black Scarab needs 70 DEX and 145 LUK."
+    ]
+   ]
+  },
+  {
+   "note": "**Count Total DEX before adding base DEX.** A permanent +DEX item can save base AP. Keep enough DEX to equip your claw after gear swaps."
+  },
+  {
+   "h2": "Claws, throwing stars, and equipment"
+  },
+  {
+   "img": "0d763d14f4f9a4.png",
+   "w": 130,
+   "h": 172
+  },
+  {
+   "h3": "Claw progression"
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Claw",
+     "W.ATK",
+     "Extra stat",
+     "Source"
+    ],
+    [
+     "30",
+     "[[img:7f4e91463e6782.png]]Adamantium Guards",
+     "23",
+     "1% Crit Damage",
+     "Sold by Cutthroat Manny."
+    ],
+    [
+     "35",
+     "[[img:27f8c50143f816.png]]Dark Guardian",
+     "26",
+     "1% Crit Damage",
+     "Weaponcrafting 7 craft. Check Item DB drops and Free Market."
+    ],
+    [
+     "50",
+     "[[img:09a879fa3f79f3.png]]Dark Slain",
+     "34",
+     "1% Crit Rate",
+     "Weaponcrafting 10 craft. Check Item DB drops and Free Market."
+    ],
+    [
+     "60",
+     "[[img:d0bcac6e1ff004.png]]Dark Gigantic",
+     "41",
+     "2% Crit Rate",
+     "Check Item DB drops and Free Market."
+    ],
+    [
+     "70",
+     "[[img:026aa3551af6a4.png]]Black Scarab",
+     "47",
+     "2% Crit Rate",
+     "Check Item DB drops and Free Market."
+    ]
+   ]
+  },
+  {
+   "p": "[[img:9c4118beadd222.png]] **Cutthroat Manny** Sells Adamantium Guards in Kerning City."
+  },
+  {
+   "h3": "Which level 50 Slain?"
+  },
+  {
+   "p": "We'd pick Dark Slain when the prices are close. All four Slains share 34 W.ATK, Fast attack speed, and the same 50 DEX and 105 LUK requirement. Blood adds 1 Accuracy, Sapphire 1% Critical Damage, Dark 1% Critical Rate. On the realistic level 70 build (26% crit rate, +61% crit damage), 1% Crit Rate adds slightly more expected damage than 1% Crit Damage, and more crits also trigger Critical Recovery sooner. One W.ATK is worth more than 1% Crit Rate on this build (see the glove comparison below), so a scrolled Steel or Blood Slain with more final W.ATK beats an unscrolled Dark Slain."
+  },
+  {
+   "table": [
+    [
+     "Claw",
+     "Extra stat",
+     "Craft path"
+    ],
+    [
+     "[[img:a358dbfa8ae49b.png]]Steel Slain",
+     "None",
+     "Weaponcrafting Lv10: 5 Bronze Ingots, 5 Iron Ingots, 30 Dragon Skins, 30 Screws, a Two-Handed Weapon Crafting Catalyst, and 16,500 mesos."
+    ],
+    [
+     "[[img:e134c2b20beba7.png]]Blood Slain",
+     "1 Accuracy",
+     "Steel Slain, 6 Garnets, a catalyst, and 1,000 mesos."
+    ],
+    [
+     "[[img:789745b6417d57.png]]Sapphire Slain",
+     "1% Critical Damage",
+     "Steel Slain, 6 Sapphires, a catalyst, and 1,000 mesos."
+    ],
+    [
+     "[[img:09a879fa3f79f3.png]]Dark Slain",
+     "1% Critical Rate",
+     "Steel Slain, 6 Black Crystals, a catalyst, and 2,000 mesos."
+    ]
+   ]
+  },
+  {
+   "p": "Price the materials against a finished claw in the Free Market before you commit. Check the Dark Slain item page for drop sources."
+  },
+  {
+   "h3": "Throwing-star progression"
+  },
+  {
+   "p": "Claw W.ATK and star W.ATK add together. A 47 W.ATK Black Scarab with 7 Lesser Weapon Attack scrolls, 5 W.ATK gloves, and Tobi Throwing Stars reaches 82 total W.ATK."
+  },
+  {
+   "p": "[[img:49136f0c4908d9.png]]Subi +15 · 500 [[img:6b8e85bc094214.png]]Wolbi +17 · 500 [[img:e092633200db86.png]]Mokbi +19 · 700 [[img:8e200753aa1aba.png]]Kumbi +21 · 700 [[img:ab8824ea8a9fe5.png]]Tobi +23 · 1,000 [[img:b7f90b5d9793d7.png]]Steely +25 · 1,000 [[img:a5277e30db944a.png]]Ilbi +27 · 800 [[img:dc34deeb7be92f.png]]Hwabi +29 · 800"
+  },
+  {
+   "p": "The number after each star is its maximum stack. Buy the best star you can afford after covering your claw, armor, and potion budget. Carry several stacks. The shop walk matters because every refill stops your EXP."
+  },
+  {
+   "h3": "The variable costs of throwing stars"
+  },
+  {
+   "p": "Claw Mastery returns thrown stars 5% of the time at skill Lv1, 9% at Lv5, and 25% at Lv20. Over 1,000 Lucky Sevens, that's 2,000 stars thrown: Lv1 hands back about 100, Lv5 about 180, Lv20 about 500. One 800-star set lasts about 533 casts at max Mastery instead of 400."
+  },
+  {
+   "p": "Recharging is the smaller bill. We'll assume one Lucky Seven every 2 seconds: 1,800 casts an hour and 3,600 stars thrown. Max Claw Mastery cuts the loss to about 2,700. The last column recharges those 2,700 stars at the NPC."
+  },
+  {
+   "table": [
+    [
+     "Star",
+     "W.ATK",
+     "Stars per set",
+     "Mesos per star",
+     "Mesos per set",
+     "Mesos per hour"
+    ],
+    [
+     "Subi",
+     "15",
+     "500",
+     "0.3",
+     "150",
+     "810"
+    ],
+    [
+     "Wolbi",
+     "17",
+     "500",
+     "0.4",
+     "200",
+     "1,080"
+    ],
+    [
+     "Mokbi",
+     "19",
+     "700",
+     "0.5",
+     "350",
+     "1,350"
+    ],
+    [
+     "Kumbi",
+     "21",
+     "700",
+     "0.6",
+     "420",
+     "1,620"
+    ],
+    [
+     "Tobi",
+     "23",
+     "1,000",
+     "0.7",
+     "700",
+     "1,890"
+    ],
+    [
+     "Steely",
+     "25",
+     "1,000",
+     "0.8",
+     "800",
+     "2,160"
+    ],
+    [
+     "Ilbi",
+     "27",
+     "800",
+     "0.9",
+     "720",
+     "2,430"
+    ],
+    [
+     "Hwabi",
+     "29",
+     "800",
+     "1.0",
+     "800",
+     "2,700"
+    ]
+   ]
+  },
+  {
+   "p": "Hwabi recharges come to under eight White Potions an hour. The expensive part of a high star is buying the first sets. Once you own them, the hourly gap between Wolbi and Hwabi is about 1,600 mesos. Max Claw Mastery saves 900 stars an hour at this pace: 360 mesos on Wolbi, 900 on Hwabi, and fewer trips to town."
+  },
+  {
+   "note": "**Snowball, Wooden Top, and Icicle recharge at 1 meso per star.** Snowball has Wolbi's 17 W.ATK and costs 2,700 an hour to run instead of 1,080. Wooden Top matches Mokbi at double the recharge price. Icicle matches Kumbi at 2,700 instead of 1,620. Their 800-star sets mean fewer trips to town. The recharge gap is 1,080 to 1,620 mesos an hour. Throw them if you already own a set. Don't buy them as your main star."
+  },
+  {
+   "h3": "Armor and scrolling priorities"
+  },
+  {
+   "ol": [
+    "**Weapon Attack:** claw and glove scrolls give the largest direct damage gain.",
+    "**LUK:** cape, overall, and earring LUK raise Lucky Seven damage and Accuracy.",
+    "**Accuracy:** use it when Training Advisor shows a miss chance on your target.",
+    "**HP and movement:** HP scrolls cover low Thief durability; Speed shoes help before Haste is maxed."
+   ]
+  },
+  {
+   "h3": "Female Thieves get a stronger level 35 overall"
+  },
+  {
+   "p": "Every job can equip a Sauna Robe at level 30. Blue Sauna Robe is for male characters and Red Sauna Robe is for female characters. Both start with +1 to every stat and 10 slots."
+  },
+  {
+   "p": "[[img:ce6353bc3a96de.png]]Blue Sauna Robe [[img:28e63130664b1b.png]]Red Sauna Robe [[img:b28ec1a0412003.png]]Dark Avenger"
+  },
+  {
+   "p": "Female Thieves can equip Dark Avenger at level 35. It starts with +6 LUK, +5 HP, and 10 slots. Ten Lesser Overall LUK scrolls raise it to +16 LUK. The same scrolls raise a Sauna Robe to +11 LUK. Intermediate Overall LUK scrolls add +2 LUK at a 60% success rate."
+  },
+  {
+   "note": "**This is a real damage advantage.** Tops and bottoms have no STR, DEX, INT, or LUK scrolls. Male Assassins can keep a scrolled Blue Sauna Robe or use Thief top and pants, but Dark Avenger is the stronger offensive body armor at this level."
+  },
+  {
+   "h2": "W.ATK or Critical Rate on gloves?"
+  },
+  {
+   "p": "These numbers use Grummash's realistic level 70 Assassin build and five successful Lesser glove scrolls. Both options use the same five slots."
+  },
+  {
+   "h3": "5x Gloves Attack Scroll: Lesser"
+  },
+  {
+   "p": "**+5 W.ATK**\n77 to 82 total W.ATK\nAbout 6.49% more expected damage."
+  },
+  {
+   "h3": "5x Gloves Crit. Rate Scroll: Lesser"
+  },
+  {
+   "p": "**+5% Critical Rate**\n26% to 31% Critical Rate\nAbout 2.63% more expected damage."
+  },
+  {
+   "note": "**Pick Attack.** The five-scroll Attack setup deals about 3.76% more expected damage than the Critical Rate setup on this build."
+  },
+  {
+   "p": "Critical Throw gives this build 61% Critical Damage, the highest value in this comparison. Crit comes closest here. Assassin's low total W.ATK also makes each point of W.ATK very strong, so Attack still wins."
+  },
+  {
+   "p": "**The ratio is the same at every grade.** Lesser gives +1 W.ATK or +1% Critical Rate (+2 M.ATK), Intermediate +2/+2% (+4 M.ATK), Greater +3/+3% (+6 M.ATK), and Chaos +4/+4% (+8 M.ATK). Matching grades have the same success and destruction rates."
+  },
+  {
+   "p": "**W.ATK also helps guaranteed kills.** It raises every physical hit, including your weakest normal roll and every critical hit. Critical Rate changes how often a critical occurs, so it cannot improve the weakest non-critical roll."
+  },
+  {
+   "h2": "Leveling builds and Training Advisor maps"
+  },
+  {
+   "p": "Your damage has a highest and lowest possible result. The **low roll** is the weakest result. A guaranteed 1-attack kill means that weakest result still removes the mob's full HP and your hit rate is 100%. These breakpoints often beat a higher-level mob that needs extra Lucky Sevens."
+  },
+  {
+   "img": "1721112124eec8.png",
+   "w": 129,
+   "h": 207
+  },
+  {
+   "h3": "Levels 30-39"
+  },
+  {
+   "note": "Level 30 example build\n30 base DEX / 132 base LUK / 34 total DEX / 139 total LUK / 77 ACC / 40 total W.ATK\nUse Adamantium Guards with Wolbi. Lucky Seven, Keen Eyes, and Nimble Body are maxed. Take Haste 1 after becoming an Assassin.\n[[img:ae64823f427bc0.png]] **Transfer Area** Stirge 1-attack, about 3,083 EXP/min · Safe · Dr. Faymus, 4 portals [[img:ae64823f427bc0.png]] **Dangerous Steam** Stirge 1-attack; Zombie and Horny Mushroom 2-attack, about 2,976 EXP/min · Caution · Mr. Sweatbottom, 8 portals"
+  },
+  {
+   "p": "**Stirge is one of the best Assassin targets at this level.** Lucky Seven reaches the flying mobs, and this checkpoint lands every hit and kills each Stirge with one attack even on the weakest damage roll."
+  },
+  {
+   "p": "At level 35, Ant Tunnel II reaches about 3,589 EXP/min with guaranteed 1-attack Horny Mushrooms and 2-attack Zombie Mushrooms. The level 35 checkpoint uses 35 base DEX, 152 total LUK, 80 ACC, and 43 total W.ATK."
+  },
+  {
+   "h3": "Levels 40-49"
+  },
+  {
+   "table": [
+    [
+     "Checkpoint",
+     "Build",
+     "Best clean maps",
+     "Guaranteed kills"
+    ],
+    [
+     "40",
+     "172 LUK, 87 ACC, 50 W.ATK",
+     "Ant Tunnel Park; Deep Ant Tunnel II",
+     "Zombie Mushroom and Horny Mushroom 1-attack; Evil Eye 2-attack · Caution · 10-11 portals to Mr. Sweatbottom"
+    ],
+    [
+     "45",
+     "192 LUK, 94 ACC, 50 W.ATK",
+     "Ant Tunnel Park; Deep Ant Tunnel II",
+     "Same breakpoints as level 40 · Caution · 10-11 portals to Mr. Sweatbottom"
+    ]
+   ]
+  },
+  {
+   "h3": "Levels 50-59"
+  },
+  {
+   "note": "Level 50 example build\n50 base DEX / 212 base LUK / 55 total DEX / 250 total LUK / 120 ACC / 71 total W.ATK\nMax Claw Mastery and Critical Throw. Lesser-scroll gear includes Dark Slain, Brown Sonata, Red-Hearted Earrings, Black Napoleon, Dark Avenger, Brown Moon Gloves, and Green Goni Shoes. This checkpoint assumes a female character because Dark Avenger is female-only. A male Assassin using a fully Lesser-scrolled Blue Sauna Robe has 5 less LUK, so run that build through Training Advisor again.\n[[img:09a879fa3f79f3.png]]Dark Slain [[img:273b104a8baa07.png]]Brown Sonata [[img:4cfcbc52234f6e.png]]Brown Moon Gloves [[img:f571343f5c2aca.png]]Green Goni Shoes\n[[img:3934c93d7d4444.png]] **Monkey Forest II** Zombie Lupin and Lupin 2-attack, about 5,298 EXP/min · Caution · 5 portals to Len [[img:2ba29b3aeef67c.png]] **Forgotten Entrance II** Raffle, Glowshroom, and Lupin 2-attack, about 5,242 EXP/min · Caution · 6 portals to Luma"
+  },
+  {
+   "p": "Monkey Forest II is still the strongest launch map at level 55 with the checkpoint gear. A newer claw, star, or scroll can open other maps earlier, so check your real build."
+  },
+  {
+   "h3": "Levels 60-70"
+  },
+  {
+   "table": [
+    [
+     "Checkpoint",
+     "Build",
+     "Top Advisor maps",
+     "Why they work"
+    ],
+    [
+     "60",
+     "290 LUK, 134 ACC, 78 W.ATK",
+     "Monkey Forest II; Tree Dungeon, Monkey Forest II",
+     "All spawns stay within two attacks · Caution · 5-6 portals to Len"
+    ],
+    [
+     "65",
+     "310 LUK, 141 ACC, 78 W.ATK",
+     "Monkey Forest II; Tree Dungeon, Monkey Forest II",
+     "Same 1- and 2-attack breakpoints · Caution · 5-6 portals to Len"
+    ],
+    [
+     "70",
+     "337 LUK, 148 ACC, 82 W.ATK",
+     "The Forest of Evil II; Tree Dungeon, Monkey Forest II",
+     "All spawns stay within two attacks · Caution · 6-7 portals to Len"
+    ]
+   ]
+  },
+  {
+   "p": "These results explain why the best map can contain mobs far below your level. Monkey Forest II stays on top from level 50 to 65 because clean one- and two-attack kills produce more EXP per minute than forcing a slower high-level target."
+  },
+  {
+   "p": "**Before you settle in:** Before leaving town, check both star supply and potions. At the map, count Lucky Seven casts on the common mobs and watch how often you have to reposition. A shorter refill trip can be worth a slightly lower EXP estimate."
+  },
+  {
+   "h2": "Assassin skill mechanics"
+  },
+  {
+   "img": "e247b31e5ab305.png",
+   "w": 130,
+   "h": 136
+  },
+  {
+   "img": "9b49577c19f806.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Claw Booster"
+  },
+  {
+   "img": "848b596bb854dc.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Haste"
+  },
+  {
+   "img": "ad0362e6799c92.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Drain"
+  },
+  {
+   "h3": "Haste"
+  },
+  {
+   "p": "Max Haste gives nearby party members Speed +30 and Jump +10 for 300 seconds. The damage screen does not show its real value. Faster platform changes, less walking between groups of mobs, and easier spacing for Lucky Seven all improve grinding."
+  },
+  {
+   "table": [
+    [
+     "Skill Lv",
+     "MP",
+     "Speed",
+     "Jump",
+     "Duration",
+     "Party area"
+    ],
+    [
+     "1",
+     "15",
+     "+10",
+     "+1",
+     "100 sec",
+     "500 x 300 px"
+    ],
+    [
+     "20",
+     "35",
+     "+30",
+     "+10",
+     "300 sec",
+     "600 x 400 px"
+    ]
+   ]
+  },
+  {
+   "p": "**Haste's party range grows at skill Lv11.** The caster stays in the center of the area."
+  },
+  {
+   "img": "8ea44ba66a1c56.png",
+   "w": 43,
+   "h": 70,
+   "cap": "Skill Lv1500 x 300 px"
+  },
+  {
+   "img": "8ea44ba66a1c56.png",
+   "w": 43,
+   "h": 70,
+   "cap": "Skill Lv20600 x 400 px"
+  },
+  {
+   "note": "**Haste was nerfed from old-school MapleStory.** The old version gave +40 Speed and +20 Jump (Ayumilove's 2008 skill list). Classic World max Haste gives +30 Speed and +10 Jump. Jump was cut in half, while Speed was reduced by 10."
+  },
+  {
+   "h2": "Find Your Build's Best Training Map with Training Advisor"
+  },
+  {
+   "p": "**Danger measures how hard a mob hits you for: under 10% of your HP is Safe, 10-24% is Caution, 25-49% is Danger, and 50%+ is Lethal.**"
+  },
+  {
+   "p": "The examples use fixed checkpoint gear. Your claw roll, star, scrolls, skill levels, and Accuracy can change every kill breakpoint."
+  },
+  {
+   "ol": [
+    "Open Character Builder and enter your real AP, skills, claw, star, and equipment.",
+    "Open Training Advisor and set reliability to 100%.",
+    "Leave **Factor Danger into recommendations** enabled. Lucky Seven is ranged, so dangerous maps receive a smaller EXP penalty than they do for melee attacks.",
+    "Prioritize maps where every major spawn dies in one or two attacks, including your weakest damage result.",
+    "Compare EXP per minute, MP use, star use, travel time, and platform spacing.",
+    "Check the nearest potion shop and star recharge NPC. A nearest-town scroll gets you back to town. Add the walk back to the map when comparing a distant Stirge spot with an easier Kerning map."
+   ]
+  },
+  {
+   "img": "4831f6c2da7611.png",
+   "w": 360,
+   "h": 393,
+   "cap": "The saved Assassin build in Training Advisor: current hit rate, danger, damage, and EXP per hour for the equipped character."
+  },
+  {
+   "h2": "Recommended potions"
+  },
+  {
+   "p": "Assassins are MP efficient with Lucky Seven, but constant attacking, Haste, Booster, star recharges, and gear upgrades compete for the same mesos. Buy the most cost-efficient potions."
+  },
+  {
+   "img": "acd017c388c398.png",
+   "w": 130,
+   "h": 139
+  },
+  {
+   "p": "**BEST TO BUY** Best HP or MP recovered per meso"
+  },
+  {
+   "p": "[[img:be80aa4791c684.png]] **Red Potion** 50 mesos · 100 HP 2 HP per meso [[img:39a28ad40190a6.png]] **Fried Chicken** 60 mesos · 120 HP 2 HP per meso [[img:51e2250795d8f6.png]] **Meat** 80 mesos · 160 HP 2 HP per meso [[img:da1e5c881a1df6.png]] **Orange** 50 mesos · 50 MP 1 MP per meso [[img:d59bc967011b87.png]] **Lemon** 150 mesos · 150 MP 1 MP per meso"
+  },
+  {
+   "p": "**Situational** Buy only when the buff reaches a useful breakpoint"
+  },
+  {
+   "p": "[[img:4e15182d2a8a6e.png]] **Sniper Potion** 500 mesos · +5 ACC for 10 min Use to remove misses [[img:e18fe0a27cd32a.png]] **Supreme Sniper Potion** 600 mesos · +7 ACC for 15 min Best shop ACC buff [[img:8d7b05272e3e8b.png]] **Warrior Potion** 500 mesos · +10 Attack Power for 10 min Use for a damage breakpoint"
+  },
+  {
+   "p": "**DON'T BUY** Worse recovery per meso than the choices above"
+  },
+  {
+   "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 mesos · 500 HP 1.43 HP per meso [[img:d19cbf8225851d.png]] **Blue Potion** 220 mesos · 200 MP 0.91 MP per meso"
+  },
+  {
+   "guide": "best-buy-shop-efficiency",
+   "text": "Compare shop potion efficiency"
+  },
+  {
+   "h2": "Common mistakes"
+  },
+  {
+   "img": "c1e27c15d669c6.png",
+   "w": 129,
+   "h": 195
+  },
+  {
+   "ol": [
+    "**Rushing Critical Throw and delaying Booster too long.** COT2 Claw Mastery gives Attack Power, and Claw Booster needs Claw Mastery Lv5.",
+    "**Buying one expensive star set.** One strong stack can run empty in the middle of a grind. Several usable stacks are safer.",
+    "**Running Snowball, Wooden Top, or Icicle all day.** They recharge at 1 meso per star. Wolbi gives the same 17 W.ATK as Snowball for 40% of the recharge bill.",
+    "**Ignoring claw punch range.** Give Lucky Seven enough space or your claw will punch an enemy and deal almost no damage.",
+    "**Using Drain as the main DPS skill.** At the default Lv11 it costs 18 MP (28 MP at Lv30) and deals less expected damage than Lucky Seven.",
+    "**Adding base DEX without counting equipment.** Claw requirements use Total DEX.",
+    "**Picking maps by mob level.** Check 100% hit rate and guaranteed one- or two-attack kills.",
+    "**Arriving with too few MP potions.** Great damage per MP does not help after the last Lemon is gone."
+   ]
+  },
+  {
+   "h2": "Realistic level 70 Assassin build"
+  },
+  {
+   "p": "This guide is based on a realistic level 70 Assassin build by Grummash. Every equipment slot uses successful Lesser scrolls. Grummash's saved build maxes Drain with Critical Recovery 12 and Booster 9. Our default moves those 19 SP into Critical Recovery and Booster. Gear, stats, and Training Advisor results are unchanged."
+  },
+  {
+   "img": "692599562d7f8c.png",
+   "w": 129,
+   "h": 204
+  },
+  {
+   "note": "**Final stats with gear:** 4 STR / 70 DEX / 4 INT / 337 LUK, 148 ACC, 82 total W.ATK, 26 % Critical Rate, and + 61 % Critical Damage."
+  },
+  {
+   "p": "[[img:026aa3551af6a4.png]]Black Scarab [[img:5062d3d8f6886f.png]]White Nightfox [[img:7074fdfc4eab49.png]]Dark Studded Top [[img:9a4ed6cdd4a272.png]]Dark Studded Pants [[img:fccac9b25cdcb4.png]]Gold Rover [[img:f5a7d4b9df805b.png]]Blue Mystique Shoes [[img:888d6716376ade.png]]Black Gaia Cape [[img:ea67f3099d0314.png]]Metal Silver Earrings [[img:ab8824ea8a9fe5.png]]Tobi Throwing Stars"
+  },
+  {
+   "table": [
+    [
+     "First-job skills",
+     "Second-job skills"
+    ],
+    [
+     "Nimble Body 15, Keen Eyes 15, Disorder 3, Dark Sight 8, Lucky Seven 20",
+     "Claw Mastery 20, Critical Throw 30, Critical Recovery 20, Claw Booster 20, Haste 20, Drain 11"
+    ]
+   ]
+  },
+  {
+   "h3": "At level 70: become a Hermit"
+  },
+  {
+   "p": "[[img:427c5ad4050c0c.png]] **Arec** Handles the Hermit advancement in El Nath."
+  },
+  {
+   "p": "Assassin advances to Hermit through Arec in El Nath. Third job and El Nath are not in the launch build. This guide stops before third-job SP. Finish the second-job build, then plan around the COT2 Hermit skill book."
+  },
+  {
+   "p": "See COT2 Hermit skills"
+  },
+  {
+   "p": "The damage, Accuracy, skill, item, monster, spawn, and map examples use current COT2 data. Training Advisor supplies the map estimates. Community feedback is welcome in forum suggestions."
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/assassin-class-guide",
+ "hash": "4fce25ab1ae4"
+}

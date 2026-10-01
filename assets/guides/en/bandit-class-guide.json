@@ -1,0 +1,1248 @@
+{
+ "title": "MapleStory Classic Bandit Build and Leveling Guide: Lv 30-70",
+ "intro": "Bandits hit hard up close with Savage Blow. This guide levels with Lucky Seven first, then resets into a dagger build around level 40. Plan that switch before spending on gear.",
+ "hero": "8760a3337bbd9b.png",
+ "minutes": null,
+ "blocks": [
+  {
+   "p": "**Pros**"
+  },
+  {
+   "ul": [
+    "#1 single-target damage at level 70 in the current COT2 benchmark.",
+    "Haste gives the party Speed and Jump; Steal can stun and raise your Attack Power.",
+    "Dagger users can equip shields, and Guard can fully block eligible physical hits."
+   ]
+  },
+  {
+   "p": "**Cons**"
+  },
+  {
+   "ul": [
+    "Very short reach and constant face tanking.",
+    "Max Savage Blow costs 28 MP per attack and is less MP efficient than Double Stab.",
+    "STR and DEX dagger requirements can waste AP if the weapon path is planned late."
+   ]
+  },
+  {
+   "h2": "Starting at level 30"
+  },
+  {
+   "p": "New Thief? Finish the Thief level 1-30 guide first. The Accuracy formula, first-job SP allocation, early equipment, citizenship, and training maps are explained there."
+  },
+  {
+   "p": "**Keep Lucky Seven and Keen Eyes.** Hold onto the claw and throwing stars too. The Bandit job advancement should not force an immediate switch to a dagger and Savage Blow. Lucky Seven remains your better early attack."
+  },
+  {
+   "img": "55a43ebb095dcc.png",
+   "w": 130,
+   "h": 202
+  },
+  {
+   "h2": "Recommended citizenship: Kerning City"
+  },
+  {
+   "p": "[[img:9f0b2c3fcd68dd.png]] Keep Kerning City citizenship from the first-job guide. Distinguished Citizen unlocks the Lesser Overall LUK scroll, and Guardian of the Village unlocks the Lesser Glove Attack scroll. Helpful Stranger's Wolbi reward matters more to Assassins, but the LUK and W.ATK scrolls are excellent for Bandits. Max sells Wolbi Throwing Stars at Helpful Stranger, the third grade, which asks for 2,000 contribution and takes about two weeks of Kerning City board dailies and weekly donations."
+  },
+  {
+   "h2": "ACC is still a decisive factor in optimal training spots"
+  },
+  {
+   "img": "6decd4b2f443e2.png",
+   "w": 130,
+   "h": 134
+  },
+  {
+   "p": "Bandit Accuracy comes from your character level and stats. Nimble Body adds to it. Check your hit rate before switching to a higher level mob."
+  },
+  {
+   "note": "Base ACC = floor((1.2 x DEX + 2 x Level + 0.6 x LUK) x 0.25 + 15)\nTotal ACC = Base ACC + direct Accuracy + Nimble Body\n**+0.50** Base ACC per level\n**+0.30** Base ACC per DEX\n**+0.15** Base ACC per LUK\n**+15** ACC from Nimble Body"
+  },
+  {
+   "p": "**Character level contributes more Accuracy than one point of DEX.** Level also closes the hit-rate penalty against higher-level mobs. The mob's Avoidability remains part of the requirement."
+  },
+  {
+   "table": [
+    [
+     "Mob",
+     "Level",
+     "Mob Avoid",
+     "ACC for 100% hit at equal level"
+    ],
+    [
+     "[[img:777ced8b4048a6.png]]Jr. Wraith",
+     "34",
+     "24",
+     "79 ACC"
+    ],
+    [
+     "[[img:2a5d75bf6e3634.png]]Lorang",
+     "38",
+     "23",
+     "76 ACC"
+    ],
+    [
+     "[[img:3934c93d7d4444.png]]Zombie Lupin",
+     "41",
+     "28",
+     "92 ACC"
+    ],
+    [
+     "[[img:0386eea7010d4c.png]]Wraith",
+     "48",
+     "31",
+     "101 ACC"
+    ]
+   ]
+  },
+  {
+   "p": "The 100% column means every attack lands at the same character and mob level. Fighting at a lower level raises the ACC requirement."
+  },
+  {
+   "h2": "Bandit skill build and SP allocation"
+  },
+  {
+   "img": "5e6e80989241d8.png",
+   "w": 130,
+   "h": 156
+  },
+  {
+   "h3": "Level 30 Bandit job advancement"
+  },
+  {
+   "ol": [
+    "Talk to **Dark Lord in Kerning City** and accept The Thief's Next Journey.",
+    "Deliver his letter to the **Thief Job Instructor** at Construction Site North of Kerning City.",
+    "Enter the test area. Defeat its monsters until you collect 30 Dark Marbles.",
+    "Take The Proof of a Hero back to Dark Lord and choose **Bandit**."
+   ]
+  },
+  {
+   "p": "[[img:b6ff6ad9543a4d.png]] **Dark Lord** Starts and finishes the Bandit advancement in Kerning City. [[img:9bb96a2a6733f9.png]] **Thief Job Instructor** Runs the Dark Marble test north of Kerning City."
+  },
+  {
+   "note": "**First Bandit SP: Haste 1.** Continue using max Lucky Seven. Haste reaches 20 at level 37, followed by Nimble Recovery 8 at level 39."
+  },
+  {
+   "h3": "Bandit (Sindit) SP allocation: levels 30-70 (with Reset)"
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "Spend SP on",
+     "Result"
+    ],
+    [
+     "30-36",
+     "Haste +19",
+     "Haste 19; keep using Lucky Seven"
+    ],
+    [
+     "37",
+     "Haste +1, Nimble Recovery +2",
+     "Haste 20 max, Recovery 2"
+    ],
+    [
+     "38-39",
+     "Nimble Recovery +6",
+     "Nimble Recovery 8"
+    ],
+    [
+     "40 reset",
+     "Dagger Mastery 20, Dagger Booster 1, Savage Blow 10",
+     "Mastery 20 max; reset first-job SP into max Double Stab, which replaces Lucky Seven"
+    ],
+    [
+     "41-43",
+     "Savage Blow +9",
+     "Savage Blow 19; switch to Savage Blow at level 42"
+    ],
+    [
+     "44",
+     "Savage Blow +2, Haste +1",
+     "Six-hit Savage Blow 21, Haste 1"
+    ],
+    [
+     "45-47",
+     "Savage Blow +9",
+     "Savage Blow 30 max"
+    ],
+    [
+     "48-53",
+     "Haste +18",
+     "Haste 19"
+    ],
+    [
+     "54",
+     "Haste +1, Nimble Recovery +2",
+     "Haste 20 max, Recovery 2"
+    ],
+    [
+     "55-57",
+     "Nimble Recovery +9",
+     "Nimble Recovery 11"
+    ],
+    [
+     "58",
+     "Nimble Recovery +1, Steal +2",
+     "Recovery 12, Steal 2"
+    ],
+    [
+     "59-67",
+     "Steal +27",
+     "Steal 29"
+    ],
+    [
+     "68",
+     "Steal +1, Dagger Booster +2",
+     "Steal 30 max, Booster 3"
+    ],
+    [
+     "69-70",
+     "Dagger Booster +6",
+     "Dagger Booster 9"
+    ]
+   ]
+  },
+  {
+   "p": "Second-job SP cannot be spent on first-job skills, so finish the first-job plan by level 30. Character Builder flags any build that breaks it."
+  },
+  {
+   "note": "**With the reset, attack with Double Stab at levels 40-41.** From level 42, Savage Blow 16 ranks above it in Training Advisor."
+  },
+  {
+   "h3": "Bandit SP allocation: levels 30-70 (no Reset)"
+  },
+  {
+   "p": "For a dagger Bandit who never buys an SP Reset Scroll. Your first-job SP should already follow the dagger plan with max Double Stab, which stays as your main attack until level 43, when Savage Blow reaches skill Lv18. After one point of Haste, Mastery goes first because it raises Double Stab's min hit roll: at level 39 this path lets you reach about 4,740 EXP/min in Training Advisor, against about 3,600 EXP/min for taking Savage Blow first. Maxing Dagger Mastery is far more important than maxing Savage Blow for EXP farming efficiency."
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "Spend SP on",
+     "Result"
+    ],
+    [
+     "30",
+     "Haste +1",
+     "Haste 1; attack with max Double Stab"
+    ],
+    [
+     "31",
+     "Dagger Mastery +3",
+     "Mastery 3"
+    ],
+    [
+     "32",
+     "Dagger Mastery +2, Dagger Booster +1",
+     "Mastery 5, Booster 1"
+    ],
+    [
+     "33-37",
+     "Dagger Mastery +15",
+     "Mastery 20 max"
+    ],
+    [
+     "38-44",
+     "Savage Blow +21",
+     "Six-hit Savage Blow 21"
+    ],
+    [
+     "45-47",
+     "Savage Blow +9",
+     "Savage Blow 30 max"
+    ],
+    [
+     "48-53",
+     "Haste +18",
+     "Haste 19"
+    ],
+    [
+     "54",
+     "Haste +1, Nimble Recovery +2",
+     "Haste 20 max, Recovery 2"
+    ],
+    [
+     "55-57",
+     "Nimble Recovery +9",
+     "Nimble Recovery 11"
+    ],
+    [
+     "58",
+     "Nimble Recovery +1, Steal +2",
+     "Recovery 12, Steal 2"
+    ],
+    [
+     "59-67",
+     "Steal +27",
+     "Steal 29"
+    ],
+    [
+     "68",
+     "Steal +1, Dagger Booster +2",
+     "Steal 30 max, Booster 3"
+    ],
+    [
+     "69-70",
+     "Dagger Booster +6",
+     "Dagger Booster 9"
+    ]
+   ]
+  },
+  {
+   "h3": "Level 70 sample skill target"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Level 70 target",
+     "What it does"
+    ],
+    [
+     "[[img:6b429f611cfb6b.png]]Dagger Mastery",
+     "20 / 20",
+     "Mastery 10, Critical Rate +20%, and 20% chance to ignore knockback."
+    ],
+    [
+     "[[img:144cf326554785.png]]Nimble Recovery",
+     "12 / 20",
+     "An evade can recover 6% HP and MP, with a 64% proc chance and a 30-second lockout."
+    ],
+    [
+     "[[img:f601ef1535d691.png]]Dagger Booster",
+     "9 / 20",
+     "Attack Speed +2 stages for 180 seconds. Costs 22 HP and 22 MP."
+    ],
+    [
+     "[[img:29b1cbacd35050.png]]Haste",
+     "20 / 20",
+     "Party Speed +30 and Jump +10 for 300 seconds."
+    ],
+    [
+     "[[img:28d2a0ad93474f.png]]Steal",
+     "30 / 30",
+     "Hits two mobs and attempts to steal. A successful proc stuns and gives Attack Power +35 for 30 seconds."
+    ],
+    [
+     "[[img:c1aec993cbf747.png]]Savage Blow",
+     "30 / 30",
+     "Six hits at 75% each for 450% total damage and 28 MP."
+    ]
+   ]
+  },
+  {
+   "h3": "Level 70 Bandit SP options and tradeoffs"
+  },
+  {
+   "p": "Maxing all six Bandit skills costs 140 SP, but levels 30-70 give 121. Keep Dagger Mastery 20 and Savage Blow 30. Haste also stays at 20. The remaining 51 SP goes into Dagger Booster, Nimble Recovery, and Steal."
+  },
+  {
+   "table": [
+    [
+     "Priority",
+     "Booster",
+     "Recovery",
+     "Steal",
+     "Tradeoff"
+    ],
+    [
+     "Grummash sample",
+     "9",
+     "12",
+     "30",
+     "180-second Booster with partial Recovery."
+    ],
+    [
+     "Recovery and Steal",
+     "1",
+     "20",
+     "30",
+     "Full recovery and Steal; recast Booster every 100 seconds."
+    ],
+    [
+     "Fewer rebuffs",
+     "20",
+     "1",
+     "30",
+     "Booster and Haste both last 300 seconds; Recovery barely heals."
+    ],
+    [
+     "Recovery and uptime",
+     "20",
+     "20",
+     "11",
+     "Max Recovery and Booster; Steal falls to 50% success and +15 Attack Power."
+    ]
+   ]
+  },
+  {
+   "p": "Ducky Duck Gaming's Bandit class breakdown also walks through these SP tradeoffs."
+  },
+  {
+   "h3": "Reset the Sindit around level 40"
+  },
+  {
+   "p": "The SP Reset Scroll resets every skill except Beginner skills. That includes first-job and Bandit SP. Its live Cash Shop price is unconfirmed."
+  },
+  {
+   "p": "[[img:5e2296e71267c0.png]]SP Reset Scroll"
+  },
+  {
+   "p": "Random's COT2 Sindit build switched around level 40-41 with a level 40 dagger. A weaker level 35 dagger moved the useful breakpoint closer to level 43-44. Check your own minimum damage before spending the scroll."
+  },
+  {
+   "p": "You have three useful ways to spend the 61 first-job SP after the reset:"
+  },
+  {
+   "h3": "Max Double Stab"
+  },
+  {
+   "p": "**Nimble Body 15 / Disorder 20 / Dark Sight 6 / Double Stab 20.** Double Stab remains the cheaper attack when it guarantees the same kill as Savage Blow."
+  },
+  {
+   "h3": "Max Dark Sight"
+  },
+  {
+   "p": "**Nimble Body 15 / Disorder 20 / Dark Sight 20 / Double Stab 6.** Max Dark Sight removes its Speed penalty and lowers the activation cost to 30 MP. Double Stab 6 is too weak to attack with, so pair this option with Savage Blow 21 / Dagger Mastery 9 at the reset."
+  },
+  {
+   "note": "**You can max both.** Nimble Body 15 / Disorder 6 / Dark Sight 20 / Double Stab 20 uses all 61 first-job SP. Pick this if max Disorder matters less than keeping both dagger damage and full-speed Dark Sight."
+  },
+  {
+   "note": "**Level 40 Bandit SP:** Dagger Mastery 20 / Dagger Booster 1 / Savage Blow 10."
+  },
+  {
+   "p": "Max Dagger Mastery raises the low roll of every dagger attack, and the low roll decides guaranteed kills. At level 40 it gives max Double Stab a 798 low roll, against 588 for Savage Blow 21 with Dagger Mastery 9, and about 4,740 EXP/min in Training Advisor against 3,950. Booster gives the full two-stage speed increase at skill Lv1."
+  },
+  {
+   "h3": "When does Savage Blow beat Double Stab and Lucky Seven?"
+  },
+  {
+   "p": "Savage Blow first beats max Double Stab's damage per attack at skill Lv11: 325% total damage against Double Stab's 320%. Savage Blow has the longer attack animation, so damage per minute does not pass Double Stab until skill Lv21 with a boosted Fast 4 dagger in the current calculator."
+  },
+  {
+   "note": "**Level 35 is the first clean-gear DPS breakpoint against max Lucky Seven in the current calculator.** Savage Blow 1 / Dagger Mastery 14 / Dagger Booster 1 with a clean Halfmoon Zamadar reaches about 46,762 damage per minute. Max Lucky Seven with clean Adamantium Guards and Wolbi reaches about 46,287. Savage Blow wins by about 1.0%."
+  },
+  {
+   "p": "Level 40 is the more practical reset point, because the stronger Gephart makes the reset a much larger upgrade. Your dagger and guaranteed kills in Training Advisor can move the best reset level earlier or later."
+  },
+  {
+   "p": "These level 40 results use the guide's clean Adamantium Guards and Wolbi before the reset, then a clean Gephart with Dagger Mastery 9 and Dagger Booster 1 after it. The target has 0 WDEF."
+  },
+  {
+   "table": [
+    [
+     "Level 40 attack",
+     "Expected damage per attack",
+     "Damage per minute",
+     "Damage per MP"
+    ],
+    [
+     "Lucky Seven 20",
+     "615",
+     "51,004",
+     "38.4"
+    ],
+    [
+     "Double Stab 20",
+     "719",
+     "71,897",
+     "44.9"
+    ],
+    [
+     "Savage Blow 21",
+     "876",
+     "72,746",
+     "36.5"
+    ]
+   ]
+  },
+  {
+   "p": "**At this breakpoint, Savage Blow deals about 21.9% more damage per attack and 1.2% more damage per minute than Double Stab. It deals about 42.6% more damage per minute than Lucky Seven with the sample equipment.** Double Stab remains about 23.0% more MP efficient. The current calculator now uses Savage Blow's confirmed timing, rounded to the game's 30 ms steps, but your dagger and guaranteed kill still decide whether the reset is worth it."
+  },
+  {
+   "h3": "Why level Haste first?"
+  },
+  {
+   "p": "Haste improves mobility and party value while Lucky Seven already handles damage. The reset moves those Haste points into Savage Blow and Mastery, then you level Haste again."
+  },
+  {
+   "h3": "Community Bandit build notes: Random and Grummash"
+  },
+  {
+   "p": "Random's COT2 Sindit guide leaves Booster at 1 and maxes Nimble Recovery. Grummash's realistic level 70 build uses Booster 9 and Nimble Recovery 12. Both get the full two-stage speed increase. Random gets stronger recovery but recasts Booster every 100 seconds. Grummash trades 8 Nimble Recovery levels for a 180-second Booster."
+  },
+  {
+   "p": "The delayed reset and early Haste plan come from Random. Skill values, damage comparisons, and sample map results use current MapleStory Classic World data."
+  },
+  {
+   "h2": "Bandit AP allocation: levels 30-70"
+  },
+  {
+   "p": "The default build follows DEX daggers. It starts from the first-job guide's 30 base DEX and 132 base LUK. Add **1 DEX and 4 LUK per level through level 61**. Put all 5 AP into LUK from levels 62 through 70. This finishes at 61 base DEX and 301 base LUK."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Base DEX",
+     "Base LUK",
+     "Equipment check"
+    ],
+    [
+     "30",
+     "30",
+     "132",
+     "Reef Claw needs 25 DEX and 60 LUK."
+    ],
+    [
+     "40",
+     "40",
+     "172",
+     "Gephart needs 35 DEX and 80 LUK."
+    ],
+    [
+     "50",
+     "50",
+     "212",
+     "Shinkita needs 45 DEX and 100 LUK."
+    ],
+    [
+     "60",
+     "60",
+     "252",
+     "Deadly Fin needs 55 DEX and 120 LUK."
+    ],
+    [
+     "70",
+     "61",
+     "301",
+     "Kandine needs 65 Total DEX and 140 LUK."
+    ]
+   ]
+  },
+  {
+   "p": "The realistic level 70 build gets its final 4 DEX from other equipment. More equipment DEX lets you stop base DEX lower. A dagger's own DEX or STR cannot help meet that dagger's equip requirement."
+  },
+  {
+   "h2": "DEX daggers or STR daggers?"
+  },
+  {
+   "img": "c2383358fcd382.png",
+   "w": 130,
+   "h": 172
+  },
+  {
+   "p": "Bandits have two main weapon lines. DEX daggers carry 3 more base W.ATK at the same level. STR daggers attack one stage faster, and they stay one stage faster with Booster. The weapon requirement changes, but every dagger still uses LUK as its main damage stat."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "DEX dagger",
+     "Requirement",
+     "W.ATK / speed",
+     "STR or fast dagger",
+     "Requirement",
+     "W.ATK / speed"
+    ],
+    [
+     "30",
+     "[[img:a4f35b3221de6d.png]]Reef Claw",
+     "25 DEX / 60 LUK",
+     "48 / Fast 4",
+     "[[img:3a36b47901a8a1.png]]Cass",
+     "25 STR / 60 LUK",
+     "45 / Faster 3"
+    ],
+    [
+     "40",
+     "[[img:dbf27d9aa2fcfb.png]]Gephart",
+     "35 DEX / 80 LUK",
+     "58 / Fast 4",
+     "[[img:43be4f6d664d23.png]]Korean Fan",
+     "70 LUK",
+     "55 / Faster 3"
+    ],
+    [
+     "50",
+     "[[img:864717543715dd.png]]Shinkita",
+     "45 DEX / 100 LUK",
+     "68 / Fast 4",
+     "[[img:ad19c181101453.png]]Sai",
+     "45 STR / 100 LUK",
+     "65 / Faster 3"
+    ],
+    [
+     "60",
+     "[[img:0ceb32ba9fe976.png]]Deadly Fin",
+     "55 DEX / 120 LUK",
+     "78 / Fast 4",
+     "[[img:9052636244612a.png]]Serpent's Coil",
+     "55 STR / 120 LUK",
+     "75 / Faster 3"
+    ],
+    [
+     "70",
+     "[[img:975cc72e71bc7c.png]]Kandine",
+     "65 DEX / 140 LUK",
+     "88 / Fast 4",
+     "[[img:5d94e55325caee.png]]Golden River",
+     "65 STR / 140 LUK",
+     "85 / Faster 3"
+    ]
+   ]
+  },
+  {
+   "p": "**Current Weaponcrafting options:** Halfmoon Zamadar unlocks at skill level 7 and Gephart at 8. Sai unlocks at 10. There is no Shinkita recipe, so plan how you will get the level 50 dagger before adding both STR and DEX."
+  },
+  {
+   "h3": "What are STR daggers and are they any good?"
+  },
+  {
+   "p": "Players call Cass, Sai, Serpent's Coil, and Golden River STR daggers because STR replaces DEX in their equip requirements. They do not turn STR into a Bandit's main damage stat. Korean Fan belongs in the same Faster (3) weapon line, but it only requires 70 LUK."
+  },
+  {
+   "p": "At level 70, the DEX and STR dagger lines deal almost the same damage. The DEX dagger gets 9 more Accuracy."
+  },
+  {
+   "p": "Dagger Booster moves both lines two stages faster, so a Faster 3 STR dagger reaches speed 1 and a Fast 4 DEX dagger reaches speed 2."
+  },
+  {
+   "p": "With a similar realistic stat build, Golden River (STR) gets 90 Savage Blow casts per minute, compared with Kandine (DEX) at 83. That is about 5% more damage. That +5% is on identical stats; once you spend 65 STR for Golden River, it ends up 1.3% behind."
+  },
+  {
+   "p": "The huge catch is AP. Level 70 Thief armor still requires 60 DEX, so Golden River's 65 STR needs to come from somewhere unless you plan to go armorless or use low-level common armor."
+  },
+  {
+   "p": "We strongly do not recommend going STR daggers while the game's meta armor still requires DEX."
+  },
+  {
+   "h3": "Why LUK does more damage"
+  },
+  {
+   "p": "The dagger damage formulas are:"
+  },
+  {
+   "note": "Maximum raw hit = (1 + (2 × LUK + STR + DEX) / 100 + Attack Power / 50) × W.ATK × Skill Damage\nMinimum raw hit = (0.8 + (2 × LUK × Mastery + STR + DEX) / 100 + Attack Power / 50) × W.ATK × Skill Damage"
+  },
+  {
+   "p": "**One LUK has twice the stat weight of one STR or DEX on the maximum roll.** On the minimum roll, one LUK has 1.76 times their weight with max Dagger Mastery. DEX also helps Accuracy and equipment requirements."
+  },
+  {
+   "p": "STR also boosts your WDEF. Once your equipment and hit-rate requirements are covered, put the remaining AP into LUK."
+  },
+  {
+   "table": [
+    [
+     "Level 70 stat test",
+     "Average Savage Blow",
+     "Gain"
+    ],
+    [
+     "343 LUK / 65 DEX / 4 STR",
+     "3,890",
+     "Baseline"
+    ],
+    [
+     "Add 10 LUK",
+     "3,981",
+     "+91 / +2.34%"
+    ],
+    [
+     "Add 10 STR",
+     "3,939",
+     "+49 / +1.25%"
+    ],
+    [
+     "Add 10 DEX",
+     "3,939",
+     "+49 / +1.25%"
+    ]
+   ]
+  },
+  {
+   "p": "This comparison keeps the realistic level 70 build's 100 W.ATK, max Dagger Mastery, max Savage Blow, 29% Critical Rate, and 26% Critical Damage. The target is equal level with 0 WDEF. Ten LUK adds about 1.88 times the average damage of ten STR or ten DEX in this build."
+  },
+  {
+   "guide": "explaining-the-damage-formula",
+   "text": "Read the complete damage formula"
+  },
+  {
+   "h2": "Weapon Reach (Hitbox)"
+  },
+  {
+   "p": "Every dagger attack lands inside a box in front of you, called the hitbox. Its length is your dagger's reach. A dagger has five basic attacks, three swings and two thrusts, each with its own box, and the game picks one at random each time. The numbers below are the average reach of one basic attack."
+  },
+  {
+   "img": "ca9a6014fcb195.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Shinkita, Swing 3. Any monster whose body touches the blue box gets hit: 22-102 px in front of you, from 10 to 50 px above your feet."
+  },
+  {
+   "p": "Cass, Halfmoon Zamadar, and Shinkita reach farther. They average 86 px per basic attack, against 74 px for the other daggers in the rows below. At level 50, Shinkita reaches 86 px and Sai 74 px. The level 60 and 70 daggers all average 74 px. Reach has a direct effect on DPS in practice. Longer reach makes mobs easier to hit from a distance and keeps them from getting close enough to hit you. Compare every weapon family in the weapon reach guide."
+  },
+  {
+   "p": "**86 px avg reach**"
+  },
+  {
+   "p": "[[img:3a36b47901a8a1.png]]Cass (Lv 30) [[img:d8273c938a2a3c.png]]Halfmoon Zamadar (Lv 35) [[img:864717543715dd.png]]Shinkita (Lv 50)"
+  },
+  {
+   "p": "**74 px avg reach**"
+  },
+  {
+   "p": "[[img:a4f35b3221de6d.png]]Reef Claw (Lv 30) [[img:dbf27d9aa2fcfb.png]]Gephart (Lv 40) [[img:43be4f6d664d23.png]]Korean Fan (Lv 40) [[img:d32307a68d5a9c.png]]Bazlud (Lv 45) [[img:ad19c181101453.png]]Sai (Lv 50) [[img:0ceb32ba9fe976.png]]Deadly Fin (Lv 60) [[img:9052636244612a.png]]Serpent's Coil (Lv 60) [[img:975cc72e71bc7c.png]]Kandine (Lv 70) [[img:5d94e55325caee.png]]Golden River (Lv 70)"
+  },
+  {
+   "h3": "Which Bandit skills use weapon reach?"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Uses weapon reach?",
+     "Hitbox"
+    ],
+    [
+     "[[img:864717543715dd.png]]Basic attack",
+     "Yes",
+     "One of your weapon's five attacks, picked at random."
+    ],
+    [
+     "[[img:3c37dc4ebd42ec.png]]Double Stab",
+     "Yes, thrusts only",
+     "Double Stab always uses Thrust 1 or Thrust 2. They reach 84 and 83 px with Cass, Halfmoon Zamadar, and Shinkita, and 74 and 70 px with every other level 30-70 dagger."
+    ],
+    [
+     "[[img:c1aec993cbf747.png]]Savage Blow",
+     "No",
+     "Savage Blow has its own box: 18-95 px in front of you and 6-62 px above your feet. Every dagger gives the same box."
+    ],
+    [
+     "[[img:28d2a0ad93474f.png]]Steal",
+     "No",
+     "Steal has its own box: 180 px in front of you and 60 px above your feet. Every dagger gives the same box."
+    ],
+    [
+     "[[img:8b4eddf653e003.png]]Lucky Seven",
+     "No",
+     "Stars fly up to 200 px, or 400 px with max Keen Eyes. Inside 65 px your claw punches instead of throwing stars."
+    ]
+   ]
+  },
+  {
+   "h2": "The female overall advantage"
+  },
+  {
+   "p": "Every job can equip a level 30 Sauna Robe with +1 to every stat and 10 slots. Blue Sauna Robe is male-only, while Red Sauna Robe is female-only."
+  },
+  {
+   "p": "[[img:ce6353bc3a96de.png]]Blue Sauna Robe [[img:b28ec1a0412003.png]]Dark Avenger [[img:fc03d62b8ed84c.png]]Black Knucklevest [[img:896e4b76999783.png]]Black Knucklevest Pants"
+  },
+  {
+   "p": "Female Bandits get the better damage option at level 35. Dark Avenger starts with +6 LUK and has 10 overall slots. Ten Lesser Overall LUK scrolls raise it to +16 LUK. Intermediate Overall LUK scrolls add +2 LUK at a 60% success rate. A male Bandit's Black Knucklevest and pants also start with +6 LUK combined, but tops and bottoms cannot take LUK scrolls. A male Blue Sauna Robe reaches +11 LUK with ten Lesser scrolls."
+  },
+  {
+   "note": "**For damage, use Dark Avenger on a female Bandit.** Male Bandits can keep a scrolled Blue Sauna Robe or use top and pants when the extra armor matters more."
+  },
+  {
+   "h2": "Shields and Guard"
+  },
+  {
+   "p": "Daggers let you equip a shield. Shield WDEF reduces eligible physical damage and raises the chance to Guard, which fully blocks an eligible physical hit. Shield WDEF scrolls raise both values."
+  },
+  {
+   "table": [
+    [
+     "Shield",
+     "Base WDEF",
+     "Base Guard",
+     "With 7 Lesser WDEF scrolls",
+     "Extra stat"
+    ],
+    [
+     "[[img:50988435f40c62.png]]Pan Lid",
+     "44",
+     "8.1%",
+     "58 WDEF / 10.4% Guard",
+     "Any class"
+    ],
+    [
+     "[[img:568ccfc864a49b.png]]Seclusion Wristguard",
+     "54",
+     "9.7%",
+     "68 WDEF / 12.0% Guard",
+     "34 DEX requirement"
+    ],
+    [
+     "[[img:ccc77b0684488c.png]]Nimble Wristguard",
+     "54",
+     "9.7%",
+     "68 WDEF / 12.0% Guard",
+     "34 LUK requirement"
+    ],
+    [
+     "[[img:c67b2d43ce5509.png]]Jurgen Wristguard",
+     "54",
+     "9.7%",
+     "68 WDEF / 12.0% Guard",
+     "+1 DEX"
+    ]
+   ]
+  },
+  {
+   "p": "Jurgen Wristguard helps reach Kandine's 65 DEX requirement. The three Thief wristguards share the same WDEF and Guard chance. Jurgen wins when its +1 DEX helps equip a dagger."
+  },
+  {
+   "h2": "W.ATK or Critical Rate on gloves?"
+  },
+  {
+   "p": "These numbers use Grummash's realistic level 70 Bandit build and five successful Lesser glove scrolls. Both options use the same five slots."
+  },
+  {
+   "h3": "5x Gloves Attack Scroll: Lesser"
+  },
+  {
+   "p": "**+5 W.ATK**\n95 to 100 total W.ATK\nAbout 5.26% more expected damage."
+  },
+  {
+   "h3": "5x Gloves Crit. Rate Scroll: Lesser"
+  },
+  {
+   "p": "**+5% Critical Rate**\n29% to 34% Critical Rate\nAbout 1.21% more expected damage."
+  },
+  {
+   "note": "**Pick Attack.** The five-scroll Attack setup deals about 4.01% more expected damage than the Critical Rate setup on this build."
+  },
+  {
+   "p": "Dagger Mastery gives this build plenty of Critical Rate, but its Critical Damage is 26%. W.ATK wins by a wide margin."
+  },
+  {
+   "p": "**The ratio is the same at every grade.** Lesser gives +1 W.ATK or +1% Critical Rate (+2 M.ATK), Intermediate +2/+2% (+4 M.ATK), Greater +3/+3% (+6 M.ATK), and Chaos +4/+4% (+8 M.ATK). Matching grades have the same success and destruction rates."
+  },
+  {
+   "p": "**W.ATK also helps guaranteed kills.** It raises every physical hit, including your weakest normal roll and every critical hit. Critical Rate changes how often a critical occurs, so it cannot improve the weakest non-critical roll."
+  },
+  {
+   "h2": "Example builds and Training Advisor maps by level"
+  },
+  {
+   "img": "c7b004da13427a.png",
+   "w": 130,
+   "h": 183
+  },
+  {
+   "p": "Every attack has a damage range. The **low roll** is the weakest hit it can deal. A guaranteed 1-attack kill means even that weakest hit kills the mob at a 100% hit rate. Easy one-hit maps can win on EXP per hour and MP cost."
+  },
+  {
+   "h3": "Levels 30-39"
+  },
+  {
+   "note": "Level 30 example\n30 base DEX / 132 base LUK / 34 total DEX / 139 total LUK / 77 ACC / 40 W.ATK\nKeep max Lucky Seven and Keen Eyes. Equip clean Adamantium Guards with Wolbi and spend the first Bandit SP on Haste. A planned low-DEX Sindit can use Meba instead, but matching that AP setup from the first-job guide requires an AP Reset.\n[[img:7f4e91463e6782.png]]Adamantium Guards\n[[img:ae64823f427bc0.png]] **Transfer Area** Stirge 1-attack, about 3,083 EXP/min · Safe · Dr. Faymus, 4 portals [[img:36750484773e65.png]] **Dangerous Steam** Stirge 1-attack; Zombie and Horny Mushroom 2-attack, about 2,976 EXP/min · Caution · Mr. Sweatbottom, 8 portals"
+  },
+  {
+   "note": "**How good is Meba?** Meba is Faster 3 with 19 W.ATK. Adamantium Guards is Fast 4 with 23 W.ATK and +1% Critical Damage. Wolbi adds 17 W.ATK. Meba + Wolbi has 36 W.ATK. Adamantium Guards + Wolbi has 40 total W.ATK."
+  },
+  {
+   "table": [
+    [
+     "Level 30 claw setup",
+     "Expected damage/cast",
+     "Damage/min",
+     "Damage/MP"
+    ],
+    [
+     "Clean Meba + Wolbi",
+     "451",
+     "40,630",
+     "28.22"
+    ],
+    [
+     "Clean Adamantium Guards + Wolbi",
+     "502",
+     "41,671",
+     "31.38"
+    ],
+    [
+     "Meba + 7 Lesser Claw Attack scrolls + Wolbi",
+     "539",
+     "48,532",
+     "33.70"
+    ],
+    [
+     "Adamantium Guards + 7 Lesser Claw Attack scrolls + Wolbi",
+     "590",
+     "48,965",
+     "36.87"
+    ]
+   ]
+  },
+  {
+   "p": "At level 35, Ant Tunnel II reaches about 3,238 EXP/min on two-attack Zombie and Horny Mushrooms, and the four Ant Tunnel maps sit within a few percent of each other. By level 39 they reach about 3,508 EXP/min on Lucky Seven. Ant Tunnel II is four portals from Mr. Sweatbottom."
+  },
+  {
+   "h3": "Levels 40-49"
+  },
+  {
+   "table": [
+    [
+     "Checkpoint",
+     "Main attack",
+     "Best clean maps",
+     "Guaranteed kills"
+    ],
+    [
+     "40 before reset: 179 LUK, 91 ACC, 40 W.ATK",
+     "Lucky Seven 20",
+     "Ant Tunnel II; Ant Tunnel III",
+     "Zombie and Horny Mushroom 2-attack, about 3,508 EXP/min · Caution · 4-5 portals to Mr. Sweatbottom"
+    ],
+    [
+     "40 after reset: 177 LUK, 87 ACC, 58 W.ATK",
+     "Double Stab 20",
+     "Ant Tunnel Park; Deep Ant Tunnel II",
+     "Zombie Mushroom, Horny Mushroom, and Evil Eye 1-attack, about 4,630-4,740 EXP/min · Caution · 10-11 portals to Mr. Sweatbottom"
+    ],
+    [
+     "42: 185 LUK, 89 ACC, 58 W.ATK",
+     "Savage Blow 16",
+     "The Burnt Land I; The Burnt Land III",
+     "Dark Axe Stump 1-attack; Fire Boar 2-attack, about 4,610-4,720 EXP/min · Caution · 4-6 portals to Arturo"
+    ],
+    [
+     "45: 197 LUK, 94 ACC, 63 W.ATK",
+     "Savage Blow 24",
+     "Tree Dungeon, Forest Up North IX; The Burnt Land V",
+     "Curse Eye 2-attack; Fire Boar 1-attack and Lupin 2-attack, about 4,850-4,890 EXP/min · Caution · 5 portals to Len or 8 to Arturo"
+    ]
+   ]
+  },
+  {
+   "h3": "Levels 50-59"
+  },
+  {
+   "note": "Level 50 example\n45 base DEX / 217 base LUK / 51 total DEX / 255 total LUK / 119 ACC / 80 W.ATK\nMax Dagger Mastery and Savage Blow. This checkpoint assumes a female character because Dark Avenger is female-only. A male Bandit using a fully Lesser-scrolled Blue Sauna Robe has 5 less LUK, so check your kill breakpoints in Training Advisor.\n[[img:864717543715dd.png]]Shinkita [[img:c67b2d43ce5509.png]]Jurgen Wristguard [[img:4cfcbc52234f6e.png]]Brown Moon Gloves [[img:f571343f5c2aca.png]]Green Goni Shoes\n[[img:3934c93d7d4444.png]] **Tree Dungeon, Monkey Forest II** Zombie Lupin and Curse Eye 1-attack, about 7,883 EXP/min · Caution · 6 portals to Len [[img:e76e0b84c470a2.png]] **Monkey Forest II** Zombie Lupin and Lupin 1-attack, about 7,845 EXP/min · Caution · 5 portals to Len"
+  },
+  {
+   "p": "At level 55, Primeval Forest I takes the lead at about 8,747 EXP/min, two portals from Luma. The Faded Canopy is close behind."
+  },
+  {
+   "h3": "Levels 60-70"
+  },
+  {
+   "table": [
+    [
+     "Checkpoint",
+     "Build",
+     "Top Advisor maps",
+     "Why they work"
+    ],
+    [
+     "60",
+     "295 LUK, 133 ACC, 90 W.ATK",
+     "Perilous Descent III; The End of Fleeting Light",
+     "Duskmander, Echopus, and Aqumander 1-attack; Rafflesia 2-attack · Caution · 2-6 portals to Luma"
+    ],
+    [
+     "65",
+     "315 LUK, 140 ACC, 90 W.ATK",
+     "The Forest of Evil II; Perilous Descent III",
+     "Malady 2-attack; other listed mobs 1-attack · Caution · 7 portals to Len or 6 to Luma"
+    ],
+    [
+     "70",
+     "343 LUK, 147 ACC, 100 W.ATK",
+     "The Forest of Evil II; Perilous Descent III",
+     "Malady, Zombie Lupin, Duskmander, and Echopus 1-attack, about 11,100-12,000 EXP/min · Caution · 7 portals to Len or 6 to Luma"
+    ]
+   ]
+  },
+  {
+   "p": "The level 70 recommendations use level 41-55 mobs because every spawn dies to one Savage Blow on the weakest damage result. That clear speed beats many same-level targets that need a second attack."
+  },
+  {
+   "p": "**Before you settle in:** After the level 40 reset, rerun the map comparison with your dagger equipped. The Lucky Seven setup from the 30s cannot tell you how Savage Blow will perform. Test Double Stab too when it already finishes the smaller mobs."
+  },
+  {
+   "h2": "Bandit skill mechanics"
+  },
+  {
+   "img": "7c653054ff2234.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "h3": "Savage Blow hit breakpoints"
+  },
+  {
+   "table": [
+    [
+     "Savage Blow skill Lv",
+     "Hits",
+     "Damage per hit",
+     "Total skill damage",
+     "MP"
+    ],
+    [
+     "1",
+     "4",
+     "65%",
+     "260%",
+     "14"
+    ],
+    [
+     "10",
+     "4",
+     "75%",
+     "300%",
+     "16"
+    ],
+    [
+     "11",
+     "5",
+     "65%",
+     "325%",
+     "19"
+    ],
+    [
+     "20",
+     "5",
+     "75%",
+     "375%",
+     "21"
+    ],
+    [
+     "21",
+     "6",
+     "65%",
+     "390%",
+     "24"
+    ],
+    [
+     "30",
+     "6",
+     "75%",
+     "450%",
+     "28"
+    ]
+   ]
+  },
+  {
+   "p": "Savage Blow starts with four hits, reaches five hits at skill Lv11, and reaches six hits at skill Lv21. The sixth hit is the most important breakpoint."
+  },
+  {
+   "img": "76e051354a50fc.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "h3": "Steal and the +35 Attack Power buff"
+  },
+  {
+   "p": "Max Steal attacks up to two mobs at 180% damage for 24 MP and has a 90% steal chance. A successful steal can make the mob drop an item, stuns it for 1.5 seconds, and gives the Bandit +35 Attack Power for 30 seconds. You can retry after a failure; each mob can only be stolen from successfully once."
+  },
+  {
+   "p": "In the dagger damage formula, +35 Attack Power contributes the same raw damage term as +70 STR or +70 DEX."
+  },
+  {
+   "table": [
+    [
+     "Level 70 attack",
+     "Without Steal buff",
+     "With +35 Attack Power",
+     "Gain",
+     "Damage/MP while buffed"
+    ],
+    [
+     "Double Stab",
+     "2,766 per attack",
+     "3,007 per attack",
+     "+ 8.7 %",
+     "187.94"
+    ],
+    [
+     "Savage Blow",
+     "3,890 per attack",
+     "4,229 per attack",
+     "+ 8.7 %",
+     "151.03"
+    ]
+   ]
+  },
+  {
+   "h3": "Double Stab can still be useful"
+  },
+  {
+   "p": "Max Double Stab is more damage per MP than max Savage Blow. Use it when both attacks guarantee the same kill and you are broke and starving for MP pots."
+  },
+  {
+   "img": "22259df9b0ecd8.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "h3": "Dagger Mastery, Booster, and Nimble Recovery"
+  },
+  {
+   "p": "Max Dagger Mastery gives mastery level 10, Critical Rate +20%, and a 20% chance to ignore knockback. Dagger Booster gives its full two-stage speed increase at skill Lv1; later SP extends the duration and lowers its cost. Skill Lv1 lasts 100 seconds and costs 30 HP and 30 MP. Skill Lv9 lasts 180 seconds and costs 22 of each."
+  },
+  {
+   "p": "Nimble Recovery has a 30-second lockout and can trigger only after an evade. Grummash's skill Lv12 restores 6% HP and MP with a 64% chance after an evade. Random's skill Lv20 restores 10% with a 100% chance. In Random's level 39 Ant Tunnel test, skill Lv8 recovered about 104 HP and 88 MP over 80 seconds. It is passive savings; do not take extra hits trying to trigger it."
+  },
+  {
+   "img": "4bb1f7d7352bad.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "h3": "Haste"
+  },
+  {
+   "p": "Max Haste gives nearby party members Speed +30 and Jump +10 for 300 seconds. Bandits need to reach every target in melee, so faster platform changes and less walking between groups of mobs directly improve clear speed."
+  },
+  {
+   "p": "Haste's party area increases at skill Lv11. The first ten skill levels cover 500 x 300 px. Skill Lv11 through 20 cover 600 x 400 px."
+  },
+  {
+   "img": "8ea44ba66a1c56.png",
+   "w": 43,
+   "h": 70,
+   "cap": "Skill Lv1500 x 300 px"
+  },
+  {
+   "img": "8ea44ba66a1c56.png",
+   "w": 43,
+   "h": 70,
+   "cap": "Skill Lv20600 x 400 px"
+  },
+  {
+   "note": "**Simple grinding loop:** Keep Haste and Booster active, use Steal on a fresh target when its 30-second Attack Power buff is missing, then finish with Savage Blow. Use Double Stab instead when it guarantees the same kill for less MP; let Nimble Recovery happen on its own."
+  },
+  {
+   "h2": "Find Your Build's Best Training Map with Training Advisor"
+  },
+  {
+   "p": "**Danger measures how hard a mob hits you for: under 10% of your HP is Safe, 10-24% is Caution, 25-49% is Danger, and 50%+ is Lethal.**"
+  },
+  {
+   "ol": [
+    "Open Character Builder and enter your real AP with current skills. Add the dagger, shield, and other equipment.",
+    "Scroll down, open Training Advisor, and set hit-rate reliability to 100%.",
+    "Before the reset, choose Lucky Seven and enter your claw and throwing star. After the reset, choose Savage Blow at its current skill level.",
+    "Leave **Factor Danger into recommendations** enabled. Bandits fight in melee range, so dangerous maps receive the stronger EXP penalty.",
+    "Filter for one- or two-attack kills that still work on the weakest damage result. Compare EXP per minute, MP use, incoming touch damage, and map layout.",
+    "Compare the refill loop. A nearest-town scroll gets you back to town, but you still have to walk back to the training map."
+   ]
+  },
+  {
+   "img": "6816059e6d8737.png",
+   "w": 360,
+   "h": 393,
+   "cap": "The saved Bandit build in Training Advisor: current hit rate, danger, damage, and EXP per hour for the equipped character."
+  },
+  {
+   "h2": "Recommended potions"
+  },
+  {
+   "p": "Bandits spend heavily on HP from face tanking and on MP once Savage Blow reaches 28 MP. Buy the most cost-efficient potions."
+  },
+  {
+   "img": "7268dfb32fe80e.png",
+   "w": 130,
+   "h": 145
+  },
+  {
+   "p": "**BEST TO BUY** Best HP or MP recovered per meso"
+  },
+  {
+   "p": "[[img:be80aa4791c684.png]] **Red Potion** 50 mesos · 100 HP 2 HP per meso [[img:39a28ad40190a6.png]] **Fried Chicken** 60 mesos · 120 HP 2 HP per meso [[img:51e2250795d8f6.png]] **Meat** 80 mesos · 160 HP 2 HP per meso [[img:da1e5c881a1df6.png]] **Orange** 50 mesos · 50 MP 1 MP per meso [[img:d59bc967011b87.png]] **Lemon** 150 mesos · 150 MP 1 MP per meso"
+  },
+  {
+   "p": "**Situational** Buy only when the buff reaches a useful breakpoint"
+  },
+  {
+   "p": "[[img:4e15182d2a8a6e.png]] **Sniper Potion** 500 mesos · +5 ACC for 10 min Use to remove misses [[img:e18fe0a27cd32a.png]] **Supreme Sniper Potion** 600 mesos · +7 ACC for 15 min Best shop ACC buff [[img:8d7b05272e3e8b.png]] **Warrior Potion** 500 mesos · +10 Attack Power for 10 min Use for a damage breakpoint"
+  },
+  {
+   "p": "**DON'T BUY** Worse recovery per meso than the choices above"
+  },
+  {
+   "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 mesos · 500 HP 1.43 HP per meso [[img:d19cbf8225851d.png]] **Blue Potion** 220 mesos · 200 MP 0.91 MP per meso"
+  },
+  {
+   "guide": "best-buy-shop-efficiency",
+   "text": "Compare shop potion efficiency"
+  },
+  {
+   "h2": "Common mistakes"
+  },
+  {
+   "img": "55ea388be0bed6.png",
+   "w": 129,
+   "h": 195
+  },
+  {
+   "ol": [
+    "**Resetting skills at level 30.** Lucky Seven remains your best easy-to-use skill until around level 40, when the reset can max Dagger Mastery for Double Stab and Savage Blow.",
+    "**Dropping Double Stab after Savage Blow is maxed.** Double Stab remains useful when both attacks guarantee the same kill and MP costs matter.",
+    "**Adding extra STR or DEX for damage.** Meet the dagger and armor requirements. Add enough Accuracy to hit, then put the remaining AP into LUK. A STR dagger still uses LUK as its main damage stat.",
+    "**Treating a shield as plain WDEF.** A shield can Guard and fully block eligible physical hits. Scrolling shield WDEF raises the proc rate.",
+    "**Picking maps by mob level near you.** The best training maps can have much weaker mobs that always die to one Savage Blow."
+   ]
+  },
+  {
+   "h2": "Realistic level 70 Bandit build"
+  },
+  {
+   "img": "d7a9848a2f4603.png",
+   "w": 130,
+   "h": 210
+  },
+  {
+   "p": "This guide is based heavily on a realistic level 70 Bandit build by Grummash. Every equipment slot uses successful Lesser scrolls."
+  },
+  {
+   "note": "**Final stats with gear:** 4 STR / 65 DEX / 4 INT / 343 LUK, 147 ACC, 100 W.ATK, 29 % Critical Rate, + 26 % Critical Damage, and +35 Attack Power while max Steal is active."
+  },
+  {
+   "p": "[[img:975cc72e71bc7c.png]]Kandine [[img:5062d3d8f6886f.png]]White Nightfox [[img:7074fdfc4eab49.png]]Dark Studded Top [[img:9a4ed6cdd4a272.png]]Dark Studded Pants [[img:fccac9b25cdcb4.png]]Gold Rover [[img:f5a7d4b9df805b.png]]Blue Mystique Shoes [[img:888d6716376ade.png]]Black Gaia Cape [[img:ea67f3099d0314.png]]Metal Silver Earrings [[img:c67b2d43ce5509.png]]Jurgen Wristguard"
+  },
+  {
+   "table": [
+    [
+     "First-job skills",
+     "Second-job skills"
+    ],
+    [
+     "Nimble Body 15, Disorder 20, Dark Sight 6, Double Stab 20",
+     "Dagger Mastery 20, Nimble Recovery 12, Dagger Booster 9, Haste 20, Steal 30, Savage Blow 30"
+    ]
+   ]
+  },
+  {
+   "p": "This saved build uses the max Double Stab first-job option. Max Dark Sight or the reduced-Disorder option that maxes both skills are also valid after the reset."
+  },
+  {
+   "h3": "At level 70: become a Chief Bandit"
+  },
+  {
+   "p": "[[img:427c5ad4050c0c.png]] **Arec** Handles the Chief Bandit advancement in El Nath."
+  },
+  {
+   "p": "Bandit advances to Chief Bandit through Arec in El Nath. Third job and El Nath are not in the launch build. This guide stops before third-job SP. Finish the second-job build, then plan around the COT2 Chief Bandit skill book."
+  },
+  {
+   "p": "See COT2 Chief Bandit skills"
+  },
+  {
+   "p": "The damage, Accuracy, skill, item, monster, spawn, and map examples use current COT2 data. Training Advisor supplies the map estimates. Community feedback is welcome in forum suggestions."
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/bandit-class-guide",
+ "hash": "5bcc6d3a9920"
+}

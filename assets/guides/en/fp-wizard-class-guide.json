@@ -1,0 +1,709 @@
+{
+ "title": "MapleStory Classic F/P Wizard Build and Leveling Guide: Lv 30-70",
+ "intro": "Fire/Poison Wizards' Fire Arrow burns down a target while poison spamming an entire map. They are the masters of damage over time effects.",
+ "hero": "c6c16edcf9315e.png",
+ "minutes": null,
+ "blocks": [
+  {
+   "p": "This guide is based off of a realistic lv 70 F/P Wizard build by Grummash."
+  },
+  {
+   "p": "**Pros**"
+  },
+  {
+   "ul": [
+    "#3 AoE damage at level 70.",
+    "#2 Physical EHP and tied #1 Magic EHP at level 70 in the current benchmark.",
+    "Fire Arrow deals 25% more damage to fire-weak mobs.",
+    "Poison Breath's contact explosion reaches up to four mobs.",
+    "Meditation gives nearby party members 25 Magic Attack.",
+    "Teleport and MP Eater improve movement and potion use."
+   ]
+  },
+  {
+   "p": "**Cons**"
+  },
+  {
+   "ul": [
+    "Fire-resistant mobs cut Fire Arrow's direct damage by 25%.",
+    "Max Poison Breath costs 40 MP per cast.",
+    "Low HP makes careless Magic Guard use expensive in MP."
+   ]
+  },
+  {
+   "h2": "Starting at level 30"
+  },
+  {
+   "p": "This guide picks up from our Magician level 1 to 30 guide, which compares these first-job builds by meso cost. Any of them works for an F/P Wizard."
+  },
+  {
+   "img": "6a5c564ccbecfc.png",
+   "w": 130,
+   "h": 164
+  },
+  {
+   "table": [
+    [
+     "First-job skill",
+     "Budget",
+     "Safer",
+     "Grummash's level 70"
+    ],
+    [
+     "[[img:24dcca787059a4.png]]Energy Bolt",
+     "20",
+     "20",
+     "1"
+    ],
+    [
+     "[[img:5370722a856bb9.png]]Magic Claw",
+     "0",
+     "0",
+     "20"
+    ],
+    [
+     "[[img:664c530d20bba5.png]]Improved MP Recovery",
+     "3",
+     "3",
+     "10"
+    ],
+    [
+     "[[img:d0a2f30f9abf2b.png]]Max MP Increase",
+     "15",
+     "15",
+     "15"
+    ],
+    [
+     "[[img:211a115f0a6318.png]]Magic Guard",
+     "3",
+     "15",
+     "15"
+    ],
+    [
+     "[[img:32b086d39a1fbe.png]]Magic Armor",
+     "20",
+     "8",
+     "0"
+    ]
+   ]
+  },
+  {
+   "p": "Safer moves 12 SP from Magic Armor to Magic Guard. Grummash's build needs an SP reset; its Cash Shop price is unconfirmed."
+  },
+  {
+   "h3": "Recommended citizenship"
+  },
+  {
+   "p": "Stay with Kerning City from the Magician guide. Higher citizenship levels open Lesser Overall LUK and INT scrolls for mage robes, which fit the Angel Wings endpoint without giving up damage AP."
+  },
+  {
+   "h2": "Accuracy after level 30"
+  },
+  {
+   "p": "A training map only works when your attacks connect. Every miss spends MP, wastes the attack animation, and lowers EXP per minute."
+  },
+  {
+   "img": "1f962bcb88c6d5.png",
+   "w": 130,
+   "h": 179
+  },
+  {
+   "note": "**Magician Base Accuracy**\nLevel, INT, LUK, and direct Accuracy all add to total ACC.\n**+0.39** ACC per level\n**+0.24** ACC per INT\n**+0.12** ACC per LUK\n**+1.00** ACC per direct ACC"
+  },
+  {
+   "p": "Every mob has Avoidability. Fighting above your level raises the ACC needed to hit, while gaining levels closes that penalty. This is why a lower-level map with clean one- or two-attack kills can beat a higher-level map with misses."
+  },
+  {
+   "table": [
+    [
+     "Mob",
+     "Mob level",
+     "Mob Avoid",
+     "ACC to never miss at equal level"
+    ],
+    [
+     "[[img:777ced8b4048a6.png]]Jr. Wraith",
+     "34",
+     "24",
+     "79 ACC"
+    ],
+    [
+     "[[img:2a5d75bf6e3634.png]]Lorang",
+     "38",
+     "23",
+     "76 ACC"
+    ],
+    [
+     "[[img:3934c93d7d4444.png]]Zombie Lupin",
+     "41",
+     "28",
+     "92 ACC"
+    ],
+    [
+     "[[img:0386eea7010d4c.png]]Wraith",
+     "48",
+     "31",
+     "101 ACC"
+    ]
+   ]
+  },
+  {
+   "guide": "magician-class-guide",
+   "text": "Read the full Magician Accuracy explanation"
+  },
+  {
+   "h2": "Levels 30-70: F/P Wizard skill build and leveling"
+  },
+  {
+   "img": "8b0bd01d5aeb46.png",
+   "w": 130,
+   "h": 139
+  },
+  {
+   "h3": "Level 30 F/P Wizard job advancement"
+  },
+  {
+   "ol": [
+    "Start the second-job advancement with Grendel the Really Old in Ellinia.",
+    "Carry Grendel's letter to the Magician Job Instructor in The Forest North of Ellinia.",
+    "Gather 30 Dark Marbles in the test and trade them for The Proof of a Hero.",
+    "Give the proof to Grendel and become an F/P Wizard."
+   ]
+  },
+  {
+   "p": "[[img:fb4af958a97eb5.png]] **Grendel the Really Old** Starts and finishes the F/P Wizard advancement in Ellinia."
+  },
+  {
+   "p": "[[img:9a7face47a910e.png]] **Magician Job Instructor** Runs the Dark Marble test north of Ellinia."
+  },
+  {
+   "note": "**First F/P Wizard SP: Teleport 1.** The first point gives immediate map movement at a steep 55 MP. Use it for platforms and emergencies until later skill levels make regular Teleport cheaper."
+  },
+  {
+   "h3": "Level 70 skill target"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "SP",
+     "Result at the saved skill level"
+    ],
+    [
+     "[[img:604935d1a72b1f.png]]MP Eater",
+     "20 / 20",
+     "For every attack, 50% success rate, absorb 50% of the enemy's Max MP"
+    ],
+    [
+     "[[img:3c723432bbc71b.png]]Meditation",
+     "20 / 20",
+     "MP -25; Party's Magic Attack +25 for 300 sec"
+    ],
+    [
+     "[[img:185d5db6e5b052.png]]Teleport",
+     "20 / 20",
+     "MP -15; Teleport, with 150 in distance"
+    ],
+    [
+     "[[img:de76eb368ead85.png]]Slow",
+     "1 / 20",
+     "MP -15; Enemy Speed -10, Evasion -1 for 10 sec"
+    ],
+    [
+     "[[img:c5fb9f28d4a0c9.png]]Fire Arrow",
+     "30 / 30",
+     "MP -28; Basic Attack 180, Mastery level 10; Deals 50 Basic Attack over 3 sec"
+    ],
+    [
+     "[[img:c2c06146bd2ee1.png]]Poison Breath",
+     "30 / 30",
+     "MP -40; Basic Attack 80, Mastery level 10; 75% success rate, deals 40 Basic Attack over 5 sec"
+    ]
+   ]
+  },
+  {
+   "h3": "F/P Wizard SP allocation: levels 30-70"
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "Spend",
+     "Running total",
+     "Reason"
+    ],
+    [
+     "30",
+     "Teleport +1",
+     "Teleport 1",
+     "Immediate movement and platform access."
+    ],
+    [
+     "31-39",
+     "Fire Arrow +27",
+     "Fire Arrow 27",
+     "Build the main single-target spell."
+    ],
+    [
+     "40",
+     "Fire Arrow +3",
+     "Fire Arrow 30",
+     "Max direct damage, Mastery, and burn power."
+    ],
+    [
+     "41-49",
+     "Poison Breath +27",
+     "Poison Breath 27",
+     "Build the four-target contact explosion."
+    ],
+    [
+     "50",
+     "Poison Breath +3",
+     "Poison Breath 30",
+     "Max the four-target contact explosion."
+    ],
+    [
+     "51",
+     "MP Eater +3",
+     "MP Eater 3",
+     "Unlock Meditation."
+    ],
+    [
+     "52-57",
+     "Meditation +18",
+     "Meditation 18",
+     "Raise party Magic Attack."
+    ],
+    [
+     "58",
+     "Meditation +2, MP Eater +1",
+     "Meditation 20 / Eater 4",
+     "Max the party buff."
+    ],
+    [
+     "59-63",
+     "MP Eater +15",
+     "MP Eater 19",
+     "Build the potion-saving passive."
+    ],
+    [
+     "64",
+     "MP Eater +1, Teleport +2",
+     "Eater 20 / Teleport 3",
+     "Max MP Eater."
+    ],
+    [
+     "65-69",
+     "Teleport +15",
+     "Teleport 18",
+     "Cut MP cost and raise distance."
+    ],
+    [
+     "70",
+     "Teleport +2, Slow +1",
+     "Teleport 20 / Slow 1",
+     "Finish Grummash's endpoint."
+    ]
+   ]
+  },
+  {
+   "p": "Second-job SP cannot be spent on first-job skills, so finish the first-job plan by level 30. Character Builder flags any build that breaks it."
+  },
+  {
+   "h3": "Fire Arrow or Poison Breath first?"
+  },
+  {
+   "p": "[[img:c5fb9f28d4a0c9.png]]Fire Arrow hits one mob hard. [[img:c2c06146bd2ee1.png]]Poison Breath's contact explosion hits up to four mobs, but deals far less damage to each one. Which to max first depends on how many mobs each Poison Breath actually hits."
+  },
+  {
+   "table": [
+    [
+     "Mobs hit per Poison Breath",
+     "Fire Arrow first",
+     "Poison Breath first"
+    ],
+    [
+     "1",
+     "4,243",
+     "3,239"
+    ],
+    [
+     "2",
+     "4,243",
+     "4,148"
+    ],
+    [
+     "3",
+     "4,243",
+     "6,222"
+    ],
+    [
+     "4",
+     "4,243",
+     "8,296"
+    ]
+   ]
+  },
+  {
+   "p": "EXP per minute at level 40 on the best launch map in Training Advisor. On one mob, [[img:24dcca787059a4.png]]Energy Bolt/[[img:5370722a856bb9.png]]Magic Claw 20 hits harder than Poison Breath 30, so the Poison Breath first column falls back to it."
+  },
+  {
+   "p": "The break-even is 2 mobs per cast. We max Fire Arrow first because most casts do not hit 2+ mobs when they are spread out, while Fire Arrow works on every map. Poison Breath pulls ahead of Fire Arrow if you can consistently hit 3 or more mobs every cast."
+  },
+  {
+   "p": "Against elemental-neutral mobs, keep using Energy Bolt or Magic Claw as your main attack until Fire Arrow reaches skill Lv21 at level 37. Against mobs weak to Fire, [[img:c5fb9f28d4a0c9.png]]Fire Arrow is the better skill from skill Lv15 at level 35. Fire-resistant mobs such as Fire Boar need Fire Arrow 30 before it beats Energy Bolt."
+  },
+  {
+   "h3": "Possible changes to the default order"
+  },
+  {
+   "h3": "Poison Breath first"
+  },
+  {
+   "p": "If you consistently hit 3 or more mobs per cast, swap levels 31-40 and 41-50: max Poison Breath first, then Fire Arrow. At 3 mobs per cast it reaches about 6,222 EXP/min at level 40, against 4,243 for Fire Arrow."
+  },
+  {
+   "h3": "Meditation before Poison Breath"
+  },
+  {
+   "p": "Mostly fighting one mob at a time? After Fire Arrow 30, take MP Eater 3 at level 41 and max Meditation before Poison Breath. Poison Breath adds little on a single target, while Meditation raises every spell, for up to 12% more single-target damage between levels 42 and 55."
+  },
+  {
+   "h3": "Teleport 10 sooner"
+  },
+  {
+   "p": "Raise Teleport after max Fire Arrow if platform movement matters more than early Poison Breath. Skill Lv10 costs 37 MP and moves 128 px."
+  },
+  {
+   "h2": "F/P Wizard AP allocation: levels 30-70"
+  },
+  {
+   "p": "The level-70 target is 299 base INT and 63 base LUK. Grummash reaches 65 Total LUK with equipment for Angel Wings. Check the equipped total before spending LUK; INT adds damage, MP, and Accuracy."
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "AP each level",
+     "Base AP at the end"
+    ],
+    [
+     "31-40",
+     "INT +3 / LUK +2",
+     "172 INT / 40 LUK"
+    ],
+    [
+     "41-63",
+     "INT +4 / LUK +1",
+     "264 INT / 63 LUK"
+    ],
+    [
+     "64-70",
+     "INT +5",
+     "299 INT / 63 LUK"
+    ]
+   ]
+  },
+  {
+   "h2": "Recommended equipment"
+  },
+  {
+   "img": "8a00d5eea92238.png",
+   "w": 130,
+   "h": 185
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Item",
+     "Why it matters"
+    ],
+    [
+     "10",
+     "[[img:50988435f40c62.png]]Pan Lid",
+     "Any class. 44 WDEF gives an 8.09% Guard chance, the best block rate for a mage."
+    ],
+    [
+     "30",
+     "[[img:2e8d2c65bd2aec.png]]Mithril Wand",
+     "55 M.ATK. Requires 60 INT and 20 LUK."
+    ],
+    [
+     "35",
+     "[[img:eb1d5689fc40fb.png]]Esther Shield",
+     "Mage shield with 28 WDEF and 55 MDEF. Its 5.30% Guard chance is lower than Pan Lid's. Requires 60 INT and 25 LUK."
+    ],
+    [
+     "40",
+     "[[img:512b9623061125.png]]Fairy Wand",
+     "69 M.ATK. Requires 80 INT and 30 LUK."
+    ],
+    [
+     "45",
+     "[[img:8fb958a3a2bb3e.png]]Arc Staff",
+     "73 M.ATK. Requires 90 INT and 40 LUK."
+    ],
+    [
+     "50",
+     "[[img:07f049cea846d4.png]]Cromi",
+     "83 M.ATK before scrolling. Requires 100 INT and 40 LUK."
+    ],
+    [
+     "55",
+     "[[img:3d68bcb0a089c0.png]]Thorns",
+     "87 M.ATK. Requires 110 INT and 50 LUK."
+    ],
+    [
+     "60",
+     "[[img:cad3048cc1d6cd.png]]Evil Tale",
+     "97 M.ATK. Requires 120 INT and 55 LUK."
+    ],
+    [
+     "65",
+     "[[img:b2c74841227fe5.png]]Evil Wings",
+     "101 M.ATK. Requires 130 INT and 60 LUK."
+    ],
+    [
+     "70",
+     "[[img:e4a7a0c9e9a042.png]]Angel Wings",
+     "111 M.ATK before scrolling. Requires 140 INT and 65 LUK."
+    ]
+   ]
+  },
+  {
+   "p": "F/P Wizards can hold a shield with either a wand or a staff. Spell cast time does not change with weapon speed, so take the highest M.ATK you can equip. Pan Lid blocks more often than Esther Shield (8.09% against 5.30% Guard chance), while Esther Shield adds 55 MDEF against magic attacks. Every WDEF scroll on the shield raises Guard chance further."
+  },
+  {
+   "h3": "Armor checkpoints"
+  },
+  {
+   "p": "[[img:865f68bdf44e7c.png]]Brown Jester[[img:9bb0c142cdc0c7.png]]Blue Wizard Robe[[img:5ca31d9e7d020a.png]]White Guiltian[[img:78d839fcd323e4.png]]Brown Starlight[[img:8d8a46fa3d576a.png]]Flame Golden Circlet[[img:47590281c2f8ba.png]]Red Calas[[img:ccef521f33304a.png]]Red Seraphis[[img:f4a44340286672.png]]Blue Anakamoon"
+  },
+  {
+   "p": "These are clean level 30, 40, 50, and 60 hat-and-robe checkpoints from the current item database. Open each item page for its current drop, craft, or shop sources. A cheaper robe with useful INT or LUK can be better than forcing every tier."
+  },
+  {
+   "h2": "M.ATK or Critical Rate on gloves?"
+  },
+  {
+   "p": "These numbers use Grummash's realistic level 70 F/P Wizard build and five successful Lesser glove scrolls. Both options use the same five slots."
+  },
+  {
+   "h3": "5x Gloves Magic Attack Scroll: Lesser"
+  },
+  {
+   "p": "**+10 M.ATK**\n326 to 336 total M.ATK\nAbout 3.07% more expected damage."
+  },
+  {
+   "h3": "5x Gloves Crit. Rate Scroll: Lesser"
+  },
+  {
+   "p": "**+5% Critical Rate**\n9% to 14% Critical Rate\nAbout 1.27% more expected damage."
+  },
+  {
+   "note": "**Pick Magic Attack.** The five-scroll Magic Attack setup deals about 1.77% more expected damage than the Critical Rate setup on this build."
+  },
+  {
+   "p": "W.ATK does not increase spell damage. The matching Magic Attack scroll gives twice as much M.ATK as the Critical Rate scroll gives Critical Rate."
+  },
+  {
+   "p": "**The ratio is the same at every grade.** Lesser gives +1 W.ATK or +1% Critical Rate (+2 M.ATK), Intermediate +2/+2% (+4 M.ATK), Greater +3/+3% (+6 M.ATK), and Chaos +4/+4% (+8 M.ATK). Matching grades have the same success and destruction rates."
+  },
+  {
+   "h2": "Example builds and Training Advisor maps"
+  },
+  {
+   "img": "110d28b8432240.png",
+   "w": 130,
+   "h": 179
+  },
+  {
+   "p": "Run Fire Arrow and Poison Breath as separate Advisor checks because their target caps and elements produce different winners. A guaranteed two-cast means the mob dies to two of your weakest normal direct hits with no misses. Poison damage over time is not counted here; Training Advisor only models direct attacks. Each pick also shows Danger and the nearest potion refill."
+  },
+  {
+   "note": "Level 30\nEnergy Bolt 20 / MG 3 / MA 20 / 71 ACC / 155 INT\n[[img:ae64823f427bc0.png]] **Transfer Area** Energy Bolt: Stirge 1-cast, Safe at 7%; Dr. Faymus refill in 4 portals; about 2,741 EXP/min [[img:059caff41683e8.png]] **Dungeon, Southern Forest IV** Energy Bolt: Blue Mushroom 2-cast and other spawns 1-cast, Safe at 9%; Len the Fairy refill in 5 portals; about 2,435 EXP/min\nLevel 40\nFire Arrow 30, 83 ACC, 182 INT\n[[img:777ced8b4048a6.png]] **Line 1 <Area 2>** Fire Arrow: Jr. Wraith is fire-weak and 2-cast; Stirge is neutral and 1-cast, Safe at 7%; Dr. Faymus refill in 5 portals; about 4,243 EXP/min [[img:a951e586bae69f.png]] **Ant Tunnel Park** Fire Arrow: Evil Eye and both mushrooms are guaranteed 1-cast, Safe at 7%; Mr. Sweatbottom refill in 11 portals; about 3,511 EXP/min\nLevel 50\nPoison Breath 30, Fire Arrow 30, 98 ACC, 225 INT\n[[img:36750484773e65.png]] **Ant Tunnel III** Poison Breath: both mushrooms are guaranteed 1-cast, Safe at 4%; Mr. Sweatbottom refill in 5 portals; about 12,878 EXP/min [[img:1d6ce5099450d1.png]] **Tree Dungeon, Forest Up North IX** Fire Arrow: Curse Eye is guaranteed 1-cast, Safe at 7%; Len the Fairy refill in 5 portals; about 4,889 EXP/min\nLevel 60\nPoison Breath 30, Fire Arrow 30, max Meditation, 270 INT\n[[img:a951e586bae69f.png]] **Ant Tunnel Park** Poison Breath: Evil Eye and both mushrooms are guaranteed 1-cast, Safe at 5%; Mr. Sweatbottom refill in 11 portals; about 14,043 EXP/min [[img:2ba29b3aeef67c.png]] **Forgotten Dungeon Tunnel** Fire Arrow: Raffle, Glowshroom, and Curse Eye are guaranteed 1-cast, Safe at 8%; Luma refill in 4 portals; about 6,540 EXP/min\nLevel 70\nGrummash build, 352 INT, 336 M.ATK with Meditation\n[[img:777ced8b4048a6.png]] **Line 1 <Area 2>** Poison Breath: Jr. Wraith and Stirge are guaranteed 1-cast, Safe at 5%; Dr. Faymus refill in 5 portals; about 18,459 EXP/min [[img:0386eea7010d4c.png]] **Line 2 <Area 3>** Fire Arrow: Wraith is guaranteed 1-cast, Safe at 7%; Dr. Faymus refill in 7 portals; about 9,778 EXP/min"
+  },
+  {
+   "h2": "Important F/P Wizard skill mechanics"
+  },
+  {
+   "h3": "Fire Arrow"
+  },
+  {
+   "img": "4ef289a47aa390.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "Max Fire Arrow has 180 Basic Attack and Mastery 10 for 28 MP. Fire-weak mobs take 25% more direct damage. Fire-resistant mobs take 25% less direct damage and can't be burned. Each hit also burns the target for 50 Basic Attack over 3 seconds, ticking once per second."
+  },
+  {
+   "p": "**The level 70 benchmark deals about 2,667 expected direct damage to a neutral target and 3,334 to a fire-weak target. The damage-over-time portion is excluded from those figures.**"
+  },
+  {
+   "h3": "Poison Breath"
+  },
+  {
+   "img": "6a9330b2fc4021.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "The projectile hits one mob, then the contact explosion can damage up to four nearby mobs. Max Poison Breath has 80 Basic Attack, Mastery 10, a 75% poison chance, and costs 40 MP."
+  },
+  {
+   "p": "**One neutral poison tick on this build deals 512 damage, or 646 on a critical hit. The 9% critical rate puts the average at 524.06 per target. Against a poison-weak target, the average is 655.94.**"
+  },
+  {
+   "p": "Poison ticks once per second for 5 seconds. It does not stack: casting again on a poisoned mob refreshes the 5 seconds instead of adding a second poison. Poison-resistant mobs can't be poisoned. The sustained benchmark below assumes you keep every target poisoned."
+  },
+  {
+   "h3": "Meditation"
+  },
+  {
+   "img": "b3d35d3d0ffb22.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "Max Meditation costs 25 MP and gives 25 Magic Attack to nearby party members for 300 seconds. It only boosts spell damage, and does not affect weapon damage."
+  },
+  {
+   "h3": "Fire and poison on Victoria Island"
+  },
+  {
+   "p": "Fire Arrow has plenty of weak targets on Victoria Island. Poison Breath has three weak mobs and eight that resist it."
+  },
+  {
+   "p": "Weak mobs take 25% more damage. Resistant mobs take 25% less and can't be burned or poisoned by that element. The table covers regular spawns from level 20 up."
+  },
+  {
+   "table": [
+    [
+     "Element",
+     "Weak",
+     "Resistant"
+    ],
+    [
+     "Fire",
+     "[[img:e8898b9357e436.png]]Dark Axe Stump (Lv 23), [[img:b6569c0a7fdae3.png]]Ligator (Lv 31), [[img:777ced8b4048a6.png]]Jr. Wraith (Lv 34), [[img:b13145852aee23.png]]Cold Eye (Lv 40), [[img:2ba29b3aeef67c.png]]Raffle (Lv 40), [[img:ab7412e282fc07.png]]Rafflesia (Lv 47), [[img:0058915bf9763c.png]]Croco (Lv 52), [[img:9581b138675a2f.png]]Myewood (Lv 54), [[img:e5d5d56f40987e.png]]Sporewood (Lv 59)",
+     "[[img:762bddf50eb031.png]]Fire Boar (Lv 32), [[img:3b0aac86470550.png]]Copper Drake (Lv 45), [[img:415ed0ee975fe3.png]]Drake (Lv 50), [[img:fc715623e4983d.png]]Malady (Lv 55), [[img:bf98edf794b720.png]]Dark Stone Golem (Lv 58)"
+    ],
+    [
+     "Poison",
+     "[[img:e56a0489f87f41.png]]Fairy 2, [[img:2860bcb742fed0.png]]Fairy 3, [[img:413278152c7ddf.png]]Fairy 4 (Lv 29)",
+     "[[img:1d6ce5099450d1.png]]Curse Eye (Lv 33), [[img:110433cc83f147.png]]Jr. Boogie 2 (Lv 35), [[img:ab7412e282fc07.png]]Rafflesia (Lv 47), [[img:8d3453e377c2eb.png]]Duskmander (Lv 50), [[img:3e5429938ed2d5.png]]Stone Golem (Lv 56), [[img:d2be579f09f89b.png]]Rotten Mushroom (Lv 56), [[img:bf98edf794b720.png]]Dark Stone Golem (Lv 58), [[img:e5d5d56f40987e.png]]Sporewood (Lv 59)"
+    ]
+   ]
+  },
+  {
+   "p": "Rafflesia and Sporewood are fire-weak but resist poison, so use Fire Arrow on them. Dark Stone Golem resists both. Green Mushrooms take no damage from poison at all. Fairy 2, 3, and 4 are the only poison-weak mobs, and their 500 MDEF is the highest in this table."
+  },
+  {
+   "p": "MP Eater drains at most once every 5 seconds, and it gets nothing from mobs with 0 MP. On Victoria Island that means Pig, Ribbon Pig, Wild Boar, Ligator, and Fire Boar. Bring extra MP potions when you farm fire-weak Ligators."
+  },
+  {
+   "h2": "Find Your Build's Best Training Map with Training Advisor"
+  },
+  {
+   "p": "**Danger measures how hard a mob hits you for: under 10% of your HP is Safe, 10-24% is Caution, 25-49% is Danger, and 50%+ is Lethal.**"
+  },
+  {
+   "p": "F/P has two different map lists: Fire Arrow wants a valuable fire weakness, while Poison Breath wants enough nearby mobs to use its four-target contact explosion."
+  },
+  {
+   "ol": [
+    "Load your F/P Wizard with the actual INT, LUK, Magic Attack, skills, shield, scrolls, and buffs.",
+    "Run Fire Arrow first, set reliability to 100%, and check whether each mob is fire-weak, neutral, or resistant.",
+    "Run Poison Breath again. Its Advisor damage covers the direct contact explosion. Poison ticks are outside this calculation.",
+    "Leave Factor Danger into recommendations enabled so Magic Guard, HP, MP, WDEF, and MDEF affect the ranking.",
+    "Compare the best direct one- or two-cast results, then check spawn density and Teleport access on the map page.",
+    "Check the nearest potion shop before committing to a map. A nearest-town scroll gets you back to town, but you still have to walk back to the map after every refill."
+   ]
+  },
+  {
+   "img": "b83f242c2889a1.png",
+   "w": 360,
+   "h": 412,
+   "cap": "The saved F/P Wizard build in Training Advisor: current hit rate, danger, damage, and EXP per hour for the equipped character."
+  },
+  {
+   "h2": "Recommended potions"
+  },
+  {
+   "p": "Fire Arrow is fairly cheap; Poison Breath and early Teleport are not. Full Magic Guard adds another large MP expense when mobs hit you: at the basic shop rates, every 100 incoming damage costs about 90 mesos to refill through MG 15, compared with 50 mesos when MG stays off. Use MG only if you're at risk of dying."
+  },
+  {
+   "img": "d41e13225869ec.png",
+   "w": 130,
+   "h": 139
+  },
+  {
+   "p": "**BEST TO BUY** Best HP or MP recovered per meso"
+  },
+  {
+   "p": "[[img:be80aa4791c684.png]] **Red Potion** 50 mesos · 100 HP 2 HP per meso [[img:39a28ad40190a6.png]] **Fried Chicken** 60 mesos · 120 HP 2 HP per meso [[img:51e2250795d8f6.png]] **Meat** 80 mesos · 160 HP 2 HP per meso [[img:da1e5c881a1df6.png]] **Orange** 50 mesos · 50 MP 1 MP per meso [[img:d59bc967011b87.png]] **Lemon** 150 mesos · 150 MP 1 MP per meso"
+  },
+  {
+   "p": "**Situational** Buy only when the buff reaches a useful breakpoint"
+  },
+  {
+   "p": "[[img:01a2e09235af46.png]] **Magic Potion** 500 mesos · +10 M.ATK for 10 min Use for a damage breakpoint [[img:4e15182d2a8a6e.png]] **Sniper Potion** 500 mesos · +5 ACC for 10 min Use to remove misses [[img:e18fe0a27cd32a.png]] **Supreme Sniper Potion** 600 mesos · +7 ACC for 15 min Best shop ACC buff"
+  },
+  {
+   "p": "**DON'T BUY** Worse recovery per meso than the choices above"
+  },
+  {
+   "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 mesos · 500 HP 1.43 HP per meso [[img:d19cbf8225851d.png]] **Blue Potion** 220 mesos · 200 MP 0.91 MP per meso"
+  },
+  {
+   "guide": "best-buy-shop-efficiency",
+   "text": "Compare shop potion efficiency"
+  },
+  {
+   "h2": "Common F/P Wizard mistakes"
+  },
+  {
+   "img": "39b7e311bd0cb8.png",
+   "w": 130,
+   "h": 178
+  },
+  {
+   "ol": [
+    "**Ignoring elemental resistance.** Fire Arrow loses damage against fire-resistant mobs. Check the mob page before committing to a map.",
+    "**Spamming Teleport 1.** It costs 55 MP. Early Teleport is for useful gaps and emergencies.",
+    "**Casting Meditation for physical attackers.** It adds Magic Attack, so it helps magical damage.",
+    "**Adding LUK after the weapon requirement is met.** Check Total LUK from gear before spending more base AP."
+   ]
+  },
+  {
+   "h2": "Sample level 70 F/P Wizard build by Grummash"
+  },
+  {
+   "img": "a3e880b049879d.png",
+   "w": 130,
+   "h": 184
+  },
+  {
+   "p": "The final numbers use Grummash's saved F/P Wizard with Meditation active. All available equipment slots carry successful Lesser scrolls."
+  },
+  {
+   "p": "[[img:e4a7a0c9e9a042.png]]Angel Wings [[img:14ffcc59b9e65c.png]]Blue Infinium Circlet [[img:ad758043440bc3.png]]Blue Requiem [[img:3da7555f720bf1.png]]Blue Lorin [[img:de7702418eb057.png]]Brown Lapiz Sandals [[img:cc230a8d46e614.png]]Blue Gaia Cape [[img:ea67f3099d0314.png]]Metal Silver Earrings [[img:eb1d5689fc40fb.png]]Esther Shield"
+  },
+  {
+   "note": "352 INT / 65 LUK / 336 M.ATK\n**9%** Critical Rate\n**26%** Critical Damage\n**224** WDEF\n**372** MDEF"
+  },
+  {
+   "h2": "At level 70: become a F/P Mage"
+  },
+  {
+   "p": "[[img:c1522d01da4202.png]] **Robeira** Handles the F/P Mage advancement in El Nath."
+  },
+  {
+   "p": "F/P Wizards become F/P Mages through Robeira in El Nath. Third job and El Nath are not in the launch build."
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/fp-wizard-class-guide",
+ "hash": "e385bc5ad1e9"
+}

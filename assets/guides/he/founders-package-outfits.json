@@ -1,54 +1,147 @@
 {
- "key": "guide/founders-package-outfits",
- "source_hash": "34fb47b02f44",
- "lang": "he",
- "title": "האאוטפיטים של Founder's Package ב-MapleStory Classic",
+ "title": "האאוטפיטים של Founder's Package ב-MapleStory Classic World",
  "intro": "באיזו דרגה של Founder's Package נמצא כל אאוטפיט ב-MapleStory Classic World, חמשת החלקים של Manji, והדדליינים של 14 באוקטובר ו-30 בנובמבר.",
- "pros": [],
- "cons": [],
- "sections": [
+ "blocks": [
   {
-   "heading": "",
-   "lines": [
-    "באיזו דרגה של Founder's Package נמצא כל אאוטפיט ב-MapleStory Classic World, חמשת החלקים של Manji, והדדליינים של 14 באוקטובר ו-30 בנובמבר.",
-    "האאוטפיטים של Founder's Package ב-MapleStory Classic World",
-    "שלושת האאוטפיטים של Founder's Package מפוזרים בין הדרגות. רק ל-Zakum Package ב-$79.99 יש את שלושתם. ב-Snail ($29.99) יש את Well-Loved Outfit Set. Orange Mushroom ($59.99) מוסיף את Founder's Thief Outfit Set, ו-Zakum מוסיף מעל זה את Manji's Outfit Set. שלושתם קוסמטיקה קבועה בלי סטטים. כל ג'וב וכל מגדר יכולים ללבוש אותם.",
-    "תאריכים חשובים",
-    "שלב | דדליין",
-    "לקנות או לשדרג חבילה | 11:59 PM PDT, 14 באוקטובר 2026",
-    "לקבל אותה מתיבת הדואר במשחק | 11:59 PM UTC, 30 בנובמבר 2026",
-    "לפתוח את החבילה שקיבלת | תוך 30 יום מהקבלה",
-    "החנות של Nexon מוכרת את כל שלוש הדרגות. Steam מוכר רק את Zakum Package.",
-    "אאוטפיטים לפי חבילה",
-    "אאוטפיט | Snail ($29.99) | Orange Mushroom ($59.99) | Zakum ($79.99)",
-    "Well-Loved Outfit Set | כן | כן | כן",
-    "Founder's Thief Outfit Set | לא | כן | כן",
-    "Manji's Outfit Set | לא | לא | כן",
-    "Manji's Outfit Set",
-    "Manji's Outfit Set מגיע רק ב-Zakum Package ב-$79.99. יש בו חמישה חלקים.",
-    "חלק | סלוט",
-    "Manji's Bamboo Hat | כובע",
-    "Manji's Clothes | אוברול",
-    "Reticent Steps | נעליים",
-    "Manji's Blade | נשק",
-    "Silent Sea of Clouds | גלימה",
-    "כל חמשת החלקים על אווטאר של NiaMeowDB. לכל חשבון ב-NiaMeowDB כבר יש את כל חמשת החלקים בכלי ה-Fashion שלנו, וחשבונות חדשים מקבלים אותם בהרשמה. תנסה את הלוק על אווטאר הפרופיל שלך ב-Appearance Builder לפני שאתה בוחר דרגה.",
-    "Founder's Thief Outfit Set",
-    "Founder's Thief Outfit Set מגיע ב-Orange Mushroom Package ב-$59.99 וב-Zakum Package ב-$79.99. הנה הוא בארט החשיפה של Nexon.",
-    "מתוך החשיפה של Founder's Package של Nexon. Well-Loved Outfit Set",
-    "בכל Founder's Package יש את Well-Loved Outfit Set, עד ה-Snail Package ב-$29.99. זה סט האאוטפיט היחיד ב-Snail Package.",
-    "מתוך החשיפה של Founder's Package של Nexon. שלבי קבלה",
+   "p": "[[img:60193dfb38529f.png]] **שלושת האאוטפיטים של Founder's Package מפוזרים בין הדרגות. רק ל-Zakum Package ב-$79.99 יש את שלושתם.** ב-Snail ($29.99) יש את Well-Loved Outfit Set. Orange Mushroom ($59.99) מוסיף את Founder's Thief Outfit Set, ו-Zakum מוסיף מעל זה את Manji's Outfit Set. שלושתם קוסמטיקה קבועה בלי סטטים. כל ג'וב וכל מגדר יכולים ללבוש אותם."
+  },
+  {
+   "h2": "תאריכים חשובים"
+  },
+  {
+   "table": [
+    [
+     "שלב",
+     "דדליין"
+    ],
+    [
+     "לקנות או לשדרג חבילה",
+     "**11:59 PM PDT, 14 באוקטובר 2026**"
+    ],
+    [
+     "לקבל אותה מתיבת הדואר במשחק",
+     "**11:59 PM UTC, 30 בנובמבר 2026**"
+    ],
+    [
+     "לפתוח את החבילה שקיבלת",
+     "תוך 30 יום מהקבלה"
+    ]
+   ]
+  },
+  {
+   "p": "החנות של Nexon מוכרת את כל שלוש הדרגות. Steam מוכר רק את Zakum Package."
+  },
+  {
+   "h2": "אאוטפיטים לפי חבילה"
+  },
+  {
+   "table": [
+    [
+     "אאוטפיט",
+     "Snail ($29.99)",
+     "Orange Mushroom ($59.99)",
+     "Zakum ($79.99)"
+    ],
+    [
+     "Well-Loved Outfit Set",
+     "כן",
+     "כן",
+     "כן"
+    ],
+    [
+     "Founder's Thief Outfit Set",
+     "לא",
+     "כן",
+     "כן"
+    ],
+    [
+     "Manji's Outfit Set",
+     "לא",
+     "לא",
+     "כן"
+    ]
+   ]
+  },
+  {
+   "h2": "Manji's Outfit Set"
+  },
+  {
+   "p": "Manji's Outfit Set מגיע רק ב-Zakum Package ב-$79.99. יש בו חמישה חלקים."
+  },
+  {
+   "table": [
+    [
+     "חלק",
+     "סלוט"
+    ],
+    [
+     "[[img:8fcc937e22a04b.png]] Manji's Bamboo Hat",
+     "כובע"
+    ],
+    [
+     "[[img:3087bec9b526a6.png]] Manji's Clothes",
+     "אוברול"
+    ],
+    [
+     "[[img:47cac8d70c7911.png]] Reticent Steps",
+     "נעליים"
+    ],
+    [
+     "[[img:91c82599083c93.png]] Manji's Blade",
+     "נשק"
+    ],
+    [
+     "[[img:42f93eb3aa8631.png]] Silent Sea of Clouds",
+     "גלימה"
+    ]
+   ]
+  },
+  {
+   "img": "89085f675cf334.png",
+   "w": 264,
+   "h": 228,
+   "cap": "כל חמשת החלקים על אווטאר של NiaMeowDB."
+  },
+  {
+   "p": "לכל חשבון ב-NiaMeowDB כבר יש את כל חמשת החלקים בכלי ה-Fashion שלנו, וחשבונות חדשים מקבלים אותם בהרשמה. תנסה את הלוק על אווטאר הפרופיל שלך ב-Appearance Builder לפני שאתה בוחר דרגה."
+  },
+  {
+   "h2": "Founder's Thief Outfit Set"
+  },
+  {
+   "p": "Founder's Thief Outfit Set מגיע ב-Orange Mushroom Package ב-$59.99 וב-Zakum Package ב-$79.99. הנה הוא בארט החשיפה של Nexon."
+  },
+  {
+   "img": "baf49507f4f3bc.png",
+   "w": 120,
+   "h": 140,
+   "cap": "מתוך החשיפה של Founder's Package של Nexon."
+  },
+  {
+   "h2": "Well-Loved Outfit Set"
+  },
+  {
+   "p": "בכל Founder's Package יש את Well-Loved Outfit Set, עד ה-Snail Package ב-$29.99. זה סט האאוטפיט היחיד ב-Snail Package."
+  },
+  {
+   "img": "471f9e5f3bb561.png",
+   "w": 195,
+   "h": 145,
+   "cap": "מתוך החשיפה של Founder's Package של Nexon."
+  },
+  {
+   "h2": "שלבי קבלה"
+  },
+  {
+   "ul": [
     "לקנות או לשדרג עד 11:59 PM PDT ב-14 באוקטובר.",
     "לקבל את החבילה מתיבת הדואר במשחק בין 6 באוקטובר, כש-Founder's Access מתחיל, לבין 11:59 PM UTC ב-30 בנובמבר.",
     "שדרוגים בחנות מ-Orange Mushroom ל-Zakum שנעשים בין 6 באוקטובר לסגירת המכירות ב-14 באוקטובר שולחים את פריטי ה-Zakum הנוספים לתיבת הדואר שלך בהתחברות הבאה, אחרי שהרכישה מאושרת. אי אפשר לשלם על Founder's Package עם NX.",
     "אפשר לקבל פעם אחת לכל חשבון בכל פלטפורמה: פעם אחת באתר של Nexon ופעם אחת ב-Steam.",
     "קודם תצא מ-Maple Island, ואז תפתח את החבילה תוך 30 יום מהקבלה.",
-    "את כללי הקבלה המלאים אפשר לקרוא בהודעה של Nexon על Founder's Packages.",
-    "תאריך היציאה של MapleStory Classic World ו-Founder's Access →",
-    "חדשות: Founder's Packages במכירה עד 14 באוקטובר →",
-    "חדשות: Founder's Packages עולים $29.99, $59.99 או $79.99 →",
-    "Appearance Builder →"
+    "את כללי הקבלה המלאים אפשר לקרוא בהודעה של Nexon על Founder's Packages."
    ]
   }
- ]
+ ],
+ "source_hash": "1d2648ed79c3"
 }

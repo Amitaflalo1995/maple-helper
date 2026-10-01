@@ -1,0 +1,592 @@
+{
+ "title": "MapleStory Classic Crossbowman Build and Leveling Guide: Lv 30-70",
+ "intro": "Crossbowmen trade attack speed for heavier damage. Iron Arrow pierces through up to four mobs, Crossbow Mastery can ignore enemy's physical defense, and Final Attack gives a strong single-target follow-up.",
+ "hero": "1082ef08e7568f.png",
+ "minutes": null,
+ "blocks": [
+  {
+   "p": "This guide is based off of a realistic lv 70 Crossbowman build by Grummash."
+  },
+  {
+   "p": "**Pros**"
+  },
+  {
+   "ul": [
+    "#6 AoE damage and #4 Damage/MP at level 70 in the current benchmark.",
+    "Iron Arrow pierces four mobs in front of you.",
+    "Crossbow Mastery can ignore enemy Weapon Defense on 20% of attacks.",
+    "The level 50-70 crossbows in this guide carry more base W.ATK than the matching bows.",
+    "Soul Arrow lets you shoot without using up arrows."
+   ]
+  },
+  {
+   "p": "**Cons**"
+  },
+  {
+   "ul": [
+    "Crossbows attack slower than bows, even with Booster.",
+    "Iron Arrow loses 20% damage on each later mob it pierces.",
+    "Inside 65 px your crossbow whacks instead of firing. It is a weak melee swing.",
+    "The best maps need long, flat lanes that keep mobs lined up.",
+    "No movement skill in second job. You walk and jump to every platform."
+   ]
+  },
+  {
+   "h2": "Starting at level 30"
+  },
+  {
+   "p": "This guide continues from the Bowman level 1 to 30 guide. Its no-reset endpoint is Arrow Blow 20, Critical Shot 15, The Eye of Amazon 15, Focus 10, and Power Knockback 1."
+  },
+  {
+   "p": "Grummash's saved level 70 build uses Double Shot 20, Arrow Blow 1, and Focus 9. If you want that exact endpoint, move 19 SP from Arrow Blow and 1 from Focus into Double Shot. The live Cash Shop price for this reset is unconfirmed."
+  },
+  {
+   "img": "baa9ac22bc819c.png",
+   "w": 130,
+   "h": 219
+  },
+  {
+   "h3": "Recommended citizenship"
+  },
+  {
+   "p": "Keep Henesys citizenship from the first-job guide. Its rewards cover arrows, Accuracy consumables, DEX options, and weapon scrolls for both Bowman branches."
+  },
+  {
+   "h2": "Accuracy after level 30"
+  },
+  {
+   "p": "A training map only works when your attacks connect. Every miss spends MP, wastes the attack animation, and lowers EXP per minute."
+  },
+  {
+   "img": "2253fb1e5bc5fd.png",
+   "w": 130,
+   "h": 201
+  },
+  {
+   "note": "**Bowman Base Accuracy**\nfloor((1.2 x Total DEX + 2 x Level + 0.6 x Total LUK) / 4.8 + 20)\n**+0.42** ACC per level\n**+0.25** ACC per DEX\n**+0.13** ACC per LUK\n**+1.00** ACC per direct ACC"
+  },
+  {
+   "p": "Every mob has Avoidability. Fighting above your level raises the ACC needed to hit, while gaining levels closes that penalty. This is why a lower-level map with clean one- or two-attack kills can beat a higher-level map with misses."
+  },
+  {
+   "table": [
+    [
+     "Mob",
+     "Mob level",
+     "Mob Avoid",
+     "ACC to never miss at equal level"
+    ],
+    [
+     "[[img:777ced8b4048a6.png]]Jr. Wraith",
+     "34",
+     "24",
+     "79 ACC"
+    ],
+    [
+     "[[img:2a5d75bf6e3634.png]]Lorang",
+     "38",
+     "23",
+     "76 ACC"
+    ],
+    [
+     "[[img:3934c93d7d4444.png]]Zombie Lupin",
+     "41",
+     "28",
+     "92 ACC"
+    ],
+    [
+     "[[img:0386eea7010d4c.png]]Wraith",
+     "48",
+     "31",
+     "101 ACC"
+    ]
+   ]
+  },
+  {
+   "guide": "bowman-class-guide",
+   "text": "Read the full Bowman Accuracy explanation"
+  },
+  {
+   "h2": "Levels 30-70: Crossbowman skill build and leveling"
+  },
+  {
+   "img": "2c2c9d87584b2e.png",
+   "w": 130,
+   "h": 192
+  },
+  {
+   "h3": "Level 30 Crossbowman job advancement"
+  },
+  {
+   "ol": [
+    "Start the second-job advancement by talking to Athena Pierce in Henesys.",
+    "Deliver her letter to the instructor on The Road to the Dungeon and enter the test.",
+    "Collect 30 Dark Marbles from the test mobs to receive The Proof of a Hero.",
+    "Bring the proof back to Athena and select Crossbowman."
+   ]
+  },
+  {
+   "p": "[[img:bb76eacd73ab66.png]] **Athena Pierce** Starts and finishes the Crossbowman advancement in Henesys."
+  },
+  {
+   "p": "[[img:8572391f8c1c32.png]] **Bowman Job Instructor** Runs the Dark Marble test near Henesys."
+  },
+  {
+   "note": "**First Crossbowman SP: Iron Arrow: Crossbow 1.** One point gives a four-target piercing shot at 120% damage. Arrow Blow remains better on one isolated mob. Iron Arrow earns its MP when multiple mobs stay lined up."
+  },
+  {
+   "h3": "Level 70 skill target"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "SP",
+     "Result at the saved skill level"
+    ],
+    [
+     "[[img:fb623463b68fcb.png]]Crossbow Mastery",
+     "20 / 20",
+     "Crossbow Mastery level 10, 20% chance to ignore enemy Weapon Def."
+    ],
+    [
+     "[[img:bf962edc29af41.png]]Amazon's Judgement",
+     "20 / 20",
+     "Critical hits have a 100% chance to reduce Enemy Speed by 35 for 5 sec"
+    ],
+    [
+     "[[img:3aa1776b9e3849.png]]Final Attack: Crossbow",
+     "11 / 30",
+     "30% success rate, Final Attack with crossbow damage 230%"
+    ],
+    [
+     "[[img:4e1a660e5769f2.png]]Crossbow Booster",
+     "20 / 20",
+     "HP -10, MP -10; Increases Crossbow Attack Speed by 2 stages for 300 sec"
+    ],
+    [
+     "[[img:2f6a4b56c47660.png]]Soul Arrow: Crossbow",
+     "20 / 20",
+     "MP -5; Attack without using up any arrows for 300 sec"
+    ],
+    [
+     "[[img:a56f556b3a9db2.png]]Iron Arrow: Crossbow",
+     "30 / 30",
+     "MP -28; Damage 180%"
+    ]
+   ]
+  },
+  {
+   "h3": "Crossbowman SP allocation: levels 30-70"
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "Spend",
+     "Running total",
+     "Reason"
+    ],
+    [
+     "30",
+     "Iron Arrow +1",
+     "Iron Arrow 1",
+     "Unlock four-target piercing."
+    ],
+    [
+     "31",
+     "Crossbow Mastery +3",
+     "IA 1 / Mastery 3",
+     "Start raising the weakest damage roll."
+    ],
+    [
+     "32",
+     "Crossbow Mastery +2, Crossbow Booster +1",
+     "IA 1 / Mastery 5 / Booster 1",
+     "Unlock the full two-stage speed boost."
+    ],
+    [
+     "33",
+     "Crossbow Booster +2, Final Attack +1",
+     "IA 1 / Mastery 5 / Booster 3 / FA 1",
+     "Final Attack Lv1 costs no MP and gives about 18% more damage per MP on one mob."
+    ],
+    [
+     "34",
+     "Crossbow Booster +1, Soul Arrow +1, Crossbow Mastery +1",
+     "IA 1 / Mastery 6 / Booster 4 / Soul Arrow 1",
+     "Unlock arrow-free attacks, then return to Mastery."
+    ],
+    [
+     "35-38",
+     "Crossbow Mastery +12",
+     "IA 1 / Mastery 18 / Booster 4 / Soul Arrow 1",
+     "Strengthen low rolls and raise WDEF ignore."
+    ],
+    [
+     "39",
+     "Crossbow Mastery +2, Crossbow Booster +1",
+     "IA 1 / Mastery 20 / Booster 5 / Soul Arrow 1 / FA 1",
+     "Max Mastery."
+    ],
+    [
+     "40-48",
+     "Iron Arrow +27",
+     "IA 28",
+     "Build the main mobbing attack."
+    ],
+    [
+     "49",
+     "Iron Arrow +2, Amazon's Judgement +1",
+     "IA 30 / Judgement 1",
+     "Max Iron Arrow and start Judgement."
+    ],
+    [
+     "50-55",
+     "Amazon's Judgement +18",
+     "Judgement 19",
+     "Build the critical slow."
+    ],
+    [
+     "56-60",
+     "Amazon's Judgement +1, Crossbow Booster +14",
+     "Judgement 20 / Booster 19",
+     "Max Judgement, then stretch Booster toward 300 seconds."
+    ],
+    [
+     "61-66",
+     "Crossbow Booster +1, Soul Arrow +17",
+     "Booster 20 / Soul Arrow 18",
+     "300-second Booster for 10 HP and 10 MP, then longer arrow-free uptime for less MP."
+    ],
+    [
+     "67",
+     "Soul Arrow +2, Final Attack +1",
+     "Soul Arrow 20 / FA 2",
+     "300-second Soul Arrow for 5 MP."
+    ],
+    [
+     "68-70",
+     "Final Attack +9",
+     "FA 11",
+     "Each Final Attack level after the first raises the damage-per-MP bonus by only about 1 percentage point."
+    ]
+   ]
+  },
+  {
+   "p": "Second-job SP cannot be spent on first-job skills, so finish the first-job plan by level 30. Character Builder flags any build that breaks it."
+  },
+  {
+   "note": "**Why Mastery and Booster come first:** At level 35, this sample build improved from about 5,207 to 7,284 Advisor EXP/min. At level 40, it improved from 8,369 to 9,712 EXP/min. Stronger low rolls and faster attacks become much more valuable before Iron Arrow is maxed."
+  },
+  {
+   "h3": "Possible changes to the default order"
+  },
+  {
+   "h3": "Iron Arrow first"
+  },
+  {
+   "p": "Max Iron Arrow immediately when your map keeps four mobs lined up and they already die cleanly. You give up early Mastery, Booster, and Soul Arrow."
+  },
+  {
+   "h3": "Final Attack for bossing"
+  },
+  {
+   "p": "If MP is your limit against single targets, move Final Attack ahead of the Booster and Soul Arrow levels. It barely changes Double Shot damage, but it costs no MP."
+  },
+  {
+   "h2": "Crossbowman AP allocation: levels 30-70"
+  },
+  {
+   "p": "This continues from the crossbow path in the Bowman guide: 20 base STR and 142 base DEX. Every crossbow from Heckler to Gross Jaeger needs STR equal to its level minus 10, so 1 STR per level keeps each one wearable on time. Gross Jaeger requires 60 STR, ten less than Golden Hinkel, so those ten AP stay in DEX."
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "AP each level",
+     "Base AP at the end"
+    ],
+    [
+     "31-70",
+     "STR +1 / DEX +4",
+     "60 STR / 302 DEX"
+    ]
+   ]
+  },
+  {
+   "h2": "Recommended equipment"
+  },
+  {
+   "img": "154146493a9f72.png",
+   "w": 130,
+   "h": 224
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Item",
+     "Why it matters"
+    ],
+    [
+     "40",
+     "[[img:564bdb167d7720.png]]Heckler",
+     "59 W.ATK, Normal speed."
+    ],
+    [
+     "50",
+     "[[img:5f91a536de8887.png]]Rower",
+     "72 W.ATK, Slow speed."
+    ],
+    [
+     "60",
+     "[[img:72e6f38c890e5e.png]]Golden Crow",
+     "82 W.ATK before scrolling."
+    ],
+    [
+     "70",
+     "[[img:58a226eefb9ec4.png]]Gross Jaeger",
+     "92 W.ATK before scrolling."
+    ]
+   ]
+  },
+  {
+   "p": "Crossbows use both hands, so Crossbowmen cannot equip shields. Carry arrow stacks until Soul Arrow lasts long enough for full training sessions. While Soul Arrow is active, attacks do not consume arrows."
+  },
+  {
+   "h3": "Level 30 armor checkpoint"
+  },
+  {
+   "p": "[[img:b0355e799d609f.png]]Green Hawkeye[[img:2e84d2b21f6e5e.png]]Green Hunter's Armor[[img:aac503e8e6a29c.png]]Green Hunter's Pants[[img:205ce562d81ade.png]]Black Hunter Boots[[img:19b5abd79d0e4f.png]]Green Marker"
+  },
+  {
+   "p": "This is the clean armor used for the level 30 handoff. Open the item pages for current sources. Keep useful lower-level gear when the next armor tier does not improve a damage, Accuracy, or survival breakpoint."
+  },
+  {
+   "h2": "W.ATK or Critical Rate on gloves?"
+  },
+  {
+   "p": "These numbers use Grummash's realistic level 70 Crossbowman build and five successful Lesser glove scrolls. Both options use the same five slots."
+  },
+  {
+   "h3": "5x Gloves Attack Scroll: Lesser"
+  },
+  {
+   "p": "**+5 W.ATK**\n102 to 107 total W.ATK\nAbout 4.9% more expected damage."
+  },
+  {
+   "h3": "5x Gloves Crit. Rate Scroll: Lesser"
+  },
+  {
+   "p": "**+5% Critical Rate**\n29% to 34% Critical Rate\nAbout 1.83% more expected damage."
+  },
+  {
+   "note": "**Pick Attack.** The five-scroll Attack setup deals about 3.01% more expected damage than the Critical Rate setup on this build."
+  },
+  {
+   "p": "Critical Shot raises this build to 41% Critical Damage. This is one of the closer comparisons, but W.ATK still wins at level 70."
+  },
+  {
+   "p": "**The ratio is the same at every grade.** Lesser gives +1 W.ATK or +1% Critical Rate (+2 M.ATK), Intermediate +2/+2% (+4 M.ATK), Greater +3/+3% (+6 M.ATK), and Chaos +4/+4% (+8 M.ATK). Matching grades have the same success and destruction rates."
+  },
+  {
+   "p": "**W.ATK also helps guaranteed kills.** It raises every physical hit, including your weakest normal roll and every critical hit. Critical Rate changes how often a critical occurs, so it cannot improve the weakest non-critical roll."
+  },
+  {
+   "h2": "Example builds and Training Advisor maps"
+  },
+  {
+   "img": "c4ffca20b999ed.png",
+   "w": 130,
+   "h": 170
+  },
+  {
+   "p": "The Advisor checks the weakest normal hit. Average damage does not decide a guaranteed kill. A guaranteed two-attack result means two bad damage rolls still kill the mob and Accuracy is high enough to prevent misses. Each pick shows Danger and the nearest potion and arrow refill. Crossbowmen also need the lane to cooperate: Iron Arrow's later targets must stay lined up in front."
+  },
+  {
+   "note": "Level 30\nArrow Blow 20, 82 ACC, 53 W.ATK\n[[img:ae64823f427bc0.png]] **Transfer Area** Stirge, guaranteed 2-cast, Safe at 9%; Dr. Faymus refill in 4 portals; about 2,107 EXP/min [[img:34dcba7b3807fe.png]] **Line 1 <Area 1>** Bubbling, guaranteed 2-cast, Safe at 6%; Dr. Faymus refill in 3 portals; about 1,568 EXP/min\nLevel 40\nIron Arrow 4, max Crossbow Mastery, Booster active, 96 ACC, 64 W.ATK\n[[img:36750484773e65.png]] **Dark Cave** Stirge 1-cast; Horny Mushroom and Zombie Mushroom 2-cast; Caution at 11%; Mr. Sweatbottom refill in 7 portals; about 9,712 EXP/min [[img:ae64823f427bc0.png]] **Dangerous Steam** Stirge 1-cast; Zombie Mushroom and Horny Mushroom 2-cast; Caution at 11%; Mr. Sweatbottom refill in 8 portals; about 9,706 EXP/min\nLevel 50\nIron Arrow 30, 111 ACC, max Crossbow Mastery, Booster active\n[[img:762bddf50eb031.png]] **The Burnt Land V** Fire Boar and Dark Axe Stump 1-cast, Lupin 2-cast, Caution at 21%; Arturo refill in 8 portals; about 14,639 EXP/min [[img:3934c93d7d4444.png]] **Monkey Forest II** Zombie Lupin and Lupin, guaranteed 2-cast, Caution at 23%; Len the Fairy refill in 5 portals; about 13,462 EXP/min\nLevel 60\nIron Arrow 30, 129 ACC, 97 W.ATK\n[[img:762bddf50eb031.png]] **The Burnt Land V** Fire Boar, Lupin, and Dark Axe Stump are guaranteed 1-cast, Caution at 19%; Arturo refill in 8 portals; about 17,391 EXP/min [[img:777ced8b4048a6.png]] **Line 1 <Area 2>** Jr. Wraith and Stirge are guaranteed 1-cast, Caution at 11%; Dr. Faymus refill in 5 portals; about 17,186 EXP/min\nLevel 70\nGrummash build, 157 ACC, 107 W.ATK\n[[img:3ddc9bfe06aade.png]] **Forgotten Entrance III** Glowshroom and Curse Eye 1-cast, Raffle 2-cast, Caution at 13%; Len the Fairy refill in 6 portals; about 20,599 EXP/min [[img:2a5d75bf6e3634.png]] **Lorang Lorang** Lorang and Lupin are guaranteed 1-cast, Caution at 15%; Valen refill in 2 portals; about 20,357 EXP/min"
+  },
+  {
+   "p": "**Before you settle in:** The Iron Arrow picks from level 40 on assume every Iron Arrow pierces all four mobs. Watch the last mob Iron Arrow pierces. If it needs another Iron Arrow after the first mob dies, include that extra shot when comparing maps. Flat ground and a clean firing lane can beat a higher-ranked map with broken platforms."
+  },
+  {
+   "h2": "Important Crossbowman skill mechanics"
+  },
+  {
+   "h3": "Iron Arrow: Crossbow"
+  },
+  {
+   "img": "368441132100ca.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "Iron Arrow pierces up to four mobs. The first takes 100% of the calculated damage, followed by 80%, 60%, and 40%. A dense horizontal lane gets the full value; staggered platforms do not."
+  },
+  {
+   "p": "**At level 70, the benchmark deals about 5,852 expected total damage across four targets.**"
+  },
+  {
+   "h3": "Crossbow Mastery"
+  },
+  {
+   "p": "Max Mastery raises the minimum damage roll to Mastery 10 and gives a 20% chance to ignore enemy Weapon Defense. The ignore proc helps more against high-WDEF mobs and cannot be part of a guaranteed low-roll kill."
+  },
+  {
+   "h3": "Final Attack: Crossbow"
+  },
+  {
+   "img": "da9f45926276f7.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "Put one point in Final Attack at level 33 and leave it on while you fight single mobs. Lv1 has a 20% chance to add a 220% hit, and Final Attack costs no MP. With Arrow Blow or Double Shot, that is about 18% more damage per MP. Each proc uses up 1 arrow."
+  },
+  {
+   "p": "Each FA proc replays your crossbow shot as its own attack animation, and you can't attack again until it ends: about 0.8 seconds with Booster. At Lv1, your average damage per second on one mob drops by about 1%, and you drink fewer MP potions."
+  },
+  {
+   "p": "Final Attack: Crossbow only hits 1 mob. Once Iron Arrow is maxed and reaches two or more mobs, the extra animation costs more damage than the proc adds."
+  },
+  {
+   "p": "Max Final Attack has a 50% chance to add a 250% single-target hit. The Hunter version fires three 90% arrows instead. Grummash's build stops at Lv11, a 30% chance for 230% damage: about 29 % more damage per MP against one mob. Levels 2-11 come last because each one raises that bonus by only about 1 percentage point. The table below uses Lv11."
+  },
+  {
+   "table": [
+    [
+     "You attack with",
+     "Mobs in front",
+     "Final Attack Lv11 on vs off"
+    ],
+    [
+     "[[img:d1760c2a999abe.png]]Double Shot",
+     "any",
+     "1% less"
+    ],
+    [
+     "[[img:a56f556b3a9db2.png]]Iron Arrow",
+     "2",
+     "7% less"
+    ],
+    [
+     "[[img:a56f556b3a9db2.png]]Iron Arrow",
+     "3",
+     "11% less"
+    ],
+    [
+     "[[img:a56f556b3a9db2.png]]Iron Arrow",
+     "4",
+     "13% less"
+    ]
+   ]
+  },
+  {
+   "note": "**Level 70 damage check:** At level 70, max Double Shot deals about 2,787 expected damage to one neutral target. Max Iron Arrow reaches about 5,852 expected total damage across four targets after the piercing falloff. Booster raises the modeled rate from 68 to 76 casts per minute."
+  },
+  {
+   "h2": "Find Your Build's Best Training Map with Training Advisor"
+  },
+  {
+   "p": "**Danger measures how hard a mob hits you for: under 10% of your HP is Safe, 10-24% is Caution, 25-49% is Danger, and 50%+ is Lethal.**"
+  },
+  {
+   "p": "A map with four clean targets can beat a higher-level map where Iron Arrow only reaches one or two. Run the check with your crossbow and the platforms you can actually hold."
+  },
+  {
+   "ol": [
+    "Enter the Crossbowman's AP, equipment, scrolls, arrow stack, skills, and active buffs.",
+    "Choose Iron Arrow when mobs stand lined up in front of you, or Double Shot when most pulls are single target.",
+    "Set reliability to 100% and leave Factor Danger into recommendations enabled.",
+    "Check the guaranteed attack count for every common spawn, including lower-EXP mobs.",
+    "Open the map page and confirm its lanes are long enough for all four piercing targets.",
+    "Check the nearest potion and arrow shops. A nearest-town scroll gets you back to town, but the long walk back to the map can erase an Iron Arrow map's EXP advantage. Soul Arrow reduces arrow trips once its uptime feels comfortable."
+   ]
+  },
+  {
+   "img": "8780a5bbb35805.png",
+   "w": 360,
+   "h": 393,
+   "cap": "The saved Crossbowman build in Training Advisor: current hit rate, danger, damage, and EXP per hour for the equipped character."
+  },
+  {
+   "h2": "Recommended potions"
+  },
+  {
+   "p": "Iron Arrow and Booster make MP recovery the regular expense. Buy the efficient pots first; buff potions belong in the bag only when their stats improve a real breakpoint."
+  },
+  {
+   "img": "9cf491f59f0e5c.png",
+   "w": 130,
+   "h": 139
+  },
+  {
+   "p": "**BEST TO BUY** Best HP or MP recovered per meso"
+  },
+  {
+   "p": "[[img:be80aa4791c684.png]] **Red Potion** 50 mesos · 100 HP 2 HP per meso [[img:39a28ad40190a6.png]] **Fried Chicken** 60 mesos · 120 HP 2 HP per meso [[img:51e2250795d8f6.png]] **Meat** 80 mesos · 160 HP 2 HP per meso [[img:da1e5c881a1df6.png]] **Orange** 50 mesos · 50 MP 1 MP per meso [[img:d59bc967011b87.png]] **Lemon** 150 mesos · 150 MP 1 MP per meso"
+  },
+  {
+   "p": "**Situational** Buy only when the buff reaches a useful breakpoint"
+  },
+  {
+   "p": "[[img:4e15182d2a8a6e.png]] **Sniper Potion** 500 mesos · +5 ACC for 10 min Use to remove misses [[img:e18fe0a27cd32a.png]] **Supreme Sniper Potion** 600 mesos · +7 ACC for 15 min Best shop ACC buff [[img:8d7b05272e3e8b.png]] **Warrior Potion** 500 mesos · +10 Attack Power for 10 min Use for a damage breakpoint"
+  },
+  {
+   "p": "**DON'T BUY** Worse recovery per meso than the choices above"
+  },
+  {
+   "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 mesos · 500 HP 1.43 HP per meso [[img:d19cbf8225851d.png]] **Blue Potion** 220 mesos · 200 MP 0.91 MP per meso"
+  },
+  {
+   "guide": "best-buy-shop-efficiency",
+   "text": "Compare shop potion efficiency"
+  },
+  {
+   "h2": "Common Crossbowman mistakes"
+  },
+  {
+   "img": "523bb9d095293d.png",
+   "w": 130,
+   "h": 168
+  },
+  {
+   "ol": [
+    "**Reading 180% as 180% on all four mobs.** Iron Arrow falls to 80%, 60%, and 40% of the first target's damage.",
+    "**Using a bow after spending Crossbowman SP.** Mastery, Booster, Final Attack, Soul Arrow, and Iron Arrow require a crossbow.",
+    "**Ignoring platform direction.** Iron Arrow needs mobs lined up in front. A vertically stacked map can waste most of its cap.",
+    "**Forgetting whack range.** Leave at least 65 px between you and the nearest mob. Your crossbow whacks at close range by design, and Power Knockback is a first-job skill for pushing mobs back out of it.",
+    "**Adding Hunter-level STR.** The level 70 Crossbowman weapon needs 60 STR. The saved build puts the next ten AP into DEX."
+   ]
+  },
+  {
+   "h2": "Sample level 70 Crossbowman build by Grummash"
+  },
+  {
+   "img": "a7b7def6ad01c1.png",
+   "w": 130,
+   "h": 200
+  },
+  {
+   "p": "Grummash's saved Crossbowman is the source for the final damage, survival, and Advisor examples. Its equipment uses successful Lesser scrolls in every slot."
+  },
+  {
+   "p": "[[img:58a226eefb9ec4.png]]Gross Jaeger [[img:4f16c54abd311f.png]]Green Patriot [[img:64cc9dbf7d5b2e.png]]Beige Linnex [[img:abf011d3e9b8d0.png]]Blue Eyes [[img:8b167bc25c7b28.png]]Green Elf Shoes [[img:7efbc0d0bc666a.png]]White Gaia Cape [[img:ea67f3099d0314.png]]Metal Silver Earrings [[img:55c0bac6ebb249.png]]Mithril Arrows for Crossbows"
+  },
+  {
+   "note": "62 STR / 348 DEX / 107 W.ATK / 157 ACC\n**29%** Critical Rate\n**41%** Critical Damage\n**295** WDEF\n**63** MDEF"
+  },
+  {
+   "h2": "At level 70: become a Sniper"
+  },
+  {
+   "p": "[[img:3f41b40fa32220.png]] **Rene** Handles the Sniper advancement in El Nath."
+  },
+  {
+   "p": "Crossbowmen advance to Sniper through Rene in El Nath. Third job and El Nath are not in the launch build. Finish this second-job allocation, then open the COT2 Sniper skills before spending third-job SP."
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/crossbowman-class-guide",
+ "hash": "754a6ec8d48f"
+}

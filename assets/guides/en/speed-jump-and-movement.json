@@ -1,0 +1,431 @@
+{
+ "title": "Speed, Jump and Movement",
+ "intro": "How fast Speed makes you walk in MapleStory Classic, the 140 cap, every Speed and Jump source, jump height, rope climbing and Teleport range.",
+ "hero": null,
+ "minutes": 4,
+ "blocks": [
+  {
+   "p": "[[img:11f90822dc92bf.png]] At the base Speed of 100, your character walks 150 pixels per second in MapleStory Classic World. Every point of Speed adds 1.25 px/s, up to the cap of 140 (200 px/s). Jump caps at 120."
+  },
+  {
+   "p": "We measured COT2 video footage closely, frame by frame, and got these results."
+  },
+  {
+   "h2": "How fast does Speed make you walk?"
+  },
+  {
+   "p": "Walking speed is 125 × (Speed + 20) / 100 pixels per second. The table lists every fifth point from the base to the cap."
+  },
+  {
+   "table": [
+    [
+     "Speed",
+     "Walking speed",
+     "Faster than base",
+     "Pre-BB Speed comparison"
+    ],
+    [
+     "100 (base)",
+     "150 px/s",
+     "-",
+     "120"
+    ],
+    [
+     "105",
+     "156.25 px/s",
+     "4%",
+     "125"
+    ],
+    [
+     "110",
+     "162.5 px/s",
+     "8%",
+     "130"
+    ],
+    [
+     "115",
+     "168.75 px/s",
+     "13%",
+     "135"
+    ],
+    [
+     "120",
+     "175 px/s",
+     "17%",
+     "140"
+    ],
+    [
+     "125",
+     "181.25 px/s",
+     "21%",
+     "145"
+    ],
+    [
+     "130",
+     "187.5 px/s",
+     "25%",
+     "150"
+    ],
+    [
+     "135",
+     "193.75 px/s",
+     "29%",
+     "155"
+    ],
+    [
+     "140 (cap)",
+     "200 px/s",
+     "33%",
+     "160"
+    ]
+   ]
+  },
+  {
+   "p": "Speed above 140 does nothing. Speed also has no effect on how fast you attack. Attack speed is a weapon stat (attack speed guide)."
+  },
+  {
+   "h2": "Does Speed work like it did before Big Bang?"
+  },
+  {
+   "p": "No. Pre-Big Bang MapleStory walked 125 px/s at Speed 100. MapleStory Classic World adds 20 Speed behind the scenes, so your 100 moves like the old 120."
+  },
+  {
+   "p": "The cap is still 140. That now walks 200 px/s, the same as the old Speed 160. Old speed advice is outdated for this reason. Jump works the old way, but its cap dropped from 123 to 120."
+  },
+  {
+   "h2": "Where do you get Speed and Jump?"
+  },
+  {
+   "table": [
+    [
+     "",
+     "Source",
+     "Speed",
+     "Jump",
+     "Details"
+    ],
+    [
+     "[[img:677d1f2e03928a.png]]",
+     "Haste (Assassin, Bandit)",
+     "+10 to +30",
+     "+1 to +10",
+     "Level 1 to 20; lasts 100 to 300 sec"
+    ],
+    [
+     "[[img:e6e127b6f732b0.png]]",
+     "GM's Blessing of Wind",
+     "+30",
+     "+10",
+     "GM event buff; lasts 60 min or until you log out"
+    ],
+    [
+     "[[img:a650f5ee873737.png]]",
+     "Red Whip",
+     "+15",
+     "-",
+     "Level 35 one-handed sword"
+    ],
+    [
+     "[[img:06ee09a06714c4.png]]",
+     "Nimble Feet (every class)",
+     "+10",
+     "-",
+     "Beginner skill; lasts 10 to 30 sec; 3 min cooldown"
+    ],
+    [
+     "[[img:b86670a8a7f8f2.png]]",
+     "Speed Potion",
+     "+8",
+     "-",
+     "Lasts 10 min"
+    ],
+    [
+     "[[img:f5a7d4b9df805b.png]]",
+     "Shoes",
+     "+1 to +4",
+     "+1 to +4",
+     "Level 70 shoes carry +4; each pair has 5 upgrade slots"
+    ],
+    [
+     "[[img:b4f78ad0317c3f.png]]",
+     "White Napoleon",
+     "+3",
+     "-",
+     "Level 50 cape"
+    ],
+    [
+     "[[img:5436958bb4ffa7.png]]",
+     "Yellow Icarus Cape",
+     "+2",
+     "-",
+     "Level 46 cape"
+    ]
+   ]
+  },
+  {
+   "p": "Haste stacks with a Speed Potion and with Nimble Feet. An Assassin's Haste and a Bandit's Haste don't stack with each other, and casting Haste again only refreshes its timer. GM's Blessing of Wind stacks with other boosts."
+  },
+  {
+   "p": "Shoe scrolls add Speed or Jump:"
+  },
+  {
+   "table": [
+    [
+     "",
+     "Shoe scroll",
+     "Speed or Jump",
+     "Success rate"
+    ],
+    [
+     "[[img:f0a0835ff45699.png]]",
+     "Lesser",
+     "+1",
+     "100%"
+    ],
+    [
+     "[[img:65c4bd4f1e596d.png]]",
+     "Intermediate",
+     "+2",
+     "60%"
+    ],
+    [
+     "[[img:0c7297d77f43f8.png]]",
+     "Greater",
+     "+3",
+     "10%"
+    ],
+    [
+     "[[img:9928185c3aaf1b.png]]",
+     "Chaos",
+     "+4",
+     "10%; a failed scroll has a 50% chance to destroy the shoes"
+    ]
+   ]
+  },
+  {
+   "h2": "Can you reach the Speed cap?"
+  },
+  {
+   "p": "Yes. Thieves get there with max Haste, a Speed Potion and any shoes with +2 Speed. Anyone else needs a Red Whip or a GM's Blessing of Wind during an event, plus a Speed Potion and Speed shoes."
+  },
+  {
+   "table": [
+    [
+     "Setup",
+     "Speed",
+     "Walking speed"
+    ],
+    [
+     "Fresh character",
+     "100",
+     "150 px/s"
+    ],
+    [
+     "Speed Potion",
+     "108",
+     "160 px/s"
+    ],
+    [
+     "Level 70 shoes (+4), White Napoleon (+3), Speed Potion",
+     "115",
+     "168.75 px/s"
+    ],
+    [
+     "Same, with five +2 Speed scrolls on the shoes",
+     "125",
+     "181.25 px/s"
+    ],
+    [
+     "Red Whip, level 70 shoes, White Napoleon, Speed Potion",
+     "130",
+     "187.5 px/s"
+    ],
+    [
+     "Same, with five +2 Speed scrolls on the shoes",
+     "140 (cap)",
+     "200 px/s"
+    ],
+    [
+     "GM's Blessing of Wind, Speed Potion, shoes with +2 Speed",
+     "140 (cap)",
+     "200 px/s"
+    ],
+    [
+     "Max Haste",
+     "130",
+     "187.5 px/s"
+    ],
+    [
+     "Max Haste, Speed Potion",
+     "138",
+     "197.5 px/s"
+    ],
+    [
+     "Max Haste, Speed Potion, shoes with +2 Speed",
+     "140 (cap)",
+     "200 px/s"
+    ]
+   ]
+  },
+  {
+   "p": "Nimble Feet adds another 10 on top of Haste for up to 30 seconds, so a Thief with max Haste hits the cap during Nimble Feet with no gear at all."
+  },
+  {
+   "h2": "How high can you jump?"
+  },
+  {
+   "p": "At Jump 100 you rise 77 px. Each point of Jump adds launch speed, so height grows a little faster than Jump itself."
+  },
+  {
+   "table": [
+    [
+     "Jump",
+     "Height"
+    ],
+    [
+     "100 (base)",
+     "77 px"
+    ],
+    [
+     "105",
+     "85 px"
+    ],
+    [
+     "110",
+     "93 px"
+    ],
+    [
+     "115",
+     "102 px"
+    ],
+    [
+     "120 (cap)",
+     "111 px"
+    ]
+   ]
+  },
+  {
+   "p": "Max Haste adds 10 Jump, worth 16 px of height. Need to attack while you're in the air? See Attacks You Can Use Mid-Jump."
+  },
+  {
+   "h2": "How fast do you climb ropes?"
+  },
+  {
+   "p": "Your climbing speed in px/s is your Speed plus 20. At the base you climb 120 px/s. Ladders use the same speed, and Haste speeds up climbing too."
+  },
+  {
+   "table": [
+    [
+     "Speed",
+     "Climbing speed"
+    ],
+    [
+     "100 (base)",
+     "120 px/s"
+    ],
+    [
+     "110",
+     "130 px/s"
+    ],
+    [
+     "120",
+     "140 px/s"
+    ],
+    [
+     "130",
+     "150 px/s"
+    ],
+    [
+     "140 (cap)",
+     "160 px/s"
+    ]
+   ]
+  },
+  {
+   "h2": "How long does it take to cross a map?"
+  },
+  {
+   "p": "Time to walk the full width of each map. Ropes, slopes and jumps add more."
+  },
+  {
+   "table": [
+    [
+     "Map",
+     "Width",
+     "Speed 100",
+     "Speed 130",
+     "Speed 140"
+    ],
+    [
+     "Henesys",
+     "6,916 px",
+     "46.1 sec",
+     "36.9 sec",
+     "34.6 sec"
+    ],
+    [
+     "Lith Harbor",
+     "6,274 px",
+     "41.8 sec",
+     "33.5 sec",
+     "31.4 sec"
+    ],
+    [
+     "Kerning City",
+     "5,200 px",
+     "34.7 sec",
+     "27.7 sec",
+     "26.0 sec"
+    ],
+    [
+     "Line 1 <Area 1>",
+     "4,070 px",
+     "27.1 sec",
+     "21.7 sec",
+     "20.4 sec"
+    ],
+    [
+     "Ant Tunnel Park",
+     "3,960 px",
+     "26.4 sec",
+     "21.1 sec",
+     "19.8 sec"
+    ],
+    [
+     "Perion",
+     "3,286 px",
+     "21.9 sec",
+     "17.5 sec",
+     "16.4 sec"
+    ]
+   ]
+  },
+  {
+   "p": "Max Haste saves about 9 seconds on a walk across Henesys."
+  },
+  {
+   "h2": "How far does Teleport go?"
+  },
+  {
+   "table": [
+    [
+     "",
+     "Skill",
+     "Level 1",
+     "Level 20"
+    ],
+    [
+     "[[img:185d5db6e5b052.png]]",
+     "Teleport",
+     "110 px, 55 MP",
+     "150 px, 15 MP"
+    ]
+   ]
+  },
+  {
+   "p": "Every Magician gets Teleport at second job. A max-level Teleport covers the distance you walk in one second at Speed 100."
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/speed-jump-and-movement",
+ "hash": "bb9f9ee4ffee"
+}

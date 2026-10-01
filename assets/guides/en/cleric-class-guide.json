@@ -1,0 +1,888 @@
+{
+ "title": "MapleStory Classic Cleric Build and Leveling Guide: Lv 30-70",
+ "intro": "Clerics heal their party, buff Accuracy with Bless, and fire Holy Arrow at mobs. Max Holy Arrow first for your regular attack, or start with Heal for early healing and undead training.",
+ "hero": null,
+ "minutes": null,
+ "blocks": [
+  {
+   "p": "Our level 70 damage numbers use the gear from Grummash's level 70 Cleric build."
+  },
+  {
+   "p": "[[img:88725290764f11.png]] **Pros**"
+  },
+  {
+   "ul": [
+    "#1 in Physical EHP and tied #1 in Magical EHP in our level 70 benchmarks: you're extremely tanky.",
+    "Heal and Bless support nearby party members; Invincible reduces the damage you take when monsters touch you.",
+    "Holy Arrow can focus three arrows on one mob or split them across three.",
+    "Bless gives nearby party members up to 20 Accuracy and 20 Evasion.",
+    "Teleport keeps you moving between platforms."
+   ]
+  },
+  {
+   "p": "**Cons**"
+  },
+  {
+   "ul": [
+    "Lowest damage amongst all classes at level 70.",
+    "Holy Arrow and Heal targeting can be confusing and frustrating.",
+    "Heal is reduced by the number of enemy targets and party members."
+   ]
+  },
+  {
+   "h2": "Starting at level 30"
+  },
+  {
+   "p": "This guide picks up from our Magician level 1 to 30 guide, which compares first-job builds by meso cost. Any of these works for a Cleric."
+  },
+  {
+   "img": "99e84bf639b337.png",
+   "w": 130,
+   "h": 164
+  },
+  {
+   "table": [
+    [
+     "First-job skill",
+     "Budget",
+     "Safer",
+     "Meso saver",
+     "Grummash's level 70"
+    ],
+    [
+     "[[img:24dcca787059a4.png]]Energy Bolt",
+     "20",
+     "20",
+     "20",
+     "1"
+    ],
+    [
+     "[[img:5370722a856bb9.png]]Magic Claw",
+     "0",
+     "0",
+     "0",
+     "20"
+    ],
+    [
+     "[[img:664c530d20bba5.png]]Improved MP Recovery",
+     "3",
+     "3",
+     "15",
+     "15"
+    ],
+    [
+     "[[img:d0a2f30f9abf2b.png]]Max MP Increase",
+     "15",
+     "15",
+     "3",
+     "15"
+    ],
+    [
+     "[[img:211a115f0a6318.png]]Magic Guard",
+     "3",
+     "15",
+     "3",
+     "10"
+    ],
+    [
+     "[[img:32b086d39a1fbe.png]]Magic Armor",
+     "20",
+     "8",
+     "20",
+     "0"
+    ]
+   ]
+  },
+  {
+   "p": "Safer moves 12 SP from Magic Armor to Magic Guard. Meso saver is the level 30 build from Grummash's Cleric Meso Management Guide and goes with the solo play order below. Grummash's level 70 build is aimed at endgame bossing and uses Magic Claw for levels 10 to 40."
+  },
+  {
+   "ul": [
+    "[[img:32b086d39a1fbe.png]]Magic Armor **Take it first.** Lv14 gives +92 Weapon and Magic Defense for 495 seconds; Lv16 gives +100 for 525 seconds.",
+    "[[img:211a115f0a6318.png]]Magic Guard **Raise it later.** Lv13 moves 74% of a hit to MP and Lv15 moves 80%. Raise it when single hits get big enough to threaten you. Moving damage to MP costs more mesos to refill, so it buys safety."
+   ]
+  },
+  {
+   "h3": "Recommended citizenship"
+  },
+  {
+   "p": "We recommend Kerning City from levels 30 to 70. Its robe scrolls can help you reach a LUK requirement or add more INT. The shop discounts also help while your mesos are going into MP recovery."
+  },
+  {
+   "h2": "Accuracy after level 30"
+  },
+  {
+   "p": "Accuracy is useful only when it changes a miss into a hit. Every miss still costs MP and an attack animation, so your EXP per minute drops quickly."
+  },
+  {
+   "img": "f1f70cb77c6f2f.png",
+   "w": 130,
+   "h": 179
+  },
+  {
+   "note": "**Magician Base Accuracy**\nYour level, Total INT, Total LUK, and direct Accuracy all add to total ACC.\n**+0.39** ACC per level\n**+0.24** ACC per INT\n**+0.12** ACC per LUK\n**+1.00** ACC per direct ACC"
+  },
+  {
+   "p": "Every mob has Avoidability. Fighting above your level raises the ACC needed to never miss; gaining levels lowers that penalty. A lower-level map can easily win when you get reliable one- or two-cast kills there."
+  },
+  {
+   "table": [
+    [
+     "Mob",
+     "Mob level",
+     "Mob Avoid",
+     "ACC to never miss at equal level"
+    ],
+    [
+     "[[img:777ced8b4048a6.png]]Jr. Wraith",
+     "34",
+     "24",
+     "79 ACC"
+    ],
+    [
+     "[[img:3934c93d7d4444.png]]Zombie Lupin",
+     "41",
+     "28",
+     "92 ACC"
+    ],
+    [
+     "[[img:0386eea7010d4c.png]]Wraith",
+     "48",
+     "31",
+     "101 ACC"
+    ],
+    [
+     "[[img:d2be579f09f89b.png]]Rotten Mushroom",
+     "56",
+     "33",
+     "108 ACC"
+    ]
+   ]
+  },
+  {
+   "guide": "magician-class-guide",
+   "text": "Read the full Magician Accuracy explanation"
+  },
+  {
+   "h2": "Levels 30-70: Cleric skill build and leveling"
+  },
+  {
+   "img": "006b79f4d98b74.png",
+   "w": 130,
+   "h": 177
+  },
+  {
+   "h3": "Level 30 Cleric job advancement"
+  },
+  {
+   "ol": [
+    "Start the second-job advancement with Grendel the Really Old in Ellinia.",
+    "Bring his letter to the Magician Job Instructor at the very top of The Forest North of Ellinia.",
+    "Finish the combat test and turn 30 Dark Marbles into The Proof of a Hero.",
+    "Take the proof back to Grendel and choose Cleric."
+   ]
+  },
+  {
+   "p": "[[img:fb4af958a97eb5.png]] **Grendel the Really Old** Starts and finishes the Cleric advancement in Ellinia."
+  },
+  {
+   "p": "[[img:9a7face47a910e.png]] **Magician Job Instructor** Runs the Dark Marble test north of Ellinia."
+  },
+  {
+   "note": "**Party build: start Holy Arrow at level 31, but keep attacking with Energy Bolt until about level 38.** Holy Arrow's lowest roll overtakes Energy Bolt 20 at skill Lv18 (level 37) against Zombie Mushrooms and Jr. Wraith, and Lv24 (level 39) against Horny Mushrooms. At level 40, Holy Arrow 28 reaches about 4,860 EXP/min in Training Advisor against 3,240 for Energy Bolt. The solo play order keeps Energy Bolt until level 41 to save mesos."
+  },
+  {
+   "h3": "Level 70 skill target (party build)"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "SP",
+     "What you get"
+    ],
+    [
+     "[[img:6956fa56af375a.png]]MP Eater",
+     "20 / 20",
+     "For every attack, 50% success rate, absorb 50% of the enemy's Max MP"
+    ],
+    [
+     "[[img:761911536c6e3c.png]]Teleport",
+     "20 / 20",
+     "MP -15; Teleport, with 150 in distance"
+    ],
+    [
+     "[[img:94ac0043dcd64d.png]]Heal",
+     "30 / 30",
+     "MP -27; Recovery rate 100%"
+    ],
+    [
+     "[[img:187c5ce975e66a.png]]Invincible",
+     "5 / 20",
+     "MP 20; Physical damage -14%, Basic Attack 14 non-elemental magic damage for 140 sec"
+    ],
+    [
+     "[[img:eac115898a2f1c.png]]Bless",
+     "16 / 20",
+     "MP -27; Accuracy +16, Evasion +16, and HP recovery from the Heal skill increased by 8% for 250 sec"
+    ],
+    [
+     "[[img:ee22f70546674f.png]]Holy Arrow",
+     "30 / 30",
+     "MP -28; Basic Attack 60 on 3 enemies, Mastery level 10"
+    ]
+   ]
+  },
+  {
+   "h3": "Party Cleric SP allocation: levels 30-70"
+  },
+  {
+   "p": "For a Cleric who plays in a party. Holy Arrow comes first so you still level quickly. Invincible 5 and Bless 16 come next, so from level 49 everyone nearby gets +16 Accuracy, +16 Evasion, and 8% more Heal recovery. Heal is maxed after that. Invincible stays at 5 because it only protects you, and Teleport is maxed last for its 150 distance."
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "Spend",
+     "Running total",
+     "Reason"
+    ],
+    [
+     "30",
+     "Heal +1",
+     "Heal 1",
+     "Cheap self-healing from the start."
+    ],
+    [
+     "31",
+     "Teleport +1, MP Eater +1, Holy Arrow +1",
+     "Teleport 1 / MP Eater 1 / Holy Arrow 1",
+     "Movement and MP recovery. Teleport 1 is optional."
+    ],
+    [
+     "32-40",
+     "Holy Arrow +27",
+     "Holy Arrow 28",
+     "Your regular attack. Keep using Energy Bolt until about level 38."
+    ],
+    [
+     "41",
+     "Holy Arrow +2, Heal +1",
+     "Holy Arrow 30 / Heal 2",
+     "Max Holy Arrow. One cast now kills Jr. Wraith."
+    ],
+    [
+     "42",
+     "Heal +3",
+     "Heal 5",
+     "Unlock Invincible."
+    ],
+    [
+     "43",
+     "Invincible +3",
+     "Invincible 3",
+     "Build toward Bless."
+    ],
+    [
+     "44",
+     "Invincible +2, Bless +1",
+     "Invincible 5 / Bless 1",
+     "Unlock Bless."
+    ],
+    [
+     "45-49",
+     "Bless +15",
+     "Bless 16",
+     "Party Accuracy and Evasion."
+    ],
+    [
+     "50-57",
+     "Heal +24",
+     "Heal 29",
+     "Party healing."
+    ],
+    [
+     "58",
+     "Heal +1, MP Eater +2",
+     "Heal 30 / MP Eater 3",
+     "Max Heal."
+    ],
+    [
+     "59-63",
+     "MP Eater +15",
+     "MP Eater 18",
+     "MP recovery."
+    ],
+    [
+     "64",
+     "MP Eater +2, Teleport +1",
+     "MP Eater 20 / Teleport 2",
+     "Max MP Eater."
+    ],
+    [
+     "65-70",
+     "Teleport +18",
+     "Teleport 20",
+     "Max Teleport distance."
+    ]
+   ]
+  },
+  {
+   "p": "Second-job SP cannot be spent on first-job skills, so finish the first-job plan by level 30. Character Builder flags any build that breaks it."
+  },
+  {
+   "h3": "Solo Play Cleric SP allocation: levels 30-70"
+  },
+  {
+   "p": "For a Cleric who mostly grinds alone, based on Grummash's Cleric Meso Management Guide without its level 41 SP reset. It starts from the Meso saver first-job build."
+  },
+  {
+   "ul": [
+    "[[img:761911536c6e3c.png]]Teleport **Stays at 1 until level 56.** One cast costs 55 MP; Heal 2 costs 12.",
+    "[[img:eac115898a2f1c.png]]Bless **Stays at 1.** Its bonus mainly helps a party.",
+    "[[img:94ac0043dcd64d.png]]Heal **Maxed last, for healing yourself.** It never cleared a training map on its own in Training Advisor."
+   ]
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "Spend",
+     "Running total",
+     "Reason"
+    ],
+    [
+     "30",
+     "Heal +1",
+     "Heal 1",
+     "Cheap self-healing from the start."
+    ],
+    [
+     "31",
+     "Teleport +1, MP Eater +1, Heal +1",
+     "Teleport 1 / MP Eater 1 / Heal 2",
+     "Unlock movement and MP recovery."
+    ],
+    [
+     "32-41",
+     "Holy Arrow +30",
+     "Holy Arrow 30",
+     "Max the regular attack. Keep using Energy Bolt on Horny and Zombie Mushrooms until level 41, then switch to Holy Arrow on Jr. Wraith."
+    ],
+    [
+     "42",
+     "Heal +3",
+     "Heal 5",
+     "Unlock Invincible."
+    ],
+    [
+     "43-48",
+     "Invincible +18",
+     "Invincible 18",
+     "Take less touch damage."
+    ],
+    [
+     "49",
+     "Invincible +2, MP Eater +1",
+     "Invincible 20 / MP Eater 2",
+     "Max Invincible."
+    ],
+    [
+     "50-55",
+     "MP Eater +18",
+     "MP Eater 20",
+     "Max MP recovery."
+    ],
+    [
+     "56-61",
+     "Teleport +18",
+     "Teleport 19",
+     "Cheaper, longer teleports."
+    ],
+    [
+     "62",
+     "Teleport +1, Heal +2",
+     "Teleport 20 / Heal 7",
+     "Max Teleport."
+    ],
+    [
+     "63-69",
+     "Heal +21",
+     "Heal 28",
+     "Stronger self-healing."
+    ],
+    [
+     "70",
+     "Heal +2, Bless +1",
+     "Heal 30 / Bless 1",
+     "Grummash's solo endpoint."
+    ]
+   ]
+  },
+  {
+   "h3": "Bless or Invincible first?"
+  },
+  {
+   "p": "Training Advisor gives the Cleric the same maps and EXP either way at levels 45, 50, and 55, because every top map is Safe. Pick by how you play:"
+  },
+  {
+   "ul": [
+    "[[img:eac115898a2f1c.png]]Bless **Party:** a physical party gets +16 Accuracy and misses less.",
+    "[[img:187c5ce975e66a.png]]Invincible **Solo:** you take less touch damage and use fewer potions."
+   ]
+  },
+  {
+   "h3": "Party build vs solo build at level 70"
+  },
+  {
+   "p": "**Both builds max Heal, Holy Arrow, MP Eater, and Teleport.** The party build moves 15 SP from Invincible into Bless."
+  },
+  {
+   "table": [
+    [
+     "Level 70 build",
+     "Bless",
+     "Invincible",
+     "Teleport"
+    ],
+    [
+     "Party build",
+     "16: +16 ACC, +16 Evasion",
+     "5: touch damage -14%",
+     "20: 15 MP"
+    ],
+    [
+     "Solo build",
+     "1: +1 ACC, +1 Evasion",
+     "20: touch damage -30%",
+     "20: 15 MP"
+    ]
+   ]
+  },
+  {
+   "p": "Recovery Rate is the listed skill value and does not map to a share of Max HP. See how Heal shares its targets before choosing an undead map."
+  },
+  {
+   "p": "**Use your own skill levels in Training Advisor.** The map picks below follow the party order. Enter your own skill levels in Training Advisor for the solo order."
+  },
+  {
+   "h2": "Cleric AP allocation: levels 30-70"
+  },
+  {
+   "p": "Keep base LUK at your level minus 10 and put everything else into INT for more damage, MP, and Accuracy. That meets Mithril Wand, Esther Shield, Fairy Wand, and Cromi on the level you can equip them."
+  },
+  {
+   "p": "At level 50, craft Green Goldwind Shoes with Tailoring Lv 10. Their +5 LUK covers Thorns, Evil Tale, Evil Wings, and Angel Wings as you reach each one. Skip Arc Staff: it needs 40 LUK at level 45, when this plan has 35, so stay on Fairy Wand until Cromi at 50."
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "AP each level",
+     "Base AP at the end"
+    ],
+    [
+     "31-40",
+     "INT +4 / LUK +1",
+     "182 INT / 30 LUK"
+    ],
+    [
+     "41-50",
+     "INT +4 / LUK +1",
+     "222 INT / 40 LUK"
+    ],
+    [
+     "51-60",
+     "INT +4 / LUK +1",
+     "262 INT / 50 LUK"
+    ],
+    [
+     "61-70",
+     "INT +4 / LUK +1",
+     "302 INT / 60 LUK"
+    ]
+   ]
+  },
+  {
+   "h2": "Recommended equipment"
+  },
+  {
+   "img": "ace7bc9d96817a.png",
+   "w": 130,
+   "h": 185
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Item",
+     "Why it matters"
+    ],
+    [
+     "10",
+     "[[img:50988435f40c62.png]]Pan Lid",
+     "Any class. 44 WDEF gives an 8.09% Guard chance, the best block rate for a mage."
+    ],
+    [
+     "30",
+     "[[img:2e8d2c65bd2aec.png]]Mithril Wand",
+     "55 M.ATK. Requires 60 INT and 20 LUK."
+    ],
+    [
+     "35",
+     "[[img:eb1d5689fc40fb.png]]Esther Shield",
+     "Mage shield with 28 WDEF and 55 MDEF. Its 5.30% Guard chance is lower than Pan Lid's. Requires 60 INT and 25 LUK."
+    ],
+    [
+     "40",
+     "[[img:512b9623061125.png]]Fairy Wand",
+     "69 M.ATK. Requires 80 INT and 30 LUK."
+    ],
+    [
+     "45",
+     "[[img:8fb958a3a2bb3e.png]]Arc Staff",
+     "73 M.ATK. Requires 90 INT and 40 LUK. Skip it on this AP plan."
+    ],
+    [
+     "50",
+     "[[img:07f049cea846d4.png]]Cromi",
+     "83 M.ATK before scrolling. Requires 100 INT and 40 LUK."
+    ],
+    [
+     "50",
+     "[[img:894d94c45fe8b0.png]]Green Goldwind Shoes",
+     "+5 LUK from Tailoring Lv 10. Requires 90 INT and 40 LUK. Covers the LUK on every weapon from here to Angel Wings."
+    ],
+    [
+     "55",
+     "[[img:3d68bcb0a089c0.png]]Thorns",
+     "87 M.ATK. Requires 110 INT and 50 LUK."
+    ],
+    [
+     "60",
+     "[[img:cad3048cc1d6cd.png]]Evil Tale",
+     "97 M.ATK. Requires 120 INT and 55 LUK."
+    ],
+    [
+     "65",
+     "[[img:b2c74841227fe5.png]]Evil Wings",
+     "101 M.ATK. Requires 130 INT and 60 LUK."
+    ],
+    [
+     "70",
+     "[[img:e4a7a0c9e9a042.png]]Angel Wings",
+     "111 M.ATK before scrolling. Requires 140 INT and 65 LUK."
+    ]
+   ]
+  },
+  {
+   "p": "Clerics can hold a shield with either a wand or a staff. Spell cast time does not change with weapon speed, so take the highest M.ATK you can equip. Pan Lid blocks more often than Esther Shield (8.09% against 5.30% Guard chance), while Esther Shield adds 55 MDEF against magic attacks. Every WDEF scroll on the shield raises Guard chance further."
+  },
+  {
+   "h3": "Armor checkpoints"
+  },
+  {
+   "p": "[[img:865f68bdf44e7c.png]]Brown Jester[[img:9bb0c142cdc0c7.png]]Blue Wizard Robe[[img:5ca31d9e7d020a.png]]White Guiltian[[img:78d839fcd323e4.png]]Brown Starlight[[img:8d8a46fa3d576a.png]]Flame Golden Circlet[[img:47590281c2f8ba.png]]Red Calas[[img:ccef521f33304a.png]]Red Seraphis[[img:f4a44340286672.png]]Blue Anakamoon"
+  },
+  {
+   "p": "Skip a hat or robe upgrade when the cheaper piece already gives you the INT or LUK you need. These options cover levels 30, 40, 50, and 60. Each item page lists its drop, craft, or shop sources."
+  },
+  {
+   "h2": "M.ATK or Critical Rate on gloves?"
+  },
+  {
+   "note": "**Pick Magic Attack for this build.** Five successful Lesser M.ATK scrolls give Grummash's level 70 Cleric about 2.03% more expected damage than five Critical Rate scrolls."
+  },
+  {
+   "p": "It's all about the tradeoff. Both options use five glove slots. Critical Rate gives you more crits, but M.ATK wins on expected damage with this gear."
+  },
+  {
+   "h3": "5x Gloves Magic Attack Scroll: Lesser"
+  },
+  {
+   "p": "**+10 M.ATK**\n301 to 311 total M.ATK\nAbout 3.32% more expected damage."
+  },
+  {
+   "h3": "5x Gloves Crit. Rate Scroll: Lesser"
+  },
+  {
+   "p": "**+5% Critical Rate**\n9% to 14% Critical Rate\nAbout 1.27% more expected damage."
+  },
+  {
+   "p": "W.ATK does not increase spell damage. A matching Magic Attack scroll gives twice as much M.ATK as the Critical Rate scroll gives Critical Rate."
+  },
+  {
+   "p": "**The ratio is the same at every grade.** Lesser gives +1 W.ATK or +1% Critical Rate (+2 M.ATK), Intermediate +2/+2% (+4 M.ATK), Greater +3/+3% (+6 M.ATK), and Chaos +4/+4% (+8 M.ATK). Matching grades have the same success and destruction rates."
+  },
+  {
+   "h2": "Example builds and Training Advisor maps"
+  },
+  {
+   "img": "09c65dc91fc7ec.png",
+   "w": 130,
+   "h": 179
+  },
+  {
+   "p": "Each checkpoint has two picks, with danger and the nearest potion refill. If the EXP is close, take the safer map."
+  },
+  {
+   "ul": [
+    "[[img:24dcca787059a4.png]]Energy Bolt at level 30, [[img:ee22f70546674f.png]]Holy Arrow from level 41.",
+    "**Gear:** levels 41 to 60 wear the newest mage hat, overall, gloves, and shoes for that level, Esther Shield, and the weapon from the equipment table. Level 70 wears Grummash's gear.",
+    "**Guaranteed one-cast:** all three arrows kill the mob on the weakest roll, at a 100% hit rate.",
+    "[[img:94ac0043dcd64d.png]]Heal never gave a one- or two-cast map with these builds."
+   ]
+  },
+  {
+   "p": "A crowded map or awkward platforms can cost you that EXP advantage. Pick the lower-EXP map if it has a drop you need."
+  },
+  {
+   "note": "Level 30\nEnergy Bolt 20 / MG 3 / MA 20 / 71 ACC / 155 INT\n[[img:ae64823f427bc0.png]] **Transfer Area** Energy Bolt: Stirge 1-cast, Safe at 7%; Dr. Faymus refill in 4 portals; about 2,741 EXP/min [[img:059caff41683e8.png]] **Dungeon, Southern Forest IV** Energy Bolt: Blue Mushroom 2-cast and other spawns 1-cast, Safe at 9%; Len the Fairy refill in 5 portals; about 2,435 EXP/min\nLevel 41\nHoly Arrow 30, 86 ACC, 196 INT\n[[img:34dcba7b3807fe.png]] **Line 1 <Area 1>** Bubbling is guaranteed 1-cast, Safe at 2%; Dr. Faymus refill in 3 portals; about 5,190 EXP/min [[img:777ced8b4048a6.png]] **Line 1 <Area 2>** Jr. Wraith and Stirge are guaranteed 1-cast, Safe at 7%; Dr. Faymus refill in 5 portals; about 5,004 EXP/min\nLevel 50\nHoly Arrow 30, Bless 16 and Invincible 5 active, 116 ACC, 235 INT\n[[img:36750484773e65.png]] **Ant Tunnel II** Both mushrooms are guaranteed 1-cast, Safe at 4%; Mr. Sweatbottom refill in 4 portals; about 9,716 EXP/min [[img:36750484773e65.png]] **Ant Tunnel III** Same 1-cast mix, Safe at 4%; Mr. Sweatbottom refill in 5 portals; about 9,659 EXP/min\nLevel 60\nHoly Arrow 30, Bless 16 and Invincible 5 active, 132 ACC, 280 INT\n[[img:36750484773e65.png]] **Ant Tunnel II** Both mushrooms are guaranteed 1-cast, Safe at 3%; Mr. Sweatbottom refill in 4 portals; about 9,716 EXP/min [[img:36750484773e65.png]] **Ant Tunnel III** Same 1-cast mix, Safe at 3%; Mr. Sweatbottom refill in 5 portals; about 9,659 EXP/min\nLevel 70\nGrummash's gear, Bless 16 and Invincible 5 active, 153 ACC, 352 INT, 311 M.ATK\n[[img:a951e586bae69f.png]] **Ant Tunnel Park** Evil Eye and both mushrooms are guaranteed 1-cast, Safe at 4%; Mr. Sweatbottom refill in 11 portals; about 10,533 EXP/min [[img:0386eea7010d4c.png]] **Line 2 <Area 3>** Wraith is guaranteed 1-cast, Safe at 6%; Dr. Faymus refill in 7 portals; about 9,778 EXP/min\nGrummash notes most of this gear won't be available until Ossyria opens. Expect lower numbers at launch."
+  },
+  {
+   "p": "**Before you settle in:** Ant Tunnel II beats Ant Tunnel III by one portal to the refill shop, with the same one-cast kills and danger at levels 50 and 60. Ten more levels alone is no reason to move."
+  },
+  {
+   "p": "**Why not Jr. Wraith at level 50?** By then Jr. Wraith dies to two of your three arrows, so focusing one wastes the third. Training Advisor counts that wasted arrow: Line 1 <Area 2> comes out at about 7,836 EXP/min and the Wraith maps at about 5,867. In Ant Tunnel II one arrow kills each mushroom, so nothing is wasted."
+  },
+  {
+   "h2": "Important Cleric skill mechanics"
+  },
+  {
+   "h3": "Holy Arrow"
+  },
+  {
+   "img": "69a7ead880cdcd.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "Holy Arrow fires three arrows. You can focus all three on one mob or split them across up to three. At max level, it has 60 Basic Attack and Mastery 10 for 28 MP."
+  },
+  {
+   "p": "**Our level 70 benchmark deals about 2,468 expected total damage on a neutral target and 3,086 against an undead target.**"
+  },
+  {
+   "h3": "Heal"
+  },
+  {
+   "img": "6cab8729cef4cc.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "Heal has six shared target slots. You and nearby party members take priority, leaving up to five for undead when solo. More targets means less damage per undead."
+  },
+  {
+   "ul": [
+    "**Heal 11:** 16 MP, 60% Recovery Rate.",
+    "**Grummash's tip:** step away from Zombie Mushrooms before you heal. Healing next to undead hits them, pulls them to you, and leaves less recovery for you."
+   ]
+  },
+  {
+   "p": "See party build vs solo build for the skill values."
+  },
+  {
+   "p": "**For undead training, enter your Heal level and the number of nearby party members and undead in Training Advisor.**"
+  },
+  {
+   "h3": "Invincible and Bless"
+  },
+  {
+   "img": "8b4dcf781a460a.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "img": "d0d6338719700b.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "Max Invincible cuts the damage you take from monster touches by 30% for 300 seconds and damages mobs that touch you. Max Bless gives nearby party members 20 Accuracy, 20 Evasion, and 10% more HP recovery from the Heal skill."
+  },
+  {
+   "h3": "Holy and undead on Victoria Island"
+  },
+  {
+   "p": "Holy Arrow deals 25% more damage to holy-weak mobs. Heal only damages undead mobs. The two lists overlap, but they are different."
+  },
+  {
+   "table": [
+    [
+     "Mob",
+     "Level",
+     "Holy Arrow",
+     "Heal"
+    ],
+    [
+     "[[img:b62ded95656118.png]]Green Mushroom",
+     "14",
+     "Normal",
+     "Takes damage"
+    ],
+    [
+     "[[img:36750484773e65.png]]Zombie Mushroom",
+     "24, 30",
+     "Weak",
+     "Takes damage"
+    ],
+    [
+     "[[img:e56a0489f87f41.png]]Fairy 2, [[img:2860bcb742fed0.png]]Fairy 3, [[img:413278152c7ddf.png]]Fairy 4",
+     "29",
+     "Resistant",
+     "No damage"
+    ],
+    [
+     "[[img:777ced8b4048a6.png]]Jr. Wraith",
+     "34",
+     "Weak",
+     "Takes damage"
+    ],
+    [
+     "[[img:3934c93d7d4444.png]]Zombie Lupin",
+     "41",
+     "Weak",
+     "Takes damage"
+    ],
+    [
+     "[[img:0386eea7010d4c.png]]Wraith",
+     "48",
+     "Weak",
+     "Takes damage"
+    ],
+    [
+     "[[img:fc715623e4983d.png]]Malady",
+     "55",
+     "Weak",
+     "No damage"
+    ],
+    [
+     "[[img:d2be579f09f89b.png]]Rotten Mushroom",
+     "56",
+     "Weak",
+     "Takes damage"
+    ],
+    [
+     "[[img:bf98edf794b720.png]]Dark Stone Golem",
+     "58",
+     "Weak",
+     "No damage"
+    ],
+    [
+     "[[img:e5d5d56f40987e.png]]Sporewood",
+     "59",
+     "Weak",
+     "Takes damage"
+    ]
+   ]
+  },
+  {
+   "p": "Green Mushrooms count as undead, so Heal hits them. Holy Arrow does normal damage to them. Malady and Dark Stone Golem are holy-weak without being undead, so Heal leaves them alone. Fairy 2, 3, and 4 resist holy."
+  },
+  {
+   "p": "MP Eater drains at most once every 5 seconds, and it gets nothing from mobs with 0 MP. On Victoria Island that means Pig, Ribbon Pig, Wild Boar, Ligator, and Fire Boar. Every undead mob on Victoria Island has MP, and so does every mob on the maps this guide recommends."
+  },
+  {
+   "h2": "Find your build's best training map with Training Advisor"
+  },
+  {
+   "p": "The Training Advisor recommends the best map based on your level, equipment, and expected EXP efficiency."
+  },
+  {
+   "p": "**Danger measures how hard a mob hits you for: under 10% of your HP is Safe, 10-24% is Caution, 25-49% is Danger, and 50%+ is Lethal.**"
+  },
+  {
+   "ol": [
+    "Load your exact setup in Character Builder.",
+    "Set 100% hit rate. Use Holy Arrow, or enter the party and undead target counts when you test Heal.",
+    "Leave Factor Danger into recommendations enabled. Enter your actual Magic Guard and Invincible skill levels.",
+    "Compare the best one- or two-cast maps. Check danger and distance from a potion shop before choosing."
+   ]
+  },
+  {
+   "img": "1125dc36d3f310.png",
+   "w": 360,
+   "h": 412,
+   "cap": "Grummash's saved Cleric in Training Advisor: compare hit rate and expected EXP. Check damage and danger against your refill distance."
+  },
+  {
+   "h2": "Recommended potions"
+  },
+  {
+   "img": "338a437a15b129.png",
+   "w": 130,
+   "h": 139
+  },
+  {
+   "note": "**Heal beats every HP potion.** Grummash measured Heal 2 restoring about 110 HP for 12 MP, about 12 mesos. The same 110 HP costs about 55 mesos in potions. The HP potions below are therefore for emergencies."
+  },
+  {
+   "p": "**BEST TO BUY** Best HP or MP recovered per meso"
+  },
+  {
+   "p": "[[img:be80aa4791c684.png]] **Red Potion** 50 mesos · 100 HP 2 HP per meso [[img:39a28ad40190a6.png]] **Fried Chicken** 60 mesos · 120 HP 2 HP per meso [[img:51e2250795d8f6.png]] **Meat** 80 mesos · 160 HP 2 HP per meso [[img:da1e5c881a1df6.png]] **Orange** 50 mesos · 50 MP 1 MP per meso [[img:d59bc967011b87.png]] **Lemon** 150 mesos · 150 MP 1 MP per meso"
+  },
+  {
+   "p": "**Situational** Buy only when the buff reaches a useful breakpoint"
+  },
+  {
+   "p": "[[img:01a2e09235af46.png]] **Magic Potion** 500 mesos · +10 M.ATK for 10 min Use for a damage breakpoint [[img:4e15182d2a8a6e.png]] **Sniper Potion** 500 mesos · +5 ACC for 10 min Use to remove misses [[img:e18fe0a27cd32a.png]] **Supreme Sniper Potion** 600 mesos · +7 ACC for 15 min Best shop ACC buff"
+  },
+  {
+   "p": "**DON'T BUY** Worse recovery per meso than the choices above"
+  },
+  {
+   "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 mesos · 500 HP 1.43 HP per meso [[img:d19cbf8225851d.png]] **Blue Potion** 220 mesos · 200 MP 0.91 MP per meso"
+  },
+  {
+   "guide": "best-buy-shop-efficiency",
+   "text": "Compare shop potion efficiency"
+  },
+  {
+   "h2": "Common Cleric mistakes"
+  },
+  {
+   "img": "43ef100151c6d7.png",
+   "w": 130,
+   "h": 178
+  },
+  {
+   "ol": [
+    "**Picking the class and expecting to do lots of damage.** You just don't. Heal's damage is considerably lower than in pre-Big Bang MapleStory.",
+    "**Using HP potions instead of Heal.** Heal saves mesos."
+   ]
+  },
+  {
+   "h2": "Sample level 70 Cleric build by Grummash"
+  },
+  {
+   "img": "9566027b4a3db9.png",
+   "w": 130,
+   "h": 184
+  },
+  {
+   "p": "We use this saved Cleric's gear for the level 70 Holy Arrow and survival calculations above, plus the level 70 Training Advisor maps. Every available scroll slot has one successful Lesser scroll. Grummash notes most of this gear won't be available until Ossyria opens."
+  },
+  {
+   "p": "**Grummash's saved SP build:** Improved MP Recovery 10, Max MP Increase 15, Magic Guard 15, Energy Bolt 1, and Magic Claw 20 in first job. In second job: MP Eater 20, Teleport 20, Heal 11, Invincible 20, Bless 20, and Holy Arrow 30. His solo play order above ends at Heal 30 and Bless 1 instead."
+  },
+  {
+   "p": "[[img:e4a7a0c9e9a042.png]]Angel Wings [[img:14ffcc59b9e65c.png]]Blue Infinium Circlet [[img:ad758043440bc3.png]]Blue Requiem [[img:3da7555f720bf1.png]]Blue Lorin [[img:de7702418eb057.png]]Brown Lapiz Sandals [[img:cc230a8d46e614.png]]Blue Gaia Cape [[img:ea67f3099d0314.png]]Metal Silver Earrings [[img:eb1d5689fc40fb.png]]Esther Shield"
+  },
+  {
+   "note": "352 INT / 65 LUK / 311 M.ATK\n**9%** Critical Rate\n**26%** Critical Damage\n**224** WDEF\n**372** MDEF"
+  },
+  {
+   "h2": "At level 70: become a Priest"
+  },
+  {
+   "p": "[[img:c1522d01da4202.png]] **Robeira** Handles the Priest advancement in El Nath."
+  },
+  {
+   "p": "Robeira advances your Cleric to Priest in El Nath. Third job and El Nath are not in the launch build. This guide stops before third-job SP, so check the current Priest skills before you spend your level 70 point."
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/cleric-class-guide",
+ "hash": "b1880c915784"
+}

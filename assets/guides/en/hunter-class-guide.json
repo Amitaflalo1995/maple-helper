@@ -1,0 +1,666 @@
+{
+ "title": "MapleStory Classic Hunter Build and Leveling Guide: Lv 30-70",
+ "intro": "Hunters are the faster bow specialist built around crowd control. Arrow Bomb clears groups of mobs and stuns them in place, Amazon's Judgement slows anything that survives a critical hit, and Bow Booster keeps those arrows flying.",
+ "hero": "719e9e93196461.png",
+ "minutes": null,
+ "blocks": [
+  {
+   "p": "This guide is based off of a realistic lv 70 Hunter build by Grummash."
+  },
+  {
+   "p": "**Pros**"
+  },
+  {
+   "ul": [
+    "#2 AoE damage at level 70, best long range AoE damage dealer.",
+    "Arrow Bomb hits up to four mobs and can stun for 3 seconds.",
+    "Shoots faster than Crossbowman. Pew pew.",
+    "Almost never has any Accuracy problems.",
+    "Soul Arrow lets you shoot without using up arrows."
+   ]
+  },
+  {
+   "p": "**Cons**"
+  },
+  {
+   "ul": [
+    "Inside 65 px your bow whacks a mob. It is a weak melee swing.",
+    "Arrow Bomb costs 28 MP at max and burns through Lemons on dense maps.",
+    "Final Attack is chance-based and can interfere with your skill rotations.",
+    "Probably the squishiest class in MapleStory Classic.",
+    "No movement skill in second job. You walk and jump to every platform."
+   ]
+  },
+  {
+   "h2": "Starting at level 30"
+  },
+  {
+   "p": "This guide continues from the Bowman level 1 to 30 guide. Its no-reset endpoint is Arrow Blow 20, Critical Shot 15, The Eye of Amazon 15, Focus 10, and Power Knockback 1."
+  },
+  {
+   "p": "Grummash's saved level 70 build uses Double Shot 20, Arrow Blow 1, and Focus 9. If you want that exact endpoint, move 19 SP from Arrow Blow and 1 from Focus into Double Shot. The live Cash Shop price for this reset is unconfirmed."
+  },
+  {
+   "img": "4d01feda200a54.png",
+   "w": 130,
+   "h": 222
+  },
+  {
+   "h3": "Recommended citizenship"
+  },
+  {
+   "p": "Keep Henesys citizenship from the first-job guide. Its rewards cover arrows, Accuracy consumables, DEX options, and weapon scrolls for both Bowman branches."
+  },
+  {
+   "h2": "Accuracy after level 30"
+  },
+  {
+   "p": "A training map only works when your attacks connect. But who are we kidding? You're a Hunter. You have so much Accuracy that unless you're fighting mobs well above your level, you don't have Accuracy issues."
+  },
+  {
+   "img": "70594332255d1b.png",
+   "w": 130,
+   "h": 213
+  },
+  {
+   "note": "**Bowman Base Accuracy**\nfloor((1.2 x Total DEX + 2 x Level + 0.6 x Total LUK) / 4.8 + 20)\n**+0.42** ACC per level\n**+0.25** ACC per DEX\n**+0.13** ACC per LUK\n**+1.00** ACC per direct ACC"
+  },
+  {
+   "p": "Every mob has Avoidability. Fighting above your level raises the ACC needed to hit, while gaining levels closes that penalty. This is why a lower-level map with clean one- or two-attack kills can beat a higher-level map with misses."
+  },
+  {
+   "table": [
+    [
+     "Mob",
+     "Mob level",
+     "Mob Avoid",
+     "ACC to never miss at equal level"
+    ],
+    [
+     "[[img:777ced8b4048a6.png]]Jr. Wraith",
+     "34",
+     "24",
+     "79 ACC"
+    ],
+    [
+     "[[img:2a5d75bf6e3634.png]]Lorang",
+     "38",
+     "23",
+     "76 ACC"
+    ],
+    [
+     "[[img:3934c93d7d4444.png]]Zombie Lupin",
+     "41",
+     "28",
+     "92 ACC"
+    ],
+    [
+     "[[img:0386eea7010d4c.png]]Wraith",
+     "48",
+     "31",
+     "101 ACC"
+    ]
+   ]
+  },
+  {
+   "guide": "bowman-class-guide",
+   "text": "Read the full Bowman Accuracy explanation"
+  },
+  {
+   "h2": "Levels 30-70: Hunter skill build and leveling"
+  },
+  {
+   "img": "6c7b020e0b1956.png",
+   "w": 130,
+   "h": 126
+  },
+  {
+   "h3": "Level 30 Hunter job advancement"
+  },
+  {
+   "ol": [
+    "Start the second-job advancement with Athena Pierce in Henesys.",
+    "Take Athena's letter to the Bowman Job Instructor at The Road to the Dungeon.",
+    "Kill the test mobs until you have 30 Dark Marbles, then exchange them for The Proof of a Hero.",
+    "Return to Athena Pierce and choose Hunter."
+   ]
+  },
+  {
+   "p": "[[img:bb76eacd73ab66.png]] **Athena Pierce** Starts and finishes the Hunter advancement in Henesys."
+  },
+  {
+   "p": "[[img:8572391f8c1c32.png]] **Bowman Job Instructor** Runs the Dark Marble test near Henesys."
+  },
+  {
+   "note": "**First Hunter SP: Arrow Bomb: Bow 1.** One point unlocks the four-target explosion and a 30% stun chance. Keep using Double Shot on single mobs while Arrow Bomb is still weak."
+  },
+  {
+   "h3": "Level 70 skill target"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "SP",
+     "Result at the saved skill level"
+    ],
+    [
+     "[[img:2bd225633acfa6.png]]Bow Mastery",
+     "20 / 20",
+     "Bow Mastery level 10, Evasion +20"
+    ],
+    [
+     "[[img:9650ad63bda289.png]]Amazon's Judgement",
+     "20 / 20",
+     "Critical hits have a 100% chance to reduce Enemy Speed by 35 for 5 sec"
+    ],
+    [
+     "[[img:097752a2c7ffbb.png]]Final Attack: Bow",
+     "30 / 30",
+     "50% success rate, Final Attack with bow damage 90% to up to 3 enemies"
+    ],
+    [
+     "[[img:a3634fbf2f95a7.png]]Bow Booster",
+     "10 / 20",
+     "HP -21, MP -21; Increases Bow Attack Speed by 2 stages for 190 sec"
+    ],
+    [
+     "[[img:d639077219a31c.png]]Soul Arrow: Bow",
+     "11 / 20",
+     "MP -15; Attack without using up any arrows for 180 sec"
+    ],
+    [
+     "[[img:29c238103bdf38.png]]Arrow Bomb: Bow",
+     "30 / 30",
+     "MP -28; Stun chance 60% for 3 sec, damage 140%"
+    ]
+   ]
+  },
+  {
+   "h3": "Hunter SP allocation: levels 30-70"
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "Spend",
+     "Running total",
+     "Reason"
+    ],
+    [
+     "30",
+     "Arrow Bomb +1",
+     "Arrow Bomb 1",
+     "Unlock the mobbing skill immediately. Keep Arrow Blow for single mobs."
+    ],
+    [
+     "31",
+     "Bow Mastery +3",
+     "AB 1 / Mastery 3",
+     "Start raising the weakest damage roll."
+    ],
+    [
+     "32",
+     "Bow Mastery +2, Bow Booster +1",
+     "AB 1 / Mastery 5 / Booster 1",
+     "Unlock the full two-stage speed boost."
+    ],
+    [
+     "33",
+     "Bow Booster +3",
+     "AB 1 / Mastery 5 / Booster 4",
+     "Make the early speed buff easier to maintain."
+    ],
+    [
+     "34",
+     "Bow Booster +1, Soul Arrow +1, Bow Mastery +1",
+     "AB 1 / Mastery 6 / Booster 5 / Soul Arrow 1",
+     "Unlock arrow-free attacks, then return to Mastery."
+    ],
+    [
+     "35-38",
+     "Bow Mastery +12",
+     "AB 1 / Mastery 18 / Booster 5 / Soul Arrow 1",
+     "Strengthen low rolls and add Evasion."
+    ],
+    [
+     "39",
+     "Bow Mastery +2, Final Attack +1",
+     "AB 1 / Mastery 20 / Booster 5 / Soul Arrow 1 / FA 1",
+     "Max Mastery and open Final Attack."
+    ],
+    [
+     "40-48",
+     "Arrow Bomb +27",
+     "AB 28 / Mastery 20 / Booster 5 / Soul Arrow 1 / FA 1",
+     "Build the main mobbing attack."
+    ],
+    [
+     "49",
+     "Arrow Bomb +2, Final Attack +1",
+     "AB 30 / Mastery 20 / Booster 5 / Soul Arrow 1 / FA 2",
+     "Max Arrow Bomb."
+    ],
+    [
+     "50-58",
+     "Final Attack +27",
+     "AB 30 / Mastery 20 / Booster 5 / Soul Arrow 1 / FA 29",
+     "Build the follow-up after the core setup."
+    ],
+    [
+     "59",
+     "Final Attack +1, Amazon's Judgement +2",
+     "FA 30 / Judgement 2",
+     "Max Final Attack and start Judgement."
+    ],
+    [
+     "60-65",
+     "Amazon's Judgement +18",
+     "Judgement 20",
+     "Max the critical slow."
+    ],
+    [
+     "66",
+     "Bow Booster +3",
+     "Booster 8",
+     "Extend the speed buff."
+    ],
+    [
+     "67",
+     "Bow Booster +2, Soul Arrow +1",
+     "Booster 10 / Soul Arrow 2",
+     "Reach 190-second Booster uptime."
+    ],
+    [
+     "68-70",
+     "Soul Arrow +9",
+     "Soul Arrow 11",
+     "Finish Grummash's level 70 endpoint."
+    ]
+   ]
+  },
+  {
+   "p": "Second-job SP cannot be spent on first-job skills, so finish the first-job plan by level 30. Character Builder flags any build that breaks it."
+  },
+  {
+   "note": "**Why Mastery and Booster come first:** At level 35, this sample build improved from about 3,240 to 4,420 Advisor EXP/min. At level 40, it improved from 8,370 to 9,400 EXP/min. Stronger low rolls and faster attacks beat rushing Arrow Bomb for these checkpoints."
+  },
+  {
+   "h3": "Possible changes to the default order"
+  },
+  {
+   "h3": "Arrow Bomb first"
+  },
+  {
+   "p": "Max Arrow Bomb immediately when grouped mobs already die cleanly. You give up early Mastery, Booster, and Soul Arrow."
+  },
+  {
+   "h3": "Want to slow mobs earlier?"
+  },
+  {
+   "p": "After maxing Arrow Bomb, you can max Amazon's Judgement before Final Attack. The slow can help keep mobs from reaching you. You give up the earlier chance of a follow-up attack though."
+  },
+  {
+   "h3": "Final Attack off for breakpoints"
+  },
+  {
+   "p": "Final Attack has a 50% proc at max. Disable it when Training Advisor already shows a guaranteed one-shot and the follow-up would waste time."
+  },
+  {
+   "h2": "Hunter AP allocation: levels 30-70"
+  },
+  {
+   "p": "This continues from 30 base STR and 132 base DEX. Golden Hinkel requires 70 STR, so the simple one-STR-per-level plan lands exactly on the requirement."
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "AP each level",
+     "Base AP at the end"
+    ],
+    [
+     "31-70",
+     "STR +1 / DEX +4",
+     "70 STR / 292 DEX"
+    ]
+   ]
+  },
+  {
+   "h2": "Recommended equipment"
+  },
+  {
+   "img": "023c3d2ed5053d.png",
+   "w": 130,
+   "h": 214
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Item",
+     "Why it matters"
+    ],
+    [
+     "40",
+     "[[img:765a4be79f1075.png]]Vaulter 2000",
+     "60 W.ATK, Normal speed."
+    ],
+    [
+     "50",
+     "[[img:35f2acac8512b7.png]]Olympus",
+     "70 W.ATK, Normal speed."
+    ],
+    [
+     "60",
+     "[[img:9c9ade4e908ed1.png]]Asianic Bow",
+     "Level 60 bow for the last stretch."
+    ],
+    [
+     "70",
+     "[[img:997d1690c0b647.png]]Golden Hinkel",
+     "88 W.ATK and 2% Critical Rate before scrolling."
+    ]
+   ]
+  },
+  {
+   "p": "Bows use both hands, so Hunters cannot equip a shield. Carry enough arrows until Soul Arrow has comfortable uptime. While Soul Arrow is active, attacks do not consume arrows."
+  },
+  {
+   "h3": "Where to get Vaulter 2000 and Olympus"
+  },
+  {
+   "p": "Start Woodcrafting by level 25 if you want the Olympus at 50. No shop sells the Vaulter 2000, the Olympus, or the Asianic Bow. The Vaulter 2000 is a Woodcrafting 8 recipe. The Olympus is a Woodcrafting 10 recipe. Your character level caps your crafting level at five times the craft level, so Woodcrafting 8 opens at level 40 and Woodcrafting 10 at level 50. Same levels as the bows."
+  },
+  {
+   "p": "Vicious, the carpenter of Henesys, teaches Woodcrafting. His starter quest, Vicious in Need of an Apprentice, opens at level 10 and asks you to defeat 30 Stumps and collect 20 Tree Branches."
+  },
+  {
+   "table": [
+    [
+     "Bow",
+     "Woodcrafting",
+     "Materials",
+     "Crafting fee",
+     "Shop"
+    ],
+    [
+     "[[img:4c7f277b730140.png]]Ryden (Lv 30)",
+     "6",
+     "8 Processed Wood, 1 Gold Ingot, 1 Emerald, 1 Topaz, 18 Screw",
+     "6,500 mesos",
+     "Karl, Henesys, 26,000 mesos"
+    ],
+    [
+     "[[img:ddb81af997e88b.png]]Red Viper (Lv 35)",
+     "7",
+     "9 Processed Wood, 1 Silver Ingot, 1 Garnet, 1 Opal, 21 Screw",
+     "9,000 mesos",
+     "No shop at launch"
+    ],
+    [
+     "[[img:765a4be79f1075.png]]Vaulter 2000 (Lv 40)",
+     "8",
+     "10 Processed Wood, 2 Iron Ingot, 2 Black Crystal, 40 Drake Skull, 24 Screw",
+     "11,500 mesos",
+     "No shop"
+    ],
+    [
+     "[[img:35f2acac8512b7.png]]Olympus (Lv 50)",
+     "10",
+     "12 Processed Wood, 3 Mithril Ingot, 2 Sapphire, 30 Screw",
+     "16,500 mesos",
+     "No shop"
+    ]
+   ]
+  },
+  {
+   "h3": "Iron and Adamantium arrows"
+  },
+  {
+   "p": "Iron Arrows for Bows are a Woodcrafting 7 recipe: 500 arrows from 1 Processed Wood, 1 Iron Ingot, and 1 Stiff Feather. Adamantium Arrows for Bows are Woodcrafting 10: 1 Processed Wood, 1 Adamantium Ingot, and 12 Stiff Feather. No shop sells either, so this is your best place to get them aside from the Free Market."
+  },
+  {
+   "h3": "Level 30 armor checkpoint"
+  },
+  {
+   "p": "[[img:b0355e799d609f.png]]Green Hawkeye[[img:2e84d2b21f6e5e.png]]Green Hunter's Armor[[img:aac503e8e6a29c.png]]Green Hunter's Pants[[img:205ce562d81ade.png]]Black Hunter Boots[[img:19b5abd79d0e4f.png]]Green Marker"
+  },
+  {
+   "p": "This is the clean armor used for the level 30 handoff. Open the item pages for current sources. Keep useful lower-level gear when the next armor tier does not improve a damage, Accuracy, or survival breakpoint."
+  },
+  {
+   "h2": "W.ATK or Critical Rate on gloves?"
+  },
+  {
+   "p": "These numbers use Grummash's realistic level 70 Hunter build and five successful Lesser glove scrolls. Both options use the same five slots."
+  },
+  {
+   "h3": "5x Gloves Attack Scroll: Lesser"
+  },
+  {
+   "p": "**+5 W.ATK**\n98 to 103 total W.ATK\nAbout 5.1% more expected damage."
+  },
+  {
+   "h3": "5x Gloves Crit. Rate Scroll: Lesser"
+  },
+  {
+   "p": "**+5% Critical Rate**\n31% to 36% Critical Rate\nAbout 1.82% more expected damage."
+  },
+  {
+   "note": "**Pick Attack.** The five-scroll Attack setup deals about 3.22% more expected damage than the Critical Rate setup on this build."
+  },
+  {
+   "p": "Critical Shot raises this build to 41% Critical Damage, so Critical Rate is worth more for Hunter than it is for a Warrior. W.ATK still wins at level 70."
+  },
+  {
+   "p": "**The ratio is the same at every grade.** Lesser gives +1 W.ATK or +1% Critical Rate (+2 M.ATK), Intermediate +2/+2% (+4 M.ATK), Greater +3/+3% (+6 M.ATK), and Chaos +4/+4% (+8 M.ATK). Matching grades have the same success and destruction rates."
+  },
+  {
+   "p": "**W.ATK also helps guaranteed kills.** It raises every physical hit, including your weakest normal roll and every critical hit. Critical Rate changes how often a critical occurs, so it cannot improve the weakest non-critical roll."
+  },
+  {
+   "h2": "Example builds and Training Advisor maps"
+  },
+  {
+   "img": "06b615e48fb950.png",
+   "w": 130,
+   "h": 209
+  },
+  {
+   "p": "A low roll is the weakest normal damage your attack can deal. The picks below only count a kill as guaranteed when that weak roll finishes every important mob in one or two attacks, with no misses. Danger also checks the Hunter's HP and defenses. Each pick shows the nearest potion and arrow refill. Stirges are reachable with arrows, but bow whacking and broken platforms can still make a good calculation feel bad in play."
+  },
+  {
+   "note": "Level 30\nArrow Blow 20, 79 ACC, 51 W.ATK\n[[img:ae64823f427bc0.png]] **Transfer Area** Stirge, guaranteed 2-cast, Safe at 9%; Dr. Faymus refill in 4 portals; about 2,242 EXP/min [[img:34dcba7b3807fe.png]] **Line 1 <Area 1>** Bubbling, guaranteed 2-cast, Safe at 6%; Dr. Faymus refill in 3 portals; about 1,658 EXP/min\nLevel 40\nArrow Bomb 4, max Bow Mastery, Booster active, 94 ACC, 67 W.ATK\n[[img:ae64823f427bc0.png]] **Dangerous Steam** Stirge 1-cast; Zombie Mushroom and Horny Mushroom 2-cast; Caution at 11%; Mr. Sweatbottom refill in 8 portals; about 9,404 EXP/min [[img:36750484773e65.png]] **Dark Cave** Every listed mob dies within two casts; Caution at 11%; Mr. Sweatbottom refill in 7 portals; about 8,929 EXP/min\nLevel 50\nArrow Bomb 30, 108 ACC, max Bow Mastery, Booster active\n[[img:a951e586bae69f.png]] **Ant Tunnel Park** Every listed mob is a guaranteed 1-cast, Caution at 12%; Mr. Sweatbottom refill in 11 portals; about 14,043 EXP/min [[img:36750484773e65.png]] **Ant Tunnel III** Both mushrooms are guaranteed 1-cast, Safe at 9%; Mr. Sweatbottom refill in 5 portals; about 12,878 EXP/min\nLevel 60\nArrow Bomb 30, 126 ACC, 95 W.ATK\n[[img:762bddf50eb031.png]] **The Burnt Land V** Fire Boar and Dark Axe Stump 1-cast, Lupin 2-cast, Caution at 19%; Arturo refill in 8 portals; about 15,723 EXP/min [[img:762bddf50eb031.png]] **The Burnt Land IV** Same mix, Caution at 19%; Arturo refill in 7 portals; about 15,368 EXP/min\nLevel 70\nGrummash build, 155 ACC, 103 W.ATK\n[[img:777ced8b4048a6.png]] **Line 1 <Area 2>** Jr. Wraith and Stirge are guaranteed 1-cast, Safe at 9%; Dr. Faymus refill in 5 portals; about 18,459 EXP/min [[img:3934c93d7d4444.png]] **Monkey Forest II** Zombie Lupin and Lupin, guaranteed 2-cast, Caution at 16%; Len refill in 5 portals; about 18,164 EXP/min"
+  },
+  {
+   "p": "**Before you settle in:** The Arrow Bomb picks assume each shot reaches its full four-mob cap. Test a few groups of mobs before settling in. If mobs keep closing to whack range, choose platforms with more shooting room. Count Arrow Bomb casts on the whole group; the single-target damage number does not describe every mob in it."
+  },
+  {
+   "h2": "Important Hunter skill mechanics"
+  },
+  {
+   "h3": "Arrow Bomb: Bow"
+  },
+  {
+   "img": "3acd8cbd34590a.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "Arrow Bomb fires at one mob and the linked explosion hits up to four mobs total, including the first target. Max level deals 140% damage with a 60% chance to stun for 3 seconds."
+  },
+  {
+   "p": "**Four targets need to stay grouped.** Arrow Bomb's four-target damage assumes the explosion reaches all four mobs. Spread-out mobs reduce the damage you get per cast."
+  },
+  {
+   "p": "There are user reports of testers outside North America experiencing delayed explosions or mobs not getting hit as expected. High ping is a suspected cause, but remains unconfirmed."
+  },
+  {
+   "p": "**Warning: Arrow Bomb with high ping may be very annoying to use.**"
+  },
+  {
+   "p": "**At level 70, the benchmark deals about 6,217 expected total damage when four targets are available.**"
+  },
+  {
+   "h3": "Final Attack: Bow"
+  },
+  {
+   "img": "121d192c88934a.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "Max Final Attack has a 50% chance to fire three 90% arrows after your skill. The arrows split like Holy Arrow: all three hit a lone mob, two and one split across two mobs, and three mobs take one each. It is a toggle."
+  },
+  {
+   "p": "Each FA proc has its own attack animation, and you can't attack again until it ends: about 0.6 seconds with Booster. Hunter's Final Attack: Bow is always a damage boost if you're using Double Shot. It may be a damage boost when using Arrow Bomb, depending on the number of targets."
+  },
+  {
+   "p": "The shot goes the way you face when it fires. Hold the opposite direction to send it at a mob behind you. With no mob in front, it doesn't fire."
+  },
+  {
+   "table": [
+    [
+     "You attack with",
+     "Mobs in front",
+     "Max Final Attack on vs off"
+    ],
+    [
+     "[[img:d1760c2a999abe.png]]Double Shot",
+     "any",
+     "8% more"
+    ],
+    [
+     "[[img:29c238103bdf38.png]]Arrow Bomb",
+     "2",
+     "3% more"
+    ],
+    [
+     "[[img:29c238103bdf38.png]]Arrow Bomb",
+     "3",
+     "9% less"
+    ],
+    [
+     "[[img:29c238103bdf38.png]]Arrow Bomb",
+     "4",
+     "14% less"
+    ]
+   ]
+  },
+  {
+   "p": "Final Attack costs no MP, so it also saves potions: about 56 % more damage per MP against one mob and 24 % against four. Each proc uses up 3 arrows unless Soul Arrow is active."
+  },
+  {
+   "h3": "Amazon's Judgement"
+  },
+  {
+   "p": "Every critical hit applies the slow at max level. The target loses 35 Speed for 5 seconds. Bow Mastery also adds 20 Evasion. Hunters get the defensive bonus of the two Bowman branches."
+  },
+  {
+   "note": "**Level 70 damage check:** At level 70, max Double Shot deals about 2,664 expected damage to one neutral target per cast. Max Arrow Bomb reaches about 6,217 expected total damage with four targets. Booster raises the modeled attack rate from 74 to 83 casts per minute."
+  },
+  {
+   "h2": "Find Your Build's Best Training Map with Training Advisor"
+  },
+  {
+   "p": "**Danger measures how hard a mob hits you for: under 10% of your HP is Safe, 10-24% is Caution, 25-49% is Danger, and 50%+ is Lethal.**"
+  },
+  {
+   "p": "Arrow Bomb changes the answer as its damage, Final Attack setting, and four-target uptime change. Check the saved character instead of copying one level-70 map."
+  },
+  {
+   "ol": [
+    "Load your Hunter in Character Builder with the bow, arrows, scrolls, skills, and buffs you actually use.",
+    "Select Double Shot for single targets or Arrow Bomb for grouped mobs, then set reliability to 100%.",
+    "Leave Factor Danger into recommendations enabled. It still matters for a ranged class, though melee builds receive the larger penalty.",
+    "Look for one- or two-attack kills, then check the map keeps mobs beyond 65 px.",
+    "Use Final Attack's real on or off setting. A proc cannot make the main hit a guaranteed kill.",
+    "Check the nearest potion and arrow shops. A nearest-town scroll gets you back to town quickly. Count the walk back to the map before picking a distant grind spot. Arrow restocks matter less once Soul Arrow has comfortable uptime."
+   ]
+  },
+  {
+   "img": "24fc5eec860989.png",
+   "w": 360,
+   "h": 393,
+   "cap": "The saved Hunter build in Training Advisor: current hit rate, danger, damage, and EXP per hour for the equipped character."
+  },
+  {
+   "h2": "Recommended potions"
+  },
+  {
+   "p": "Arrow Bomb is the expensive part of Hunter grinding. Buy efficient HP and MP recovery, then use an Accuracy or Attack potion only when it changes a kill or hit-rate breakpoint."
+  },
+  {
+   "img": "1ff40cfbb56e05.png",
+   "w": 130,
+   "h": 139
+  },
+  {
+   "p": "**BEST TO BUY** Best HP or MP recovered per meso"
+  },
+  {
+   "p": "[[img:be80aa4791c684.png]] **Red Potion** 50 mesos · 100 HP 2 HP per meso [[img:39a28ad40190a6.png]] **Fried Chicken** 60 mesos · 120 HP 2 HP per meso [[img:51e2250795d8f6.png]] **Meat** 80 mesos · 160 HP 2 HP per meso [[img:da1e5c881a1df6.png]] **Orange** 50 mesos · 50 MP 1 MP per meso [[img:d59bc967011b87.png]] **Lemon** 150 mesos · 150 MP 1 MP per meso"
+  },
+  {
+   "p": "**Situational** Buy only when the buff reaches a useful breakpoint"
+  },
+  {
+   "p": "[[img:4e15182d2a8a6e.png]] **Sniper Potion** 500 mesos · +5 ACC for 10 min Use to remove misses [[img:e18fe0a27cd32a.png]] **Supreme Sniper Potion** 600 mesos · +7 ACC for 15 min Best shop ACC buff [[img:8d7b05272e3e8b.png]] **Warrior Potion** 500 mesos · +10 Attack Power for 10 min Use for a damage breakpoint"
+  },
+  {
+   "p": "**DON'T BUY** Worse recovery per meso than the choices above"
+  },
+  {
+   "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 mesos · 500 HP 1.43 HP per meso [[img:d19cbf8225851d.png]] **Blue Potion** 220 mesos · 200 MP 0.91 MP per meso"
+  },
+  {
+   "guide": "best-buy-shop-efficiency",
+   "text": "Compare shop potion efficiency"
+  },
+  {
+   "h2": "Common Hunter mistakes"
+  },
+  {
+   "img": "442dea0b177b96.png",
+   "w": 130,
+   "h": 225
+  },
+  {
+   "ol": [
+    "**Maxing Final Attack before Arrow Bomb.** Arrow Bomb gives reliable mobbing damage and control every cast. Final Attack only procs half the time at max.",
+    "**Bad positioning.** Leave space between yourself and the mob. Your bow whacks at close range by design, and you'll likely have to spend MP using Power Knockback to push mobs away.",
+    "**Running out of arrows before Soul Arrow has comfortable uptime.** Carry enough stacks to finish the training session.",
+    "**Picking maps by mob level.** Lower-level mobs you always clear in one cast can beat a higher-level target that needs three."
+   ]
+  },
+  {
+   "h2": "Sample level 70 Hunter build by Grummash"
+  },
+  {
+   "img": "18eeb9b2c50b71.png",
+   "w": 130,
+   "h": 153
+  },
+  {
+   "p": "This saved Hunter supplies the stats used by the level-70 damage and map checks. Every available scroll slot has a successful Lesser scroll."
+  },
+  {
+   "p": "[[img:997d1690c0b647.png]]Golden Hinkel [[img:4f16c54abd311f.png]]Green Patriot [[img:64cc9dbf7d5b2e.png]]Beige Linnex [[img:abf011d3e9b8d0.png]]Blue Eyes [[img:8b167bc25c7b28.png]]Green Elf Shoes [[img:7efbc0d0bc666a.png]]White Gaia Cape [[img:ea67f3099d0314.png]]Metal Silver Earrings [[img:66d73526029949.png]]Adamantium Arrows for Bows"
+  },
+  {
+   "note": "72 STR / 338 DEX / 103 W.ATK / 155 ACC\n**31%** Critical Rate\n**41%** Critical Damage\n**298** WDEF\n**63** MDEF"
+  },
+  {
+   "h2": "At level 70: become a Ranger"
+  },
+  {
+   "p": "[[img:3f41b40fa32220.png]] **Rene** Handles the Ranger advancement in El Nath."
+  },
+  {
+   "p": "Rene advances Hunters to Ranger in El Nath. Third job and El Nath are not in the launch build. The SP table above spends second-job points only. Check the COT2 Ranger book before choosing the first third-job skill."
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/hunter-class-guide",
+ "hash": "8f5e43a66cd5"
+}

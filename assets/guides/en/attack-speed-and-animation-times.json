@@ -1,0 +1,530 @@
+{
+ "title": "Attack Speed and Animation Times",
+ "intro": "How weapon speed, skill animations, and Booster affect attack timing in MapleStory Classic World, including fixed mage timing and 30 ms cadence notes.",
+ "hero": null,
+ "minutes": 5,
+ "blocks": [
+  {
+   "p": "[[img:6d94d9509cb4c4.png]]"
+  },
+  {
+   "h2": "What are weapon speeds?"
+  },
+  {
+   "p": "The name on a weapon covers one or more numbered tiers. Two weapons with the same name can still attack at different speeds, which is why skill pages show the number beside the name: Fast (4) finishes an ordinary attack 30 ms before Fast (5)."
+  },
+  {
+   "table": [
+    [
+     "Speed",
+     "Label",
+     "Ordinary attack (ms)",
+     "Attacks per minute"
+    ],
+    [
+     "0",
+     "Fastest",
+     "510",
+     "117"
+    ],
+    [
+     "1",
+     "Fastest",
+     "570",
+     "105"
+    ],
+    [
+     "2",
+     "Faster",
+     "600",
+     "100"
+    ],
+    [
+     "3",
+     "Faster",
+     "660",
+     "90"
+    ],
+    [
+     "4",
+     "Fast",
+     "720",
+     "83"
+    ],
+    [
+     "5",
+     "Fast",
+     "750",
+     "80"
+    ],
+    [
+     "6",
+     "Normal",
+     "810",
+     "74"
+    ],
+    [
+     "7",
+     "Slow",
+     "870",
+     "68"
+    ],
+    [
+     "8",
+     "Slow",
+     "900",
+     "66"
+    ],
+    [
+     "9",
+     "Slower",
+     "960",
+     "62"
+    ],
+    [
+     "10",
+     "Slowest",
+     "1020",
+     "58"
+    ],
+    [
+     "11",
+     "Slowest",
+     "1020",
+     "58"
+    ],
+    [
+     "12",
+     "Slowest",
+     "1020",
+     "58"
+    ]
+   ]
+  },
+  {
+   "p": "Ordinary attack times use a sword, axe, mace, dagger, claw or bow swing. Attacks per minute counts completed attacks in 60 seconds."
+  },
+  {
+   "h2": "The speed ladder"
+  },
+  {
+   "p": "Each tier below shows the time for one ordinary attack and who can stand on it. Tiers with a weapon listed in the last column are ones a player can reach. Tiers 11 and 12 take as long as tier 10, and no weapon in the game is slower than Slow (8)."
+  },
+  {
+   "table": [
+    [
+     "Tier",
+     "Swing (ms)",
+     "Per min",
+     "Spear stab (ms)",
+     "Crossbow (ms)",
+     "Who gets here"
+    ],
+    [
+     "0",
+     "510",
+     "117",
+     "480",
+     "540",
+     "No player weapon"
+    ],
+    [
+     "1",
+     "570",
+     "105",
+     "540",
+     "570",
+     "**Fastest a player reaches.** Faster (3) dagger or Meba, with Booster"
+    ],
+    [
+     "2",
+     "600",
+     "100",
+     "570",
+     "630",
+     "Fast (4) dagger, claw, one-handed sword, axe or mace, with Booster"
+    ],
+    [
+     "3",
+     "660",
+     "90",
+     "630",
+     "690",
+     "Faster (3) dagger or Meba; Fast (5) weapons with Booster"
+    ],
+    [
+     "4",
+     "720",
+     "83",
+     "660",
+     "720",
+     "Fast (4) weapons; Normal (6) weapons with Booster"
+    ],
+    [
+     "5",
+     "750",
+     "80",
+     "720",
+     "780",
+     "Fast (5) weapons; Slow (7) weapons with Booster"
+    ],
+    [
+     "6",
+     "810",
+     "74",
+     "750",
+     "840",
+     "Normal (6) weapons; every Magician spell; Slow (8) polearm with Booster"
+    ],
+    [
+     "7",
+     "870",
+     "68",
+     "810",
+     "870",
+     "Slow (7) weapons"
+    ],
+    [
+     "8",
+     "900",
+     "66",
+     "870",
+     "930",
+     "Slow (8) polearms, the slowest weapons in the game"
+    ],
+    [
+     "9",
+     "960",
+     "62",
+     "900",
+     "990",
+     "No player weapon"
+    ],
+    [
+     "10",
+     "1020",
+     "58",
+     "960",
+     "1050",
+     "No player weapon; 11 and 12 match this row"
+    ]
+   ]
+  },
+  {
+   "h2": "Weapon speed by weapon type"
+  },
+  {
+   "p": "Your weapon type decides your range. The best tier a type can reach is its fastest weapon with the matching Booster."
+  },
+  {
+   "table": [
+    [
+     "Weapon",
+     "Speeds",
+     "Fastest weapons",
+     "Best with Booster",
+     "Booster from"
+    ],
+    [
+     "Dagger",
+     "3-4",
+     "Fruit Knife Lv 8, Cass Lv 30, Korean Fan Lv 40, Golden River Lv 70",
+     "1",
+     "Bandit"
+    ],
+    [
+     "Claw",
+     "3-5",
+     "Meba Lv 25 (the only Faster (3) claw)",
+     "1",
+     "Assassin"
+    ],
+    [
+     "One-handed sword",
+     "4-5",
+     "Long Sword Lv 10, Sabre Lv 15, Viking Sword Lv 20",
+     "2",
+     "Fighter, Page"
+    ],
+    [
+     "One-handed axe",
+     "4-5",
+     "Double Axe Lv 10, Battle Axe Lv 15, Fireman's Axe Lv 30",
+     "2",
+     "Fighter"
+    ],
+    [
+     "One-handed mace",
+     "4-5",
+     "Red Brick Lv 15, Hammer Lv 17, Fusion Mace Lv 25",
+     "2",
+     "Page"
+    ],
+    [
+     "Two-handed sword",
+     "5-6",
+     "Wooden Sword Lv 10, Broadsword Lv 25, Lionheart Lv 35",
+     "3",
+     "Fighter, Page"
+    ],
+    [
+     "Two-handed axe",
+     "5-6",
+     "Metal Axe Lv 10, Blue Axe Lv 30, Sabretooth Lv 40",
+     "3",
+     "Fighter"
+    ],
+    [
+     "Bow",
+     "5-6",
+     "Battle Bow Lv 25, Red Viper Lv 35",
+     "3",
+     "Hunter"
+    ],
+    [
+     "Two-handed mace",
+     "6-7",
+     "Wooden Mallet Lv 10, Mithril Maul Lv 30",
+     "4",
+     "Page"
+    ],
+    [
+     "Spear",
+     "6-7",
+     "Fish Spear Lv 20, Zeco Lv 40, Holy Spear Lv 60",
+     "4",
+     "Spearman"
+    ],
+    [
+     "Crossbow",
+     "6-7",
+     "Balanche Lv 20, Heckler Lv 40",
+     "4",
+     "Crossbowman"
+    ],
+    [
+     "Polearm",
+     "7-8",
+     "Studded Polearm Lv 20",
+     "5",
+     "Spearman"
+    ],
+    [
+     "Wand, staff",
+     "6, 7",
+     "Every wand and staff casts spells at Normal (6)",
+     "6",
+     "No weapon Booster"
+    ]
+   ]
+  },
+  {
+   "h2": "Booster effects"
+  },
+  {
+   "p": "A matching weapon Booster moves your weapon **two tiers** at every skill level, so one SP already gives the full speed. Extra levels lower the HP and MP cost and extend the duration from 100 seconds at level 1 to 300 seconds at level 20."
+  },
+  {
+   "table": [
+    [
+     "Before Booster",
+     "With Booster",
+     "Ordinary attack (ms)",
+     "Attacks per minute"
+    ],
+    [
+     "Faster (3) dagger or claw",
+     "Fastest (1)",
+     "660 → 570",
+     "90 → 105 (+17%)"
+    ],
+    [
+     "Fast (4) one-handed weapon, dagger, claw",
+     "Faster (2)",
+     "720 → 600",
+     "83 → 100 (+20%)"
+    ],
+    [
+     "Fast (5) two-handed sword or axe, bow",
+     "Faster (3)",
+     "750 → 660",
+     "80 → 90 (+13%)"
+    ],
+    [
+     "Normal (6) spear, two-handed sword or axe",
+     "Fast (4)",
+     "810 → 720",
+     "74 → 83 (+12%)"
+    ],
+    [
+     "Slow (8) polearm",
+     "Normal (6)",
+     "900 → 810",
+     "66 → 74 (+12%)"
+    ]
+   ]
+  },
+  {
+   "ul": [
+    "Booster must match the weapon you hold. Sword Booster does nothing for an axe.",
+    "Earlier skills benefit once you have the matching Booster: a Bandit's Double Stab speeds up with Dagger Booster.",
+    "Spell Booster (F/P Mage and I/L Mage) moves eligible spells one tier at levels 1 to 10 and two tiers from level 11. Cleric and Priest do not get it."
+   ]
+  },
+  {
+   "h2": "Skill animation times, slowest to fastest"
+  },
+  {
+   "p": "Skills that use your weapon's attack follow the ladder. Warrior, Bowman and Thief skills with their own animation have their own times, but weapon speed still scales them. Magician spells stay at Normal (6) with any weapon. Each row shows the slowest and fastest weapon a class can use, then the best case with Booster."
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Weapon",
+     "Slowest weapon (ms)",
+     "Fastest weapon (ms)",
+     "Fastest + Booster (ms)"
+    ],
+    [
+     "[[img:854225b53354cd.png]] Rush (Fighter, Page, Spearman)",
+     "Any warrior weapon",
+     "450, Slow (8) polearm",
+     "360, Fast (4)",
+     "300"
+    ],
+    [
+     "[[img:677d1f2e03928a.png]] Haste (Assassin)",
+     "Claw",
+     "570, Fast (5)",
+     "510, Faster (3)",
+     "420"
+    ],
+    [
+     "[[img:3c37dc4ebd42ec.png]] Double Stab (Thief)",
+     "Dagger",
+     "720, Fast (4)",
+     "660, Faster (3)",
+     "570"
+    ],
+    [
+     "[[img:8b4eddf653e003.png]] Lucky Seven (Thief)",
+     "Claw",
+     "750, Fast (5)",
+     "660, Faster (3)",
+     "570"
+    ],
+    [
+     "[[img:7700d0a87ede5e.png]][[img:b5a4eaed502bda.png]] Power Strike, Slash Blast (Warrior)",
+     "One-handed",
+     "750, Fast (5)",
+     "720, Fast (4)",
+     "600"
+    ],
+    [
+     "[[img:d1760c2a999abe.png]][[img:ea717b79c3487d.png]] Double Shot, Arrow Blow (Bowman)",
+     "Bow",
+     "810, Normal (6)",
+     "750, Fast (5)",
+     "660"
+    ],
+    [
+     "[[img:d1760c2a999abe.png]][[img:ea717b79c3487d.png]] Double Shot, Arrow Blow (Bowman)",
+     "Crossbow",
+     "870, Slow (7)",
+     "840, Normal (6)",
+     "720"
+    ],
+    [
+     "[[img:c1aec993cbf747.png]] Savage Blow (Bandit)",
+     "Dagger",
+     "840, Fast (4)",
+     "780, Faster (3)",
+     "660"
+    ],
+    [
+     "[[img:5370722a856bb9.png]][[img:24dcca787059a4.png]] Magic Claw, Energy Bolt, Fire Arrow, Cold Beam, Holy Arrow (Magician, F/P Wizard, I/L Wizard, Cleric)",
+     "Any wand or staff",
+     "810 at every weapon",
+     "810 at every weapon",
+     "720 with Spell Booster 11+"
+    ],
+    [
+     "[[img:94ac0043dcd64d.png]] Heal (Cleric)",
+     "Any",
+     "600 at every weapon",
+     "600 at every weapon",
+     "600"
+    ]
+   ]
+  },
+  {
+   "p": "Open any skill page for its full table at every speed."
+  },
+  {
+   "h2": "Attack speed tiers"
+  },
+  {
+   "p": "Speed and W.ATK trade against each other, so compare total damage per minute before you swap weapons. Two examples we already calculate in the class guides:"
+  },
+  {
+   "ul": [
+    "**Level 30 Thief with a claw, no Booster yet.** Meba (Faster 3, 19 W.ATK) throws Lucky Seven in 660 ms. Adamantium Guards (Fast 4, 23 W.ATK) takes 720 ms. With Wolbi stars, Meba reaches 40,630 damage per minute against 41,671: one speed tier almost cancels a 4 W.ATK gap.",
+    "**Level 70 Bandit, Booster on.** Golden River (Faster 3) reaches speed 1 and gets 90 Savage Blows per minute in our damage calculator against Kandine's 83, about 5% more damage on the same stats. Its 65 STR requirement costs about 56 LUK, which leaves Kandine about 1% ahead."
+   ]
+  },
+  {
+   "h2": "Why mage weapons are different"
+  },
+  {
+   "p": "For Magician jobs, the displayed speed of a wand, staff, sword or umbrella does not change a spell's animation time. Every timed spell uses the Normal (6) tier: 810 ms for Magic Claw, Energy Bolt, Fire Arrow, Cold Beam and Holy Arrow. Pick a mage weapon for its Magic Attack and stats. F/P and I/L Spell Booster can still shorten eligible spells to 750 ms at levels 1 to 10 and 720 ms from level 11."
+  },
+  {
+   "h2": "Fastest and slowest at a glance"
+  },
+  {
+   "table": [
+    [
+     "Limit",
+     "Value",
+     "Detail"
+    ],
+    [
+     "Fastest a player reaches",
+     "Speed 1",
+     "Faster (3) dagger or Meba with Booster, 570 ms ordinary attack"
+    ],
+    [
+     "Fastest without Booster",
+     "Speed 3",
+     "Faster (3) daggers and Meba, 660 ms"
+    ],
+    [
+     "Slowest weapon",
+     "Speed 8",
+     "Slow (8) polearms, 900 ms, 810 ms with Booster"
+    ],
+    [
+     "Weapon Booster",
+     "2 tiers",
+     "At every skill level; must match your weapon"
+    ],
+    [
+     "Basic attack spells",
+     "810 ms",
+     "Magic Claw, Energy Bolt, Fire Arrow, Cold Beam, Holy Arrow; 720 ms with max Spell Booster. Heal is 600 ms"
+    ],
+    [
+     "Speeds 0 and 2",
+     "GM only",
+     "Speed 2 exists only on the GM Wizet Secret Agent Suitcase, and speed 0 needs that item plus Booster"
+    ]
+   ]
+  },
+  {
+   "p": "The frame durations and their attack-speed conversion are confirmed for ordinary COT2 characters, including Savage Blow. We still round displayed times up to 30 ms steps; that final rounding remains a model. The full timing formula is in Explaining the Damage Formula."
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/attack-speed-and-animation-times",
+ "hash": "6ecbf9e60664"
+}

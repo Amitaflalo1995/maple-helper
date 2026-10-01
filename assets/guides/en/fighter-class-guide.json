@@ -1,0 +1,1421 @@
+{
+ "title": "MapleStory Classic Fighter Build and Leveling Guide: Lv 30-70",
+ "intro": "Fighters are MapleStory's front-line brawlers. They train under Dances with Balrog, carry swords or axes, and do their best work by face tanking everything, getting up close and personal with mobs.",
+ "hero": "11932925d67eb1.png",
+ "minutes": null,
+ "blocks": [
+  {
+   "p": "This guide is based off of a realistic lv 70 Fighter build by Grummash."
+  },
+  {
+   "p": "**Pros**"
+  },
+  {
+   "ul": [
+    "#1 Damage/MP at level 70: very mana efficient when it comes to dealing damage.",
+    "Max Rage gives nearby party members +40 Attack Power and -40 WDEF; decent boost to physical damage.",
+    "Huge variety of weapon options: 1H sword/axe and 2H sword/axe."
+   ]
+  },
+  {
+   "p": "**Cons**"
+  },
+  {
+   "ul": [
+    "Short reach and limited mobility; constantly face tanking.",
+    "Weapon Mastery, Booster, and Final Attack lock SP to one weapon path.",
+    "Power Strike and Slash Blast remain the main DPS skills until level 70+ third job."
+   ]
+  },
+  {
+   "h2": "Starting at level 30"
+  },
+  {
+   "p": "New Warrior? Finish the Warrior level 1-30 guide first. The Accuracy formula, first-job SP allocation, early equipment, citizenship, and training maps are on there."
+  },
+  {
+   "img": "4ae130ab043e4e.png",
+   "w": 130,
+   "h": 136
+  },
+  {
+   "p": "**First-job endpoint**"
+  },
+  {
+   "p": "Power Strike 20, Slash Blast 20, Precise Strikes 15, Improved HP Recovery 3, and Max HP Increase 3."
+  },
+  {
+   "p": "**Reference level 30 stats**"
+  },
+  {
+   "p": "135 base STR / 27 base DEX\n138 STR / 30 DEX / 73 ACC with the sample gear"
+  },
+  {
+   "p": "**After the job advancement**"
+  },
+  {
+   "p": "Put the first Fighter SP into Rush."
+  },
+  {
+   "p": "[[img:2b7a3e9204d15f.png]]Blue Axe"
+  },
+  {
+   "p": "50 W.ATK before scrolling."
+  },
+  {
+   "h2": "Accuracy after level 30"
+  },
+  {
+   "p": "These totals assume your level matches the mob. Fighting a mob above your level raises the ACC requirement. The 100% column means every attack connects."
+  },
+  {
+   "img": "4337dbf87ad50d.png",
+   "w": 130,
+   "h": 143
+  },
+  {
+   "table": [
+    [
+     "Mob",
+     "Level",
+     "Avoidability",
+     "90% hit",
+     "100% hit"
+    ],
+    [
+     "Jr. Wraith",
+     "34",
+     "24",
+     "75 ACC",
+     "79 ACC"
+    ],
+    [
+     "Lorang",
+     "38",
+     "23",
+     "72 ACC",
+     "76 ACC"
+    ],
+    [
+     "Zombie Lupin",
+     "41",
+     "28",
+     "88 ACC",
+     "92 ACC"
+    ],
+    [
+     "Wraith",
+     "48",
+     "31",
+     "97 ACC",
+     "101 ACC"
+    ],
+    [
+     "Croco",
+     "52",
+     "30",
+     "94 ACC",
+     "98 ACC"
+    ],
+    [
+     "Rotten Mushroom",
+     "56",
+     "33",
+     "103 ACC",
+     "108 ACC"
+    ],
+    [
+     "Wild Kargo",
+     "62",
+     "35",
+     "109 ACC",
+     "114 ACC"
+    ],
+    [
+     "Tauromacis",
+     "70",
+     "39",
+     "121 ACC",
+     "126 ACC"
+    ]
+   ]
+  },
+  {
+   "guide": "warrior-class-guide",
+   "text": "Read the full Warrior Accuracy explanation"
+  },
+  {
+   "h2": "Levels 30-70: Fighter skill build and leveling"
+  },
+  {
+   "p": "The default order takes Rush at level 30 and Rage at level 31, unlocks Booster and Final Attack, maxes Mastery, then finishes Rage, Final Attack, Booster, and Rush. It considers party value, minimum damage, MP upkeep, and mobility."
+  },
+  {
+   "img": "ab69a9044567a4.png",
+   "w": 130,
+   "h": 224
+  },
+  {
+   "h3": "Level 30 Fighter job advancement"
+  },
+  {
+   "ol": [
+    "Talk to Dances with Balrog in Perion and start **The Warrior's Next Journey**.",
+    "Take his letter to the Warrior Job Instructor in West Rocky Mountain IV.",
+    "Enter the test, defeat the monsters, and collect 30 Dark Marbles.",
+    "Return with **The Proof of a Hero** and choose **Fighter**."
+   ]
+  },
+  {
+   "note": "**Power Guard is a third-job skill in Classic World.** Fighter gets Rush during second job. Power Guard appears in the Crusader skill book."
+  },
+  {
+   "p": "Grummash's realistic level 70 two-handed axe Fighter is the reference build for the main SP order. Sword Fighters use Sword Mastery, Final Attack: Sword, and Sword Booster at the same levels as the matching axe skills."
+  },
+  {
+   "note": "**Rush arrives immediately:** Rush 1 moves the Fighter forward, pushes up to four mobs, prevents knockback during the movement, and costs 40 MP."
+  },
+  {
+   "h3": "Level 70 Fighter skill target"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Axe build",
+     "Sword build",
+     "Max-level result"
+    ],
+    [
+     "[[img:d6ad20a37d7e36.png]]Sword Mastery",
+     "0 / 20",
+     "20 / 20",
+     "Mastery 10 and +90 WDEF."
+    ],
+    [
+     "[[img:3ed1e3fdcbdb92.png]]Axe Mastery",
+     "20 / 20",
+     "0 / 20",
+     "Mastery 10 and 25% bleed chance for 100% total damage as three equal ticks, one second apart."
+    ],
+    [
+     "[[img:194a152be08102.png]]Final Attack: Sword",
+     "0 / 30",
+     "30 / 30",
+     "50% chance, 140% damage, up to three mobs."
+    ],
+    [
+     "[[img:fdb7f350782baa.png]]Final Attack: Axe",
+     "30 / 30",
+     "0 / 30",
+     "50% chance, 140% damage, up to three mobs."
+    ],
+    [
+     "[[img:75f45ae5ea12be.png]]Sword Booster",
+     "0 / 20",
+     "20 / 20",
+     "+2 Attack Speed stages for 300 seconds."
+    ],
+    [
+     "[[img:b716ead25ac912.png]]Axe Booster",
+     "20 / 20",
+     "0 / 20",
+     "+2 Attack Speed stages for 300 seconds."
+    ],
+    [
+     "[[img:eb4ad7f867be42.png]]Rage",
+     "30 / 30",
+     "30 / 30",
+     "+40 Attack Power and -40 WDEF for 300 seconds."
+    ],
+    [
+     "[[img:854225b53354cd.png]]Rush",
+     "20 / 20",
+     "20 / 20",
+     "80% damage, four mobs, 150 distance, 20 MP."
+    ],
+    [
+     "Second-job SP used",
+     "120 / 121",
+     "120 / 121",
+     "1 SP remains."
+    ]
+   ]
+  },
+  {
+   "h3": "Fighter SP allocation: levels 30-70"
+  },
+  {
+   "note": "**Going sword?** Follow the same order, but use Sword Mastery, Final Attack: Sword, and Sword Booster wherever the table lists the matching axe skill."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Spend",
+     "Running result",
+     "Reason"
+    ],
+    [
+     "30",
+     "Rush +1",
+     "Rush 1",
+     "Gets movement, grouping, and knockback protection immediately. Skill Lv1 costs 40 MP."
+    ],
+    [
+     "31",
+     "Rage +1, Axe Mastery +2",
+     "Rush 1, Rage 1, Mastery 2",
+     "Rage gives the party +10 Attack Power for 10 MP. Mastery starts raising minimum damage."
+    ],
+    [
+     "32",
+     "Axe Mastery +3",
+     "Axe Mastery 5",
+     "Opens Axe Booster."
+    ],
+    [
+     "33",
+     "Axe Booster +1, Final Attack: Axe +1, Axe Mastery +1",
+     "Booster 1, FA 1, Mastery 6",
+     "Gets +2 Attack Speed, the Final Attack toggle, and more minimum damage."
+    ],
+    [
+     "34-37",
+     "Axe Mastery +12",
+     "Axe Mastery 18",
+     "Raises minimum damage and axe bleed chance."
+    ],
+    [
+     "38",
+     "Axe Mastery +2, Final Attack: Axe +1",
+     "Mastery 20, FA 2",
+     "Finishes Mastery."
+    ],
+    [
+     "39-47",
+     "Rage +27",
+     "Rage 28",
+     "Raises your physical damage and party damage."
+    ],
+    [
+     "48",
+     "Rage +2, Final Attack: Axe +1",
+     "Rage 30, FA 3",
+     "Finishes Rage."
+    ],
+    [
+     "49-57",
+     "Final Attack: Axe +27",
+     "Final Attack 30",
+     "Finishes its activation chance and damage."
+    ],
+    [
+     "58-63",
+     "Axe Booster +18",
+     "Axe Booster 19",
+     "Extends duration and lowers its HP and MP cost."
+    ],
+    [
+     "64",
+     "Axe Booster +1, Rush +2",
+     "Booster 20, Rush 3",
+     "Finishes Booster."
+    ],
+    [
+     "65-69",
+     "Rush +15",
+     "Rush 18",
+     "Lowers Rush MP cost and raises its damage."
+    ],
+    [
+     "70",
+     "Rush +2, hold 1 SP",
+     "Rush 20; 1 flexible SP",
+     "Matches Grummash's saved build."
+    ]
+   ]
+  },
+  {
+   "p": "Second-job SP cannot be spent on first-job skills, so finish the first-job plan by level 30. Character Builder flags any build that breaks it."
+  },
+  {
+   "h3": "Possible changes to the default order"
+  },
+  {
+   "h3": "Booster 10 earlier"
+  },
+  {
+   "p": "Booster 1 already gives +2 Attack Speed stages. Taking it to 10 after Mastery 20 reduces upkeep and recasting. This is the best QoL change when MP is tight."
+  },
+  {
+   "h3": "Rush 10 earlier"
+  },
+  {
+   "p": "Rush 10 increases its distance by a bit and costs 31 MP. Add SP here when grouping or crossing the map saves more time than another point in a damage skill."
+  },
+  {
+   "img": "7813ca8c706153.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Sword Booster: faster sword attacks after five points in Sword Mastery."
+  },
+  {
+   "img": "096c408db48ad2.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Axe Booster: faster axe attacks after five points in Axe Mastery."
+  },
+  {
+   "img": "c3b1242ecef3d3.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Rush: movement, grouping, and protection from knockback during the dash."
+  },
+  {
+   "note": "**Simple grinding loop:** Max Rage and Booster both last 300 seconds, so refresh them together. Leave Final Attack toggled on when its three-target follow-up improves your clear speed, use Rush to group the mobs, then Power Strike one target or Slash Blast several."
+  },
+  {
+   "p": "Ducky Duck Gaming's Fighter overview also walks through this buff cycle and the Final Attack toggle."
+  },
+  {
+   "h3": "Fighter AP allocation: levels 30-70"
+  },
+  {
+   "p": "The table is a sample path. Keep total DEX at the minimum your next weapon needs, subtract DEX supplied by other gear, and put the rest into STR."
+  },
+  {
+   "p": "This sample spends 3 STR and 2 DEX per level from 31 through 36, then returns to 4 STR and 1 DEX through level 57. At level 57, base DEX reaches 60. Every AP from level 58 through 70 goes into STR."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "Base STR",
+     "Base DEX",
+     "AP rule"
+    ],
+    [
+     "30",
+     "135",
+     "27",
+     "30 total DEX with Jousting Helmet"
+    ],
+    [
+     "35",
+     "150",
+     "37",
+     "3 STR, 2 DEX per level"
+    ],
+    [
+     "36",
+     "153",
+     "39",
+     "Return to 4 STR, 1 DEX next level"
+    ],
+    [
+     "40",
+     "169",
+     "43",
+     "4 STR, 1 DEX per level"
+    ],
+    [
+     "45",
+     "189",
+     "48",
+     "4 STR, 1 DEX per level"
+    ],
+    [
+     "50",
+     "209",
+     "53",
+     "4 STR, 1 DEX per level"
+    ],
+    [
+     "55",
+     "229",
+     "58",
+     "4 STR, 1 DEX per level"
+    ],
+    [
+     "57",
+     "237",
+     "60",
+     "DEX cap reached"
+    ],
+    [
+     "60",
+     "252",
+     "60",
+     "5 STR per level"
+    ],
+    [
+     "65",
+     "277",
+     "60",
+     "5 STR per level"
+    ],
+    [
+     "70",
+     "**302**",
+     "**60***",
+     "Final base AP"
+    ]
+   ]
+  },
+  {
+   "note": "**Level 70 two-handed weapons require 70 DEX.** *Grummash's build reaches the requirement with 60 base DEX and +10 DEX from his hat and shoes. Check your own gear before stopping at 60. If you have more DEX from gear, then you can reduce your total base DEX."
+  },
+  {
+   "h3": "Recommended equipment: levels 30-70"
+  },
+  {
+   "p": "Choose sword or axe before spending weapon-specific SP. Within that family, you can swap between one-handed and two-handed weapons without changing Mastery, Booster, or Final Attack."
+  },
+  {
+   "table": [
+    [
+     "Level",
+     "1H choices",
+     "2H choices",
+     "Accuracy and damage gear",
+     "Where to get it"
+    ],
+    [
+     "30",
+     "[[img:cf5a1d2beefd9e.png]]Gladius 47 W.ATK, Speed 4 [[img:5d2179f9cd3575.png]]Fireman's Axe 47 W.ATK, Speed 4",
+     "[[img:b43c1d79c94b3e.png]]Scimitar 53 W.ATK, Speed 6 [[img:2b7a3e9204d15f.png]]Blue Axe 50 W.ATK, Speed 5",
+     "[[img:f928ecd64f1813.png]]Red Cross Shield 110 WDEF, 18.0% guard [[img:4e969b6336abff.png]]Jousting Helmet +3 DEX, +3 ACC [[img:41c86855fafd40.png]]Steel Missel +3 STR, +1 ACC, +2% crit",
+     "River in Perion sells the weapons and shield. Harry sells the helmet. Steel Missel is a Smithing 6 craft."
+    ],
+    [
+     "40",
+     "[[img:d4cc0dbdbd964a.png]]Traus 60 W.ATK, Speed 5 [[img:be6af7f4298908.png]]Blue Counter 57 W.ATK, Speed 4",
+     "[[img:f45d6f8f5cc020.png]]Zard 60 W.ATK, Speed 5 [[img:21bb5270936814.png]]Sabretooth 60 W.ATK, Speed 5",
+     "[[img:41cef8cf45abf6.png]]Gold Nordic Helm +4 DEX, +5 ACC [[img:0171a0eade7772.png]]Iron Knuckle +4 STR, +1 ACC, +2% crit",
+     "Echopus drops Blue Counter. Check the item pages for the other weapons' drop sources. Sabretooth is also a Weaponcrafting 8 craft. The hat and gloves are Smithing 8 crafts."
+    ],
+    [
+     "50",
+     "[[img:c9bcc1b0224cb3.png]]Jeweled Katar 70 W.ATK, Speed 5 [[img:8374ba78d17f98.png]]Buck 70 W.ATK, Speed 5",
+     "[[img:a0a2dd24550ef7.png]]Lion's Fang 73 W.ATK, Speed 6 [[img:6302cf3ff9d35c.png]]The Rising 73 W.ATK, Speed 6",
+     "[[img:6b76d9e7e4295c.png]]Mithril Crusader Helm +5 DEX, +6 ACC [[img:f87e4c7470595f.png]]Steel Brist +5 STR, +1 ACC, +3% crit",
+     "Rafflesia drops Jeweled Katar. Check the item pages for Lion's Fang and Buck drop sources. The Rising is a Weaponcrafting 10 craft. The hat and gloves are Smithing 10 crafts."
+    ],
+    [
+     "60",
+     "[[img:7586a4219a7b91.png]]Neocora 77 W.ATK, Speed 4 [[img:e996550d6cc7de.png]]Hawkhead 77 W.ATK, Speed 4",
+     "[[img:a8b1170ad9d628.png]]Sparta 83 W.ATK, Speed 6 [[img:89ffa30976c4ba.png]]The Shining 80 W.ATK, Speed 5",
+     "[[img:6fb75ad1dd1809.png]]Blue Oriental Helmet +6 DEX, +6 ACC [[img:8d6d4d42e06dad.png]]Bronze Clench +6 STR, +1 ACC, +3% crit",
+     "Check the item pages or Free Market for the weapons, the helmet, and Bronze Clench."
+    ],
+    [
+     "70",
+     "[[img:109cc1da15d1e0.png]]Red Katana 87 W.ATK, Speed 4 [[img:5eee42adef2cb3.png]]Mikhail 87 W.ATK, Speed 4 [[img:79cbcfb2d0d6ba.png]]Gold Ancient Shield 192 WDEF, +35 HP, 27.7% guard",
+     "[[img:e22c72fcba0f4d.png]]Doombringer 93 W.ATK, Speed 6 [[img:65c7b4f30546c8.png]]Chrono 93 W.ATK, Speed 6",
+     "Use your Accuracy target to choose between STR, DEX, and direct Accuracy gear.",
+     "Check the item pages or Free Market for the weapons and Gold Ancient Shield."
+    ]
+   ]
+  },
+  {
+   "h3": "Training maps: levels 30-70"
+  },
+  {
+   "p": "The best map is often below your level. Training Advisor rewards fast, reliable kills, so a dense map of guaranteed one-shots can beat a harder map with better EXP per mob."
+  },
+  {
+   "note": "Every listed mob is a 100% hit for the sample build. Primary picks rank maps where every spawn takes no more than two Power Strikes even at the weakest possible damage. Danger uses the build's real HP, WDEF, and MDEF. Each result also shows the portal count to the nearest connected potion shop. Stirges and Flyeyes are excluded because their flying movement makes the Advisor's paper result unreliable for a melee Warrior."
+  },
+  {
+   "table": [
+    [
+     "Levels",
+     "Build checked",
+     "Training Advisor picks",
+     "Kills using your weakest damage"
+    ],
+    [
+     "**30-34**",
+     "Lv 30 138 STR / 30 DEX 73 ACC / 50 W.ATK",
+     "Line 1 <Area 1> ~1,770 EXP/min · Safe at 4% · 3 portals to Dr. Faymus Tree Dungeon, Forest Up North IV ~1,650 EXP/min · Safe at 3% · 5 portals to Len",
+     "Bubbling and Green Mushroom: 2-hit Slime: 1-hit"
+    ],
+    [
+     "**35-39**",
+     "Lv 35 153 STR / 40 DEX 82 ACC / 50 W.ATK",
+     "Ant Tunnel II ~3,857 EXP/min · Safe at 7% · 4 portals to Mr. Sweatbottom Ant Tunnel III ~3,845 EXP/min · Safe at 7% · 5 portals to Mr. Sweatbottom",
+     "Zombie Mushroom: 2-hit Horny Mushroom: 1-hit"
+    ],
+    [
+     "**40-44**",
+     "Lv 40 173 STR / 47 DEX 91 ACC / 60 W.ATK",
+     "Ant Tunnel Park ~4,309 EXP/min · Safe at 9% · 11 portals to Mr. Sweatbottom Deep Ant Tunnel II ~4,209 EXP/min · Safe at 9% · 10 portals to Mr. Sweatbottom",
+     "Evil Eye, Zombie Mushroom, and Horny Mushroom: 1-hit"
+    ],
+    [
+     "**45-49**",
+     "Lv 45 193 STR / 52 DEX 97 ACC / 60 W.ATK",
+     "The Burnt Land I ~5,153 EXP/min · Safe at 10% · 4 portals to Arturo The Burnt Land III ~5,029 EXP/min · Safe at 10% · 6 portals to Arturo",
+     "Fire Boar and Dark Axe Stump: 1-hit"
+    ],
+    [
+     "**50-54**",
+     "Lv 50 240 STR / 60 DEX 121 ACC / 85 W.ATK",
+     "Tree Dungeon, Monkey Forest II ~7,883 EXP/min · Caution at 16% · 6 portals to Len Monkey Forest II ~7,845 EXP/min · Caution at 16% · 5 portals to Len",
+     "Zombie Lupin, Curse Eye, and Lupin: 1-hit"
+    ],
+    [
+     "**55-59**",
+     "Lv 55 260 STR / 65 DEX 128 ACC / 85 W.ATK",
+     "The Forest of Evil II ~7,939 EXP/min · Caution at 19% · 7 portals to Len Perilous Descent III ~7,922 EXP/min · Caution at 11% · 6 portals to Luma",
+     "Malady, Duskmander, and Echopus: 2-hit Zombie Lupin: 1-hit"
+    ],
+    [
+     "**60-64**",
+     "Lv 60 283 STR / 67 DEX 133 ACC / 92 W.ATK",
+     "The Forest of Evil II ~10,557 EXP/min · Caution at 18% · 7 portals to Len Line 2 <Area 3> ~8,469 EXP/min · Safe at 10% · 7 portals to Dr. Faymus",
+     "Malady and Wraith: 2-hit Zombie Lupin: 1-hit"
+    ],
+    [
+     "**65-69**",
+     "Lv 65 308 STR / 67 DEX 137 ACC / 92 W.ATK",
+     "Perilous Descent III ~9,743 EXP/min · Safe at 10% · 6 portals to Luma The Forest of Evil II ~10,692 EXP/min · Caution at 17% · 7 portals to Len",
+     "Duskmander, Echopus, and Malady: 2-hit Zombie Lupin: 1-hit"
+    ],
+    [
+     "**70**",
+     "Lv 70 337 STR / 70 DEX 140 ACC / 105 W.ATK",
+     "Perilous Descent III ~11,089 EXP/min · Safe at 9% · 6 portals to Luma The End of Fleeting Light ~10,380 EXP/min · Safe at 9% · 2 portals to Luma",
+     "Duskmander, Echopus, Rafflesia, and Aqumander: 1-hit"
+    ]
+   ]
+  },
+  {
+   "h3": "Level 50 Fighter example build"
+  },
+  {
+   "p": "209 base STR / 53 base DEX\n240 STR / 60 DEX / 85 W.ATK / 121 ACC with gear"
+  },
+  {
+   "p": "**Skills:** Axe Mastery 20, Rage 30, Final Attack: Axe 9, Axe Booster 1, Rush 1."
+  },
+  {
+   "p": "[[img:6302cf3ff9d35c.png]]The Rising [[img:6b76d9e7e4295c.png]]Mithril Crusader Helm [[img:b8ab03e35a7fa4.png]]Dark Crusader Chainmail [[img:f87e4c7470595f.png]]Steel Brist"
+  },
+  {
+   "note": "The Rising is a Weaponcrafting 10 craft. The helm and gloves are Smithing 10 crafts. Check the item page for Dark Crusader Chainmail drop sources."
+  },
+  {
+   "p": "**Best guaranteed Power Strike targets with Rage active**"
+  },
+  {
+   "p": "[[img:3934c93d7d4444.png]] **Zombie Lupin** 100% hit · guaranteed 1-hit · 99 EXP/hit [[img:3ddc9bfe06aade.png]] **Glowshroom** 100% hit · guaranteed 1-hit · 90 EXP/hit"
+  },
+  {
+   "h3": "Level 70 Fighter by Grummash"
+  },
+  {
+   "p": "302 base STR / 60 base DEX\n337 STR / 70 DEX / 105 W.ATK / 140 ACC with gear"
+  },
+  {
+   "p": "**Skills:** Axe Mastery 20, Rage 30, Final Attack: Axe 30, Axe Booster 20, Rush 20, with 1 SP open."
+  },
+  {
+   "p": "[[img:65c7b4f30546c8.png]]Chrono [[img:0798a9c454e6a7.png]]Mithril Planet [[img:8c222e88833d66.png]]Bronze Husk [[img:fcb432c862ec89.png]]Red Gaia Cape"
+  },
+  {
+   "note": "Check the item pages or Free Market for Chrono, Mithril Planet, Bronze Husk, and Red Gaia Cape."
+  },
+  {
+   "p": "**Best guaranteed Power Strike targets with Rage active**"
+  },
+  {
+   "p": "[[img:8d3453e377c2eb.png]] **Duskmander** 100% hit · guaranteed 1-hit · 142 EXP/hit [[img:ab7412e282fc07.png]] **Rafflesia** 100% hit · guaranteed 1-hit · 127 EXP/hit"
+  },
+  {
+   "h2": "Rage explained"
+  },
+  {
+   "p": "Rage raises Attack Power for nearby party members and lowers WDEF. Attack Power is used by physical attacks. Magic spells use Magic Attack, so Rage does not affect their spell damage."
+  },
+  {
+   "img": "4531b102978ef9.png",
+   "w": 130,
+   "h": 167
+  },
+  {
+   "table": [
+    [
+     "Rage skill Lv",
+     "MP",
+     "Attack Power",
+     "WDEF",
+     "Duration",
+     "Party area"
+    ],
+    [
+     "1",
+     "10",
+     "+10",
+     "-10",
+     "150 sec",
+     "500 x 300 px"
+    ],
+    [
+     "16",
+     "17",
+     "+25",
+     "-25",
+     "225 sec",
+     "600 x 400 px"
+    ],
+    [
+     "30",
+     "25",
+     "+40",
+     "-40",
+     "300 sec",
+     "600 x 400 px"
+    ]
+   ]
+  },
+  {
+   "p": "The party area grows at lv 16. See the level 1 and level 30 diagrams below."
+  },
+  {
+   "img": "8ea44ba66a1c56.png",
+   "w": 43,
+   "h": 70,
+   "cap": "Level 1\n500 x 300 px"
+  },
+  {
+   "img": "8ea44ba66a1c56.png",
+   "w": 43,
+   "h": 70,
+   "cap": "Level 30\n600 x 400 px"
+  },
+  {
+   "h3": "How Attack Power affects Warrior damage"
+  },
+  {
+   "note": "**Raw physical damage**\nMAX = (1 + (STR x Weapon Multiplier + DEX) / 100 + Attack Power / 50) x W.ATK x Skill Power\nMIN = (0.8 + (STR x Weapon Multiplier x Mastery + DEX) / 100 + Attack Power / 50) x W.ATK x Skill Power\nMastery = (Mastery Level / 10 + 0.1) x 0.8"
+  },
+  {
+   "p": "**Rage boosts both the MIN and MAX damage range.**"
+  },
+  {
+   "h3": "Max Rage on a Lv 70 Fighter's Power Strike"
+  },
+  {
+   "p": "Grummash's fighter build has 337 STR, 70 DEX, 105 W.ATK, max Axe Mastery, and a max 260% Power Strike. Against an equal-level target with 0 WDEF:"
+  },
+  {
+   "table": [
+    [
+     "Power Strike",
+     "Minimum",
+     "Maximum",
+     "Average with 14% crit"
+    ],
+    [
+     "Without Rage",
+     "2,028",
+     "3,224",
+     "2,783"
+    ],
+    [
+     "With max Rage",
+     "2,247",
+     "3,442",
+     "3,009"
+    ],
+    [
+     "Gain",
+     "+219",
+     "+218",
+     "+226 per cast"
+    ]
+   ]
+  },
+  {
+   "p": "**For this build, max Rage boosts average Power Strike damage by about 8.1%.**"
+  },
+  {
+   "p": "In this formula, +40 Attack Power contributes the same raw damage term as +80 DEX. On a two-handed axe it takes roughly 27-45 STR to match that term, depending on the attack action and whether the roll uses Mastery. Rage is indeed a meaningful physical damage buff."
+  },
+  {
+   "img": "3bb1b5845aa58f.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Rage: skill Lv16 is the party-range breakpoint; skill Lv30 gives +40 Attack Power for five minutes."
+  },
+  {
+   "guide": "explaining-the-damage-formula",
+   "text": "Read the damage formula"
+  },
+  {
+   "h2": "Final Attack explained"
+  },
+  {
+   "p": "Final Attack is a toggle. At max, it has a 50% chance to add a 140% follow-up against up to three mobs after an attack skill. It shows no extra HP or MP cost."
+  },
+  {
+   "p": "Page and Spearman Final Attacks hit one target. Fighter's three-target follow-up is the better fit for grouped grinding, especially after Slash Blast leaves several mobs alive."
+  },
+  {
+   "p": "Each FA proc has its own attack animation after your skill finishes, and you can't attack again until it ends: about 0.6 seconds with Booster. Fighter's Final Attack: Sword and Final Attack: Axe spread to up to three mobs, so you do more damage overall against two or three mobs. Against one mob it doesn't and is better to toggle FA off."
+  },
+  {
+   "img": "64c694d5c5759e.png",
+   "w": 130,
+   "h": 137
+  },
+  {
+   "table": [
+    [
+     "You attack with",
+     "Mobs in front",
+     "Final Attack on vs off"
+    ],
+    [
+     "[[img:7700d0a87ede5e.png]]Power Strike",
+     "1",
+     "12% less damage"
+    ],
+    [
+     "[[img:7700d0a87ede5e.png]]Power Strike",
+     "2",
+     "6% more"
+    ],
+    [
+     "[[img:7700d0a87ede5e.png]]Power Strike",
+     "3",
+     "24% more"
+    ],
+    [
+     "[[img:b5a4eaed502bda.png]]Slash Blast",
+     "2 or 3",
+     "6% more"
+    ],
+    [
+     "[[img:b5a4eaed502bda.png]]Slash Blast",
+     "4",
+     "3% less"
+    ]
+   ]
+  },
+  {
+   "p": "Keep it on for small groups. Turn it off for bosses and single mob farming."
+  },
+  {
+   "p": "Final Attack costs no MP, so it also saves potions: about 26% more damage per MP against one mob and 39% against four. Keep it on when MP is your limit, even against groups."
+  },
+  {
+   "img": "ae72c35dd5a2cb.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Final Attack: Axe: 50% chance, 140% damage, and up to three mobs at skill Lv30."
+  },
+  {
+   "h2": "Should you use a shield?"
+  },
+  {
+   "p": "One-handed Fighters attack faster and can equip a shield. Two-handed Fighters get higher W.ATK, slightly longer attack range, and stronger weapon multipliers. Sword and axe both work; the choice changes your Mastery, Booster, and Final Attack skill path."
+  },
+  {
+   "img": "d4a579aa2c8bbc.png",
+   "w": 130,
+   "h": 141
+  },
+  {
+   "h3": "Level 30 comparison"
+  },
+  {
+   "p": "Same level 30 Fighter: 138 STR, 30 DEX, max Power Strike, Rush 1, Jousting Helmet, Steel Missel, and unscrolled weapons. Rage, Mastery, and Booster are still at 0. Damage uses a 0 WDEF target so the weapon difference is easy to compare."
+  },
+  {
+   "table": [
+    [
+     "Path",
+     "Weapon",
+     "W.ATK / speed",
+     "Power Strike range",
+     "Expected per cast",
+     "Power Strikes/min",
+     "One-minute damage",
+     "Shield"
+    ],
+    [
+     "1H Sword",
+     "[[img:cf5a1d2beefd9e.png]]Gladius",
+     "47 / Speed 4",
+     "158-462",
+     "318",
+     "83",
+     "26,398",
+     "[[img:f928ecd64f1813.png]]Red Cross Shield 110 WDEF, 18.0% guard"
+    ],
+    [
+     "1H Axe",
+     "[[img:5d2179f9cd3575.png]]Fireman's Axe",
+     "47 / Speed 4",
+     "150-563",
+     "329",
+     "83",
+     "27,323",
+     "[[img:f928ecd64f1813.png]]Red Cross Shield 110 WDEF, 18.0% guard"
+    ],
+    [
+     "2H Sword",
+     "[[img:b43c1d79c94b3e.png]]Scimitar",
+     "53 / Speed 6",
+     "189-654",
+     "432",
+     "74",
+     "31,985",
+     "None"
+    ],
+    [
+     "2H Axe",
+     "[[img:2b7a3e9204d15f.png]]Blue Axe",
+     "50 / Speed 5",
+     "171-707",
+     "418",
+     "80",
+     "33,414",
+     "None"
+    ]
+   ]
+  },
+  {
+   "h3": "Level 70 comparison"
+  },
+  {
+   "p": "Same level 70 stats as Grummash's build: 337 STR, 70 DEX, max Rage, max Mastery, max Booster, 14% Critical Rate, and +26% Critical Damage. Every weapon has seven successful Lesser Attack scrolls and the gloves add 5 W.ATK. Damage again uses a 0 WDEF target."
+  },
+  {
+   "table": [
+    [
+     "Path",
+     "Weapon",
+     "Total W.ATK / boosted speed",
+     "Power Strike range",
+     "Expected per cast",
+     "Power Strikes/min",
+     "One-minute damage",
+     "Shield"
+    ],
+    [
+     "1H Sword",
+     "[[img:109cc1da15d1e0.png]]Red Katana",
+     "99 / Speed 2",
+     "1,966-2,204",
+     "2,161",
+     "100",
+     "216,141",
+     "[[img:79cbcfb2d0d6ba.png]]Gold Ancient Shield 192 WDEF, +35 HP, 27.7% guard"
+    ],
+    [
+     "1H Axe",
+     "[[img:5eee42adef2cb3.png]]Mikhail",
+     "99 / Speed 2",
+     "1,508 - 2,725",
+     "2,263",
+     "100",
+     "226,277",
+     "[[img:79cbcfb2d0d6ba.png]]Gold Ancient Shield 192 WDEF, +35 HP, 27.7% guard"
+    ],
+    [
+     "2H Sword",
+     "[[img:e22c72fcba0f4d.png]]Doombringer",
+     "105 / Speed 4",
+     "2,651-2,982",
+     "2,920",
+     "83",
+     "242,339",
+     "None"
+    ],
+    [
+     "2H Axe",
+     "[[img:65c7b4f30546c8.png]]Chrono",
+     "105 / Speed 4",
+     "2,247 - 3,442",
+     "3,009",
+     "83",
+     "249,778",
+     "None"
+    ]
+   ]
+  },
+  {
+   "h3": "One-handed with shield: Guard Mechanic"
+  },
+  {
+   "p": "The shield can fully block eligible regular physical hits. Red Cross Shield has 110 WDEF, seven slots, and 18.0% Guard chance before scrolling. Gold Ancient Shield has 192 WDEF, +35 HP, seven slots, and 27.7% Guard chance before scrolling. Shield WDEF also lowers the hits that get through. Magic attacks cannot trigger Shield Guard, and some special attacks can bypass it."
+  },
+  {
+   "h3": "Two-handed"
+  },
+  {
+   "p": "Higher W.ATK and stronger damage multipliers win the Power Strike comparison at both levels. The higher minimum damage also makes guaranteed one-shot and two-shot kills easier to reach."
+  },
+  {
+   "h3": "Shield scrolling"
+  },
+  {
+   "p": "Shield DEF Scroll: Lesser has a 100% success rate and adds 2 WDEF per slot. The extra WDEF also raises Guard chance."
+  },
+  {
+   "table": [
+    [
+     "Shield",
+     "Clean",
+     "7x DEF Lesser"
+    ],
+    [
+     "[[img:f928ecd64f1813.png]]Red Cross Shield",
+     "110 WDEF 18.0% Guard",
+     "124 WDEF 19.9% Guard"
+    ],
+    [
+     "[[img:79cbcfb2d0d6ba.png]]Gold Ancient Shield",
+     "192 WDEF +35 HP 27.7% Guard",
+     "206 WDEF 29.2% Guard"
+    ]
+   ]
+  },
+  {
+   "p": "**Use Shield DEF Scroll: Lesser.** At level 70, seven Shield Accuracy Scrolls: Lesser add +7 ACC, but the realistic one-handed Fighter build gains no new 100%-hit mob, one- or two-hit map, or better Training Advisor map."
+  },
+  {
+   "h3": "Swords vs. axes: which is best?"
+  },
+  {
+   "p": "**Axe deals more average damage.** At level 30, the one-handed axe is about 3.5% ahead of the one-handed sword, and the two-handed axe is about 4.5% ahead of the two-handed sword over one minute. At level 70, those gaps are about 4.7% and 3.1%. These numbers do not include Axe Mastery's bleed, which adds another chance for damage at max skill level."
+  },
+  {
+   "p": "**Sword gives steadier damage.** Swords use the same multiplier on swing and stab actions, so their minimum and maximum hits stay closer together. This helps when even the sword's weakest hit can guarantee a one-shot or two-shot kill. Sword Mastery also gives +90 WDEF."
+  },
+  {
+   "p": "Pick axe for higher average damage and bleed. Pick sword for more consistent damage rolls and extra WDEF. After choosing the weapon family, decide whether you want a shield or the higher damage of a two-handed weapon."
+  },
+  {
+   "img": "569ea5c4557720.png",
+   "w": 360,
+   "h": 200,
+   "cap": "One-handed sword: fast attacks, shield access, and a fixed 1.8 multiplier."
+  },
+  {
+   "img": "43e43afc97194b.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Two-handed axe: slower attacks with the highest Fighter swing multiplier."
+  },
+  {
+   "h2": "Weapon Reach (Hitbox)"
+  },
+  {
+   "p": "Every melee hit lands inside a box in front of you, called the hitbox. Its length is your weapon's reach. A sword or axe has five basic attacks, three swings and two thrusts, with a box for each. Each attack uses one of the five at random. The strips list the average reach of one basic attack for the level 30-70 weapons."
+  },
+  {
+   "img": "00649832a9aeaf.png",
+   "w": 360,
+   "h": 200,
+   "cap": "Scimitar, Swing 1. Any monster whose body touches the blue box gets hit: 47-100 px in front of you, from 2 px below your feet to 95 px above them."
+  },
+  {
+   "p": "Some two-handed weapons reach farther. Scimitar, Lion's Fang, Sparta, and Doombringer average 102 px per basic attack. Two-handed axes and the other two-handed swords average 87-90 px, while one-handed swords and axes average 74-86 px. Reach has a direct effect on DPS in practice. Longer reach makes mobs easier to hit from a distance and keeps them from getting close enough to hit you. Our weapon reach guide charts every weapon family."
+  },
+  {
+   "p": "**102 px avg reach**"
+  },
+  {
+   "p": "[[img:b43c1d79c94b3e.png]]Scimitar (Lv 30) [[img:a0a2dd24550ef7.png]]Lion's Fang (Lv 50) [[img:a8b1170ad9d628.png]]Sparta (Lv 60) [[img:e22c72fcba0f4d.png]]Doombringer (Lv 70)"
+  },
+  {
+   "p": "**90 px avg reach**"
+  },
+  {
+   "p": "[[img:2b7a3e9204d15f.png]]Blue Axe (Lv 30) [[img:725899cbf77cbf.png]]Niam (Lv 35) [[img:21bb5270936814.png]]Sabretooth (Lv 40) [[img:6302cf3ff9d35c.png]]The Rising (Lv 50) [[img:89ffa30976c4ba.png]]The Shining (Lv 60) [[img:65c7b4f30546c8.png]]Chrono (Lv 70)"
+  },
+  {
+   "p": "**87 px avg reach**"
+  },
+  {
+   "p": "[[img:08e8b94eec0dfd.png]]Lionheart (Lv 35) [[img:f45d6f8f5cc020.png]]Zard (Lv 40)"
+  },
+  {
+   "p": "**86 px avg reach**"
+  },
+  {
+   "p": "[[img:5d2179f9cd3575.png]]Fireman's Axe (Lv 30) [[img:12aa794558f1c2.png]]Cutlus (Lv 35) [[img:4cc723b16d68b7.png]]Dankke (Lv 35) [[img:be6af7f4298908.png]]Blue Counter (Lv 40) [[img:8374ba78d17f98.png]]Buck (Lv 50) [[img:7586a4219a7b91.png]]Neocora (Lv 60) [[img:e996550d6cc7de.png]]Hawkhead (Lv 60) [[img:109cc1da15d1e0.png]]Red Katana (Lv 70) [[img:5eee42adef2cb3.png]]Mikhail (Lv 70)"
+  },
+  {
+   "p": "**74 px avg reach**"
+  },
+  {
+   "p": "[[img:cf5a1d2beefd9e.png]]Gladius (Lv 30) [[img:d4cc0dbdbd964a.png]]Traus (Lv 40) [[img:b68b630c156937.png]]Hero's Gladius (Lv 45) [[img:c9bcc1b0224cb3.png]]Jeweled Katar (Lv 50)"
+  },
+  {
+   "h3": "Which Fighter skills use weapon reach?"
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Uses weapon reach?",
+     "Hitbox"
+    ],
+    [
+     "[[img:b43c1d79c94b3e.png]]Basic attack",
+     "Yes",
+     "One of your weapon's five attacks, picked at random."
+    ],
+    [
+     "[[img:7700d0a87ede5e.png]]Power Strike",
+     "Yes",
+     "The same five attacks and boxes as your basic attack."
+    ],
+    [
+     "[[img:b5a4eaed502bda.png]]Slash Blast",
+     "Yes",
+     "The same five attacks and boxes as your basic attack. Once a monster is inside that box, Slash Blast's additional hits can reach mobs 130 px in front, or 150 px from skill Lv 11, with any weapon."
+    ],
+    [
+     "[[img:854225b53354cd.png]]Rush",
+     "No",
+     "Rush has its own box: 200 px in front of you and 50 px tall, or 220 px from skill Lv 11."
+    ],
+    [
+     "[[img:194a152be08102.png]]Final Attack",
+     "Yes, its own two attacks",
+     "A Final Attack hit uses a wide swing or a deep thrust, picked at random, and each has its own box. They reach 92-135 px, depending on the weapon. It picks its own targets inside that box, up to 3 monsters. Once a monster is inside the box, it also reaches 130 px, or 150 px from skill Lv 16."
+    ]
+   ]
+  },
+  {
+   "h2": "W.ATK or Critical Rate on gloves?"
+  },
+  {
+   "p": "These numbers use Grummash's realistic level 70 Fighter build and five successful Lesser glove scrolls. Both options use the same five slots."
+  },
+  {
+   "h3": "5x Gloves Attack Scroll: Lesser"
+  },
+  {
+   "p": "**+5 W.ATK**\n100 to 105 total W.ATK\nAbout 5% more expected damage."
+  },
+  {
+   "h3": "5x Gloves Crit. Rate Scroll: Lesser"
+  },
+  {
+   "p": "**+5% Critical Rate**\n14% to 19% Critical Rate\nAbout 1.25% more expected damage."
+  },
+  {
+   "note": "**Pick Attack.** The five-scroll Attack setup deals about 3.7% more expected damage than the Critical Rate setup on this build."
+  },
+  {
+   "p": "Fighter has only 26% Critical Damage in this build. Critical Rate does not gain enough per point to challenge W.ATK."
+  },
+  {
+   "p": "**The ratio is the same at every grade.** Lesser gives +1 W.ATK or +1% Critical Rate (+2 M.ATK), Intermediate +2/+2% (+4 M.ATK), Greater +3/+3% (+6 M.ATK), and Chaos +4/+4% (+8 M.ATK). Matching grades have the same success and destruction rates."
+  },
+  {
+   "p": "**W.ATK also helps guaranteed kills.** It raises every physical hit, including your weakest normal roll and every critical hit. Critical Rate changes how often a critical occurs, so it cannot improve the weakest non-critical roll."
+  },
+  {
+   "h2": "Find Your Build's Best Training Map with Training Advisor"
+  },
+  {
+   "p": "**Danger measures how hard a mob hits you for: under 10% of your HP is Safe, 10-24% is Caution, 25-49% is Danger, and 50%+ is Lethal.**"
+  },
+  {
+   "p": "The example builds above use Power Strike with Final Attack off. Their picks include only 100% hit targets that the minimum damage roll kills in one or two hits, ranked by EXP per required hit."
+  },
+  {
+   "note": "**Guaranteed Power Strike kills**\nGuaranteed 1-shot: Min / hit >= Mob HP\nGuaranteed 2-shot: 2 x Min / hit >= Mob HP\n**Min / hit is your weakest possible hit.** If that number is at least the mob's HP, every Power Strike kills it in one hit. A guarantee also requires 100% hit rate because a miss deals no damage."
+  },
+  {
+   "ol": [
+    "Open your saved build in Character Builder and enter your real level, AP, equipment, scrolls, skill levels, HP, MP, WDEF, and MDEF.",
+    "Choose **Power Strike**. Enable Rage only when you expect to keep it active while training.",
+    "Open **By mob** and enable **Show min damage per hit**. Check Hit Rate, Min / hit, Hits / kill, and MP / kill.",
+    "Open **By map** and compare EXP, Danger, and the walk to the nearest potion shop."
+   ]
+  },
+  {
+   "p": "Temporary potion and buff scenarios change the calculation without changing the saved build. This makes it easy to compare no buff, Rage, Accuracy potion, and Attack Power potion results."
+  },
+  {
+   "img": "e27776cdc70dad.png",
+   "w": 360,
+   "h": 271,
+   "cap": "Grummash's Fighter in Training Advisor: personalized hit rate, damage, kills, MP use, and EXP per hour for the equipped build."
+  },
+  {
+   "h2": "Recommended potions"
+  },
+  {
+   "p": "Fighters are MP efficient, but Power Strike, Slash Blast, Booster, Rage, and Rush still drain a new player's wallet. Buy the most cost-efficient potions."
+  },
+  {
+   "img": "ddd330a4e64060.png",
+   "w": 130,
+   "h": 101
+  },
+  {
+   "p": "**BEST TO BUY** Best HP or MP recovered per meso"
+  },
+  {
+   "p": "[[img:be80aa4791c684.png]] **Red Potion** 50 mesos · 100 HP 2 HP per meso [[img:39a28ad40190a6.png]] **Fried Chicken** 60 mesos · 120 HP 2 HP per meso [[img:51e2250795d8f6.png]] **Meat** 80 mesos · 160 HP 2 HP per meso [[img:da1e5c881a1df6.png]] **Orange** 50 mesos · 50 MP 1 MP per meso [[img:d59bc967011b87.png]] **Lemon** 150 mesos · 150 MP 1 MP per meso"
+  },
+  {
+   "p": "**Situational** Buy only when the buff reaches a useful breakpoint"
+  },
+  {
+   "p": "[[img:4e15182d2a8a6e.png]] **Sniper Potion** 500 mesos · +5 ACC for 10 min Use to remove misses [[img:e18fe0a27cd32a.png]] **Supreme Sniper Potion** 600 mesos · +7 ACC for 15 min Best shop ACC buff [[img:8d7b05272e3e8b.png]] **Warrior Potion** 500 mesos · +10 Attack Power for 10 min Use for a damage breakpoint"
+  },
+  {
+   "p": "**DON'T BUY** Worse recovery per meso than the choices above"
+  },
+  {
+   "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 mesos · 500 HP 1.43 HP per meso [[img:d19cbf8225851d.png]] **Blue Potion** 220 mesos · 200 MP 0.91 MP per meso"
+  },
+  {
+   "p": "Lemon was the most-purchased item in both CoT1 and CoT2 for good reason. It matches Orange at 1 MP per meso, restores three times as much MP per use, and is sold in every major training region."
+  },
+  {
+   "note": "**Level 70 cost example:** Grummash's Chrono build uses about 83 Power Strikes per minute. At 12 MP each, that is 996 MP, or 6.6 Lemons and 996 mesos per minute before Rage, Booster, Rush, HP food, or misses."
+  },
+  {
+   "p": "Accuracy potions pay for themselves when they remove misses or unlock a faster map. Test the potion in Training Advisor first. If your hit rate stays at 100% without it, spend the mesos elsewhere."
+  },
+  {
+   "guide": "best-buy-shop-efficiency",
+   "text": "Compare shop potion efficiency"
+  },
+  {
+   "h2": "Common Fighter mistakes"
+  },
+  {
+   "p": "Most bad Fighter builds come from locking in weapon SP too early, forcing maps the character cannot hit, or spending mesos faster than the build earns them."
+  },
+  {
+   "img": "1a9d73e912f3ab.png",
+   "w": 130,
+   "h": 148
+  },
+  {
+   "ol": [
+    "**Spending Mastery SP before choosing sword or axe.** One-handed and two-handed weapons share the same family skills. Sword and axe do not.",
+    "**Moving to a higher-level map with poor hit rate.** A miss still consumes the attack's HP and MP. Check 100% hit and how many of your weakest hits are needed to kill first.",
+    "**Maxing Rush early.** Rush 1 is useful, but it costs 40 MP. Early skill levels can empty your MP bar and meso wallet.",
+    "**Leaving Final Attack on without testing it.** It helps when the follow-up finishes mobs and wastes time when Power Strike already guarantees the kill.",
+    "**Treating a shield as plain WDEF.** A shield can Guard and fully block eligible physical hits. Clean Guard chance is 18.0% on Red Cross Shield and 27.7% on Gold Ancient Shield. Shield DEF scrolls raise WDEF and Guard chance.",
+    "**Assuming Rage buffs magic.** Rage raises Attack Power used by physical attacks. It does not raise Magic Attack.",
+    "**Buying every armor upgrade while short on potions.** A weapon or Accuracy breakpoint matters more than a small WDEF increase. Keep enough mesos for HP food and Lemons."
+   ]
+  },
+  {
+   "h2": "Sample level 70 Fighter build by Grummash"
+  },
+  {
+   "p": "This is a realistic two-handed axe endpoint with every equipment slot filled and scrolled with Lesser scrolls. It shows what the guide's AP and axe SP path is building toward."
+  },
+  {
+   "img": "89b71c5431f703.png",
+   "w": 130,
+   "h": 184
+  },
+  {
+   "h3": "Equipment and scrolls"
+  },
+  {
+   "table": [
+    [
+     "Slot",
+     "Item",
+     "Useful base stats",
+     "Scrolls",
+     "Source example"
+    ],
+    [
+     "Hat",
+     "[[img:0798a9c454e6a7.png]]Mithril Planet",
+     "+7 DEX, +7 ACC, 70 WDEF, 29 MDEF, +10 MP",
+     "Hat Accuracy Scroll: Lesser x7",
+     "Check the item page"
+    ],
+    [
+     "Earrings",
+     "[[img:ea67f3099d0314.png]]Metal Silver Earrings",
+     "+6% Critical Damage, 49 MDEF",
+     "Earring STR Scroll: Lesser x5",
+     "Check the item page"
+    ],
+    [
+     "Cape",
+     "[[img:fcb432c862ec89.png]]Red Gaia Cape",
+     "+4 STR, +5 ACC",
+     "Cape STR Scroll: Lesser x5",
+     "Free Market"
+    ],
+    [
+     "Top",
+     "[[img:4493a9a6e2d173.png]]Bronze Platine",
+     "+7 STR, 95 WDEF",
+     "Topwear HP Scroll: Lesser x7",
+     "Check the item page"
+    ],
+    [
+     "Weapon",
+     "[[img:65c7b4f30546c8.png]]Chrono",
+     "93 W.ATK, Speed 6",
+     "Two-handed Axe Attack Scroll: Lesser x7",
+     "Check the item page"
+    ],
+    [
+     "Gloves",
+     "[[img:8c222e88833d66.png]]Bronze Husk",
+     "+7 STR, +1 ACC, +4% Critical Rate",
+     "Gloves Attack Scroll: Lesser x5",
+     "Check the item page"
+    ],
+    [
+     "Bottom",
+     "[[img:1725335df5c70a.png]]Bronze Platine Pants",
+     "+7 STR, 73 WDEF",
+     "Bottomwear HP Scroll: Lesser x7",
+     "Check the item page"
+    ],
+    [
+     "Shoes",
+     "[[img:f0a3dc005937f7.png]]Blue Carzen Boots",
+     "+3 DEX, +7 Avoidability, +4 Speed",
+     "Shoes Speed Scroll: Lesser x5",
+     "Free Market"
+    ]
+   ]
+  },
+  {
+   "h3": "Final stats"
+  },
+  {
+   "p": "**337** Total STR"
+  },
+  {
+   "p": "**70** Total DEX"
+  },
+  {
+   "p": "**140** Total Accuracy"
+  },
+  {
+   "p": "**105** Total W.ATK"
+  },
+  {
+   "table": [
+    [
+     "Category",
+     "Final value"
+    ],
+    [
+     "Base AP",
+     "302 STR / 60 DEX / 4 INT / 4 LUK"
+    ],
+    [
+     "Total stats",
+     "337 STR / 70 DEX / 4 INT / 4 LUK"
+    ],
+    [
+     "Offense",
+     "105 W.ATK, + 40 Attack Power with Rage, 140 ACC, 14 % Critical Rate, + 26 % Critical Damage"
+    ],
+    [
+     "Defense and movement",
+     "406 WDEF, 92 MDEF, 24 Avoidability, +140 item HP, +10 item MP, +9 Speed"
+    ],
+    [
+     "Chrono speed",
+     "Speed 6 before Booster; Speed 4 while Axe Booster is active"
+    ]
+   ]
+  },
+  {
+   "h3": "Damage and MP"
+  },
+  {
+   "p": "These are raw equal-level, 0 WDEF results with max Rage active. Final Attack is excluded so its random follow-up does not inflate the baseline."
+  },
+  {
+   "table": [
+    [
+     "Skill",
+     "Raw hit range",
+     "Expected damage per cast",
+     "One-minute baseline",
+     "Damage/MP"
+    ],
+    [
+     "Normal physical hit",
+     "864-1,324",
+     "1,157 with crit",
+     "Reference range",
+     "-"
+    ],
+    [
+     "Power Strike",
+     "2,247 - 3,442",
+     "3,009 with crit",
+     "83 casts, 249,778 damage, 996 MP",
+     "250.8"
+    ],
+    [
+     "Slash Blast, four targets",
+     "1,123 - 1,721 per target",
+     "6,019 across four targets",
+     "83 casts, 499,557 damage, 996 MP",
+     "501.6"
+    ]
+   ]
+  },
+  {
+   "h3": "Realistic level 70 sword endpoint"
+  },
+  {
+   "p": "Keep the same AP, armor, accessories, and Lesser scrolling standard. Replace Chrono with a [[img:e22c72fcba0f4d.png]]Doombringer scrolled with Two-handed Sword Attack Scroll: Lesser x7. Use Sword Mastery 20, Final Attack: Sword 30, and Sword Booster 20 at the same levels as the axe skills."
+  },
+  {
+   "table": [
+    [
+     "Level 70 sword result",
+     "Value"
+    ],
+    [
+     "Total stats",
+     "337 STR, 70 DEX, 105 W.ATK, 140 ACC, +40 Attack Power with Rage"
+    ],
+    [
+     "Power Strike",
+     "2,651-2,982 raw damage, 2,920 expected with crit"
+    ],
+    [
+     "One minute",
+     "83 Power Strikes, 242,339 damage, 996 MP, 243.3 damage/MP"
+    ],
+    [
+     "Sword Mastery",
+     "+90 WDEF instead of Axe Mastery's bleed"
+    ]
+   ]
+  },
+  {
+   "h2": "At level 70: become a Crusader"
+  },
+  {
+   "p": "Fighter advances to Crusader through Tylus in El Nath. Third job and El Nath are not in the launch build. This guide stops before third-job SP. Finish the second-job build, then plan around the Crusader skill book."
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/fighter-class-guide",
+ "hash": "ba3ea99627a8"
+}

@@ -1,0 +1,636 @@
+{
+ "title": "Kerning City Party Quest (KPQ) Guide",
+ "intro": "MapleStory Classic KPQ: level 21, four players, Channel 1. Cloto's coupon answers, all stage combinations, King Slime's real stats, and Squishy Shoes.",
+ "hero": null,
+ "minutes": 8,
+ "blocks": [
+  {
+   "p": "[[img:da87da2541ddcd.png]] KPQ is the Kerning City party quest: **four players, level 21 and up**, five stages ending on a boss called King Slime. Talk to Lakelis in Kerning City to get started."
+  },
+  {
+   "p": "Is KPQ worth running? Run it for the Squishy Shoes or for nostalgia."
+  },
+  {
+   "p": "Every map in the PQ is a Hidden Street with a 1st Accompaniment stage name under it, and your entire party has 30 minutes to clear the PQ."
+  },
+  {
+   "h2": "Who can run KPQ, and where it starts"
+  },
+  {
+   "p": "You unlock KPQ at level 21. There doesn't appear to be any level cap, and there are no job restrictions."
+  },
+  {
+   "p": "Once in a party of 4, the leader needs to talk to Lakelis by the sewer entrance."
+  },
+  {
+   "p": "During the first test in April a Channel 1 rule was enforced: \"KPQ is available only on Channel 1 but multiple parties can now play KPQ simultaneously\". Before Big Bang only one party per channel could run it, so Classic World cut the wait."
+  },
+  {
+   "h2": "A quest associated with KPQ: Proof of Companionship"
+  },
+  {
+   "p": "Grab the Proof of Companionship quest from Lakelis before your first run. It also opens at 21, requires you to kill one King Slime, and gives **2,193 EXP + 614 mesos + 1 fame** plus a random Intermediate Earring scroll rolling STR, DEX, INT or LUK at 25% each. It is a one-time quest."
+  },
+  {
+   "h2": "Stage by stage"
+  },
+  {
+   "h3": "Stage 1: Ligators and Cloto's questions"
+  },
+  {
+   "img": "d848771455ca01.png",
+   "w": 360,
+   "h": 334,
+   "cap": "Stage 1: the room where the 22 Ligators spawn."
+  },
+  {
+   "p": "[[img:b423899ec4d514.png]]\nLigator"
+  },
+  {
+   "p": "Stage 1 has **22 Ligators** at 68 EXP a kill, and they drop coupons. **Cloto** asks every member except the leader a question. Each member answers by handing Cloto that exact number of coupons for a Pass."
+  },
+  {
+   "table": [
+    [
+     "What Cloto asks about",
+     "Coupons"
+    ],
+    [
+     "Magician job advancement level",
+     "10"
+    ],
+    [
+     "Warrior, Bowman or Thief job advancement level",
+     "10"
+    ],
+    [
+     "EXP needed to get from level 1 to level 2",
+     "15"
+    ],
+    [
+     "INT a Magician needs",
+     "20"
+    ],
+    [
+     "DEX a Bowman or Thief needs",
+     "25"
+    ],
+    [
+     "STR a Warrior needs",
+     "35"
+    ]
+   ]
+  },
+  {
+   "p": "Questions are subject to change and we'll update this guide as needed."
+  },
+  {
+   "p": "Fun fact: Magician advancement question was 8 before Big Bang, and Nexon's release notes moved every 1st job advancement to level 10 in MSCW."
+  },
+  {
+   "p": "One trick that likely still works: if a member draws the 35-coupon question, hand that player the leader role, since the leader never gets asked. The old leader drops to regular member, talks to Cloto, and draws a fresh question of their own, quite possibly a cheaper one."
+  },
+  {
+   "h3": "Stage 2: the ropes"
+  },
+  {
+   "img": "54fa64b6870c5a.png",
+   "w": 360,
+   "h": 189,
+   "cap": "Stage 2, cropped to the puzzle. A and B hang from the high branch, C and D from the low branches."
+  },
+  {
+   "p": "There are four ropes to hang from. Three members hang on three ropes and leave one empty, then the leader checks with Cloto. Only four arrangements exist. The ropes carry no markings, so we gave them letters, matching the picture above: A and B on the high branch, C and D on the low branches."
+  },
+  {
+   "table": [
+    [
+     "Try",
+     "Members on",
+     "Empty rope",
+     "A B C D"
+    ],
+    [
+     "1",
+     "A, B, C",
+     "leave D empty",
+     "● ● ● ○"
+    ],
+    [
+     "2",
+     "A, B, D",
+     "leave C empty",
+     "● ● ○ ●"
+    ],
+    [
+     "3",
+     "A, C, D",
+     "leave B empty",
+     "● ○ ● ●"
+    ],
+    [
+     "4",
+     "B, C, D",
+     "leave A empty",
+     "○ ● ● ●"
+    ]
+   ]
+  },
+  {
+   "h3": "Stage 3: the kittens"
+  },
+  {
+   "img": "c0ad378c5f91ed.png",
+   "w": 360,
+   "h": 157,
+   "cap": "Stage 3, cropped to the puzzle. Each platform is numbered by how many kittens it carries."
+  },
+  {
+   "p": "Five platforms carrying 1, 2, 3, 4 and 5 kittens. Three members stand on three of them, for ten combinations. The list that circulates has nine and drops 3-4-5, which is exactly the one a party reaches for after the other nine fail."
+  },
+  {
+   "table": [
+    [
+     "Try",
+     "Platforms (by kitten count)",
+     "1 2 3 4 5"
+    ],
+    [
+     "1",
+     "1-2-3",
+     "● ● ● ○ ○"
+    ],
+    [
+     "2",
+     "1-2-4",
+     "● ● ○ ● ○"
+    ],
+    [
+     "3",
+     "1-2-5",
+     "● ● ○ ○ ●"
+    ],
+    [
+     "4",
+     "1-3-4",
+     "● ○ ● ● ○"
+    ],
+    [
+     "5",
+     "1-3-5",
+     "● ○ ● ○ ●"
+    ],
+    [
+     "6",
+     "1-4-5",
+     "● ○ ○ ● ●"
+    ],
+    [
+     "7",
+     "2-3-4",
+     "○ ● ● ● ○"
+    ],
+    [
+     "8",
+     "2-3-5",
+     "○ ● ● ○ ●"
+    ],
+    [
+     "9",
+     "2-4-5",
+     "○ ● ○ ● ●"
+    ],
+    [
+     "10",
+     "3-4-5",
+     "○ ○ ● ● ●"
+    ]
+   ]
+  },
+  {
+   "h3": "Stage 4: the barrels"
+  },
+  {
+   "img": "e9903901558c8c.png",
+   "w": 360,
+   "h": 149,
+   "cap": "Stage 4, cropped to the puzzle. The barrels carry their own numbers: 1 on top, then 2 and 3, then 4, 5 and 6."
+  },
+  {
+   "p": "Six numbered barrels in a stack, three members standing on three of them, 20 combinations. The table below shows all 20 possible options."
+  },
+  {
+   "table": [
+    [
+     "Try",
+     "Barrels",
+     "1 2 3 4 5 6"
+    ],
+    [
+     "1",
+     "1-2-3",
+     "● ● ● ○ ○ ○"
+    ],
+    [
+     "2",
+     "1-2-4",
+     "● ● ○ ● ○ ○"
+    ],
+    [
+     "3",
+     "1-2-5",
+     "● ● ○ ○ ● ○"
+    ],
+    [
+     "4",
+     "1-2-6",
+     "● ● ○ ○ ○ ●"
+    ],
+    [
+     "5",
+     "1-3-4",
+     "● ○ ● ● ○ ○"
+    ],
+    [
+     "6",
+     "1-3-5",
+     "● ○ ● ○ ● ○"
+    ],
+    [
+     "7",
+     "1-3-6",
+     "● ○ ● ○ ○ ●"
+    ],
+    [
+     "8",
+     "1-4-5",
+     "● ○ ○ ● ● ○"
+    ],
+    [
+     "9",
+     "1-4-6",
+     "● ○ ○ ● ○ ●"
+    ],
+    [
+     "10",
+     "1-5-6",
+     "● ○ ○ ○ ● ●"
+    ],
+    [
+     "11",
+     "2-3-4",
+     "○ ● ● ● ○ ○"
+    ],
+    [
+     "12",
+     "2-3-5",
+     "○ ● ● ○ ● ○"
+    ],
+    [
+     "13",
+     "2-3-6",
+     "○ ● ● ○ ○ ●"
+    ],
+    [
+     "14",
+     "2-4-5",
+     "○ ● ○ ● ● ○"
+    ],
+    [
+     "15",
+     "2-4-6",
+     "○ ● ○ ● ○ ●"
+    ],
+    [
+     "16",
+     "2-5-6",
+     "○ ● ○ ○ ● ●"
+    ],
+    [
+     "17",
+     "3-4-5",
+     "○ ○ ● ● ● ○"
+    ],
+    [
+     "18",
+     "3-4-6",
+     "○ ○ ● ● ○ ●"
+    ],
+    [
+     "19",
+     "3-5-6",
+     "○ ○ ● ○ ● ●"
+    ],
+    [
+     "20",
+     "4-5-6",
+     "○ ○ ○ ● ● ●"
+    ]
+   ]
+  },
+  {
+   "h3": "The last stage: the boss fight"
+  },
+  {
+   "img": "8bebc56464f00c.png",
+   "w": 360,
+   "h": 741,
+   "cap": "The last stage. Four tiers linked by ladders, with the way onward at the top."
+  },
+  {
+   "p": "[[img:d47c459228f719.png]]\nJr. Necki"
+  },
+  {
+   "p": "[[img:79f71ad279ea99.png]]\nCurse Eye"
+  },
+  {
+   "p": "The last stage has Curse Eyes at the top, Jr. Neckis in the middle, King Slime at the bottom, and the NPCs at the very top, so after the boss dies you climb back up."
+  },
+  {
+   "p": "The room holds **6 Jr. Neckis, 3 Curse Eyes and 1 King Slime**. Each of the ten drops a coupon, and the leader hands all ten to Cloto. Jr. Neckis have high avoidability - it'll be good to have at least one player that has enough accuracy to hit them reliably."
+  },
+  {
+   "p": "One tip from the April test: a trade blocked player could not drop the passes at all, and the fix was to make that player the leader."
+  },
+  {
+   "h3": "If someone dies or disconnects"
+  },
+  {
+   "p": "Dying no longer ends your run. In the original game a death threw you out and stranded whatever passes you were carrying, which could sink the whole party; a player who died in the August test walked back in."
+  },
+  {
+   "p": "Three players can still finish. Cloto only questions the members who are not leading, so stage 1 needs two passes instead of three. The puzzle stages still need three bodies on the ropes, platforms and barrels, and the leader fills the empty spot. That is what original-game parties did. Drop to two before the puzzles are done and the run is over: leave and rebuild. Two players who already reached the boss stage can still finish it."
+  },
+  {
+   "h2": "King Slime"
+  },
+  {
+   "p": "[[img:8c9dd185d386ed.png]]\nKing Slime"
+  },
+  {
+   "p": "King Slime is level 32 with **16,820 HP**. Pre-BB's King Slime had about 8,000, so Classic World more than doubled it."
+  },
+  {
+   "table": [
+    [
+     "Stat",
+     "Value"
+    ],
+    [
+     "Level",
+     "32"
+    ],
+    [
+     "HP",
+     "16,820"
+    ],
+    [
+     "MP",
+     "100"
+    ],
+    [
+     "EXP",
+     "248"
+    ],
+    [
+     "Weapon attack",
+     "391"
+    ],
+    [
+     "Magic attack",
+     "391"
+    ],
+    [
+     "Weapon defence",
+     "15"
+    ],
+    [
+     "Magic defence",
+     "15"
+    ],
+    [
+     "Accuracy",
+     "121"
+    ],
+    [
+     "Avoidability",
+     "11"
+    ],
+    [
+     "Knocked back at",
+     "1,750 damage"
+    ]
+   ]
+  },
+  {
+   "p": "King Slime resists holy, fire, ice and lightning, and on death it splits into **11 Slimes**."
+  },
+  {
+   "p": "Two behaviours are still unconfirmed for Classic World. Guides to the original game say it slams the ground for heavy damage that jumping avoids, and that it summons extra Slimes as its HP falls. The melee complaint from the April test held up through August: Classic World has since raised King Slime's weapon attack to 391 and its knockback threshold to 1,750, and warriors in the August test measured single hits of 531 and 600."
+  },
+  {
+   "p": "Original-game players had a timing answer to the slam. He hops before it lands, and the shockwave only catches you on the ground, so jump just before he touches down and it passes under you."
+  },
+  {
+   "p": "**Fun fact:** parties used to insist that killing the Slimes he splits into cut the reward. Players who ran the quest hundreds of times said they never saw a difference."
+  },
+  {
+   "h2": "Bonus stage and getting out"
+  },
+  {
+   "img": "b8f9744b0f0d19.png",
+   "w": 360,
+   "h": 329,
+   "cap": "The bonus room, the densest map in the party quest."
+  },
+  {
+   "p": "[[img:059caff41683e8.png]]\nHorny Mushroom"
+  },
+  {
+   "p": "[[img:b62ded95656118.png]]\nGreen Mushroom"
+  },
+  {
+   "p": "After the boss you land in the bonus room: **24 Horny Mushrooms and 12 Green Mushrooms**, 36 monsters in one small map and the densest in the quest, in a single wave. No KPQ map has an ordinary portal, so talk to **Nella** to leave. She stands on all seven: the five stages, the bonus room, and the exit map after it."
+  },
+  {
+   "img": "383927b49af88b.png",
+   "w": 360,
+   "h": 318,
+   "cap": "The exit map, the seventh and last stop. Nella sends you out from here."
+  },
+  {
+   "h2": "Every monster inside the party quest"
+  },
+  {
+   "p": "The party quest runs its own copies of three familiar monsters, and they are not the ones you meet outside."
+  },
+  {
+   "table": [
+    [
+     "Monster",
+     "Lvl",
+     "HP",
+     "EXP",
+     "Acc",
+     "Avoid",
+     "Where"
+    ],
+    [
+     "[[img:b423899ec4d514.png]] Ligator",
+     "21",
+     "778",
+     "68",
+     "92",
+     "9",
+     "Stage 1, 22 of them"
+    ],
+    [
+     "[[img:d47c459228f719.png]] Jr. Necki",
+     "25",
+     "765",
+     "80",
+     "111",
+     "12",
+     "Last stage, 6, respawns every 180s"
+    ],
+    [
+     "[[img:79f71ad279ea99.png]] Curse Eye",
+     "29",
+     "1,186",
+     "94",
+     "106",
+     "13",
+     "Last stage, 3, respawns every 180s"
+    ],
+    [
+     "[[img:8c9dd185d386ed.png]] King Slime",
+     "32",
+     "16,820",
+     "248",
+     "121",
+     "11",
+     "Last stage, 1, no respawn"
+    ]
+   ]
+  },
+  {
+   "p": "The mob adjustment is real: Ligators in Kerning City swamp are level 31 with 19 avoidability, while stage 1's in KPQ is level 21 with 9 avoidability."
+  },
+  {
+   "h2": "KPQ Rewards"
+  },
+  {
+   "p": "KPQ gives three things: EXP as you clear stages, a chance at **Squishy Shoes** when King Slime dies, and a **Companion's Magic Box** for every member when completing the PQ."
+  },
+  {
+   "h3": "Squishy Shoes"
+  },
+  {
+   "p": "Squishy Shoes are Level 28, have no class requirement and no stat requirement: **+1 STR, +1 DEX, +1 INT, +1 LUK, 18 weapon defence, 7 magic defence, 5 upgrade slots**. They are tradeable."
+  },
+  {
+   "p": "[[img:5a873eeffa58c6.png]]\nSquishy Shoes"
+  },
+  {
+   "h3": "Companion's Magic Box"
+  },
+  {
+   "p": "The table below tracks what players report getting from Companion's Magic Box; add your own items to it on the item page."
+  },
+  {
+   "h2": "Possible Contents"
+  },
+  {
+   "p": "Community sourced"
+  },
+  {
+   "p": "Items players have received from opening this. Record the count range you've seen; others can vote on it."
+  },
+  {
+   "p": "Loading…"
+  },
+  {
+   "p": "[[img:3d13264659dfce.png]]\nCompanion's Magic Box"
+  },
+  {
+   "h2": "Finding a party"
+  },
+  {
+   "p": "Parties form right next to the KPQ npc. Type **J>PQ** with your level and class if you want in. Type **L>PQ** or **R>PQ** if you are the one building the party."
+  },
+  {
+   "ul": [
+    "Done with your coupons early, or leading? Go help whoever is slowest collect theirs.",
+    "Pick up stray coupons and passes and drop them in front of the NPC.",
+    "Explain the combination order calmly to a first-timer.",
+    "Say so before you go AFK.",
+    "Do not leave or kick mid-run. In the original game that ended the run for everyone still inside."
+   ]
+  },
+  {
+   "h2": "Frequently asked questions"
+  },
+  {
+   "h3": "What level do you need for KPQ?"
+  },
+  {
+   "p": "Level 21 and up with no apparent level cap in COT2. The original game capped entry at level 30."
+  },
+  {
+   "h3": "Can you solo KPQ, and how many players does it need?"
+  },
+  {
+   "p": "You cannot enter KPQ without a party of 4."
+  },
+  {
+   "h3": "What are the answers to Cloto's coupon questions?"
+  },
+  {
+   "p": "Known questions: 10 for any job advancement level (fun fact: it was 8 before Big Bang), 15 for the EXP from level 1 to level 2, 20 for a Magician's INT, 25 for a Bowman or Thief's DEX, 35 for a Warrior's STR. August footage also shows members needing 21 and 30, so more questions exist. Hand Cloto the exact count and drop the spares."
+  },
+  {
+   "h3": "What is inside Companion's Magic Box?"
+  },
+  {
+   "p": "Ores, potions, scrolls and gear. The live contents table in the box section above collects every reported pull with community votes."
+  },
+  {
+   "guide": "beginners-guide-first-steps-in-maple-world",
+   "text": "Beginner's Guide: MapleStory Classic World"
+  },
+  {
+   "guide": "warrior-class-guide",
+   "text": "MapleStory Classic Warrior Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "magician-class-guide",
+   "text": "MapleStory Classic Magician Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "bowman-class-guide",
+   "text": "MapleStory Classic Bowman Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "thief-class-guide",
+   "text": "MapleStory Classic Thief Build and Leveling Guide: Lv 1-30"
+  },
+  {
+   "guide": "best-grind-maps-every-level",
+   "text": "Best Grind Maps for Every Level 1-70"
+  },
+  {
+   "guide": "exp-table-level-1-to-100",
+   "text": "EXP Table Lv 1-100: Current and Historical Reference"
+  },
+  {
+   "guide": "maplestory-classic-glossary",
+   "text": "MapleStory Classic World Glossary"
+  },
+  {
+   "guide": "maplestory-classic-worlds-release-date",
+   "text": "MapleStory Classic World Release Date"
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/kerning-city-party-quest-kpq-guide",
+ "hash": "8b21d29077a3"
+}

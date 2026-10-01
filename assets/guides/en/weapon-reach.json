@@ -1,0 +1,766 @@
+{
+ "title": "MapleStory Classic Weapon Reach and Attack Distance",
+ "intro": "Each weapon type has a maximum hit distance depending on animation type. We measured the hit distance of every melee attack animation and ranked every weapon.",
+ "hero": null,
+ "minutes": 5,
+ "blocks": [
+  {
+   "p": "[[img:2e5b5dc346deb7.png]] Every close-range presentation has its own hit zone. This guide shows the full set so you can compare their shapes and reach. Each card is labeled Basic, Final Attack, or Not used. Crouched attack is a basic attack with its own card."
+  },
+  {
+   "p": "**Measurement status:** Close-range hit zones are the same in the first and second tests. Arrow and star base distances plus the current passive maxima were checked in the current Global build in August 2026. Spot different behavior? Tell us on Discord."
+  },
+  {
+   "h2": "Reach mechanics"
+  },
+  {
+   "p": "A normal basic attack can use only the presentations marked Basic. Wider or deeper presentations are separate entries. On weapons with a Final Attack skill they are its follow-up swings; on daggers, wands, and staffs no skill uses them. Bows and crossbows have their own close-range presentations, shown separately below."
+  },
+  {
+   "p": "Playback uses one shared preview speed. Attack Speed changes how long each action takes. 2H Swords use two swing and thrust sets: Scimitar, Lion's Fang, Sparta, and Doombringer have a longer set with its own chart below, and every other 2H Sword uses the Wooden Sword set. Wooden Sword, Two-Handed Sword, Broadsword, and Lionheart are all Fast in the current build."
+  },
+  {
+   "p": "The distances below are exact for each shown presentation. A normal attack with a sword, axe, blunt weapon, spear, polearm, or dagger swings 60% of the time and stabs 40%. At close range, a bow always swings and a crossbow splits 50/50. The data does not identify every skill that can call a non-basic presentation."
+  },
+  {
+   "p": "Swings and thrusts differ in height. A spear or polearm Side swing reaches 125 px above your feet, while thrusts stay at body height, about 30 px up. Every reach number in this guide is the horizontal distance, and each card shows its box height. Every weapon's page in the item database shows its average reach and height, with swings weighted 60% and thrusts 40%, and draws each basic attack to scale."
+  },
+  {
+   "p": "**Read the label first:**\n- **Basic** means a normal basic-attack presentation, including Crouched attack.\n- **Final Attack** marks the follow-up swing a Final Attack proc plays with that weapon.\n- **Not used** means the presentation is in the weapon's art set, but no skill plays it with that weapon."
+  },
+  {
+   "h2": "Reach charts and labels"
+  },
+  {
+   "table": [
+    [
+     "Weapon family",
+     "Confirmed basic maximum",
+     "Other presentations"
+    ],
+    [
+     "**Spear, Polearm**",
+     "133, Overhead swing",
+     "Full sweep 144; Deep thrust 124, Final Attack; Crouched attack 113, also Basic"
+    ],
+    [
+     "**2H Sword: Scimitar, Lion's Fang, Sparta, Doombringer**",
+     "127, Thrust 2",
+     "Wide swing 116; Deep thrust 135, Final Attack; Crouched attack 109, also Basic"
+    ],
+    [
+     "**Other 2H Swords**",
+     "98, Thrust 1 and 2",
+     "Wide swing 92; Deep thrust 123, Final Attack; Crouched attack 92, also Basic"
+    ],
+    [
+     "**2H Axe, 2H Blunt Weapon**",
+     "99, Swing 1",
+     "Wide swing 114; Deep thrust 116, Final Attack; Crouched attack 86, also Basic"
+    ],
+    [
+     "**1H Axe, most 1H Swords**",
+     "102, Swing 3",
+     "Wide swing 123; Deep thrust 110, Final Attack; Crouched attack 74, also Basic"
+    ],
+    [
+     "**1H Sword: Long Sword, Beginner's Long Sword, Gladius, Old Gladius, Hero's Gladius, Traus, Jeweled Katar, Sky Blue Umbrella, Yellow Umbrella**",
+     "85, Swing 1",
+     "Wide swing 100; Deep thrust 95, Final Attack; Crouched attack 66, also Basic"
+    ],
+    [
+     "**Dagger: Triangular Zamadar, Beginner's Triangular Zamadar, Triple-Tipped Zamadar, Halfmoon Zamadar, Forked Dagger, Cass, Shinkita**",
+     "102, Swing 3",
+     "Wide swing 123; Deep thrust 110, not used; Crouched attack 74, also Basic"
+    ],
+    [
+     "**Other Daggers**",
+     "85, Swing 1",
+     "Wide swing 100; Deep thrust 95, not used; Crouched attack 66, also Basic"
+    ],
+    [
+     "**1H Blunt Weapon**",
+     "94, Swing 3",
+     "Wide swing 118; Deep thrust 108, Final Attack; Crouched attack 72, also Basic"
+    ],
+    [
+     "**Wand, Staff**",
+     "69, Swing 2, their only normal attack",
+     "Swing 3 94, Swing 1 77, and thrusts 82, never in normal attacks; Crouched attack 72, also Basic"
+    ],
+    [
+     "**Bow**",
+     "92, Crouched attack",
+     "Overhead whack 86; Uppercut whack 78, also Basic"
+    ],
+    [
+     "**Crossbow**",
+     "86, Overhead whack",
+     "Thrust 84, also Basic; Crouched attack 85, also Basic"
+    ],
+    [
+     "**Bare hands**",
+     "64, Punch 1",
+     "Punch 2 60; Crouched attack 56, also Basic"
+    ]
+   ]
+  },
+  {
+   "p": "Each diagram draws that presentation's hit box over your character. The bar under the box reads \"hits A-B px out\": B is the far edge, and the short dashed part is the close-in zone it cannot touch. The label on top is the box height. Check the card label before treating a distance as a normal basic attack. Each crouched basic-attack card uses the ordinary prone pose shown in its clip."
+  },
+  {
+   "p": "Basic attack reach at a glance"
+  },
+  {
+   "p": "Bars are proportional; values are game pixels."
+  },
+  {
+   "p": "Spear / Polearm: **133**"
+  },
+  {
+   "p": "Scimitar, Lion's Fang, Sparta, Doombringer: **127**"
+  },
+  {
+   "p": "1H Sword / Axe, Zamadar daggers: **102**"
+  },
+  {
+   "p": "2H Axe / Blunt: **99**"
+  },
+  {
+   "p": "Other 2H Swords: **98**"
+  },
+  {
+   "p": "1H Blunt Weapon: **94**"
+  },
+  {
+   "p": "Bow crouched attack: **92**"
+  },
+  {
+   "p": "Crossbow overhead whack: **86**"
+  },
+  {
+   "p": "Long Sword group, other daggers: **85**"
+  },
+  {
+   "p": "Wand / Staff (Swing 2 only): **69**"
+  },
+  {
+   "p": "Bare hands: **64**"
+  },
+  {
+   "p": "Spear and Polearm: basic and Final Attack presentations"
+  },
+  {
+   "p": "Pictured: Pole Arm. Spears and polearms share identical hit zones."
+  },
+  {
+   "p": "swing Full sweep (Final Attack) 144 px"
+  },
+  {
+   "img": "aa1ac3718a0d14.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Overhead swing (Basic) 133 px"
+  },
+  {
+   "img": "643d2ef9dd6ab3.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Side swing (Basic) 120 px"
+  },
+  {
+   "img": "5c55cee77778ec.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Short swing (Basic) 116 px"
+  },
+  {
+   "img": "5ad0c8efedf70a.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Thrust 1 (Basic) 130 px"
+  },
+  {
+   "img": "81ae886dfe4b2c.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Deep thrust (Final Attack) 124 px"
+  },
+  {
+   "img": "5e071a4fc3bb39.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Thrust 2 (Basic) 111 px"
+  },
+  {
+   "img": "6be3f1256821f1.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "crouch Crouched attack (Basic) 113 px"
+  },
+  {
+   "img": "ba3a0c31f487ec.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "2H Sword: basic and Final Attack presentations"
+  },
+  {
+   "p": "Pictured: Wooden Sword. Every 2H Sword except Scimitar, Lion's Fang, Sparta, and Doombringer uses this set. Wide swing and Deep thrust are the follow-up swings of Final Attack: Sword."
+  },
+  {
+   "p": "swing Wide swing (Final Attack) 92 px"
+  },
+  {
+   "img": "2e60279022154d.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Swing 1 (Basic) 86 px"
+  },
+  {
+   "img": "4198fffc378588.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Swing 3 (Basic) 78 px"
+  },
+  {
+   "img": "30673fa1d0d0cf.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Swing 2 (Basic) 75 px"
+  },
+  {
+   "img": "af34b0e4375182.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Deep thrust (Final Attack) 123 px"
+  },
+  {
+   "img": "4cf67b48c447e3.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Thrust 2 (Basic) 98 px"
+  },
+  {
+   "img": "e9c5bb3930e3bd.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Thrust 1 (Basic) 98 px"
+  },
+  {
+   "img": "9472d4f339361a.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "crouch Crouched attack (Basic) 92 px"
+  },
+  {
+   "img": "171b767f69d360.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "2H Sword, long set: basic and Final Attack presentations"
+  },
+  {
+   "p": "Pictured: Scimitar. Scimitar, Lion's Fang, Sparta, and Doombringer use this longer set. Wide swing and Deep thrust are the follow-up swings of Final Attack: Sword."
+  },
+  {
+   "p": "swing Wide swing (Final Attack) 116 px"
+  },
+  {
+   "img": "79a21475b0c554.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Swing 1 (Basic) 100 px"
+  },
+  {
+   "img": "00649832a9aeaf.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Swing 3 (Basic) 87 px"
+  },
+  {
+   "img": "595e667d045444.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Swing 2 (Basic) 86 px"
+  },
+  {
+   "img": "ffd5084ec6c614.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Deep thrust (Final Attack) 135 px"
+  },
+  {
+   "img": "363d017cd412c4.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Thrust 2 (Basic) 127 px"
+  },
+  {
+   "img": "ac02c11c7f63f6.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Thrust 1 (Basic) 110 px"
+  },
+  {
+   "img": "c9085533704b1d.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "crouch Crouched attack (Basic) 109 px"
+  },
+  {
+   "img": "ec272e3d2a2b2a.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "2H Axe and 2H Blunt: basic and extra presentations"
+  },
+  {
+   "p": "Pictured: Metal Axe. Wide swing and Deep thrust are Final Attack's follow-up swings for both 2H Axe and 2H Blunt Weapon."
+  },
+  {
+   "p": "swing Wide swing (Final Attack) 114 px"
+  },
+  {
+   "img": "6f9334752e33a1.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Swing 1 (Basic) 99 px"
+  },
+  {
+   "img": "43e43afc97194b.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Swing 3 (Basic) 85 px"
+  },
+  {
+   "img": "b7030e60668376.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Swing 2 (Basic) 84 px"
+  },
+  {
+   "img": "006e1b968032af.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Deep thrust (Final Attack) 116 px"
+  },
+  {
+   "img": "3601002e9e587f.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Thrust 2 (Basic) 90 px"
+  },
+  {
+   "img": "4af5620e46136e.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Thrust 1 (Basic) 90 px"
+  },
+  {
+   "img": "c0a567299a006c.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "crouch Crouched attack (Basic) 86 px"
+  },
+  {
+   "img": "0e9f9743efc034.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "1H Sword and 1H Axe: basic and extra presentations"
+  },
+  {
+   "p": "Pictured: Sword. Every 1H Axe, most 1H Swords, and the Zamadar daggers, Forked Dagger, Cass, and Shinkita use this set. Wide swing and Deep thrust are Final Attack's follow-up swings for 1H Sword and 1H Axe. Claw melee pokes share this art set; Crouched attack is basic."
+  },
+  {
+   "p": "swing Wide swing (Final Attack) 123 px"
+  },
+  {
+   "img": "d201b34f0c7efa.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Swing 3 (Basic) 102 px"
+  },
+  {
+   "img": "ebed65f325401d.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Swing 1 (Basic) 88 px"
+  },
+  {
+   "img": "569ea5c4557720.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Swing 2 (Basic) 73 px"
+  },
+  {
+   "img": "d892cbf5a4e175.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Deep thrust (Final Attack) 110 px"
+  },
+  {
+   "img": "79644f44312c62.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Thrust 1 (Basic) 84 px"
+  },
+  {
+   "img": "38c1eb1f598ff1.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Thrust 2 (Basic) 83 px"
+  },
+  {
+   "img": "108c81e1bfcd69.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "crouch Crouched attack (Basic) 74 px"
+  },
+  {
+   "img": "0cc40c62972493.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "Dagger: basic and unused presentations"
+  },
+  {
+   "p": "Pictured: Razor. Most daggers use this shorter set, and so do Long Sword, Beginner's Long Sword, Gladius, Old Gladius, Hero's Gladius, Traus, Jeweled Katar, and both umbrellas. On those swords, Wide swing and Deep thrust are Final Attack's follow-up swings."
+  },
+  {
+   "p": "swing Wide swing (not used) 100 px"
+  },
+  {
+   "img": "7e98e7d8dbb728.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Swing 3 (Basic) 78 px"
+  },
+  {
+   "img": "2e49f18bf55c0f.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Swing 1 (Basic) 85 px"
+  },
+  {
+   "img": "01d9a8321fedca.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Swing 2 (Basic) 64 px"
+  },
+  {
+   "img": "a635f814503166.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Deep thrust (not used) 95 px"
+  },
+  {
+   "img": "f29f16dee6325b.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Thrust 1 (Basic) 74 px"
+  },
+  {
+   "img": "23c18198912ff8.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Thrust 2 (Basic) 70 px"
+  },
+  {
+   "img": "ef6794082bcaef.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "crouch Crouched attack (Basic) 66 px"
+  },
+  {
+   "img": "a5359de43a2706.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "1H Blunt, Wand, and Staff: basic and extra presentations"
+  },
+  {
+   "p": "Pictured: Wooden Wand, and Wooden Club for Wide swing and Deep thrust (the same set). Wide swing and Deep thrust are Final Attack's follow-up swings for 1H Blunt Weapon. No skill uses them with wands or staffs. Wands and staffs attack with Swing 2 only; the other basic cards apply to 1H Blunt Weapon."
+  },
+  {
+   "p": "swing Wide swing (Final Attack or not used) 118 px"
+  },
+  {
+   "img": "4721775647e6cf.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Swing 3 (Basic) 94 px"
+  },
+  {
+   "img": "ee8dd28362bd77.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Swing 1 (Basic) 77 px"
+  },
+  {
+   "img": "54cb06749b1aee.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Swing 2 (Basic) 69 px"
+  },
+  {
+   "img": "1ae17ed1480ad2.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Deep thrust (Final Attack or not used) 108 px"
+  },
+  {
+   "img": "d4084623d957ca.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Thrust 1 (Basic) 82 px"
+  },
+  {
+   "img": "dbd6f593c0ab5b.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Thrust 2 (Basic) 82 px"
+  },
+  {
+   "img": "82d16a4fd8f957.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "crouch Crouched attack (Basic) 72 px"
+  },
+  {
+   "img": "04a41f2923ee01.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "Bow: basic and crouched melee presentations"
+  },
+  {
+   "p": "Pictured: War Bow. Both whacks and Crouched attack are basic attacks."
+  },
+  {
+   "p": "swing Overhead whack (Basic) 86 px"
+  },
+  {
+   "img": "4496fd2ca19db9.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "swing Uppercut whack (Basic) 78 px"
+  },
+  {
+   "img": "4a4be00dc1a1af.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "crouch Crouched attack (Basic) 92 px"
+  },
+  {
+   "img": "1250043c0920de.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "Crossbow: basic melee presentations"
+  },
+  {
+   "p": "Pictured: Crossbow. Overhead whack, Thrust, and Crouched attack are all basic attacks. At close range, a normal crossbow attack is an Overhead whack or a Thrust, 50/50."
+  },
+  {
+   "p": "swing Overhead whack (Basic) 86 px"
+  },
+  {
+   "img": "1d734bcd6985a8.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Thrust (Basic) 84 px"
+  },
+  {
+   "img": "5f81803c878930.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "crouch Crouched attack (Basic) 85 px"
+  },
+  {
+   "img": "5a91818341b30e.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "Bare hands: punches and crouched presentation"
+  },
+  {
+   "p": "No weapon equipped."
+  },
+  {
+   "p": "thrust Punch 1 (Basic) 64 px"
+  },
+  {
+   "img": "7465cd16d359f7.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "thrust Punch 2 (Basic) 60 px"
+  },
+  {
+   "img": "1bf6df56678d35.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "crouch Crouched attack (Basic) 56 px"
+  },
+  {
+   "img": "3eb680350780bb.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "h2": "Why can a spear basic attack whiff at range?"
+  },
+  {
+   "p": "For a normal spear or polearm basic attack, Overhead swing reaches 133, Thrust 1 reaches 130, and Thrust 2 reaches 111. At 133, only Overhead swing connects. Full sweep reaches 144, but it is Final Attack's follow-up swing and does not raise normal basic-attack reach."
+  },
+  {
+   "p": "The hit-zone data gives each presentation's shape, and the 60/40 split describes a normal attack. Power Strike, Slash Blast, and the extra hit from Final Attack use the same 60/40 split as a normal attack."
+  },
+  {
+   "h2": "Do spears and polearms have the longest basic reach?"
+  },
+  {
+   "p": "Yes. Their confirmed basic maximum is Overhead swing at 133. The next longest basic attacks are Thrust 2 at 127 on Scimitar, Lion's Fang, Sparta, and Doombringer, and Swing 3 at 102 on 1H Swords, 1H Axes, and the Zamadar daggers. Spear and polearm share the same hit zones, so neither out-reaches the other. The 144 Full sweep and 124 Deep thrust remain useful for comparing every presentation, but they are not normal basic attacks."
+  },
+  {
+   "p": "Basic presentations still overlap. Thrust 2 on Scimitar, Lion's Fang, Sparta, and Doombringer reaches 127, farther than a spear or polearm Short swing at 116, and the basic spear and polearm set spans 111 to 133. Each zone is exact. A normal spear or polearm attack swings 60% of the time and stabs 40%."
+  },
+  {
+   "h2": "Do bows out-reach throwing stars?"
+  },
+  {
+   "p": "Yes. A bow or crossbow basic arrow starts at 300 px, while a throwing star starts at 200 px. The Eye of Amazon adds up to 120 px, giving bows and crossbows 420 px at max. Keen Eyes adds up to 200 px, giving throwing stars 400 px at max. Projectile distances use a different measurement from the close-range hit rectangles above."
+  },
+  {
+   "p": "Bow has three basic close-range attacks: Crouched attack at 92, Overhead whack at 86, and Uppercut whack at 78. The crouched bow attack reaches 6 px farther than the longest standing whack. Crossbow Overhead whack reaches 86, its Crouched attack reaches 85, and its Thrust reaches 84."
+  },
+  {
+   "h2": "Measurement method"
+  },
+  {
+   "p": "Each shown presentation carries a hit rectangle that decides what it can reach. We measured its forward reach and height from the game's own data, then grouped presentations that share the same close-range set. That is why some rows match: wands, staffs, and 1H blunt weapons share one set, while spear and polearm share another. Crouched cards use the ordinary prone pose shown in their GIFs."
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/weapon-reach",
+ "hash": "004d47e56362"
+}

@@ -1,0 +1,638 @@
+{
+ "title": "Forgotten Hollow Guide: Quests, Monsters and Maps (Lv 39-60)",
+ "intro": "Forgotten Hollow exists nowhere else in MapleStory: 15 quests, a cave fairy town, ten new monsters and the Rotten Mushmom boss.",
+ "hero": null,
+ "minutes": 8,
+ "blocks": [
+  {
+   "p": "[[img:99e27e8c542fc6.png]] Forgotten Hollow is a brand-new area that exists nowhere else in MapleStory. It's a cave with its own fairy town, ten new monsters, the Rotten Mushmom boss and 15 quests. The story starts at level 39 with Grendel the Really Old in Ellinia. It ends with him too."
+  },
+  {
+   "img": "666c9e9d0a6175.png",
+   "w": 360,
+   "h": 204,
+   "cap": "The Forgotten Hollow town. Take the upper-left door for the Cave Fairy Sanctuary, or the lower door with the potion sign for the Cave Fairy Department Store."
+  },
+  {
+   "h2": "Getting into the Hollow"
+  },
+  {
+   "p": "The front door is The Tree Tunnel At the Forest Up North, off The Forest North of Ellinia. The Ellinia quests track the disturbance to that tunnel. Welcome to the Hollow sends you down it. On the Hollow side, Forgotten Entrance III has the portal back up to the tunnel. From there, walk west through Forgotten Entrance II and I, then Primeval Forest III, II and I, to reach town."
+  },
+  {
+   "p": "There is a back door too. Sleepy Dungeon V has a way down into Forgotten Dungeon Tunnel. From there, The Faded Canopy and The End of Fleeting Light lead to town."
+  },
+  {
+   "p": "A Return Scroll to Forgotten Hollow takes you straight to town. Zelya gives you two for Natural Adhesive, and Luma sells them for 800 mesos."
+  },
+  {
+   "h2": "The lore"
+  },
+  {
+   "p": "[[img:2331c6fcb73c56.png]]\nGrendel the Really Old"
+  },
+  {
+   "p": "[[img:40679144823e91.png]]\nArwen the Fairy"
+  },
+  {
+   "p": "[[img:d788217f0b6bb7.png]]\nNyroth"
+  },
+  {
+   "p": "[[img:083f1b7e92257b.png]]\nZelya"
+  },
+  {
+   "p": "[[img:e3ba4ea871bc1b.png]]\nJaime the Wandering Explorer"
+  },
+  {
+   "p": "[[img:8f0cbb26a9908f.png]]\nDaniel the Scholar"
+  },
+  {
+   "p": "[[img:ef41fd7de88d5f.png]]\nMyra"
+  },
+  {
+   "h3": "Grendel's warning"
+  },
+  {
+   "p": "Grendel the Really Old senses a magical disturbance from the Magic Library. Bring him 25 Luminous Magical Resonance vials from Lupins and he confirms it: an ancient seal has fractured, and something buried long ago is waking up. He sends you to Arwen the Fairy, because the fairies are native to the forest and feel the distress of the ancient woods."
+  },
+  {
+   "p": "Arwen uses Rotten Root Fragments from Cold Eyes as a tracking focus and traces the dark resonance to The Tree Tunnel At the Forest Up North. When you bring that news back, Grendel realizes an ancient barrier has been ripped open. That reveals the entrance to the Forgotten Hollow."
+  },
+  {
+   "p": "He asks you to go down and see what remains of the fairy homeland. At the bottom you meet Nyroth, an eccentric fairy who chose to stay behind in the dark decades ago."
+  },
+  {
+   "h3": "Zelya's map"
+  },
+  {
+   "p": "Zelya is a cave fairy whose people once lived deep inside the cave. She drew a map to find her way back, then dropped it when Glowshrooms attacked her on a walk. The monsters tore it to pieces. You gather the fragments and bring Raffle Petals to piece it together. Then you clear the Aqumanders and Echopuses blocking her way home, but monsters keep pouring out from deeper in the cave."
+  },
+  {
+   "h3": "Nyroth, Jaime and Daniel"
+  },
+  {
+   "p": "Nyroth tries to Arcforge a protection scroll from Rafflesia Petals. The rot inside them swallows his forging fire, and all he gets is a Scorched Arcon Scroll. He decides the sickness is a living malice and sends you to the alchemist Jaime the Wandering Explorer in Decayed Tunnel III."
+  },
+  {
+   "p": "Jaime traces the rot to rusted iron in the soil, left over from Tristan's ancient battle with the Balrog. Clearing 50 Echopuses cleans the air. The living malice, Caligo, lies deeper."
+  },
+  {
+   "p": "Daniel the Scholar, a friendly mediator for the fairies, waits at the Precipice of Darkness. Caligo has consumed the Arcon. Daniel weaves an invisible Stasis Seal from Cursed Dolls and Duskmander Tails. It hides the fairies from Caligo's sight and stops the World Tree's roots from decaying, but it only buys time. You carry the warning back to Grendel, who is relieved the Cave Fairies survived. The Sages now have to prepare for the corrupted Arcon."
+  },
+  {
+   "h3": "Myra's old friends"
+  },
+  {
+   "p": "Deep in the cave, Myra grieves for her old companions. They have changed into the Myewoods nearby and the Sporewoods deeper in the cave, and she asks you to put them to rest. Her second quest sends you to her old friend Grendel in Ellinia with an Ominous Rotten Branch. He is deeply troubled by what is happening there."
+  },
+  {
+   "p": "The Hollow's story starts in Grendel's Magic Library with The Roots of Regret. The Sage's Burden and Myra's Old Friend both end there."
+  },
+  {
+   "h2": "Level range"
+  },
+  {
+   "p": "The ten new monsters run from level 39 (Glowshroom) to 59 (Sporewood). Rotten Mushmom is level 60. The quests open in steps: the Ellinia chain and Zelya's first two at 39, The Road Back Home at 43, Nyroth's chain at 45, Myra at 49 and Daniel at 50. Older monsters share the maps: Zombie Mushrooms, Zombie Lupins, Lupins, Curse Eyes, Evil Eyes and Fairies."
+  },
+  {
+   "h2": "The questline, quest by quest"
+  },
+  {
+   "p": "Fifteen quests in four chains, worth **84,249 EXP and 19,573 mesos** in total. The Ellinia chain comes first. Finishing Welcome to the Hollow opens the other three at once. You can run Zelya, Nyroth and Myra side by side as your level allows."
+  },
+  {
+   "h3": "Ellinia: Grendel and Arwen"
+  },
+  {
+   "table": [
+    [
+     "Quest",
+     "Lvl",
+     "Start and turn-in",
+     "What you do",
+     "Rewards"
+    ],
+    [
+     "The Roots of Regret",
+     "39",
+     "Grendel the Really Old, Magic Library",
+     "Bring 25 Luminous Magical Resonance from Lupins",
+     "3,531 EXP, 900 mesos, 20 Orange Potions"
+    ],
+    [
+     "A Fairy's Insight",
+     "39",
+     "Grendel, then Arwen the Fairy in Ellinia",
+     "Talk to Arwen",
+     "4,200 EXP, 1,100 mesos, 20 Blue Potions"
+    ],
+    [
+     "Tracing the Resonance",
+     "39",
+     "Arwen the Fairy",
+     "Bring 25 Rotten Root Fragments from Cold Eyes",
+     "4,200 EXP, 1,100 mesos, one Hat Accuracy Scroll: Intermediate or Hat Accuracy Scroll: Greater (50% each)"
+    ],
+    [
+     "The Yawning Abyss",
+     "39",
+     "Arwen, then Grendel",
+     "Report where the resonance leads",
+     "1,500 EXP, 500 mesos, 10 Blue Potions"
+    ],
+    [
+     "Welcome to the Hollow",
+     "39",
+     "Grendel, then Nyroth in Forgotten Hollow",
+     "Go down through The Tree Tunnel At the Forest Up North",
+     "2,500 EXP, 800 mesos, one Greater weapon scroll of your choice for your class"
+    ]
+   ]
+  },
+  {
+   "h3": "Zelya"
+  },
+  {
+   "table": [
+    [
+     "Quest",
+     "Lvl",
+     "Start and turn-in",
+     "What you do",
+     "Rewards"
+    ],
+    [
+     "Zelya's Map",
+     "39",
+     "Zelya, Cave Fairy Sanctuary",
+     "Bring 25 Zelya's Map Fragments from Glowshrooms",
+     "5,062 EXP, 1,140 mesos, 20 Blue Potions"
+    ],
+    [
+     "Natural Adhesive",
+     "39",
+     "Zelya",
+     "Defeat 50 Raffles and bring 25 Raffle Petals",
+     "5,062 EXP, 1,140 mesos, 2 Return Scrolls to Forgotten Hollow"
+    ],
+    [
+     "The Road Back Home",
+     "43",
+     "Zelya",
+     "Defeat 50 Aqumanders and 50 Echopuses",
+     "6,075 EXP, 1,257 mesos, one random Greater earring scroll: STR, DEX, INT or LUK (25% each)"
+    ]
+   ]
+  },
+  {
+   "h3": "Nyroth, Jaime and Daniel the Scholar"
+  },
+  {
+   "table": [
+    [
+     "Quest",
+     "Lvl",
+     "Start and turn-in",
+     "What you do",
+     "Rewards"
+    ],
+    [
+     "Nyroth's Fragile Hope",
+     "45",
+     "Nyroth, Forgotten Hollow",
+     "Bring 20 Rafflesia Petals",
+     "5,255 EXP, 1,300 mesos, 25 Blue Potions"
+    ],
+    [
+     "Matters of the Heart",
+     "45",
+     "Nyroth, then Jaime the Wandering Explorer in Decayed Tunnel III",
+     "Deliver the Scorched Arcon Scroll",
+     "5,255 EXP, 1,300 mesos, one Cape Accuracy Scroll: Intermediate or Cape Accuracy Scroll: Greater (50% each)"
+    ],
+    [
+     "A Memory of Iron",
+     "45",
+     "Jaime the Wandering Explorer",
+     "Defeat 50 Echopuses",
+     "6,134 EXP, 1,600 mesos, 15 Watermelons, 10 Lemons"
+    ],
+    [
+     "A Heart of Stillness and Wood",
+     "50",
+     "Daniel the Scholar, Precipice of Darkness",
+     "Bring 30 Cursed Dolls and 20 Duskmander Tails",
+     "12,500 EXP, 2,500 mesos, 15 Elixirs, a Bottomwear HP Scroll: Greater"
+    ],
+    [
+     "The Sage's Burden",
+     "50",
+     "Daniel, then Grendel the Really Old in Ellinia",
+     "Warn Grendel",
+     "9,875 EXP, 2,500 mesos, 2 Mana Elixirs, 10 Lemons, 15 Elixirs"
+    ]
+   ]
+  },
+  {
+   "h3": "Myra"
+  },
+  {
+   "table": [
+    [
+     "Quest",
+     "Lvl",
+     "Start and turn-in",
+     "What you do",
+     "Rewards"
+    ],
+    [
+     "Old Friends",
+     "49",
+     "Myra, Lingering Regret",
+     "Defeat 50 Myewoods and 30 Sporewoods",
+     "7,706 EXP, 1,433 mesos"
+    ],
+    [
+     "Myra's Old Friend",
+     "49",
+     "Myra, then Grendel the Really Old in Ellinia",
+     "Deliver the Ominous Rotten Branch Myra hands you",
+     "5,394 EXP, 1,003 mesos, 15 Mana Elixirs"
+    ]
+   ]
+  },
+  {
+   "p": "**Where to farm each quest target:**\n• **Lupins:** Monkey Swamp I (28 of 31)\n• **Cold Eyes:** The Tunnel That Lost Light I (32 of 52)\n• **Glowshrooms:** Forgotten Entrance III (19 of 44)\n• **Raffles:** Forgotten Entrance II and III (14 each)\n• **Aqumanders and Echopuses:** Primeval Forest II (17 of 19)\n• **Rafflesias:** Forbidden Entrance (13)\n• **Echopuses for A Memory of Iron:** Perilous Descent I and II (11 each)\n• **Duskmanders:** Precipice of Darkness (14), next to Daniel\n• **Myewoods:** Lingering Regret (9), where Myra stands\n• **Sporewoods:** Another Sanctuary (7)"
+  },
+  {
+   "h2": "The fairy town"
+  },
+  {
+   "p": "[[img:325d236810c58a.png]]\nArcane Station"
+  },
+  {
+   "p": "[[img:d5f99cdfa5fed8.png]]\nMyen"
+  },
+  {
+   "p": "[[img:203bec653b4bcb.png]]\nLuma"
+  },
+  {
+   "p": "[[img:398b7652a8fab2.png]]\nCave Fairy's Storage"
+  },
+  {
+   "p": "Forgotten Hollow itself is a town map with no monsters. Nyroth stands there next to an Arcane Station for Arcforge crafting. Two doors lead off it."
+  },
+  {
+   "p": "Zelya and Myen are in Cave Fairy Sanctuary."
+  },
+  {
+   "p": "Luma runs the grocery in Cave Fairy Department Store, the only shop in the Hollow. The Cave Fairy's Storage is in the same room. Luma's prices:"
+  },
+  {
+   "table": [
+    [
+     "",
+     "Item",
+     "Mesos"
+    ],
+    [
+     "[[img:be80aa4791c684.png]]",
+     "Red Potion",
+     "50"
+    ],
+    [
+     "[[img:5fa106a591e538.png]]",
+     "Orange Potion",
+     "150"
+    ],
+    [
+     "[[img:a699b6aea354d7.png]]",
+     "White Potion",
+     "350"
+    ],
+    [
+     "[[img:d19cbf8225851d.png]]",
+     "Blue Potion",
+     "220"
+    ],
+    [
+     "[[img:d59bc967011b87.png]]",
+     "Lemon",
+     "150"
+    ],
+    [
+     "[[img:0b62d3c8097728.png]]",
+     "Unagi",
+     "1,000"
+    ],
+    [
+     "[[img:7a625f6fc18a15.png]]",
+     "Orange Juice",
+     "540"
+    ],
+    [
+     "[[img:214630d8acd39d.png]]",
+     "Grape Juice",
+     "1,260"
+    ],
+    [
+     "[[img:05012a2a19e380.png]]",
+     "Return Scroll - Nearest Town",
+     "400"
+    ],
+    [
+     "[[img:d8e686bce03609.png]]",
+     "Return Scroll to Forgotten Hollow",
+     "800"
+    ],
+    [
+     "[[img:05bc2e762fe7a7.png]]",
+     "Arrow for Bow",
+     "1"
+    ],
+    [
+     "[[img:984d475639fe5f.png]]",
+     "Arrow for Crossbow",
+     "1"
+    ],
+    [
+     "[[img:49136f0c4908d9.png]]",
+     "Subi Throwing-Stars",
+     "500"
+    ]
+   ]
+  },
+  {
+   "h2": "The new monsters"
+  },
+  {
+   "p": "Ten regular monsters are new to the Hollow, plus the boss. Levels, HP, EXP and elements:"
+  },
+  {
+   "table": [
+    [
+     "Monster",
+     "Lvl",
+     "HP",
+     "EXP",
+     "Weakness",
+     "Notes"
+    ],
+    [
+     "[[img:3ddc9bfe06aade.png]] Glowshroom",
+     "39",
+     "1,377",
+     "90",
+     "None",
+     "Drops Zelya's Map Fragments"
+    ],
+    [
+     "[[img:2ba29b3aeef67c.png]] Raffle",
+     "40",
+     "1,722",
+     "94",
+     "Fire (ice resistant)",
+     "Drops Raffle Petals"
+    ],
+    [
+     "[[img:71f1092337f3c8.png]] Golden Stirge",
+     "42",
+     "1,278",
+     "103",
+     "None",
+     "Stronger than the regular Stirge"
+    ],
+    [
+     "[[img:fa554ceb1468b9.png]] Aqumander",
+     "43",
+     "2,069",
+     "108",
+     "Lightning (ice resistant)",
+     "Kill target for The Road Back Home"
+    ],
+    [
+     "[[img:2e195968c99a6e.png]] Echopus",
+     "45",
+     "2,163",
+     "117",
+     "Lightning",
+     "Kill target for The Road Back Home and A Memory of Iron"
+    ],
+    [
+     "[[img:ab7412e282fc07.png]] Rafflesia",
+     "47",
+     "2,285",
+     "127",
+     "Fire (ice, poison resistant)",
+     "Drops Rafflesia Petals"
+    ],
+    [
+     "[[img:8d3453e377c2eb.png]] Duskmander",
+     "50",
+     "2,682",
+     "142",
+     "Ice (poison resistant)",
+     "Drops Duskmander Tails"
+    ],
+    [
+     "[[img:9581b138675a2f.png]] Myewood",
+     "54",
+     "3,924",
+     "168",
+     "Fire (lightning resistant)",
+     "Ranged attack uses 125% of its 306 P.DMG. Kill target for Old Friends"
+    ],
+    [
+     "[[img:d2be579f09f89b.png]] Rotten Mushroom",
+     "56",
+     "3,520",
+     "190",
+     "Holy (poison resistant)",
+     "Undead"
+    ],
+    [
+     "[[img:e5d5d56f40987e.png]] Sporewood",
+     "59",
+     "4,834",
+     "205",
+     "Holy / Fire (poison resistant)",
+     "Undead, regenerates HP, same 125% ranged attack as Myewood. Strongest regular monster in the Hollow"
+    ]
+   ]
+  },
+  {
+   "h2": "The boss: Rotten Mushmom"
+  },
+  {
+   "p": "Rotten Mushmom only spawns in Someone Else's Grave, a hidden map off Decayed Tunnel I. She is an undead Mushmom, level 60 against the original's 40."
+  },
+  {
+   "p": "[[img:c090f6e4b73be2.png]]\nRotten Mushmom"
+  },
+  {
+   "table": [
+    [
+     "Boss",
+     "Lvl",
+     "HP",
+     "EXP",
+     "Weakness",
+     "Notes"
+    ],
+    [
+     "[[img:c090f6e4b73be2.png]] Rotten Mushmom",
+     "60",
+     "86,400",
+     "852",
+     "Holy / Fire (poison resistant)",
+     "Undead. Regenerates 864 HP per tick. Respawns every 1 to 1.5 hours"
+    ]
+   ]
+  },
+  {
+   "p": "Her stat block has 752 P.DMG and 827 M.DMG. Those are base stats. What she hits you for depends on the attack she uses and your defenses. Bring a party and potions. We don't recommend soloing her without practice."
+  },
+  {
+   "h2": "Every hunting map"
+  },
+  {
+   "p": "Monster counts per map, in walking order. East of town leads out to the front door. West of town leads down into the Deep Passage."
+  },
+  {
+   "table": [
+    [
+     "Map",
+     "Monsters",
+     "Notes"
+    ],
+    [
+     "Primeval Forest I",
+     "Aqumander 9, Echopus 6, Glowshroom 5",
+     "East of town"
+    ],
+    [
+     "Primeval Forest II",
+     "Echopus 9, Aqumander 8, Golden Stirge 2",
+     ""
+    ],
+    [
+     "Collision of Ice and Fire",
+     "Aqumander 15, Glowshroom 11, Rafflesia 7",
+     "Hidden Street off Primeval Forest II"
+    ],
+    [
+     "Primeval Forest III",
+     "Aqumander 6, Raffle 5",
+     ""
+    ],
+    [
+     "The Valley of Death",
+     "Rafflesia 10, Zombie Mushroom 8, Zombie Lupin 8",
+     "Hidden Street off Primeval Forest III"
+    ],
+    [
+     "Forgotten Entrance I",
+     "Raffle 12, Aqumander 9, Golden Stirge 2",
+     ""
+    ],
+    [
+     "Forgotten Entrance II",
+     "Raffle 14, Glowshroom 13, Lupin 8",
+     ""
+    ],
+    [
+     "Forgotten Entrance III",
+     "Glowshroom 19, Raffle 14, Curse Eye 11",
+     "Exit to The Tree Tunnel At the Forest Up North"
+    ],
+    [
+     "The End of Fleeting Light",
+     "Rafflesia 11, Aqumander 9, Duskmander 7",
+     "West of town"
+    ],
+    [
+     "The Faded Canopy",
+     "Glowshroom 10, Raffle 8, Echopus 7",
+     ""
+    ],
+    [
+     "Forgotten Dungeon Tunnel",
+     "Glowshroom 12, Raffle 12, Curse Eye 4",
+     "Exit to Sleepy Dungeon V"
+    ],
+    [
+     "Forbidden Entrance",
+     "Rafflesia 13, Duskmander 12, Zombie Mushroom 4, Golden Stirge 3",
+     ""
+    ],
+    [
+     "Perilous Descent I",
+     "Echopus 11, Zombie Mushroom 7",
+     "Deep Passage starts here"
+    ],
+    [
+     "Perilous Descent II",
+     "Echopus 11, Duskmander 11, Zombie Mushroom 5",
+     ""
+    ],
+    [
+     "Perilous Descent III",
+     "Duskmander 9, Echopus 5",
+     ""
+    ],
+    [
+     "Decayed Tunnel I",
+     "Duskmander 11, Evil Eye 9",
+     ""
+    ],
+    [
+     "Someone Else's Grave",
+     "Rotten Mushroom 4, Zombie Mushroom 2, Fairy 1",
+     "Hidden Street off Decayed Tunnel I. Rotten Mushmom"
+    ],
+    [
+     "Decayed Tunnel II",
+     "Rafflesia 11, Zombie Lupin 7, Golden Stirge 4",
+     ""
+    ],
+    [
+     "Decayed Tunnel III",
+     "Rafflesia 7, Myewood 6, Golden Stirge 2",
+     "Jaime the Wandering Explorer"
+    ],
+    [
+     "Lingering Regret",
+     "Myewood 9, Echopus 7, Fairy 3",
+     "Myra"
+    ],
+    [
+     "Precipice of Darkness",
+     "Duskmander 14, Rotten Mushroom 6, Zombie Lupin 5, Zombie Mushroom 2",
+     "Daniel the Scholar"
+    ],
+    [
+     "Dilapidated Tomb",
+     "Rotten Mushroom 14, Fairy 3, Sporewood 3",
+     ""
+    ],
+    [
+     "Another Sanctuary",
+     "Rotten Mushroom 10, Sporewood 7, Golden Stirge 3",
+     "Dead end"
+    ]
+   ]
+  },
+  {
+   "h2": "Best classes for grinding here"
+  },
+  {
+   "ul": [
+    "Wizards split the Hollow by element. I/L Wizards get the lightning-weak Aqumander and Echopus plus the ice-weak Duskmander. F/P Wizards get Raffle, Rafflesia, Myewood and Sporewood, which are all weak to fire. Skip poison: Rafflesia, Duskmander, Rotten Mushroom and Sporewood resist it.",
+    "Clerics wreck the undead: Heal hurts Rotten Mushrooms, Sporewood and Rotten Mushmom.",
+    "Warriors fight up close, so touch damage matters. Myewood and Sporewood touch you for their base P.DMG (306 and 331). Their ranged attack uses 125% of P.DMG, so the projectile hits harder before defense."
+   ]
+  }
+ ],
+ "source": "https://meowdb.com/msclassic/guides/forgotten-hollow-the-new-endgame-area",
+ "hash": "69f5a8a4f98e"
+}

@@ -1,308 +1,589 @@
 {
- "key": "guide/crossbowman-class-guide",
- "source_hash": "39d778db5c18",
- "lang": "he",
  "title": "מדריך Crossbowman ל-MapleStory Classic: לבל 30-70",
- "intro": "מדריך Crossbowman ללבלים 30-70. תעקוב אחרי חלוקת ה-SP, תבנה Iron Arrow ו-Crossbow Mastery, ואז תבדוק ציוד ומפות מ-Training Advisor.",
- "pros": [
-  "מקום 6 בדמג' AoE ומקום 4 ב-Damage/MP בלבל 70 בבנצ'מרק הנוכחי.",
-  "Iron Arrow חודר ארבעה מובים לפניך.",
-  "Crossbow Mastery יכול להתעלם מה-Weapon Defense של האויב ב-20% מהמתקפות.",
-  "ל-Crossbow של לבל 50-70 במדריך יש יותר W.ATK בסיסי מה-Bow המקבילים.",
-  "Soul Arrow מאפשר לירות בלי לצרוך חצים."
- ],
- "cons": [
-  "Crossbow תוקף לאט יותר מ-Bow, גם עם Booster.",
-  "Iron Arrow מאבד 20% דמג' על כל מוב נוסף שהוא חודר.",
-  "בטווח של פחות מ-65 px ה-Crossbow שלך מכה במקום לירות. זאת הנפת מלי חלשה.",
-  "המפות הכי טובות צריכות מסלולים ארוכים ושטוחים שמשאירים את המובים בשורה.",
-  "אין סקיל תנועה בג'וב השני. הולכים וקופצים לכל פלטפורמה."
- ],
- "sections": [
+ "intro": "Crossbowman מוותרים על מהירות התקפה בשביל דמג' יותר כבד. Iron Arrow חודר עד ארבעה מובים, Crossbow Mastery יכול להתעלם מה-Defense הפיזי של האויב, ו-Final Attack נותן המשך חזק לטרגט יחיד.",
+ "blocks": [
   {
-   "heading": "מתחילים בלבל 30",
-   "lines": [
-    "המדריך הזה ממשיך את מדריך ה-Bowman ללבל 1 עד 30. נקודת הסיום שלו בלי ריסט היא Arrow Blow 20, Critical Shot 15, The Eye of Amazon 15, Focus 10 ו-Power Knockback 1.",
-    "הבילד השמור של Grummash בלבל 70 משתמש ב-Double Shot 20, Arrow Blow 1 ו-Focus 9. אם אתה רוצה בדיוק את נקודת הסיום הזאת, תעביר 19 SP מ-Arrow Blow ו-1 מ-Focus ל-Double Shot. המחיר בפועל של הריסט הזה ב-Cash Shop לא מאומת."
+   "p": "המדריך הזה מבוסס על בילד ריאלי של Crossbowman בלבל 70 מאת Grummash."
+  },
+  {
+   "p": "**יתרונות**"
+  },
+  {
+   "ul": [
+    "מקום 6 בדמג' AoE ומקום 4 ב-Damage/MP בלבל 70 בבנצ'מרק הנוכחי.",
+    "Iron Arrow חודר ארבעה מובים לפניך.",
+    "Crossbow Mastery יכול להתעלם מה-Weapon Defense של האויב ב-20% מהמתקפות.",
+    "ל-Crossbow של לבל 50-70 במדריך יש יותר W.ATK בסיסי מה-Bow המקבילים.",
+    "Soul Arrow מאפשר לירות בלי לצרוך חצים."
    ]
   },
   {
-   "heading": "אזרחות מומלצת",
-   "lines": [
-    "תשמור על אזרחות Henesys מהמדריך של הג'וב הראשון. התגמולים שלה מכסים חצים, מתכלים של Accuracy, אפשרויות DEX וסקרולי נשק לשני הענפים של Bowman.",
-    "השווה תגמולי אזרחות"
+   "p": "**חסרונות**"
+  },
+  {
+   "ul": [
+    "Crossbow תוקף לאט יותר מ-Bow, גם עם Booster.",
+    "Iron Arrow מאבד 20% דמג' על כל מוב נוסף שהוא חודר.",
+    "בטווח של פחות מ-65 px ה-Crossbow שלך מכה במקום לירות. זאת הנפת מלי חלשה.",
+    "המפות הכי טובות צריכות מסלולים ארוכים ושטוחים שמשאירים את המובים בשורה.",
+    "אין סקיל תנועה בג'וב השני. הולכים וקופצים לכל פלטפורמה."
    ]
   },
   {
-   "heading": "Accuracy אחרי לבל 30",
-   "lines": [
-    "מפת אימון עובדת רק כשהמתקפות שלך פוגעות. כל פספוס מוציא MP, מבזבז את אנימציית המתקפה ומוריד את ה-EXP לדקה.",
-    "Accuracy בסיסי של Bowman: floor((1.2 x Total DEX + 2 x Level + 0.6 x Total LUK) / 4.8 + 20)",
-    "+0.42 ACC לכל לבל",
-    "+0.25 ACC לכל DEX",
-    "+0.13 ACC לכל LUK",
-    "+1.00 ACC לכל ACC ישיר",
-    "לכל מוב יש Avoidability. להילחם מעל הלבל שלך מעלה את ה-ACC שצריך כדי לפגוע, ועליית לבלים סוגרת את הקנס הזה. לכן מפה בלבל נמוך יותר עם הריגות נקיות במתקפה אחת או שתיים יכולה לנצח מפה בלבל גבוה יותר עם פספוסים.",
-    "מוב | לבל המוב | Avoid של המוב | ACC כדי לא לפספס אף פעם באותו לבל",
-    "Jr. Wraith | 34 | 24 | 79 ACC",
-    "Lorang | 38 | 23 | 76 ACC",
-    "Zombie Lupin | 41 | 28 | 92 ACC",
-    "Wraith | 48 | 31 | 101 ACC",
-    "קרא את ההסבר המלא על Accuracy של Bowman · פתח את Accuracy Simulator"
+   "h2": "מתחילים בלבל 30"
+  },
+  {
+   "p": "המדריך הזה ממשיך את מדריך ה-Bowman ללבל 1 עד 30. נקודת הסיום שלו בלי ריסט היא Arrow Blow 20, Critical Shot 15, The Eye of Amazon 15, Focus 10 ו-Power Knockback 1."
+  },
+  {
+   "p": "הבילד השמור של Grummash בלבל 70 משתמש ב-Double Shot 20, Arrow Blow 1 ו-Focus 9. אם אתה רוצה בדיוק את נקודת הסיום הזאת, תעביר 19 SP מ-Arrow Blow ו-1 מ-Focus ל-Double Shot. המחיר בפועל של הריסט הזה ב-Cash Shop לא מאומת."
+  },
+  {
+   "img": "baa9ac22bc819c.png",
+   "w": 130,
+   "h": 219
+  },
+  {
+   "h3": "אזרחות מומלצת"
+  },
+  {
+   "p": "תשמור על אזרחות Henesys מהמדריך של הג'וב הראשון. התגמולים שלה מכסים חצים, מתכלים של Accuracy, אפשרויות DEX וסקרולי נשק לשני הענפים של Bowman."
+  },
+  {
+   "h2": "Accuracy אחרי לבל 30"
+  },
+  {
+   "p": "מפת אימון עובדת רק כשהמתקפות שלך פוגעות. כל פספוס מוציא MP, מבזבז את אנימציית המתקפה ומוריד את ה-EXP לדקה."
+  },
+  {
+   "img": "2253fb1e5bc5fd.png",
+   "w": 130,
+   "h": 201
+  },
+  {
+   "note": "**Bowman Base Accuracy**\nfloor((1.2 x Total DEX + 2 x Level + 0.6 x Total LUK) / 4.8 + 20)\n**+0.42** ACC לכל לבל\n**+0.25** ACC לכל DEX\n**+0.13** ACC לכל LUK\n**+1.00** ACC לכל ACC ישיר"
+  },
+  {
+   "p": "לכל מוב יש Avoidability. להילחם מעל הלבל שלך מעלה את ה-ACC שצריך כדי לפגוע, ועליית לבלים סוגרת את הקנס הזה. לכן מפה בלבל נמוך יותר עם הריגות נקיות במתקפה אחת או שתיים יכולה לנצח מפה בלבל גבוה יותר עם פספוסים."
+  },
+  {
+   "table": [
+    [
+     "מוב",
+     "לבל המוב",
+     "Avoid של המוב",
+     "ACC כדי לא לפספס אף פעם באותו לבל"
+    ],
+    [
+     "[[img:777ced8b4048a6.png]]Jr. Wraith",
+     "34",
+     "24",
+     "79 ACC"
+    ],
+    [
+     "[[img:2a5d75bf6e3634.png]]Lorang",
+     "38",
+     "23",
+     "76 ACC"
+    ],
+    [
+     "[[img:3934c93d7d4444.png]]Zombie Lupin",
+     "41",
+     "28",
+     "92 ACC"
+    ],
+    [
+     "[[img:0386eea7010d4c.png]]Wraith",
+     "48",
+     "31",
+     "101 ACC"
+    ]
    ]
   },
   {
-   "heading": "לבל 30-70: בילד סקילים ולבלינג ל-Crossbowman",
-   "lines": []
+   "guide": "bowman-class-guide",
+   "text": "קרא את ההסבר המלא על Accuracy של Bowman"
   },
   {
-   "heading": "התקדמות ג'וב ל-Crossbowman בלבל 30",
-   "lines": [
+   "h2": "לבל 30-70: בילד סקילים ולבלינג ל-Crossbowman"
+  },
+  {
+   "img": "2c2c9d87584b2e.png",
+   "w": 130,
+   "h": 192
+  },
+  {
+   "h3": "התקדמות ג'וב ל-Crossbowman בלבל 30"
+  },
+  {
+   "ol": [
     "תתחיל את התקדמות הג'וב השני בשיחה עם Athena Pierce ב-Henesys.",
     "תמסור את המכתב שלה למדריך ב-The Road to the Dungeon ותיכנס למבחן.",
     "תאסוף 30 Dark Marbles ממובי המבחן כדי לקבל את The Proof of a Hero.",
-    "תחזיר את ההוכחה ל-Athena ותבחר Crossbowman.",
-    "Athena Pierce: מתחילה ומסיימת את ההתקדמות ל-Crossbowman ב-Henesys.",
-    "Bowman Job Instructor: מריץ את מבחן ה-Dark Marble ליד Henesys.",
-    "ה-SP הראשון של Crossbowman: Iron Arrow: Crossbow 1. נקודה אחת נותנת ירייה חודרת לארבע מטרות ב-120% דמג'. Arrow Blow נשאר טוב יותר על מוב בודד. Iron Arrow מצדיק את ה-MP שלו כשכמה מובים נשארים בשורה."
+    "תחזיר את ההוכחה ל-Athena ותבחר Crossbowman."
    ]
   },
   {
-   "heading": "יעד סקילים בלבל 70",
-   "lines": [
-    "סקיל | SP | תוצאה בלבל הסקיל השמור",
-    "Crossbow Mastery | 20 / 20 | Crossbow Mastery לבל 10, 20% סיכוי להתעלם מה-Weapon Def של האויב.",
-    "Amazon's Judgement | 20 / 20 | למכות קריט יש 100% סיכוי להוריד את ה-Speed של האויב ב-35 ל-5 שניות",
-    "Final Attack: Crossbow | 11 / 30 | 30% הצלחה, Final Attack עם 230% דמג' Crossbow",
-    "Crossbow Booster | 20 / 20 | HP -10, MP -10. מעלה Attack Speed של Crossbow ב-2 שלבים ל-300 שניות",
-    "Soul Arrow: Crossbow | 20 / 20 | MP -5. תוקף בלי לצרוך חצים ל-300 שניות",
-    "Iron Arrow: Crossbow | 30 / 30 | MP -28. דמג' 180%"
+   "p": "[[img:bb76eacd73ab66.png]] **Athena Pierce** מתחילה ומסיימת את ההתקדמות ל-Crossbowman ב-Henesys."
+  },
+  {
+   "p": "[[img:8572391f8c1c32.png]] **Bowman Job Instructor** מריץ את מבחן ה-Dark Marble ליד Henesys."
+  },
+  {
+   "note": "**ה-SP הראשון של Crossbowman: Iron Arrow: Crossbow 1.** נקודה אחת נותנת ירייה חודרת לארבע מטרות ב-120% דמג'. Arrow Blow נשאר טוב יותר על מוב בודד. Iron Arrow מצדיק את ה-MP שלו כשכמה מובים נשארים בשורה."
+  },
+  {
+   "h3": "יעד סקילים בלבל 70"
+  },
+  {
+   "table": [
+    [
+     "סקיל",
+     "SP",
+     "תוצאה בלבל הסקיל השמור"
+    ],
+    [
+     "[[img:fb623463b68fcb.png]]Crossbow Mastery",
+     "20 / 20",
+     "Crossbow Mastery לבל 10, 20% סיכוי להתעלם מה-Weapon Def של האויב."
+    ],
+    [
+     "[[img:bf962edc29af41.png]]Amazon's Judgement",
+     "20 / 20",
+     "למכות קריט יש 100% סיכוי להוריד את ה-Speed של האויב ב-35 ל-5 שניות"
+    ],
+    [
+     "[[img:3aa1776b9e3849.png]]Final Attack: Crossbow",
+     "11 / 30",
+     "30% הצלחה, Final Attack עם 230% דמג' Crossbow"
+    ],
+    [
+     "[[img:4e1a660e5769f2.png]]Crossbow Booster",
+     "20 / 20",
+     "HP -10, MP -10; מעלה Attack Speed של Crossbow ב-2 שלבים ל-300 שניות"
+    ],
+    [
+     "[[img:2f6a4b56c47660.png]]Soul Arrow: Crossbow",
+     "20 / 20",
+     "MP -5; תוקף בלי לצרוך חצים ל-300 שניות"
+    ],
+    [
+     "[[img:a56f556b3a9db2.png]]Iron Arrow: Crossbow",
+     "30 / 30",
+     "MP -28; דמג' 180%"
+    ]
    ]
   },
   {
-   "heading": "חלוקת SP ל-Crossbowman: לבל 30-70",
-   "lines": [
-    "לבלים | השקעה | סה\"כ מצטבר | סיבה",
-    "30 | Iron Arrow +1 | Iron Arrow 1 | פותח חדירה לארבע מטרות.",
-    "31 | Crossbow Mastery +3 | IA 1 / Mastery 3 | מתחילים להעלות את רול הדמג' הכי חלש.",
-    "32 | Crossbow Mastery +2, Crossbow Booster +1 | IA 1 / Mastery 5 / Booster 1 | פותח את בוסט המהירות המלא של שני שלבים.",
-    "33 | Crossbow Booster +2, Final Attack +1 | IA 1 / Mastery 5 / Booster 3 / FA 1 | Final Attack Lv1 לא עולה MP ונותן בערך 18% יותר דמג' לכל MP על מוב אחד.",
-    "34 | Crossbow Booster +1, Soul Arrow +1, Crossbow Mastery +1 | IA 1 / Mastery 6 / Booster 4 / Soul Arrow 1 | פותח מתקפות בלי חצים, ואז חוזרים ל-Mastery.",
-    "35-38 | Crossbow Mastery +12 | IA 1 / Mastery 18 / Booster 4 / Soul Arrow 1 | מחזק רולים נמוכים ומעלה את ההתעלמות מ-WDEF.",
-    "39 | Crossbow Mastery +2, Crossbow Booster +1 | IA 1 / Mastery 20 / Booster 5 / Soul Arrow 1 / FA 1 | Mastery במקסימום.",
-    "40-48 | Iron Arrow +27 | IA 28 | בונים את מתקפת המובינג הראשית.",
-    "49 | Iron Arrow +2, Amazon's Judgement +1 | IA 30 / Judgement 1 | Iron Arrow במקסימום ומתחילים Judgement.",
-    "50-55 | Amazon's Judgement +18 | Judgement 19 | בונים את ההאטה מקריט.",
-    "56-60 | Amazon's Judgement +1, Crossbow Booster +14 | Judgement 20 / Booster 19 | Judgement במקסימום, ואז מאריכים את Booster לכיוון 300 שניות.",
-    "61-66 | Crossbow Booster +1, Soul Arrow +17 | Booster 20 / Soul Arrow 18 | Booster של 300 שניות ב-10 HP ו-10 MP, ואז יותר זמן בלי חצים בפחות MP.",
-    "67 | Soul Arrow +2, Final Attack +1 | Soul Arrow 20 / FA 2 | Soul Arrow של 300 שניות ב-5 MP.",
-    "68-70 | Final Attack +9 | FA 11 | כל לבל Final Attack אחרי הראשון מעלה את בונוס הדמג' לכל MP רק בבערך נקודת אחוז אחת.",
-    "אי אפשר להשקיע SP של הג'וב השני בסקילים של הג'וב הראשון, אז תסיים את תוכנית הג'וב הראשון עד לבל 30. Character Builder מסמן כל בילד שמפר את זה.",
-    "למה Mastery ו-Booster קודם: בלבל 35, הבילד לדוגמה השתפר מבערך 5,207 ל-7,284 EXP לדקה ב-Advisor. בלבל 40 הוא השתפר מ-8,369 ל-9,712 EXP לדקה. רולים נמוכים חזקים יותר ומתקפות מהירות יותר שווים הרבה יותר לפני ש-Iron Arrow במקסימום."
+   "h3": "חלוקת SP ל-Crossbowman: לבל 30-70"
+  },
+  {
+   "table": [
+    [
+     "לבלים",
+     "השקעה",
+     "סה\"כ מצטבר",
+     "סיבה"
+    ],
+    [
+     "30",
+     "Iron Arrow +1",
+     "Iron Arrow 1",
+     "פותח חדירה לארבע מטרות."
+    ],
+    [
+     "31",
+     "Crossbow Mastery +3",
+     "IA 1 / Mastery 3",
+     "מתחילים להעלות את רול הדמג' הכי חלש."
+    ],
+    [
+     "32",
+     "Crossbow Mastery +2, Crossbow Booster +1",
+     "IA 1 / Mastery 5 / Booster 1",
+     "פותח את בוסט המהירות המלא של שני שלבים."
+    ],
+    [
+     "33",
+     "Crossbow Booster +2, Final Attack +1",
+     "IA 1 / Mastery 5 / Booster 3 / FA 1",
+     "Final Attack Lv1 לא עולה MP ונותן בערך 18% יותר דמג' לכל MP על מוב אחד."
+    ],
+    [
+     "34",
+     "Crossbow Booster +1, Soul Arrow +1, Crossbow Mastery +1",
+     "IA 1 / Mastery 6 / Booster 4 / Soul Arrow 1",
+     "פותח מתקפות בלי חצים, ואז חוזרים ל-Mastery."
+    ],
+    [
+     "35-38",
+     "Crossbow Mastery +12",
+     "IA 1 / Mastery 18 / Booster 4 / Soul Arrow 1",
+     "מחזק רולים נמוכים ומעלה את ההתעלמות מ-WDEF."
+    ],
+    [
+     "39",
+     "Crossbow Mastery +2, Crossbow Booster +1",
+     "IA 1 / Mastery 20 / Booster 5 / Soul Arrow 1 / FA 1",
+     "Mastery במקסימום."
+    ],
+    [
+     "40-48",
+     "Iron Arrow +27",
+     "IA 28",
+     "בונים את מתקפת המובינג הראשית."
+    ],
+    [
+     "49",
+     "Iron Arrow +2, Amazon's Judgement +1",
+     "IA 30 / Judgement 1",
+     "Iron Arrow במקסימום ומתחילים Judgement."
+    ],
+    [
+     "50-55",
+     "Amazon's Judgement +18",
+     "Judgement 19",
+     "בונים את ההאטה מקריט."
+    ],
+    [
+     "56-60",
+     "Amazon's Judgement +1, Crossbow Booster +14",
+     "Judgement 20 / Booster 19",
+     "Judgement במקסימום, ואז מאריכים את Booster לכיוון 300 שניות."
+    ],
+    [
+     "61-66",
+     "Crossbow Booster +1, Soul Arrow +17",
+     "Booster 20 / Soul Arrow 18",
+     "Booster של 300 שניות ב-10 HP ו-10 MP, ואז יותר זמן בלי חצים בפחות MP."
+    ],
+    [
+     "67",
+     "Soul Arrow +2, Final Attack +1",
+     "Soul Arrow 20 / FA 2",
+     "Soul Arrow של 300 שניות ב-5 MP."
+    ],
+    [
+     "68-70",
+     "Final Attack +9",
+     "FA 11",
+     "כל לבל Final Attack אחרי הראשון מעלה את בונוס הדמג' לכל MP רק בבערך נקודת אחוז אחת."
+    ]
    ]
   },
   {
-   "heading": "שינויים אפשריים לסדר ברירת המחדל",
-   "lines": [
-    "Iron Arrow קודם",
-    "תמקסם Iron Arrow מיד אם המפה שלך שומרת ארבעה מובים בשורה והם כבר מתים נקי. אתה מוותר על Mastery, Booster ו-Soul Arrow מוקדמים.",
-    "Final Attack לבוסים",
-    "אם ה-MP הוא המגבלה שלך מול מטרות בודדות, תקדים את Final Attack לפני הלבלים של Booster ו-Soul Arrow. הוא כמעט לא משנה את הדמג' של Double Shot, אבל הוא לא עולה MP."
+   "p": "אי אפשר להשקיע SP של הג'וב השני בסקילים של הג'וב הראשון, אז תסיים את תוכנית הג'וב הראשון עד לבל 30. Character Builder מסמן כל בילד שמפר את זה."
+  },
+  {
+   "note": "**למה Mastery ו-Booster קודם:** בלבל 35, הבילד לדוגמה השתפר מבערך 5,207 ל-7,284 EXP לדקה ב-Advisor. בלבל 40 הוא השתפר מ-8,369 ל-9,712 EXP לדקה. רולים נמוכים חזקים יותר ומתקפות מהירות יותר שווים הרבה יותר לפני ש-Iron Arrow במקסימום."
+  },
+  {
+   "h3": "שינויים אפשריים לסדר ברירת המחדל"
+  },
+  {
+   "h3": "Iron Arrow קודם"
+  },
+  {
+   "p": "תמקסם Iron Arrow מיד אם המפה שלך שומרת ארבעה מובים בשורה והם כבר מתים נקי. אתה מוותר על Mastery, Booster ו-Soul Arrow מוקדמים."
+  },
+  {
+   "h3": "Final Attack לבוסים"
+  },
+  {
+   "p": "אם ה-MP הוא המגבלה שלך מול מטרות בודדות, תקדים את Final Attack לפני הלבלים של Booster ו-Soul Arrow. הוא כמעט לא משנה את הדמג' של Double Shot, אבל הוא לא עולה MP."
+  },
+  {
+   "h2": "חלוקת AP ל-Crossbowman: לבל 30-70"
+  },
+  {
+   "p": "זה ממשיך את מסלול ה-Crossbow ממדריך ה-Bowman: 20 STR בסיס ו-142 DEX בסיס. כל Crossbow מ-Heckler ועד Gross Jaeger צריך STR שווה ללבל שלו פחות 10, אז 1 STR לכל לבל מאפשר ללבוש כל אחד בזמן. Gross Jaeger דורש 60 STR, עשרה פחות מ-Golden Hinkel, אז עשרת ה-AP האלה נשארים ב-DEX."
+  },
+  {
+   "table": [
+    [
+     "לבלים",
+     "AP בכל לבל",
+     "AP בסיס בסוף"
+    ],
+    [
+     "31-70",
+     "STR +1 / DEX +4",
+     "60 STR / 302 DEX"
+    ]
    ]
   },
   {
-   "heading": "חלוקת AP ל-Crossbowman: לבל 30-70",
-   "lines": [
-    "זה ממשיך את מסלול ה-Crossbow ממדריך ה-Bowman: 20 STR בסיס ו-142 DEX בסיס. כל Crossbow מ-Heckler ועד Gross Jaeger צריך STR שווה ללבל שלו פחות 10, אז 1 STR לכל לבל מאפשר ללבוש כל אחד בזמן. Gross Jaeger דורש 60 STR, עשרה פחות מ-Golden Hinkel, אז עשרת ה-AP האלה נשארים ב-DEX.",
-    "לבלים | AP בכל לבל | AP בסיס בסוף",
-    "31-70 | STR +1 / DEX +4 | 60 STR / 302 DEX"
+   "h2": "ציוד מומלץ"
+  },
+  {
+   "img": "154146493a9f72.png",
+   "w": 130,
+   "h": 224
+  },
+  {
+   "table": [
+    [
+     "לבל",
+     "אייטם",
+     "למה זה חשוב"
+    ],
+    [
+     "40",
+     "[[img:564bdb167d7720.png]]Heckler",
+     "59 W.ATK, מהירות Normal."
+    ],
+    [
+     "50",
+     "[[img:5f91a536de8887.png]]Rower",
+     "72 W.ATK, מהירות Slow."
+    ],
+    [
+     "60",
+     "[[img:72e6f38c890e5e.png]]Golden Crow",
+     "82 W.ATK לפני סקרולים."
+    ],
+    [
+     "70",
+     "[[img:58a226eefb9ec4.png]]Gross Jaeger",
+     "92 W.ATK לפני סקרולים."
+    ]
    ]
   },
   {
-   "heading": "ציוד מומלץ",
-   "lines": [
-    "לבל | אייטם | למה זה חשוב",
-    "40 | Heckler | 59 W.ATK, מהירות Normal.",
-    "50 | Rower | 72 W.ATK, מהירות Slow.",
-    "60 | Golden Crow | 82 W.ATK לפני סקרולים.",
-    "70 | Gross Jaeger | 92 W.ATK לפני סקרולים.",
-    "Crossbow משתמש בשתי הידיים, אז Crossbowman לא יכול לצייד מגן. תסחוב סטאקים של חצים עד ש-Soul Arrow מחזיק מספיק זמן לסשנים מלאים של אימון. כש-Soul Arrow פעיל, מתקפות לא צורכות חצים."
+   "p": "Crossbow משתמש בשתי הידיים, אז Crossbowman לא יכול לצייד מגן. תסחוב סטאקים של חצים עד ש-Soul Arrow מחזיק מספיק זמן לסשנים מלאים של אימון. כש-Soul Arrow פעיל, מתקפות לא צורכות חצים."
+  },
+  {
+   "h3": "צ'קפוינט שריון בלבל 30"
+  },
+  {
+   "p": "[[img:b0355e799d609f.png]]Green Hawkeye[[img:2e84d2b21f6e5e.png]]Green Hunter's Armor[[img:aac503e8e6a29c.png]]Green Hunter's Pants[[img:205ce562d81ade.png]]Black Hunter Boots[[img:19b5abd79d0e4f.png]]Green Marker"
+  },
+  {
+   "p": "זה השריון הנקי שמשמש במעבר של לבל 30. פתח את דפי האייטמים למקורות עדכניים. תשאיר ציוד שימושי מלבל נמוך כשדרגת השריון הבאה לא משפרת נקודת שבירה של דמג', Accuracy או הישרדות."
+  },
+  {
+   "h2": "W.ATK או Critical Rate על הכפפות?"
+  },
+  {
+   "p": "המספרים האלה מבוססים על בילד ה-Crossbowman הריאלי של Grummash בלבל 70 וחמישה סקרולי כפפות Lesser שהצליחו. שתי האפשרויות משתמשות באותם חמישה סלוטים."
+  },
+  {
+   "h3": "5x Gloves Attack Scroll: Lesser"
+  },
+  {
+   "p": "**+5 W.ATK**\nמ-102 ל-107 W.ATK כולל\nבערך 4.9% יותר דמג' צפוי."
+  },
+  {
+   "h3": "5x Gloves Crit. Rate Scroll: Lesser"
+  },
+  {
+   "p": "**+5% Critical Rate**\nמ-29% ל-34% Critical Rate\nבערך 1.83% יותר דמג' צפוי."
+  },
+  {
+   "note": "**תבחר Attack.** סט חמשת סקרולי ה-Attack עושה בערך 3.01% יותר דמג' צפוי מסט ה-Critical Rate בבילד הזה."
+  },
+  {
+   "p": "Critical Shot מעלה את הבילד הזה ל-41% Critical Damage. זאת אחת ההשוואות הצמודות יותר, אבל W.ATK עדיין מנצח בלבל 70."
+  },
+  {
+   "p": "**היחס זהה בכל דרגה.** Lesser נותן +1 W.ATK או +1% Critical Rate (+2 M.ATK), Intermediate נותן +2/+2% (+4 M.ATK), Greater נותן +3/+3% (+6 M.ATK), ו-Chaos נותן +4/+4% (+8 M.ATK). לדרגות תואמות יש אותם אחוזי הצלחה והשמדה."
+  },
+  {
+   "p": "**W.ATK עוזר גם להריגות מובטחות.** הוא מעלה כל מכה פיזית, כולל הרול הרגיל הכי חלש שלך וכל מכת קריט. Critical Rate משנה רק כמה פעמים יוצא קריט, אז הוא לא יכול לשפר את הרול הכי חלש בלי קריט."
+  },
+  {
+   "h2": "בילדים לדוגמה ומפות מ-Training Advisor"
+  },
+  {
+   "img": "c4ffca20b999ed.png",
+   "w": 130,
+   "h": 170
+  },
+  {
+   "p": "ה-Advisor בודק את המכה הרגילה הכי חלשה. דמג' ממוצע לא קובע הריגה מובטחת. תוצאה מובטחת בשתי מתקפות אומרת ששני רולים גרועים עדיין הורגים את המוב וה-Accuracy מספיק גבוה כדי למנוע פספוסים. כל בחירה מראה Danger ואת המילוי הקרוב ביותר של פוטים וחצים. Crossbowman צריך גם שהמסלול ישתף פעולה: המטרות המאוחרות של Iron Arrow חייבות להישאר בשורה מלפנים."
+  },
+  {
+   "note": "לבל 30\nArrow Blow 20, 82 ACC, 53 W.ATK\n[[img:ae64823f427bc0.png]] **Transfer Area** Stirge, 2 הטלות מובטחות, Safe ב-9%; מילוי אצל Dr. Faymus ב-4 פורטלים; בערך 2,107 EXP לדקה [[img:34dcba7b3807fe.png]] **Line 1 <Area 1>** Bubbling, 2 הטלות מובטחות, Safe ב-6%; מילוי אצל Dr. Faymus ב-3 פורטלים; בערך 1,568 EXP לדקה\nלבל 40\nIron Arrow 4, Crossbow Mastery במקסימום, Booster פעיל, 96 ACC, 64 W.ATK\n[[img:36750484773e65.png]] **Dark Cave** Stirge בהטלה אחת; Horny Mushroom ו-Zombie Mushroom ב-2 הטלות; Caution ב-11%; מילוי אצל Mr. Sweatbottom ב-7 פורטלים; בערך 9,712 EXP לדקה [[img:ae64823f427bc0.png]] **Dangerous Steam** Stirge בהטלה אחת; Zombie Mushroom ו-Horny Mushroom ב-2 הטלות; Caution ב-11%; מילוי אצל Mr. Sweatbottom ב-8 פורטלים; בערך 9,706 EXP לדקה\nלבל 50\nIron Arrow 30, 111 ACC, Crossbow Mastery במקסימום, Booster פעיל\n[[img:762bddf50eb031.png]] **The Burnt Land V** Fire Boar ו-Dark Axe Stump בהטלה אחת, Lupin ב-2 הטלות, Caution ב-21%; מילוי אצל Arturo ב-8 פורטלים; בערך 14,639 EXP לדקה [[img:3934c93d7d4444.png]] **Monkey Forest II** Zombie Lupin ו-Lupin, 2 הטלות מובטחות, Caution ב-23%; מילוי אצל Len the Fairy ב-5 פורטלים; בערך 13,462 EXP לדקה\nלבל 60\nIron Arrow 30, 129 ACC, 97 W.ATK\n[[img:762bddf50eb031.png]] **The Burnt Land V** Fire Boar, Lupin ו-Dark Axe Stump מתים בהטלה אחת מובטחת, Caution ב-19%; מילוי אצל Arturo ב-8 פורטלים; בערך 17,391 EXP לדקה [[img:777ced8b4048a6.png]] **Line 1 <Area 2>** Jr. Wraith ו-Stirge מתים בהטלה אחת מובטחת, Caution ב-11%; מילוי אצל Dr. Faymus ב-5 פורטלים; בערך 17,186 EXP לדקה\nלבל 70\nהבילד של Grummash, 157 ACC, 107 W.ATK\n[[img:3ddc9bfe06aade.png]] **Forgotten Entrance III** Glowshroom ו-Curse Eye בהטלה אחת, Raffle ב-2 הטלות, Caution ב-13%; מילוי אצל Len the Fairy ב-6 פורטלים; בערך 20,599 EXP לדקה [[img:2a5d75bf6e3634.png]] **Lorang Lorang** Lorang ו-Lupin מתים בהטלה אחת מובטחת, Caution ב-15%; מילוי אצל Valen ב-2 פורטלים; בערך 20,357 EXP לדקה"
+  },
+  {
+   "p": "**לפני שמתמקמים:** הבחירות של Iron Arrow מלבל 40 והלאה מניחות שכל Iron Arrow חודר את כל ארבעת המובים. שים לב למוב האחרון ש-Iron Arrow חודר. אם הוא צריך עוד Iron Arrow אחרי שהמוב הראשון מת, תכלול את הירייה הנוספת כשאתה משווה מפות. קרקע שטוחה ומסלול ירי נקי יכולים לנצח מפה בדירוג גבוה יותר עם פלטפורמות שבורות."
+  },
+  {
+   "h2": "מכניקות סקילים חשובות של Crossbowman"
+  },
+  {
+   "h3": "Iron Arrow: Crossbow"
+  },
+  {
+   "img": "368441132100ca.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "Iron Arrow חודר עד ארבעה מובים. הראשון חוטף 100% מהדמג' המחושב, ואחריו 80%, 60% ו-40%. מסלול אופקי צפוף מקבל את מלוא הערך. פלטפורמות מדורגות לא."
+  },
+  {
+   "p": "**בלבל 70, הבנצ'מרק עושה בערך 5,852 דמג' צפוי כולל על ארבע מטרות.**"
+  },
+  {
+   "h3": "Crossbow Mastery"
+  },
+  {
+   "p": "Mastery במקסימום מעלה את רול הדמג' המינימלי ל-Mastery 10 ונותן 20% סיכוי להתעלם מה-Weapon Defense של האויב. הפרוק של ההתעלמות עוזר יותר מול מובים עם WDEF גבוה, ואי אפשר להכניס אותו לחישוב של הריגה מובטחת ברול נמוך."
+  },
+  {
+   "h3": "Final Attack: Crossbow"
+  },
+  {
+   "img": "da9f45926276f7.png",
+   "w": 360,
+   "h": 200
+  },
+  {
+   "p": "תשים נקודה אחת ב-Final Attack בלבל 33 ותשאיר אותו דולק כשאתה נלחם במובים בודדים. ל-Lv1 יש 20% סיכוי להוסיף מכה של 220%, ו-Final Attack לא עולה MP. עם Arrow Blow או Double Shot, זה בערך 18% יותר דמג' לכל MP. כל פרוק צורך חץ אחד."
+  },
+  {
+   "p": "כל פרוק של FA משחזר את יריית ה-Crossbow שלך כאנימציית מתקפה משלו, ואי אפשר לתקוף שוב עד שהיא נגמרת: בערך 0.8 שניות עם Booster. ב-Lv1, הדמג' הממוצע שלך לשנייה על מוב אחד יורד בבערך 1%, ואתה שותה פחות פוטי MP."
+  },
+  {
+   "p": "Final Attack: Crossbow פוגע רק במוב אחד. ברגע ש-Iron Arrow במקסימום ומגיע לשני מובים או יותר, האנימציה הנוספת עולה יותר דמג' ממה שהפרוק מוסיף."
+  },
+  {
+   "p": "ל-Final Attack במקסימום יש 50% סיכוי להוסיף מכה של 250% על מטרה אחת. גרסת ה-Hunter יורה במקום זה שלושה חצים של 90%. הבילד של Grummash עוצר ב-Lv11, סיכוי של 30% ל-230% דמג': בערך 29 % יותר דמג' לכל MP מול מוב אחד. לבלים 2-11 באים אחרונים, כי כל אחד מעלה את הבונוס הזה רק בבערך נקודת אחוז אחת. הטבלה למטה משתמשת ב-Lv11."
+  },
+  {
+   "table": [
+    [
+     "אתה תוקף עם",
+     "מובים לפניך",
+     "Final Attack Lv11 דולק מול כבוי"
+    ],
+    [
+     "[[img:d1760c2a999abe.png]]Double Shot",
+     "כל כמות",
+     "1% פחות"
+    ],
+    [
+     "[[img:a56f556b3a9db2.png]]Iron Arrow",
+     "2",
+     "7% פחות"
+    ],
+    [
+     "[[img:a56f556b3a9db2.png]]Iron Arrow",
+     "3",
+     "11% פחות"
+    ],
+    [
+     "[[img:a56f556b3a9db2.png]]Iron Arrow",
+     "4",
+     "13% פחות"
+    ]
    ]
   },
   {
-   "heading": "צ'קפוינט שריון בלבל 30",
-   "lines": [
-    "Green Hawkeye · Green Hunter's Armor · Green Hunter's Pants · Black Hunter Boots · Green Marker",
-    "זה השריון הנקי שמשמש במעבר של לבל 30. פתח את דפי האייטמים למקורות עדכניים. תשאיר ציוד שימושי מלבל נמוך כשדרגת השריון הבאה לא משפרת נקודת שבירה של דמג', Accuracy או הישרדות."
-   ]
+   "note": "**בדיקת דמג' בלבל 70:** בלבל 70, Double Shot במקסימום עושה בערך 2,787 דמג' צפוי למטרה ניטרלית אחת. Iron Arrow במקסימום מגיע לבערך 5,852 דמג' צפוי כולל על ארבע מטרות אחרי הירידה בחדירה. Booster מעלה את הקצב המחושב מ-68 ל-76 הטלות לדקה."
   },
   {
-   "heading": "W.ATK או Critical Rate על הכפפות?",
-   "lines": [
-    "המספרים האלה מבוססים על בילד ה-Crossbowman הריאלי של Grummash בלבל 70 וחמישה סקרולי כפפות Lesser שהצליחו. שתי האפשרויות משתמשות באותם חמישה סלוטים.",
-    "5x Gloves Attack Scroll: Lesser",
-    "+5 W.ATK",
-    "מ-102 ל-107 W.ATK כולל",
-    "בערך 4.9% יותר דמג' צפוי.",
-    "5x Gloves Crit. Rate Scroll: Lesser",
-    "+5% Critical Rate",
-    "מ-29% ל-34% Critical Rate",
-    "בערך 1.83% יותר דמג' צפוי.",
-    "תבחר Attack. סט חמשת סקרולי ה-Attack עושה בערך 3.01% יותר דמג' צפוי מסט ה-Critical Rate בבילד הזה.",
-    "Critical Shot מעלה את הבילד הזה ל-41% Critical Damage. זאת אחת ההשוואות הצמודות יותר, אבל W.ATK עדיין מנצח בלבל 70.",
-    "היחס זהה בכל דרגה. Lesser נותן +1 W.ATK או +1% Critical Rate (+2 M.ATK), Intermediate נותן +2/+2% (+4 M.ATK), Greater נותן +3/+3% (+6 M.ATK), ו-Chaos נותן +4/+4% (+8 M.ATK). לדרגות תואמות יש אותם אחוזי הצלחה והשמדה.",
-    "W.ATK עוזר גם להריגות מובטחות. הוא מעלה כל מכה פיזית, כולל הרול הרגיל הכי חלש שלך וכל מכת קריט. Critical Rate משנה רק כמה פעמים יוצא קריט, אז הוא לא יכול לשפר את הרול הכי חלש בלי קריט."
-   ]
+   "h2": "מצא את מפת האימון הכי טובה לבילד שלך עם Training Advisor"
   },
   {
-   "heading": "בילדים לדוגמה ומפות מ-Training Advisor",
-   "lines": [
-    "ה-Advisor בודק את המכה הרגילה הכי חלשה. דמג' ממוצע לא קובע הריגה מובטחת. תוצאה מובטחת בשתי מתקפות אומרת ששני רולים גרועים עדיין הורגים את המוב וה-Accuracy מספיק גבוה כדי למנוע פספוסים. כל בחירה מראה Danger ואת המילוי הקרוב ביותר של פוטים וחצים. Crossbowman צריך גם שהמסלול ישתף פעולה: המטרות המאוחרות של Iron Arrow חייבות להישאר בשורה מלפנים."
-   ]
+   "p": "**Danger מודד כמה חזק מוב מכה אותך: פחות מ-10% מה-HP שלך זה Safe, 10-24% זה Caution, 25-49% זה Danger, ו-50%+ זה Lethal.**"
   },
   {
-   "heading": "לבל 30",
-   "lines": [
-    "Arrow Blow 20, 82 ACC, 53 W.ATK",
-    "Transfer Area: Stirge, 2 הטלות מובטחות, Safe ב-9%. מילוי אצל Dr. Faymus ב-4 פורטלים. בערך 2,107 EXP לדקה",
-    "Line 1 <Area 1>: Bubbling, 2 הטלות מובטחות, Safe ב-6%. מילוי אצל Dr. Faymus ב-3 פורטלים. בערך 1,568 EXP לדקה"
-   ]
+   "p": "מפה עם ארבע מטרות נקיות יכולה לנצח מפה בלבל גבוה יותר שבה Iron Arrow מגיע רק לאחת או שתיים. תריץ את הבדיקה עם ה-Crossbow שלך ועם הפלטפורמות שאתה באמת יכול להחזיק."
   },
   {
-   "heading": "לבל 40",
-   "lines": [
-    "Iron Arrow 4, Crossbow Mastery במקסימום, Booster פעיל, 96 ACC, 64 W.ATK",
-    "Dark Cave: Stirge בהטלה אחת. Horny Mushroom ו-Zombie Mushroom ב-2 הטלות. Caution ב-11%. מילוי אצל Mr. Sweatbottom ב-7 פורטלים. בערך 9,712 EXP לדקה",
-    "Dangerous Steam: Stirge בהטלה אחת. Zombie Mushroom ו-Horny Mushroom ב-2 הטלות. Caution ב-11%. מילוי אצל Mr. Sweatbottom ב-8 פורטלים. בערך 9,706 EXP לדקה"
-   ]
-  },
-  {
-   "heading": "לבל 50",
-   "lines": [
-    "Iron Arrow 30, 111 ACC, Crossbow Mastery במקסימום, Booster פעיל",
-    "The Burnt Land V: Fire Boar ו-Dark Axe Stump בהטלה אחת, Lupin ב-2 הטלות, Caution ב-21%. מילוי אצל Arturo ב-8 פורטלים. בערך 14,639 EXP לדקה",
-    "Monkey Forest II: Zombie Lupin ו-Lupin, 2 הטלות מובטחות, Caution ב-23%. מילוי אצל Len the Fairy ב-5 פורטלים. בערך 13,462 EXP לדקה"
-   ]
-  },
-  {
-   "heading": "לבל 60",
-   "lines": [
-    "Iron Arrow 30, 129 ACC, 97 W.ATK",
-    "The Burnt Land V: Fire Boar, Lupin ו-Dark Axe Stump מתים בהטלה אחת מובטחת, Caution ב-19%. מילוי אצל Arturo ב-8 פורטלים. בערך 17,391 EXP לדקה",
-    "Line 1 <Area 2>: Jr. Wraith ו-Stirge מתים בהטלה אחת מובטחת, Caution ב-11%. מילוי אצל Dr. Faymus ב-5 פורטלים. בערך 17,186 EXP לדקה"
-   ]
-  },
-  {
-   "heading": "לבל 70",
-   "lines": [
-    "הבילד של Grummash, 157 ACC, 107 W.ATK",
-    "Forgotten Entrance III: Glowshroom ו-Curse Eye בהטלה אחת, Raffle ב-2 הטלות, Caution ב-13%. מילוי אצל Len the Fairy ב-6 פורטלים. בערך 20,599 EXP לדקה",
-    "Lorang Lorang: Lorang ו-Lupin מתים בהטלה אחת מובטחת, Caution ב-15%. מילוי אצל Valen ב-2 פורטלים. בערך 20,357 EXP לדקה",
-    "לפני שמתמקמים: הבחירות של Iron Arrow מלבל 40 והלאה מניחות שכל Iron Arrow חודר את כל ארבעת המובים. שים לב למוב האחרון ש-Iron Arrow חודר. אם הוא צריך עוד Iron Arrow אחרי שהמוב הראשון מת, תכלול את הירייה הנוספת כשאתה משווה מפות. קרקע שטוחה ומסלול ירי נקי יכולים לנצח מפה בדירוג גבוה יותר עם פלטפורמות שבורות."
-   ]
-  },
-  {
-   "heading": "מכניקות סקילים חשובות של Crossbowman",
-   "lines": []
-  },
-  {
-   "heading": "Iron Arrow: Crossbow",
-   "lines": [
-    "Iron Arrow חודר עד ארבעה מובים. הראשון חוטף 100% מהדמג' המחושב, ואחריו 80%, 60% ו-40%. מסלול אופקי צפוף מקבל את מלוא הערך. פלטפורמות מדורגות לא.",
-    "בלבל 70, הבנצ'מרק עושה בערך 5,852 דמג' צפוי כולל על ארבע מטרות."
-   ]
-  },
-  {
-   "heading": "Crossbow Mastery",
-   "lines": [
-    "Mastery במקסימום מעלה את רול הדמג' המינימלי ל-Mastery 10 ונותן 20% סיכוי להתעלם מה-Weapon Defense של האויב. הפרוק של ההתעלמות עוזר יותר מול מובים עם WDEF גבוה, ואי אפשר להכניס אותו לחישוב של הריגה מובטחת ברול נמוך."
-   ]
-  },
-  {
-   "heading": "Final Attack: Crossbow",
-   "lines": [
-    "תשים נקודה אחת ב-Final Attack בלבל 33 ותשאיר אותו דולק כשאתה נלחם במובים בודדים. ל-Lv1 יש 20% סיכוי להוסיף מכה של 220%, ו-Final Attack לא עולה MP. עם Arrow Blow או Double Shot, זה בערך 18% יותר דמג' לכל MP. כל פרוק צורך חץ אחד.",
-    "כל פרוק של FA משחזר את יריית ה-Crossbow שלך כאנימציית מתקפה משלו, ואי אפשר לתקוף שוב עד שהיא נגמרת: בערך 0.8 שניות עם Booster. ב-Lv1, הדמג' הממוצע שלך לשנייה על מוב אחד יורד בבערך 1%, ואתה שותה פחות פוטי MP.",
-    "Final Attack: Crossbow פוגע רק במוב אחד. ברגע ש-Iron Arrow במקסימום ומגיע לשני מובים או יותר, האנימציה הנוספת עולה יותר דמג' ממה שהפרוק מוסיף.",
-    "ל-Final Attack במקסימום יש 50% סיכוי להוסיף מכה של 250% על מטרה אחת. גרסת ה-Hunter יורה במקום זה שלושה חצים של 90%. הבילד של Grummash עוצר ב-Lv11, סיכוי של 30% ל-230% דמג': בערך 29 % יותר דמג' לכל MP מול מוב אחד. לבלים 2-11 באים אחרונים, כי כל אחד מעלה את הבונוס הזה רק בבערך נקודת אחוז אחת. הטבלה למטה משתמשת ב-Lv11.",
-    "אתה תוקף עם | מובים לפניך | Final Attack Lv11 דולק מול כבוי",
-    "Double Shot | כל כמות | 1% פחות",
-    "Iron Arrow | 2 | 7% פחות",
-    "Iron Arrow | 3 | 11% פחות",
-    "Iron Arrow | 4 | 13% פחות",
-    "בדיקת דמג' בלבל 70: בלבל 70, Double Shot במקסימום עושה בערך 2,787 דמג' צפוי למטרה ניטרלית אחת. Iron Arrow במקסימום מגיע לבערך 5,852 דמג' צפוי כולל על ארבע מטרות אחרי הירידה בחדירה. Booster מעלה את הקצב המחושב מ-68 ל-76 הטלות לדקה."
-   ]
-  },
-  {
-   "heading": "מצא את מפת האימון הכי טובה לבילד שלך עם Training Advisor",
-   "lines": [
-    "Danger מודד כמה חזק מוב מכה אותך: פחות מ-10% מה-HP שלך זה Safe, 10-24% זה Caution, 25-49% זה Danger, ו-50%+ זה Lethal.",
-    "מפה עם ארבע מטרות נקיות יכולה לנצח מפה בלבל גבוה יותר שבה Iron Arrow מגיע רק לאחת או שתיים. תריץ את הבדיקה עם ה-Crossbow שלך ועם הפלטפורמות שאתה באמת יכול להחזיק.",
+   "ol": [
     "תכניס את ה-AP, הציוד, הסקרולים, סטאק החצים, הסקילים והבאפים הפעילים של ה-Crossbowman.",
     "בחר Iron Arrow כשמובים עומדים בשורה לפניך, או Double Shot כשרוב המשיכות הן על מטרה אחת.",
     "תגדיר אמינות ל-100% ותשאיר את Factor Danger into recommendations מופעל.",
     "תבדוק את מספר המתקפות המובטח לכל ספאון נפוץ, כולל מובים עם פחות EXP.",
     "פתח את דף המפה ותוודא שהמסלולים ארוכים מספיק לכל ארבע מטרות החדירה.",
-    "תבדוק את חנויות הפוטים והחצים הכי קרובות. סקרול לעיר הקרובה מחזיר אותך לעיר, אבל ההליכה הארוכה חזרה למפה יכולה למחוק את יתרון ה-EXP של מפת Iron Arrow. Soul Arrow מוריד נסיעות לחצים ברגע שהזמן שלו נוח.",
-    "בילד ה-Crossbowman השמור ב-Training Advisor: אחוז פגיעה, Danger, דמג' ו-EXP לשעה עדכניים לדמות המצוידת. פתח את ה-Crossbowman הזה ב-Training Advisor"
+    "תבדוק את חנויות הפוטים והחצים הכי קרובות. סקרול לעיר הקרובה מחזיר אותך לעיר, אבל ההליכה הארוכה חזרה למפה יכולה למחוק את יתרון ה-EXP של מפת Iron Arrow. Soul Arrow מוריד נסיעות לחצים ברגע שהזמן שלו נוח."
    ]
   },
   {
-   "heading": "פוטים מומלצים",
-   "lines": [
-    "Iron Arrow ו-Booster הופכים ריקברי MP להוצאה הקבועה. תקנה קודם את הפוטים המשתלמים. פוטי באף נכנסים לתיק רק כשהסטטים שלהם משפרים נקודת שבירה אמיתית.",
-    "הכי שווה לקנות: הכי הרבה HP או MP לכל מסו",
-    "Red Potion 50 מסוס · 100 HP 2 HP למסו",
-    "Fried Chicken 60 מסוס · 120 HP 2 HP למסו",
-    "Meat 80 מסוס · 160 HP 2 HP למסו",
-    "Orange 50 מסוס · 50 MP 1 MP למסו",
-    "Lemon 150 מסוס · 150 MP 1 MP למסו",
-    "לפי מצב: קנה רק כשהבאף מגיע לנקודת שבירה שימושית",
-    "Sniper Potion 500 מסוס · +5 ACC ל-10 דק' לביטול פספוסים",
-    "Supreme Sniper Potion 600 מסוס · +7 ACC ל-15 דק' באף ה-ACC הכי טוב בחנות",
-    "Warrior Potion 500 מסוס · +10 Attack Power ל-10 דק' לנקודת שבירה של דמג'",
-    "לא לקנות: פחות החזר לכל מסו מהאפשרויות למעלה",
-    "White Potion 350 מסוס · 500 HP 1.43 HP למסו",
-    "Blue Potion 220 מסוס · 200 MP 0.91 MP למסו",
-    "השווה יעילות של פוטים מהחנות"
+   "img": "8780a5bbb35805.png",
+   "w": 360,
+   "h": 393,
+   "cap": "בילד ה-Crossbowman השמור ב-Training Advisor: אחוז פגיעה, Danger, דמג' ו-EXP לשעה עדכניים לדמות המצוידת."
+  },
+  {
+   "h2": "פוטים מומלצים"
+  },
+  {
+   "p": "Iron Arrow ו-Booster הופכים ריקברי MP להוצאה הקבועה. תקנה קודם את הפוטים המשתלמים. פוטי באף נכנסים לתיק רק כשהסטטים שלהם משפרים נקודת שבירה אמיתית."
+  },
+  {
+   "img": "9cf491f59f0e5c.png",
+   "w": 130,
+   "h": 139
+  },
+  {
+   "p": "**הכי שווה לקנות** הכי הרבה HP או MP לכל מסו"
+  },
+  {
+   "p": "[[img:be80aa4791c684.png]] **Red Potion** 50 מסוס · 100 HP 2 HP למסו [[img:39a28ad40190a6.png]] **Fried Chicken** 60 מסוס · 120 HP 2 HP למסו [[img:51e2250795d8f6.png]] **Meat** 80 מסוס · 160 HP 2 HP למסו [[img:da1e5c881a1df6.png]] **Orange** 50 מסוס · 50 MP 1 MP למסו [[img:d59bc967011b87.png]] **Lemon** 150 מסוס · 150 MP 1 MP למסו"
+  },
+  {
+   "p": "**לפי מצב** קנה רק כשהבאף מגיע לנקודת שבירה שימושית"
+  },
+  {
+   "p": "[[img:4e15182d2a8a6e.png]] **Sniper Potion** 500 מסוס · +5 ACC ל-10 דק' לביטול פספוסים [[img:e18fe0a27cd32a.png]] **Supreme Sniper Potion** 600 מסוס · +7 ACC ל-15 דק' באף ה-ACC הכי טוב בחנות [[img:8d7b05272e3e8b.png]] **Warrior Potion** 500 מסוס · +10 Attack Power ל-10 דק' לנקודת שבירה של דמג'"
+  },
+  {
+   "p": "**לא לקנות** פחות החזר לכל מסו מהאפשרויות למעלה"
+  },
+  {
+   "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 מסוס · 500 HP 1.43 HP למסו [[img:d19cbf8225851d.png]] **Blue Potion** 220 מסוס · 200 MP 0.91 MP למסו"
+  },
+  {
+   "guide": "best-buy-shop-efficiency",
+   "text": "השווה יעילות של פוטים מהחנות"
+  },
+  {
+   "h2": "טעויות נפוצות של Crossbowman"
+  },
+  {
+   "img": "523bb9d095293d.png",
+   "w": 130,
+   "h": 168
+  },
+  {
+   "ol": [
+    "**לקרוא 180% כאילו זה 180% על כל ארבעת המובים.** Iron Arrow יורד ל-80%, 60% ו-40% מהדמג' של המטרה הראשונה.",
+    "**להשתמש ב-Bow אחרי שהשקעת SP של Crossbowman.** Mastery, Booster, Final Attack, Soul Arrow ו-Iron Arrow דורשים Crossbow.",
+    "**להתעלם מכיוון הפלטפורמות.** Iron Arrow צריך מובים בשורה מלפנים. מפה עם מובים אחד מעל השני יכולה לבזבז את רוב התקרה שלו.",
+    "**לשכוח את טווח המכה הקרובה.** תשאיר לפחות 65 px בינך לבין המוב הכי קרוב. ה-Crossbow שלך מכה מקרוב בכוונה, ו-Power Knockback הוא סקיל של הג'וב הראשון לדחוף מובים החוצה מהטווח הזה.",
+    "**להוסיף STR ברמה של Hunter.** הנשק של Crossbowman בלבל 70 צריך 60 STR. הבילד השמור שם את עשרת ה-AP הבאים ב-DEX."
    ]
   },
   {
-   "heading": "טעויות נפוצות של Crossbowman",
-   "lines": [
-    "לקרוא 180% כאילו זה 180% על כל ארבעת המובים. Iron Arrow יורד ל-80%, 60% ו-40% מהדמג' של המטרה הראשונה.",
-    "להשתמש ב-Bow אחרי שהשקעת SP של Crossbowman. Mastery, Booster, Final Attack, Soul Arrow ו-Iron Arrow דורשים Crossbow.",
-    "להתעלם מכיוון הפלטפורמות. Iron Arrow צריך מובים בשורה מלפנים. מפה עם מובים אחד מעל השני יכולה לבזבז את רוב התקרה שלו.",
-    "לשכוח את טווח המכה הקרובה. תשאיר לפחות 65 px בינך לבין המוב הכי קרוב. ה-Crossbow שלך מכה מקרוב בכוונה, ו-Power Knockback הוא סקיל של הג'וב הראשון לדחוף מובים החוצה מהטווח הזה.",
-    "להוסיף STR ברמה של Hunter. הנשק של Crossbowman בלבל 70 צריך 60 STR. הבילד השמור שם את עשרת ה-AP הבאים ב-DEX."
-   ]
+   "h2": "בילד Crossbowman לדוגמה בלבל 70 של Grummash"
   },
   {
-   "heading": "בילד Crossbowman לדוגמה בלבל 70 של Grummash",
-   "lines": [
-    "ה-Crossbowman השמור של Grummash הוא המקור לדוגמאות הסופיות של דמג', הישרדות ו-Advisor. הציוד שלו משתמש בסקרולי Lesser שהצליחו בכל סלוט.",
-    "Gross Jaeger",
-    "Green Patriot",
-    "Beige Linnex",
-    "Blue Eyes",
-    "Green Elf Shoes",
-    "White Gaia Cape",
-    "Metal Silver Earrings",
-    "Mithril Arrows for Crossbows",
-    "62 STR / 348 DEX / 107 W.ATK / 157 ACC",
-    "29% Critical Rate",
-    "41% Critical Damage",
-    "295 WDEF",
-    "63 MDEF"
-   ]
+   "img": "a7b7def6ad01c1.png",
+   "w": 130,
+   "h": 200
   },
   {
-   "heading": "בלבל 70: הופכים ל-Sniper",
-   "lines": [
-    "Rene: מטפלת בהתקדמות ל-Sniper ב-El Nath.",
-    "Crossbowman מתקדם ל-Sniper דרך Rene ב-El Nath. הג'וב השלישי ו-El Nath לא נמצאים בגרסת ההשקה. תסיים את חלוקת הג'וב השני הזאת, ואז תפתח את הסקילים של Sniper ב-COT2 לפני שאתה משקיע SP של הג'וב השלישי.",
-    "ראה סקילים של Sniper ב-COT2"
-   ]
+   "p": "ה-Crossbowman השמור של Grummash הוא המקור לדוגמאות הסופיות של דמג', הישרדות ו-Advisor. הציוד שלו משתמש בסקרולי Lesser שהצליחו בכל סלוט."
+  },
+  {
+   "p": "[[img:58a226eefb9ec4.png]]Gross Jaeger [[img:4f16c54abd311f.png]]Green Patriot [[img:64cc9dbf7d5b2e.png]]Beige Linnex [[img:abf011d3e9b8d0.png]]Blue Eyes [[img:8b167bc25c7b28.png]]Green Elf Shoes [[img:7efbc0d0bc666a.png]]White Gaia Cape [[img:ea67f3099d0314.png]]Metal Silver Earrings [[img:55c0bac6ebb249.png]]Mithril Arrows for Crossbows"
+  },
+  {
+   "note": "62 STR / 348 DEX / 107 W.ATK / 157 ACC\n**29%** Critical Rate\n**41%** Critical Damage\n**295** WDEF\n**63** MDEF"
+  },
+  {
+   "h2": "בלבל 70: הופכים ל-Sniper"
+  },
+  {
+   "p": "[[img:3f41b40fa32220.png]] **Rene** מטפלת בהתקדמות ל-Sniper ב-El Nath."
+  },
+  {
+   "p": "Crossbowman מתקדם ל-Sniper דרך Rene ב-El Nath. הג'וב השלישי ו-El Nath לא נמצאים בגרסת ההשקה. תסיים את חלוקת הג'וב השני הזאת, ואז תפתח את הסקילים של Sniper ב-COT2 לפני שאתה משקיע SP של הג'וב השלישי."
   }
- ]
+ ],
+ "source_hash": "754a6ec8d48f"
 }

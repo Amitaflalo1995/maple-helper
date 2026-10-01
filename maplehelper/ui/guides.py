@@ -125,7 +125,9 @@ class GuidesDialog(GlassDialog):
             texts = self.__dict__.setdefault("_texts", {})
             for g in self.all:
                 if g["key"] not in texts:
-                    texts[g["key"]] = (guides.search_text(g["key"], self.kb.page(g["key"])) + " "
+                    b = guides.book(g["key"], self.t.lang)
+                    texts[g["key"]] = (guides.book_text(b) if b else
+                                       guides.search_text(g["key"], self.kb.page(g["key"])) + " "
                                        + guides.text_of(g["key"], self.t.lang)).lower()
             shown = [g for g in self.all if q in g["title"].lower() or q in texts[g["key"]]]
         elif cat == "for_you":
@@ -175,14 +177,28 @@ class GuidesDialog(GlassDialog):
         self.stale.setWordWrap(True)
         lay.addWidget(self.stale)
         self.browser = QTextBrowser(objectName="GuideText")
-        self.browser.setOpenExternalLinks(True)
+        self.browser.setOpenLinks(False)                      # guide: links open here, web links in the browser
+        self.browser.anchorClicked.connect(self._on_link)
         self.browser.setLayoutDirection(Qt.LeftToRight)      # the guides are written in English
         lay.addWidget(self.browser, 1)
         return w
 
+    def _on_link(self, url):
+        link = url.toString()
+        if link.startswith("guide:"):
+            key = "guide/" + link[6:]
+            if self.kb.get(key) or guides.book(key, "en"):
+                self.open_guide(key)
+        elif link.startswith("http"):
+            webbrowser.open(link)
+
     def open_guide(self, key: str):
         t = self.t
         self._reading = key
+        b = guides.book(key, t.lang)
+        if b:
+            self._open_book(key, b)
+            return
         page = self.kb.page(key)
         g, translated, stale = guides.localized(key, page, t.lang)
         rtl = translated and t.rtl
@@ -199,4 +215,23 @@ class GuidesDialog(GlassDialog):
         opt.setTextDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
         self.browser.document().setDefaultTextOption(opt)
         self.browser.setHtml(guides.to_html(g, labels, rtl))
+        self.stack.setCurrentIndex(1)
+
+    def _open_book(self, key: str, b: dict):
+        """A full guide (pictures, tables, notes) from assets/guides."""
+        from . import theme
+        t = self.t
+        rtl = b["lang"] != "en" and t.rtl
+        self.r_title.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
+        self.r_title.setText(bidi.plain(b.get("title") or key, rtl))
+        meta = t(f"gcat_{guides.category(key)}") + (f" · {t('g_minutes', n=b['minutes'])}" if b.get("minutes") else "")
+        self.r_meta.setText(bidi.plain(meta, t.rtl))
+        self.stale.setVisible(b["lang"] != "en" and b.get("stale", False))
+        self.stale.setText(bidi.plain(t("g_stale"), t.rtl))
+        self.browser.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
+        opt = self.browser.document().defaultTextOption()
+        opt.setTextDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
+        self.browser.document().setDefaultTextOption(opt)
+        self.browser.setHtml(guides.book_html(b, theme.MODE, t.rtl))
+        self.browser.verticalScrollBar().setValue(0)
         self.stack.setCurrentIndex(1)
