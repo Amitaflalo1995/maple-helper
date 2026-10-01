@@ -9,15 +9,13 @@ from __future__ import annotations
 import threading
 
 import numpy as np
-from PySide6.QtCore import QObject, QTimer, Signal
+from PySide6.QtCore import QObject, Signal
 
-from . import winapi
 from .store import DATA_DIR
 
 MODEL_ID = "ivrit-ai/whisper-large-v3-turbo-ct2"
 SAMPLE_RATE = 16_000
 MIN_SECONDS = 0.4
-POLL_MS = 30
 
 
 class Transcriber:
@@ -50,7 +48,9 @@ class Transcriber:
 
 
 class VoiceController(QObject):
-    """Polls the push-to-talk key (no keyboard hook) and records while it is held."""
+    """Talk key (a plain Windows hotkey, handled in app.py) or mic button: press to start, again to send.
+
+    No key-state polling and no keyboard hook: nothing that looks like a macro tool to anti-cheat."""
 
     started = Signal()
     state = Signal(str)          # listening | transcribing | loading | idle
@@ -61,35 +61,18 @@ class VoiceController(QObject):
         super().__init__()
         self.key_name = key_name
         self.transcriber = Transcriber()
-        self._held = False
-        self._manual = False
         self._chunks: list[np.ndarray] = []
         self._stream = None
-        self._timer = QTimer(self, interval=POLL_MS, timeout=self._poll)
-        self._timer.start()
 
     def set_key(self, key_name: str):
         self.key_name = key_name
 
     def toggle(self):
-        """Mic button: click to start, click again to stop and transcribe."""
+        """Start recording, or stop and transcribe (mic button and talk key alike)."""
         if self._stream:
-            self._manual = False
             self._stop()
         else:
-            self._manual = True
             self._start()
-
-    def _poll(self):
-        if getattr(self, "_manual", False):
-            return            # a click-started recording is stopped by the next click, not by the key
-        down = winapi.key_down(self.key_name)
-        if down and not self._held:
-            self._held = True
-            self._start()
-        elif not down and self._held:
-            self._held = False
-            self._stop()
 
     def _start(self):
         try:
@@ -102,7 +85,7 @@ class VoiceController(QObject):
             self.failed.emit(f"mic: {e}")
             return
         self.started.emit()
-        self.state.emit("listening_click" if self._manual else "listening")
+        self.state.emit("listening")
 
     def _stop(self):
         if not self._stream:
