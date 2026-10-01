@@ -26,7 +26,9 @@ _RUN = re.compile(
     # start: a letter, a digit, or a sign/$/# right before a digit; but a hyphen glued to a Hebrew
     # letter ("ב-84%", "ל-30") is the Hebrew prefix hyphen, not a minus sign
     rf"(?:(?<![{RTL_CHARS}])[+\-±](?=\d)|[$#](?=\d)|\d|[A-Za-z])"
-    r"(?:(?:[A-Za-z0-9.'’:&/+\-–%#×_ ()@<>]|,(?=\d{3}\b))*"   # body; "1,500" keeps its comma, a@b.com its @,
+    # body; "1,500" keeps its comma, a@b.com its @, "11:41" its colon; ": " ends the block
+    # ("ה-AI: Claude או Codex" is two blocks, not "AI: Claude" read backwards)
+    r"(?:(?:[A-Za-z0-9.'’&/+\-–%#×_ ()@<>]|:(?! )|,(?=\d{3}\b))*"
     r"[A-Za-z0-9%)>])?"                          # "Line 2 <Area 1>" stays one map name
 )
 
