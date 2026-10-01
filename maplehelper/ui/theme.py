@@ -197,6 +197,8 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
                         min-height: 28px; max-height: 28px; padding: 0 13px; font-size: {s - 2}px; font-weight: 500; color: {c['text']}; }}
     QPushButton#Chip:hover {{ background: {c['fill3']}; }}
     QPushButton#Chip:pressed {{ background: {c['pressed']}; }}
+    QPushButton#Chip:checked {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFA24A, stop:1 {ORANGE_DEEP});
+                                border: 1px solid {ORANGE_DEEP}; color: white; font-weight: 700; }}
     #Tag, #TagGood, #TagWarn, #TagAccent {{ font-size: {s - 3}px; font-weight: 600; border-radius: 8px; padding: 2px 8px; }}
     #Tag {{ color: {c['muted']}; background: {c['fill3']}; }}
     #TagGood {{ color: #2E9E5B; background: rgba(52,199,89,0.16); }}
