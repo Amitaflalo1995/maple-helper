@@ -209,7 +209,7 @@ class ToolsDialog(GlassDialog):
                 self._meter_reading()
             else:
                 self.meter.pop("pending")
-                self.exp_status.setText(self._p(self.t("exp_failed")))
+                self._set(self.exp_status, self.t("exp_failed"))
         self.refresh()
 
     def _read_screen(self):
@@ -221,9 +221,24 @@ class ToolsDialog(GlassDialog):
     def _p(self, text: str) -> str:
         return bidi.plain(text, self.t.rtl)
 
+    def _html(self, text: str) -> str:
+        d = "rtl" if self.t.rtl else "ltr"
+        out = []
+        for line in (text or "").split("\n"):
+            if not line.strip():
+                out.append("<p style='margin:0; font-size:5px;'>&nbsp;</p>")
+                continue
+            out.append(bidi.paragraph_html(line, d).replace("margin:0 0 4px 0;", "margin:0 0 3px 0; line-height:135%;"))
+        return "".join(out)
+
+    def _set(self, label: QLabel, text: str):
+        label.setText(self._html(text))
+
     def _label(self, text: str, obj: str = "RowLabel", wrap: bool = True) -> QLabel:
-        lb = QLabel(self._p(text), objectName=obj)
+        lb = QLabel(objectName=obj)
+        lb.setTextFormat(Qt.RichText)
         lb.setWordWrap(wrap)
+        self._set(lb, text)
         return lb
 
     def _no_character(self, lay):
@@ -242,9 +257,7 @@ class ToolsDialog(GlassDialog):
             sec.add_row(t(f"stat_{key}"), st)
             steppers[key] = st
         self.__dict__.setdefault("_steppers", []).append(steppers)
-        hint = QLabel(self._p(t("my_stats_hint")), objectName="RowHint")
-        hint.setWordWrap(True)
-        sec.add_widget(hint)
+        sec.add_widget(self._label(t("my_stats_hint"), "RowHint"))
         read = QPushButton(self._p(t("my_stats_read")), objectName="Link")
         read.setCursor(Qt.PointingHandCursor)
         read.clicked.connect(self._read_screen)
@@ -306,7 +319,7 @@ class ToolsDialog(GlassDialog):
         head = " · ".join(bits)
         if not (acc and dmg):
             head += "\n" + t("train_need_stats")
-        self.train_head.setText(self._p(head))
+        self._set(self.train_head, head)
         if not rows:
             self.train_list.addWidget(self._label(t("train_none"), "RowHint"))
             return
@@ -332,22 +345,25 @@ class ToolsDialog(GlassDialog):
         col.setSpacing(3)
         name = QLabel(self._p(f"{m.name} · {t('lv_short', n=m.level)}"), objectName="CardName")
         col.addWidget(name)
-        where = QLabel(self._p(t("spot_where", map=s.map, n=m.maps[0][1])), objectName="CardSub")
-        where.setWordWrap(True)
-        col.addWidget(where)
-        tags = QHBoxLayout()
-        tags.setSpacing(5)
+        col.addWidget(self._label(s.map, "CardSub"))
+        # two short rows of tags: why it's picked, then the numbers (one long row pushed the card wider)
+        why, nums = QHBoxLayout(), QHBoxLayout()
+        for line in (why, nums):
+            line.setSpacing(5)
         if best:
-            tags.addWidget(tag(self._p(t("spot_best")), "TagAccent"))
+            why.addWidget(tag(self._p(t("spot_best")), "TagAccent"))
         if s.recommended:
-            tags.addWidget(tag(self._p(t("spot_guide")), "TagGood"))
+            why.addWidget(tag(self._p(t("spot_guide")), "TagGood"))
         if self._stats()[0]:
-            tags.addWidget(tag(self._p(t("spot_hit", pct=round(s.hit * 100))), "TagGood" if s.hit >= 0.999 else "TagWarn"))
+            why.addWidget(tag(self._p(t("spot_hit", pct=round(s.hit * 100))), "TagGood" if s.hit >= 0.999 else "TagWarn"))
         if s.hits:
-            tags.addWidget(tag(self._p(t("spot_hits", n=s.hits)), "Tag"))
-        tags.addWidget(tag(self._p(t("spot_exp", n=m.exp)), "Tag"))
-        tags.addStretch(1)
-        col.addLayout(tags)
+            nums.addWidget(tag(self._p(t("spot_hits", n=s.hits)), "Tag"))
+        nums.addWidget(tag(self._p(t("spot_exp", n=m.exp)), "Tag"))
+        nums.addWidget(tag(self._p(t("spot_crowd", n=m.maps[0][1])), "Tag"))
+        for line in (why, nums):
+            if line.count():
+                line.addStretch(1)
+                col.addLayout(line)
         info = []
         if s.hit < 0.999 and self._stats()[0]:
             info.append(t("spot_acc_need", n=s.acc_needed))
@@ -355,9 +371,7 @@ class ToolsDialog(GlassDialog):
         if kills:
             info.append(t("spot_kills", n=f"{kills:,}"))
         if info:
-            sub = QLabel(self._p(" · ".join(info)), objectName="CardSub")
-            sub.setWordWrap(True)
-            col.addWidget(sub)
+            col.addWidget(self._label("\n".join(info), "CardSub"))
         row.addLayout(col, 1)
         ask = QPushButton(self._p(t("ask_short")), objectName="Link")
         ask.setCursor(Qt.PointingHandCursor)
@@ -443,9 +457,10 @@ class ToolsDialog(GlassDialog):
         for lv in (c.level - 5, c.level, c.level + 5):
             if lv >= 1:
                 lv_rows.append(t("calc_at_level", lv=lv, n=combat.acc_needed(lv, m.level, m.avoid)))
-        sec.add_widget(self._label(" · ".join(lv_rows), "RowHint"))
+        sec.add_widget(self._label("\n".join([t("calc_acc_by_level")] + ["• " + r for r in lv_rows]), "RowHint"))
         if m.maps:
-            sec.add_widget(self._label(t("calc_maps", maps=", ".join(mp for mp, _ in m.maps[:3])), "RowHint"))
+            sec.add_widget(self._label("\n".join([t("calc_maps_head")] + ["• " + mp for mp, _ in m.maps[:3]]),
+                                       "RowHint"))
         self.calc_box.addWidget(sec)
 
     # build ---------------------------------------------------------------
@@ -473,13 +488,13 @@ class ToolsDialog(GlassDialog):
     def _fill_build(self):
         t, c = self.t, self.c
         if not c:
-            self.build_head.setText(self._p(t("tool_no_char")))
+            self._set(self.build_head, t("tool_no_char"))
             self.build_view.setHtml("")
             return
         key, tables = buildplan.tables(self.kb, c.base_class, c.job, c.level, t.lang)
         self._build_key = key
         self.build_guide_btn.setVisible(bool(key))
-        self.build_head.setText(self._p(t("build_head", job=c.job or c.base_class, n=c.level)))
+        self._set(self.build_head, t("build_head", job=c.job or c.base_class, n=c.level))
         if not tables:
             self.build_view.setHtml(f"<p>{t('build_none')}</p>")
             return
@@ -558,8 +573,8 @@ class ToolsDialog(GlassDialog):
         r = quests.for_level(self.kb, c.level, c.base_class, c.job, c.quests_done)
         mode = self.q_mode.value()
         rows = r[mode]
-        self.q_head.setText(self._p(t(f"q_head_{mode}", n=len(rows), lv=c.level) +
-                                    (" · " + t("q_done_count", n=r["done"]) if r["done"] else "")))
+        self._set(self.q_head, t(f"q_head_{mode}", n=len(rows), lv=c.level) +
+                  ("\n" + t("q_done_count", n=r["done"]) if r["done"] else ""))
         if not rows:
             self.q_list.addWidget(self._label(t("q_none"), "RowHint"))
         for q in rows[:MAX_QUESTS]:
@@ -706,7 +721,7 @@ class ToolsDialog(GlassDialog):
             return
         self.meter[c.id] = {"start": None, "result": None}
         self.meter["pending"] = ("start", c.id)
-        self.exp_status.setText(self._p(self.t("exp_reading")))
+        self._set(self.exp_status, self.t("exp_reading"))
         self._read_screen()
 
     def _meter_measure(self):
@@ -714,7 +729,7 @@ class ToolsDialog(GlassDialog):
         if not c or not (self.meter.get(c.id) or {}).get("start"):
             return
         self.meter["pending"] = ("end", c.id)
-        self.exp_status.setText(self._p(self.t("exp_reading")))
+        self._set(self.exp_status, self.t("exp_reading"))
         self._read_screen()
 
     def _meter_reading(self):
@@ -734,10 +749,10 @@ class ToolsDialog(GlassDialog):
     def _fill_exp(self):
         t, c = self.t, self.c
         if not c:
-            self.exp_now.setText(self._p(t("tool_no_char")))
+            self._set(self.exp_now, t("tool_no_char"))
             return
         pct = f"{c.exp_pct:.1f}%" if c.exp_pct is not None else "?"
-        self.exp_now.setText(self._p(t("exp_now", lv=c.level, pct=pct)))
+        self._set(self.exp_now, t("exp_now", lv=c.level, pct=pct))
         m = self.meter.get(c.id) or {}
         r = m.get("result")
         for key, cell in self.exp_cells.items():
@@ -756,13 +771,13 @@ class ToolsDialog(GlassDialog):
             return
         if m.get("start") and not r:
             mins = max(0, round((time.time() - m["start"][0]) / 60))
-            self.exp_status.setText(self._p(t("exp_started", n=mins, pct=f"{m['start'][2]:.1f}%")))
+            self._set(self.exp_status, t("exp_started", n=mins, pct=f"{m['start'][2]:.1f}%"))
         elif r:
-            self.exp_status.setText(self._p(t("exp_result", n=r["minutes"])))
+            self._set(self.exp_status, t("exp_result", n=r["minutes"]))
         elif m.get("end"):
-            self.exp_status.setText(self._p(t("exp_no_gain")))
+            self._set(self.exp_status, t("exp_no_gain"))
         else:
-            self.exp_status.setText(self._p(t("exp_idle")))
+            self._set(self.exp_status, t("exp_idle"))
 
     # quick checks --------------------------------------------------------
 
