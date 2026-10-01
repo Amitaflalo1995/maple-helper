@@ -59,6 +59,10 @@ class Claude(Provider):
     def find_exe(self) -> str | None:
         return find_claude()
 
+    def models(self) -> list[tuple[str | None, str]]:
+        # Claude Code's aliases always point at the newest model of each family
+        return [("sonnet", "Sonnet"), ("opus", "Opus"), ("haiku", "Haiku")]
+
     def account(self) -> dict:
         exe = find_claude()
         if not exe:
@@ -201,6 +205,7 @@ class ClaudeBackend:
         current = ""       # text of the assistant message being streamed
         result = None
         limits = None
+        model = None
         for line in self._proc.stdout:
             try:
                 ev = json.loads(line)
@@ -211,12 +216,15 @@ class ClaudeBackend:
                 se = ev.get("event", {})
                 if se.get("type") == "message_start":
                     current = ""
+                    model = (se.get("message") or {}).get("model") or model
                 elif se.get("type") == "content_block_delta" and se.get("delta", {}).get("type") == "text_delta":
                     current += se["delta"]["text"]
                     if on_raw_delta:
                         on_raw_delta(current)
             elif t == "result":
                 result = ev
+            elif t == "system" and ev.get("subtype") == "init":
+                model = ev.get("model") or model
             elif t == "rate_limit_event":
                 limits = usage.parse(ev.get("rate_limit_info"))
         self._proc.wait()
@@ -228,7 +236,8 @@ class ClaudeBackend:
         if result.get("is_error"):
             log.warning("Claude Code error: %s | %s", str(result.get("result", ""))[:500], stderr[-1000:])
             return RawResult(error=classify_error(str(result.get("result", "")) + stderr) or "api_error")
-        return RawResult(text=result.get("result") or current, cost_usd=result.get("total_cost_usd"), limits=limits)
+        return RawResult(text=result.get("result") or current, cost_usd=result.get("total_cost_usd"), limits=limits,
+                         model=model)
 
     def summarize(self, instructions: str, text: str, timeout: int = 90) -> str | None:
         """One short call on Haiku, no tools: session summaries and guide summaries."""

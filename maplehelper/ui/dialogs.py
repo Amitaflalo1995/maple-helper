@@ -614,6 +614,15 @@ class SettingsDialog(GlassDialog):
                                        providers.get(settings["provider"]).name, rtl)
         self.provider_pick.changed.connect(self._on_provider)
         sec.add_row(t("ai_provider"), self.provider_pick)
+        # the model acts right away too; under it, which model answered last
+        self.model_pick = Select()
+        self.model_hint = sec.add_row(t("ai_model"), self.model_pick, hint=" ").findChild(QLabel, "RowHint")
+        self.model_hint.setWordWrap(True)
+        self.model_pick.picked.connect(self._on_model)
+        self._model_values: list = []
+        self._models_bridge = _Bridge()
+        self._models_bridge.account.connect(lambda r: self._show_models(r["provider"], r["models"]))
+        self._fill_models()
         self.account_label = QLabel(bidi.plain(t("ob_checking"), rtl), objectName="RowLabel")
         self.account_label.setWordWrap(True)
         self.account_label.setContentsMargins(0, 10, 0, 10)
@@ -731,8 +740,64 @@ class SettingsDialog(GlassDialog):
         usage.record(self.settings, r["limits"], provider=r["provider"])
         self._show_usage(r["provider"])
 
+    # model ---------------------------------------------------------------
+
+    def _fill_models(self):
+        """Claude's list is fixed; ChatGPT's comes from OpenAI, so it fills in a moment later."""
+        ai = self._ai()
+        if ai.name == "codex":
+            self._show_models(ai.name, [(None, "")])
+            threading.Thread(target=lambda: self._models_bridge.account.emit(
+                {"provider": ai.name, "models": ai.models()}), daemon=True).start()
+        else:
+            self._show_models(ai.name, ai.models())
+
+    def _show_models(self, name: str, models: list):
+        from ..providers.base import model_name
+        ai = self._ai()
+        if name != ai.name:
+            return              # a list that arrived after the player switched AI
+        t = self.t
+        cur = self.settings[ai.model_setting]
+        labels, values = [], []
+        for value, shown in models:
+            if value is None:
+                labels.append(t("model_default", name=shown) if shown else t("model_default_unknown"))
+            elif name == "claude" and value == "sonnet":
+                labels.append(t("model_recommended", name=shown))
+            else:
+                labels.append(shown)
+            values.append(value)
+        if cur not in values:            # a model the list doesn't offer (any more): keep showing it
+            labels.append(model_name(cur) if cur else t("model_default_unknown"))
+            values.append(cur)
+        self._model_values = values
+        self.model_pick.clear()
+        self.model_pick.addItems(labels)
+        self.model_pick.setCurrentIndex(values.index(cur))
+        self._model_note()
+
+    def _model_note(self):
+        from ..providers.base import model_name
+        t, ai = self.t, self._ai()
+        lines = [t.p("model_hint", ai.name)]
+        last = (self.settings["last_model"] or {}).get(ai.name)
+        if last:
+            lines.append(t("model_last", name=model_name(last)))
+        if self.settings["saver_mode"] and ai.saver_model:
+            lines.append(t("model_saver_note", name=ai.saver_model.capitalize()))
+        self.model_hint.setText(bidi.plain(" · ".join(lines[:1]) + ("\n" + " · ".join(lines[1:]) if lines[1:] else ""),
+                                           t.rtl))
+
+    def _on_model(self, i: int):
+        ai = self._ai()
+        if 0 <= i < len(self._model_values):
+            self.settings[ai.model_setting] = self._model_values[i]
+            self.account_changed.emit()      # the app moves its AI to the new model
+
     def _on_provider(self, name: str):
         self.settings["provider"] = name
+        self._fill_models()
         self._label_usage()
         self._login_timer.stop()
         self._account_status = None

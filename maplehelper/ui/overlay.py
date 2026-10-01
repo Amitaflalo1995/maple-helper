@@ -948,6 +948,8 @@ class Overlay(QWidget):
         self._on_text(self.input.text())
         self._note_usage(ans.limits)
         self._read_limits_after_answer()
+        if ans.model:
+            self.settings["last_model"] = {**(self.settings["last_model"] or {}), self.settings["provider"]: ans.model}
         if ans.error:
             import logging
             logging.getLogger(__name__).warning("answer failed: %s", ans.error)

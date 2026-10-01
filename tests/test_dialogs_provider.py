@@ -68,3 +68,16 @@ def test_settings_switching_provider_tells_the_app(env):
     dlg.account_changed.connect(lambda: seen.append(s["provider"]))
     dlg._on_provider("codex")
     assert seen == ["codex"]
+
+
+def test_settings_model_pick_applies_right_away(env):
+    from maplehelper.ui.dialogs import SettingsDialog
+    s, profiles, kb = env
+    s["provider"] = "claude"
+    s["last_model"] = {"claude": "claude-sonnet-5"}
+    dlg = SettingsDialog(s, profiles, kb, lambda *_: "")
+    seen = []
+    dlg.account_changed.connect(lambda: seen.append(s["model"]))
+    assert dlg.model_pick.text() == "Sonnet (recommended)" and "Sonnet 5" in dlg.model_hint.text()
+    dlg._on_model(dlg._model_values.index("opus"))
+    assert s["model"] == "opus" and seen == ["opus"]
