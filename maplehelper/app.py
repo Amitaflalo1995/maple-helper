@@ -150,9 +150,31 @@ class MapleHelperApp:
             self.overlay.add_notice(t("whats_new_notice", version=__version__), t("whats_new_show"),
                                     lambda: self.show_whats_new(notes))
 
+    def open_window(self, kind: str, make, on_close=None):
+        """Settings, guides, history…: a window NEXT TO the chat, which stays usable (not modal).
+        One window of each kind; asking again brings the open one forward."""
+        windows = self.__dict__.setdefault("_windows", {})
+        dlg = windows.get(kind)
+        if dlg is not None and dlg.isVisible():
+            dlg.raise_()
+            dlg.activateWindow()
+            return dlg
+        dlg = make()
+        windows[kind] = dlg
+        dlg.setWindowModality(Qt.NonModal)
+        dlg.setWindowFlag(Qt.WindowStaysOnTopHint, True)      # over the game, like the chat
+        dlg.finished.connect(lambda *_: windows.pop(kind, None) if windows.get(kind) is dlg else None)
+        if on_close:
+            dlg.finished.connect(lambda *_: on_close())
+        self.bring_dialogs_forward()
+        dlg.show()
+        dlg.raise_()
+        dlg.activateWindow()
+        return dlg
+
     def show_whats_new(self, notes: list[dict] | None = None):
-        WhatsNewDialog(notes if notes is not None else whatsnew.load()[:6], self.settings["language"],
-                       self.style()).exec()
+        self.open_window("whats_new", lambda: WhatsNewDialog(
+            notes if notes is not None else whatsnew.load()[:6], self.settings["language"], self.style()))
 
     def register_hotkeys(self):
         key = self.settings["hotkey_toggle"]
@@ -256,17 +278,17 @@ class MapleHelperApp:
         self._tray_menu = menu
 
     def open_settings(self):
-        dlg = SettingsDialog(self.settings, self.profiles, self.kb, self.style)
-        dlg.changed.connect(self.on_settings_changed)
-        dlg.update_kb_requested.connect(self.update_kb_interactive)
-        dlg.history_cleared.connect(self.on_history_cleared)
-        dlg.report_requested.connect(self.make_report)
-        dlg.account_changed.connect(self.on_account_changed)
-        dlg.patch_notes_requested.connect(lambda: self.show_patch_notes())
-        dlg.whats_new_requested.connect(lambda: self.show_whats_new())
-        self.bring_dialogs_forward()
-        dlg.exec()
-        self.overlay.refresh_profile_chip()
+        def make():
+            dlg = SettingsDialog(self.settings, self.profiles, self.kb, self.style)
+            dlg.changed.connect(self.on_settings_changed)
+            dlg.update_kb_requested.connect(self.update_kb_interactive)
+            dlg.history_cleared.connect(self.on_history_cleared)
+            dlg.report_requested.connect(self.make_report)
+            dlg.account_changed.connect(self.on_account_changed)
+            dlg.patch_notes_requested.connect(lambda: self.show_patch_notes())
+            dlg.whats_new_requested.connect(lambda: self.show_whats_new())
+            return dlg
+        self.open_window("settings", make, on_close=self.overlay.refresh_profile_chip)
 
     def add_character(self):
         before = self.profiles.active_id
@@ -421,12 +443,14 @@ class MapleHelperApp:
 
     def show_guides(self, open_key: str | None = None):
         from .ui.guides import GuidesDialog
-        dlg = GuidesDialog(self.kb, self.profiles.active, self.settings["language"], self.style(),
-                           summarize=self.brain.summarize_guide if self.brain.available() else None,
-                           open_key=open_key)
-        dlg.ask_requested.connect(self.ask_about_guide)
-        self.bring_dialogs_forward()
-        dlg.exec()
+        def make():
+            dlg = GuidesDialog(self.kb, self.profiles.active, self.settings["language"], self.style(),
+                               summarize=self.brain.summarize_guide if self.brain.available() else None)
+            dlg.ask_requested.connect(self.ask_about_guide)
+            return dlg
+        dlg = self.open_window("guides", make)
+        if open_key and self.kb.get(open_key):
+            dlg.open_guide(open_key)
 
     def ask_about_guide(self, key: str):
         """Tag the guide in the chat, so the next question is about it (Claude reads the page)."""
@@ -442,20 +466,22 @@ class MapleHelperApp:
         if not c:
             return
         pairs = pins.conversations(History(c.id).recent(100000))
-        dlg = HistoryDialog(pairs, c.name, self.settings["language"], self.style())
-        dlg.pin_requested.connect(self.overlay.pin_answer)
-        self.bring_dialogs_forward()
-        dlg.exec()
+        def make():
+            dlg = HistoryDialog(pairs, c.name, self.settings["language"], self.style())
+            dlg.pin_requested.connect(self.overlay.pin_answer)
+            return dlg
+        self.open_window("history", make)
 
     def show_wishlist(self):
         from .ui.wishlist import WishlistDialog
         keys = wishlist.items(self.settings, self.profiles.active_id)
-        WishlistDialog(keys, self.kb, self.settings["language"], self.style()).exec()
+        self.open_window("wishlist", lambda: WishlistDialog(keys, self.kb, self.settings["language"], self.style()))
 
     def show_patch_notes(self, entries: list[dict] | None = None):
         if entries is None:
             entries = updater.changelog()[:5]
-        PatchNotesDialog(entries, self.settings["language"], self.style(), self.kb).exec()
+        self.open_window("patch_notes", lambda: PatchNotesDialog(entries, self.settings["language"], self.style(),
+                                                                 self.kb))
 
     def reload_kb(self):
         self.kb = KnowledgeBase()

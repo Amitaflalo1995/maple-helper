@@ -414,6 +414,9 @@ class Overlay(QWidget):
 
     def character_menu(self):
         """Click the character card: pick another character or add one, right from the chat."""
+        # the click that closes the open menu lands on the card too: don't reopen it
+        if time.monotonic() - getattr(self, "_menu_closed_at", 0) < 0.3:
+            return
         menu = QMenu(self)
         menu.setWindowFlags(menu.windowFlags() | Qt.FramelessWindowHint | Qt.NoDropShadowWindowHint)
         menu.setAttribute(Qt.WA_TranslucentBackground)
@@ -446,6 +449,7 @@ class Overlay(QWidget):
         card = self.profile_card
         menu.setMinimumWidth(card.width())
         menu.exec(card.mapToGlobal(QPoint(0, card.height() + 4)))
+        self._menu_closed_at = time.monotonic()
 
     def switch_character(self, cid: str):
         if cid == self.profiles.active_id:
