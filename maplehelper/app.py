@@ -155,8 +155,7 @@ class MapleHelperApp:
             return            # a new player gets the welcome screen, not a changelog
         notes = whatsnew.since(seen, __version__)
         if notes:
-            t = I18n(self.settings["language"])
-            self.overlay.add_notice(t("whats_new_notice", version=__version__), t("whats_new_show"),
+            self.overlay.add_notice(lambda t: t("whats_new_notice", version=__version__), lambda t: t("whats_new_show"),
                                     lambda: self.show_whats_new(notes))
             if UPDATED_ARG in sys.argv:
                 # back from "Update now": the chat is open, show what changed right away
@@ -533,10 +532,11 @@ class MapleHelperApp:
             return
         hits = wishlist.touched(entries, wishlist.items(self.settings, self.profiles.active_id), self.kb)
         if hits:
-            self.overlay.add_notice(t("wish_kb_hit", names=", ".join(hits)), t("patch_notes_show"),
+            self.overlay.add_notice(lambda t: t("wish_kb_hit", names=", ".join(hits)), lambda t: t("patch_notes_show"),
                                     lambda: self.show_patch_notes(entries))
         # in the chat, where the player looks next; a dialog over the game would interrupt play
-        self.overlay.add_notice(t("patch_notes_summary", summary=summary(t, entries)), t("patch_notes_show"),
+        self.overlay.add_notice(lambda t: t("patch_notes_summary", summary=summary(t, entries)),
+                                lambda t: t("patch_notes_show"),
                                 lambda: self.show_patch_notes(entries))
         if not self.overlay.isVisible():
             self.toast(t("kb_updated"), t("kb_updated_open"))
