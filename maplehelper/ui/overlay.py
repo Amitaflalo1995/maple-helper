@@ -679,7 +679,8 @@ class Overlay(QWidget):
         import re
         text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
         d = "rtl" if self.t.rtl else "ltr"
-        self.shot_hint.setText(f"<div dir='{d}' align='{'right' if self.t.rtl else 'left'}'>📷 {text}</div>")
+        from .. import glossary          # the same orange "?" badge as beside game terms
+        self.shot_hint.setText(f"<div dir='{d}' align='{'right' if self.t.rtl else 'left'}'>{glossary.MARK}&nbsp; {text}</div>")
         self.shot_hint.show()
 
     def recapture(self):
