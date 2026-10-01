@@ -2,12 +2,15 @@
 from __future__ import annotations
 
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
+from PySide6.QtGui import QPixmap
+from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 
 from .. import bidi
 from ..i18n import STRINGS, I18n
-from .controls import Section, rtl_buttons
+from ..kb import KnowledgeBase
+from .controls import rtl_buttons
 from .glass import GlassDialog
+from .widgets import EntityCard, Selectable
 
 SHOWN = 80   # rows per list; the rest is counted
 
@@ -38,12 +41,47 @@ def _value(v) -> str:
     return "—" if v is None or v == "" else str(v)
 
 
+class ChangeCard(Selectable, QFrame):
+    """A chat-style card (picture, name, category) with what changed underneath."""
+
+    def __init__(self, kb: KnowledgeBase, r: dict, sub: str, lines: list[str], rtl: bool):
+        super().__init__()
+        self.setObjectName("Card")
+        if kb.get(r["key"]):
+            self._init_selectable(r["key"])      # tap to ask about it, like the cards in the chat
+        row = QHBoxLayout(self)
+        row.setContentsMargins(10, 8, 10, 8)
+        row.setSpacing(10)
+        pic = QLabel()
+        pic.setFixedSize(48, 48)
+        pic.setAlignment(Qt.AlignCenter)
+        img = kb.picture(r["key"])
+        pm = QPixmap(str(img)) if img else QPixmap()
+        if not pm.isNull():
+            pic.setPixmap(pm.scaled(48, 48, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        row.addWidget(pic, 0, Qt.AlignTop)
+        col = QVBoxLayout()
+        col.setSpacing(2)
+        align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute
+        for text, name in [(r["name"], "CardName"), (sub, "CardSub")] + [(ln, "CardStat") for ln in lines]:
+            lb = QLabel(text if name == "CardName" else bidi.plain(text, rtl), objectName=name)
+            lb.setWordWrap(True)
+            lb.setAlignment(align)
+            col.addWidget(lb)
+        row.addLayout(col, 1)
+
+    def mouseReleaseEvent(self, ev):
+        if hasattr(self, "key"):
+            super().mouseReleaseEvent(ev)
+
+
 class PatchNotesDialog(GlassDialog):
-    def __init__(self, entries: list[dict], lang: str, stylesheet: str):
+    def __init__(self, entries: list[dict], lang: str, stylesheet: str, kb: KnowledgeBase):
         self.t = t = I18n(lang or "he")
         super().__init__(t("patch_notes"), t.rtl)
+        self.kb = kb
         self.setStyleSheet(stylesheet)
-        self.resize(500, 640)
+        self.resize(520, 680)
         outer = QVBoxLayout(self.content)
         outer.setContentsMargins(0, 0, 0, 0)
         scroll = QScrollArea()
@@ -82,21 +120,27 @@ class PatchNotesDialog(GlassDialog):
         lay.addWidget(title)
         counts = e.get("counts") or {}
 
-        def section(kind: str, rows: list[dict], row_fn):
+        def section(kind: str, rows: list[dict], card_fn):
             n = counts.get(kind, len(rows))
             if not n:
                 return
-            sec = Section(t(f"pn_{kind}", n=n), rtl)
+            box = QVBoxLayout()
+            box.setSpacing(8)
+            box.addWidget(QLabel(bidi.plain(t(f"pn_{kind}", n=n), rtl), objectName="SectionHeader"))
             for r in rows[:SHOWN]:
-                row_fn(sec, r)
+                box.addWidget(card_fn(r))
             if n > min(len(rows), SHOWN):
-                sec.add_row(t("pn_more", n=n - min(len(rows), SHOWN)))
-            lay.addWidget(sec)
+                more = QLabel(bidi.plain(t("pn_more", n=n - min(len(rows), SHOWN)), rtl), objectName="RowHint")
+                more.setAlignment(Qt.AlignHCenter)
+                box.addWidget(more)
+            lay.addLayout(box)
 
-        def simple(sec, r):
-            sec.add_row(r["name"], hint=_category(t, r.get("category", "")))
+        def simple(r):
+            if self.kb.get(r["key"]):
+                return EntityCard(self.kb, r["key"], t.lang)     # exactly the chat's card
+            return ChangeCard(self.kb, r, _category(t, r.get("category", "")), [], rtl)
 
-        def changed(sec, r):
+        def changed(r):
             # "HP: 45 → 50" reads left to right even in Hebrew (the arrow must point from old to new)
             lines = [f"{bidi.LRE}{f}: {_value(a)} → {_value(b)}{bidi.PDF}" for f, a, b in r.get("props", [])]
             if r.get("drops_added"):
@@ -105,8 +149,7 @@ class PatchNotesDialog(GlassDialog):
                 lines.append(t("pn_drops_removed", items=", ".join(r["drops_removed"])))
             if r.get("old_name"):
                 lines.append(t("pn_renamed", name=r["old_name"]))
-            hint = _category(t, r.get("category", ""))
-            sec.add_row(r["name"], hint="\n".join([hint] + lines) if hint else "\n".join(lines))
+            return ChangeCard(self.kb, r, _category(t, r.get("category", "")), lines, rtl)
 
         section("added", e.get("added", []), simple)
         section("changed", e.get("changed", []), changed)

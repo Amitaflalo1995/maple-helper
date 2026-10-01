@@ -318,7 +318,7 @@ class MapleHelperApp:
     def show_patch_notes(self, entries: list[dict] | None = None):
         if entries is None:
             entries = updater.changelog()[:5]
-        PatchNotesDialog(entries, self.settings["language"], self.style()).exec()
+        PatchNotesDialog(entries, self.settings["language"], self.style(), self.kb).exec()
 
     def reload_kb(self):
         self.kb = KnowledgeBase()
