@@ -31,7 +31,7 @@ Entries (key | English name):
 
 def claude_exe() -> str:
     sys.path.insert(0, str(ROOT))
-    from maplehelper.brain import find_claude
+    from maplehelper.providers.claude import find_claude
     exe = find_claude()
     if not exe:
         sys.exit("Claude Code not found")

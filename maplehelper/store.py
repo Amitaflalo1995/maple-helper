@@ -75,8 +75,12 @@ DEFAULT_SETTINGS = {
     "start_with_windows": False,
     "voice_send_immediately": True,
     "microphone": None,
-    "model": "sonnet",
-    "api_key_fallback": False,    # use an Anthropic API key (stored in Credential Manager / Keychain)
+    "provider": "claude",          # claude | codex: which AI CLI answers (see providers/)
+    "model": "sonnet",             # Claude's model
+    "codex_model": None,           # Codex's model; None = the Codex CLI default
+    # per provider: use an API key (stored in Credential Manager / Keychain) instead of the account login.
+    # Older files hold a single bool here, which meant the Anthropic key.
+    "api_key_fallback": {},
     "onboarding_done": False,
     "pins": {},                   # character id -> pinned answers [{q, a, t}]
     "tips_dismissed": {},         # character id -> {tip kind: level it was hidden at}
@@ -105,6 +109,19 @@ class Settings:
 
     def save(self):
         _write_json(self.path, self.data)
+
+    def _api_key_flags(self) -> dict:
+        v = self["api_key_fallback"]
+        return dict(v) if isinstance(v, dict) else {"claude": bool(v)}
+
+    def api_key_mode(self, provider: str) -> bool:
+        """True when this provider runs on a stored API key rather than the player's account login."""
+        return bool(self._api_key_flags().get(provider))
+
+    def set_api_key_mode(self, provider: str, on: bool) -> None:
+        flags = self._api_key_flags()
+        flags[provider] = bool(on)
+        self["api_key_fallback"] = flags
 
 
 # ---------------------------------------------------------------- profiles

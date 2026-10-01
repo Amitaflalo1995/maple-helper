@@ -16,6 +16,27 @@ def test_settings_keep_new_defaults_for_old_files(isolated_store):
     assert s["language"] == "he" and s["appearance"] == "light"
 
 
+def test_provider_defaults_to_claude(isolated_store):
+    assert isolated_store.Settings()["provider"] == "claude"
+
+
+class TestApiKeyMode:
+    def test_legacy_flag_belongs_to_claude(self, isolated_store):
+        # settings written before Codex support kept a single bool for the Anthropic key
+        isolated_store.Settings.path.write_text('{"api_key_fallback": true}', encoding="utf-8")
+        s = isolated_store.Settings()
+        assert s.api_key_mode("claude") and not s.api_key_mode("codex")
+
+    def test_each_provider_keeps_its_own_flag(self, isolated_store):
+        s = isolated_store.Settings()
+        s.set_api_key_mode("codex", True)
+        assert s.api_key_mode("codex") and not s.api_key_mode("claude")
+        s.set_api_key_mode("claude", True)
+        s.set_api_key_mode("codex", False)
+        again = isolated_store.Settings()
+        assert again.api_key_mode("claude") and not again.api_key_mode("codex")
+
+
 def test_corrupt_settings_fall_back_to_defaults(isolated_store):
     isolated_store.Settings.path.write_text("{oops", encoding="utf-8")
     assert isolated_store.Settings()["font_size"] == 14

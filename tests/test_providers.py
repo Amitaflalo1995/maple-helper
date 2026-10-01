@@ -1,0 +1,298 @@
+"""AI providers (Claude Code, Codex CLI): commands, output parsing, discovery and keys (no real CLI calls)."""
+import io
+import json
+import tomllib
+
+import pytest
+
+from maplehelper import providers
+from maplehelper.providers import base, claude, codex
+
+
+class TestRegistry:
+    def test_known_providers(self):
+        assert providers.get("claude").name == "claude"
+        assert providers.get("codex").name == "codex"
+        assert providers.get("codex").label == "Codex"
+
+    def test_unknown_or_missing_falls_back_to_claude(self):
+        assert providers.get(None).name == "claude"
+        assert providers.get("gemini").name == "claude"
+
+
+@pytest.mark.parametrize("text,kind", [
+    ("Error: Not logged in · Please run /login", "not_logged_in"),
+    ("Invalid API key", "not_logged_in"),
+    ("unexpected status 401 Unauthorized: auth error code: invalid_api_key", "not_logged_in"),
+    ("Claude usage limit reached. Your limit resets at 5pm", "usage_limit"),
+    ("You've hit your usage limit. Upgrade to Pro or try again later.", "usage_limit"),
+    ("getaddrinfo ENOTFOUND api.anthropic.com", "offline"),
+    ("something unexpected", None),
+])
+def test_classify_error(text, kind):
+    assert base.classify_error(text) == kind
+
+
+class TestCodexCommand:
+    def cmd(self, **kw):
+        args = dict(exe="codex", workdir="C:/kb", instructions="Be brief.", platform="linux")
+        args.update(kw)
+        return codex.codex_command(**args)
+
+    def test_locked_down_read_only_run(self):
+        c = self.cmd()
+        assert c[:2] == ["codex", "exec"]
+        for flag in ("--json", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--skip-git-repo-check"):
+            assert flag in c
+        assert c[c.index("-s") + 1] == "read-only"
+        assert c[c.index("-C") + 1] == "C:/kb"
+        assert c[-1] == "-"                       # the prompt comes on stdin
+
+    def test_instructions_survive_toml_parsing(self):
+        text = 'Line "one"\nשורה בעברית {json} \\ end'
+        c = self.cmd(instructions=text)
+        override = next(v for v in c if v.startswith("developer_instructions="))
+        assert tomllib.loads(override)["developer_instructions"] == text
+
+    def test_windows_needs_the_unelevated_sandbox(self):
+        assert 'windows.sandbox="unelevated"' in self.cmd(platform="win32")
+        assert not any("windows.sandbox" in v for v in self.cmd(platform="darwin"))
+
+    def test_model_only_when_chosen(self):
+        assert "-m" not in self.cmd()
+        c = self.cmd(model="gpt-5-codex")
+        assert c[c.index("-m") + 1] == "gpt-5-codex"
+
+    def test_image_is_attached_before_other_flags(self):
+        # --image takes several values: placed last it would swallow the "-" stdin marker
+        c = self.cmd(image="C:/tmp/shot.jpg")
+        assert c[2:4] == ["--image", "C:/tmp/shot.jpg"]
+        assert c[-1] == "-"
+
+
+def events(*objs, noise=True) -> list[str]:
+    lines = [json.dumps(o) + "\n" for o in objs]
+    if noise:
+        lines.insert(1, "2026-10-01T07:52:57Z ERROR codex_core::tools::router: something\n")
+    return lines
+
+
+class TestCodexEvents:
+    def test_last_agent_message_is_the_answer(self):
+        r = codex.parse_events(events(
+            {"type": "thread.started", "thread_id": "x"},
+            {"type": "item.completed", "item": {"type": "agent_message", "text": "I'll check the database."}},
+            {"type": "item.completed", "item": {"type": "command_execution", "aggregated_output": "..."}},
+            {"type": "item.completed", "item": {"type": "agent_message", "text": "Hunt Red Snail.\n@@META@@ {}"}},
+            {"type": "turn.completed", "usage": {"input_tokens": 10}},
+        ))
+        assert r.text == "Hunt Red Snail.\n@@META@@ {}" and r.error is None
+
+    def test_failed_turn_is_classified(self):
+        r = codex.parse_events(events(
+            {"type": "error", "message": "Reconnecting... 2/5 (unexpected status 401 Unauthorized)"},
+            {"type": "turn.failed", "error": {"message": "unexpected status 401 Unauthorized: invalid_api_key"}},
+        ))
+        assert r.error == "not_logged_in"
+
+    def test_no_answer_at_all(self):
+        assert codex.parse_events(events({"type": "turn.started"})).error == "no_result"
+        assert codex.parse_events([], stderr="getaddrinfo ENOTFOUND api.openai.com").error == "offline"
+
+
+@pytest.mark.parametrize("code,out,status,method", [
+    (0, "Logged in using ChatGPT\n", "ok", "chatgpt"),
+    (0, "Logged in using an API key - sk-proj-***abc\n", "ok", "api_key"),
+    (1, "Not logged in\n", "logged_out", None),
+    (0, "", "logged_out", None),
+])
+def test_codex_login_status(code, out, status, method):
+    assert codex.parse_status(code, out) == {"status": status, "email": None, "method": method}
+
+
+class TestDiscovery:
+    def test_finds_claude_outside_the_finder_path(self, tmp_path, monkeypatch):
+        # an app opened from Finder has no ~/.local/bin on PATH: the native installer's spot must still be found
+        exe = tmp_path / "bin" / "claude"
+        exe.parent.mkdir()
+        exe.write_text("#!/bin/sh\n")
+        exe.chmod(0o755)
+        monkeypatch.setattr(base.shutil, "which", lambda _name: None)
+        assert base.find_posix("claude", ["/nonexistent", str(exe.parent)]) == str(exe)
+
+    def test_windows_codex_ignores_the_npm_cmd_shim(self, tmp_path, monkeypatch):
+        # a .cmd shim goes through cmd.exe, which mangles the quoted instructions: only a real .exe is used
+        exe = tmp_path / "Programs" / "OpenAI" / "Codex" / "bin" / "codex.exe"
+        exe.parent.mkdir(parents=True)
+        exe.write_bytes(b"MZ")
+        monkeypatch.setattr(base.shutil, "which", lambda _name: str(tmp_path / "npm" / "codex.cmd"))
+        monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
+        assert codex.find_windows() == str(exe)
+
+    def test_windows_codex_missing(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(base.shutil, "which", lambda _name: str(tmp_path / "codex.cmd"))
+        for var in ("LOCALAPPDATA", "APPDATA", "USERPROFILE"):
+            monkeypatch.setenv(var, str(tmp_path))
+        assert codex.find_windows() is None
+
+
+def test_creation_flags_are_windows_only():
+    # subprocess raises ValueError for nonzero creationflags outside Windows
+    assert (base.CREATE_NO_WINDOW != 0) == (base.sys.platform == "win32")
+
+
+class FakeKeyring:
+    def __init__(self):
+        self.store = {}
+
+    def set_password(self, service, user, pw):
+        self.store[(service, user)] = pw
+
+    def get_password(self, service, user):
+        return self.store.get((service, user))
+
+    def delete_password(self, service, user):
+        self.store.pop((service, user), None)
+
+
+def test_api_keys_are_kept_per_provider(monkeypatch):
+    import sys
+    monkeypatch.setitem(sys.modules, "keyring", FakeKeyring())
+    providers.get("claude").save_api_key("sk-ant-1")
+    providers.get("codex").save_api_key("sk-proj-2")
+    providers.get("codex").delete_api_key()
+    assert providers.get("claude").load_api_key() == "sk-ant-1"
+    assert providers.get("codex").load_api_key() is None
+
+
+class FakePopen:
+    """Records the command and replays canned Codex output."""
+    calls: list = []
+    stdout_lines: list[str] = []
+
+    def __init__(self, cmd, **kw):
+        FakePopen.calls.append((cmd, kw))
+        image = cmd[cmd.index("--image") + 1] if "--image" in cmd else None
+        self.image_existed = bool(image) and open(image, "rb").read() == b"JPEGDATA"
+        FakePopen.last = self
+        self.stdin = io.BytesIO()
+        self.stdin.close = lambda: None
+        self.stdout = iter(line.encode() for line in FakePopen.stdout_lines)
+        self.stderr = io.BytesIO(b"")
+        self.returncode = 0
+
+    def poll(self):
+        return self.returncode
+
+    def wait(self, timeout=None):
+        return 0
+
+    def kill(self):
+        pass
+
+
+class TestCodexBackend:
+    @pytest.fixture
+    def kb(self, kb_copy):
+        # ask() writes drops.tsv into the knowledge base: never into the shared fixture
+        from maplehelper.kb import KnowledgeBase
+        return KnowledgeBase(kb_copy)
+
+    def make(self, kb, monkeypatch, api_key=None):
+        FakePopen.calls = []
+        FakePopen.stdout_lines = events(
+            {"type": "item.completed", "item": {"type": "agent_message", "text": "Looking…"}},
+            {"type": "item.completed", "item": {"type": "agent_message",
+                                                "text": 'Hunt **Red Snail**.\n@@META@@\n{"entities": ["monster/130101"]}'}},
+        )
+        monkeypatch.setattr(codex.subprocess, "Popen", FakePopen)
+        from maplehelper.brain import Brain
+        b = Brain(kb, provider="codex", api_key=api_key)
+        b.backend.exe = "codex"
+        return b
+
+    def test_answer_goes_through_the_shared_post_processing(self, kb, monkeypatch):
+        b = self.make(kb, monkeypatch)
+        ans = b.ask("where is Red Snail?", None, None, b"JPEGDATA")
+        assert ans.error is None and ans.text == "Hunt **Red Snail**."
+        assert ans.entities[0] == "monster/130101"
+        cmd, kw = FakePopen.calls[0]
+        assert kw["cwd"] == str(kb.root)
+        assert "<question>" in FakePopen.last.stdin.getvalue().decode()
+
+    def test_screenshot_file_exists_during_the_run_and_is_removed_after(self, kb, monkeypatch):
+        b = self.make(kb, monkeypatch)
+        b.ask("hi", None, None, b"JPEGDATA")
+        cmd, _ = FakePopen.calls[0]
+        image = cmd[cmd.index("--image") + 1]
+        assert FakePopen.last.image_existed
+        assert not __import__("os").path.exists(image)
+
+    def test_account_login_vs_api_key_env(self, kb, monkeypatch):
+        monkeypatch.setenv("CODEX_API_KEY", "leftover")
+        b = self.make(kb, monkeypatch)
+        b.ask("hi", None, None, None)
+        assert "CODEX_API_KEY" not in FakePopen.calls[0][1]["env"]   # the player's ChatGPT login
+        b = self.make(kb, monkeypatch, api_key="sk-proj-9")
+        b.ask("hi", None, None, None)
+        assert FakePopen.calls[0][1]["env"]["CODEX_API_KEY"] == "sk-proj-9"
+        assert "--image" not in FakePopen.calls[0][0]
+
+    def test_not_installed(self, kb, monkeypatch):
+        b = self.make(kb, monkeypatch)
+        b.backend.exe = None
+        assert b.ask("hi", None, None, None).error == "not_installed"
+        assert not b.available()
+
+
+class TestClaudeBackend:
+    RATE = {"type": "rate_limit_event", "rate_limit_info": {"unifiedWindows": {
+        "five_hour": {"utilization": 0.7, "resetsAt": 2000}}}}
+
+    def make(self, kb_copy, monkeypatch, *evs):
+        from maplehelper.brain import Brain
+        from maplehelper.kb import KnowledgeBase
+        FakePopen.calls = []
+        FakePopen.stdout_lines = [json.dumps(e) + "\n" for e in evs]
+        monkeypatch.setattr(claude.subprocess, "Popen", FakePopen)
+        b = Brain(KnowledgeBase(kb_copy), provider="claude")
+        b.backend.exe = "claude"
+        monkeypatch.setattr(b.backend, "prewarm", lambda: None)
+        return b
+
+    def test_plan_usage_reaches_the_answer(self, kb_copy, monkeypatch):
+        b = self.make(kb_copy, monkeypatch, self.RATE, {"type": "result", "result": "Hi.\n@@META@@\n{}"})
+        ans = b.ask("hi", None, None, None)
+        assert ans.text == "Hi." and ans.limits == {"five_hour": {"used": 0.7, "resets": 2000}}
+
+    def test_plan_usage_is_kept_when_the_answer_fails(self, kb_copy, monkeypatch):
+        # a usage-limit stop still tells the meter where the plan stands
+        b = self.make(kb_copy, monkeypatch, self.RATE)
+        ans = b.ask("hi", None, None, None)
+        assert ans.error == "no_result" and ans.limits["five_hour"]["used"] == 0.7
+
+
+def test_guide_summaries_go_through_the_active_provider(kb):
+    from maplehelper.brain import Brain
+    b = Brain(kb, provider="codex")
+    seen = {}
+
+    def fake(instructions, text, timeout=90):
+        seen.update(instructions=instructions, text=text, timeout=timeout)
+        return "• Hunt snails"
+    b.backend.summarize = fake
+    assert b.summarize_guide("guide/1", "x" * 70000, "he") == "• Hunt snails"
+    assert "Hebrew" in seen["instructions"] and len(seen["text"]) == 60000 and seen["timeout"] == 120
+
+
+def test_only_claude_has_a_lighter_saver_model():
+    assert providers.get("claude").saver_model == "haiku" and providers.get("claude").reports_usage
+    assert providers.get("codex").saver_model is None and not providers.get("codex").reports_usage
+
+
+def test_switching_provider_swaps_the_backend(kb):
+    from maplehelper.brain import Brain
+    b = Brain(kb, provider="claude")
+    assert isinstance(b.backend, claude.ClaudeBackend)
+    b.provider = "codex"
+    assert isinstance(b.backend, codex.CodexBackend)

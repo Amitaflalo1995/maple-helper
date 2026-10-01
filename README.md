@@ -47,9 +47,11 @@ The app uses screen capture and its own overlay window. It does not read game me
 
 - Windows 10 or 11, or macOS 12 or later on Apple Silicon (M1 or newer).
 - Python 3.10 or later to run from source (the installer needs no Python).
-- Claude Code installed, with either a Claude Pro or Max account or an Anthropic API key. The app uses Claude Code in both modes.
+- One AI provider, chosen during setup and switchable in settings:
+  - **Claude**: Claude Code installed, with a Claude Pro or Max account or an Anthropic API key.
+  - **Codex**: the Codex CLI installed, with a ChatGPT plan that includes Codex or an OpenAI API key. Codex answers appear all at once instead of streaming.
 - Maple Story Classic World running in **Borderless** or **Windowed Fullscreen** mode.
-- An internet connection for Claude responses and initial data downloads.
+- An internet connection for AI responses and initial data downloads.
 - A microphone if you want to use voice input.
 
 ## Install
@@ -98,7 +100,7 @@ Open PowerShell (Windows) or Terminal (macOS) in the repository folder. On macOS
    .\.venv\Scripts\python -m maplehelper
    ```
 
-4. Follow the setup screens to choose a language, connect Claude, and create your character profile. The setup includes options to install Claude Code and sign in, or enter an Anthropic API key.
+4. Follow the setup screens to choose a language, connect your AI (Claude or Codex), and create your character profile. For either provider, the setup can install its CLI and sign you in, or take an API key (Anthropic for Claude, OpenAI for Codex).
 
 ## Using the overlay
 
@@ -111,7 +113,7 @@ Open PowerShell (Windows) or Terminal (macOS) in the repository folder. On macOS
 | **Camera button** | Take a fresh screenshot of the game window. |
 | **System tray menu** | Show the overlay, open settings, or quit the app. |
 
-In settings, you can change the appearance (light or dark), hotkeys, language, font size, answer length, starting with Windows, and whether voice questions are sent immediately.
+In settings, you can change the AI provider (Claude or Codex) and its account, the appearance (light or dark), hotkeys, language, font size, answer length, starting with Windows, and whether voice questions are sent immediately.
 
 The speech model downloads on first use, so the first voice request takes longer. Transcription uses CUDA when available and falls back to the CPU (always the CPU on macOS).
 
@@ -119,7 +121,7 @@ The speech model downloads on first use, so the first voice request takes longer
 
 Settings, character profiles, conversation history, speech models, and downloaded knowledge-base updates are stored locally in `%APPDATA%\MapleHelper` on Windows and `~/Library/Application Support/MapleHelper` on macOS. The knowledge base built from source is stored in `data/kb/` inside the repository. API keys entered in the app are stored in Windows Credential Manager or the macOS Keychain.
 
-When you ask a question, the app sends Claude your question, the available game screenshot, character profile, recent conversation, earlier session summaries, and relevant knowledge-base context. Claude can also read local knowledge-base files to answer the question. After a chat session has been closed for 30 minutes, the app may send the session transcript to Claude to generate a summary for future conversations.
+When you ask a question, the app sends your chosen AI provider (Anthropic for Claude, OpenAI for Codex) your question, the available game screenshot, character profile, recent conversation, earlier session summaries, and relevant knowledge-base context. The AI can also read local knowledge-base files to answer the question; it runs read-only and cannot change files. With Codex, the screenshot is written to a temporary file for the run and deleted right after. After a chat session has been closed for 30 minutes, the app may send the session transcript to the same provider to generate a summary for future conversations.
 
 Voice recordings are transcribed locally. The resulting text is used as your question. The app also checks GitHub Releases for app and knowledge-base updates, and installs an update only when its SHA-256 matches the release's checksums.
 

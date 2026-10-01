@@ -9,7 +9,7 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
                                QScrollArea, QStackedWidget, QVBoxLayout, QWidget)
 
-from .. import bidi, claude_setup
+from .. import bidi, providers
 from .controls import Section, Segmented, Select, Stepper, Switch, rtl_buttons
 from .glass import GlassDialog
 from .widgets import CharacterRow
@@ -53,7 +53,7 @@ def _field(text: str) -> QLabel:
 
 
 class _Bridge(QObject):
-    status = Signal(str)
+    status = Signal(str, str)      # provider, status
     account = Signal(object)
     logged_out = Signal()
 
@@ -193,7 +193,7 @@ class CharacterForm(QWidget):
 
 
 class Onboarding(GlassDialog):
-    """Language → Claude connection → character. Every step is required."""
+    """Language → AI connection (Claude or Codex) → character. Every step is required."""
 
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, stylesheet_fn, only_character=False,
                  edit_id: str | None = None):
@@ -208,7 +208,8 @@ class Onboarding(GlassDialog):
         self.resize(600, 680)
         self._bridge = _Bridge()
         self._bridge.status.connect(self._on_status)
-        self._claude_ok = False
+        self.provider = providers.get(settings["provider"]).name
+        self._ai_ok = False
         self._build()
 
     def _build(self):
@@ -231,7 +232,7 @@ class Onboarding(GlassDialog):
         self.pages = []
         if not self.only_character:
             self.pages.append(self._page_language())
-            self.pages.append(self._page_claude())
+            self.pages.append(self._page_ai())
         self.pages.append(self._page_character())
         if not self.only_character:
             self.pages.append(self._page_done())
@@ -272,15 +273,22 @@ class Onboarding(GlassDialog):
         lay.addStretch(1)
         return w
 
-    def _page_claude(self):
+    def _page_ai(self):
         w = QWidget()
         lay = QVBoxLayout(w)
         lay.setSpacing(12)
         lay.addWidget(_title(self.t("ob_connect")))
-        lay.addWidget(_body(self.t("ob_connect_body") + " " + self.t("ob_need_plan")))
-        lay.addSpacing(6)
         rtl = self.t.rtl
-        sec = Section(self.t("sec_account"), rtl)
+        self.provider_pick = Segmented([(p.label, p.name) for p in providers.PROVIDERS.values()], self.provider, rtl)
+        self.provider_pick.changed.connect(self._on_provider)
+        prow = QHBoxLayout()
+        prow.addWidget(self.provider_pick)
+        prow.addStretch(1)
+        lay.addLayout(prow)
+        self.ai_body = _body("")
+        lay.addWidget(self.ai_body)
+        lay.addSpacing(6)
+        sec = self.account_sec = Section(self.t("sec_account"), rtl)
         status_row = QWidget()
         srow = QHBoxLayout(status_row)
         srow.setContentsMargins(0, 6, 0, 6)
@@ -288,11 +296,11 @@ class Onboarding(GlassDialog):
         self.status_label = QLabel(bidi.plain(self.t("ob_checking"), rtl), objectName="RowLabel")
         self.status_label.setWordWrap(True)
         srow.addWidget(self.status_label, 1)
-        self.install_btn = QPushButton(self.t("ob_install"), objectName="Link")
-        self.login_btn = QPushButton(self.t("ob_login"), objectName="Link")
+        self.install_btn = QPushButton(objectName="Link")
+        self.login_btn = QPushButton(objectName="Link")
         self.check_btn = QPushButton(self.t("ob_check"), objectName="Link")
-        self.install_btn.clicked.connect(lambda: (claude_setup.install(), self._poll_status(90)))
-        self.login_btn.clicked.connect(lambda: (claude_setup.login(), self._poll_status(120)))
+        self.install_btn.clicked.connect(lambda: (self._ai().install(), self._poll_status(90)))
+        self.login_btn.clicked.connect(lambda: (self._ai().login(), self._poll_status(120)))
         self.check_btn.clicked.connect(self._check_status)
         for b in (self.install_btn, self.login_btn, self.check_btn):
             b.setCursor(Qt.PointingHandCursor)
@@ -308,7 +316,6 @@ class Onboarding(GlassDialog):
         krow.setContentsMargins(0, 10, 0, 10)
         self.key_edit = QLineEdit()
         self.key_edit.setEchoMode(QLineEdit.Password)
-        self.key_edit.setPlaceholderText(self.t("ob_api_key_hint"))
         self.key_edit.setLayoutDirection(Qt.LeftToRight)
         key_btn = QPushButton(self.t("ob_check"), objectName="Secondary")
         key_btn.setCursor(Qt.PointingHandCursor)
@@ -318,7 +325,32 @@ class Onboarding(GlassDialog):
         sec.add_widget(kbox)
         lay.addWidget(sec)
         lay.addStretch(1)
+        self._label_ai_page()
         return w
+
+    def _ai(self):
+        return providers.get(self.provider)
+
+    def _label_ai_page(self):
+        """Texts of the connect page for the chosen provider."""
+        t, p = self.t, self.provider
+        self.ai_body.setText(bidi.plain(t.p("ob_connect_body", p) + " " + t.p("ob_need_plan", p), t.rtl))
+        self.account_sec.set_header(t.p("sec_account", p))
+        self.install_btn.setText(t.p("ob_install", p))
+        self.login_btn.setText(t.p("ob_login", p))
+        self.key_edit.clear()
+        self.key_edit.setPlaceholderText(t.p("ob_api_key_hint", p))
+        if getattr(self, "privacy_label", None):          # the done page is built after this one
+            self.privacy_label.setText(bidi.plain(t.p("ob_privacy", p), t.rtl))
+
+    def _on_provider(self, name: str):
+        self.provider = self.settings["provider"] = name
+        self._ai_ok = False
+        self.install_btn.hide()
+        self.login_btn.hide()
+        self._label_ai_page()
+        self._check_status()
+        self._update_nav()
 
     def _page_character(self):
         w = QWidget()
@@ -351,7 +383,7 @@ class Onboarding(GlassDialog):
         lay.addSpacing(4)
         sec = Section("", self.t.rtl)
         sec.add_row(self.t("ob_borderless"))
-        sec.add_row(self.t("ob_privacy"))
+        self.privacy_label = sec.add_row(self.t.p("ob_privacy", self.provider)).findChild(QLabel, "RowLabel")
         sec.add_row(self.t("disclaimer"))
         lay.addWidget(sec)
         note = QLabel(bidi.plain(self.t("unofficial"), self.t.rtl), objectName="RowHint")
@@ -377,7 +409,8 @@ class Onboarding(GlassDialog):
 
     def _check_status(self):
         self.status_label.setText(bidi.plain(self.t("ob_checking"), self.t.rtl))
-        threading.Thread(target=lambda: self._bridge.status.emit(claude_setup.status()), daemon=True).start()
+        ai = self._ai()
+        threading.Thread(target=lambda: self._bridge.status.emit(ai.name, ai.status()), daemon=True).start()
 
     def _poll_status(self, seconds: int):
         self._poll_left = seconds // 3
@@ -387,28 +420,32 @@ class Onboarding(GlassDialog):
 
     def _poll_tick(self):
         self._poll_left -= 1
-        if self._poll_left <= 0 or self._claude_ok:
+        if self._poll_left <= 0 or self._ai_ok:
             self._poll_timer.stop()
             return
         self._check_status()
 
-    def _on_status(self, st: str):
-        self._claude_ok = st == "ok"
-        text = {"ok": self.t("ob_connected"), "logged_out": self.t("ob_not_logged"),
-                "not_installed": self.t("ob_not_installed")}[st]
-        self.status_label.setText(bidi.plain(text, self.t.rtl))
+    def _on_status(self, provider: str, st: str):
+        if provider != self.provider:
+            return            # a check that started before the player switched provider
+        t = self.t
+        self._ai_ok = st == "ok"
+        text = {"ok": t("ob_connected"), "logged_out": t.p("ob_not_logged", provider),
+                "not_installed": t.p("ob_not_installed", provider)}[st]
+        self.status_label.setText(bidi.plain(text, t.rtl))
         self.install_btn.setVisible(st == "not_installed")
         self.login_btn.setVisible(st == "logged_out")
-        if self._claude_ok:
-            self.settings["api_key_fallback"] = False
+        if self._ai_ok:
+            self.settings.set_api_key_mode(provider, False)
         self._update_nav()
 
     def _check_key(self):
         key = self.key_edit.text().strip()
-        if key and claude_setup.test_api_key(key):
-            claude_setup.save_api_key(key)
-            self.settings["api_key_fallback"] = True
-            self._claude_ok = True
+        ai = self._ai()
+        if key and ai.test_api_key(key):
+            ai.save_api_key(key)
+            self.settings.set_api_key_mode(ai.name, True)
+            self._ai_ok = True
             self.status_label.setText(bidi.plain(self.t("ob_connected"), self.t.rtl))
         else:
             self.status_label.setText("✗")
@@ -424,7 +461,7 @@ class Onboarding(GlassDialog):
         if not self.only_character and page is self.pages[0]:
             return self.lang_group.checkedButton() is not None
         if not self.only_character and page is self.pages[1]:
-            return self._claude_ok
+            return self._ai_ok
         if page.findChild(CharacterForm):
             return self.form.valid()
         return True
@@ -457,7 +494,7 @@ class Onboarding(GlassDialog):
         self._update_nav()
 
     def restart_on_language(self):
-        """After a language restart, open straight on the Claude step."""
+        """After a language restart, open straight on the AI step."""
         if not self.only_character and self.stack.count() > 1:
             self.stack.setCurrentIndex(1)
             self._update_nav()
@@ -554,22 +591,23 @@ class SettingsDialog(GlassDialog):
         self.length = Segmented([(t("short"), "short"), (t("detailed"), "detailed")], settings["answer_length"], rtl)
         sec.add_row(t("answer_length"), self.length)
         self.instant = Switch(settings["instant_answers"])
-        sec.add_row(t("instant_answers"), self.instant, hint=t("instant_answers_hint"))
+        sec.add_row(t("instant_answers"), self.instant, hint=t.p("instant_answers_hint", settings["provider"]))
         lay.addWidget(sec)
 
-        # plan usage
+        # plan usage (only Claude Code reports it) and saver mode
         from .. import usage
-        sec = Section(t("sec_usage"), rtl)
-        meter = QLabel(bidi.plain("\n".join(usage.lines(settings, t)), rtl), objectName="RowLabel")
-        meter.setWordWrap(True)
-        meter.setContentsMargins(0, 10, 0, 2)
-        sec.add_widget(meter)
-        note = QLabel(bidi.plain(t("usage_note"), rtl), objectName="RowHint")
-        note.setContentsMargins(0, 0, 0, 8)
-        sec.add_widget(note)
+        sec = self.usage_sec = Section(t("sec_usage"), rtl)
+        self.usage_meter = QLabel(bidi.plain("\n".join(usage.lines(settings, t)), rtl), objectName="RowLabel")
+        self.usage_meter.setWordWrap(True)
+        self.usage_meter.setContentsMargins(0, 10, 0, 2)
+        sec.add_widget(self.usage_meter)
+        self.usage_note = QLabel(bidi.plain(t("usage_note"), rtl), objectName="RowHint")
+        self.usage_note.setContentsMargins(0, 0, 0, 8)
+        sec.add_widget(self.usage_note)
         self.saver = Switch(settings["saver_mode"])
-        sec.add_row(t("saver_mode"), self.saver, hint=t("saver_hint"))
+        self.saver_hint = sec.add_row(t("saver_mode"), self.saver, hint=t("saver_hint")).findChild(QLabel, "RowHint")
         lay.addWidget(sec)
+        self._label_usage()
 
         # privacy & system
         sec = Section(t("sec_system"), rtl)
@@ -577,8 +615,12 @@ class SettingsDialog(GlassDialog):
         sec.add_row(t("start_at_login" if sys.platform == "darwin" else "start_with_windows"), self.autostart)
         lay.addWidget(sec)
 
-        # Claude account
-        sec = Section(t("sec_account"), rtl)
+        # AI account: the provider and its sign-in act right away (like sign-out), not on Save
+        sec = Section(t("sec_ai"), rtl)
+        self.provider_pick = Segmented([(p.label, p.name) for p in providers.PROVIDERS.values()],
+                                       providers.get(settings["provider"]).name, rtl)
+        self.provider_pick.changed.connect(self._on_provider)
+        sec.add_row(t("ai_provider"), self.provider_pick)
         self.account_label = QLabel(bidi.plain(t("ob_checking"), rtl), objectName="RowLabel")
         self.account_label.setWordWrap(True)
         self.account_label.setContentsMargins(0, 10, 0, 10)
@@ -658,28 +700,53 @@ class SettingsDialog(GlassDialog):
         outer.addLayout(brow)
         rtl_buttons(self, rtl)
 
-    # Claude account ------------------------------------------------------
+    # AI account ----------------------------------------------------------
+
+    def _ai(self):
+        return providers.get(self.settings["provider"])
+
+    def _label_usage(self):
+        """The Claude plan meter shows only while Claude answers; saver mode is there for both."""
+        t, ai = self.t, self._ai()
+        self.usage_sec.set_header(t("sec_usage") if ai.reports_usage else t("sec_saver"))
+        self.usage_meter.setVisible(ai.reports_usage)
+        self.usage_note.setVisible(ai.reports_usage)
+        self.saver_hint.setText(bidi.plain(t.p("saver_hint", ai.name), t.rtl))
+
+    def _on_provider(self, name: str):
+        self.settings["provider"] = name
+        self._label_usage()
+        self._login_timer.stop()
+        self._account_status = None
+        self.switch_btn.hide()
+        self.logout_btn.hide()
+        self._set_account_text(self.t("ob_checking"))
+        self.account_changed.emit()        # the app moves its AI over to this provider
+        self._refresh_account()
 
     def _refresh_account(self):
-        threading.Thread(target=lambda: self._account_bridge.account.emit(claude_setup.account()),
+        ai = self._ai()
+        threading.Thread(target=lambda: self._account_bridge.account.emit({**ai.account(), "provider": ai.name}),
                          daemon=True).start()
 
     def _set_account_text(self, text: str):
         self.account_label.setText(bidi.plain(text, self.t.rtl))
 
     def _on_account(self, acc: dict):
-        t = self.t
+        t, p = self.t, acc.get("provider")
+        if p != self._ai().name:
+            return            # a check that started before the player switched provider
         st = acc["status"]
         was, self._account_status = self._account_status, st
-        api_key = bool(self.settings["api_key_fallback"])
+        api_key = self.settings.api_key_mode(p) or acc.get("method") == "api_key"
         if api_key:
             self._set_account_text(t("account_api_key"))
         elif st == "ok":
-            self._set_account_text(t("account_signed_in", email=acc.get("email") or "Claude"))
+            self._set_account_text(t.p("account_signed_in", p, email=acc.get("email") or self._ai().label))
         elif not self._login_timer.isActive():
-            self._set_account_text(t("ob_not_logged") if st == "logged_out" else t("ob_not_installed"))
+            self._set_account_text(t.p("ob_not_logged", p) if st == "logged_out" else t.p("ob_not_installed", p))
         connected = api_key or st == "ok"
-        self.switch_btn.setText(t("account_switch") if connected else t("ob_login"))
+        self.switch_btn.setText(t("account_switch") if connected else t.p("ob_login", p))
         self.switch_btn.setVisible(st != "not_installed")
         self.logout_btn.setVisible(connected)
         if self._login_timer.isActive() and st == "ok":
@@ -687,18 +754,26 @@ class SettingsDialog(GlassDialog):
         if was is not None and was != st and not api_key:
             self.account_changed.emit()
 
+    def _drop_api_key(self) -> bool:
+        """Forget this provider's stored API key; True if it was in use."""
+        ai = self._ai()
+        if not self.settings.api_key_mode(ai.name):
+            return False
+        ai.delete_api_key()
+        self.settings.set_api_key_mode(ai.name, False)
+        self.account_changed.emit()
+        return True
+
     def _switch_account(self):
         """Sign out, then run the official sign-in so another account can be chosen in the browser."""
         self.switch_btn.setEnabled(False)
         self.logout_btn.hide()
         self._set_account_text(self.t("account_signing_out"))
-        if self.settings["api_key_fallback"]:
-            claude_setup.delete_api_key()
-            self.settings["api_key_fallback"] = False
-            self.account_changed.emit()
+        self._drop_api_key()
+        ai = self._ai()
 
         def work():
-            claude_setup.logout()
+            ai.logout()
             self._account_bridge.logged_out.emit()
         threading.Thread(target=work, daemon=True).start()
 
@@ -706,7 +781,7 @@ class SettingsDialog(GlassDialog):
         self.switch_btn.setEnabled(True)
         self._account_status = "logged_out"
         self.account_changed.emit()
-        claude_setup.login()
+        self._ai().login()
         self._set_account_text(self.t("account_browser"))
         self._login_left = 60   # 3 minutes
         self._login_timer.start()
@@ -719,22 +794,20 @@ class SettingsDialog(GlassDialog):
 
     def _logout(self):
         t = self.t
-        dlg = ConfirmDialog(t("account_logout"), t("account_logout_confirm"), t("account_logout"), t("cancel"),
-                            t.rtl, self.stylesheet_fn(1.0))
+        ai = self._ai()
+        dlg = ConfirmDialog(t("account_logout"), t.p("account_logout_confirm", ai.name), t("account_logout"),
+                            t("cancel"), t.rtl, self.stylesheet_fn(1.0))
         if not dlg.exec():
             return
         self.logout_btn.hide()
         self._set_account_text(t("account_signing_out"))
-        if self.settings["api_key_fallback"]:
-            claude_setup.delete_api_key()
-            self.settings["api_key_fallback"] = False
-            self.account_changed.emit()
+        if self._drop_api_key():
             self._refresh_account()
             return
 
         def work():
-            claude_setup.logout()
-            self._account_bridge.account.emit(claude_setup.account())
+            ai.logout()
+            self._account_bridge.account.emit({**ai.account(), "provider": ai.name})
         threading.Thread(target=work, daemon=True).start()
 
     def _fill_chars(self):

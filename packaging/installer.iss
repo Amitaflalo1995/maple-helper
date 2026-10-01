@@ -80,8 +80,8 @@ Type: filesandordirs; Name: "{app}"
 hebrew.WelcomeLabel1=ברוכים הבאים ל-Maple Helper
 hebrew.WelcomeLabel2=העוזר האישי שלכם ב-MapleStory.%n%nההתקנה לוקחת פחות מדקה ולא דורשת הרשאות מנהל.
 hebrew.FinishedHeadingLabel=Maple Helper מוכן!
-hebrew.FinishedLabel=בכניסה הראשונה נחבר את Claude וניצור את הדמות שלכם.%n%nבתוך המשחק, לחצו F9 כדי לפתוח ולסגור את הצ'אט.
+hebrew.FinishedLabel=בכניסה הראשונה נחבר את ה-AI שלכם (Claude או Codex) וניצור את הדמות שלכם.%n%nבתוך המשחק, לחצו F9 כדי לפתוח ולסגור את הצ'אט.
 english.WelcomeLabel1=Welcome to Maple Helper
 english.WelcomeLabel2=Your personal MapleStory assistant.%n%nSetup takes under a minute and needs no admin rights.
 english.FinishedHeadingLabel=Maple Helper is ready!
-english.FinishedLabel=On first launch we'll connect Claude and set up your character.%n%nIn game, press F9 to open and close the chat.
+english.FinishedLabel=On first launch we'll connect your AI (Claude or Codex) and set up your character.%n%nIn game, press F9 to open and close the chat.
