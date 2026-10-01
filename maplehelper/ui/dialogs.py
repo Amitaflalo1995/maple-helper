@@ -557,6 +557,20 @@ class SettingsDialog(GlassDialog):
         scroll.setWidget(body)
         outer.addWidget(scroll, 1)
 
+        # characters first: the thing players change most
+        sec = Section(t("characters"), rtl)
+        self.chars_box = QWidget(objectName="Feed")
+        self.chars = QVBoxLayout(self.chars_box)
+        self.chars.setContentsMargins(0, 0, 0, 0)
+        self.chars.setSpacing(0)
+        sec.add_widget(self.chars_box)
+        self._fill_chars()
+        add = QPushButton("＋  " + t("add_character"), objectName="Link")
+        add.setCursor(Qt.PointingHandCursor)
+        add.clicked.connect(self._add_char)
+        sec.add_widget(add)
+        lay.addWidget(sec)
+
         # appearance
         sec = Section(t("sec_appearance"), rtl)
         self.appearance = Segmented([(t("appearance_dark_short"), "dark"), (t("appearance_light_short"), "light")],
@@ -642,20 +656,6 @@ class SettingsDialog(GlassDialog):
         sec = Section(t("sec_system"), rtl)
         self.autostart = Switch(settings["start_with_windows"])
         sec.add_row(t("start_at_login" if sys.platform == "darwin" else "start_with_windows"), self.autostart)
-        lay.addWidget(sec)
-
-        # characters
-        sec = Section(t("characters"), rtl)
-        self.chars_box = QWidget(objectName="Feed")
-        self.chars = QVBoxLayout(self.chars_box)
-        self.chars.setContentsMargins(0, 0, 0, 0)
-        self.chars.setSpacing(0)
-        sec.add_widget(self.chars_box)
-        self._fill_chars()
-        add = QPushButton("＋  " + t("add_character"), objectName="Link")
-        add.setCursor(Qt.PointingHandCursor)
-        add.clicked.connect(self._add_char)
-        sec.add_widget(add)
         lay.addWidget(sec)
 
         # data
@@ -760,7 +760,8 @@ class SettingsDialog(GlassDialog):
         if api_key:
             self._set_account_text(t("account_api_key"))
         elif st == "ok":
-            self._set_account_text(t.p("account_signed_in", p, email=acc.get("email") or self._ai().label))
+            self._set_account_text(t("account_signed_in", email=acc["email"]) if acc.get("email")
+                                   else t("account_signed_in_no_email", name=self._ai().label))
         elif not self._login_timer.isActive():
             self._set_account_text(t.p("ob_not_logged", p) if st == "logged_out" else t.p("ob_not_installed", p))
         connected = api_key or st == "ok"
