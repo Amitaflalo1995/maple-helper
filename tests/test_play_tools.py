@@ -1,10 +1,9 @@
-"""Play tools: combat math (checked against NiaMeowDB's own numbers), quests, build tables, timers, EXP meter."""
-import time
+"""Play tools: combat math (checked against NiaMeowDB's own numbers), quests, build tables, EXP meter."""
 from pathlib import Path
 
 import pytest
 
-from maplehelper import buildplan, combat, plan, quests, timers
+from maplehelper import buildplan, combat, plan, quests
 
 REAL_KB = Path(__file__).resolve().parent.parent / "data" / "kb"
 needs_kb = pytest.mark.skipif(not (REAL_KB / "index.json").exists(), reason="no real knowledge base")
@@ -32,29 +31,6 @@ def test_training_spots_are_reachable_and_ranked():
     assert rows and all(combat.grind_map(s.map) for s in rows)
     assert not any("Orbis" in s.map or "Warrior's" in s.map for s in rows)
     assert rows == sorted(rows, key=lambda s: -s.score)
-
-
-def test_timer_clock_and_parse():
-    assert timers.clock(125) == "2:05" and timers.clock(3725) == "1:02:05"
-    assert timers.parse_clock("3") == 180 and timers.parse_clock("2:30") == 150 and timers.parse_clock("x") is None
-
-
-def test_timers_finish_once():
-    import sys
-    from PySide6.QtCore import QCoreApplication
-    QCoreApplication.instance() or QCoreApplication(sys.argv)
-    tm = timers.Timers()
-    done = []
-    tm.finished.connect(done.append)
-    r = tm.start("Haste", 200)
-    r.ends = time.time() - 1
-    tm._on_tick()
-    tm._on_tick()
-    assert done == ["Haste"] and tm.running[0].ends == 0
-    tm.restart(r.id)
-    assert tm.running[0].left() > 190
-    tm.stop(tm.running[0].id)
-    assert tm.running == []
 
 
 @needs_kb
@@ -119,17 +95,12 @@ def test_tools_window_builds_every_page(tmp_path, monkeypatch):
     c = p.add("Kiwi", "Thief", "Assassin", 34)
     c.stats = {"acc": 80, "dmg_min": 150, "dmg_max": 320}
     s = store.Settings()
-    tm = timers.Timers()
-    d = ToolsDialog(KnowledgeBase(REAL_KB), p, s, "he", "", tm, {})
+    d = ToolsDialog(KnowledgeBase(REAL_KB), p, s, "he", "", {})
     for i in range(len(PAGES)):
         d.show_page(i)
         app.processEvents()
     d.calc_input.setText("Zombie Mushroom")
     d._fill_calc()
-    d.t_name.setText("Haste")
-    d.t_time.setText("3:20")
-    d._add_timer()
-    assert tm.running and tm.running[0].name == "Haste" and s["timer_presets"][-1] == {"name": "Haste", "seconds": 200}
     d._quest_done(quests.for_level(d.kb, 34, "Thief", "Assassin", [])["now"][0].key)
     assert len(c.quests_done) == 1
     d.close()

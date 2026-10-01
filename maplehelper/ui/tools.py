@@ -1,24 +1,25 @@
-"""Play tools: where to train, hit/damage calculator, build plan, quests, timers, EXP meter, and two
+"""Play tools: where to train, hit/damage calculator, build plan, quests, EXP meter, and two
 quick checks (what to sell, what to buy). Everything reads the KB and the character; nothing touches
 the game. The window is non-modal, so it can stay open beside the chat."""
 from __future__ import annotations
 
+import html
 import math
+import re
 import time
 
-from PySide6.QtCore import QStringListModel, Qt, QTimer, Signal
-from PySide6.QtGui import QPixmap
+from PySide6.QtCore import QEvent, QSize, Qt, QTimer, QUrl, Signal
+from PySide6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (QButtonGroup, QCompleter, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
 
 from .. import bidi, buildplan, combat, guides, plan, quests
-from .. import timers as timers_mod
 from ..i18n import I18n
 from . import theme
 from .controls import Section, Segmented, Stepper, rtl_buttons
 from .glass import GlassDialog
 
-PAGES = ("train", "calc", "build", "quests", "timers", "exp", "more")
+PAGES = ("train", "calc", "build", "quests", "exp", "more")
 MAX_QUESTS = 40
 
 
@@ -51,24 +52,111 @@ def scroll_page() -> tuple[QScrollArea, QVBoxLayout]:
     return sc, lay
 
 
+NAME_ROLE = Qt.UserRole + 1
+
+
+class EntityPicker(QLineEdit):
+    """A search box that opens a list of names with pictures; typing narrows it down.
+    rows: (shown text, name to put in the box, picture path or None)."""
+    picked = Signal()
+
+    def __init__(self, rows: list[tuple[str, str, object]], placeholder: str, icon: int = 36):
+        super().__init__()
+        self.setPlaceholderText(placeholder)
+        self.setClearButtonEnabled(True)
+        model = QStandardItemModel(self)
+        for shown, name, path in rows:
+            item = QStandardItem(shown)
+            item.setData(name, NAME_ROLE)
+            if path:
+                item.setIcon(QIcon(QPixmap(str(path)).scaled(icon, icon, Qt.KeepAspectRatio, Qt.SmoothTransformation)))
+            item.setEditable(False)
+            model.appendRow(item)
+        comp = QCompleter(model, self)
+        comp.setCompletionRole(NAME_ROLE)
+        comp.setCaseSensitivity(Qt.CaseInsensitive)
+        comp.setFilterMode(Qt.MatchContains)
+        comp.setMaxVisibleItems(9)
+        comp.popup().setIconSize(QSize(icon, icon))
+        c = theme.P()
+        bg = "#2C2C2E" if theme.MODE == "dark" else "#FFFFFF"
+        comp.popup().setStyleSheet(
+            f"QListView {{ background: {bg}; color: {c['text']}; border: 1px solid {c['stroke']}; border-radius: 10px;"
+            f" padding: 4px; outline: none; }}"
+            f"QListView::item {{ padding: 4px 6px; border-radius: 8px; color: {c['text']}; }}"
+            f"QListView::item:selected, QListView::item:hover {{ background: rgba(255,149,51,0.22); color: {c['text']}; }}")
+        comp.activated.connect(lambda *_: QTimer.singleShot(0, self._chosen))
+        self.setCompleter(comp)
+        self.returnPressed.connect(self.picked.emit)
+
+    def _chosen(self):
+        self.setCursorPosition(0)              # a long name shows from its start
+        self.picked.emit()
+
+    def open_list(self):
+        comp = self.completer()
+        comp.setCompletionPrefix(self.text())
+        comp.complete()
+
+    def mousePressEvent(self, e):
+        super().mousePressEvent(e)
+        self.open_list()                      # a click shows the whole list, not only after typing
+
+    def event(self, e):
+        if e.type() == QEvent.KeyPress and e.key() == Qt.Key_Down and not self.completer().popup().isVisible():
+            self.open_list()
+            return True
+        return super().event(e)
+
+
+def monster_rows(kb) -> list[tuple[str, str, object]]:
+    """Every monster once (the version that spawns on the most maps), lowest level first."""
+    best: dict[str, combat.Monster] = {}
+    for m in combat.monsters(kb):
+        if combat.special_monster(m.name):
+            continue
+        if m.name not in best or sum(n for _, n in m.maps) > sum(n for _, n in best[m.name].maps):
+            best[m.name] = m
+    return [(f"{m.name}  ·  Lv. {m.level}", m.name, kb.picture(m.key))
+            for m in sorted(best.values(), key=lambda m: (m.level, m.name))]
+
+
+def map_rows(kb) -> list[tuple[str, str, object]]:
+    """Every reachable map with its minimap: hunting grounds by monster level, then towns and the rest."""
+    rows = []
+    for k, e in kb.entities.items():
+        if e.get("category") != "map":
+            continue
+        page = kb.page(k)
+        where = re.search(r"\nLocation (.+)", page)
+        place = where.group(1).split(" / ")[-1].strip() if where else ""
+        if not combat.grind_map(f"{e['name']} {place}"):
+            continue
+        lv = re.search(r"\nMonster levels Lv (\d+)\s*[-–]\s*(\d+)", page)
+        lo = int(lv.group(1)) if lv else 999
+        bits = [e["name"]] + ([f"Lv. {lv.group(1)}-{lv.group(2)}"] if lv else []) + ([place] if place else [])
+        rows.append((lo, e["name"], ("  ·  ".join(bits), e["name"], kb.picture(k))))
+    rows.sort(key=lambda r: (r[0], r[1]))
+    return [r[2] for r in rows]
+
+
 class ToolsDialog(GlassDialog):
     sync_requested = Signal()                 # read level/EXP/stats from a screenshot (the chat does it)
     ask_requested = Signal(str, bool)          # question for the chat, with a fresh screenshot?
     tag_requested = Signal(str)                # tag an entity (monster, quest) in the chat
     guide_requested = Signal(str)              # open a guide in the guides window
 
-    def __init__(self, kb, profiles, settings, lang: str, stylesheet: str, timers, exp_meter: dict,
-                 page: str = "train"):
+    def __init__(self, kb, profiles, settings, lang: str, stylesheet: str, exp_meter: dict, page: str = "train"):
         self.t = t = I18n(lang or "he")
         super().__init__(t("tools"), t.rtl)
-        self.kb, self.profiles, self.settings, self.timers, self.meter = kb, profiles, settings, timers, exp_meter
+        self.kb, self.profiles, self.settings, self.meter = kb, profiles, settings, exp_meter
         self.setStyleSheet(stylesheet)
         self.resize(580, 800)
         rtl = t.rtl
         outer = QVBoxLayout(self.content)
         outer.setContentsMargins(0, 0, 0, 0)
         outer.setSpacing(10)
-        # the pages as chips, two short rows so every label stays readable
+        # the pages as chips, two rows of three so every label stays readable
         grid = QGridLayout()
         grid.setHorizontalSpacing(6)
         grid.setVerticalSpacing(6)
@@ -79,7 +167,7 @@ class ToolsDialog(GlassDialog):
             b.setCursor(Qt.PointingHandCursor)
             b.setProperty("page", name)
             self.nav.addButton(b, i)
-            grid.addWidget(b, i // 4, i % 4)
+            grid.addWidget(b, i // 3, i % 3)
         self.nav.idClicked.connect(self.show_page)
         outer.addLayout(grid)
         self.stack = QStackedWidget()
@@ -89,7 +177,6 @@ class ToolsDialog(GlassDialog):
             w = getattr(self, f"_page_{name}")()
             self.pages[name] = w
             self.stack.addWidget(w)
-        timers.changed.connect(self._timers_tick)
         rtl_buttons(self, rtl)
         self.show_page(PAGES.index(page) if page in PAGES else 0)
 
@@ -283,16 +370,8 @@ class ToolsDialog(GlassDialog):
     def _page_calc(self):
         t = self.t
         sc, lay = scroll_page()
-        self.calc_input = QLineEdit()
-        self.calc_input.setPlaceholderText(self._p(t("calc_placeholder")))
-        self.calc_input.setClearButtonEnabled(True)
-        names = sorted({m.name for m in combat.monsters(self.kb)})
-        comp = QCompleter(QStringListModel(names, self), self)
-        comp.setCaseSensitivity(Qt.CaseInsensitive)
-        comp.setFilterMode(Qt.MatchContains)
-        self.calc_input.setCompleter(comp)
-        comp.activated.connect(lambda *_: self._fill_calc())
-        self.calc_input.returnPressed.connect(self._fill_calc)
+        self.calc_input = EntityPicker(monster_rows(self.kb), self._p(t("calc_placeholder")))
+        self.calc_input.picked.connect(self._fill_calc)
         lay.addWidget(self.calc_input)
         self.calc_box = QVBoxLayout()
         self.calc_box.setSpacing(12)
@@ -405,6 +484,7 @@ class ToolsDialog(GlassDialog):
             self.build_view.setHtml(f"<p>{t('build_none')}</p>")
             return
         he = t.lang != "en"
+        icons = self._skill_icons()
         col = guides.NOTE_COLORS.get(theme.MODE, guides.NOTE_COLORS["light"])
         side = "dir='rtl' align='right'" if he else ""
         out = []
@@ -416,6 +496,7 @@ class ToolsDialog(GlassDialog):
                 tagname = "th" if n == 0 else "td"
                 cells.append("<tr>" + "".join(
                     f"<{tagname}{bg}><p {'dir=rtl align=right' if he and bidi._RTL.search(x) else ''} style='margin:0'>"
+                    f"{self._with_skill_icon(x, icons) if tb.kind == 'sp' and n else ''}"
                     f"{guides._rich(x, he and bool(bidi._RTL.search(x)), 18)}</p></{tagname}>"
                     for i, x in enumerate(row)) + "</tr>")
             out.append(f"<table {side} width='100%' cellspacing='0' cellpadding='5' border='1' "
@@ -425,6 +506,31 @@ class ToolsDialog(GlassDialog):
         opt.setTextDirection(Qt.RightToLeft if he else Qt.LeftToRight)
         self.build_view.document().setDefaultTextOption(opt)
         self.build_view.setHtml("\n".join(out))
+
+    def _skill_icons(self) -> list[tuple[str, str]]:
+        """(skill name, picture file URI), longest names first so "Power Strike" wins over "Power"."""
+        if not hasattr(self, "_skills"):
+            out = []
+            for k, e in self.kb.entities.items():
+                if e.get("category") == "skill":
+                    path = self.kb.picture(k)
+                    if path:
+                        out.append((e["name"], path.as_uri()))
+            self._skills = sorted(out, key=lambda x: -len(x[0]))
+        return self._skills
+
+    @staticmethod
+    def _with_skill_icon(cell: str, icons: list[tuple[str, str]]) -> str:
+        """Icons of the skills a table cell names ("Rush +1", "Power Strike 20, Slash Blast 3")."""
+        if "[[img:" in cell:
+            return ""
+        found, taken = [], cell
+        for name, uri in icons:
+            if name in taken:
+                found.append((cell.find(name), uri))
+                taken = taken.replace(name, " " * len(name))
+        return "".join(f"<img src='{uri}' height='20' style='vertical-align: middle'> "
+                       for _, uri in sorted(found)[:3])
 
     # quests --------------------------------------------------------------
 
@@ -459,12 +565,56 @@ class ToolsDialog(GlassDialog):
         for q in rows[:MAX_QUESTS]:
             self.q_list.addWidget(self._quest_card(q))
 
+    def _picture_uri(self, kind: str, name: str) -> str | None:
+        """The KB picture of a monster / item / NPC by its name, as a file URI."""
+        n = name.strip().lower()
+        if kind == "npc":
+            key = self.kb._npc_by_name.get(n)
+        elif kind == "item":
+            key = self.kb._item_by_name.get(n)
+        else:
+            key = next((m.key for m in combat.monsters(self.kb) if m.name.lower() == n), None)
+        path = self.kb.picture(key) if key else None
+        return path.as_uri() if path else None
+
+    def _thing_html(self, text: str) -> str:
+        """ "Defeat Blue Snail x 10" / "Red Potion x 20" -> its picture, then the name (kept as one English block)."""
+        m = re.fullmatch(r"(Defeat |Collect )?(.+?) x ([\d,]+)", text.strip())
+        if not m:
+            return html.escape(text)
+        verb, name, n = m.groups()
+        uri = self._picture_uri("monster" if verb == "Defeat " else "item", name) or \
+            self._picture_uri("item" if verb == "Defeat " else "monster", name)
+        img = f"<img src='{uri}' height='24' style='vertical-align: middle'>&nbsp;" if uri else ""
+        # picture and name in one left-to-right unit, so in Hebrew the picture stays beside its own name
+        return f"<span style='white-space: nowrap'>{bidi.LRE}{img}{html.escape(name)} x{n}{bidi.PDF}{bidi.RLM}</span>"
+
+    def _things_label(self, head: str, things: list[str]) -> QLabel:
+        rtl = self.t.rtl
+        body = "&nbsp;&nbsp; ".join(self._thing_html(x) for x in things)
+        lb = QLabel(f"<div {'dir=rtl' if rtl else ''}><b>{html.escape(head)}</b>&nbsp; {body}</div>", objectName="CardSub")
+        lb.setTextFormat(Qt.RichText)
+        lb.setWordWrap(True)
+        return lb
+
     def _quest_card(self, q: quests.Quest) -> QFrame:
         t = self.t
         card = QFrame(objectName="Card")
-        col = QVBoxLayout(card)
-        col.setContentsMargins(12, 10, 12, 10)
+        outer = QHBoxLayout(card)
+        outer.setContentsMargins(12, 10, 12, 10)
+        outer.setSpacing(12)
+        npc = QLabel()
+        npc.setFixedSize(52, 60)
+        npc.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+        uri = self._picture_uri("npc", q.npc) if q.npc else None
+        if uri:
+            pm = QPixmap(QUrl(uri).toLocalFile())
+            if not pm.isNull():
+                npc.setPixmap(pm.scaled(52, 60, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        outer.addWidget(npc, 0, Qt.AlignTop)
+        col = QVBoxLayout()
         col.setSpacing(4)
+        outer.addLayout(col, 1)
         top = QHBoxLayout()
         name = QLabel(self._p(q.name), objectName="CardName")
         name.setWordWrap(True)
@@ -477,10 +627,13 @@ class ToolsDialog(GlassDialog):
         if where:
             col.addWidget(self._label(" · ".join(where), "CardSub"))
         if q.needs:
-            col.addWidget(self._label(t("q_needs", what=" · ".join(q.needs[:4])), "CardSub"))
-        gets = ([f"{q.mesos:,} mesos"] if q.mesos else []) + q.rewards[:3]
-        if gets:
-            col.addWidget(self._label(t("q_gets", what=" · ".join(gets)), "CardSub"))
+            col.addWidget(self._things_label(t("q_needs_head"), q.needs[:4]))
+        gets = q.rewards[:3]
+        if gets or q.mesos:
+            lb = self._things_label(t("q_gets_head"), gets)
+            if q.mesos:
+                lb.setText(lb.text().replace("</div>", f"&nbsp;&nbsp; {bidi.LRE}{q.mesos:,} mesos{bidi.PDF}</div>"))
+            col.addWidget(lb)
         if q.after:
             col.addWidget(self._label(t("q_after", name=q.after), "RowHint"))
         acts = QHBoxLayout()
@@ -502,131 +655,6 @@ class ToolsDialog(GlassDialog):
             c.quests_done.append(key)
             self.profiles.save()
         self._fill_quests()
-
-    # timers --------------------------------------------------------------
-
-    def _page_timers(self):
-        t = self.t
-        sc, lay = scroll_page()
-        self.run_sec = Section(t("timers_running"), t.rtl)
-        self.run_box = QVBoxLayout()
-        holder = QWidget()
-        holder.setLayout(self.run_box)
-        self.run_sec.add_widget(holder)
-        lay.addWidget(self.run_sec)
-        self.preset_sec = Section(t("timers_presets"), t.rtl)
-        self.preset_grid = QGridLayout()
-        self.preset_grid.setSpacing(8)
-        holder2 = QWidget()
-        holder2.setLayout(self.preset_grid)
-        self.preset_sec.add_widget(holder2)
-        lay.addWidget(self.preset_sec)
-        add = Section(t("timers_new"), t.rtl)
-        self.t_name = QLineEdit()
-        self.t_name.setPlaceholderText(self._p(t("timers_name_ph")))
-        self.t_time = QLineEdit()
-        self.t_time.setPlaceholderText("3:20")
-        self.t_time.setFixedWidth(90)
-        self.t_time.setAlignment(Qt.AlignCenter)
-        row = QHBoxLayout()
-        row.addWidget(self.t_name, 1)
-        row.addWidget(self.t_time)
-        go = QPushButton(self._p(t("timers_add")), objectName="Primary")
-        go.setCursor(Qt.PointingHandCursor)
-        go.clicked.connect(self._add_timer)
-        self.t_time.returnPressed.connect(self._add_timer)
-        row.addWidget(go)
-        holder3 = QWidget()
-        holder3.setLayout(row)
-        add.add_widget(holder3)
-        self.t_error = self._label("", "RowHint")
-        add.add_widget(self.t_error)
-        add.add_widget(self._label(t("timers_hint"), "RowHint"))
-        lay.addWidget(add)
-        lay.addStretch(1)
-        return sc
-
-    def _presets(self) -> list[dict]:
-        return self.settings["timer_presets"] or [dict(p) for p in timers_mod.DEFAULT_PRESETS]
-
-    def _fill_timers(self):
-        t = self.t
-        clear(self.preset_grid)
-        for i, p in enumerate(self._presets()):
-            name = t(f"timer_{p['name'].lower()}") if p["name"] in ("Buff", "Potions", "Boss") else p["name"]
-            b = QPushButton(self._p(f"{name} · {timers_mod.clock(p['seconds'])}"), objectName="Secondary")
-            b.setCursor(Qt.PointingHandCursor)
-            b.clicked.connect(lambda _=False, n=name, s=p["seconds"]: self.timers.start(n, s))
-            x = QPushButton(theme.ICON["close"], objectName="Link")
-            x.setStyleSheet(f"font-family: '{theme.ICON_FONT}'; font-size: 10px; min-height: 20px;")
-            x.setCursor(Qt.PointingHandCursor)
-            x.setToolTip(t("timers_remove"))
-            x.clicked.connect(lambda _=False, idx=i: self._remove_preset(idx))
-            cell = QHBoxLayout()
-            cell.setSpacing(2)
-            cell.addWidget(b, 1)
-            cell.addWidget(x)
-            self.preset_grid.addLayout(cell, i // 2, i % 2)
-        self._timers_tick()
-
-    def _timers_tick(self):
-        if not hasattr(self, "run_box"):
-            return
-        t = self.t
-        running = self.timers.running
-        if [r.id for r in running] != getattr(self, "_run_ids", None):
-            self._run_ids = [r.id for r in running]
-            clear(self.run_box)
-            self._run_labels = {}
-            if not running:
-                self.run_box.addWidget(self._label(t("timers_none"), "RowHint"))
-            for r in running:
-                line = QHBoxLayout()
-                name = QLabel(self._p(r.name), objectName="CardName")
-                line.addWidget(name, 1)
-                left = QLabel("", objectName="BigStat")
-                line.addWidget(left)
-                again = QPushButton(theme.ICON["refresh"], objectName="Link")
-                again.setStyleSheet(f"font-family: '{theme.ICON_FONT}';")
-                again.setToolTip(t("timers_restart"))
-                again.clicked.connect(lambda _=False, i=r.id: self.timers.restart(i))
-                stop = QPushButton(theme.ICON["close"], objectName="LinkDanger")
-                stop.setStyleSheet(f"font-family: '{theme.ICON_FONT}';")
-                stop.setToolTip(t("timers_stop"))
-                stop.clicked.connect(lambda _=False, i=r.id: self.timers.stop(i))
-                for b in (again, stop):
-                    b.setCursor(Qt.PointingHandCursor)
-                    line.addWidget(b)
-                holder = QWidget()
-                holder.setLayout(line)
-                self.run_box.addWidget(holder)
-                self._run_labels[r.id] = left
-        for r in running:
-            lb = self._run_labels.get(r.id)
-            if lb:
-                lb.setText(timers_mod.clock(r.left()) if r.ends else "✓")
-
-    def _add_timer(self):
-        t = self.t
-        secs = timers_mod.parse_clock(self.t_time.text())
-        name = self.t_name.text().strip()
-        if not secs or not name:
-            self.t_error.setText(self._p(t("timers_bad")))
-            return
-        self.t_error.setText("")
-        presets = [p for p in self._presets() if p["name"] != name] + [{"name": name, "seconds": secs}]
-        self.settings["timer_presets"] = presets[-8:]
-        self.timers.start(name, secs)
-        self.t_name.clear()
-        self.t_time.clear()
-        self._fill_timers()
-
-    def _remove_preset(self, i: int):
-        presets = self._presets()
-        if 0 <= i < len(presets):
-            presets.pop(i)
-            self.settings["timer_presets"] = presets
-        self._fill_timers()
 
     # EXP meter -----------------------------------------------------------
 
@@ -750,8 +778,7 @@ class ToolsDialog(GlassDialog):
         lay.addWidget(sell)
         shop = Section(t("shop_title"), t.rtl)
         shop.add_widget(self._label(t("shop_body"), "RowLabel"))
-        self.shop_map = QLineEdit()
-        self.shop_map.setPlaceholderText(self._p(t("shop_map_ph")))
+        self.shop_map = EntityPicker(map_rows(self.kb), self._p(t("shop_map_ph")), icon=40)
         self.shop_map.setMinimumWidth(280)
         shop.add_row(t("shop_where"), self.shop_map)
         self.shop_len = Segmented([("30", 30), ("60", 60), ("120", 120)], 60, t.rtl)
@@ -780,48 +807,3 @@ class ToolsDialog(GlassDialog):
     def _shopping(self):
         where = self.shop_map.text().strip() or self.t("shop_here")
         self.ask_requested.emit(self.t("shop_q", map=where, n=self.shop_len.value()), False)
-
-
-class TimerBar(QWidget):
-    """The running timers as chips under the character card: tap to restart, ✕ to close."""
-
-    def __init__(self, timers, t):
-        super().__init__()
-        self.timers, self.t = timers, t
-        self.lay = QHBoxLayout(self)
-        self.lay.setContentsMargins(2, 0, 2, 0)
-        self.lay.setSpacing(6)
-        self._ids = None
-        self._chips = {}
-        timers.changed.connect(self.redraw)
-        self.redraw()
-
-    def redraw(self):
-        running = self.timers.running
-        self.setVisible(bool(running))
-        if [r.id for r in running] != self._ids:
-            self._ids = [r.id for r in running]
-            clear(self.lay)
-            self._chips = {}
-            for r in running:
-                chip = QPushButton(objectName="TimerChip")
-                chip.setCursor(Qt.PointingHandCursor)
-                chip.setToolTip(self.t("timers_chip_tip"))
-                chip.clicked.connect(lambda _=False, i=r.id: self.timers.restart(i))
-                x = QPushButton(theme.ICON["close"], objectName="Link")
-                x.setStyleSheet(f"font-family: '{theme.ICON_FONT}'; font-size: 9px; min-height: 18px; padding: 0 2px;")
-                x.setCursor(Qt.PointingHandCursor)
-                x.clicked.connect(lambda _=False, i=r.id: self.timers.stop(i))
-                self.lay.addWidget(chip)
-                self.lay.addWidget(x)
-                self._chips[r.id] = chip
-            self.lay.addStretch(1)
-        for r in running:
-            chip = self._chips.get(r.id)
-            if not chip:
-                continue
-            done = not r.ends
-            chip.setObjectName("TimerChipDone" if done else "TimerChip")
-            chip.setText(f"{r.name} · " + (self.t("timers_done_short") if done else timers_mod.clock(r.left())))
-            chip.style().unpolish(chip)
-            chip.style().polish(chip)

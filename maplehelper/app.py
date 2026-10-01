@@ -107,12 +107,8 @@ class MapleHelperApp:
         self.overlay.update_requested.connect(self.update_now)
         self.overlay.profile_requested.connect(self.open_settings)
         self.overlay.add_character_requested.connect(self.add_character)
-        # play tools: timers keep running while the chat is hidden; the EXP meter lives as long as the app
-        from .timers import Timers
-        self.timers = Timers()
-        self.timers.finished.connect(self.on_timer_done)
+        # play tools: the EXP meter lives as long as the app (the window may close in between)
         self.exp_meter: dict = {}
-        self.overlay.set_timers(self.timers)
         self.overlay.tools_requested.connect(lambda: self.show_tools())
         self.overlay.profile_changed.connect(self.on_profile_changed)
         self.overlay.sync_finished.connect(lambda ok: self._tools_call("sync_done", ok))
@@ -469,7 +465,7 @@ class MapleHelperApp:
 
         def make():
             dlg = ToolsDialog(self.kb, self.profiles, self.settings, self.settings["language"], self.style(),
-                              self.timers, self.exp_meter, page)
+                              self.exp_meter, page)
             dlg.sync_requested.connect(self.overlay.sync_profile)
             dlg.ask_requested.connect(self.ask_from_tools)
             dlg.tag_requested.connect(self.ask_about_guide)
@@ -492,12 +488,6 @@ class MapleHelperApp:
 
     def on_profile_changed(self):
         self._tools_call("profile_changed")
-
-    def on_timer_done(self, name: str):
-        from PySide6.QtWidgets import QApplication
-        t = I18n(self.settings["language"])
-        QApplication.beep()
-        self.toast(t("timer_done", name=name), t("timer_done_body"), timeout_ms=8000)
 
     def show_guides(self, open_key: str | None = None):
         from .ui.guides import GuidesDialog

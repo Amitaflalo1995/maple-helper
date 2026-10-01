@@ -78,7 +78,6 @@ DEFAULT_SETTINGS = {
     "provider": "claude",          # claude | codex: which AI CLI answers (see providers/)
     "model": "sonnet",             # Claude's model
     "codex_model": None,           # Codex's model; None = the Codex CLI default
-    "timer_presets": None,         # play timers [{name, seconds}]; None = the defaults (see timers.py)
     "last_model": {},              # provider -> the model that actually answered last (shown in Settings)
     # per provider: use an API key (stored in Credential Manager / Keychain) instead of the account login.
     # Older files hold a single bool here, which meant the Anthropic key.
@@ -150,6 +149,12 @@ class Character:
             parts.append(f"Last known map: {self.map}")
         if self.active_quests:
             parts.append("Active quests: " + ", ".join(self.active_quests))
+        st = self.stats or {}
+        if st:
+            bits = [f"ACC {st['acc']}" if st.get("acc") else "",
+                    f"damage {st['dmg_min']}-{st.get('dmg_max', st['dmg_min'])}" if st.get("dmg_min") else "",
+                    f"max HP {st['hp']}" if st.get("hp") else "", f"max MP {st['mp']}" if st.get("mp") else ""]
+            parts.append("Stats (stat window): " + ", ".join(b for b in bits if b))
         if self.notes:
             parts.append("Notes: " + "; ".join(self.notes[-10:]))
         return "\n".join(parts)

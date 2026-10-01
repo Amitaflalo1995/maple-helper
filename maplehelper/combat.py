@@ -57,6 +57,11 @@ _NOT_GRIND_MOB = re.compile(r"\(|Fairy \d|Dummy", re.I)
 NOT_YET = ("Orbis", "El Nath", "Ludibrium", "Aquarium", "Aqua Road", "Leafre", "Mu Lung", "Omega Sector")
 
 
+def special_monster(name: str) -> bool:
+    """Tutorial, event and job-test versions ("Tutorial Jr. Sentinel", "Jr. Necki (alt) (KPQ)")."""
+    return bool(_NOT_GRIND_MOB.search(name)) or name.startswith("Tutorial")
+
+
 def grind_map(name: str) -> bool:
     return not _NOT_GRIND.search(name) and not any(r in name for r in NOT_YET)
 

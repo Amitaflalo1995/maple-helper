@@ -227,9 +227,6 @@ class Overlay(QWidget):
         self.profile_card.clicked.connect(self.character_menu)
         self.profile_card.setCursor(Qt.PointingHandCursor)
         lay.addWidget(self.profile_card)
-        self.timer_bar = None            # set_timers() adds the running play timers here
-        self._timer_slot = lay.count()
-        self._main_lay = lay
         from .plancard import TipStrip
         self.tip_strip = TipStrip()
         self.tip_strip.asked.connect(self.ask)
@@ -403,12 +400,6 @@ class Overlay(QWidget):
         data[c.id] = {**data.get(c.id, {}), kind: c.level}
         self.settings["tips_dismissed"] = data
         self.refresh_plan()
-
-    def set_timers(self, timers):
-        """Show the play timers (they live in the app, so they keep running while the chat is hidden)."""
-        from .tools import TimerBar
-        self.timer_bar = TimerBar(timers, self.t)
-        self._main_lay.insertWidget(self._timer_slot, self.timer_bar)
 
     def ask_with_screenshot(self, question: str):
         """Like "What now?": a fresh screenshot of the game, then the question."""
