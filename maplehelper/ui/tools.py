@@ -13,13 +13,13 @@ from PySide6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (QButtonGroup, QCompleter, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
 
-from .. import bidi, buildplan, combat, guides, plan, quests
+from .. import bidi, buildplan, combat, crafting, guides, plan, quests
 from ..i18n import I18n
 from . import theme
 from .controls import Section, Segmented, Stepper, rtl_buttons
 from .glass import GlassDialog
 
-PAGES = ("train", "calc", "build", "quests", "exp", "more")
+PAGES = ("train", "calc", "build", "quests", "crafting", "town", "exp", "more")
 MAX_QUESTS = 40
 CURRENT_ROW = {"light": "#FFD3A3", "dark": "#7A4615"}     # the build table row for the player's level
 
@@ -177,7 +177,7 @@ class ToolsDialog(GlassDialog):
         outer = QVBoxLayout(self.content)
         outer.setContentsMargins(0, 0, 0, 0)
         outer.setSpacing(10)
-        # the pages as chips, two rows of three so every label stays readable
+        # the pages as chips, two rows of four so every label stays readable
         grid = QGridLayout()
         grid.setHorizontalSpacing(6)
         grid.setVerticalSpacing(6)
@@ -188,7 +188,7 @@ class ToolsDialog(GlassDialog):
             b.setCursor(Qt.PointingHandCursor)
             b.setProperty("page", name)
             self.nav.addButton(b, i)
-            grid.addWidget(b, i // 3, i % 3)
+            grid.addWidget(b, i // 4, i % 4)
         self.nav.idClicked.connect(self.show_page)
         outer.addLayout(grid)
         self.stack = QStackedWidget()
@@ -577,7 +577,7 @@ class ToolsDialog(GlassDialog):
     def _page_quests(self):
         t = self.t
         sc, lay = scroll_page()
-        self.q_mode = Segmented([(t("q_now"), "now"), (t("q_soon"), "soon"), (t("q_town"), "town")], "now", t.rtl)
+        self.q_mode = Segmented([(t("q_now"), "now"), (t("q_soon"), "soon")], "now", t.rtl)
         self.q_mode.changed.connect(lambda *_: self._fill_quests())
         lay.addWidget(self.q_mode, 0, Qt.AlignHCenter)
         self.q_head = self._label("", "ToolHeader")
@@ -695,7 +695,161 @@ class ToolsDialog(GlassDialog):
         if c and key not in c.quests_done:
             c.quests_done.append(key)
             self.profiles.save()
-        self._fill_quests()
+        self.refresh()
+
+    # crafting ------------------------------------------------------------
+
+    def _page_crafting(self):
+        t = self.t
+        sc, lay = scroll_page()
+        grid = QGridLayout()
+        grid.setSpacing(6)
+        self.craft_pick = QButtonGroup(self)
+        for i, prof in enumerate(crafting.PROFESSIONS):
+            b = QPushButton(crafting.NAMES[prof], objectName="Chip")
+            b.setCheckable(True)
+            b.setCursor(Qt.PointingHandCursor)
+            b.setProperty("prof", prof)
+            self.craft_pick.addButton(b, i)
+            grid.addWidget(b, i // 3, i % 3)
+        self.craft_pick.button(0).setChecked(True)
+        self.craft_pick.idClicked.connect(lambda *_: self._fill_crafting())
+        lay.addLayout(grid)
+        sec = Section("", t.rtl)
+        self.craft_level = Stepper(1, 10, 1)
+        self.craft_level.valueChanged.connect(self._set_craft_level)
+        sec.add_row(t("craft_my_level"), self.craft_level, hint=t("craft_level_hint"))
+        lay.addWidget(sec)
+        self.craft_head = self._label("", "ToolHeader")
+        lay.addWidget(self.craft_head)
+        self.craft_list = QVBoxLayout()
+        self.craft_list.setSpacing(8)
+        lay.addLayout(self.craft_list)
+        lay.addStretch(1)
+        return sc
+
+    def _prof(self) -> str:
+        return self.craft_pick.checkedButton().property("prof")
+
+    def _set_craft_level(self, v: int):
+        c = self.c
+        if c:
+            c.crafts = {**(c.crafts or {}), self._prof(): v}
+            self.profiles.save()
+        self._fill_crafting()
+
+    def _fill_crafting(self):
+        t, c = self.t, self.c
+        clear(self.craft_list)
+        if not c:
+            self._no_character(self.craft_list)
+            return
+        prof = self._prof()
+        top = crafting.max_level(self.kb, prof)
+        lv = int((c.crafts or {}).get(prof, 1))
+        self.craft_level.blockSignals(True)
+        self.craft_level.hi = top
+        self.craft_level.setValue(min(lv, top))
+        self.craft_level.blockSignals(False)
+        now, nxt = crafting.for_level(self.kb, prof, min(lv, top))
+        head = t("craft_head", prof=crafting.NAMES[prof], lv=lv, n=len(now.recipes) if now else 0)
+        if nxt and nxt.needs_exp:
+            head += "\n" + t("craft_next", lv=nxt.level, exp=f"{nxt.needs_exp:,}", char=nxt.char_level or "?")
+        self._set(self.craft_head, head)
+        if not now or not now.recipes:
+            self.craft_list.addWidget(self._label(t("craft_none"), "RowHint"))
+            return
+        for i, r in enumerate(now.recipes):
+            self.craft_list.addWidget(self._recipe_card(r, best=(i == 0)))
+
+    def _recipe_card(self, r: crafting.Recipe, best: bool) -> QFrame:
+        t = self.t
+        card = QFrame(objectName="Card")
+        outer = QHBoxLayout(card)
+        outer.setContentsMargins(12, 10, 12, 10)
+        outer.setSpacing(12)
+        pic = QLabel()
+        pic.setFixedSize(44, 44)
+        pic.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+        uri = self._picture_uri("item", r.name)
+        if uri:
+            pm = QPixmap(QUrl(uri).toLocalFile())
+            if not pm.isNull():
+                pic.setPixmap(pm.scaled(44, 44, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        outer.addWidget(pic, 0, Qt.AlignTop)
+        col = QVBoxLayout()
+        col.setSpacing(4)
+        outer.addLayout(col, 1)
+        col.addWidget(self._label(f"**{r.name}**", "CardName"))
+        why = QHBoxLayout()
+        why.setSpacing(5)
+        if best:
+            why.addWidget(tag(self._p(t("craft_best")), "TagAccent"))
+        why.addWidget(tag(f"+{r.exp} EXP", "TagGood"))
+        why.addWidget(tag(self._p(t("craft_cost", n=f"{r.catalyst:,}")), "Tag"))
+        why.addStretch(1)
+        col.addLayout(why)
+        col.addWidget(self._things_label(t("craft_needs"), [f"{name} x {n}" for n, name in r.ingredients]))
+        net = t("craft_net_gain", n=f"{r.net:,}") if r.net >= 0 else t("craft_net_loss", n=f"{-r.net:,}")
+        col.addWidget(self._label(net, "RowHint"))
+        return card
+
+    # citizenship ---------------------------------------------------------
+
+    def _page_town(self):
+        t = self.t
+        sc, lay = scroll_page()
+        sec = Section(t("town_title"), t.rtl)
+        self.town_pick = Segmented([(name, name) for name in quests.TOWNS], quests.TOWNS[0], t.rtl)
+        self.town_pick.changed.connect(self._set_town)
+        sec.add_row(t("town_mine"), self.town_pick)
+        self.town_advice = self._label("", "RowLabel")
+        sec.add_widget(self.town_advice)
+        self.town_basics = self._label(t("town_basics"), "RowHint")
+        sec.add_widget(self.town_basics)
+        lay.addWidget(sec)
+        self.town_head = self._label("", "ToolHeader")
+        lay.addWidget(self.town_head)
+        self.town_list = QVBoxLayout()
+        self.town_list.setSpacing(8)
+        lay.addLayout(self.town_list)
+        lay.addStretch(1)
+        return sc
+
+    def _set_town(self, *_):
+        c = self.c
+        if c:
+            c.town = self.town_pick.value()
+            self.profiles.save()
+        self._fill_town()
+
+    def _fill_town(self):
+        t, c = self.t, self.c
+        clear(self.town_list)
+        if not c:
+            self._no_character(self.town_list)
+            return
+        rec, paras = buildplan.citizenship_advice(self.kb, c.base_class, c.job, t.lang)
+        town = c.town or rec or quests.TOWNS[0]
+        self.town_pick.blockSignals(True)
+        for b in self.town_pick.findChildren(QPushButton):
+            b.setChecked(b.property("value") == town or b.text() == town)
+        self.town_pick.blockSignals(False)
+        advice = ""
+        if rec:
+            advice = t("town_recommended", town=rec, job=c.job or c.base_class)
+        if paras:
+            advice += ("\n" if advice else "") + "\n".join(guides._ICON.sub("", p).strip() for p in paras[:2])
+        self._set(self.town_advice, advice or t("town_no_advice"))
+        rows = quests.citizenship(self.kb, town, c.level, c.quests_done)
+        self._set(self.town_head, t("town_head", n=len(rows), town=town))
+        if c.level < 12:
+            self.town_list.addWidget(self._label(t("town_too_low"), "RowHint"))
+            return
+        if not rows:
+            self.town_list.addWidget(self._label(t("q_none"), "RowHint"))
+        for q in rows[:MAX_QUESTS]:
+            self.town_list.addWidget(self._quest_card(q))
 
     # EXP meter -----------------------------------------------------------
 

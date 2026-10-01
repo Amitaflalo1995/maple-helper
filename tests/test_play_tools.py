@@ -104,3 +104,30 @@ def test_tools_window_builds_every_page(tmp_path, monkeypatch):
     d._quest_done(quests.for_level(d.kb, 34, "Thief", "Assassin", [])["now"][0].key)
     assert len(c.quests_done) == 1
     d.close()
+
+
+@needs_kb
+def test_crafting_recipes_by_profession_level():
+    from maplehelper import crafting
+    from maplehelper.kb import KnowledgeBase
+    kb = KnowledgeBase(REAL_KB)
+    smithing = crafting.levels(kb, "smithing")
+    assert sum(len(lv.recipes) for lv in smithing) == 68            # the page says "68 recipes"
+    now, nxt = crafting.for_level(kb, "smithing", 2)
+    juno = next(r for r in now.recipes if r.name == "Juno")
+    assert juno.exp == 40 and juno.catalyst == 1200 and juno.net == -226
+    assert (2, "Iron Ingot") in juno.ingredients and (6, "Screw") in juno.ingredients
+    assert now.recipes == sorted(now.recipes, key=lambda r: (-r.exp_per_meso, -r.exp))
+    assert nxt.level == 3 and nxt.needs_exp == 199
+    assert all(crafting.levels(kb, p) for p in crafting.PROFESSIONS)
+
+
+@needs_kb
+def test_citizenship_town_and_quests():
+    from maplehelper.kb import KnowledgeBase
+    kb = KnowledgeBase(REAL_KB)
+    assert buildplan.citizenship_advice(kb, "Warrior", "Fighter", "en")[0] == "Henesys"   # from the Warrior guide
+    assert buildplan.citizenship_advice(kb, "Thief", "Assassin", "en")[0] == "Kerning City"
+    rows = quests.citizenship(kb, "Henesys", 30)
+    assert rows and all(quests.town_of(kb, q) == "Henesys" and q.level <= 30 for q in rows)
+    assert quests.citizenship(kb, "Henesys", 11) == [] or all(q.level <= 11 for q in quests.citizenship(kb, "Henesys", 11))

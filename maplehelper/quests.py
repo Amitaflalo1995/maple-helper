@@ -101,3 +101,32 @@ def for_level(kb, level: int, base_class: str = "", job: str = "", done: list[st
     soon.sort(key=lambda q: (q.level, -q.exp))
     town.sort(key=lambda q: -q.exp)
     return {"now": now, "soon": soon, "town": town, "done": len(done_set)}
+
+
+# ------------------------------------------------------------------ citizenship
+
+TOWNS = ("Henesys", "Kerning City")          # the towns with citizenship (their donation boards in the KB)
+
+
+def town_of(kb, q: Quest) -> str:
+    """The citizenship town a quest belongs to: its board's town, else where its NPC stands."""
+    m = re.search(r"\((.+)\)", q.npc or "")
+    if m and m.group(1) in TOWNS:
+        return m.group(1)
+    key = kb._npc_by_name.get((q.npc or "").lower())
+    page = kb.page(key) if key else ""
+    hits = [(page.find(t), t) for t in TOWNS if t in page]
+    return min(hits)[1] if hits else ""
+
+
+def citizenship(kb, town: str, level: int, done: list[str] | None = None) -> list[Quest]:
+    """The town's citizenship quests (donations and the rest) you can do now, best EXP first."""
+    done_set = set(done or [])
+    out = []
+    for k, e in kb.entities.items():
+        if e.get("category") != "quest" or k in done_set:
+            continue
+        q = quest(kb, k)
+        if q and q.area == "Citizenship" and q.level <= level and town_of(kb, q) == town:
+            out.append(q)
+    return sorted(out, key=lambda q: (-q.exp, q.level))

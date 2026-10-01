@@ -141,6 +141,8 @@ class Character:
     exp_pct: float | None = None  # EXP bar of the current level, read from a screenshot
     stats: dict = field(default_factory=dict)          # from the stat window: acc, dmg_min, dmg_max, hp, mp
     quests_done: list[str] = field(default_factory=list)   # quest keys the player marked done
+    town: str = ""                                    # citizenship town (Henesys / Kerning City), "" = not chosen
+    crafts: dict = field(default_factory=dict)        # crafting profession -> its level
     updated_at: float = field(default_factory=time.time)
 
     def summary(self) -> str:

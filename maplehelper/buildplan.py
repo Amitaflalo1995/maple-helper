@@ -79,3 +79,34 @@ def tables(kb, base_class: str, job: str, level: int, lang: str) -> tuple[str | 
             fits = [max(reached, key=lambda x: x[0])[1]] if reached else [t for t, _ in mine[:1]]
         picked += fits
     return key, picked
+
+
+def citizenship_advice(kb, base_class: str, job: str, lang: str) -> tuple[str | None, list[str]]:
+    """(the town the class guide recommends, its "Recommended citizenship" paragraphs in the player's language)."""
+    from .quests import TOWNS
+    # the job's guide first; a 2nd-job guide often only says "keep the citizenship from first job"
+    for name in dict.fromkeys((job, base_class)):
+        key = plan.class_guide(kb, base_class, name)
+        town, paras = _citizenship_in(kb, key, lang, TOWNS) if key else (None, [])
+        if town:
+            return town, paras
+    return None, []
+
+
+def _citizenship_in(kb, key: str, lang: str, TOWNS) -> tuple[str | None, list[str]]:
+    en = guides.book(key, "en")
+    if not en:
+        return None, []
+    local = guides.book(key, lang) or en
+    same = len(local.get("blocks", [])) == len(en["blocks"])
+    blocks = en["blocks"]
+    start = next((i for i, b in enumerate(blocks) if re.search(r"citizenship", b.get("h2") or b.get("h3") or "", re.I)), None)
+    if start is None:
+        return None, []
+    end = next((i for i in range(start + 1, len(blocks)) if "h2" in blocks[i] or "h3" in blocks[i]), len(blocks))
+    text_en = " ".join(b.get("p", "") for b in blocks[start:end]) + " " + (blocks[start].get("h2") or blocks[start].get("h3"))
+    hits = [(text_en.find(t), t) for t in TOWNS if t in text_en]
+    town = min(hits)[1] if hits else None
+    src = local["blocks"] if same else blocks
+    paras = [b["p"] for b in src[start + 1:end] if "p" in b]
+    return town, paras
