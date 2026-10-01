@@ -137,6 +137,9 @@ STRINGS = {
     "cat_guide": {"he": "מדריך", "en": "Guide"},
     "cat_crafting": {"he": "קראפטינג", "en": "Crafting"},
     "cat_formula": {"he": "נוסחה", "en": "Formula"},
+    "update_bar": {"he": "גרסה {version} מוכנה", "en": "Version {version} is ready"},
+    "update_now": {"he": "עדכן עכשיו", "en": "Update now"},
+    "update_now_tray": {"he": "עדכן לגרסה {version}", "en": "Update to {version}"},
     "update_ready": {"he": "גרסה חדשה של Maple Helper ירדה ותותקן כשתסגרו את האפליקציה.",
                      "en": "A new Maple Helper version is ready and will install when you quit."},
     # macOS: no silent self-update (the installer is a Windows program); the menu bar links to the new DMG
