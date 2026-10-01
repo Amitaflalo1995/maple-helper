@@ -594,27 +594,6 @@ class SettingsDialog(GlassDialog):
         sec.add_row(t("instant_answers"), self.instant, hint=t.p("instant_answers_hint", settings["provider"]))
         lay.addWidget(sec)
 
-        # plan usage (only Claude Code reports it) and saver mode
-        from .. import usage
-        sec = self.usage_sec = Section(t("sec_usage"), rtl)
-        self.usage_meter = QLabel(bidi.plain("\n".join(usage.lines(settings, t)), rtl), objectName="RowLabel")
-        self.usage_meter.setWordWrap(True)
-        self.usage_meter.setContentsMargins(0, 10, 0, 2)
-        sec.add_widget(self.usage_meter)
-        self.usage_note = QLabel(bidi.plain(t("usage_note"), rtl), objectName="RowHint")
-        self.usage_note.setContentsMargins(0, 0, 0, 8)
-        sec.add_widget(self.usage_note)
-        self.saver = Switch(settings["saver_mode"])
-        self.saver_hint = sec.add_row(t("saver_mode"), self.saver, hint=t("saver_hint")).findChild(QLabel, "RowHint")
-        lay.addWidget(sec)
-        self._label_usage()
-
-        # privacy & system
-        sec = Section(t("sec_system"), rtl)
-        self.autostart = Switch(settings["start_with_windows"])
-        sec.add_row(t("start_at_login" if sys.platform == "darwin" else "start_with_windows"), self.autostart)
-        lay.addWidget(sec)
-
         # AI account: the provider and its sign-in act right away (like sign-out), not on Save
         sec = Section(t("sec_ai"), rtl)
         self.provider_pick = Segmented([(p.label, p.name) for p in providers.PROVIDERS.values()],
@@ -642,6 +621,28 @@ class SettingsDialog(GlassDialog):
         self._login_timer = QTimer(self, interval=3000)
         self._login_timer.timeout.connect(self._login_tick)
         self._refresh_account()
+
+        # usage of the plan above (Claude reports it with each answer, ChatGPT when asked) and saver mode
+        sec = self.usage_sec = Section(t("sec_usage"), rtl)
+        self.usage_meter = QLabel(objectName="RowLabel")
+        self.usage_meter.setWordWrap(True)
+        self.usage_meter.setContentsMargins(0, 10, 0, 2)
+        sec.add_widget(self.usage_meter)
+        self.usage_note = QLabel(objectName="RowHint")
+        self.usage_note.setContentsMargins(0, 0, 0, 8)
+        sec.add_widget(self.usage_note)
+        self.saver = Switch(settings["saver_mode"])
+        self.saver_hint = sec.add_row(t("saver_mode"), self.saver, hint=t("saver_hint")).findChild(QLabel, "RowHint")
+        lay.addWidget(sec)
+        self._limits_bridge = _Bridge()
+        self._limits_bridge.account.connect(self._on_limits)
+        self._label_usage()
+
+        # privacy & system
+        sec = Section(t("sec_system"), rtl)
+        self.autostart = Switch(settings["start_with_windows"])
+        sec.add_row(t("start_at_login" if sys.platform == "darwin" else "start_with_windows"), self.autostart)
+        lay.addWidget(sec)
 
         # characters
         sec = Section(t("characters"), rtl)
@@ -706,12 +707,29 @@ class SettingsDialog(GlassDialog):
         return providers.get(self.settings["provider"])
 
     def _label_usage(self):
-        """The Claude plan meter shows only while Claude answers; saver mode is there for both."""
+        """The meter shows the plan of the AI that answers now (Claude's or ChatGPT's); saver mode is there for both."""
         t, ai = self.t, self._ai()
-        self.usage_sec.set_header(t("sec_usage") if ai.reports_usage else t("sec_saver"))
+        self.usage_sec.set_header(t.p("sec_usage", ai.name) if ai.reports_usage else t("sec_saver"))
+        self._show_usage(ai.name)
         self.usage_meter.setVisible(ai.reports_usage)
+        self.usage_note.setText(bidi.plain(t.p("usage_note", ai.name), t.rtl))
         self.usage_note.setVisible(ai.reports_usage)
         self.saver_hint.setText(bidi.plain(t.p("saver_hint", ai.name), t.rtl))
+        if ai.reports_usage and not self.settings.api_key_mode(ai.name):
+            threading.Thread(target=lambda: self._limits_bridge.account.emit(
+                {"provider": ai.name, "limits": ai.read_limits()}), daemon=True).start()
+
+    def _show_usage(self, provider: str):
+        from .. import usage
+        self.usage_meter.setText(bidi.plain("\n".join(usage.lines(self.settings, self.t, provider=provider)), self.t.rtl))
+
+    def _on_limits(self, r: dict):
+        """Fresh usage read in the background (ChatGPT); ignored if the player switched AI meanwhile."""
+        from .. import usage
+        if r["provider"] != self._ai().name or not r["limits"]:
+            return
+        usage.record(self.settings, r["limits"], provider=r["provider"])
+        self._show_usage(r["provider"])
 
     def _on_provider(self, name: str):
         self.settings["provider"] = name

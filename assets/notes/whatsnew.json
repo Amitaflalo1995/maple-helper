@@ -2,14 +2,14 @@
  {
   "version": "0.6.0",
   "he": [
-   "אפשר לבחור את ה-AI: Claude או Codex. בהגדרות ← חשבון AI אפשר להחליף בכל רגע.",
-   "Codex עובד עם מנוי ChatGPT (או מפתח OpenAI API), כולל התקנה והתחברות ישר מהאפליקציה.",
-   "עם Codex התשובה מופיעה בבת אחת, אחרי ה\"חושב…\"."
+   "אפשר לבחור את ה-AI: Claude או ChatGPT. בהגדרות ← חשבון AI אפשר להחליף בכל רגע.",
+   "ChatGPT עובד עם מנוי ChatGPT בתשלום (או מפתח OpenAI API), כולל התקנה והתחברות ישר מהאפליקציה.",
+   "עם ChatGPT התשובה מופיעה בבת אחת, אחרי ה\"חושב…\"."
   ],
   "en": [
-   "Choose your AI: Claude or Codex. Switch any time in Settings → AI account.",
-   "Codex runs on your ChatGPT plan (or an OpenAI API key), with install and sign-in right from the app.",
-   "With Codex the answer appears all at once, after \"Thinking…\"."
+   "Choose your AI: Claude or ChatGPT. Switch any time in Settings → AI account.",
+   "ChatGPT runs on your paid ChatGPT plan (or an OpenAI API key), with install and sign-in right from the app.",
+   "With ChatGPT the answer appears all at once, after \"Thinking…\"."
   ]
  },
  {

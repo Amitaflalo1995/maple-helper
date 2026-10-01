@@ -795,9 +795,10 @@ class Overlay(QWidget):
         from .. import usage
         if not limits:
             return
-        usage.record(self.settings, limits)
-        lvl = usage.level(self.settings)
-        w = usage.current(self.settings).get("five_hour", {})
+        p = self.settings["provider"]
+        usage.record(self.settings, limits, provider=p)
+        lvl = usage.level(self.settings, provider=p)
+        w = usage.current(self.settings, provider=p).get("five_hour", {})
         if lvl == "ok" or self.settings["usage_warned"] == [w.get("resets"), lvl]:
             return
         if lvl == "high" and self.settings["saver_mode"]:
