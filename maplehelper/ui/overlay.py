@@ -319,6 +319,8 @@ class Overlay(QWidget):
         self.history_btn.setToolTip(self.t("history"))
         self.profile_card.refresh.setToolTip(self.t("refresh_tip"))
         self.profile_card.plan_btn.setToolTip(self.t("plan_open"))
+        if getattr(self, "_update_version", None):
+            self.show_update(self._update_version)
         self.profile_card.setToolTip(self.t("switch_character"))
         self.min_btn.setToolTip(self.t("minimize"))
         self.close_btn.setToolTip(self.t("close_chat").replace("F9", self.settings["hotkey_toggle"]))
@@ -327,6 +329,7 @@ class Overlay(QWidget):
         self.refresh_profile_chip()
 
     def show_update(self, version: str):
+        self._update_version = version
         self.update_label.setText(bidi.plain(self.t("update_bar", version=version), self.t.rtl))
         self.update_btn.setText(bidi.plain(self.t("update_now"), self.t.rtl))
         self.update_bar.show()
@@ -347,10 +350,11 @@ class Overlay(QWidget):
         c = self.profiles.active
         self.pins_bar.show_pins(pins.items(self.settings, c.id if c else None), self.t, self.t.rtl)
 
-    def pin_answer(self, question: str, answer: str):
+    def pin_answer(self, question: str, answer: str, cid: str | None = None):
         from .. import pins
         c = self.profiles.active
-        if c and pins.add(self.settings, c.id, question, answer):
+        cid = cid or (c.id if c else None)
+        if cid and pins.add(self.settings, cid, question, answer):
             self.refresh_pins()
             self.add_system(self.t("pinned_done"))
 
@@ -384,7 +388,7 @@ class Overlay(QWidget):
         self.profile_card.exp.show_progress(plan.progress(self.kb, c.level, c.exp_pct), self.t, self.t.rtl)
         dismissed = (self.settings["tips_dismissed"] or {}).get(c.id, {})
         self.tip_strip.show_tip(plan.tip(self.kb, c, self.t, dismissed), self.t, self.t.rtl)
-        if self.plan_panel.isVisible():
+        if self.profile_card.plan_btn.isChecked():
             self.plan_panel.fill(self.kb, c, self.t, self.t.rtl)
 
     def _toggle_plan(self, on: bool):
@@ -405,11 +409,16 @@ class Overlay(QWidget):
     def what_now(self):
         """'What now?': a fresh screenshot and the question, so Claude sees where the player is."""
         self.profile_card.plan_btn.setChecked(False)
+        self.setWindowOpacity(0.0)        # the chat is part of the screen: step aside for the shot
+        QTimer.singleShot(120, self._what_now_capture)
+
+    def _what_now_capture(self):
         hwnd = osapi.find_game_window()
         if hwnd:
             self.game_hwnd = hwnd
             self.shot = self.shot_provider(hwnd) if self.shot_provider else osapi.capture_game(hwnd)
             self.shot_used = False
+        self.setWindowOpacity(1.0)
         self.ask(self.t("what_now_q"))
 
     def character_menu(self):
@@ -610,11 +619,12 @@ class Overlay(QWidget):
         QTimer.singleShot(120, self._do_recapture)
 
     def _do_recapture(self):
-        hwnd = self.game_hwnd or osapi.find_game_window()
-        self.shot = osapi.capture_game(hwnd)
+        hwnd = osapi.find_game_window() or self.game_hwnd
+        self.game_hwnd = hwnd
+        self.shot = osapi.capture_game(hwnd) if hwnd else None
         self.shot_used = False
         self.setWindowOpacity(1.0)
-        self.add_system("✓ " + self.t("recaptured"))
+        self.add_system("✓ " + self.t("recaptured") if self.shot else self.t("sync_no_game"))
 
     # ------------------------------------------------------------------ feed
 
@@ -632,6 +642,8 @@ class Overlay(QWidget):
         a.start()
 
     def clear_feed(self):
+        self._anchor = None
+        self._pending_bubble = None
         while self.feed_lay.count() > 1:
             w = self.feed_lay.takeAt(0).widget()
             if w:
@@ -728,15 +740,16 @@ class Overlay(QWidget):
 
     def _send_typed(self):
         q = self.input.text().strip()
-        if q:
+        if q and self.ask(q):
             self.input.clear()
-            self.ask(q)
 
-    def ask(self, question: str, force_claude: bool = False):
-        if self.busy or not question.strip():
-            return
+    def ask(self, question: str, force_claude: bool = False) -> bool:
+        """Ask (instant answer or Claude). False when nothing was asked (busy, empty)."""
+        if self.busy or getattr(self, "_syncing", False) or not question.strip():
+            return False
         self._last_question = question
         c = self.profiles.active
+        self._asked_cid = c.id if c else None
         history = History(c.id) if c else None
         focus = list(self.focus_keys)
         focus_name = ", ".join(self.kb.get(k)["name"] for k in focus)
@@ -750,13 +763,13 @@ class Overlay(QWidget):
                     if history:
                         history.append("user", question)
                     self._show_quick(qa, question, history)
-                    return
+                    return True
         shot = None if self.shot_used else self.shot
         self._question_shot = shot
         if shot is None and not self.shot_used and not self.game_hwnd:
             self.add_system(self.t("no_game"))
         self.shot_used = True
-        if history and not force_claude:
+        if history:   # again for "Ask Claude anyway", so history search pairs the question with this answer
             history.append("user", f"[about {focus_name}] {question}" if focus_name else question)
         self._anchor = None
         self._follow = True
@@ -775,6 +788,7 @@ class Overlay(QWidget):
         self._worker.done.connect(self._on_done_main)
         self._worker.done.connect(self._thread.quit)
         self._thread.start()
+        return True
 
     def _note_usage(self, limits: dict | None):
         """Remember the plan usage; when the 5-hour window runs low, say so once (with the way to save)."""
@@ -786,6 +800,8 @@ class Overlay(QWidget):
         w = usage.current(self.settings).get("five_hour", {})
         if lvl == "ok" or self.settings["usage_warned"] == [w.get("resets"), lvl]:
             return
+        if lvl == "high" and self.settings["saver_mode"]:
+            return              # already saving: only the "almost used up" warning matters
         self.settings["usage_warned"] = [w.get("resets"), lvl]
         text = self.t("usage_high" if lvl == "high" else "usage_critical", pct=round(w["used"] * 100),
                       at=usage.reset_clock(w.get("resets")))
@@ -811,7 +827,7 @@ class Overlay(QWidget):
         again = QPushButton(bidi.plain(self.t.p("quick_ask_ai", self.settings["provider"]), self.t.rtl),
                             objectName="Link")
         again.setCursor(Qt.PointingHandCursor)
-        again.clicked.connect(lambda: (again.setEnabled(False), self.ask(question, force_claude=True)))
+        again.clicked.connect(lambda: again.setEnabled(not self.ask(question, force_claude=True)))
         rl.addWidget(again)
         rl.addStretch(1)
         self._add_widget(row)
@@ -849,6 +865,12 @@ class Overlay(QWidget):
             self._pending_bubble.set_text(text)
             QTimer.singleShot(0, self._keep_answer_readable)
 
+    SYNC_QUESTION = ("[Profile sync, not a chat question] Look at the screenshot and read MY character's current "
+                     "level, job and EXP bar percentage (the HUD shows them). Reply with one short line in the "
+                     "profile's language, then @@META@@ with profile_update (level, job, base_class if visible, "
+                     "exp_percent) and avatar_box. If the game or the character is not visible, say so briefly "
+                     "and leave profile_update empty.")
+
     def sync_profile(self):
         if self.busy or getattr(self, "_syncing", False):
             return
@@ -859,8 +881,11 @@ class Overlay(QWidget):
         QTimer.singleShot(120, self._sync_capture)
 
     def _sync_capture(self):
-        hwnd = self.game_hwnd or osapi.find_game_window()
-        shot = osapi.capture_game(hwnd)
+        try:
+            hwnd = osapi.find_game_window() or self.game_hwnd
+            shot = osapi.capture_game(hwnd) if hwnd else None
+        except Exception:      # noqa: BLE001 - a failed capture must not leave the button spinning forever
+            shot = None
         self.setWindowOpacity(1.0)
         if not shot:
             self._syncing = False
@@ -869,6 +894,7 @@ class Overlay(QWidget):
             return
         self._sync_shot = shot
         self._sync_thread = QThread(self)
+        self._sync_cid = self.profiles.active_id
         self._sync_worker = AskWorker(self.brain, self.SYNC_QUESTION, self.profiles.active, None, shot)
         self._sync_worker.moveToThread(self._sync_thread)
         self._sync_thread.started.connect(self._sync_worker.run)
@@ -882,6 +908,8 @@ class Overlay(QWidget):
         if ans.error:
             self.add_system(self.t("err_generic"))
             return
+        if self.profiles.active_id != getattr(self, "_sync_cid", None):
+            return             # the player switched character meanwhile: this read belongs to the other one
         changes = self.profiles.apply_update(ans.profile_update or {})
         if ans.avatar_box:
             self._update_avatar(self._sync_shot, ans.avatar_box)
@@ -897,6 +925,8 @@ class Overlay(QWidget):
 
     def _on_done(self, ans: Answer, history: History | None):
         self.busy = False
+        if self._pending_bubble is None:          # the feed was cleared meanwhile
+            self._pending_bubble = self.add_bubble("", "assistant")
         self._on_text(self.input.text())
         self._note_usage(ans.limits)
         if ans.error:
@@ -917,9 +947,10 @@ class Overlay(QWidget):
             self._add_widget(DropGroupCard(self.kb, g["monster"], g["items"]))
         if ans.entities:
             self.add_cards(ans.entities)
-        self._apply_profile_update(ans.profile_update)
-        if ans.avatar_box and getattr(self, "_question_shot", None):
-            self._update_avatar(self._question_shot, ans.avatar_box)
+        if self.profiles.active_id == getattr(self, "_asked_cid", None):
+            self._apply_profile_update(ans.profile_update)
+            if ans.avatar_box and getattr(self, "_question_shot", None):
+                self._update_avatar(self._question_shot, ans.avatar_box)
 
     def _apply_profile_update(self, update: dict):
         c = self.profiles.active
@@ -930,8 +961,10 @@ class Overlay(QWidget):
             # a lower level usually means the screenshot showed another character: ask first
             rest = {k: v for k, v in update.items() if k != "level"}
             self._show_changes(self.profiles.apply_update(rest))
+            cid = c.id
             self.add_confirm(self.t("confirm_profile", level=new_level),
-                             lambda: self._show_changes(self.profiles.apply_update({"level": new_level})))
+                             lambda: self._show_changes(self.profiles.apply_update({"level": new_level}))
+                             if self.profiles.active_id == cid else None)
             return
         self._show_changes(self.profiles.apply_update(update))
 
@@ -988,8 +1021,8 @@ class Overlay(QWidget):
         text = text.strip()
         if not text:
             return
-        if send:
-            self.ask(text)
+        if send and self.ask(text):
+            return
         else:
             self.input.setText(text)
             self.input.setFocus()
