@@ -331,7 +331,7 @@ def book_html(b: dict, mode: str = "light", rtl_ui: bool = False) -> str:
                 cells.append("<tr>" + "".join(
                     f"<{tag}{bg}><p {'dir=rtl align=right' if rtl_of(c) else ''} style='margin:0'>{_rich(c, rtl_of(c), 18)}</p></{tag}>"
                     for c in row) + "</tr>")
-            out.append(f"<table {side} cellspacing='0' cellpadding='5' border='1' style='border-color: {col['line']};"
+            out.append(f"<table {side} width='100%' cellspacing='0' cellpadding='5' border='1' style='border-color: {col['line']};"
                        f" border-style: solid; margin: 4px 0 10px 0;'>{''.join(cells)}</table>")
         elif "img" in blk:
             cap = f"<br><span style='font-size: small;'>{_rich(blk['cap'], rtl_of(blk['cap']))}</span>" if blk.get("cap") else ""

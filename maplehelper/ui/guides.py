@@ -179,6 +179,7 @@ class GuidesDialog(GlassDialog):
         self.browser = QTextBrowser(objectName="GuideText")
         self.browser.setOpenLinks(False)                      # guide: links open here, web links in the browser
         self.browser.anchorClicked.connect(self._on_link)
+        self.browser.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)   # wide tables wrap their cells instead
         self.browser.setLayoutDirection(Qt.LeftToRight)      # the guides are written in English
         lay.addWidget(self.browser, 1)
         return w
