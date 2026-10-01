@@ -58,7 +58,7 @@ STRINGS = {
     "plan_open": {"he": "התוכנית שלי", "en": "My plan"},
     "plan_title": {"he": "התוכנית של {name}", "en": "{name}'s plan"},
     "plan_where": {"he": "איפה לאמן", "en": "Where to train"},
-    "plan_spot": {"he": "לבל {lo}–{hi}: {map} · {mob} ({lv})", "en": "Lv {lo}–{hi}: {map} · {mob} ({lv})"},
+    "plan_spot": {"he": "לבל {lo}–{hi} · {map} · {mob} ({lv})", "en": "Lv {lo}–{hi} · {map} · {mob} ({lv})"},
     "plan_spot_q": {"he": "איך מגיעים ל-{map} ומה כדאי לדעת שם?", "en": "How do I get to {map}, and what should I know there?"},
     "plan_no_route": {"he": "אין עדיין מסלול לבלים ללבל הזה במדריכים.", "en": "The guides have no training route for this level yet."},
     "plan_job": {"he": "הג'וב הבא", "en": "Next job"},
