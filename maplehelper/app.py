@@ -24,6 +24,7 @@ from .voice import VoiceController
 HOTKEY_TOGGLE = 1
 HOTKEY_VOICE = 2
 BACKGROUND_ARG = "--background"   # start in the tray only (autostart at login, silent updates)
+UPDATED_ARG = "--updated"         # the installer reopens the app with it after "Update now": show what's new
 # the .ico carries every Windows size; macOS draws the menu bar and Dock from a PNG
 APP_ICON = "app.ico" if sys.platform == "win32" else "icon-256.png"
 
@@ -157,6 +158,9 @@ class MapleHelperApp:
             t = I18n(self.settings["language"])
             self.overlay.add_notice(t("whats_new_notice", version=__version__), t("whats_new_show"),
                                     lambda: self.show_whats_new(notes))
+            if UPDATED_ARG in sys.argv:
+                # back from "Update now": the chat is open, show what changed right away
+                QTimer.singleShot(900, lambda: self.show_whats_new(notes))
 
     def open_window(self, kind: str, make, on_close=None):
         """Settings, guides, history…: a window NEXT TO the chat, which stays usable (not modal).
@@ -415,11 +419,12 @@ class MapleHelperApp:
                 if rel:
                     self.main_thread.call.emit(lambda: self.announce_update(*rel))
             threading.Thread(target=mac_update, daemon=True).start()
-        elif getattr(sys, "frozen", False) and not self.pending_installer:
+        elif getattr(sys, "frozen", False) and not self.pending_installer and not getattr(self, "_downloading", False):
             def app_update():
-                path = updater.download_app_update(__version__)
-                if path:
-                    self.main_thread.call.emit(lambda: self.app_update_ready(path))
+                rel = updater.newer_release(__version__)
+                if not rel:
+                    return
+                self.main_thread.call.emit(lambda: self.update_found(rel[0]))
             threading.Thread(target=app_update, daemon=True).start()
 
         if self.overlay.busy or getattr(self.overlay, "_syncing", False):
@@ -443,22 +448,69 @@ class MapleHelperApp:
         a = QAction(t("update_available", version=version), self._tray_menu, triggered=lambda: webbrowser.open(url))
         self._tray_menu.insertAction(self._tray_menu.actions()[2], a)   # right under the header
 
+    def update_found(self, version: str):
+        """A newer version exists: say so at once, and download it in the background (with progress)."""
+        if self.pending_installer or getattr(self, "_downloading", False):
+            return
+        self._update_version = version
+        self.overlay.show_update(version, "available")
+        self._start_download()
+
+    def _start_download(self):
+        self._downloading = True
+        version = getattr(self, "_update_version", "")
+
+        def progress(done, total):
+            if total and getattr(self, "_update_clicked", False):
+                pct = done * 100 / total
+                if pct - getattr(self, "_last_pct", -1) >= 1 or done == total:
+                    self._last_pct = pct
+                    self.main_thread.call.emit(lambda p=pct: self.overlay.show_update(version, "downloading", p))
+
+        def work():
+            path = updater.download_app_update(__version__, progress)
+            self._downloading = False
+            self.main_thread.call.emit(lambda: self.app_update_ready(path) if path else self._download_failed())
+        threading.Thread(target=work, daemon=True).start()
+
+    def _download_failed(self):
+        if getattr(self, "_update_clicked", False):
+            self.overlay.show_update(getattr(self, "_update_version", ""), "failed")
+        self._update_clicked = False
+
     def app_update_ready(self, path: str):
         """A newer version is downloaded and verified: offer it at the top of the chat and in the tray."""
         self.pending_installer = path
         version = updater.installer_version(path)
+        if getattr(self, "_update_clicked", False):
+            self._install_now()          # the player is waiting on the progress bar: go on
+            return
         t = I18n(self.settings["language"])
-        self.overlay.show_update(version)
+        self.overlay.show_update(version, "ready")
         self.toast(t("update_bar", version=version), t("update_ready"))
         self.tray.hide()
         self.make_tray()   # adds "Update to X" to the tray menu
 
     def update_now(self):
-        """Quit; the installer updates in the background and opens the new version with the chat."""
-        if not self.pending_installer:
-            return
+        """The player pressed "Update now": show the download, then install and reopen with what's new."""
+        self._update_clicked = True
+        if not self.overlay.isVisible():
+            self.overlay.toggle(self.capture)
+        if self.pending_installer:
+            self._install_now()
+        elif getattr(self, "_downloading", False):
+            self._last_pct = -1
+            self.overlay.show_update(getattr(self, "_update_version", ""), "downloading", 0)
+        else:                                   # a failed download: try again
+            self.overlay.show_update(getattr(self, "_update_version", ""), "downloading", 0)
+            self._start_download()
+
+    def _install_now(self):
+        """Say what happens next, then close: the installer shows its progress and opens the new version."""
+        version = updater.installer_version(self.pending_installer)
+        self.overlay.show_update(version, "installing")
         self._reopen_after_update = True
-        self.qapp.quit()
+        QTimer.singleShot(1800, self.qapp.quit)
 
     def update_kb_interactive(self):
         t = I18n(self.settings["language"])

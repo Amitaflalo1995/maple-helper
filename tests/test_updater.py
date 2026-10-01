@@ -230,3 +230,32 @@ def test_kb_in_use_is_kept_whole_and_retried_later(env, monkeypatch):
     monkeypatch.setattr(type(user_kb), "rename", busy)
     assert updater.update_kb() is False and still_old(user_kb)
     assert not user_kb.with_name("kb.new").exists()
+
+
+def test_download_reports_progress(monkeypatch):
+    class Resp:
+        headers = {"Content-Length": "600000"}
+
+        def __init__(self):
+            self.left = b"x" * 600000
+
+        def read(self, n):
+            out, self.left = self.left[:n], self.left[n:]
+            return out
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+    monkeypatch.setattr(updater.urllib.request, "urlopen", lambda req, timeout=0: Resp())
+    seen = []
+    data = updater._download("https://dl/setup", lambda done, total: seen.append((done, total)))
+    assert len(data) == 600000 and seen[-1] == (600000, 600000) and len(seen) == 3
+
+
+def test_update_now_shows_the_installer_progress():
+    args = updater.installer_args("C:/x/MapleHelper-Setup-v0.7.0.exe", reopen=True)
+    assert "/SILENT" in args and "/VERYSILENT" not in args and args[-1] == "/LAUNCHARGS=--updated"
+    quiet = updater.installer_args("C:/x/MapleHelper-Setup-v0.7.0.exe", reopen=False)
+    assert "/VERYSILENT" in quiet

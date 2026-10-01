@@ -216,8 +216,19 @@ class Overlay(QWidget):
         ub.setContentsMargins(12, 6, 8, 6)
         ub.setSpacing(10)
         ub.addWidget(QLabel(theme.ICON["refresh"], objectName="InfoIcon"), 0, Qt.AlignVCenter)
+        col = QVBoxLayout()
+        col.setSpacing(4)
         self.update_label = QLabel(objectName="InfoText")
-        ub.addWidget(self.update_label, 1)
+        self.update_label.setWordWrap(True)
+        col.addWidget(self.update_label)
+        from PySide6.QtWidgets import QProgressBar
+        self.update_progress = QProgressBar(objectName="ExpBar")
+        self.update_progress.setRange(0, 1000)
+        self.update_progress.setTextVisible(False)
+        self.update_progress.setFixedHeight(6)
+        self.update_progress.hide()
+        col.addWidget(self.update_progress)
+        ub.addLayout(col, 1)
         self.update_btn = QPushButton(objectName="Primary")
         self.update_btn.setCursor(Qt.PointingHandCursor)
         self.update_btn.clicked.connect(self.update_requested.emit)
@@ -335,7 +346,7 @@ class Overlay(QWidget):
         self.profile_card.now_btn.setText(self.t("plan_what_now"))
         self.profile_card.now_btn.setToolTip(self.t("what_now_tip"))
         if getattr(self, "_update_version", None):
-            self.show_update(self._update_version)
+            self.show_update(self._update_version, getattr(self, "_update_state", "available"))
         self.profile_card.setToolTip(self.t("switch_character"))
         self.min_btn.setToolTip(self.t("minimize"))
         self.close_btn.setToolTip(self.t("close_chat").replace("F9", self.settings["hotkey_toggle"]))
@@ -343,10 +354,24 @@ class Overlay(QWidget):
         self._on_text(self.input.text())
         self.refresh_profile_chip()
 
-    def show_update(self, version: str):
-        self._update_version = version
-        self.update_label.setText(bidi.plain(self.t("update_bar", version=version), self.t.rtl))
-        self.update_btn.setText(bidi.plain(self.t("update_now"), self.t.rtl))
+    def show_update(self, version: str, state: str = "available", pct: float | None = None):
+        """The update bar: available (button) -> downloading (progress) -> installing; failed (retry)."""
+        self._update_version, self._update_state = version, state
+        t, rtl = self.t, self.t.rtl
+        text = {"available": t("update_bar_available", version=version),
+                "ready": t("update_bar", version=version),
+                "downloading": t("update_downloading", version=version, pct=round(pct or 0)),
+                "installing": t("update_installing", version=version),
+                "failed": t("update_failed")}[state]
+        self.update_label.setText(bidi.plain(text, rtl))
+        self.update_btn.setText(bidi.plain(t("update_retry" if state == "failed" else "update_now"), rtl))
+        self.update_btn.setVisible(state in ("available", "ready", "failed"))
+        self.update_progress.setVisible(state in ("downloading", "installing"))
+        if state == "downloading":
+            self.update_progress.setRange(0, 1000)
+            self.update_progress.setValue(round((pct or 0) * 10))
+        elif state == "installing":
+            self.update_progress.setRange(0, 0)          # busy: the installer takes over in a moment
         self.update_bar.show()
 
     def refresh_profile_chip(self):
