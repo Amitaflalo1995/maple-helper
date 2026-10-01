@@ -13,13 +13,13 @@ from PySide6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (QButtonGroup, QCompleter, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
 
-from .. import bidi, buildplan, combat, crafting, guides, plan, quests
+from .. import bidi, buildplan, combat, crafting, guides, market, plan, quests
 from ..i18n import I18n
 from . import theme
 from .controls import Section, Segmented, Stepper, rtl_buttons
 from .glass import GlassDialog
 
-PAGES = ("train", "calc", "build", "quests", "crafting", "town", "exp", "more")
+PAGES = ("train", "calc", "build", "quests", "crafting", "town", "prices", "exp", "more")
 MAX_QUESTS = 40
 CURRENT_ROW = {"light": "#FFD3A3", "dark": "#7A4615"}     # the build table row for the player's level
 
@@ -129,6 +129,16 @@ class EntityPicker(QLineEdit):
         return super().event(e)
 
 
+CITIZEN_GRADES = ("Helpful Stranger", "Distinguished Citizen", "Guardian of the Village")
+
+
+def _bold_names(text: str) -> str:
+    """Citizen grades and the towns stand out in a long piece of advice."""
+    for name in CITIZEN_GRADES + quests.TOWNS:
+        text = re.sub(rf"(?<!\*)\b{re.escape(name)}\b(?!\*)", f"**{name}**", text)
+    return text
+
+
 def monster_rows(kb) -> list[tuple[str, str, object]]:
     """Every monster once (the version that spawns on the most maps), lowest level first."""
     best: dict[str, combat.Monster] = {}
@@ -139,6 +149,15 @@ def monster_rows(kb) -> list[tuple[str, str, object]]:
             best[m.name] = m
     return [(f"{m.name}  ·  Lv. {m.level}", m.name, kb.picture(m.key))
             for m in sorted(best.values(), key=lambda m: (m.level, m.name))]
+
+
+def item_rows(kb) -> list[tuple[str, str, object]]:
+    """Every item once, by name."""
+    seen = {}
+    for k, e in kb.entities.items():
+        if e.get("category") == "item" and e["name"].strip() and e["name"] not in seen:
+            seen[e["name"]] = k
+    return [(name, name, kb.picture(k)) for name, k in sorted(seen.items(), key=lambda x: x[0].lower())]
 
 
 def map_rows(kb) -> list[tuple[str, str, object]]:
@@ -163,6 +182,7 @@ def map_rows(kb) -> list[tuple[str, str, object]]:
 
 class ToolsDialog(GlassDialog):
     sync_requested = Signal()                 # read level/EXP/stats from a screenshot (the chat does it)
+    market_ready = Signal(object)             # (item name, Market or None) from the background lookup
     ask_requested = Signal(str, bool)          # question for the chat, with a fresh screenshot?
     tag_requested = Signal(str)                # tag an entity (monster, quest) in the chat
     guide_requested = Signal(str)              # open a guide in the guides window
@@ -177,7 +197,7 @@ class ToolsDialog(GlassDialog):
         outer = QVBoxLayout(self.content)
         outer.setContentsMargins(0, 0, 0, 0)
         outer.setSpacing(10)
-        # the pages as chips, two rows of four so every label stays readable
+        # the pages as chips, three rows of three so every label stays readable
         grid = QGridLayout()
         grid.setHorizontalSpacing(6)
         grid.setVerticalSpacing(6)
@@ -188,7 +208,7 @@ class ToolsDialog(GlassDialog):
             b.setCursor(Qt.PointingHandCursor)
             b.setProperty("page", name)
             self.nav.addButton(b, i)
-            grid.addWidget(b, i // 4, i % 4)
+            grid.addWidget(b, i // 3, i % 3)
         self.nav.idClicked.connect(self.show_page)
         outer.addLayout(grid)
         self.stack = QStackedWidget()
@@ -835,12 +855,13 @@ class ToolsDialog(GlassDialog):
         for b in self.town_pick.findChildren(QPushButton):
             b.setChecked(b.property("value") == town or b.text() == town)
         self.town_pick.blockSignals(False)
-        advice = ""
-        if rec:
-            advice = t("town_recommended", town=rec, job=c.job or c.base_class)
-        if paras:
-            advice += ("\n" if advice else "") + "\n".join(guides._ICON.sub("", p).strip() for p in paras[:2])
-        self._set(self.town_advice, advice or t("town_no_advice"))
+        # the guide's advice, one sentence per line, the grades and towns in bold
+        lines = [t("town_recommended", town=rec, job=c.job or c.base_class)] if rec else []
+        for para in paras[:2]:
+            for sentence in re.split(r"(?<=[.!?])\s+", guides._ICON.sub("", para).strip()):
+                if sentence.strip():
+                    lines.append("• " + _bold_names(sentence.strip()))
+        self._set(self.town_advice, "\n".join(lines) if lines else t("town_no_advice"))
         rows = quests.citizenship(self.kb, town, c.level, c.quests_done)
         self._set(self.town_head, t("town_head", n=len(rows), town=town))
         if c.level < 12:
@@ -850,6 +871,86 @@ class ToolsDialog(GlassDialog):
             self.town_list.addWidget(self._label(t("q_none"), "RowHint"))
         for q in rows[:MAX_QUESTS]:
             self.town_list.addWidget(self._quest_card(q))
+
+    # prices --------------------------------------------------------------
+
+    def _page_prices(self):
+        t = self.t
+        sc, lay = scroll_page()
+        rows = item_rows(self.kb)
+        self.price_input = EntityPicker(rows, self._p(t("price_placeholder", n=f"{len(rows):,}")), icon=32)
+        self.price_input.picked.connect(self._fill_prices)
+        lay.addWidget(self.price_input)
+        self.price_box = QVBoxLayout()
+        self.price_box.setSpacing(12)
+        lay.addLayout(self.price_box)
+        lay.addWidget(self._label(t("price_hint"), "RowHint"))
+        lay.addStretch(1)
+        self.market_ready.connect(self._on_market)
+        return sc
+
+    def _fill_prices(self):
+        t = self.t
+        clear(self.price_box)
+        name = self.price_input.text().strip()
+        key = self.kb._item_by_name.get(name.lower()) if name else None
+        if not key:
+            if name:
+                self.price_box.addWidget(self._label(t("price_none"), "RowHint"))
+            return
+        npc = market.npc_prices(self.kb, key)
+        card = QFrame(objectName="Card")
+        outer = QHBoxLayout(card)
+        outer.setContentsMargins(12, 10, 12, 10)
+        outer.setSpacing(12)
+        pic = QLabel()
+        pic.setFixedSize(48, 48)
+        pic.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+        path = self.kb.picture(key)
+        if path:
+            pm = QPixmap(str(path))
+            if not pm.isNull():
+                pic.setPixmap(pm.scaled(48, 48, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        outer.addWidget(pic, 0, Qt.AlignTop)
+        col = QVBoxLayout()
+        col.setSpacing(6)
+        outer.addLayout(col, 1)
+        col.addWidget(self._label(f"**{name}**", "CardName"))
+        lines = []
+        if npc.sell_back is not None:
+            lines.append(t("price_npc_buys", n=f"{npc.sell_back:,}"))
+        if npc.shops:
+            cheapest = npc.shops[0]
+            lines.append(t("price_shop", n=f"{cheapest[2]:,}", npc=cheapest[0], where=cheapest[1].split(" · ")[-1]))
+        if not lines:
+            lines.append(t("price_no_npc"))
+        col.addWidget(self._label("\n".join(lines), "RowLabel"))
+        self.fm_label = self._label(t("price_fm_loading"), "RowLabel")
+        col.addWidget(self.fm_label)
+        web = QPushButton(self._p(t("price_open_site")), objectName="Link")
+        web.setCursor(Qt.PointingHandCursor)
+        web.clicked.connect(lambda _=False, n=name: __import__("webbrowser").open(market.page_url(n)))
+        col.addWidget(web, 0, (Qt.AlignRight if t.rtl else Qt.AlignLeft) | Qt.AlignAbsolute)
+        self.price_box.addWidget(card)
+        self._price_for = name
+        import threading
+        threading.Thread(target=lambda n=name: self.market_ready.emit((n, market.free_market(n))), daemon=True).start()
+
+    def _on_market(self, result):
+        t = self.t
+        name, m = result
+        if name != getattr(self, "_price_for", None) or not hasattr(self, "fm_label"):
+            return                      # an older lookup, the player picked another item since
+        if m is None:
+            text = t("price_fm_offline")
+        elif not m.count:
+            text = t("price_fm_empty")
+        else:
+            text = t("price_fm", median=f"{m.median:,}", n=m.count, low=f"{m.low:,}", high=f"{m.high:,}")
+        try:
+            self._set(self.fm_label, text)
+        except RuntimeError:
+            pass                        # the card was redrawn meanwhile
 
     # EXP meter -----------------------------------------------------------
 

@@ -131,3 +131,23 @@ def test_citizenship_town_and_quests():
     rows = quests.citizenship(kb, "Henesys", 30)
     assert rows and all(quests.town_of(kb, q) == "Henesys" and q.level <= 30 for q in rows)
     assert quests.citizenship(kb, "Henesys", 11) == [] or all(q.level <= 11 for q in quests.citizenship(kb, "Henesys", 11))
+
+
+@needs_kb
+def test_npc_prices_from_the_item_page():
+    from maplehelper import market
+    from maplehelper.kb import KnowledgeBase
+    kb = KnowledgeBase(REAL_KB)
+    red = market.npc_prices(kb, kb._item_by_name["red potion"])
+    assert red.sell_back == 5 and red.shops and red.shops[0][2] == 50
+    assert red.shops == sorted(red.shops, key=lambda s: s[2])
+
+
+def test_free_market_summary_keeps_the_exact_item():
+    from maplehelper import market
+    rows = [{"itemName": "Work Gloves", "priceEach": 1000, "createdAt": "2026-10-21T10:00:00Z"},
+            {"itemName": "Work Gloves", "priceEach": 3000},
+            {"itemName": "Work Gloves (Blue)", "priceEach": 5}]
+    m = market.summarize(rows, "Work Gloves")
+    assert (m.count, m.median, m.low, m.high) == (2, 2000, 1000, 3000) and m.latest
+    assert market.summarize([], "Work Gloves").count == 0
