@@ -8,6 +8,7 @@
 
 <p align="center">
   <a href="https://github.com/Amitaflalo1995/maple-helper/releases/latest"><img src="https://img.shields.io/badge/Download-Windows%20installer-2ea44f?style=for-the-badge&logo=windows&logoColor=white" alt="Download the Windows installer"></a>
+  <a href="https://github.com/Amitaflalo1995/maple-helper/releases/latest"><img src="https://img.shields.io/badge/Download-macOS%20(Apple%20Silicon)-2ea44f?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS (Apple Silicon)"></a>
   <a href="https://github.com/Amitaflalo1995/maple-helper/releases"><img src="https://img.shields.io/badge/All-releases-555?style=for-the-badge&logo=github&logoColor=white" alt="All releases"></a>
 </p>
 
