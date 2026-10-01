@@ -83,3 +83,83 @@ def test_cli_exit_codes(kb_copy, capsys):
     assert kb_release.main(["validate", str(kb_copy)]) == 0
     assert kb_release.main(["validate", str(kb_copy), "--min-entities", "999"]) == 1
     assert "::error::" in capsys.readouterr().out
+
+
+# ---------------------------------------------------------------- patch notes
+
+def _edit(kb, fn):
+    index = json.loads((kb / "index.json").read_text(encoding="utf-8"))
+    index = fn(index)
+    (kb / "index.json").write_text(json.dumps(index), encoding="utf-8")
+
+
+def _drops(kb, rows):
+    lines = ["monster\tmonster_level\tmonster_key\titem\titem_type\titem_key"]
+    lines += [f"{m}\t1\t{mk}\t{i}\tEtc\t{ik}" for m, mk, i, ik in rows]
+    (kb / "drops.tsv").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def test_patch_notes_list_exactly_what_changed(kb_copy, tmp_path):
+    import shutil
+    old = tmp_path / "old"
+    shutil.copytree(kb_copy, old)
+    index = json.loads((kb_copy / "index.json").read_text(encoding="utf-8"))
+    mob, gone, page = [e for e in index if e["category"] == "monster"][:3]
+    _drops(old, [(mob["name"], mob["key"], "Snail Shell", "item/1"), (mob["name"], mob["key"], "Red Potion", "item/2")])
+    _drops(kb_copy, [(mob["name"], mob["key"], "Snail Shell", "item/1"), (mob["name"], mob["key"], "Blue Potion", "item/3")])
+
+    def change(idx):
+        for e in idx:
+            if e["key"] == mob["key"]:
+                e["props"] = {**(e.get("props") or {}), "HP": 999999}
+            if e["key"] == page["key"]:
+                e["hash"] = "different"
+        idx = [e for e in idx if e["key"] != gone["key"]]
+        return idx + [{"key": "monster/new", "name": "Brand New Mob", "category": "monster"}]
+    _edit(kb_copy, change)
+
+    d = kb_release.diff_kb(old, kb_copy)
+    assert d["counts"] == {"added": 1, "removed": 1, "changed": 1, "updated": 1}
+    assert d["added"][0]["name"] == "Brand New Mob" and d["removed"][0]["key"] == gone["key"]
+    c = d["changed"][0]
+    assert c["key"] == mob["key"] and ["HP", (mob.get("props") or {}).get("HP"), 999999] in c["props"]
+    assert c["drops_added"] == ["Blue Potion"] and c["drops_removed"] == ["Red Potion"]
+    assert d["updated"][0]["key"] == page["key"]
+
+
+def test_changelog_is_newest_first_and_skips_no_op_updates(kb_copy, tmp_path):
+    import shutil
+    old = tmp_path / "old"
+    shutil.copytree(kb_copy, old)
+    assert kb_release.record_changes(kb_copy, old, "2026.10.01.0100") is None      # nothing changed
+    assert not (kb_copy / "changelog.json").exists()
+    _edit(kb_copy, lambda idx: idx + [{"key": "item/a", "name": "A", "category": "item"}])
+    kb_release.record_changes(kb_copy, old, "2026.10.01.0100")
+    _edit(kb_copy, lambda idx: idx + [{"key": "item/b", "name": "B", "category": "item"}])
+    kb_release.record_changes(kb_copy, old, "2026.10.02.0100")
+    log = json.loads((kb_copy / "changelog.json").read_text(encoding="utf-8"))
+    assert [e["version"] for e in log] == ["2026.10.02.0100", "2026.10.01.0100"]
+
+
+def test_app_shows_only_updates_newer_than_its_kb(kb_copy, tmp_path, monkeypatch):
+    import shutil
+    from maplehelper import updater
+    old = tmp_path / "old"
+    shutil.copytree(kb_copy, old)
+    for v, key in (("2026.10.01.0100", "item/a"), ("2026.10.02.0100", "item/b")):
+        _edit(kb_copy, lambda idx, key=key: idx + [{"key": key, "name": key, "category": "item"}])
+        kb_release.record_changes(kb_copy, old, v)
+    monkeypatch.setattr(updater, "kb_dir", lambda: kb_copy)
+    assert [e["version"] for e in updater.changes_since("2026.10.01.0100")] == ["2026.10.02.0100"]
+    assert len(updater.changes_since("")) == 2
+
+
+def test_pack_with_previous_kb_ships_the_patch_notes(kb_copy, tmp_path):
+    import shutil
+    old = tmp_path / "old"
+    shutil.copytree(kb_copy, old)
+    _edit(kb_copy, lambda idx: idx + [{"key": "item/a", "name": "A", "category": "item"}])
+    m = kb_release.pack(kb_copy, tmp_path / "d", version="2026.10.03.0100", previous_kb=old)
+    with zipfile.ZipFile(tmp_path / "d" / "kb.zip") as z:
+        log = json.loads(z.read("changelog.json"))
+    assert log[0]["version"] == m["version"] and log[0]["counts"]["added"] == 1

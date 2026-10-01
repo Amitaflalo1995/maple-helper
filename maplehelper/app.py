@@ -19,6 +19,7 @@ from .store import ASSETS, DATA_DIR, History, Profiles, Settings
 from .ui import theme
 from .ui.dialogs import Onboarding, SettingsDialog
 from .ui.overlay import Overlay
+from .ui.patchnotes import PatchNotesDialog, summary
 from .ui.toast import notify
 from .voice import VoiceController
 
@@ -221,6 +222,7 @@ class MapleHelperApp:
         dlg.update_kb_requested.connect(self.update_kb_interactive)
         dlg.history_cleared.connect(self.on_history_cleared)
         dlg.account_changed.connect(self.on_account_changed)
+        dlg.patch_notes_requested.connect(lambda: self.show_patch_notes())
         dlg.exec()
         self.overlay.refresh_profile_chip()
 
@@ -282,17 +284,41 @@ class MapleHelperApp:
             threading.Thread(target=app_update, daemon=True).start()
 
         def work():
+            before = updater.local_version()
             if updater.update_kb():
                 self.main_thread.call.emit(self.reload_kb)
-                self.main_thread.call.emit(lambda: self.toast(I18n(self.settings["language"])("kb_updated")))
+                self.main_thread.call.emit(lambda: self.kb_updated(before))
         threading.Thread(target=work, daemon=True).start()
 
     def update_kb_interactive(self):
         t = I18n(self.settings["language"])
-        changed = updater.update_kb()
-        if changed:
+        before = updater.local_version()
+        if updater.update_kb():
             self.reload_kb()
-        self.toast(t("kb_updated") if changed else t("kb_uptodate"))
+            self.kb_updated(before, interactive=True)
+        else:
+            self.toast(t("kb_uptodate"))
+
+    def kb_updated(self, before: str, interactive: bool = False):
+        """Tell the player exactly what the update changed (patch notes), not just that it happened."""
+        t = I18n(self.settings["language"])
+        entries = updater.changes_since(before)
+        if not entries:
+            self.toast(t("kb_updated"))
+            return
+        if interactive:
+            self.show_patch_notes(entries)
+            return
+        # in the chat, where the player looks next; a dialog over the game would interrupt play
+        self.overlay.add_notice(t("patch_notes_summary", summary=summary(t, entries)), t("patch_notes_show"),
+                                lambda: self.show_patch_notes(entries))
+        if not self.overlay.isVisible():
+            self.toast(t("kb_updated"), t("kb_updated_open"))
+
+    def show_patch_notes(self, entries: list[dict] | None = None):
+        if entries is None:
+            entries = updater.changelog()[:5]
+        PatchNotesDialog(entries, self.settings["language"], self.style()).exec()
 
     def reload_kb(self):
         self.kb = KnowledgeBase()

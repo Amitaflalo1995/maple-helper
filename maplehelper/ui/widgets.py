@@ -67,6 +67,28 @@ class SystemLine(QLabel):
         self.setAlignment(Qt.AlignHCenter)
 
 
+class NoticeCard(QFrame):
+    """An orange note in the conversation with one action (e.g. "what changed?")."""
+
+    clicked = Signal()
+
+    def __init__(self, text: str, action: str, rtl: bool):
+        super().__init__(objectName="InfoNote")
+        from . import theme
+        self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
+        lay = QHBoxLayout(self)
+        lay.setContentsMargins(12, 8, 12, 8)
+        lay.setSpacing(10)
+        lay.addWidget(QLabel(theme.ICON["info"], objectName="InfoIcon"), 0, Qt.AlignVCenter)
+        msg = QLabel(bidi.plain(text, rtl), objectName="InfoText")
+        msg.setWordWrap(True)
+        lay.addWidget(msg, 1)
+        btn = QPushButton(bidi.plain(action, rtl), objectName="Link")
+        btn.setCursor(Qt.PointingHandCursor)
+        btn.clicked.connect(self.clicked.emit)
+        lay.addWidget(btn, 0, Qt.AlignVCenter)
+
+
 # ------------------------------------------------------------------ entity cards
 
 CARD_FIELDS = {

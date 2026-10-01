@@ -28,6 +28,20 @@ def local_version() -> str:
         return ""
 
 
+def changelog() -> list[dict]:
+    """Patch notes of recent KB updates, newest first (written by tools/kb_release.py)."""
+    try:
+        log = json.loads((kb_dir() / "changelog.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    return [e for e in log if isinstance(e, dict) and e.get("version")] if isinstance(log, list) else []
+
+
+def changes_since(version: str) -> list[dict]:
+    """The updates a player hasn't seen yet: every entry newer than the KB they had."""
+    return [e for e in changelog() if str(e["version"]) > version]
+
+
 def _get(url: str, timeout: int = 30) -> bytes | None:
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "MapleHelper"})

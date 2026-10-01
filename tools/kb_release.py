@@ -1,16 +1,19 @@
 """Knowledge-base checks and packing used by CI (and by hand).
 
     python tools/kb_release.py validate data/kb [--previous old/index.json] [--min-entities N]
-    python tools/kb_release.py pack data/kb dist-kb [--version 2026.10.02.1200]
+    python tools/kb_release.py pack data/kb dist-kb [--version 2026.10.02.1200] [--previous-kb old_kb_dir]
 
 `validate` is the gate in front of every KB publish: a broken scrape must never reach players.
 `pack` writes kb.zip + kb-manifest.json in the format maplehelper/updater.py reads (the same
 format tools/release.py writes): {"version", "sha256", "url": ".../releases/latest/download/kb.zip"}.
 Versions are zero-padded UTC timestamps, so plain string comparison orders them.
+With a previous KB, `pack` also records what changed (new / removed entries, stat and drop changes)
+in changelog.json, which the app shows players as patch notes after an update.
 """
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
 import sys
@@ -21,6 +24,9 @@ from pathlib import Path
 REPO = "Amitaflalo1995/maple-helper"
 CATEGORIES = ["monster", "item", "map", "quest", "npc", "skill", "class", "guide", "shop", "crafting", "formula"]
 MIN_KEEP_RATIO = 0.9   # an update may not lose more than 10% of the previous entities
+CHANGELOG = "changelog.json"
+CHANGELOG_KEEP = 30    # updates kept, so a player who skipped a few still sees everything they missed
+MAX_LISTED = 300       # per list in one update; the rest is only counted
 
 
 class InvalidKB(Exception):
@@ -68,9 +74,87 @@ def validate(kb: Path, previous_index: Path | None = None, min_entities: int = 1
     return {"count": count, "categories": sorted(seen)}
 
 
-def pack(kb: Path, out: Path, version: str | None = None) -> dict:
+# ---------------------------------------------------------------- patch notes
+
+def _index(kb: Path) -> dict[str, dict]:
+    try:
+        return {e["key"]: e for e in json.loads((kb / "index.json").read_text(encoding="utf-8")) if "key" in e}
+    except (OSError, json.JSONDecodeError, TypeError):
+        return {}
+
+
+def _drops(kb: Path) -> dict[str, dict[str, str]]:
+    """monster key -> {item key: item name}"""
+    out: dict[str, dict[str, str]] = {}
+    try:
+        with open(kb / "drops.tsv", encoding="utf-8", newline="") as f:
+            for r in csv.DictReader(f, delimiter="	"):
+                if r.get("monster_key") and r.get("item_key"):
+                    out.setdefault(r["monster_key"], {})[r["item_key"]] = r.get("item") or r["item_key"]
+    except OSError:
+        pass
+    return out
+
+
+def _brief(e: dict) -> dict:
+    return {"key": e["key"], "name": e.get("name") or e["key"], "category": e.get("category", "")}
+
+
+def diff_kb(old: Path, new: Path) -> dict:
+    """What a player would notice between two KBs: entries added/removed, stats and drops changed,
+    and entries whose page text changed without a stat change ("updated")."""
+    a, b = _index(old), _index(new)
+    da, db = _drops(old), _drops(new)
+    added = [_brief(b[k]) for k in sorted(b.keys() - a.keys())]
+    removed = [_brief(a[k]) for k in sorted(a.keys() - b.keys())]
+    changed, updated = [], []
+    for k in sorted(a.keys() & b.keys()):
+        pa, pb = a[k].get("props") or {}, b[k].get("props") or {}
+        props = [[f, pa.get(f), pb.get(f)] for f in sorted(pa.keys() | pb.keys()) if pa.get(f) != pb.get(f)]
+        oa, ob = da.get(k, {}), db.get(k, {})
+        drops_added = sorted(ob[i] for i in ob.keys() - oa.keys())
+        drops_removed = sorted(oa[i] for i in oa.keys() - ob.keys())
+        renamed = a[k].get("name") != b[k].get("name")
+        if props or drops_added or drops_removed or renamed:
+            c = _brief(b[k])
+            if renamed:
+                c["old_name"] = a[k].get("name")
+            if props:
+                c["props"] = props
+            if drops_added:
+                c["drops_added"] = drops_added
+            if drops_removed:
+                c["drops_removed"] = drops_removed
+            changed.append(c)
+        elif a[k].get("hash") != b[k].get("hash"):
+            updated.append(_brief(b[k]))
+    counts = {"added": len(added), "removed": len(removed), "changed": len(changed), "updated": len(updated)}
+    return {"counts": counts, "added": added[:MAX_LISTED], "removed": removed[:MAX_LISTED],
+            "changed": changed[:MAX_LISTED], "updated": updated[:MAX_LISTED]}
+
+
+def record_changes(kb: Path, previous_kb: Path, version: str) -> dict | None:
+    """Prepend this update's changes to kb/changelog.json (newest first). None when nothing changed."""
+    d = diff_kb(previous_kb, kb)
+    if not any(d["counts"].values()):
+        return None
+    path = kb / CHANGELOG
+    try:
+        log = json.loads(path.read_text(encoding="utf-8"))
+        log = log if isinstance(log, list) else []
+    except (OSError, json.JSONDecodeError):
+        log = []
+    entry = {"version": version, "date": time.strftime("%Y-%m-%d", time.gmtime()), **d}
+    log = [entry] + [e for e in log if e.get("version") != version]
+    path.write_text(json.dumps(log[:CHANGELOG_KEEP], ensure_ascii=False, indent=1), encoding="utf-8")
+    return entry
+
+
+def pack(kb: Path, out: Path, version: str | None = None, previous_kb: Path | None = None) -> dict:
     """Stamp the version into meta.json, zip the KB (files at the zip root) and write the manifest."""
     version = version or time.strftime("%Y.%m.%d.%H%M", time.gmtime())
+    if previous_kb:
+        record_changes(kb, previous_kb, version)
     meta_path = kb / "meta.json"
     meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
     meta["version"] = version
@@ -98,13 +182,14 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("kb", type=Path)
     p.add_argument("out", type=Path)
     p.add_argument("--version")
+    p.add_argument("--previous-kb", type=Path, help="the published KB, to record patch notes against")
     a = ap.parse_args(argv)
 
     try:
         if a.cmd == "validate":
             print("KB valid:", json.dumps(validate(a.kb, a.previous, a.min_entities)))
         else:
-            print("Packed:", json.dumps(pack(a.kb, a.out, a.version)))
+            print("Packed:", json.dumps(pack(a.kb, a.out, a.version, a.previous_kb)))
     except InvalidKB as e:
         print(f"::error::Knowledge base rejected: {e}")
         return 1

@@ -13,9 +13,13 @@ import json
 import re
 import subprocess
 import sys
+import tempfile
 import time
 import zipfile
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import kb_release  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist"
@@ -43,8 +47,26 @@ def set_version(version: str) -> None:
     vi.write_text(t, encoding="utf-8")
 
 
-def build_kb() -> tuple[Path, Path]:
+def record_patch_notes(version: str) -> None:
+    """Compare against the KB players have now (the latest release's kb.zip) and add the
+    differences to changelog.json, which the app shows as patch notes after the update."""
+    with tempfile.TemporaryDirectory() as tmp:
+        r = subprocess.run(["gh", "release", "download", "--repo", REPO, "--pattern", "kb.zip", "--dir", tmp],
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            print("no published kb.zip to compare with - no patch notes this time")
+            return
+        prev = Path(tmp) / "kb"
+        with zipfile.ZipFile(Path(tmp) / "kb.zip") as z:
+            z.extractall(prev)
+        entry = kb_release.record_changes(KB, prev, version)
+        print("patch notes:", json.dumps(entry["counts"]) if entry else "no visible changes")
+
+
+def build_kb(patch_notes: bool = False) -> tuple[Path, Path]:
     version = time.strftime("%Y.%m.%d.%H%M")
+    if patch_notes:
+        record_patch_notes(version)
     meta = json.loads((KB / "meta.json").read_text(encoding="utf-8")) if (KB / "meta.json").exists() else {}
     meta["version"] = version
     (KB / "meta.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
@@ -70,7 +92,7 @@ def main():
     ap.add_argument("--notes", default="")
     args = ap.parse_args()
 
-    kb_zip, manifest = build_kb()
+    kb_zip, manifest = build_kb(patch_notes=args.kb_only)
     if args.kb_only:
         tag = subprocess.run(["gh", "release", "view", "--repo", REPO, "--json", "tagName", "-q", ".tagName"],
                              capture_output=True, text=True, check=True).stdout.strip()
