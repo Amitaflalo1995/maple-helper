@@ -324,3 +324,15 @@ def test_chatgpt_account_shows_its_email(monkeypatch):
     assert codex.account_email() == "p@x.com"
     monkeypatch.setattr(codex, "app_server", lambda *a, **k: {"account": {"type": "apiKey"}})
     assert codex.account_email() is None
+
+
+def test_model_names_and_chatgpt_list(monkeypatch):
+    from maplehelper.providers.base import model_name
+    assert model_name("claude-sonnet-4-5-20250929") == "Sonnet 4.5" and model_name("claude-opus-5") == "Opus 5"
+    assert model_name("gpt-6.1-sol") == "GPT-6.1-Sol"
+    monkeypatch.setattr(codex, "app_server", lambda method, params=None, timeout=20: {"data": [
+        {"id": "gpt-6.1-sol", "displayName": "GPT-6.1-Sol", "isDefault": True},
+        {"id": "gpt-5.5", "displayName": "GPT-5.5"}]})
+    assert codex.Codex().models() == [(None, "GPT-6.1-Sol"), ("gpt-6.1-sol", "GPT-6.1-Sol"), ("gpt-5.5", "GPT-5.5")]
+    monkeypatch.setattr(codex, "app_server", lambda *a, **k: None)
+    assert codex.Codex().models() == [(None, "")]          # offline: just "OpenAI's default"

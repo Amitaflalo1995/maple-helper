@@ -78,6 +78,7 @@ class Answer:
     error: str | None = None
     cost_usd: float | None = None
     limits: dict | None = None          # Claude plan usage (usage.parse of Claude Code's rate_limit_event)
+    model: str | None = None            # the model that answered, when the CLI says
 
 
 REPLY_RULES = """<reply_rules>
@@ -271,7 +272,7 @@ class Brain:
             box = None
         return Answer(text=text, entities=entities[:12], drop_groups=groups[:8], profile_update=meta.get("profile_update") or {},
                       avatar_box=box if screenshot_jpeg else None, cost_usd=result.cost_usd,
-                      limits=result.limits)
+                      limits=result.limits, model=result.model)
 
     def summarize(self, transcript: str) -> str | None:
         """One-paragraph summary of a finished session, kept as long-term context."""

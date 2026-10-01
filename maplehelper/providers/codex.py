@@ -196,6 +196,14 @@ class Codex(Provider):
     def find_exe(self) -> str | None:
         return find_codex()
 
+    def models(self) -> list[tuple[str | None, str]]:
+        """OpenAI's current list (model/list), the default first; just the default when it can't be read."""
+        data = (app_server("model/list", {}) or {}).get("data") or []
+        default = next((m.get("displayName") or m.get("id") for m in data if m.get("isDefault")), None)
+        out: list[tuple[str | None, str]] = [(None, default or "")]
+        out += [(m["id"], m.get("displayName") or m["id"]) for m in data if m.get("id") and not m.get("hidden")]
+        return out
+
     def read_limits(self, timeout: float = 20) -> dict | None:
         """The ChatGPT plan usage (5-hour and weekly windows), from `codex app-server`'s
         account/rateLimits/read. None when not installed, signed out, on an API key, or on any error."""

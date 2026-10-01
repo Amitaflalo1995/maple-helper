@@ -23,6 +23,19 @@ class RawResult:
     error: str | None = None
     cost_usd: float | None = None
     limits: dict | None = None     # plan usage, when the CLI reports it with the answer (Claude Code, see usage.py)
+    model: str | None = None       # the model that answered, when the CLI says ("claude-sonnet-5")
+
+
+def model_name(model_id: str) -> str:
+    """A readable name: "claude-sonnet-5-20260101" -> "Sonnet 5", "claude-opus-4-5" -> "Opus 4.5",
+    "gpt-6.1-sol" -> "GPT-6.1-Sol"."""
+    import re
+    m = re.fullmatch(r"claude-([a-z]+)-(\d+(?:-\d+)?)(?:-\d{8})?(?:\[.*\])?", model_id or "")
+    if m:
+        return f"{m.group(1).capitalize()} {m.group(2).replace('-', '.')}"
+    if (model_id or "").startswith("gpt-"):
+        return "GPT-" + "-".join(w.capitalize() for w in model_id[4:].split("-"))
+    return model_id or ""
 
 
 def find_posix(name: str, dirs: list[str]) -> str | None:
@@ -110,6 +123,10 @@ class Provider:
 
     def find_exe(self) -> str | None:
         raise NotImplementedError
+
+    def models(self) -> list[tuple[str | None, str]]:
+        """The models a player can pick: [(value for the CLI, name to show)]; None = the CLI's default."""
+        return []
 
     def read_limits(self) -> dict | None:
         """The plan usage read on demand (usage.parse shape); None when the CLI only reports it with answers."""

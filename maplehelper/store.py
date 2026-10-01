@@ -78,6 +78,7 @@ DEFAULT_SETTINGS = {
     "provider": "claude",          # claude | codex: which AI CLI answers (see providers/)
     "model": "sonnet",             # Claude's model
     "codex_model": None,           # Codex's model; None = the Codex CLI default
+    "last_model": {},              # provider -> the model that actually answered last (shown in Settings)
     # per provider: use an API key (stored in Credential Manager / Keychain) instead of the account login.
     # Older files hold a single bool here, which meant the Anthropic key.
     "api_key_fallback": {},
