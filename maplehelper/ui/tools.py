@@ -8,7 +8,7 @@ import math
 import re
 import time
 
-from PySide6.QtCore import QEvent, QSize, Qt, QTimer, QUrl, Signal
+from PySide6.QtCore import QEvent, QPoint, QSize, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (QButtonGroup, QCompleter, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
@@ -88,6 +88,22 @@ class EntityPicker(QLineEdit):
         comp.activated.connect(lambda *_: QTimer.singleShot(0, self._chosen))
         self.setCompleter(comp)
         self.returnPressed.connect(self.picked.emit)
+        # a chevron says "this opens a list" before anyone clicks
+        arrow = self.addAction(self._chevron(), QLineEdit.TrailingPosition)
+        arrow.triggered.connect(self.open_list)
+        self.setMinimumHeight(34)
+
+    @staticmethod
+    def _chevron() -> QIcon:
+        from PySide6.QtGui import QColor, QPainter, QPen
+        pm = QPixmap(20, 20)
+        pm.fill(Qt.transparent)
+        p = QPainter(pm)
+        p.setRenderHint(QPainter.Antialiasing)
+        p.setPen(QPen(QColor(theme.ORANGE_DEEP), 2.2, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
+        p.drawPolyline([QPoint(5, 8), QPoint(10, 13), QPoint(15, 8)])
+        p.end()
+        return QIcon(pm)
 
     def _chosen(self):
         self.setCursorPosition(0)              # a long name shows from its start
@@ -384,7 +400,8 @@ class ToolsDialog(GlassDialog):
     def _page_calc(self):
         t = self.t
         sc, lay = scroll_page()
-        self.calc_input = EntityPicker(monster_rows(self.kb), self._p(t("calc_placeholder")))
+        rows = monster_rows(self.kb)
+        self.calc_input = EntityPicker(rows, self._p(t("calc_placeholder", n=len(rows))))
         self.calc_input.picked.connect(self._fill_calc)
         lay.addWidget(self.calc_input)
         self.calc_box = QVBoxLayout()
@@ -793,7 +810,8 @@ class ToolsDialog(GlassDialog):
         lay.addWidget(sell)
         shop = Section(t("shop_title"), t.rtl)
         shop.add_widget(self._label(t("shop_body"), "RowLabel"))
-        self.shop_map = EntityPicker(map_rows(self.kb), self._p(t("shop_map_ph")), icon=40)
+        maps = map_rows(self.kb)
+        self.shop_map = EntityPicker(maps, self._p(t("shop_map_ph", n=len(maps))), icon=40)
         self.shop_map.setMinimumWidth(280)
         shop.add_row(t("shop_where"), self.shop_map)
         self.shop_len = Segmented([("30", 30), ("60", 60), ("120", 120)], 60, t.rtl)
