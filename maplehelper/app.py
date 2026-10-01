@@ -9,7 +9,7 @@ from PySide6.QtCore import QLockFile, QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QAction, QIcon, QKeySequence
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
-from . import APP_NAME, __version__, claude_setup, osapi, report, updater, whatsnew, wishlist
+from . import APP_NAME, __version__, osapi, providers, report, updater, whatsnew, wishlist
 from .brain import Brain
 from .i18n import I18n
 from .kb import KnowledgeBase
@@ -86,12 +86,11 @@ class MapleHelperApp:
             if not self.run_onboarding():
                 return False
         elif not self.profiles.active:
-            # set up already (language, Claude): only a character is missing
+            # set up already (language, AI): only a character is missing
             self.style()
             Onboarding(self.settings, self.profiles, self.kb, self.style, only_character=True).exec()
-        api_key = claude_setup.load_api_key() if self.settings["api_key_fallback"] else None
-        self.brain = Brain(self.kb, model=self.settings["model"], length=self.settings["answer_length"], api_key=api_key)
-        self.apply_saver_mode()
+        self.brain = Brain(self.kb, provider=self.settings["provider"], length=self.settings["answer_length"])
+        self.apply_ai_settings()
         threading.Thread(target=self.brain.prewarm, daemon=True).start()   # first answer without startup delay
         self.overlay = Overlay(self.settings, self.profiles, self.kb, self.brain)
         self.overlay.setStyleSheet(self.style())
@@ -277,9 +276,16 @@ class MapleHelperApp:
             if c and c.id != before:
                 self.overlay.add_system(I18n(self.settings["language"])("switched_character", name=c.name))
 
+    def apply_ai_settings(self):
+        """Point the brain at the chosen provider, with its model, saver mode and (when used) its stored API key."""
+        self.brain.provider = self.settings["provider"]
+        ai = providers.get(self.settings["provider"])
+        self.brain.api_key = ai.load_api_key() if self.settings.api_key_mode(ai.name) else None
+        self.apply_saver_mode()
+
     def on_account_changed(self):
-        # the warm Claude process was started under the old account: replace it
-        self.brain.api_key = claude_setup.load_api_key() if self.settings["api_key_fallback"] else None
+        # another provider or account: a warm process started under the old one is replaced
+        self.apply_ai_settings()
         self.brain.shutdown()
         threading.Thread(target=self.brain.prewarm, daemon=True).start()
 
@@ -289,7 +295,8 @@ class MapleHelperApp:
         from pathlib import Path
         from PySide6.QtCore import QStandardPaths
         t = I18n(self.settings["language"])
-        info = report.system_info(__version__, updater.local_version(), claude_setup.status())
+        ai = providers.get(self.settings["provider"])
+        info = report.system_info(__version__, updater.local_version(), f"{ai.label}: {ai.status()}")
         desktop = Path(QStandardPaths.writableLocation(QStandardPaths.DesktopLocation) or Path.home())
         path = report.build_report(desktop, info, dict(self.settings.data))
         report.log.info("problem report written: %s", path.name)
@@ -302,10 +309,12 @@ class MapleHelperApp:
         self.toast(I18n(self.settings["language"])("history_cleared"))
 
     def apply_saver_mode(self):
-        """Saver mode: short answers on the lighter model. The warm process is respawned on the next prewarm."""
-        from . import usage
+        """Saver mode: short answers, on the provider's lighter model when it has one.
+
+        The warm process is respawned on the next prewarm."""
+        ai = providers.get(self.settings["provider"])
         saver = self.settings["saver_mode"]
-        self.brain.model = usage.SAVER_MODEL if saver else self.settings["model"]
+        self.brain.model = (saver and ai.saver_model) or self.settings[ai.model_setting]
         self.brain.length = "short" if saver else self.settings["answer_length"]
 
     def turn_on_saver(self):

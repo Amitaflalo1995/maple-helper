@@ -804,7 +804,8 @@ class Overlay(QWidget):
         rl.setContentsMargins(4, 0, 4, 0)
         rl.setSpacing(8)
         rl.addWidget(QLabel(bidi.plain(self.t("quick_badge"), self.t.rtl), objectName="SystemLine"))
-        again = QPushButton(bidi.plain(self.t("quick_ask_claude"), self.t.rtl), objectName="Link")
+        again = QPushButton(bidi.plain(self.t.p("quick_ask_ai", self.settings["provider"]), self.t.rtl),
+                            objectName="Link")
         again.setCursor(Qt.PointingHandCursor)
         again.clicked.connect(lambda: (again.setEnabled(False), self.ask(question, force_claude=True)))
         rl.addWidget(again)
@@ -898,8 +899,8 @@ class Overlay(QWidget):
             import logging
             logging.getLogger(__name__).warning("answer failed: %s", ans.error)
             key = f"err_{ans.error}" if ans.error in ("offline", "not_logged_in", "usage_limit",
-                                                      "claude_not_installed") else "err_generic"
-            self._pending_bubble.set_text(self.t(key))
+                                                      "not_installed") else "err_generic"
+            self._pending_bubble.set_text(self.t.p(key, self.settings["provider"]))
             return
         self._pending_bubble.set_text(ans.text)
         q = getattr(self, "_last_question", "")
@@ -931,7 +932,7 @@ class Overlay(QWidget):
         self._show_changes(self.profiles.apply_update(update))
 
     def _update_avatar(self, shot_jpeg: bytes, box: list) -> None:
-        """Crop the player's own sprite (box from Claude, fractions of the image) into the portrait."""
+        """Crop the player's own sprite (box from the AI, fractions of the image) into the portrait."""
         import io
         from PIL import Image
         try:

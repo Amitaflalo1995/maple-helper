@@ -100,15 +100,21 @@ class Section(QFrame):
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)
         outer.setSpacing(6)
+        self.header = None
         if header:
-            h = QLabel(bidi.plain(header.upper() if not rtl else header, rtl), objectName="SectionHeader")
-            outer.addWidget(h)
+            self.header = QLabel(objectName="SectionHeader")
+            self.set_header(header)
+            outer.addWidget(self.header)
         self.card = QFrame(objectName="Group")
         self.rows = QVBoxLayout(self.card)
         self.rows.setContentsMargins(14, 4, 14, 4)
         self.rows.setSpacing(0)
         outer.addWidget(self.card)
         self._count = 0
+
+    def set_header(self, header: str) -> None:
+        if self.header is not None:
+            self.header.setText(bidi.plain(header.upper() if not self.rtl else header, self.rtl))
 
     def add_row(self, label: str, control: QWidget | None = None, hint: str = "") -> QWidget:
         if self._count:

@@ -1,4 +1,4 @@
-"""Answer parsing, level detection, error classification and prompt assembly (no Claude calls)."""
+"""Answer parsing, level detection and prompt assembly (no AI calls). Providers: test_providers.py."""
 import pytest
 
 from maplehelper import brain
@@ -41,17 +41,6 @@ def test_no_stated_level(text):
     assert brain.stated_level(text) is None
 
 
-@pytest.mark.parametrize("text,kind", [
-    ("Error: Not logged in · Please run /login", "not_logged_in"),
-    ("Invalid API key", "not_logged_in"),
-    ("Claude usage limit reached. Your limit resets at 5pm", "usage_limit"),
-    ("getaddrinfo ENOTFOUND api.anthropic.com", "offline"),
-    ("something unexpected", None),
-])
-def test_classify_error(text, kind):
-    assert brain.classify_error(text) == kind
-
-
 def test_kb_has(kb):
     assert brain.kb_has(kb, "monster/130101")
     assert not brain.kb_has(kb, "monster/0")
@@ -89,19 +78,3 @@ class TestBuildPrompt:
         # the system prompt uses {{ }} escapes around the META JSON; a bad escape would raise here
         s = brain.SYSTEM_PROMPT.format(length=brain.LENGTH["short"])
         assert '{"entities"' in s and brain.META in s
-
-
-def test_finds_claude_outside_the_finder_path(tmp_path, monkeypatch):
-    # an app opened from Finder has no ~/.local/bin on PATH: the native installer's spot must still be found
-    exe = tmp_path / "bin" / "claude"
-    exe.parent.mkdir()
-    exe.write_text("#!/bin/sh\n")
-    exe.chmod(0o755)
-    monkeypatch.setattr(brain.shutil, "which", lambda _name: None)
-    monkeypatch.setattr(brain, "POSIX_CLAUDE_DIRS", ["/nonexistent", str(exe.parent)])
-    assert brain._find_claude_posix() == str(exe)
-
-
-def test_creation_flags_are_windows_only():
-    # subprocess raises ValueError for nonzero creationflags outside Windows
-    assert (brain.CREATE_NO_WINDOW != 0) == (brain.sys.platform == "win32")

@@ -1,25 +1,17 @@
-"""Talks to Claude through the player's own Claude Code install (their Claude account).
+"""Asks the player's chosen AI (Claude Code or Codex, see providers/) and turns its reply into an Answer.
 
-Each question runs `claude -p` in a locked-down mode: no shell, no web, no MCP
-servers, read-only file tools confined to the knowledge-base folder. The
-screenshot travels inside the message itself (stream-json input), so Claude sees
-it without an extra tool round-trip, and the answer streams back token by token.
+The prompt, the knowledge-base pre-fetch and the answer post-processing (cards,
+drop groups, profile updates) live here and are the same for every provider;
+the provider's backend only runs the CLI and returns the raw text.
 """
 from __future__ import annotations
 
-import base64
 import json
 import logging
-import os
 import re
-import shutil
-import subprocess
-import sys
-import threading
 from dataclasses import dataclass, field
-from pathlib import Path
 
-from . import usage
+from . import providers
 from .kb import KnowledgeBase
 from .store import Character, History
 
@@ -28,8 +20,8 @@ log = logging.getLogger(__name__)
 META = "@@META@@"
 REVERSE_WORDS = re.compile(r"(מאיז[הו]|מאילו|איזה|אילו)\s+מפלצ|מי\s+מפיל|which\s+monsters?|who\s+drops|what\s+drops", re.I)
 DROP_WORDS = re.compile(r"דרופ|מפיל|נופל|שנופל|drops?\b|loot", re.I)
-# no console window flashing up on Windows; elsewhere creationflags must stay 0
-CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
+SUMMARY_PROMPT = ("Summarize this MapleStory Classic helper conversation in 2-3 sentences for future context: "
+                  "what the player worked on, decisions, open goals. Same language as the conversation.")
 
 SYSTEM_PROMPT = """You are Maple Helper, a personal in-game assistant for MapleStory Classic World (MapleStory Classic), shown as a small chat window on top of the game.
 
@@ -76,49 +68,6 @@ LENGTH = {
 }
 
 
-def find_claude() -> str | None:
-    """Locate the Claude Code executable (native install, npm or Homebrew)."""
-    if sys.platform != "win32":
-        return _find_claude_posix()
-    for name in ("claude.exe", "claude"):
-        p = shutil.which(name)
-        if p and p.lower().endswith(".exe"):
-            return p
-    candidates = [
-        Path(os.environ.get("USERPROFILE", "")) / ".local" / "bin" / "claude.exe",
-        Path(os.environ.get("APPDATA", "")) / "npm" / "node_modules" / "@anthropic-ai" / "claude-code" / "bin" / "claude.exe",
-        Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "claude" / "claude.exe",
-    ]
-    for c in candidates:
-        if c.exists():
-            return str(c)
-    return shutil.which("claude")
-
-
-# An app opened from Finder gets PATH=/usr/bin:/bin:/usr/sbin:/sbin, so the usual install spots are listed here.
-POSIX_CLAUDE_DIRS = ["~/.local/bin", "~/.claude/local", "/opt/homebrew/bin", "/usr/local/bin", "~/.npm-global/bin"]
-
-
-def _find_claude_posix() -> str | None:
-    p = shutil.which("claude")
-    if p:
-        return p
-    for d in POSIX_CLAUDE_DIRS:
-        c = Path(d).expanduser() / "claude"
-        if c.is_file() and os.access(c, os.X_OK):
-            return str(c)
-    return None
-
-
-def child_env(env: dict | None = None) -> dict:
-    """Environment for Claude Code: on macOS the install folders join PATH (an npm install needs node)."""
-    env = dict(os.environ if env is None else env)
-    if sys.platform != "win32":
-        extra = [str(Path(d).expanduser()) for d in POSIX_CLAUDE_DIRS]
-        env["PATH"] = os.pathsep.join([env.get("PATH") or "/usr/bin:/bin"] + extra)
-    return env
-
-
 @dataclass
 class Answer:
     text: str = ""
@@ -128,7 +77,7 @@ class Answer:
     drop_groups: list = field(default_factory=list)
     error: str | None = None
     cost_usd: float | None = None
-    limits: dict | None = None          # plan usage (usage.parse of Claude Code's rate_limit_event)
+    limits: dict | None = None          # Claude plan usage (usage.parse of Claude Code's rate_limit_event)
 
 
 REPLY_RULES = """<reply_rules>
@@ -238,140 +187,55 @@ def split_meta(raw: str) -> tuple[str, dict]:
 
 
 class Brain:
-    def __init__(self, kb: KnowledgeBase, model: str = "sonnet", length: str = "short", api_key: str | None = None):
+    def __init__(self, kb: KnowledgeBase, provider: str = providers.DEFAULT, model: str | None = None,
+                 length: str = "short", api_key: str | None = None):
         self.kb = kb
         self.model = model
         self.length = length
         self.api_key = api_key
-        self.exe = find_claude()
-        self._proc: subprocess.Popen | None = None
-        self._warm: subprocess.Popen | None = None
-        self._warm_config: tuple | None = None
-        self._warm_lock = threading.Lock()
+        self._provider = providers.get(provider)
+        self.backend = self._provider.backend(self)
 
-    # ------------------------------------------------------------ warm process
-    # Claude Code needs ~3s to start. A process started ahead of time sits waiting for its first
-    # stdin message, so a question skips that startup entirely. One fresh process per question
-    # keeps every answer's context clean.
+    @property
+    def provider(self) -> str:
+        return self._provider.name
 
-    def _config(self) -> tuple:
-        return (self.exe, self.model, self.length, self.api_key, str(self.kb.root))
+    @provider.setter
+    def provider(self, name: str) -> None:
+        """Switch AI: the old backend's processes are stopped, the new one starts cold."""
+        new = providers.get(name)
+        if new.name != self._provider.name:
+            self.backend.shutdown()
+            self._provider, self.backend = new, new.backend(self)
 
-    def _spawn(self) -> subprocess.Popen:
-        cmd = [self.exe, "-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose",
-               "--include-partial-messages", "--restricted", "--strict-mcp-config", "--tools", "Read,Grep,Glob",
-               "--model", self.model, "--no-session-persistence",
-               "--system-prompt", SYSTEM_PROMPT.format(length=LENGTH.get(self.length, LENGTH["short"]))]
-        env = child_env()
-        if self.api_key:
-            env["ANTHROPIC_API_KEY"] = self.api_key
-        else:
-            env.pop("ANTHROPIC_API_KEY", None)  # use the player's Claude account login
-        return subprocess.Popen(cmd, cwd=str(self.kb.root), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE, env=env, creationflags=CREATE_NO_WINDOW)
+    def system_prompt(self) -> str:
+        return SYSTEM_PROMPT.format(length=LENGTH.get(self.length, LENGTH["short"]))
 
     def prewarm(self) -> None:
-        """Start the next question's process now (no-op if one is ready)."""
-        if not self.exe:
-            return
-        with self._warm_lock:
-            if self._warm and self._warm.poll() is None and self._warm_config == self._config():
-                return
-            self._discard_warm()
-            try:
-                self._warm, self._warm_config = self._spawn(), self._config()
-            except OSError:
-                self._warm = None
-
-    def _take_warm(self) -> subprocess.Popen | None:
-        with self._warm_lock:
-            p, cfg = self._warm, self._warm_config
-            self._warm = None
-        if p and p.poll() is None and cfg == self._config():
-            return p
-        if p and p.poll() is None:
-            p.kill()
-        return None
-
-    def _discard_warm(self) -> None:
-        if self._warm and self._warm.poll() is None:
-            self._warm.kill()
-        self._warm = None
+        """Get the next question's process ready now, where the provider supports it."""
+        self.backend.prewarm()
 
     def shutdown(self) -> None:
-        with self._warm_lock:
-            self._discard_warm()
-        self.cancel()
+        self.backend.shutdown()
 
     def available(self) -> bool:
-        return self.exe is not None
+        return self.backend.exe is not None
 
     def cancel(self) -> None:
-        if self._proc and self._proc.poll() is None:
-            self._proc.kill()
+        self.backend.cancel()
 
     def ask(self, question: str, character: Character | None, history: History | None,
             screenshot_jpeg: bytes | None, on_delta=None, focus=None) -> Answer:
         """Blocking call; on_delta(visible_text_so_far) is invoked while the answer streams."""
-        if not self.exe:
-            return Answer(error="claude_not_installed")
+        if not self.backend.exe:
+            return Answer(error="not_installed")
         self.kb.ensure_drop_table()
         prompt = build_prompt(question, character, history, self.kb, screenshot_jpeg is not None, self.length, focus)
-        content = []
-        if screenshot_jpeg:
-            content.append({"type": "image", "source": {"type": "base64", "media_type": "image/jpeg",
-                                                         "data": base64.b64encode(screenshot_jpeg).decode()}})
-        content.append({"type": "text", "text": prompt})
-        msg = {"type": "user", "message": {"role": "user", "content": content}}
-
-        try:
-            self._proc = self._take_warm() or self._spawn()
-        except OSError as e:
-            log.error("could not start Claude Code: %s", e)
-            return Answer(error=f"launch_failed: {e}")
-        try:
-            self._proc.stdin.write((json.dumps(msg) + "\n").encode("utf-8"))
-            self._proc.stdin.close()
-        except OSError:
-            # the warm process died meanwhile: start fresh once
-            self._proc = self._spawn()
-            self._proc.stdin.write((json.dumps(msg) + "\n").encode("utf-8"))
-            self._proc.stdin.close()
-        # get the next one ready while the player reads this answer
-        threading.Thread(target=self.prewarm, daemon=True).start()
-
-        current = ""       # text of the assistant message being streamed
-        result = None
-        limits = None
-        for line in self._proc.stdout:
-            try:
-                ev = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            t = ev.get("type")
-            if t == "stream_event":
-                se = ev.get("event", {})
-                if se.get("type") == "message_start":
-                    current = ""
-                elif se.get("type") == "content_block_delta" and se.get("delta", {}).get("type") == "text_delta":
-                    current += se["delta"]["text"]
-                    if on_delta:
-                        on_delta(current.split(META)[0].strip())
-            elif t == "result":
-                result = ev
-            elif t == "rate_limit_event":
-                limits = usage.parse(ev.get("rate_limit_info"))
-        self._proc.wait()
-        stderr = self._proc.stderr.read().decode("utf-8", errors="replace")
-        if not result:
-            if limits:
-                return Answer(error=classify_error(stderr) or "no_result", limits=limits)
-            log.warning("no result from Claude Code (exit %s): %s", self._proc.returncode, stderr[-1500:])
-            return Answer(error=classify_error(stderr) or "no_result")
-        if result.get("is_error"):
-            log.warning("Claude Code error: %s | %s", str(result.get("result", ""))[:500], stderr[-1000:])
-            return Answer(error=classify_error(str(result.get("result", "")) + stderr) or "api_error")
-        text, meta = split_meta(result.get("result") or current)
+        raw_delta = (lambda raw: on_delta(raw.split(META)[0].strip())) if on_delta else None
+        result = self.backend.run(prompt, screenshot_jpeg, raw_delta)
+        if result.error:
+            return Answer(error=result.error, limits=result.limits)
+        text, meta = split_meta(result.text)
         if not meta.get("profile_update"):
             stated = stated_level(question)
             if stated:
@@ -406,45 +270,26 @@ class Brain:
         if not (isinstance(box, list) and len(box) == 4 and all(isinstance(v, (int, float)) for v in box)):
             box = None
         return Answer(text=text, entities=entities[:12], drop_groups=groups[:8], profile_update=meta.get("profile_update") or {},
-                      avatar_box=box if screenshot_jpeg else None, cost_usd=result.get("total_cost_usd"),
-                      limits=limits)
+                      avatar_box=box if screenshot_jpeg else None, cost_usd=result.cost_usd,
+                      limits=result.limits)
 
     def summarize(self, transcript: str) -> str | None:
         """One-paragraph summary of a finished session, kept as long-term context."""
-        if not self.exe or not transcript.strip():
+        if not transcript.strip():
             return None
-        cmd = [self.exe, "-p", "--restricted", "--strict-mcp-config", "--tools", "", "--model", "haiku",
-               "--no-session-persistence", "--system-prompt",
-               "Summarize this MapleStory Classic helper conversation in 2-3 sentences for future context: "
-               "what the player worked on, decisions, open goals. Same language as the conversation."]
-        try:
-            r = subprocess.run(cmd, input=transcript.encode("utf-8"), capture_output=True, timeout=90,
-                               env=child_env(), creationflags=CREATE_NO_WINDOW)
-            out = r.stdout.decode("utf-8", errors="replace").strip()
-            return out or None
-        except (OSError, subprocess.TimeoutExpired):
-            return None
-
+        return self.backend.summarize(SUMMARY_PROMPT, transcript)
 
     def summarize_guide(self, key: str, page: str, lang: str) -> str | None:
-        """The practical takeaways of a KB guide in the player's language (Haiku, one short call)."""
-        if not self.exe:
-            return None
+        """The practical takeaways of a KB guide in the player's language (a light model, one short call)."""
         language = "Hebrew" if lang == "he" else "English"
         prompt = (f"Summarize this MapleStory Classic guide for a player, in {language}: 6-10 short bullet lines "
                   "('• ...') with the most useful practical advice (builds, levels, where to go, what to buy). "
                   "Keep every game name (items, monsters, maps, skills, jobs) in English exactly as written. "
                   "No intro, no outro.")
-        cmd = [self.exe, "-p", "--restricted", "--strict-mcp-config", "--tools", "", "--model", "haiku",
-               "--no-session-persistence", "--system-prompt", prompt]
-        try:
-            r = subprocess.run(cmd, input=page[:60000].encode("utf-8"), capture_output=True, timeout=120,
-                               env=child_env(), creationflags=CREATE_NO_WINDOW)
-            out = r.stdout.decode("utf-8", errors="replace").strip()
-            return out or None
-        except (OSError, subprocess.TimeoutExpired):
+        out = self.backend.summarize(prompt, page[:60000], timeout=120)
+        if not out:
             log.warning("guide summary failed for %s", key)
-            return None
+        return out
 
 
 _LEVEL_PATTERNS = [
@@ -465,14 +310,3 @@ def stated_level(text: str) -> int | None:
 
 def kb_has(kb: KnowledgeBase, key: str) -> bool:
     return kb.get(key) is not None
-
-
-def classify_error(text: str) -> str | None:
-    t = text.lower()
-    if "not logged in" in t or "please run /login" in t or "invalid api key" in t or "authentication" in t:
-        return "not_logged_in"
-    if "usage limit" in t or "rate limit" in t or "limit reached" in t or "resets" in t:
-        return "usage_limit"
-    if "enotfound" in t or "econnrefused" in t or "network" in t or "fetch failed" in t:
-        return "offline"
-    return None

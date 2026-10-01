@@ -17,7 +17,7 @@ from pathlib import Path
 MODULES = [
     "PySide6.QtWidgets", "mss", "PIL.Image", "numpy", "keyring", "sounddevice",
     "faster_whisper", "ctranslate2",
-    "maplehelper.app", "maplehelper.osapi", "maplehelper.brain", "maplehelper.voice", "maplehelper.claude_setup",
+    "maplehelper.app", "maplehelper.osapi", "maplehelper.brain", "maplehelper.voice", "maplehelper.providers",
     "maplehelper.updater",
     "maplehelper.ui.overlay", "maplehelper.ui.dialogs", "maplehelper.ui.toast",
 ]
@@ -100,11 +100,10 @@ def run(require_kb: bool = False) -> tuple[bool, list[str]]:
         return sys.platform
     check("os layer", os_layer)
 
-    def claude():
-        # informational: CI machines and fresh PCs have no Claude Code, and onboarding installs it
-        from .brain import find_claude
-        return find_claude() or "not installed (onboarding offers to install it)"
-    check("claude code", claude)
+    # informational: CI machines and fresh PCs have no AI CLI, and onboarding installs the chosen one
+    from . import providers
+    for ai in providers.PROVIDERS.values():
+        check(f"{ai.label} CLI", lambda ai=ai: ai.find_exe() or "not installed (onboarding offers to install it)")
 
     lines.append("SELFTEST OK" if ok else "SELFTEST FAILED")
     return ok, lines

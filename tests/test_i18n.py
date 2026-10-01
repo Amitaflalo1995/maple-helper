@@ -17,6 +17,21 @@ def test_both_languages_with_same_placeholders(key):
     assert fields(entry["he"]) == fields(entry["en"]), f"{key} placeholders differ"
 
 
+PROVIDER_SUFFIXES = ("_claude", "_codex")
+
+
+@pytest.mark.parametrize("key", sorted(k for k in STRINGS if k.endswith(PROVIDER_SUFFIXES)))
+def test_provider_variants_have_a_base_string(key):
+    assert key.rsplit("_", 1)[0] in STRINGS
+
+
+def test_provider_lookup():
+    t = I18n("en")
+    assert t.p("ob_install", "codex") == "Install Codex CLI"
+    assert t.p("ob_install", "claude") == "Install Claude Code"      # no _claude variant: the base string
+    assert t.p("err_usage_limit", None) == t("err_usage_limit")
+
+
 def test_lookup_and_fallbacks():
     assert I18n("en")("hotkey_taken", key="F9").startswith("F9 is taken")
     assert I18n("xx").lang == "he" and I18n("he").rtl and not I18n("en").rtl
