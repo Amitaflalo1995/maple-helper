@@ -97,6 +97,7 @@ class Overlay(QWidget):
     profile_requested = Signal()
     add_character_requested = Signal()
     mic_clicked = Signal()
+    limits_read = Signal(object)      # plan usage read in the background after an answer (ChatGPT)
 
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, brain: Brain):
         super().__init__(None, Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
@@ -790,6 +791,22 @@ class Overlay(QWidget):
         self._thread.start()
         return True
 
+    def _read_limits_after_answer(self):
+        """ChatGPT doesn't report its plan usage with the answer: read it in the background, so the
+        same "running low" heads-up shows for both AIs."""
+        import threading
+
+        from .. import providers
+        ai = providers.get(self.settings["provider"])
+        if not ai.reports_usage or self.settings.api_key_mode(ai.name):
+            return
+        if type(ai).read_limits is providers.base.Provider.read_limits:
+            return                      # this AI already reported it with the answer
+        if not getattr(self, "_limits_wired", False):
+            self.limits_read.connect(self._note_usage)
+            self._limits_wired = True
+        threading.Thread(target=lambda: self.limits_read.emit(ai.read_limits()), daemon=True).start()
+
     def _note_usage(self, limits: dict | None):
         """Remember the plan usage; when the 5-hour window runs low, say so once (with the way to save)."""
         from .. import usage
@@ -804,8 +821,8 @@ class Overlay(QWidget):
         if lvl == "high" and self.settings["saver_mode"]:
             return              # already saving: only the "almost used up" warning matters
         self.settings["usage_warned"] = [w.get("resets"), lvl]
-        text = self.t("usage_high" if lvl == "high" else "usage_critical", pct=round(w["used"] * 100),
-                      at=usage.reset_clock(w.get("resets")))
+        text = self.t.p("usage_high" if lvl == "high" else "usage_critical", p, pct=round(w["used"] * 100),
+                        at=usage.reset_clock(w.get("resets")))
         if self.settings["saver_mode"]:
             self.add_system(text)
         else:
@@ -930,6 +947,7 @@ class Overlay(QWidget):
             self._pending_bubble = self.add_bubble("", "assistant")
         self._on_text(self.input.text())
         self._note_usage(ans.limits)
+        self._read_limits_after_answer()
         if ans.error:
             import logging
             logging.getLogger(__name__).warning("answer failed: %s", ans.error)
