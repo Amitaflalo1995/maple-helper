@@ -1,6 +1,7 @@
-"""Site screenshots, step 2: raw PNGs from tools/site_shots.py -> site/assets/shots/[en/]<name>-<mode>.webp.
+"""Site screenshots, step 2: raw PNGs from tools/site_shots.py -> <site repo>/assets/shots/[en/]<name>-<mode>.webp.
 
-Run: python tools/site_shots_webp.py <raw_dir>     (needs Pillow)
+Run: python tools/site_shots_webp.py <raw_dir> <maple-helper-site checkout>/assets/shots     (needs Pillow)
+The website lives in its own repository: https://github.com/Amitaflalo1995/maple-helper-site
 """
 import os
 import sys
@@ -8,7 +9,7 @@ import sys
 from PIL import Image, ImageChops, ImageDraw
 
 RAW = sys.argv[1]
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "site", "assets", "shots")
+OUT = sys.argv[2]
 M, R = 30, 55
 for base in ['mano', 'hp', 'wishlist', 'settings', 'guide']:
     for mode in ['light', 'dark']:
