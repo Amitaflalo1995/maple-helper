@@ -102,7 +102,7 @@ The Mac app is not notarized by Apple yet, so macOS blocks the first launch. Ope
 
 Maple Helper lives in the menu bar (there is no Dock icon). Allow **Screen Recording** when it asks (or under **System Settings → Privacy & Security → Screen Recording**), then restart the app: that is how it sees the game window. The hotkeys are ordinary system shortcuts and need no permission.
 
-Maple Story Classic World has no Mac version, so you run it through CrossOver, Whisky, or a virtual machine. Maple Helper finds the game window by its title either way.
+Maple Story Classic World runs on Mac too. Maple Helper finds the game window by its title.
 
 On most Mac keyboards, the F-keys control brightness and volume. Hold **fn** while pressing them, or turn on **System Settings → Keyboard → Keyboard Shortcuts → Function Keys → Use F1, F2, etc. keys as standard function keys**.
 
