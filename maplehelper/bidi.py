@@ -77,7 +77,10 @@ def isolate_ltr_runs(text: str) -> str:
         out.append(text[pos:start])
         # the RLM after the block keeps following punctuation (") - ", ", ") in the Hebrew flow,
         # so two English blocks never glue into one left-to-right chunk
-        out.append(f"{LRE}{run}{PDF}{RLM}")
+        # Qt mirrors a ">" that follows a digit inside a Hebrew line ("Line 2 <Area 1>" shows "<Area 1<"),
+        # so map names with an <area> suffix are shown as "Line 2 · Area 1"
+        shown = re.sub(r"\s*<([^<>]+)>", r" · \1", run)
+        out.append(f"{LRE}{shown}{PDF}{RLM}")
         pos = end
     out.append(text[pos:])
     return "".join(out)

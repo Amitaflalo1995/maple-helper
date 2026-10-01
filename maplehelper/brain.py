@@ -426,6 +426,27 @@ class Brain:
             return None
 
 
+    def summarize_guide(self, key: str, page: str, lang: str) -> str | None:
+        """The practical takeaways of a KB guide in the player's language (Haiku, one short call)."""
+        if not self.exe:
+            return None
+        language = "Hebrew" if lang == "he" else "English"
+        prompt = (f"Summarize this MapleStory Classic guide for a player, in {language}: 6-10 short bullet lines "
+                  "('• ...') with the most useful practical advice (builds, levels, where to go, what to buy). "
+                  "Keep every game name (items, monsters, maps, skills, jobs) in English exactly as written. "
+                  "No intro, no outro.")
+        cmd = [self.exe, "-p", "--restricted", "--strict-mcp-config", "--tools", "", "--model", "haiku",
+               "--no-session-persistence", "--system-prompt", prompt]
+        try:
+            r = subprocess.run(cmd, input=page[:60000].encode("utf-8"), capture_output=True, timeout=120,
+                               env=child_env(), creationflags=CREATE_NO_WINDOW)
+            out = r.stdout.decode("utf-8", errors="replace").strip()
+            return out or None
+        except (OSError, subprocess.TimeoutExpired):
+            log.warning("guide summary failed for %s", key)
+            return None
+
+
 _LEVEL_PATTERNS = [
     r"(?:עליתי|הגעתי)\s+(?:ל|ללבל|לרמה)\s*-?\s*(\d{1,3})",
     r"(?:אני|עכשיו)\s+(?:ב)?(?:לבל|רמה)\s*(\d{1,3})",

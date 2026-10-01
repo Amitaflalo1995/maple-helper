@@ -86,6 +86,7 @@ class FocusLineEdit(QLineEdit):
 
 
 class Overlay(QWidget):
+    guides_requested = Signal()
     guide_requested = Signal(str)
     saver_requested = Signal()
     wishlist_requested = Signal()
@@ -174,6 +175,9 @@ class Overlay(QWidget):
         self.saver_badge.hide()
         tb.addWidget(self.saver_badge)
         tb.addStretch(1)
+        self.guides_btn = self._icon_button(theme.ICON["book"])
+        self.guides_btn.clicked.connect(self.guides_requested.emit)
+        tb.addWidget(self.guides_btn)
         self.wish_btn = self._icon_button(theme.ICON["star"])
         self.wish_btn.clicked.connect(self.wishlist_requested.emit)
         tb.addWidget(self.wish_btn)
@@ -303,6 +307,7 @@ class Overlay(QWidget):
         self.saver_badge.setText("🍃 " + self.t("saver_on_badge"))
         self.saver_badge.setToolTip(self.t("saver_hint"))
         self.wish_btn.setToolTip(self.t("wishlist"))
+        self.guides_btn.setToolTip(self.t("guides"))
         self.profile_card.refresh.setToolTip(self.t("refresh_tip"))
         self.profile_card.plan_btn.setToolTip(self.t("plan_open"))
         self.profile_card.setToolTip(self.t("switch_character"))

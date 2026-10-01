@@ -101,6 +101,8 @@ class MapleHelperApp:
         self.overlay.saver_requested.connect(self.turn_on_saver)
         self.overlay.show_saver_badge(self.settings["saver_mode"])
         self.overlay.wishlist_requested.connect(self.show_wishlist)
+        self.overlay.guides_requested.connect(lambda: self.show_guides())
+        self.overlay.guide_requested.connect(lambda key: self.show_guides(key))
         self.overlay.closed.connect(self.maybe_summarize_later)
         self.overlay.update_requested.connect(self.update_now)
         self.overlay.profile_requested.connect(self.open_settings)
@@ -406,6 +408,22 @@ class MapleHelperApp:
                                 lambda: self.show_patch_notes(entries))
         if not self.overlay.isVisible():
             self.toast(t("kb_updated"), t("kb_updated_open"))
+
+    def show_guides(self, open_key: str | None = None):
+        from .ui.guides import GuidesDialog
+        dlg = GuidesDialog(self.kb, self.profiles.active, self.settings["language"], self.style(),
+                           summarize=self.brain.summarize_guide if self.brain.available() else None,
+                           open_key=open_key)
+        dlg.ask_requested.connect(self.ask_about_guide)
+        self.bring_dialogs_forward()
+        dlg.exec()
+
+    def ask_about_guide(self, key: str):
+        """Tag the guide in the chat, so the next question is about it (Claude reads the page)."""
+        if not self.overlay.isVisible():
+            self.overlay.toggle(self.capture)
+        self.overlay.set_tags([key])
+        self.overlay.input.setFocus()
 
     def show_wishlist(self):
         from .ui.wishlist import WishlistDialog
