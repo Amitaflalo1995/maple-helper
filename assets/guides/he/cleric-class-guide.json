@@ -1,0 +1,373 @@
+{
+ "key": "guide/cleric-class-guide",
+ "source_hash": "a1d916122b67",
+ "lang": "he",
+ "title": "MapleStory Classic: מדריך Cleric לבל 30-70",
+ "intro": "מדריך Cleric ללבלים 30-70. תכננו SP ו-AP, בנו Holy Arrow ו-Heal, ואז השוו ציוד ומפות Training Advisor מותאמות אישית.",
+ "pros": [
+  "#1 ב-Physical EHP ותיקו על #1 ב-Magical EHP בבנצ'מרקים שלנו בלבל 70: אתם טנקיים בטירוף.",
+  "Heal ו-Bless תומכים בחברי פארטי קרובים; Invincible מוריד את הנזק שאתם סופגים כשמפלצות נוגעות בכם.",
+  "Holy Arrow יכול למקד שלושה חיצים במוב אחד או לפצל אותם על שלושה.",
+  "Bless נותן לחברי פארטי קרובים עד 20 Accuracy ו-20 Evasion.",
+  "Teleport שומר אתכם בתנועה בין פלטפורמות."
+ ],
+ "cons": [
+  "הנזק הכי נמוך מכל הקלאסים בלבל 70.",
+  "הטירגוט של Holy Arrow ו-Heal יכול לבלבל ולתסכל.",
+  "Heal נחלש לפי מספר מטרות האויב וחברי הפארטי."
+ ],
+ "sections": [
+  {
+   "heading": "מתחילים בלבל 30",
+   "lines": [
+    "המדריך הזה ממשיך מאיפה שעצר מדריך ה-Magician שלנו ללבל 1 עד 30 , שמשווה בילדים של ג'וב ראשון לפי עלות במסוס. כל אחד מהם עובד ל-Cleric.",
+    "סקיל ג'וב ראשון | חסכוני | בטוח יותר | חוסך מסוס | לבל 70 של Grummash",
+    "Energy Bolt | 20 | 20 | 20 | 1",
+    "Magic Claw | 0 | 0 | 0 | 20",
+    "Improved MP Recovery | 3 | 3 | 15 | 15",
+    "Max MP Increase | 15 | 15 | 3 | 15",
+    "Magic Guard | 3 | 15 | 3 | 10",
+    "Magic Armor | 20 | 8 | 20 | 0",
+    "הבטוח יותר מעביר 12 SP מ-Magic Armor ל-Magic Guard. חוסך המסוס הוא הבילד של לבל 30 מ-Cleric Meso Management Guide של Grummash ומתאים לסדר המשחק הסולו למטה. הבילד של Grummash ללבל 70 מכוון לבוסים באנדגיים ומשתמש ב-Magic Claw בלבלים 10 עד 40.",
+    "Magic Armor קחו אותו קודם. לבל 14 נותן +92 Weapon ו-Magic Defense ל-495 שניות; לבל 16 נותן +100 ל-525 שניות.",
+    "Magic Guard תעלו אותו מאוחר יותר. לבל 13 מעביר 74% מהמכה ל-MP ולבל 15 מעביר 80%. תעלו אותו כשמכות בודדות נהיות גדולות מספיק כדי לאיים עליכם. העברת נזק ל-MP עולה יותר מסוס למלא מחדש, אז הוא קונה ביטחון."
+   ]
+  },
+  {
+   "heading": "אזרחות מומלצת",
+   "lines": [
+    "אנחנו ממליצים על Kerning City מלבל 30 עד 70. מגילות הרובים שלה יכולות לעזור להגיע לדרישת LUK או להוסיף עוד INT. גם ההנחות בחנות עוזרות כשהמסוס שלכם הולך על שחזור MP.",
+    "השוו את פרסי האזרחות"
+   ]
+  },
+  {
+   "heading": "Accuracy אחרי לבל 30",
+   "lines": [
+    "Accuracy שימושי רק כשהוא הופך פספוס לפגיעה. כל פספוס עדיין עולה MP ואנימציית התקפה, אז ה-EXP לדקה שלכם יורד מהר.",
+    "Accuracy בסיסי של Magician הלבל, ה-Total INT, ה-Total LUK וה-Accuracy הישיר שלכם מתווספים כולם ל-ACC הכולל.",
+    "+0.39 ACC לכל לבל",
+    "+0.24 ACC לכל INT",
+    "+0.12 ACC לכל LUK",
+    "+1.00 ACC לכל ACC ישיר",
+    "לכל מוב יש Avoidability. להילחם מעל הלבל שלכם מעלה את ה-ACC שצריך כדי לא לפספס אף פעם; לעלות לבלים מוריד את העונש הזה. מפה בלבל נמוך יותר יכולה בקלות לנצח כשאתם מקבלים שם קילים אמינים בהטלה אחת או שתיים.",
+    "מוב | לבל מוב | Avoid של המוב | ACC כדי לא לפספס בלבל שווה",
+    "Jr. Wraith | 34 | 24 | 79 ACC",
+    "Zombie Lupin | 41 | 28 | 92 ACC",
+    "Wraith | 48 | 31 | 101 ACC",
+    "Rotten Mushroom | 56 | 33 | 108 ACC",
+    "קראו את ההסבר המלא על Accuracy של Magician פתחו את סימולטור ה-Accuracy"
+   ]
+  },
+  {
+   "heading": "לבלים 30-70: בילד סקילים ולבלינג ל-Cleric",
+   "lines": []
+  },
+  {
+   "heading": "אדוונס ל-Cleric בלבל 30",
+   "lines": [
+    "התחילו את האדוונס לג'וב שני אצל Grendel the Really Old ב-Ellinia.",
+    "הביאו את המכתב שלו ל-Magician Job Instructor בפסגה של The Forest North of Ellinia.",
+    "סיימו את מבחן הקרב והחליפו 30 Dark Marbles ב-The Proof of a Hero.",
+    "קחו את ההוכחה בחזרה ל-Grendel ובחרו Cleric.",
+    "Grendel the Really Old מתחיל ומסיים את האדוונס ל-Cleric ב-Ellinia.",
+    "Magician Job Instructor מריץ את מבחן ה-Dark Marble צפונית ל-Ellinia.",
+    "בילד פארטי: התחילו Holy Arrow בלבל 31, אבל תמשיכו לתקוף עם Energy Bolt עד בערך לבל 38. הגלגול הנמוך ביותר של Holy Arrow עוקף את Energy Bolt 20 בלבל סקיל 18 (לבל 37) מול Zombie Mushrooms ו-Jr. Wraith, ובלבל סקיל 24 (לבל 39) מול Horny Mushrooms. בלבל 40, Holy Arrow 28 מגיע לבערך 4,860 EXP/min ב-Training Advisor מול 3,240 של Energy Bolt. סדר המשחק הסולו שומר על Energy Bolt עד לבל 41 כדי לחסוך מסוס."
+   ]
+  },
+  {
+   "heading": "יעד הסקילים בלבל 70 (בילד פארטי)",
+   "lines": [
+    "סקיל | SP | מה מקבלים",
+    "MP Eater | 20 / 20 | בכל התקפה, 50% סיכוי הצלחה, סופג 50% מה-Max MP של האויב",
+    "Teleport | 20 / 20 | MP -15; Teleport, למרחק 150",
+    "Heal | 30 / 30 | MP -27; Recovery rate 100%",
+    "Invincible | 5 / 20 | MP 20; נזק פיזי -14%, Basic Attack 14 נזק מאגי לא אלמנטלי ל-140 שניות",
+    "Bless | 16 / 20 | MP -27; Accuracy +16, Evasion +16, ושחזור HP מהסקיל Heal גדל ב-8% ל-250 שניות",
+    "Holy Arrow | 30 / 30 | MP -28; Basic Attack 60 על 3 אויבים, Mastery level 10"
+   ]
+  },
+  {
+   "heading": "חלוקת SP ל-Cleric פארטי: לבלים 30-70",
+   "lines": [
+    "ל-Cleric שמשחק בפארטי. Holy Arrow בא קודם כדי שעדיין תעלו לבלים מהר. Invincible 5 ו-Bless 16 באים אחריו, כך שמלבל 49 כל מי שקרוב מקבל +16 Accuracy, +16 Evasion ו-8% יותר שחזור מ-Heal. Heal ממוקס אחרי זה. Invincible נשאר על 5 כי הוא מגן רק עליכם, ו-Teleport ממוקס אחרון בשביל המרחק של 150.",
+    "לבלים | הוצאה | סך מצטבר | סיבה",
+    "30 | Heal +1 | Heal 1 | ריפוי עצמי זול מההתחלה.",
+    "31 | Teleport +1, MP Eater +1, Holy Arrow +1 | Teleport 1 / MP Eater 1 / Holy Arrow 1 | תנועה ושחזור MP. Teleport 1 אופציונלי.",
+    "32-40 | Holy Arrow +27 | Holy Arrow 28 | ההתקפה הרגילה שלכם. תמשיכו להשתמש ב-Energy Bolt עד בערך לבל 38.",
+    "41 | Holy Arrow +2, Heal +1 | Holy Arrow 30 / Heal 2 | Holy Arrow במקסימום. הטלה אחת הורגת עכשיו Jr. Wraith.",
+    "42 | Heal +3 | Heal 5 | פותח את Invincible.",
+    "43 | Invincible +3 | Invincible 3 | בונים לקראת Bless.",
+    "44 | Invincible +2, Bless +1 | Invincible 5 / Bless 1 | פותח את Bless.",
+    "45-49 | Bless +15 | Bless 16 | Accuracy ו-Evasion לפארטי.",
+    "50-57 | Heal +24 | Heal 29 | ריפוי לפארטי.",
+    "58 | Heal +1, MP Eater +2 | Heal 30 / MP Eater 3 | Heal במקסימום.",
+    "59-63 | MP Eater +15 | MP Eater 18 | שחזור MP.",
+    "64 | MP Eater +2, Teleport +1 | MP Eater 20 / Teleport 2 | MP Eater במקסימום.",
+    "65-70 | Teleport +18 | Teleport 20 | מרחק Teleport מקסימלי.",
+    "אי אפשר להוציא SP של ג'וב שני על סקילים של ג'וב ראשון, אז תסיימו את תוכנית הג'וב הראשון עד לבל 30. Character Builder מסמן כל בילד שמפר את זה."
+   ]
+  },
+  {
+   "heading": "חלוקת SP ל-Cleric סולו: לבלים 30-70",
+   "lines": [
+    "ל-Cleric שבעיקר מגרנד לבד, מבוסס על Cleric Meso Management Guide של Grummash בלי איפוס ה-SP שלו בלבל 41. מתחיל מבילד הג'וב הראשון של חוסך המסוס.",
+    "Teleport נשאר על 1 עד לבל 56. הטלה אחת עולה 55 MP; Heal 2 עולה 12.",
+    "Bless נשאר על 1. הבונוס שלו עוזר בעיקר לפארטי.",
+    "Heal ממוקס אחרון, בשביל לרפא את עצמכם. הוא אף פעם לא ניקה מפת אימון לבד ב-Training Advisor.",
+    "לבלים | הוצאה | סך מצטבר | סיבה",
+    "30 | Heal +1 | Heal 1 | ריפוי עצמי זול מההתחלה.",
+    "31 | Teleport +1, MP Eater +1, Heal +1 | Teleport 1 / MP Eater 1 / Heal 2 | פותח תנועה ושחזור MP.",
+    "32-41 | Holy Arrow +30 | Holy Arrow 30 | ממקסים את ההתקפה הרגילה. תמשיכו להשתמש ב-Energy Bolt על Horny ו-Zombie Mushrooms עד לבל 41, ואז תעברו ל-Holy Arrow על Jr. Wraith.",
+    "42 | Heal +3 | Heal 5 | פותח את Invincible.",
+    "43-48 | Invincible +18 | Invincible 18 | סופגים פחות נזק מגע.",
+    "49 | Invincible +2, MP Eater +1 | Invincible 20 / MP Eater 2 | Invincible במקסימום.",
+    "50-55 | MP Eater +18 | MP Eater 20 | שחזור MP מקסימלי.",
+    "56-61 | Teleport +18 | Teleport 19 | טלפורטים זולים וארוכים יותר.",
+    "62 | Teleport +1, Heal +2 | Teleport 20 / Heal 7 | Teleport במקסימום.",
+    "63-69 | Heal +21 | Heal 28 | ריפוי עצמי חזק יותר.",
+    "70 | Heal +2, Bless +1 | Heal 30 / Bless 1 | נקודת הסיום של הסולו של Grummash."
+   ]
+  },
+  {
+   "heading": "Bless או Invincible קודם?",
+   "lines": [
+    "Training Advisor נותן ל-Cleric את אותן מפות ואותו EXP בכל מקרה בלבלים 45, 50 ו-55, כי כל המפות המובילות הן Safe. תבחרו לפי איך שאתם משחקים:",
+    "Bless פארטי: פארטי פיזי מקבל +16 Accuracy ומפספס פחות.",
+    "Invincible סולו: אתם סופגים פחות נזק מגע ומשתמשים בפחות פוטים."
+   ]
+  },
+  {
+   "heading": "בילד פארטי מול בילד סולו בלבל 70",
+   "lines": [
+    "שני הבילדים ממקסים Heal, Holy Arrow, MP Eater ו-Teleport. בילד הפארטי מעביר 15 SP מ-Invincible ל-Bless.",
+    "בילד לבל 70 | Bless | Invincible | Teleport",
+    "בילד פארטי | 16: +16 ACC, +16 Evasion | 5: נזק מגע -14% | 20: 15 MP",
+    "בילד סולו | 1: +1 ACC, +1 Evasion | 20: נזק מגע -30% | 20: 15 MP",
+    "Recovery Rate הוא ערך הסקיל הרשום ולא מתורגם לאחוז מה-Max HP. תראו איך Heal מחלק את המטרות שלו לפני שאתם בוחרים מפת אנדדים.",
+    "תשתמשו בלבלי הסקילים שלכם ב-Training Advisor. בחירות המפות למטה עוקבות אחרי סדר הפארטי. הכניסו את לבלי הסקילים שלכם ב-Training Advisor בשביל הסדר הסולו."
+   ]
+  },
+  {
+   "heading": "חלוקת AP ל-Cleric: לבלים 30-70",
+   "lines": [
+    "תשאירו את ה-LUK הבסיסי על הלבל שלכם פחות 10 ותשימו את כל השאר ב-INT בשביל יותר נזק, MP ו-Accuracy. זה עומד בדרישות של Mithril Wand, Esther Shield, Fairy Wand ו-Cromi בלבל שבו אפשר ללבוש אותם.",
+    "בלבל 50, תכינו Green Goldwind Shoes עם Tailoring Lv 10. ה-+5 LUK שלהן מכסה את Thorns, Evil Tale, Evil Wings ו-Angel Wings כשאתם מגיעים לכל אחד מהם. תדלגו על Arc Staff: הוא דורש 40 LUK בלבל 45, כשבתוכנית הזאת יש 35, אז תישארו על Fairy Wand עד Cromi ב-50.",
+    "לבלים | AP בכל לבל | AP בסיסי בסוף",
+    "31-40 | INT +4 / LUK +1 | 182 INT / 30 LUK",
+    "41-50 | INT +4 / LUK +1 | 222 INT / 40 LUK",
+    "51-60 | INT +4 / LUK +1 | 262 INT / 50 LUK",
+    "61-70 | INT +4 / LUK +1 | 302 INT / 60 LUK"
+   ]
+  },
+  {
+   "heading": "ציוד מומלץ",
+   "lines": [
+    "לבל | פריט | למה זה חשוב",
+    "10 | Pan Lid | כל קלאס. 44 WDEF נותן 8.09% סיכוי Guard, אחוז החסימה הכי טוב למאג'.",
+    "30 | Mithril Wand | 55 M.ATK. דורש 60 INT ו-20 LUK.",
+    "35 | Esther Shield | מגן מאג' עם 28 WDEF ו-55 MDEF. סיכוי ה-Guard שלו, 5.30%, נמוך מזה של Pan Lid. דורש 60 INT ו-25 LUK.",
+    "40 | Fairy Wand | 69 M.ATK. דורש 80 INT ו-30 LUK.",
+    "45 | Arc Staff | 73 M.ATK. דורש 90 INT ו-40 LUK. תדלגו עליו בתוכנית ה-AP הזאת.",
+    "50 | Cromi | 83 M.ATK לפני סקרולים. דורש 100 INT ו-40 LUK.",
+    "50 | Green Goldwind Shoes | +5 LUK מ-Tailoring Lv 10. דורש 90 INT ו-40 LUK. מכסה את ה-LUK של כל נשק מכאן ועד Angel Wings.",
+    "55 | Thorns | 87 M.ATK. דורש 110 INT ו-50 LUK.",
+    "60 | Evil Tale | 97 M.ATK. דורש 120 INT ו-55 LUK.",
+    "65 | Evil Wings | 101 M.ATK. דורש 130 INT ו-60 LUK.",
+    "70 | Angel Wings | 111 M.ATK לפני סקרולים. דורש 140 INT ו-65 LUK.",
+    "Clerics יכולים להחזיק מגן גם עם וונד וגם עם סטאף. זמן הטלת הספל לא משתנה עם מהירות הנשק, אז קחו את ה-M.ATK הכי גבוה שאתם יכולים ללבוש. Pan Lid חוסם יותר מ-Esther Shield (8.09% מול 5.30% סיכוי Guard), בזמן ש-Esther Shield מוסיף 55 MDEF נגד התקפות מאגיות. כל סקרול WDEF על המגן מעלה עוד את סיכוי ה-Guard."
+   ]
+  },
+  {
+   "heading": "נקודות ביקורת לשריון",
+   "lines": [
+    "Brown Jester Blue Wizard Robe White Guiltian Brown Starlight Flame Golden Circlet Red Calas Red Seraphis Blue Anakamoon",
+    "תדלגו על שדרוג כובע או רוב כשהפריט הזול יותר כבר נותן לכם את ה-INT או ה-LUK שאתם צריכים. האפשרויות האלה מכסות את לבלים 30, 40, 50 ו-60. בדף של כל פריט מופיעים מקורות הדרופ, הקראפט או החנות שלו."
+   ]
+  },
+  {
+   "heading": "M.ATK או Critical Rate על הכפפות?",
+   "lines": [
+    "בבילד הזה תבחרו Magic Attack. חמישה סקרולי Lesser M.ATK מוצלחים נותנים ל-Cleric לבל 70 של Grummash בערך 2.03% יותר נזק צפוי מחמישה סקרולי Critical Rate.",
+    "הכל עניין של טרייד-אוף. שתי האפשרויות משתמשות בחמישה סלוטים של כפפות. Critical Rate נותן לכם יותר קריטים, אבל M.ATK מנצח בנזק צפוי עם הציוד הזה.",
+    "5x Gloves Magic Attack Scroll: Lesser",
+    "+10 M.ATK",
+    "301 עד 311 M.ATK כולל",
+    "בערך 3.32% יותר נזק צפוי.",
+    "5x Gloves Crit. Rate Scroll: Lesser",
+    "+5% Critical Rate",
+    "9% עד 14% Critical Rate",
+    "בערך 1.27% יותר נזק צפוי.",
+    "W.ATK לא מעלה נזק של ספלים. סקרול Magic Attack מקביל נותן פי שניים M.ATK ממה שסקרול Critical Rate נותן Critical Rate.",
+    "היחס זהה בכל דרגה. Lesser נותן +1 W.ATK או +1% Critical Rate (+2 M.ATK), Intermediate +2/+2% (+4 M.ATK), Greater +3/+3% (+6 M.ATK), ו-Chaos +4/+4% (+8 M.ATK). לדרגות מקבילות יש אותם אחוזי הצלחה והשמדה."
+   ]
+  },
+  {
+   "heading": "בילדים לדוגמה ומפות Training Advisor",
+   "lines": [
+    "לכל נקודת ביקורת יש שתי בחירות, עם רמת הסכנה ונקודת מילוי הפוטים הקרובה. אם ה-EXP קרוב, קחו את המפה הבטוחה יותר.",
+    "Energy Bolt בלבל 30, Holy Arrow מלבל 41.",
+    "ציוד: לבלים 41 עד 60 לובשים את כובע המאג', האוברול, הכפפות והנעליים החדשים ביותר לאותו לבל, Esther Shield, ואת הנשק מטבלת הציוד. לבל 70 לובש את הציוד של Grummash.",
+    "הטלה אחת מובטחת: כל שלושת החיצים הורגים את המוב בגלגול הכי חלש, ב-100% hit rate.",
+    "Heal אף פעם לא נתן מפה של הטלה אחת או שתיים עם הבילדים האלה.",
+    "מפה עמוסה או פלטפורמות מסורבלות יכולות לעלות לכם את יתרון ה-EXP הזה. תבחרו את המפה עם פחות EXP אם יש בה דרופ שאתם צריכים."
+   ]
+  },
+  {
+   "heading": "לבל 30",
+   "lines": [
+    "Energy Bolt 20 / MG 3 / MA 20 / 71 ACC / 155 INT",
+    "Transfer Area Energy Bolt: Stirge בהטלה אחת, Safe ב-7%; מילוי אצל Dr. Faymus במרחק 4 פורטלים; בערך 2,741 EXP/min",
+    "Dungeon, Southern Forest IV Energy Bolt: Blue Mushroom בשתי הטלות ושאר הספאונים בהטלה אחת, Safe ב-9%; מילוי אצל Len the Fairy במרחק 5 פורטלים; בערך 2,435 EXP/min"
+   ]
+  },
+  {
+   "heading": "לבל 41",
+   "lines": [
+    "Holy Arrow 30, 86 ACC, 196 INT",
+    "Line 1 <Area 1> Bubbling בהטלה אחת מובטחת, Safe ב-2%; מילוי אצל Dr. Faymus במרחק 3 פורטלים; בערך 5,190 EXP/min",
+    "Line 1 <Area 2> Jr. Wraith ו-Stirge בהטלה אחת מובטחת, Safe ב-7%; מילוי אצל Dr. Faymus במרחק 5 פורטלים; בערך 5,004 EXP/min"
+   ]
+  },
+  {
+   "heading": "לבל 50",
+   "lines": [
+    "Holy Arrow 30, Bless 16 ו-Invincible 5 פעילים, 116 ACC, 235 INT",
+    "Ant Tunnel II שתי הפטריות בהטלה אחת מובטחת, Safe ב-4%; מילוי אצל Mr. Sweatbottom במרחק 4 פורטלים; בערך 9,716 EXP/min",
+    "Ant Tunnel III אותו שילוב של הטלה אחת, Safe ב-4%; מילוי אצל Mr. Sweatbottom במרחק 5 פורטלים; בערך 9,659 EXP/min"
+   ]
+  },
+  {
+   "heading": "לבל 60",
+   "lines": [
+    "Holy Arrow 30, Bless 16 ו-Invincible 5 פעילים, 132 ACC, 280 INT",
+    "Ant Tunnel II שתי הפטריות בהטלה אחת מובטחת, Safe ב-3%; מילוי אצל Mr. Sweatbottom במרחק 4 פורטלים; בערך 9,716 EXP/min",
+    "Ant Tunnel III אותו שילוב של הטלה אחת, Safe ב-3%; מילוי אצל Mr. Sweatbottom במרחק 5 פורטלים; בערך 9,659 EXP/min"
+   ]
+  },
+  {
+   "heading": "לבל 70",
+   "lines": [
+    "הציוד של Grummash, Bless 16 ו-Invincible 5 פעילים, 153 ACC, 352 INT, 311 M.ATK",
+    "Ant Tunnel Park Evil Eye ושתי הפטריות בהטלה אחת מובטחת, Safe ב-4%; מילוי אצל Mr. Sweatbottom במרחק 11 פורטלים; בערך 10,533 EXP/min",
+    "Line 2 <Area 3> Wraith בהטלה אחת מובטחת, Safe ב-6%; מילוי אצל Dr. Faymus במרחק 7 פורטלים; בערך 9,778 EXP/min",
+    "Grummash מציין שרוב הציוד הזה לא יהיה זמין עד ש-Ossyria תיפתח. תצפו למספרים נמוכים יותר בהשקה.",
+    "לפני שאתם מתמקמים: Ant Tunnel II מנצח את Ant Tunnel III בפורטל אחד פחות לחנות המילוי, עם אותם קילים בהטלה אחת ואותה סכנה בלבלים 50 ו-60. עשרה לבלים נוספים לבד הם לא סיבה לעבור.",
+    "למה לא Jr. Wraith בלבל 50? עד אז Jr. Wraith מת משניים משלושת החיצים שלכם, אז למקד באחד מבזבז את השלישי. Training Advisor סופר את החץ המבוזבז: Line 1 <Area 2> יוצא בערך 7,836 EXP/min ומפות ה-Wraith בערך 5,867. ב-Ant Tunnel II חץ אחד הורג כל פטרייה, אז שום דבר לא מתבזבז."
+   ]
+  },
+  {
+   "heading": "מכניקות סקילים חשובות של Cleric",
+   "lines": []
+  },
+  {
+   "heading": "Holy Arrow",
+   "lines": [
+    "Holy Arrow יורה שלושה חיצים. אפשר למקד את שלושתם במוב אחד או לפצל אותם על עד שלושה. במקסימום יש לו 60 Basic Attack ו-Mastery 10 תמורת 28 MP.",
+    "הבנצ'מרק שלנו בלבל 70 מוציא בערך 2,468 נזק כולל צפוי על מטרה ניטרלית ו-3,086 מול מטרה אנדד."
+   ]
+  },
+  {
+   "heading": "Heal",
+   "lines": [
+    "ל-Heal יש שישה סלוטים משותפים למטרות. אתם וחברי פארטי קרובים מקבלים עדיפות, מה שמשאיר עד חמישה לאנדדים כשאתם סולו. יותר מטרות אומר פחות נזק לכל אנדד.",
+    "Heal 11: 16 MP, 60% Recovery Rate.",
+    "הטיפ של Grummash: תתרחקו מ-Zombie Mushrooms לפני שאתם מרפאים. ריפוי ליד אנדדים פוגע בהם, מושך אותם אליכם ומשאיר פחות ריפוי בשבילכם.",
+    "ראו בילד פארטי מול בילד סולו בשביל ערכי הסקילים.",
+    "לאימון על אנדדים, הכניסו ב-Training Advisor את לבל ה-Heal שלכם ואת מספר חברי הפארטי והאנדדים הקרובים."
+   ]
+  },
+  {
+   "heading": "Invincible ו-Bless",
+   "lines": [
+    "Invincible במקסימום מוריד ב-30% את הנזק שאתם סופגים ממגע של מפלצות ל-300 שניות ופוגע במובים שנוגעים בכם. Bless במקסימום נותן לחברי פארטי קרובים 20 Accuracy, 20 Evasion ו-10% יותר שחזור HP מהסקיל Heal."
+   ]
+  },
+  {
+   "heading": "Holy ואנדדים ב-Victoria Island",
+   "lines": [
+    "Holy Arrow עושה 25% יותר נזק למובים שחלשים ל-Holy. Heal פוגע רק במובים אנדדים. שתי הרשימות חופפות, אבל הן שונות.",
+    "מוב | לבל | Holy Arrow | Heal",
+    "Green Mushroom | 14 | רגיל | סופג נזק",
+    "Zombie Mushroom | 24, 30 | חלש | סופג נזק",
+    "Fairy 2 , Fairy 3 , Fairy 4 | 29 | עמיד | אין נזק",
+    "Jr. Wraith | 34 | חלש | סופג נזק",
+    "Zombie Lupin | 41 | חלש | סופג נזק",
+    "Wraith | 48 | חלש | סופג נזק",
+    "Malady | 55 | חלש | אין נזק",
+    "Rotten Mushroom | 56 | חלש | סופג נזק",
+    "Dark Stone Golem | 58 | חלש | אין נזק",
+    "Sporewood | 59 | חלש | סופג נזק",
+    "Green Mushrooms נחשבות אנדד, אז Heal פוגע בהן. Holy Arrow עושה להן נזק רגיל. Malady ו-Dark Stone Golem חלשים ל-Holy בלי להיות אנדדים, אז Heal לא נוגע בהם. Fairy 2, 3 ו-4 עמידות ל-Holy.",
+    "MP Eater שואב לכל היותר פעם ב-5 שניות, והוא לא מקבל כלום ממובים עם 0 MP. ב-Victoria Island זה אומר Pig, Ribbon Pig, Wild Boar, Ligator ו-Fire Boar. לכל מוב אנדד ב-Victoria Island יש MP, וגם לכל מוב במפות שהמדריך הזה ממליץ עליהן."
+   ]
+  },
+  {
+   "heading": "מצאו את מפת האימון הכי טובה לבילד שלכם עם Training Advisor",
+   "lines": [
+    "Training Advisor ממליץ על המפה הכי טובה לפי הלבל, הציוד ויעילות ה-EXP הצפויה שלכם.",
+    "Danger מודד כמה חזק מוב מכה אתכם: מתחת ל-10% מה-HP שלכם זה Safe, 10-24% זה Caution, 25-49% זה Danger, ו-50%+ זה Lethal.",
+    "טענו את ההגדרה המדויקת שלכם ב-Character Builder.",
+    "הגדירו 100% hit rate. השתמשו ב-Holy Arrow, או הכניסו את מספר מטרות הפארטי והאנדדים כשאתם בודקים Heal.",
+    "השאירו את Factor Danger into recommendations מופעל. הכניסו את לבלי הסקיל האמיתיים שלכם של Magic Guard ו-Invincible.",
+    "השוו את המפות הכי טובות של הטלה אחת או שתיים. בדקו סכנה ומרחק מחנות פוטים לפני שאתם בוחרים.",
+    "ה-Cleric השמור של Grummash ב-Training Advisor: השוו hit rate ו-EXP צפוי. בדקו נזק וסכנה מול מרחק המילוי. פתחו את ה-Cleric הזה ב-Training Advisor"
+   ]
+  },
+  {
+   "heading": "פוטים מומלצים",
+   "lines": [
+    "Heal עדיף על כל פוט HP. Grummash מדד ש-Heal 2 מחזיר בערך 110 HP תמורת 12 MP, בערך 12 מסוס. אותם 110 HP עולים בערך 55 מסוס בפוטים. לכן פוטי ה-HP למטה הם למקרי חירום.",
+    "הכי שווה לקנות הכי הרבה HP או MP לכל מסו",
+    "Red Potion 50 מסוס · 100 HP 2 HP לכל מסו",
+    "Fried Chicken 60 מסוס · 120 HP 2 HP לכל מסו",
+    "Meat 80 מסוס · 160 HP 2 HP לכל מסו",
+    "Orange 50 מסוס · 50 MP 1 MP לכל מסו",
+    "Lemon 150 מסוס · 150 MP 1 MP לכל מסו",
+    "לפי מצב קנו רק כשהבאף מגיע לנקודת שבירה שימושית",
+    "Magic Potion 500 מסוס · +10 M.ATK ל-10 דקות לנקודת שבירה בנזק",
+    "Sniper Potion 500 מסוס · +5 ACC ל-10 דקות כדי לבטל פספוסים",
+    "Supreme Sniper Potion 600 מסוס · +7 ACC ל-15 דקות באף ה-ACC הכי טוב בחנות",
+    "לא לקנות שחזור גרוע יותר לכל מסו מהאפשרויות למעלה",
+    "White Potion 350 מסוס · 500 HP 1.43 HP לכל מסו",
+    "Blue Potion 220 מסוס · 200 MP 0.91 MP לכל מסו",
+    "השוו את יעילות הפוטים בחנויות"
+   ]
+  },
+  {
+   "heading": "טעויות נפוצות של Cleric",
+   "lines": [
+    "לבחור את הקלאס ולצפות לעשות הרבה נזק. זה פשוט לא קורה. הנזק של Heal נמוך משמעותית ממה שהיה ב-MapleStory של לפני Big Bang.",
+    "להשתמש בפוטי HP במקום ב-Heal. Heal חוסך מסוס."
+   ]
+  },
+  {
+   "heading": "בילד Cleric לבל 70 לדוגמה מאת Grummash",
+   "lines": [
+    "אנחנו משתמשים בציוד של ה-Cleric השמור הזה לחישובי ה-Holy Arrow וההישרדות בלבל 70 שלמעלה, ועוד למפות ה-Training Advisor בלבל 70. בכל סלוט סקרול זמין יש סקרול Lesser מוצלח אחד. Grummash מציין שרוב הציוד הזה לא יהיה זמין עד ש-Ossyria תיפתח.",
+    "בילד ה-SP השמור של Grummash: Improved MP Recovery 10, Max MP Increase 15, Magic Guard 15, Energy Bolt 1 ו-Magic Claw 20 בג'וב ראשון. בג'וב שני: MP Eater 20, Teleport 20, Heal 11, Invincible 20, Bless 20 ו-Holy Arrow 30. סדר המשחק הסולו שלו למעלה מסתיים דווקא ב-Heal 30 ו-Bless 1.",
+    "Angel Wings",
+    "Blue Infinium Circlet",
+    "Blue Requiem",
+    "Blue Lorin",
+    "Brown Lapiz Sandals",
+    "Blue Gaia Cape",
+    "Metal Silver Earrings",
+    "Esther Shield",
+    "352 INT / 65 LUK / 311 M.ATK",
+    "9% Critical Rate",
+    "26% Critical Damage",
+    "224 WDEF",
+    "372 MDEF",
+    "פתחו את בילד לבל 70 של Grummash"
+   ]
+  },
+  {
+   "heading": "בלבל 70: נהיים Priest",
+   "lines": [
+    "Robeira מטפלת באדוונס ל-Priest ב-El Nath.",
+    "Robeira מקדמת את ה-Cleric שלכם ל-Priest ב-El Nath. ג'וב שלישי ו-El Nath לא נמצאים בגרסת ההשקה. המדריך הזה עוצר לפני SP של ג'וב שלישי, אז תבדקו את סקילי ה-Priest הנוכחיים לפני שאתם מוציאים את הנקודה של לבל 70.",
+    "ראו את סקילי ה-Priest ב-COT2"
+   ]
+  }
+ ]
+}

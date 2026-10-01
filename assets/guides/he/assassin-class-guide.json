@@ -1,0 +1,405 @@
+{
+ "key": "guide/assassin-class-guide",
+ "source_hash": "d9cdf660134b",
+ "lang": "he",
+ "title": "מדריך Assassin ל-MapleStory Classic: לבל 30-70",
+ "intro": "מדריך Assassin ללבלים 30-70. תעקוב אחרי חלוקת ה-SP, תשווה Claw וכוכבים, ואז תתכנן אימון עם Lucky Seven בעזרת ה-Advisor.",
+ "pros": [
+  "מקום 3 בדמג' על מטרה אחת בלבל 70, והדמג' הכי גבוה מטווח.",
+  "Haste נותן לפארטי Speed ו-Jump לניקוי מפות מהר יותר.",
+  "Claw Mastery, Critical Recovery ו-Drain מורידים חלק מעלויות הכוכבים והפוטים.",
+  "יותר LUK אומר פחות איבוד EXP בכל מוות."
+ ],
+ "cons": [
+  "אין מתקפת מובינג אמיתית עד הג'וב השלישי.",
+  "כוכבי זריקה עולים מסוס, צריכים כמה סטאקים באינבנטורי וצריך לטעון אותם מחדש.",
+  "HP נמוך וכמעט בלי הגנה."
+ ],
+ "sections": [
+  {
+   "heading": "מתחילים בלבל 30",
+   "lines": [
+    "המדריך הזה ממשיך את מדריך ה-Thief ללבל 1 עד 30. אתה אמור להגיע עם Lucky Seven, Keen Eyes ו-Nimble Body במקסימום.",
+    "אזרחות מומלצת: Kerning City",
+    "תשמור על אזרחות Kerning City מהמדריך של הג'וב הראשון. Helpful Stranger פותח את Wolbi Throwing Stars אצל Max ב-Civic Center (1,000 מסוס לסט של 500), Distinguished Citizen פותח את סקרול ה-Lesser Overall LUK, ו-Guardian of the Village פותח את סקרול ה-Lesser Glove Attack. מלבל 17, שרשרת הקווסטים Stirge Phobia של Jake בכניסה לרכבת התחתית נותנת תרומה לאזרחות Kerning City."
+   ]
+  },
+  {
+   "heading": "ACC עדיין קובע איפה הכי שווה להתאמן",
+   "lines": [
+    "Assassin מקבל Accuracy מהלבל של הדמות, DEX, LUK, Accuracy ישיר ו-Nimble Body במקסימום. פספוס עדיין צורך שני כוכבים, 16 MP ואת כל אנימציית ה-Lucky Seven. תבדוק אחוז פגיעה לפני שאתה עובר למפה שנראית טוב יותר ב-EXP על הנייר.",
+    "Base ACC = floor((1.2 x DEX + 2 x Level + 0.6 x LUK) x 0.25 + 15)",
+    "Total ACC = Base ACC + direct Accuracy + Nimble Body",
+    "+0.50 Base ACC לכל לבל",
+    "+0.30 Base ACC לכל DEX",
+    "+0.15 Base ACC לכל LUK",
+    "+15 ACC מ-Nimble Body",
+    "לבל הדמות נותן יותר Accuracy מנקודת DEX אחת. הוא גם סוגר את קנס אחוז הפגיעה מול מובים בלבל גבוה יותר. ה-Avoidability של המוב נשאר חלק מהדרישה.",
+    "מוב | לבל | Avoid של המוב | ACC ל-100% פגיעה באותו לבל",
+    "Jr. Wraith | 34 | 24 | 79 ACC",
+    "Lorang | 38 | 23 | 76 ACC",
+    "Zombie Lupin | 41 | 28 | 92 ACC",
+    "Wraith | 48 | 31 | 101 ACC",
+    "עמודת ה-100% אומרת שכל מתקפה פוגעת כשהדמות והמוב באותו לבל. להילחם בלבל נמוך יותר מעלה את דרישת ה-ACC."
+   ]
+  },
+  {
+   "heading": "בילד סקילים וחלוקת SP ל-Assassin",
+   "lines": []
+  },
+  {
+   "heading": "התקדמות ג'וב ל-Assassin בלבל 30",
+   "lines": [
+    "תדבר עם Dark Lord ב-Kerning City ותקבל את The Thief's Next Journey.",
+    "תמסור את המכתב שלו ל-Thief Job Instructor ב-Construction Site North of Kerning City.",
+    "תיכנס לאזור המבחן, תהרוג את המפלצות ותאסוף 30 Dark Marbles.",
+    "תחזיר את The Proof of a Hero ל-Dark Lord ותבחר Assassin.",
+    "Dark Lord: מתחיל ומסיים את ההתקדמות ב-Kerning City.",
+    "Thief Job Instructor: מריץ את מבחן ה-Dark Marble צפונית ל-Kerning City.",
+    "ה-SP הראשון של Assassin: Haste 1. הוא נותן מיד Speed +10 ו-Jump +1 ל-100 שניות. Mastery מתחיל בלבל 31 כדי שהלבל הבא יפתח את Booster בצורה נקייה."
+   ]
+  },
+  {
+   "heading": "יעד סקילים ל-Assassin בלבל 70",
+   "lines": [
+    "סקיל | יעד בלבל 70 | מה הוא עושה",
+    "Claw Mastery | 20 / 20 | Mastery 10, Attack Power +20 ו-25% החזרת כוכבים.",
+    "Critical Throw | 30 / 30 | Critical Rate +15% ו-Critical Damage +35%.",
+    "Critical Recovery | 20 / 20 | כל מכת קריט מחזירה 10% HP ו-MP אחרי שנעילת 30 השניות שלו נגמרת.",
+    "Claw Booster | 20 / 20 | Attack Speed +2 שלבים ל-300 שניות. עולה 10 HP ו-10 MP.",
+    "Haste | 20 / 20 | Speed +30 ו-Jump +10 לפארטי ל-300 שניות.",
+    "Drain | 11 / 30 | 200% דמג' מטווח עם 5% סיכוי לספוג 8% מהדמג' כ-HP."
+   ]
+  },
+  {
+   "heading": "חלוקת SP ל-Assassin: לבל 30-70",
+   "lines": [
+    "לבלים | שים SP על | תוצאה",
+    "30 | Haste +1 | Haste 1",
+    "31 | Claw Mastery +3 | Mastery 3",
+    "32 | Claw Mastery +2, Claw Booster +1 | Mastery 5, Booster 1",
+    "33-37 | Claw Mastery +15 | Claw Mastery 20 מקסימום",
+    "38-47 | Critical Throw +30 | Critical Throw 30 מקסימום",
+    "48-53 | Haste +18 | Haste 19",
+    "54 | Haste +1, Claw Booster +2 | Haste 20 מקסימום, Booster 3",
+    "55-56 | Claw Booster +6 | Booster 9",
+    "57-62 | Critical Recovery +18 | Critical Recovery 18, Drain נפתח",
+    "63 | Critical Recovery +2, Claw Booster +1 | Critical Recovery 20 מקסימום, Booster 10",
+    "64-66 | Claw Booster +9 | Booster 19",
+    "67 | Claw Booster +1, Drain +2 | Booster 20 מקסימום, Drain 2",
+    "68-70 | Drain +9 | Drain 11",
+    "אי אפשר להשקיע SP של הג'וב השני בסקילים של הג'וב הראשון, אז תסיים את תוכנית הג'וב הראשון עד לבל 30. Character Builder מסמן כל בילד שמפר את זה.",
+    "הסדר הזה מסתיים בבילד הסקילים הדיפולטי שלנו ללבל 70. הוא לוקח Booster בנקודה אחת בלבל 32, ממקסם Mastery לפני Critical Throw, ושם את ה-SP המאוחר ב-Critical Recovery וב-Booster לפני Drain."
+   ]
+  },
+  {
+   "heading": "למה למקסם Claw Mastery לפני Critical Throw",
+   "lines": [
+    "Claw Mastery מעלה את הדמג' המינימלי של Lucky Seven כי הוא נותן Attack Power, וזה עוזר בהמלצות האימון ומאפשר להרוג מטרות במכה אחת בצורה אמינה יותר. בלבל 40 הממוצע של שני הסקילים קרוב, אבל Mastery קודם נותן רול נמוך חזק יותר להריגות מובטחות."
+   ]
+  },
+  {
+   "heading": "Claw Booster",
+   "lines": [
+    "Claw Booster מעלה את מהירות המתקפה בשני שלבים בכל לבל סקיל. SP נוסף מוריד את עלות ה-HP וה-MP ומאריך את המשך. לבל סקיל 1 כבר נותן את כל העלייה במהירות. הבילד הדיפולטי מגיע ל-Lv20 בלבל 67, ושם הוא מחזיק 300 שניות ב-10 HP ו-10 MP, בדיוק כמו Haste במקסימום, אז מבאפים את שניהם ביחד."
+   ]
+  },
+  {
+   "heading": "Drain ו-Critical Recovery",
+   "lines": [
+    "Critical Recovery צריך מכות קריט. בלבל סקיל 20 מכת קריט מחזירה 10% HP ו-10% MP פעם ב-30 שניות. Lv12 נותן 6% בסיכוי של 64%. בבילד של Grummash בלבל 70 (26% Critical Rate, 100 Lucky Seven לדקה), קריט נוחת שנייה או שתיים אחרי שהנעילה נגמרת, אז הוא מופעל בערך פעמיים בדקה. עם 2,154 HP ו-1,633 MP של הבילד הזה, זה בערך 430 HP ו-330 MP לדקה ב-Lv20, מול 260 HP ו-200 MP ב-Lv12. ה-MP הנוסף לבד שווה בערך 7,800 מסוס של Lemon לשעה.",
+    "Drain הוא יותר סקיל ריקברי לחירום. Drain במקסימום עושה 240% דמג' ב-28 MP ויש לו 12% סיכוי להחזיר 15% מהדמג' כ-HP. ספיגה אחת לא יכולה לעבור 25% מה-Max HP שלך או מה-Max HP של המטרה. ובכל זאת, אם אתה רוצה למקסם Drain במקום Critical Recovery, לך על זה.",
+    "מתקפה בלבל 70 | דמג' צפוי לשימוש | שימושים לדקה | דמג' לדקה | MP לשימוש | Damage/MP",
+    "Lucky Seven 20 | 2,560 | 100 | 255,978 | 16 | 159.99",
+    "Drain 30 | 2,271 | 100 | 227,086 | 28 | 81.10",
+    "Lucky Seven נשאר המתקפה הראשית שלך. תשתמש ב-Drain כשלסיכוי להחזיר HP יש ערך. ספאם של Drain להריגות רגילות מוריד בערך בחצי את הדמג' לכל MP בבילד הזה."
+   ]
+  },
+  {
+   "heading": "שינויים אפשריים לסדר ברירת המחדל",
+   "lines": [
+    "סקיל | תוכנית דיפולטית | החלפה",
+    "Booster ארוך יותר מוקדם יותר. קח את זה אם להטיל Booster כל 100 שניות מתחיל לעצבן.",
+    "Claw Booster | Lv1 עד לבל 53, Lv9 בלבל 56 (180 שניות) | Lv9 בלבל 50 (180 שניות)",
+    "Haste | Lv20 בלבל 54 | Lv20 בלבל 56",
+    "Drain במקסימום במקום Critical Recovery. קח את זה אם אתה מטיל Drain כדי להתרפא.",
+    "Critical Recovery | Lv20: מחזיר 10% HP ו-MP, סיכוי 100% | Lv12: מחזיר 6% HP ו-MP, סיכוי 64%",
+    "Claw Booster | Lv20: 300 שניות ב-10 HP ו-10 MP | Lv9: 180 שניות ב-22 HP ו-22 MP",
+    "Drain | Lv11: 200% דמג', 5% סיכוי לספוג 8% מהדמג' כ-HP | Lv30: 240% דמג', 12% סיכוי לספוג 15% מהדמג' כ-HP",
+    "שתי ההחלפות מוציאות אותם 121 SP. החלפת ה-Booster עדיין מסתיימת בבילד הדיפולטי של לבל 70. Critical Recovery מופעל כשאתה נוחת מכת קריט ושומר על נעילת 30 השניות שלו בכל לבל.",
+    "חלוקת AP ל-Assassin: לבל 30-70",
+    "תוסיף 1 DEX ו-4 LUK בכל לבל מ-31 עד 70. ככה מגיעים ל-70 DEX בסיס בשביל ה-Claw של לבל 70, וכל שאר הנקודות הולכות ל-LUK.",
+    "לבל | DEX בסיס | LUK בסיס | בדיקת ציוד",
+    "30 | 30 | 132 | Adamantium Guards צריך 30 DEX ו-65 LUK.",
+    "40 | 40 | 172 | Dark Guardian צריך 35 DEX ו-75 LUK.",
+    "50 | 50 | 212 | Dark Slain צריך 50 DEX ו-105 LUK.",
+    "60 | 60 | 252 | Dark Gigantic צריך 60 DEX ו-125 LUK.",
+    "70 | 70 | 292 | Black Scarab צריך 70 DEX ו-145 LUK.",
+    "תספור את ה-DEX הכולל לפני שאתה מוסיף DEX בסיס. אייטם קבוע עם +DEX יכול לחסוך AP בסיס. תשאיר מספיק DEX כדי לצייד את ה-Claw שלך אחרי החלפות ציוד."
+   ]
+  },
+  {
+   "heading": "Claw, כוכבי זריקה וציוד",
+   "lines": []
+  },
+  {
+   "heading": "התקדמות Claw",
+   "lines": [
+    "לבל | Claw | W.ATK | סטט נוסף | מקור",
+    "30 | Adamantium Guards | 23 | 1% Crit Damage | נמכר אצל Cutthroat Manny.",
+    "35 | Dark Guardian | 26 | 1% Crit Damage | קראפט ב-Weaponcrafting 7. בדוק דרופים ב-Item DB וב-Free Market.",
+    "50 | Dark Slain | 34 | 1% Crit Rate | קראפט ב-Weaponcrafting 10. בדוק דרופים ב-Item DB וב-Free Market.",
+    "60 | Dark Gigantic | 41 | 2% Crit Rate | בדוק דרופים ב-Item DB וב-Free Market.",
+    "70 | Black Scarab | 47 | 2% Crit Rate | בדוק דרופים ב-Item DB וב-Free Market.",
+    "Cutthroat Manny: מוכר Adamantium Guards ב-Kerning City."
+   ]
+  },
+  {
+   "heading": "איזה Slain בלבל 50?",
+   "lines": [
+    "אנחנו היינו בוחרים Dark Slain כשהמחירים קרובים. לכל ארבעת ה-Slain יש 34 W.ATK, מהירות מתקפה Fast ואותה דרישה של 50 DEX ו-105 LUK. Blood מוסיף 1 Accuracy, Sapphire מוסיף 1% Critical Damage, ו-Dark מוסיף 1% Critical Rate. בבילד הריאלי של לבל 70 (26% קריט, +61% קריט דמג'), 1% Crit Rate מוסיף קצת יותר דמג' צפוי מ-1% Crit Damage, ויותר קריטים מפעילים גם את Critical Recovery מוקדם יותר. נקודת W.ATK אחת שווה יותר מ-1% Crit Rate בבילד הזה (ראה את השוואת הכפפות למטה), אז Steel או Blood Slain מסוקרלים עם יותר W.ATK סופי מנצחים Dark Slain בלי סקרולים.",
+    "Claw | סטט נוסף | מסלול קראפט",
+    "Steel Slain | אין | Weaponcrafting Lv10: 5 Bronze Ingots, 5 Iron Ingots, 30 Dragon Skins, 30 Screws, Two-Handed Weapon Crafting Catalyst ו-16,500 מסוס.",
+    "Blood Slain | 1 Accuracy | Steel Slain, 6 Garnets, קטליסט ו-1,000 מסוס.",
+    "Sapphire Slain | 1% Critical Damage | Steel Slain, 6 Sapphires, קטליסט ו-1,000 מסוס.",
+    "Dark Slain | 1% Critical Rate | Steel Slain, 6 Black Crystals, קטליסט ו-2,000 מסוס.",
+    "תשווה את מחיר החומרים מול Claw מוכן ב-Free Market לפני שאתה מתחייב. בדוק את דף האייטם של Dark Slain בשביל מקורות דרופ."
+   ]
+  },
+  {
+   "heading": "התקדמות כוכבי זריקה",
+   "lines": [
+    "ה-W.ATK של ה-Claw וה-W.ATK של הכוכב מתחברים. Black Scarab עם 47 W.ATK, 7 סקרולי Lesser Weapon Attack, כפפות עם 5 W.ATK ו-Tobi Throwing Stars מגיע ל-82 W.ATK כולל.",
+    "Subi +15 · 500",
+    "Wolbi +17 · 500",
+    "Mokbi +19 · 700",
+    "Kumbi +21 · 700",
+    "Tobi +23 · 1,000",
+    "Steely +25 · 1,000",
+    "Ilbi +27 · 800",
+    "Hwabi +29 · 800",
+    "המספר אחרי כל כוכב הוא גודל הסטאק המקסימלי שלו. תקנה את הכוכב הכי טוב שאתה יכול להרשות לעצמך אחרי שכיסית Claw, שריון ותקציב פוטים. תסחוב כמה סטאקים. ההליכה לחנות חשובה, כי כל מילוי עוצר לך את ה-EXP."
+   ]
+  },
+  {
+   "heading": "העלויות המשתנות של כוכבי זריקה",
+   "lines": [
+    "Claw Mastery מחזיר כוכבים שנזרקו ב-5% מהזמן בלבל סקיל 1, 9% ב-Lv5 ו-25% ב-Lv20. על 1,000 Lucky Seven נזרקים 2,000 כוכבים: Lv1 מחזיר בערך 100, Lv5 בערך 180, Lv20 בערך 500. סט אחד של 800 כוכבים מחזיק בערך 533 הטלות עם Mastery במקסימום במקום 400.",
+    "הטעינה מחדש היא החשבון הקטן יותר. נניח Lucky Seven אחד כל 2 שניות: 1,800 הטלות לשעה ו-3,600 כוכבים שנזרקים. Claw Mastery במקסימום מוריד את האיבוד לבערך 2,700. העמודה האחרונה היא הטעינה של 2,700 הכוכבים האלה אצל ה-NPC.",
+    "כוכב | W.ATK | כוכבים לסט | מסוס לכוכב | מסוס לסט | מסוס לשעה",
+    "Subi | 15 | 500 | 0.3 | 150 | 810",
+    "Wolbi | 17 | 500 | 0.4 | 200 | 1,080",
+    "Mokbi | 19 | 700 | 0.5 | 350 | 1,350",
+    "Kumbi | 21 | 700 | 0.6 | 420 | 1,620",
+    "Tobi | 23 | 1,000 | 0.7 | 700 | 1,890",
+    "Steely | 25 | 1,000 | 0.8 | 800 | 2,160",
+    "Ilbi | 27 | 800 | 0.9 | 720 | 2,430",
+    "Hwabi | 29 | 800 | 1.0 | 800 | 2,700",
+    "הטעינה של Hwabi יוצאת פחות משמונה White Potion לשעה. החלק היקר בכוכב גבוה הוא לקנות את הסטים הראשונים. ברגע שהם אצלך, הפער השעתי בין Wolbi ל-Hwabi הוא בערך 1,600 מסוס. Claw Mastery במקסימום חוסך 900 כוכבים לשעה בקצב הזה: 360 מסוס על Wolbi, 900 על Hwabi, ופחות נסיעות לעיר.",
+    "Snowball, Wooden Top ו-Icicle נטענים ב-1 מסו לכוכב. ל-Snowball יש את ה-17 W.ATK של Wolbi והוא עולה 2,700 לשעה במקום 1,080. Wooden Top משתווה ל-Mokbi במחיר טעינה כפול. Icicle משתווה ל-Kumbi ב-2,700 במקום 1,620. הסטים של 800 כוכבים שלהם אומרים פחות נסיעות לעיר. פער הטעינה הוא 1,080 עד 1,620 מסוס לשעה. תזרוק אותם אם כבר יש לך סט. אל תקנה אותם בתור הכוכב הראשי."
+   ]
+  },
+  {
+   "heading": "סדר עדיפויות לשריון ולסקרולים",
+   "lines": [
+    "Weapon Attack: סקרולים ל-Claw ולכפפות נותנים את העלייה הישירה הכי גדולה בדמג'.",
+    "LUK: LUK על גלימה, אוברול ועגילים מעלה את הדמג' של Lucky Seven ואת ה-Accuracy.",
+    "Accuracy: תשתמש בזה כש-Training Advisor מראה סיכוי לפספס את המטרה שלך.",
+    "HP ותנועה: סקרולי HP מכסים את העמידות הנמוכה של Thief. נעלי Speed עוזרות לפני ש-Haste במקסימום."
+   ]
+  },
+  {
+   "heading": "ל-Thief נקבה יש אוברול חזק יותר בלבל 35",
+   "lines": [
+    "כל ג'וב יכול לצייד Sauna Robe בלבל 30. Blue Sauna Robe לדמויות זכר ו-Red Sauna Robe לדמויות נקבה. שניהם מתחילים עם +1 לכל סטט ו-10 סלוטים.",
+    "Blue Sauna Robe",
+    "Red Sauna Robe",
+    "Dark Avenger",
+    "Thief נקבה יכולה לצייד Dark Avenger בלבל 35. הוא מתחיל עם +6 LUK, +5 HP ו-10 סלוטים. עשרה סקרולי Lesser Overall LUK מעלים אותו ל-+16 LUK. אותם סקרולים מעלים Sauna Robe ל-+11 LUK. סקרולי Intermediate Overall LUK מוסיפים +2 LUK בסיכוי הצלחה של 60%.",
+    "זה יתרון דמג' אמיתי. לחולצות ולמכנסיים אין סקרולי STR, DEX, INT או LUK. Assassin זכר יכול להישאר עם Blue Sauna Robe מסוקרל או ללבוש חולצה ומכנסיים של Thief, אבל Dark Avenger הוא שריון הגוף ההתקפי החזק יותר בלבל הזה."
+   ]
+  },
+  {
+   "heading": "W.ATK או Critical Rate על הכפפות?",
+   "lines": [
+    "המספרים האלה מבוססים על בילד ה-Assassin הריאלי של Grummash בלבל 70 וחמישה סקרולי כפפות Lesser שהצליחו. שתי האפשרויות משתמשות באותם חמישה סלוטים.",
+    "5x Gloves Attack Scroll: Lesser",
+    "+5 W.ATK",
+    "מ-77 ל-82 W.ATK כולל",
+    "בערך 6.49% יותר דמג' צפוי.",
+    "5x Gloves Crit. Rate Scroll: Lesser",
+    "+5% Critical Rate",
+    "מ-26% ל-31% Critical Rate",
+    "בערך 2.63% יותר דמג' צפוי.",
+    "תבחר Attack. סט חמשת סקרולי ה-Attack עושה בערך 3.76% יותר דמג' צפוי מסט ה-Critical Rate בבילד הזה.",
+    "Critical Throw נותן לבילד הזה 61% Critical Damage, הערך הכי גבוה בהשוואה הזאת. כאן הקריט מתקרב הכי הרבה. אבל ה-W.ATK הכולל הנמוך של Assassin הופך כל נקודת W.ATK לחזקה מאוד, אז Attack עדיין מנצח.",
+    "היחס זהה בכל דרגה. Lesser נותן +1 W.ATK או +1% Critical Rate (+2 M.ATK), Intermediate נותן +2/+2% (+4 M.ATK), Greater נותן +3/+3% (+6 M.ATK), ו-Chaos נותן +4/+4% (+8 M.ATK). לדרגות תואמות יש אותם אחוזי הצלחה והשמדה.",
+    "W.ATK עוזר גם להריגות מובטחות. הוא מעלה כל מכה פיזית, כולל הרול הרגיל הכי חלש שלך וכל מכת קריט. Critical Rate משנה רק כמה פעמים יוצא קריט, אז הוא לא יכול לשפר את הרול הכי חלש בלי קריט."
+   ]
+  },
+  {
+   "heading": "בילדים ללבלינג ומפות מ-Training Advisor",
+   "lines": [
+    "לדמג' שלך יש תוצאה הכי גבוהה והכי נמוכה אפשרית. הרול הנמוך הוא התוצאה הכי חלשה. הריגה מובטחת במתקפה אחת אומרת שגם התוצאה הכי חלשה מורידה את כל ה-HP של המוב ושאחוז הפגיעה שלך 100%. נקודות השבירה האלה לרוב מנצחות מוב בלבל גבוה יותר שצריך עוד Lucky Seven."
+   ]
+  },
+  {
+   "heading": "לבל 30-39",
+   "lines": []
+  },
+  {
+   "heading": "בילד לדוגמה בלבל 30",
+   "lines": [
+    "30 DEX בסיס / 132 LUK בסיס / 34 DEX כולל / 139 LUK כולל / 77 ACC / 40 W.ATK כולל",
+    "תשתמש ב-Adamantium Guards עם Wolbi. Lucky Seven, Keen Eyes ו-Nimble Body במקסימום. קח Haste 1 אחרי שאתה הופך ל-Assassin.",
+    "Transfer Area: Stirge במתקפה אחת, בערך 3,083 EXP לדקה · Safe · Dr. Faymus, 4 פורטלים",
+    "Dangerous Steam: Stirge במתקפה אחת. Zombie Mushroom ו-Horny Mushroom ב-2 מתקפות, בערך 2,976 EXP לדקה · Caution · Mr. Sweatbottom, 8 פורטלים",
+    "Stirge הוא אחת המטרות הכי טובות ל-Assassin בלבל הזה. Lucky Seven מגיע למובים המעופפים, ובצ'קפוינט הזה כל מכה פוגעת וכל Stirge מת במתקפה אחת, גם ברול הדמג' הכי חלש.",
+    "בלבל 35, Ant Tunnel II מגיע לבערך 3,589 EXP לדקה עם Horny Mushroom מובטח במתקפה אחת ו-Zombie Mushroom ב-2 מתקפות. הצ'קפוינט של לבל 35 משתמש ב-35 DEX בסיס, 152 LUK כולל, 80 ACC ו-43 W.ATK כולל."
+   ]
+  },
+  {
+   "heading": "לבל 40-49",
+   "lines": [
+    "צ'קפוינט | בילד | המפות הנקיות הכי טובות | הריגות מובטחות",
+    "40 | 172 LUK, 87 ACC, 50 W.ATK | Ant Tunnel Park ; Deep Ant Tunnel II | Zombie Mushroom ו-Horny Mushroom במתקפה אחת. Evil Eye ב-2 מתקפות · Caution · 10-11 פורטלים עד Mr. Sweatbottom",
+    "45 | 192 LUK, 94 ACC, 50 W.ATK | Ant Tunnel Park ; Deep Ant Tunnel II | אותן נקודות שבירה כמו בלבל 40 · Caution · 10-11 פורטלים עד Mr. Sweatbottom"
+   ]
+  },
+  {
+   "heading": "לבל 50-59",
+   "lines": []
+  },
+  {
+   "heading": "בילד לדוגמה בלבל 50",
+   "lines": [
+    "50 DEX בסיס / 212 LUK בסיס / 55 DEX כולל / 250 LUK כולל / 120 ACC / 71 W.ATK כולל",
+    "Claw Mastery ו-Critical Throw במקסימום. הציוד עם סקרולי Lesser כולל Dark Slain, Brown Sonata, Red-Hearted Earrings, Black Napoleon, Dark Avenger, Brown Moon Gloves ו-Green Goni Shoes. הצ'קפוינט הזה מניח דמות נקבה, כי Dark Avenger רק לנקבות. ל-Assassin זכר עם Blue Sauna Robe מסוקרל במלואו ב-Lesser יש 5 LUK פחות, אז תריץ את הבילד הזה שוב ב-Training Advisor.",
+    "Dark Slain",
+    "Brown Sonata",
+    "Brown Moon Gloves",
+    "Green Goni Shoes",
+    "Monkey Forest II: Zombie Lupin ו-Lupin ב-2 מתקפות, בערך 5,298 EXP לדקה · Caution · 5 פורטלים עד Len",
+    "Forgotten Entrance II: Raffle, Glowshroom ו-Lupin ב-2 מתקפות, בערך 5,242 EXP לדקה · Caution · 6 פורטלים עד Luma",
+    "Monkey Forest II עדיין מפת ההשקה הכי חזקה בלבל 55 עם הציוד של הצ'קפוינט. Claw, כוכב או סקרול חדשים יכולים לפתוח מפות אחרות מוקדם יותר, אז תבדוק את הבילד האמיתי שלך."
+   ]
+  },
+  {
+   "heading": "לבל 60-70",
+   "lines": [
+    "צ'קפוינט | בילד | מפות Advisor מובילות | למה הן עובדות",
+    "60 | 290 LUK, 134 ACC, 78 W.ATK | Monkey Forest II ; Tree Dungeon, Monkey Forest II | כל הספאונים מתים בתוך שתי מתקפות · Caution · 5-6 פורטלים עד Len",
+    "65 | 310 LUK, 141 ACC, 78 W.ATK | Monkey Forest II ; Tree Dungeon, Monkey Forest II | אותן נקודות שבירה של מתקפה אחת ושתיים · Caution · 5-6 פורטלים עד Len",
+    "70 | 337 LUK, 148 ACC, 82 W.ATK | The Forest of Evil II ; Tree Dungeon, Monkey Forest II | כל הספאונים מתים בתוך שתי מתקפות · Caution · 6-7 פורטלים עד Len",
+    "התוצאות האלה מסבירות למה המפה הכי טובה יכולה להכיל מובים הרבה מתחת ללבל שלך. Monkey Forest II נשארת בראש מלבל 50 עד 65, כי הריגות נקיות במתקפה אחת או שתיים נותנות יותר EXP לדקה מאשר להתעקש על מטרה איטית בלבל גבוה.",
+    "לפני שמתמקמים: לפני שיוצאים מהעיר, תבדוק גם מלאי כוכבים וגם פוטים. במפה, תספור כמה Lucky Seven צריך על המובים הנפוצים ותשים לב כמה פעמים אתה צריך לזוז. נסיעת מילוי קצרה יותר יכולה להיות שווה הערכת EXP קצת נמוכה יותר."
+   ]
+  },
+  {
+   "heading": "מכניקות סקילים של Assassin",
+   "lines": []
+  },
+  {
+   "heading": "Claw Booster",
+   "lines": []
+  },
+  {
+   "heading": "Haste",
+   "lines": []
+  },
+  {
+   "heading": "Drain",
+   "lines": []
+  },
+  {
+   "heading": "Haste",
+   "lines": [
+    "Haste במקסימום נותן לחברי הפארטי הקרובים Speed +30 ו-Jump +10 ל-300 שניות. מסך הדמג' לא מראה את הערך האמיתי שלו. מעבר מהיר יותר בין פלטפורמות, פחות הליכה בין קבוצות מובים ומרווח קל יותר ל-Lucky Seven משפרים את הגרינד.",
+    "Skill Lv | MP | Speed | Jump | משך | אזור פארטי",
+    "1 | 15 | +10 | +1 | 100 שנ' | 500 x 300 px",
+    "20 | 35 | +30 | +10 | 300 שנ' | 600 x 400 px",
+    "טווח הפארטי של Haste גדל בלבל סקיל 11. המטיל נשאר במרכז האזור.",
+    "Skill Lv1: 500 x 300 px",
+    "250 px ימינה ושמאלה, 150 px למעלה ולמטה.",
+    "Skill Lv20: 600 x 400 px",
+    "300 px ימינה ושמאלה, 200 px למעלה ולמטה. הקו המקווקו מראה את האזור של לבל סקיל 1.",
+    "Haste קיבל נרף לעומת MapleStory הישן. הגרסה הישנה נתנה +40 Speed ו-+20 Jump (רשימת הסקילים של Ayumilove מ-2008). Haste במקסימום ב-Classic World נותן +30 Speed ו-+10 Jump. ה-Jump נחתך בחצי וה-Speed ירד ב-10."
+   ]
+  },
+  {
+   "heading": "מצא את מפת האימון הכי טובה לבילד שלך עם Training Advisor",
+   "lines": [
+    "Danger מודד כמה חזק מוב מכה אותך: פחות מ-10% מה-HP שלך זה Safe, 10-24% זה Caution, 25-49% זה Danger, ו-50%+ זה Lethal.",
+    "הדוגמאות משתמשות בציוד צ'קפוינט קבוע. הסטטים של ה-Claw שלך, הכוכב, הסקרולים, לבלי הסקילים וה-Accuracy יכולים לשנות כל נקודת שבירה של הריגה.",
+    "פתח את Character Builder ותכניס את ה-AP, הסקילים, ה-Claw, הכוכב והציוד האמיתיים שלך.",
+    "פתח את Training Advisor ותגדיר אמינות ל-100%.",
+    "תשאיר את Factor Danger into recommendations מופעל. Lucky Seven הוא מטווח, אז מפות מסוכנות מקבלות קנס EXP קטן יותר מאשר במתקפות מלי.",
+    "תעדיף מפות שבהן כל ספאון מרכזי מת במתקפה אחת או שתיים, כולל תוצאת הדמג' הכי חלשה שלך.",
+    "תשווה EXP לדקה, צריכת MP, צריכת כוכבים, זמן נסיעה ומרווחים בין פלטפורמות.",
+    "תבדוק את חנות הפוטים הכי קרובה ואת ה-NPC של טעינת הכוכבים. סקרול לעיר הקרובה מחזיר אותך לעיר. תוסיף את ההליכה חזרה למפה כשאתה משווה ספוט Stirge רחוק למפה קלה יותר ב-Kerning.",
+    "בילד ה-Assassin השמור ב-Training Advisor: אחוז פגיעה, Danger, דמג' ו-EXP לשעה עדכניים לדמות המצוידת. פתח את ה-Assassin הזה ב-Training Advisor"
+   ]
+  },
+  {
+   "heading": "פוטים מומלצים",
+   "lines": [
+    "Assassin יעיל ב-MP עם Lucky Seven, אבל מתקפה רצופה, Haste, Booster, טעינת כוכבים ושדרוגי ציוד מתחרים על אותם מסוס. תקנה את הפוטים הכי משתלמים.",
+    "הכי שווה לקנות: הכי הרבה HP או MP לכל מסו",
+    "Red Potion 50 מסוס · 100 HP 2 HP למסו",
+    "Fried Chicken 60 מסוס · 120 HP 2 HP למסו",
+    "Meat 80 מסוס · 160 HP 2 HP למסו",
+    "Orange 50 מסוס · 50 MP 1 MP למסו",
+    "Lemon 150 מסוס · 150 MP 1 MP למסו",
+    "לפי מצב: קנה רק כשהבאף מגיע לנקודת שבירה שימושית",
+    "Sniper Potion 500 מסוס · +5 ACC ל-10 דק' לביטול פספוסים",
+    "Supreme Sniper Potion 600 מסוס · +7 ACC ל-15 דק' באף ה-ACC הכי טוב בחנות",
+    "Warrior Potion 500 מסוס · +10 Attack Power ל-10 דק' לנקודת שבירה של דמג'",
+    "לא לקנות: פחות החזר לכל מסו מהאפשרויות למעלה",
+    "White Potion 350 מסוס · 500 HP 1.43 HP למסו",
+    "Blue Potion 220 מסוס · 200 MP 0.91 MP למסו",
+    "השווה יעילות של פוטים מהחנות"
+   ]
+  },
+  {
+   "heading": "טעויות נפוצות",
+   "lines": [
+    "למהר עם Critical Throw ולדחות את Booster יותר מדי. Claw Mastery ב-COT2 נותן Attack Power, ו-Claw Booster דורש Claw Mastery Lv5.",
+    "לקנות סט כוכבים יקר אחד. סטאק חזק אחד יכול להיגמר באמצע גרינד. כמה סטאקים שמישים זה בטוח יותר.",
+    "להשתמש ב-Snowball, Wooden Top או Icicle כל היום. הם נטענים ב-1 מסו לכוכב. Wolbi נותן את אותם 17 W.ATK כמו Snowball ב-40% מחשבון הטעינה.",
+    "להתעלם מטווח האגרוף של ה-Claw. תשאיר ל-Lucky Seven מספיק מרווח, אחרת ה-Claw שלך ייתן אגרוף לאויב ויעשה כמעט אפס דמג'.",
+    "להשתמש ב-Drain כסקיל ה-DPS הראשי. ב-Lv11 הדיפולטי הוא עולה 18 MP (28 MP ב-Lv30) ועושה פחות דמג' צפוי מ-Lucky Seven.",
+    "להוסיף DEX בסיס בלי לספור ציוד. דרישות ה-Claw משתמשות ב-DEX הכולל.",
+    "לבחור מפות לפי לבל המוב. תבדוק 100% פגיעה והריגות מובטחות במתקפה אחת או שתיים.",
+    "להגיע עם מעט מדי פוטי MP. דמג' מעולה לכל MP לא עוזר אחרי שה-Lemon האחרון נגמר."
+   ]
+  },
+  {
+   "heading": "בילד Assassin ריאלי בלבל 70",
+   "lines": [
+    "המדריך הזה מבוסס על בילד Assassin ריאלי בלבל 70 של Grummash. כל סלוט ציוד משתמש בסקרולי Lesser שהצליחו. הבילד השמור של Grummash ממקסם Drain עם Critical Recovery 12 ו-Booster 9. הדיפולט שלנו מעביר את 19 ה-SP האלה ל-Critical Recovery ול-Booster. הציוד, הסטטים והתוצאות ב-Training Advisor לא משתנים.",
+    "סטטים סופיים עם ציוד: 4 STR / 70 DEX / 4 INT / 337 LUK, 148 ACC, 82 W.ATK כולל, 26 % Critical Rate ו-+ 61 % Critical Damage.",
+    "Black Scarab",
+    "White Nightfox",
+    "Dark Studded Top",
+    "Dark Studded Pants",
+    "Gold Rover",
+    "Blue Mystique Shoes",
+    "Black Gaia Cape",
+    "Metal Silver Earrings",
+    "Tobi Throwing Stars",
+    "סקילים של הג'וב הראשון | סקילים של הג'וב השני",
+    "Nimble Body 15, Keen Eyes 15, Disorder 3, Dark Sight 8, Lucky Seven 20 | Claw Mastery 20, Critical Throw 30, Critical Recovery 20, Claw Booster 20, Haste 20, Drain 11",
+    "פתח את הבילד של Grummash בלבל 70"
+   ]
+  },
+  {
+   "heading": "בלבל 70: הופכים ל-Hermit",
+   "lines": [
+    "Arec: מטפל בהתקדמות ל-Hermit ב-El Nath.",
+    "Assassin מתקדם ל-Hermit דרך Arec ב-El Nath. הג'וב השלישי ו-El Nath לא נמצאים בגרסת ההשקה. המדריך הזה נעצר לפני SP של הג'וב השלישי. תסיים את בילד הג'וב השני, ואז תתכנן לפי ספר הסקילים של Hermit ב-COT2.",
+    "ראה סקילים של Hermit ב-COT2",
+    "הדוגמאות של דמג', Accuracy, סקילים, אייטמים, מפלצות, ספאונים ומפות משתמשות בנתוני COT2 עדכניים. Training Advisor מספק את ההערכות למפות. פידבק מהקהילה מתקבל בברכה בהצעות בפורום."
+   ]
+  }
+ ]
+}

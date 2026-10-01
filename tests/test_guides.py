@@ -63,3 +63,14 @@ def test_picks_for_a_character_start_with_their_job():
     assert picks[:2] == ["guide/assassin-class-guide", "guide/thief-class-guide"]
     assert "guide/best-grind-maps-every-level" in picks
     assert all(g.sections for g in (guides.parse(x["key"], kb.page(x["key"])) for x in guides.all_guides(kb)))
+
+
+def test_every_shipped_translation_matches_its_guide_structure():
+    import json
+    folder = guides.TRANSLATIONS / "he"
+    files = sorted(folder.glob("*.json"))
+    assert files, "Hebrew guide translations are missing"
+    for f in files:
+        tr = json.loads(f.read_text(encoding="utf-8"))
+        assert tr["key"] == f"guide/{f.stem}" and tr.get("lang") == "he" and tr.get("title")
+        assert all(isinstance(s.get("lines"), list) for s in tr["sections"])
