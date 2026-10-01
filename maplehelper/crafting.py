@@ -88,3 +88,72 @@ def for_level(kb, profession: str, level: int) -> tuple[Level | None, Level | No
         if x:
             x.recipes.sort(key=lambda r: (-r.exp_per_meso, -r.exp))
     return now, nxt
+
+
+# ------------------------------------------------------------------ who teaches it, where to work
+
+STATIONS = {"smithing": "Anvil", "weaponcrafting": "Weaponcrafting Station", "tailoring": "Sewing Machine",
+            "woodcrafting": "Woodworking Station", "leatherworking": "Leatherworking Station", "arcforge": "Arcane Station"}
+MASTER_WORD = {"smithing": "Blacksmith", "weaponcrafting": "Weaponcrafter", "tailoring": "Tailor",
+               "woodcrafting": "Carpenter", "leatherworking": "Leatherworker", "arcforge": "Arcforger"}
+
+
+@dataclass
+class Info:
+    teacher: str = ""
+    teacher_key: str = ""
+    teacher_town: str = ""
+    start_quest: str = ""               # "<teacher> in Need of an Apprentice" (Lv. 10)
+    start_level: int | None = None
+    master_quest: str = ""              # "A <title> in My Own Right!" (Lv. 25)
+    master_level: int | None = None
+    station: str = ""
+    station_towns: list[str] = field(default_factory=list)
+
+
+def _town(kb, key: str) -> str:
+    """The first location of an NPC page ("Location Perion Victoria Road" -> "Perion")."""
+    lines = [ln.strip() for ln in kb.page(key).splitlines()]
+    for i, ln in enumerate(lines):
+        if ln in ("Location", "Locations") and i + 1 < len(lines):
+            return lines[i + 1].replace(" Victoria Road", "").replace(" Dungeon", "").strip()
+    return ""
+
+
+def info(kb, profession: str) -> Info:
+    """The profession's teacher (and town), its start and mastery quests, and its work stations."""
+    from . import combat, quests
+    out = Info()
+    word = MASTER_WORD.get(profession, "")
+    for k, e in kb.entities.items():
+        if e.get("category") != "quest":
+            continue
+        q = quests.quest(kb, k)
+        if not q or q.area != "Crafting":
+            continue
+        if word and e["name"].startswith(f"A {word} in My Own Right") or e["name"].startswith(f"An {word} in My Own Right"):
+            out.master_quest, out.master_level, out.teacher = e["name"], q.level, q.npc
+    if out.teacher:
+        out.teacher_key = kb._npc_by_name.get(out.teacher.lower(), "")
+        out.teacher_town = _town(kb, out.teacher_key) if out.teacher_key else ""
+        # the first lesson: "<teacher> in Need of an Apprentice", else the teacher's lowest crafting quest
+        mine = [(q.level or 0, e["name"] != f"{out.teacher} in Need of an Apprentice", e["name"], q.level)
+                for k, e in kb.entities.items() if e.get("category") == "quest"
+                for q in [quests.quest(kb, k)] if q and q.area == "Crafting" and q.npc == out.teacher
+                and e["name"] != out.master_quest]
+        if mine:
+            _, _, out.start_quest, out.start_level = min(mine, key=lambda m: (m[1], m[0]))
+    out.station = STATIONS.get(profession, "")
+    key = kb._npc_by_name.get(out.station.lower())
+    if key:
+        lines = [ln.strip() for ln in kb.page(key).splitlines()]
+        if any(ln.startswith("Locations") for ln in lines):
+            i = next(i for i, ln in enumerate(lines) if ln.startswith("Locations")) + 1
+            while i < len(lines) and lines[i] != "About":
+                ln = lines[i]
+                if ln and ln != "Find path here":
+                    town = ln.replace(" Victoria Road", "").replace(" Dungeon", "").replace(" Shallow Passage", "").strip()
+                    if combat.grind_map(town) and town not in out.station_towns:
+                        out.station_towns.append(town)
+                i += 1
+    return out

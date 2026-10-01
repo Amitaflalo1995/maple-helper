@@ -151,3 +151,15 @@ def test_free_market_summary_keeps_the_exact_item():
     m = market.summarize(rows, "Work Gloves")
     assert (m.count, m.median, m.low, m.high) == (2, 2000, 1000, 3000) and m.latest
     assert market.summarize([], "Work Gloves").count == 0
+
+
+@needs_kb
+def test_profession_info_names_teacher_town_and_quests():
+    from maplehelper import crafting
+    from maplehelper.kb import KnowledgeBase
+    KB = KnowledgeBase(REAL_KB)
+    i = crafting.info(KB, "smithing")
+    assert i.teacher == "Silas Irons" and i.teacher_town == "Perion"
+    assert i.start_level == 10 and i.master_level == 25
+    assert "Perion" in i.station_towns and "El Nath" not in " ".join(i.station_towns)
+    assert crafting.info(KB, "leatherworking").start_quest       # no "in Need of an Apprentice": the first one

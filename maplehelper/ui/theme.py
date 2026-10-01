@@ -313,3 +313,22 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
 
 def dialog_background() -> str:
     return "#1C1C1E" if MODE == "dark" else "#F2F2F7"
+
+
+def glyph_icon(name: str, color: str | None = None, px: int = 16):
+    """A menu icon drawn from the app's icon font (the same pencil / trash as the Settings screen)."""
+    from PySide6.QtCore import QRect, Qt
+    from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPixmap
+    scale = 3
+    pm = QPixmap(px * scale, px * scale)
+    pm.fill(Qt.transparent)
+    p = QPainter(pm)
+    p.setRenderHint(QPainter.Antialiasing)
+    f = QFont(ICON_FONT)
+    f.setPixelSize(int(px * scale * 0.8))
+    p.setFont(f)
+    p.setPen(QColor(color or P()["muted"]))
+    p.drawText(QRect(0, 0, px * scale, px * scale), Qt.AlignCenter, ICON[name])
+    p.end()
+    pm.setDevicePixelRatio(scale)
+    return QIcon(pm)

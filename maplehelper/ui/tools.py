@@ -770,6 +770,8 @@ class ToolsDialog(GlassDialog):
         self.craft_level.valueChanged.connect(self._set_craft_level)
         self._row(sec, t("craft_my_level"), self.craft_level, hint=t("craft_level_hint"))
         lay.addWidget(sec)
+        self.craft_info = QVBoxLayout()           # who teaches the profession, where you work it
+        lay.addLayout(self.craft_info)
         self.craft_head = self._label("", "ToolHeader")
         lay.addWidget(self.craft_head)
         self.craft_list = QVBoxLayout()
@@ -791,6 +793,8 @@ class ToolsDialog(GlassDialog):
     def _fill_crafting(self):
         t, c = self.t, self.c
         clear(self.craft_list)
+        clear(self.craft_info)
+        self.craft_info.addWidget(self._craft_info_card(self._prof()))
         if not c:
             self._no_character(self.craft_list)
             return
@@ -811,6 +815,39 @@ class ToolsDialog(GlassDialog):
             return
         for i, r in enumerate(now.recipes):
             self.craft_list.addWidget(self._recipe_card(r, best=(i == 0)))
+
+    def _craft_info_card(self, prof: str) -> QFrame:
+        """The profession explained: what it makes, its teacher (and town), the quests, the work stations."""
+        t = self.t
+        i = crafting.info(self.kb, prof)
+        card = QFrame(objectName="Card")
+        outer = QHBoxLayout(card)
+        outer.setContentsMargins(12, 10, 12, 10)
+        outer.setSpacing(12)
+        pic = QLabel()
+        pic.setFixedSize(52, 60)
+        pic.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+        uri = self._picture_uri("npc", i.teacher) if i.teacher else None
+        if uri:
+            pm = QPixmap(QUrl(uri).toLocalFile())
+            if not pm.isNull():
+                pic.setPixmap(pm.scaled(52, 60, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        outer.addWidget(pic, 0, Qt.AlignTop)
+        col = QVBoxLayout()
+        col.setSpacing(6)
+        outer.addLayout(col, 1)
+        col.addWidget(self._label(f"**{crafting.NAMES[prof]}**", "CardName"))
+        col.addWidget(self._label(t(f"craft_makes_{prof}"), "RowLabel"))
+        if i.teacher:
+            col.addWidget(self._label(t("craft_teacher", npc=i.teacher, town=i.teacher_town or "?"), "RowLabel"))
+        if i.start_quest:
+            col.addWidget(self._label(t("craft_start", quest=i.start_quest.rstrip("!"), lv=i.start_level or "?"), "RowLabel"))
+        if i.master_quest:
+            col.addWidget(self._label(t("craft_master", quest=i.master_quest.rstrip("!"), lv=i.master_level or "?"), "RowLabel"))
+        if i.station_towns:
+            col.addWidget(self._label(t("craft_station", station=i.station, towns=", ".join(i.station_towns)),
+                                      "RowLabel"))
+        return card
 
     def _recipe_card(self, r: crafting.Recipe, best: bool) -> QFrame:
         t = self.t
