@@ -1,4 +1,4 @@
-"""Push-to-talk: hold the voice key, speak, release. Transcription runs locally.
+"""Voice questions: press the talk key (or the mic), speak, press again. Transcription runs locally.
 
 Model: ivrit.ai's Hebrew-tuned Whisper large-v3-turbo (CTranslate2), which also
 handles English. Downloaded once on first use (~1.6GB) into the app's data folder.

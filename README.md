@@ -19,7 +19,7 @@
 
 ## About
 
-Maple Helper is a desktop assistant for Windows and macOS that puts a chat overlay on top of Maple Story Classic World. Press **F9** to open it, then type a question or hold **F10** to speak. Answers draw on a screenshot of your game, your character profile, previous conversations, and a local copy of the NiaMeowDB game database.
+Maple Helper is a desktop assistant for Windows and macOS that puts a chat overlay on top of Maple Story Classic World. Press **F9** to open it, then type a question or press **F10** to speak (press again to stop). Answers draw on a screenshot of your game, your character profile, previous conversations, and a local copy of the NiaMeowDB game database.
 
 Use it to look up drops, find quest NPCs, or ask where to train without switching away from the game.
 
@@ -58,8 +58,8 @@ The app uses screen capture and its own overlay window. It does not read game me
 
 Download the latest release from the [Releases page](https://github.com/Amitaflalo1995/maple-helper/releases/latest):
 
-- **`MapleHelper-Setup-<version>.exe`**: the installer. This is the recommended option and doesn't need admin rights.
-- **`MapleHelper-<version>-portable.zip`**: unzip it anywhere and run `MapleHelper.exe`.
+- **`MapleHelper-Setup.exe`**: the installer. This is the recommended option and doesn't need admin rights.
+- **`MapleHelper-<version>-portable.zip`**: unzip it anywhere and run `Maple Helper.exe`.
 
 - **`MapleHelper-macOS.dmg`**: for Macs with Apple Silicon. Open it and drag **Maple Helper** into Applications.
 
@@ -107,7 +107,7 @@ Open PowerShell (Windows) or Terminal (macOS) in the repository folder. On macOS
 | Control | Action |
 | --- | --- |
 | **F9** | Open or close the chat overlay. |
-| **F10** (hold) | Record your voice. Release to transcribe and, by default, send the question. |
+| **F10** | Start recording your voice; press again to transcribe and, by default, send the question. |
 | **Window buttons** | Minimize or close the overlay (F9 opens it again). |
 | **Tap a card** | Tag it for the next question; tap again to untag. |
 | **Camera button** | Take a fresh screenshot of the game window. |
