@@ -217,6 +217,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
                            color: {ORANGE_DEEP}; }}
     QPushButton#NowChip:hover {{ background: rgba(255,149,51,0.22); }}
     QPushButton#NowChip:pressed {{ background: rgba(255,149,51,0.32); }}
+    #ShotHint {{ color: {c['muted']}; font-size: {s - 3}px; padding: 0 6px 2px 6px; }}
     #ToolHeader {{ font-size: {s - 1}px; color: {c['muted']}; }}
 
     #Capsule {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 21px; }}

@@ -1,0 +1,146 @@
+"""Game terms explained: a small "?" beside a term shows what it means (hover or click).
+
+Definitions come from the KB's "MapleStory Classic World Glossary" guide (shipped in English and Hebrew,
+assets/guides) with a few clearer ones written for the app. Only the terms below get a "?" in running
+text; slang from the glossary ("gg", "rip") would mark ordinary words.
+"""
+from __future__ import annotations
+
+import html
+import json
+import re
+from functools import lru_cache
+
+from . import bidi
+from .store import ASSETS
+
+GLOSSARY = "maplestory-classic-glossary"
+
+# term shown in the app -> the glossary entry it uses (or an app definition below)
+TERMS = {
+    "EXP": "EXP", "HP": "HP / MP", "MP": "HP / MP", "ACC": "ACC", "Accuracy": "ACC", "Avoid": "Avoid",
+    "AVOID": "Avoid", "P.DEF": "P.DEF", "PDEF": "P.DEF", "M.DEF": "M.DEF", "MDEF": "M.DEF",
+    "W.ATK": "WATK / W.ATK", "WATK": "WATK / W.ATK", "M.ATK": "Magic / MATK", "AP": "AP", "SP": "SP",
+    "STR": "STR / DEX / INT / LUK", "DEX": "STR / DEX / INT / LUK", "INT": "STR / DEX / INT / LUK",
+    "LUK": "STR / DEX / INT / LUK", "mesos": "mesos", "NPC": "NPC", "Free Market": "FM", "KPQ": "kPQ",
+    "KS": "KS", "Citizenship": "Citizenship", "Lv.": "Lv.", "grind": "grind", "buff": "buff",
+    "Booster": "booster", "Mastery": "mastery", "Critical Rate": "crit", "scroll": "scroll", "mob": "mob",
+    "catalyst": "catalyst", "Training Advisor": "Training Advisor",
+}
+
+# clearer or missing definitions, written for the app
+APP = {
+    "ACC": ("Accuracy: כמה טוב אתם פוגעים. ככל שה-ACC שלכם גבוה יותר מה-Avoid של המפלצת, אתם מפספסים פחות. "
+            "רואים אותו בחלון ה-Stat (מקש S).",
+            "Accuracy: how well you hit. The more your ACC beats a monster's Avoid, the fewer misses. "
+            "It's in the Stat window (S key)."),
+    "Avoid": ("Avoidability: כמה טוב המפלצת מתחמקת. Avoid גבוה = צריך יותר ACC כדי לפגוע בה. "
+              "מפלצת בלבל גבוה משלכם מתחמקת עוד יותר.",
+              "Avoidability: how well a monster dodges. Higher Avoid means you need more ACC to hit it. "
+              "A monster above your level dodges even more."),
+    "P.DEF": ("Physical Defense: הגנה מפני מכות פיזיות. מורידה מהנזק של מכות רגילות (לא קסמים).",
+              "Physical Defense: cuts the damage of physical hits (not magic)."),
+    "M.DEF": ("Magic Defense: הגנה מפני קסמים. מורידה מהנזק של מכות קסם.",
+              "Magic Defense: cuts the damage of magic hits."),
+    "AP": ("Ability Points: 5 נקודות בכל עליית לבל, שמחלקים ל-STR / DEX / INT / LUK.",
+           "Ability Points: 5 per level up, spent on STR / DEX / INT / LUK."),
+    "SP": ("Skill Points: נקודות לסקילים, מקבלים בכל עליית לבל אחרי הג'וב הראשון.",
+           "Skill Points: points for your skills, earned every level after your first job."),
+    "NPC": ("דמות של המשחק (לא שחקן): חנויות, נותני קווסטים ומדריכי ג'וב.",
+            "A character run by the game (not a player): shops, quest givers, job instructors."),
+    "Citizenship": ("אזרחות בעיר (Henesys או Kerning City) מ-Lv. 12. תרומות מעלות דרגה, שפותחת הנחות ופריטים בחנויות העיר.",
+                    "Citizenship of a town (Henesys or Kerning City) from Lv. 12. Donations raise your grade, "
+                    "which opens discounts and items in that town's shops."),
+    "Lv.": ("Level: הלבל של הדמות או של המפלצת. כל עליית לבל נותנת AP ו-SP.",
+            "Level: of your character or a monster. Every level up gives AP and SP."),
+    "mob": ("מפלצת (קיצור של mobile). \"מובים\" = מפלצות.", "A monster (short for mobile)."),
+    "catalyst": ("ה-mesos שמשלמים כדי ליצור את הפריט, מעבר לחומרים.", "The mesos paid to craft, on top of the materials."),
+    "Training Advisor": ("כלי של NiaMeowDB שממליץ על מפות אימון לפי הדמות והבילד.",
+                         "NiaMeowDB's tool that recommends training maps for your character and build."),
+}
+
+
+def _clean(term: str) -> str:
+    return re.sub(r"\*\*|\s*\(.*?\)", "", term).strip()
+
+
+@lru_cache(maxsize=2)
+def _book(lang: str) -> dict[str, str]:
+    """Glossary entry name -> definition, in one language (English when there's no translation)."""
+    out = {}
+    try:
+        en = json.loads((ASSETS / "guides" / "en" / f"{GLOSSARY}.json").read_text(encoding="utf-8"))
+        local = en
+        if lang != "en":
+            local = json.loads((ASSETS / "guides" / lang / f"{GLOSSARY}.json").read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return out
+    same = len(local.get("blocks", [])) == len(en.get("blocks", []))
+    for i, b in enumerate(en.get("blocks", [])):
+        if "table" not in b:
+            continue
+        lt = local["blocks"][i].get("table") if same else None
+        for j, row in enumerate(b["table"][1:], start=1):
+            if len(row) < 2:
+                continue
+            meaning = lt[j][1] if lt and j < len(lt) and len(lt[j]) > 1 else row[1]
+            whole = _clean(row[0])
+            out[whole] = meaning
+            for part in re.split(r"\s*/\s*", whole):     # "FM / Free Market" answers to both
+                out.setdefault(part, meaning)
+    return out
+
+
+def explain(term: str, lang: str) -> str | None:
+    """What a game term means, in the player's language; None when it isn't a known term."""
+    entry = TERMS.get(term, term)
+    if entry in APP:
+        he, en = APP[entry]
+        return en if lang == "en" else he
+    book = _book(lang)
+    text = book.get(entry) or book.get(term)
+    return re.sub(r"\*\*", "", text) if text else None
+
+
+_PATTERN = re.compile(r"(?<![\w.])(" + "|".join(re.escape(t) for t in sorted(TERMS, key=len, reverse=True)) + r")(?![\w])")
+
+
+def annotate(html_text: str, lang: str, color: str = "#F07A12", seen: set | None = None, limit: int = 6) -> str:
+    """Put a small "?" link after the first appearance of each known term in an HTML text.
+    Links are "g:<term>"; the widget shows explain(term) on hover / click. Tags are left alone."""
+    seen = set() if seen is None else seen
+    count = [0]
+
+    def link(term: str) -> str:
+        return (f"<a href='g:{html.escape(term)}' style='color:{color}; text-decoration:none;'>"
+                f"<sup><b>?</b></sup></a>")
+
+    def wanted(term: str) -> bool:
+        key = TERMS.get(term, term)
+        if key in seen or count[0] >= limit or explain(term, lang) is None:
+            return False
+        seen.add(key)
+        count[0] += 1
+        return True
+
+    def text_part(part: str) -> str:
+        # an English block inside Hebrew (LRE ... PDF, see bidi.py) must stay whole: a link in its middle
+        # breaks the embedding ("Avoid 14" showed as "14 Avoid"), so its "?" go right after the block
+        out, pos = [], 0
+        for run in re.finditer(f"{bidi.LRE}(.*?){bidi.PDF}", part, re.S):
+            out.append(_PATTERN.sub(lambda m: m.group(1) + link(m.group(1)) if wanted(m.group(1)) else m.group(1),
+                                    part[pos:run.start()]))
+            marks = "".join(link(m.group(1)) for m in _PATTERN.finditer(run.group(1)) if wanted(m.group(1)))
+            out.append(run.group(0) + marks)
+            pos = run.end()
+        out.append(_PATTERN.sub(lambda m: m.group(1) + link(m.group(1)) if wanted(m.group(1)) else m.group(1),
+                                part[pos:]))
+        return "".join(out)
+
+    # only text between tags, never inside a tag or an existing link
+    parts = re.split(r"(<a\b.*?</a>|<[^>]+>)", html_text, flags=re.S)
+    return "".join(p if p.startswith("<") else text_part(p) for p in parts)
+
+
+def term_of(link: str) -> str | None:
+    return link[2:] if link.startswith("g:") else None

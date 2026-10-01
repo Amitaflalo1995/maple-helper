@@ -315,6 +315,8 @@ class GuidesDialog(GlassDialog):
         self.browser = QTextBrowser(objectName="GuideText")
         self.browser.setOpenLinks(False)                      # guide: links open here, web links in the browser
         self.browser.anchorClicked.connect(self._on_link)
+        from . import terms
+        self.browser.highlighted.connect(lambda url: terms.show(url.toString(), self.t.lang))   # hover shows it too
         self.browser.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)   # wide tables wrap their cells instead
         self.zoom = ImageZoom(self.browser)
         self.browser.setLayoutDirection(Qt.LeftToRight)      # the guides are written in English
@@ -323,6 +325,9 @@ class GuidesDialog(GlassDialog):
 
     def _on_link(self, url):
         link = url.toString()
+        from . import terms
+        if terms.show(link, self.t.lang):
+            return
         if link.startswith("guide:"):
             key = "guide/" + link[6:]
             if self.kb.get(key) or guides.book(key, "en"):
@@ -370,6 +375,7 @@ class GuidesDialog(GlassDialog):
         opt = self.browser.document().defaultTextOption()
         opt.setTextDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
         self.browser.document().setDefaultTextOption(opt)
-        self.browser.setHtml(guides.book_html(b, theme.MODE, t.rtl))
+        from .. import glossary
+        self.browser.setHtml(glossary.annotate(guides.book_html(b, theme.MODE, t.rtl), t.lang, limit=30))
         self.browser.verticalScrollBar().setValue(0)
         self.stack.setCurrentIndex(1)

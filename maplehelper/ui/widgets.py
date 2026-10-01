@@ -40,7 +40,18 @@ class Bubble(QFrame):
         self.set_text(text)
 
     def set_text(self, text: str) -> None:
-        self.label.setText(bidi.to_html(text) if text else "")
+        if not text:
+            self.label.setText("")
+            return
+        body = bidi.to_html(text)
+        if self.role != "user":
+            from . import terms
+            from .. import glossary
+            body = glossary.annotate(body, terms.LANG, limit=4)
+            if not getattr(self, "_terms", False):
+                terms.watch(self.label, terms.LANG)
+                self._terms = True
+        self.label.setText(body)
 
     def add_pin(self, on_pin, tip: str) -> None:
         """A small 📌 under a finished answer."""

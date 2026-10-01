@@ -106,6 +106,8 @@ class Overlay(QWidget):
 
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, brain: Brain):
         super().__init__(None, Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
+        from . import terms
+        terms.LANG = settings["language"] or "he"
         self.setObjectName("Overlay")
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAttribute(Qt.WA_MacAlwaysShowToolWindow)   # macOS hides tool windows of inactive apps
@@ -296,6 +298,13 @@ class Overlay(QWidget):
         self.send_btn.clicked.connect(self._send_typed)
         self.send_btn.setEnabled(False)
         row.addWidget(self.send_btn)
+        # what the next question sends: the F9 screenshot goes with the first question only
+        self.shot_hint = QLabel(objectName="ShotHint")
+        self.shot_hint.setTextFormat(Qt.RichText)
+        self.shot_hint.setWordWrap(True)
+        self.shot_hint.linkActivated.connect(lambda _link: self.recapture())
+        self.shot_hint.hide()
+        lay.addWidget(self.shot_hint)
         lay.addWidget(self.capsule)
 
         self.grip = QSizeGrip(self)
@@ -552,6 +561,7 @@ class Overlay(QWidget):
 
     def open_overlay(self, shot: bytes | None, game_hwnd: int | None):
         self.shot, self.shot_used, self.game_hwnd = shot, False, game_hwnd
+        self._update_shot_hint()
         if not self.settings["window"]:
             self.place_default(game_hwnd)
         if self._session_started is None:
@@ -630,6 +640,22 @@ class Overlay(QWidget):
             return
         super().keyPressEvent(e)
 
+    def _update_shot_hint(self):
+        """Fresh screenshot: it goes with the next question. Used: say so, with a one-click retake."""
+        if not self.game_hwnd and not self.shot:
+            self.shot_hint.hide()
+            return
+        if self.shot and not self.shot_used:
+            text = self.t("shot_hint_ready")
+        else:
+            text = self.t("shot_hint_used") + f" <a href='shot:now' style='color:{theme.ORANGE_DEEP}; " \
+                                               f"text-decoration:none;'><b>{self.t('shot_hint_retake')}</b></a>"
+        import re
+        text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
+        d = "rtl" if self.t.rtl else "ltr"
+        self.shot_hint.setText(f"<div dir='{d}' align='{'right' if self.t.rtl else 'left'}'>📷 {text}</div>")
+        self.shot_hint.show()
+
     def recapture(self):
         # the chat is part of the screen: step aside for a moment so the shot shows the game
         self.setWindowOpacity(0.0)
@@ -642,6 +668,7 @@ class Overlay(QWidget):
         self.shot_used = False
         self.setWindowOpacity(1.0)
         self.add_system("✓ " + self.t("recaptured") if self.shot else self.t("sync_no_game"))
+        self._update_shot_hint()
 
     # ------------------------------------------------------------------ feed
 
@@ -786,6 +813,7 @@ class Overlay(QWidget):
         if shot is None and not self.shot_used and not self.game_hwnd:
             self.add_system(self.t("no_game"))
         self.shot_used = True
+        self._update_shot_hint()
         if history:   # again for "Ask Claude anyway", so history search pairs the question with this answer
             history.append("user", f"[about {focus_name}] {question}" if focus_name else question)
         self._anchor = None

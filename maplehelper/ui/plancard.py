@@ -37,7 +37,14 @@ class ExpBar(QFrame):
             text = t("exp_line_kills", pct=f"{p['pct']:g}", left=f"{p['left']:,}", n=f"{p['kills']:,}", mob=p["mob"])
         else:
             text = t("exp_line", pct=f"{p['pct']:g}", left=f"{p['left']:,}")
-        self.text.setText(bidi.plain(text, rtl))
+        from .. import glossary
+        from . import terms
+        if not getattr(self, "_terms", False):
+            terms.watch(self.text, t.lang)
+            self._terms = True
+        d = "rtl" if rtl else "ltr"
+        self.text.setText(glossary.annotate(bidi.paragraph_html(text, d).replace("margin:0 0 4px 0;", "margin:0;"),
+                                            t.lang, limit=1))
         self.text.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute)
 
 

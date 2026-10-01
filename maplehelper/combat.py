@@ -49,7 +49,7 @@ def _after(lines: list[str], label: str) -> int | None:
 # maps nobody grinds on: job-advancement tests, party quest stages, event rooms
 _NOT_GRIND = re.compile(r"^(Warrior|Thief|Magician|Bowman|Pirate)'s |Accompaniment|KPQ|Party Quest|Test|Event|"
                         r"Hidden Street$|Exam", re.I)
-_NOT_GRIND_MOB = re.compile(r"\(|Fairy \d|Dummy", re.I)
+_NOT_GRIND_MOB = re.compile(r"\(|\bFairy \d|Dummy", re.I)
 
 
 # Ossyria (Orbis, El Nath and beyond) is not initial-launch content (Nexon's August 2026 report, see the

@@ -13,9 +13,9 @@ from PySide6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (QButtonGroup, QCompleter, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
 
-from .. import bidi, buildplan, combat, crafting, guides, market, plan, quests
+from .. import bidi, buildplan, combat, crafting, glossary, guides, market, plan, quests
 from ..i18n import I18n
-from . import theme
+from . import terms, theme
 from .controls import Section, Segmented, Stepper, rtl_buttons
 from .glass import GlassDialog
 
@@ -270,7 +270,7 @@ class ToolsDialog(GlassDialog):
                 out.append("<p style='margin:0; font-size:5px;'>&nbsp;</p>")
                 continue
             out.append(bidi.paragraph_html(line, d).replace("margin:0 0 4px 0;", "margin:0 0 3px 0; line-height:135%;"))
-        return "".join(out)
+        return glossary.annotate("".join(out), self.t.lang)
 
     def _set(self, label: QLabel, text: str):
         label.setText(self._html(text))
@@ -280,7 +280,30 @@ class ToolsDialog(GlassDialog):
         lb.setTextFormat(Qt.RichText)
         lb.setWordWrap(wrap)
         self._set(lb, text)
-        return lb
+        return terms.watch(lb, self.t.lang)
+
+    def _row(self, sec: Section, label: str, control: QWidget | None = None, hint: str = "") -> QWidget:
+        """A settings-style row whose label explains its game terms ("?")."""
+        row = sec.add_row(label, control, hint=hint)
+        lb = row.findChild(QLabel, "RowLabel")
+        if lb is not None:
+            lb.setText(self._html(label))
+            terms.watch(lb, self.t.lang)
+        return row
+
+    def _big(self, value: str, label: str, explain: bool = True) -> QVBoxLayout:
+        """A big number with its (explained) name under it."""
+        box = QVBoxLayout()
+        box.setSpacing(0)
+        v = QLabel(value, objectName="BigStat")
+        v.setAlignment(Qt.AlignCenter)
+        text = html.escape(label)
+        lb = QLabel(glossary.annotate(text, self.t.lang) if explain else text, objectName="BigStatLabel")
+        lb.setAlignment(Qt.AlignCenter)
+        terms.watch(lb, self.t.lang)
+        box.addWidget(v)
+        box.addWidget(lb)
+        return box
 
     def _no_character(self, lay):
         lay.addWidget(self._label(self.t("tool_no_char"), "RowHint"))
@@ -295,7 +318,7 @@ class ToolsDialog(GlassDialog):
             st = Stepper(0, hi, 0)
             st.edit.setFixedWidth(64)
             st.valueChanged.connect(lambda v, k=key: self._set_stat(k, v))
-            sec.add_row(t(f"stat_{key}"), st)
+            self._row(sec, t(f"stat_{key}"), st)
             steppers[key] = st
         self.__dict__.setdefault("_steppers", []).append(steppers)
         sec.add_widget(self._label(t("my_stats_hint"), "RowHint"))
@@ -465,45 +488,49 @@ class ToolsDialog(GlassDialog):
         nums = QHBoxLayout()
         for value, label in ((f"{m.hp:,}", "HP"), (f"{m.exp:,}", "EXP"), (str(m.avoid), "Avoid"),
                              (str(m.mdef if magic else m.pdef), "M.DEF" if magic else "P.DEF")):
-            box = QVBoxLayout()
-            box.setSpacing(0)
-            v = QLabel(value, objectName="BigStat")
-            v.setAlignment(Qt.AlignCenter)
-            lb = QLabel(label, objectName="BigStatLabel")
-            lb.setAlignment(Qt.AlignCenter)
-            box.addWidget(v)
-            box.addWidget(lb)
-            nums.addLayout(box)
+            nums.addLayout(self._big(value, label))
         holder = QWidget()
         holder.setLayout(nums)
         sec.add_widget(holder)
-        need100 = combat.acc_needed(c.level, m.level, m.avoid)
-        need90 = combat.acc_needed(c.level, m.level, m.avoid, 0.9)
-        sec.add_row(t("calc_acc_need"), tag(f"{need100}", "TagAccent"), hint=t("calc_acc_need90", n=need90))
-        if acc:
-            hit = combat.hit_chance(acc, c.level, m.level, m.avoid)
-            hint = ""
-            if hit < 0.999:
-                more = need100 - acc
-                pts = math.ceil(more / combat.acc_per_point(c.base_class))
-                hint = t("calc_more_acc", n=more, pts=pts, stat="INT" if magic else "DEX")
-            sec.add_row(t("calc_hit"), tag(f"{round(hit * 100)}%", "TagGood" if hit >= 0.999 else "TagWarn"),
-                        hint=hint)
+        if m.avoid <= 0:
+            # nothing to compute: say it plainly instead of a column of zeros
+            self._row(sec, t("calc_never_dodges"))
+        else:
+            need100 = combat.acc_needed(c.level, m.level, m.avoid)
+            need90 = combat.acc_needed(c.level, m.level, m.avoid, 0.9)
+            self._row(sec, t("calc_acc_need"), tag(f"{need100}", "TagAccent"), hint=t("calc_acc_need90", n=need90))
+            if acc:
+                hit = combat.hit_chance(acc, c.level, m.level, m.avoid)
+                hint = ""
+                if hit < 0.999:
+                    more = need100 - acc
+                    pts = math.ceil(more / combat.acc_per_point(c.base_class))
+                    hint = t("calc_more_acc", n=more, pts=pts, stat="INT" if magic else "DEX")
+                self._row(sec, t("calc_hit"), tag(f"{round(hit * 100)}%", "TagGood" if hit >= 0.999 else "TagWarn"),
+                          hint=hint)
         if dmg:
             hits, avg = combat.hits_to_kill(dmg[0], dmg[1], m, c.level, magic)
-            sec.add_row(t("calc_hits"), tag(str(hits), "Tag"), hint=t("calc_hits_avg", n=f"{avg:.1f}"))
+            self._row(sec, t("calc_hits"), tag(str(hits), "Tag"), hint=t("calc_hits_avg", n=f"{avg:.1f}"))
         if not (acc and dmg):
             sec.add_widget(self._label(t("calc_need_stats"), "RowHint"))
-        # the same monster a few levels from now
-        lv_rows = []
-        for lv in (c.level - 5, c.level, c.level + 5):
-            if lv >= 1:
-                lv_rows.append(t("calc_at_level", lv=lv, n=combat.acc_needed(lv, m.level, m.avoid)))
-        sec.add_widget(self._label("\n".join([t("calc_acc_by_level")] + ["• " + r for r in lv_rows]), "RowHint"))
-        if m.maps:
-            sec.add_widget(self._label("\n".join([t("calc_maps_head")] + ["• " + mp for mp, _ in m.maps[:3]]),
-                                       "RowHint"))
         self.calc_box.addWidget(sec)
+        if m.avoid > 0:
+            # ACC to never miss as your level changes: three big numbers, not a list
+            lv_sec = Section(t("calc_acc_by_level_head"), t.rtl)
+            strip = QHBoxLayout()
+            for lv in (c.level - 5, c.level, c.level + 5):
+                if lv >= 1:
+                    strip.addLayout(self._big(str(combat.acc_needed(lv, m.level, m.avoid)), f"Lv. {lv}", explain=False))
+            holder2 = QWidget()
+            holder2.setLayout(strip)
+            lv_sec.add_widget(holder2)
+            lv_sec.add_widget(self._label(t("calc_acc_by_level_hint"), "RowHint"))
+            self.calc_box.addWidget(lv_sec)
+        if m.maps:
+            maps_sec = Section(t("calc_maps_head_plain"), t.rtl)
+            for mp, n in m.maps[:3]:
+                self._row(maps_sec, mp, tag(self._p(t("spot_crowd", n=n)), "Tag"))
+            self.calc_box.addWidget(maps_sec)
 
     # build ---------------------------------------------------------------
 
@@ -741,7 +768,7 @@ class ToolsDialog(GlassDialog):
         sec.add_widget(holder)
         self.craft_level = Stepper(1, 10, 1)
         self.craft_level.valueChanged.connect(self._set_craft_level)
-        sec.add_row(t("craft_my_level"), self.craft_level, hint=t("craft_level_hint"))
+        self._row(sec, t("craft_my_level"), self.craft_level, hint=t("craft_level_hint"))
         lay.addWidget(sec)
         self.craft_head = self._label("", "ToolHeader")
         lay.addWidget(self.craft_head)
@@ -967,16 +994,9 @@ class ToolsDialog(GlassDialog):
         grid = QHBoxLayout()
         self.exp_cells = {}
         for key in ("per_hour", "pct_hour", "to_level"):
-            box = QVBoxLayout()
-            box.setSpacing(0)
-            v = QLabel("–", objectName="BigStat")
-            v.setAlignment(Qt.AlignCenter)
-            lb = QLabel(self._p(t(f"exp_{key}")), objectName="BigStatLabel")
-            lb.setAlignment(Qt.AlignCenter)
-            box.addWidget(v)
-            box.addWidget(lb)
+            box = self._big("–", self._p(t(f"exp_{key}")))
             grid.addLayout(box)
-            self.exp_cells[key] = v
+            self.exp_cells[key] = box.itemAt(0).widget()
         holder = QWidget()
         holder.setLayout(grid)
         sec.add_widget(holder)
