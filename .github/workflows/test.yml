@@ -23,11 +23,15 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
-          cache: pip
-          cache-dependency-path: requirements*.txt
+
+      # uv installs the same wheels into the same interpreter as pip, several times faster
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+          cache-dependency-glob: requirements*.txt
 
       - name: Install dependencies
-        run: python -m pip install -r requirements-dev.txt
+        run: uv pip install --system -r requirements-dev.txt
 
       - name: Lint
         run: python -m ruff check . --output-format=github

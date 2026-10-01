@@ -5,7 +5,8 @@
 #   - kb-manifest.json + kb.zip        (knowledge-base updates, maplehelper/updater.py update_kb)
 #   - MapleHelper-Setup.exe + SHA256SUMS.txt   (silent app self-update on Windows, verified by hash)
 # so every release carries all of them, plus MapleHelper-macOS.dmg. The current KB is carried forward
-# from the previous release; the Windows job gets it and hands the same KB to the macOS job.
+# from the previous release; the kb job gets it once and both builds bundle that same KB.
+# The builds run alongside the tests; Publish waits for all of them, so nothing ships unless every one passes.
 # Windows and macOS are published together or not at all.
 name: Release
 
@@ -55,11 +56,10 @@ jobs:
   test:
     uses: ./.github/workflows/test.yml
 
-  build:
-    name: Build release (Windows)
-    needs: [version, test]
-    runs-on: windows-latest
-    timeout-minutes: 240      # the very first release scrapes the KB (~1h); later ones take ~15 min
+  kb:
+    name: Get the knowledge base
+    runs-on: ubuntu-latest
+    timeout-minutes: 240      # the very first release scrapes the KB (~1h); later ones take seconds
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
@@ -68,46 +68,72 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
-          cache: pip
-          cache-dependency-path: requirements*.txt
+
+      - name: Get the knowledge base
+        run: |
+          mkdir -p kb-in dist-kb
+          gh release download --repo "$GITHUB_REPOSITORY" --pattern kb.zip --pattern kb-manifest.json --dir kb-in 2>/dev/null || true
+          if [ ! -f kb-in/kb.zip ]; then
+            # no release yet: a hand-curated seed (prerelease "kb-seed") carries what a fresh scrape can't
+            # rebuild in CI, e.g. the Hebrew name dictionary (aliases.json) made with Claude
+            gh release download kb-seed --repo "$GITHUB_REPOSITORY" --pattern kb.zip --pattern kb-manifest.json --dir kb-in 2>/dev/null || true
+            if [ -f kb-in/kb.zip ]; then echo "Using the kb-seed release"; fi
+          fi
+          if [ -f kb-in/kb.zip ]; then
+            # carry the published KB forward unchanged (its manifest already points at latest/download)
+            want=$(python -c 'import json; print(json.load(open("kb-in/kb-manifest.json"))["sha256"])')
+            echo "$want  kb-in/kb.zip" | sha256sum -c - || { echo "::error::published kb.zip does not match kb-manifest.json"; exit 1; }
+            python -m zipfile -e kb-in/kb.zip data/kb
+            cp kb-in/kb.zip kb-in/kb-manifest.json dist-kb/
+            echo "Carrying forward KB $(python -c 'import json; print(json.load(open("kb-in/kb-manifest.json"))["version"])')"
+          else
+            # first release ever: build the KB (NiaMeowDB, used with permission; polite single-site scrape)
+            echo "No published knowledge base yet: scraping NiaMeowDB"
+            python tools/scrape_meowdb.py
+            python tools/kb_release.py validate data/kb --min-entities 500
+            python tools/kb_release.py pack data/kb dist-kb
+          fi
+          python tools/kb_release.py validate data/kb --min-entities 100
+
+      # both builds bundle exactly this KB, and Publish attaches it
+      - uses: actions/upload-artifact@v7
+        with:
+          name: kb
+          path: dist-kb/*
+          retention-days: 30
+
+  build:
+    name: Build release (Windows)
+    needs: [version, kb]
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      # uv installs the same wheels into the same interpreter as pip, several times faster
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+          cache-dependency-glob: requirements*.txt
 
       - name: Install dependencies
-        run: python -m pip install -r requirements-dev.txt
+        run: uv pip install --system -r requirements-dev.txt
 
       - name: Install Inno Setup
         shell: pwsh
         run: ./packaging/install-inno.ps1
 
-      - name: Get the knowledge base
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force kb-in, dist-kb | Out-Null
-          gh release download --repo $env:GITHUB_REPOSITORY --pattern kb.zip --pattern kb-manifest.json --dir kb-in 2>$null
-          if (-not (Test-Path kb-in/kb.zip)) {
-            # no release yet: a hand-curated seed (prerelease "kb-seed") carries what a fresh scrape can't
-            # rebuild in CI, e.g. the Hebrew name dictionary (aliases.json) made with Claude
-            gh release download kb-seed --repo $env:GITHUB_REPOSITORY --pattern kb.zip --pattern kb-manifest.json --dir kb-in 2>$null
-            if (Test-Path kb-in/kb.zip) { Write-Host "Using the kb-seed release" }
-          }
-          if (Test-Path kb-in/kb.zip) {
-            # carry the published KB forward unchanged (its manifest already points at latest/download)
-            $manifest = Get-Content kb-in/kb-manifest.json -Raw | ConvertFrom-Json
-            $sha = (Get-FileHash kb-in/kb.zip -Algorithm SHA256).Hash.ToLower()
-            if ($sha -ne $manifest.sha256) { Write-Host "::error::published kb.zip does not match kb-manifest.json"; exit 1 }
-            python -m zipfile -e kb-in/kb.zip data/kb
-            Copy-Item kb-in/kb.zip, kb-in/kb-manifest.json dist-kb/
-            Write-Host "Carrying forward KB $($manifest.version)"
-          } else {
-            # first release ever: build the KB (NiaMeowDB, used with permission; polite single-site scrape)
-            Write-Host "No published knowledge base yet: scraping NiaMeowDB"
-            python tools/scrape_meowdb.py
-            if ($LASTEXITCODE -ne 0) { exit 1 }
-            python tools/kb_release.py validate data/kb --min-entities 500
-            if ($LASTEXITCODE -ne 0) { exit 1 }
-            python tools/kb_release.py pack data/kb dist-kb
-          }
-          python tools/kb_release.py validate data/kb --min-entities 100
-          exit $LASTEXITCODE
+      - uses: actions/download-artifact@v8
+        with:
+          name: kb
+          path: kb-in
+
+      - name: Unpack the knowledge base
+        run: python -m zipfile -e kb-in/kb.zip data/kb
 
       - name: Build, sign, self-test, installer round trip
         shell: pwsh
@@ -122,16 +148,9 @@ jobs:
           path: dist/release/*
           retention-days: 30
 
-      # the macOS build bundles exactly this KB
-      - uses: actions/upload-artifact@v7
-        with:
-          name: kb
-          path: dist-kb/*
-          retention-days: 30
-
   build-macos:
     name: Build release (macOS)
-    needs: [version, build]
+    needs: [version, kb]
     runs-on: macos-latest
     timeout-minutes: 60
     steps:
@@ -140,11 +159,15 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
-          cache: pip
-          cache-dependency-path: requirements*.txt
+
+      # uv installs the same wheels into the same interpreter as pip, several times faster
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+          cache-dependency-glob: requirements*.txt
 
       - name: Install dependencies
-        run: python -m pip install -r requirements-dev.txt
+        run: uv pip install --system -r requirements-dev.txt
 
       - uses: actions/download-artifact@v8
         with:
@@ -167,7 +190,7 @@ jobs:
 
   publish:
     name: Publish
-    needs: [version, build, build-macos]
+    needs: [version, test, build, build-macos]
     runs-on: ubuntu-latest
     permissions:
       contents: write
