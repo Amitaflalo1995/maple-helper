@@ -18,10 +18,8 @@ from ..store import ASSETS, History, Profiles, Settings
 from . import theme
 from .glass import paint_glass
 from .minibubble import MiniBubble
-from .widgets import (SELECTION, WISHLIST, Bubble, BubbleRow, DropGroupCard, EntityCard, NoticeCard, ProfileCard, SystemLine,
-                      TileGrid, character_image)
-from .widgets import (SELECTION, Bubble, BubbleRow, DropGroupCard, EntityCard, NoticeCard, ProfileCard, SessionCard,
-                      SystemLine, TileGrid, character_image)
+from .widgets import (SELECTION, WISHLIST, Bubble, BubbleRow, DropGroupCard, EntityCard, NoticeCard, ProfileCard,
+                      SessionCard, SystemLine, TileGrid, character_image)
 
 
 
@@ -621,6 +619,8 @@ class Overlay(QWidget):
         focus_name = ", ".join(self.kb.get(k)["name"] for k in focus)
         if not force_claude:          # "Ask Claude anyway" re-asks a question already in the chat
             self.add_bubble(question, "user", focus_name)
+            if self.stats:
+                self.stats.question(c)     # once per question, however it gets answered
             if not focus and self.settings["instant_answers"]:
                 qa = quick.answer(question, self.kb, self.t)
                 if qa:
@@ -635,8 +635,6 @@ class Overlay(QWidget):
         self.shot_used = True
         if history and not force_claude:
             history.append("user", f"[about {focus_name}] {question}" if focus_name else question)
-        if self.stats:
-            self.stats.question(c)
         self._anchor = None
         self._follow = True
         self._pending_bubble = self.add_bubble(self.t("thinking"), "assistant")
