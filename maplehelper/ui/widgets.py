@@ -103,13 +103,20 @@ class NoticeCard(QFrame):
         lay.setContentsMargins(12, 8, 12, 8)
         lay.setSpacing(10)
         lay.addWidget(QLabel(theme.ICON["info"], objectName="InfoIcon"), 0, Qt.AlignVCenter)
-        msg = QLabel(bidi.plain(text, rtl), objectName="InfoText")
-        msg.setWordWrap(True)
-        lay.addWidget(msg, 1)
-        btn = QPushButton(bidi.plain(action, rtl), objectName="Link")
-        btn.setCursor(Qt.PointingHandCursor)
-        btn.clicked.connect(self.clicked.emit)
-        lay.addWidget(btn, 0, Qt.AlignVCenter)
+        self.msg = QLabel(objectName="InfoText")
+        self.msg.setWordWrap(True)
+        lay.addWidget(self.msg, 1)
+        self.btn = QPushButton(objectName="Link")
+        self.btn.setCursor(Qt.PointingHandCursor)
+        self.btn.clicked.connect(self.clicked.emit)
+        lay.addWidget(self.btn, 0, Qt.AlignVCenter)
+        self.set_texts(text, action, rtl)
+
+    def set_texts(self, text: str, action: str, rtl: bool):
+        """Shown again in a new language when the player switches it."""
+        self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
+        self.msg.setText(bidi.plain(text, rtl))
+        self.btn.setText(bidi.plain(action, rtl))
 
 
 class SessionCard(QFrame):

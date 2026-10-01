@@ -85,6 +85,15 @@ class FocusLineEdit(QLineEdit):
         self.focus_changed.emit(False)
 
 
+def _alive(w) -> bool:
+    """False once Qt deleted the widget (e.g. the chat was cleared)."""
+    try:
+        from shiboken6 import isValid
+        return isValid(w)
+    except Exception:
+        return False
+
+
 class Overlay(QWidget):
     history_requested = Signal()
     guides_requested = Signal()
@@ -354,6 +363,10 @@ class Overlay(QWidget):
         self.mic_btn.setToolTip(self.t("mic_tip", key=hk_voice))
         self._on_text(self.input.text())
         self.refresh_profile_chip()
+        self._update_shot_hint()
+        for card, render in getattr(self, "_notices", []):
+            if _alive(card):
+                card.set_texts(*render(self.t), self.t.rtl)
 
     def show_update(self, version: str, state: str = "available", pct: float | None = None):
         """The update bar: available (button) -> downloading (progress) -> installing; failed (retry)."""
@@ -763,9 +776,15 @@ class Overlay(QWidget):
     def add_system(self, text: str):
         self._add_widget(SystemLine(text))
 
-    def add_notice(self, text: str, action: str, on_click) -> None:
-        card = NoticeCard(text, action, self.t.rtl)
+    def add_notice(self, text, action, on_click) -> None:
+        """text / action: a string, or a function of I18n that builds it (then a language switch
+        shows the notice in the new language too)."""
+        def render(t):
+            return (text(t) if callable(text) else text), (action(t) if callable(action) else action)
+        card = NoticeCard(*render(self.t), self.t.rtl)
         card.clicked.connect(on_click)
+        if callable(text) or callable(action):
+            self._notices = [n for n in getattr(self, "_notices", []) if _alive(n[0])] + [(card, render)]
         self._add_widget(card)
 
     def add_cards(self, keys: list[str]):
@@ -892,12 +911,13 @@ class Overlay(QWidget):
         if lvl == "high" and self.settings["saver_mode"]:
             return              # already saving: only the "almost used up" warning matters
         self.settings["usage_warned"] = [w.get("resets"), lvl]
-        text = self.t.p("usage_high" if lvl == "high" else "usage_critical", p, pct=round(w["used"] * 100),
-                        at=usage.reset_clock(w.get("resets")))
+        def text(t):
+            return t.p("usage_high" if lvl == "high" else "usage_critical", p, pct=round(w["used"] * 100),
+                       at=usage.reset_clock(w.get("resets")))
         if self.settings["saver_mode"]:
-            self.add_system(text)
+            self.add_system(text(self.t))
         else:
-            self.add_notice(text, self.t("saver_turn_on"), self.saver_requested.emit)
+            self.add_notice(text, lambda t: t("saver_turn_on"), self.saver_requested.emit)
 
     def show_saver_badge(self, on: bool):
         self.saver_badge.setVisible(on)
