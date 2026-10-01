@@ -1,4 +1,4 @@
-"""Paths, settings, character profiles and conversation history (all local, under %APPDATA%)."""
+"""Paths, settings, character profiles and conversation history (all local, in the per-user data folder)."""
 from __future__ import annotations
 
 import json
@@ -20,7 +20,18 @@ def _app_root() -> Path:
 APP_ROOT = _app_root()
 ASSETS = APP_ROOT / "assets"
 BUNDLED_KB = APP_ROOT / "data" / "kb"
-DATA_DIR = Path(os.environ.get("APPDATA", Path.home())) / "MapleHelper"
+
+
+def _data_root() -> Path:
+    """%APPDATA% on Windows, ~/Library/Application Support on macOS. $APPDATA wins anywhere (tests set it)."""
+    if os.environ.get("APPDATA"):
+        return Path(os.environ["APPDATA"])
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Application Support"
+    return Path.home()
+
+
+DATA_DIR = _data_root() / "MapleHelper"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 USER_KB = DATA_DIR / "kb"            # knowledge base updates downloaded at runtime
 SHOTS_DIR = DATA_DIR / "shots"       # screenshots live only until the answer arrives
@@ -65,7 +76,7 @@ DEFAULT_SETTINGS = {
     "voice_send_immediately": True,
     "microphone": None,
     "model": "sonnet",
-    "api_key_fallback": False,    # use an Anthropic API key (stored in Windows Credential Manager)
+    "api_key_fallback": False,    # use an Anthropic API key (stored in Credential Manager / Keychain)
     "onboarding_done": False,
 }
 

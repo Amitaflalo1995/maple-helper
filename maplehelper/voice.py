@@ -1,8 +1,8 @@
 """Push-to-talk: hold the voice key, speak, release. Transcription runs locally.
 
 Model: ivrit.ai's Hebrew-tuned Whisper large-v3-turbo (CTranslate2), which also
-handles English. Downloaded once on first use (~1.6GB) into %APPDATA%.
-GPU (CUDA) when available, otherwise CPU int8.
+handles English. Downloaded once on first use (~1.6GB) into the app's data folder.
+GPU (CUDA) when available, otherwise CPU int8 (always on macOS).
 """
 from __future__ import annotations
 
@@ -48,7 +48,7 @@ class Transcriber:
 
 
 class VoiceController(QObject):
-    """Talk key (a plain Windows hotkey, handled in app.py) or mic button: press to start, again to send.
+    """Talk key (a plain system hotkey, handled in app.py) or mic button: press to start, again to send.
 
     No key-state polling and no keyboard hook: nothing that looks like a macro tool to anti-cheat."""
 

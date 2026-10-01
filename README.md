@@ -18,13 +18,15 @@
 
 ## About
 
-Maple Helper is a Windows desktop assistant that puts a chat overlay on top of Maple Story Classic World. Press **F9** to open it, then type a question or hold **F10** to speak. Answers draw on a screenshot of your game, your character profile, previous conversations, and a local copy of the NiaMeowDB game database.
+Maple Helper is a desktop assistant for Windows and macOS that puts a chat overlay on top of Maple Story Classic World. Press **F9** to open it, then type a question or hold **F10** to speak. Answers draw on a screenshot of your game, your character profile, previous conversations, and a local copy of the NiaMeowDB game database.
 
 Use it to look up drops, find quest NPCs, or ask where to train without switching away from the game.
 
 ## Download
 
 **[Download Maple Helper for Windows](https://github.com/Amitaflalo1995/maple-helper/releases/latest/download/MapleHelper-Setup.exe)**, run the installer, and follow the setup screens. The app updates itself and its game database in the background. A portable zip is on the [Releases page](https://github.com/Amitaflalo1995/maple-helper/releases/latest).
+
+**[Download Maple Helper for macOS](https://github.com/Amitaflalo1995/maple-helper/releases/latest/download/MapleHelper-macOS.dmg)** (Apple Silicon), open it, and drag **Maple Helper** into Applications. See [First launch on macOS](#first-launch-on-macos). The game database updates itself; for a new app version, the app shows a notice and a download link in its menu bar menu.
 
 ## Features
 
@@ -42,7 +44,7 @@ The app uses screen capture and its own overlay window. It does not read game me
 
 ## Requirements
 
-- Windows 10 or 11.
+- Windows 10 or 11, or macOS 12 or later on Apple Silicon (M1 or newer).
 - Python 3.10 or later to run from source (the installer needs no Python).
 - Claude Code installed, with either a Claude Pro or Max account or an Anthropic API key. The app uses Claude Code in both modes.
 - Maple Story Classic World running in **Borderless** or **Windowed Fullscreen** mode.
@@ -56,11 +58,23 @@ Download the latest release from the [Releases page](https://github.com/Amitafla
 - **`MapleHelper-Setup-<version>.exe`**: the installer. This is the recommended option and doesn't need admin rights.
 - **`MapleHelper-<version>-portable.zip`**: unzip it anywhere and run `MapleHelper.exe`.
 
-Both include the knowledge base. The app tells you when a new version is available.
+- **`MapleHelper-macOS.dmg`**: for Macs with Apple Silicon. Open it and drag **Maple Helper** into Applications.
+
+All of them include the knowledge base. The app tells you when a new version is available.
+
+### First launch on macOS
+
+The Mac app is not notarized by Apple yet, so macOS blocks the first launch. Open **System Settings → Privacy & Security** and click **Open Anyway** next to Maple Helper. You do this once per version.
+
+Maple Helper lives in the menu bar (there is no Dock icon). Allow **Screen Recording** when it asks (or under **System Settings → Privacy & Security → Screen Recording**), then restart the app: that is how it sees the game window. The hotkeys are ordinary system shortcuts and need no permission.
+
+Maple Story Classic World has no Mac version, so you run it through CrossOver, Whisky, or a virtual machine. Maple Helper finds the game window by its title either way.
+
+On most Mac keyboards, the F-keys control brightness and volume. Hold **fn** while pressing them, or turn on **System Settings → Keyboard → Keyboard Shortcuts → Function Keys → Use F1, F2, etc. keys as standard function keys**.
 
 ## Run from source
 
-Open PowerShell in the repository folder.
+Open PowerShell (Windows) or Terminal (macOS) in the repository folder. On macOS, use `.venv/bin/python` instead of `.\.venv\Scripts\python`, and `/` instead of `\` in paths.
 
 1. Create a virtual environment and install the dependencies:
 
@@ -98,11 +112,11 @@ Open PowerShell in the repository folder.
 
 In settings, you can change the appearance (light or dark), hotkeys, language, font size, answer length, starting with Windows, and whether voice questions are sent immediately.
 
-The speech model downloads on first use, so the first voice request takes longer. Transcription uses CUDA when available and falls back to the CPU.
+The speech model downloads on first use, so the first voice request takes longer. Transcription uses CUDA when available and falls back to the CPU (always the CPU on macOS).
 
 ## Data and privacy
 
-Settings, character profiles, conversation history, speech models, and downloaded knowledge-base updates are stored locally in `%APPDATA%\MapleHelper`. The knowledge base built from source is stored in `data/kb/` inside the repository. API keys entered in the app are stored in Windows Credential Manager.
+Settings, character profiles, conversation history, speech models, and downloaded knowledge-base updates are stored locally in `%APPDATA%\MapleHelper` on Windows and `~/Library/Application Support/MapleHelper` on macOS. The knowledge base built from source is stored in `data/kb/` inside the repository. API keys entered in the app are stored in Windows Credential Manager or the macOS Keychain.
 
 When you ask a question, the app sends Claude your question, the available game screenshot, character profile, recent conversation, earlier session summaries, and relevant knowledge-base context. Claude can also read local knowledge-base files to answer the question. After a chat session has been closed for 30 minutes, the app may send the session transcript to Claude to generate a summary for future conversations.
 

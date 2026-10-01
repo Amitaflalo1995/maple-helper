@@ -1,6 +1,7 @@
 """Onboarding (mandatory, no skipping), character editor and settings."""
 from __future__ import annotations
 
+import sys
 import threading
 
 from PySide6.QtCore import QObject, Qt, QTimer, Signal
@@ -555,7 +556,7 @@ class SettingsDialog(GlassDialog):
         # privacy & system
         sec = Section(t("sec_system"), rtl)
         self.autostart = Switch(settings["start_with_windows"])
-        sec.add_row(t("start_with_windows"), self.autostart)
+        sec.add_row(t("start_at_login" if sys.platform == "darwin" else "start_with_windows"), self.autostart)
         lay.addWidget(sec)
 
         # Claude account

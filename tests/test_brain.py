@@ -89,3 +89,19 @@ class TestBuildPrompt:
         # the system prompt uses {{ }} escapes around the META JSON; a bad escape would raise here
         s = brain.SYSTEM_PROMPT.format(length=brain.LENGTH["short"])
         assert '{"entities"' in s and brain.META in s
+
+
+def test_finds_claude_outside_the_finder_path(tmp_path, monkeypatch):
+    # an app opened from Finder has no ~/.local/bin on PATH: the native installer's spot must still be found
+    exe = tmp_path / "bin" / "claude"
+    exe.parent.mkdir()
+    exe.write_text("#!/bin/sh\n")
+    exe.chmod(0o755)
+    monkeypatch.setattr(brain.shutil, "which", lambda _name: None)
+    monkeypatch.setattr(brain, "POSIX_CLAUDE_DIRS", ["/nonexistent", str(exe.parent)])
+    assert brain._find_claude_posix() == str(exe)
+
+
+def test_creation_flags_are_windows_only():
+    # subprocess raises ValueError for nonzero creationflags outside Windows
+    assert (brain.CREATE_NO_WINDOW != 0) == (brain.sys.platform == "win32")

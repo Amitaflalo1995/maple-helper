@@ -1,4 +1,4 @@
-"""`Maple Helper.exe --selftest <report file> [--require-kb]`: proves a built app can run.
+"""`Maple Helper(.exe) --selftest <report file> [--require-kb]`: proves a built app can run.
 
 Release builds are windowed, so there is no console to print to: the result is the
 exit code (0 = healthy) plus a small report file. Checks the things a frozen build
@@ -17,10 +17,12 @@ from pathlib import Path
 MODULES = [
     "PySide6.QtWidgets", "mss", "PIL.Image", "numpy", "keyring", "sounddevice",
     "faster_whisper", "ctranslate2",
-    "maplehelper.app", "maplehelper.brain", "maplehelper.voice", "maplehelper.claude_setup",
+    "maplehelper.app", "maplehelper.osapi", "maplehelper.brain", "maplehelper.voice", "maplehelper.claude_setup",
     "maplehelper.updater",
     "maplehelper.ui.overlay", "maplehelper.ui.dialogs", "maplehelper.ui.toast",
 ]
+if sys.platform == "darwin":
+    MODULES += ["objc", "Quartz", "AppKit"]   # pyobjc bridges, imported lazily by macapi
 ASSET_FILES = ["brand/app.ico", "brand/icon-64.png", "brand/wordmark.png", "fonts/Rubik-Variable.ttf"]
 
 
@@ -87,6 +89,16 @@ def run(require_kb: bool = False) -> tuple[bool, list[str]]:
             raise RuntimeError(f"knowledge base is empty ({base.root})")
         return f"{n} entities, version {_kb_version(base.root) or '?'}"
     check("knowledge base", kb)
+
+    def os_layer():
+        # lists windows through the native API (no permission needed; a CI runner has no game)
+        from . import osapi
+        osapi.find_game_window()
+        if osapi.IS_MAC:
+            from . import macapi
+            macapi.carbon().GetApplicationEventTarget()   # the hotkey API resolves in this build
+        return sys.platform
+    check("os layer", os_layer)
 
     def claude():
         # informational: CI machines and fresh PCs have no Claude Code, and onboarding installs it

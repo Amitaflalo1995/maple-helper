@@ -3,8 +3,10 @@
 #
 # Installed apps read two things from the *latest* release:
 #   - kb-manifest.json + kb.zip        (knowledge-base updates, maplehelper/updater.py update_kb)
-#   - MapleHelper-Setup.exe + SHA256SUMS.txt   (silent app self-update, verified by hash)
-# so every release carries all of them. The current KB is carried forward from the previous release.
+#   - MapleHelper-Setup.exe + SHA256SUMS.txt   (silent app self-update on Windows, verified by hash)
+# so every release carries all of them, plus MapleHelper-macOS.dmg. The current KB is carried forward
+# from the previous release; the Windows job gets it and hands the same KB to the macOS job.
+# Windows and macOS are published together or not at all.
 name: Release
 
 on:
@@ -54,7 +56,7 @@ jobs:
     uses: ./.github/workflows/test.yml
 
   build:
-    name: Build release
+    name: Build release (Windows)
     needs: [version, test]
     runs-on: windows-latest
     timeout-minutes: 240      # the very first release scrapes the KB (~1h); later ones take ~15 min
@@ -114,29 +116,58 @@ jobs:
           MAPLEHELPER_SIGN: ${{ secrets.MAPLEHELPER_SIGN }}
         run: ./packaging/build.ps1 -KbDir data/kb -RequireKb -TestInstaller
 
-      - name: Checksums
-        shell: pwsh
-        run: |
-          # covers the app downloads (kb.zip is verified through kb-manifest.json, and changes nightly)
-          Push-Location dist/release
-          $lines = Get-ChildItem -File | Sort-Object Name | ForEach-Object {
-            "{0}  {1}" -f (Get-FileHash $_.Name -Algorithm SHA256).Hash.ToLower(), $_.Name
-          }
-          # LF line endings, so `sha256sum -c` (the Publish check, and players on any OS) reads it
-          [IO.File]::WriteAllText("$PWD/SHA256SUMS.txt", (($lines -join "`n") + "`n"), [Text.Encoding]::ASCII)
-          Get-Content SHA256SUMS.txt
-          Pop-Location
-          Copy-Item dist-kb/kb.zip, dist-kb/kb-manifest.json dist/release/
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-windows
+          path: dist/release/*
+          retention-days: 30
+
+      # the macOS build bundles exactly this KB
+      - uses: actions/upload-artifact@v7
+        with:
+          name: kb
+          path: dist-kb/*
+          retention-days: 30
+
+  build-macos:
+    name: Build release (macOS)
+    needs: [version, build]
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: kb
+          path: kb-in
+
+      - name: Unpack the knowledge base
+        run: python -m zipfile -e kb-in/kb.zip data/kb
+
+      - name: Build, self-test, DMG round trip
+        env:
+          PYTHON: python
+        run: ./packaging/build-macos.sh --kb-dir data/kb --require-kb --test-dmg
 
       - uses: actions/upload-artifact@v7
         with:
-          name: release-assets
+          name: release-macos
           path: dist/release/*
           retention-days: 30
 
   publish:
     name: Publish
-    needs: [version, build]
+    needs: [version, build, build-macos]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -148,7 +179,24 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
-          name: release-assets
+          pattern: release-*
+          path: assets
+          merge-multiple: true
+
+      - name: Checksums
+        working-directory: assets
+        run: |
+          for f in MapleHelper-Setup.exe "MapleHelper-$VERSION-portable.zip" MapleHelper-macOS.dmg; do
+            [ -f "$f" ] || { echo "::error::missing release asset $f"; ls -la; exit 1; }
+          done
+          # covers the app downloads (kb.zip is verified through kb-manifest.json, and changes nightly)
+          find . -maxdepth 1 -type f -printf '%f\n' | LC_ALL=C sort | xargs sha256sum > ../SHA256SUMS.txt
+          mv ../SHA256SUMS.txt .
+          cat SHA256SUMS.txt
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: kb
           path: assets
 
       - name: Create the GitHub Release
@@ -156,12 +204,19 @@ jobs:
           cat > notes.md <<EOF
           ## Download
 
+          **Windows 10 or 11**
           - **[MapleHelper-Setup.exe](https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/MapleHelper-Setup.exe)**: installer (recommended; no admin rights needed)
           - [MapleHelper-$VERSION-portable.zip](https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/MapleHelper-$VERSION-portable.zip): unzip anywhere and run \`Maple Helper.exe\`
 
           Already installed? Maple Helper updates itself: the new version downloads in the background and installs when you close the app.
-
           Windows may show "Windows protected your PC" because the app is not code-signed yet: click **More info → Run anyway**.
+
+          **macOS 12 or later, Apple Silicon (M1 or newer)**
+          - **[MapleHelper-macOS.dmg](https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/MapleHelper-macOS.dmg)**: open it and drag **Maple Helper** into Applications (over the old version when updating)
+
+          The app is not notarized yet, so macOS blocks the first launch: open **System Settings → Privacy & Security** and click **Open Anyway**.
+          Then allow **Screen Recording** for Maple Helper, so it can see the game.
+
           Verify downloads with \`SHA256SUMS.txt\`.
 
           EOF
@@ -179,8 +234,10 @@ jobs:
             echo "waiting for the release CDN ($attempt)"; sleep 10
           done
           [ "$ok" = true ] || { echo "::error::$src/SHA256SUMS.txt is not the one just published"; exit 1; }
-          curl -fsSL "$src/MapleHelper-Setup.exe" -o MapleHelper-Setup.exe
-          tr -d '\r' < SHA256SUMS.txt | grep '  MapleHelper-Setup.exe$' | sha256sum -c -
+          for f in MapleHelper-Setup.exe MapleHelper-macOS.dmg; do
+            curl -fsSL "$src/$f" -o "$f"
+            grep "  $f\$" SHA256SUMS.txt | sha256sum -c -
+          done
           if [ "$PRERELEASE" = false ]; then
             curl -fsSL "$src/kb-manifest.json" -o manifest.json
             url=$(python3 -c 'import json; print(json.load(open("manifest.json"))["url"])')
