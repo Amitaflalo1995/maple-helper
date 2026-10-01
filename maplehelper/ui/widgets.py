@@ -40,7 +40,18 @@ class Bubble(QFrame):
         self.set_text(text)
 
     def set_text(self, text: str) -> None:
-        self.label.setText(bidi.to_html(text) if text else "")
+        if not text:
+            self.label.setText("")
+            return
+        body = bidi.to_html(text)
+        if self.role != "user":
+            from . import terms
+            from .. import glossary
+            body = glossary.annotate(body, terms.LANG, limit=4)
+            if not getattr(self, "_terms", False):
+                terms.watch(self.label, terms.LANG)
+                self._terms = True
+        self.label.setText(body)
 
     def add_pin(self, on_pin, tip: str) -> None:
         """A small 📌 under a finished answer."""
@@ -414,10 +425,10 @@ class ProfileCard(QFrame):
         self.refresh.setCursor(Qt.PointingHandCursor)
         self.refresh.clicked.connect(self.refresh_requested.emit)
         row.addWidget(self.refresh, 0, Qt.AlignVCenter)
-        self.plan_btn = QToolButton(objectName="Refresh", text=theme.ICON["plan"])
-        self.plan_btn.setCursor(Qt.PointingHandCursor)
-        self.plan_btn.setCheckable(True)
-        row.addWidget(self.plan_btn, 0, Qt.AlignVCenter)
+        from PySide6.QtWidgets import QPushButton
+        self.now_btn = QPushButton(objectName="NowChip")      # "What now?": the text comes from the chat (language)
+        self.now_btn.setCursor(Qt.PointingHandCursor)
+        row.addWidget(self.now_btn, 0, Qt.AlignVCenter)
         self._spin_frames = ["\ue72c", "\ue895"]      # refresh / sync glyphs alternate while busy
         from PySide6.QtCore import QTimer
         self._spin = QTimer(self, interval=260, timeout=self._tick)

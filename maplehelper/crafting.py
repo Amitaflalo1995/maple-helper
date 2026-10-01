@@ -1,0 +1,159 @@
+"""Crafting professions from the KB's crafting pages (Smithing, Weaponcrafting, Tailoring, Woodcrafting,
+Leatherworking, Arcforge): every recipe by profession level, with its ingredients, EXP and cost."""
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass, field
+from functools import lru_cache
+
+PROFESSIONS = ("smithing", "weaponcrafting", "tailoring", "woodcrafting", "leatherworking", "arcforge")
+NAMES = {p: p.capitalize() for p in PROFESSIONS}
+
+
+@dataclass
+class Recipe:
+    name: str
+    level: int                      # profession level that unlocks it
+    exp: int
+    catalyst: int                   # mesos paid to craft
+    net: int                        # mesos gained (+) or burned (-) counting ingredients at NPC value
+    exp_per_meso: float
+    mats: str                       # "Farm only", "Mixed", ...
+    ingredients: list[tuple[int, str]] = field(default_factory=list)   # (count, name)
+
+
+@dataclass
+class Level:
+    level: int
+    needs_exp: int | None           # profession EXP to reach this level
+    char_level: int | None          # character level it asks for
+    recipes: list[Recipe] = field(default_factory=list)
+
+
+def _int(text: str) -> int:
+    m = re.search(r"[-+]?\s*[\d,]+", text or "")
+    return int(m.group(0).replace(",", "").replace(" ", "")) if m else 0
+
+
+def _float(text: str) -> float:
+    m = re.search(r"\d+(\.\d+)?", text or "")
+    return float(m.group(0)) if m else 0.0
+
+
+@lru_cache(maxsize=8)
+def _levels(page: str) -> tuple[Level, ...]:
+    lines = [ln.strip() for ln in page.split("\n---", 2)[-1].splitlines()]
+    out: list[Level] = []
+    cur: Level | None = None
+    i = 0
+    while i < len(lines):
+        ln = lines[i]
+        m = re.fullmatch(r"Lv\. (\d+)", ln)
+        if m:
+            cur = next((lv for lv in out if lv.level == int(m.group(1))), None)
+            if cur is None:
+                cur = Level(int(m.group(1)), None, None)
+                out.append(cur)
+            need = re.match(r"needs ([\d,]+) EXP · char Lv\. (\d+)", lines[i + 1] if i + 1 < len(lines) else "")
+            if need:
+                cur.needs_exp, cur.char_level = _int(need.group(1)), int(need.group(2))
+            i += 1
+            continue
+        row = re.fullmatch(r"(\d+) \| (.+)", ln)
+        if cur and row and i + 2 < len(lines) and lines[i + 2].startswith("|"):
+            ing = [(int(n), name.strip()) for n, name in re.findall(r"(\d+) x (.+?)(?=\s+\d+ x |$)", lines[i + 1])]
+            vals = [v.strip() for v in lines[i + 2].strip("| ").split("|")]
+            if len(vals) >= 7 and not any(r.name == row.group(2).strip() for r in cur.recipes):
+                cur.recipes.append(Recipe(row.group(2).strip(), cur.level, _int(vals[0]), _int(vals[1]), _int(vals[5]),
+                                          _float(vals[6]), vals[7] if len(vals) > 7 else "", ing))
+            i += 3
+            continue
+        i += 1
+    return tuple(out)
+
+
+def levels(kb, profession: str) -> tuple[Level, ...]:
+    return _levels(kb.page(f"crafting/efficiency__{profession}"))
+
+
+def max_level(kb, profession: str) -> int:
+    return max((lv.level for lv in levels(kb, profession)), default=1)
+
+
+def for_level(kb, profession: str, level: int) -> tuple[Level | None, Level | None]:
+    """(the recipes at your profession level, the ones the next level opens), best EXP per meso first."""
+    lv = {x.level: x for x in levels(kb, profession)}
+    now, nxt = lv.get(level), lv.get(level + 1)
+    for x in (now, nxt):
+        if x:
+            x.recipes.sort(key=lambda r: (-r.exp_per_meso, -r.exp))
+    return now, nxt
+
+
+# ------------------------------------------------------------------ who teaches it, where to work
+
+STATIONS = {"smithing": "Anvil", "weaponcrafting": "Weaponcrafting Station", "tailoring": "Sewing Machine",
+            "woodcrafting": "Woodworking Station", "leatherworking": "Leatherworking Station", "arcforge": "Arcane Station"}
+MASTER_WORD = {"smithing": "Blacksmith", "weaponcrafting": "Weaponcrafter", "tailoring": "Tailor",
+               "woodcrafting": "Carpenter", "leatherworking": "Leatherworker", "arcforge": "Arcforger"}
+
+
+@dataclass
+class Info:
+    teacher: str = ""
+    teacher_key: str = ""
+    teacher_town: str = ""
+    start_quest: str = ""               # "<teacher> in Need of an Apprentice" (Lv. 10)
+    start_level: int | None = None
+    master_quest: str = ""              # "A <title> in My Own Right!" (Lv. 25)
+    master_level: int | None = None
+    station: str = ""
+    station_towns: list[str] = field(default_factory=list)
+
+
+def _town(kb, key: str) -> str:
+    """The first location of an NPC page ("Location Perion Victoria Road" -> "Perion")."""
+    lines = [ln.strip() for ln in kb.page(key).splitlines()]
+    for i, ln in enumerate(lines):
+        if ln in ("Location", "Locations") and i + 1 < len(lines):
+            return lines[i + 1].replace(" Victoria Road", "").replace(" Dungeon", "").strip()
+    return ""
+
+
+def info(kb, profession: str) -> Info:
+    """The profession's teacher (and town), its start and mastery quests, and its work stations."""
+    from . import combat, quests
+    out = Info()
+    word = MASTER_WORD.get(profession, "")
+    for k, e in kb.entities.items():
+        if e.get("category") != "quest":
+            continue
+        q = quests.quest(kb, k)
+        if not q or q.area != "Crafting":
+            continue
+        if word and e["name"].startswith(f"A {word} in My Own Right") or e["name"].startswith(f"An {word} in My Own Right"):
+            out.master_quest, out.master_level, out.teacher = e["name"], q.level, q.npc
+    if out.teacher:
+        out.teacher_key = kb._npc_by_name.get(out.teacher.lower(), "")
+        out.teacher_town = _town(kb, out.teacher_key) if out.teacher_key else ""
+        # the first lesson: "<teacher> in Need of an Apprentice", else the teacher's lowest crafting quest
+        mine = [(q.level or 0, e["name"] != f"{out.teacher} in Need of an Apprentice", e["name"], q.level)
+                for k, e in kb.entities.items() if e.get("category") == "quest"
+                for q in [quests.quest(kb, k)] if q and q.area == "Crafting" and q.npc == out.teacher
+                and e["name"] != out.master_quest]
+        if mine:
+            _, _, out.start_quest, out.start_level = min(mine, key=lambda m: (m[1], m[0]))
+    out.station = STATIONS.get(profession, "")
+    key = kb._npc_by_name.get(out.station.lower())
+    if key:
+        lines = [ln.strip() for ln in kb.page(key).splitlines()]
+        if any(ln.startswith("Locations") for ln in lines):
+            i = next(i for i, ln in enumerate(lines) if ln.startswith("Locations")) + 1
+            while i < len(lines) and lines[i] != "About":
+                ln = lines[i]
+                if ln and ln != "Find path here":
+                    town = ln.replace(" Victoria Road", "").replace(" Dungeon", "").replace(" Shallow Passage", "").strip()
+                    if combat.grind_map(town) and town not in out.station_towns:
+                        out.station_towns.append(town)
+                i += 1
+    return out

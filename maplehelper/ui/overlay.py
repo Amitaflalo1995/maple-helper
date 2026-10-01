@@ -97,10 +97,18 @@ class Overlay(QWidget):
     profile_requested = Signal()
     add_character_requested = Signal()
     mic_clicked = Signal()
-    limits_read = Signal(object)      # plan usage read in the background after an answer (ChatGPT)
+    limits_read = Signal(object)
+    profile_changed = Signal()        # level / EXP / stats changed (a screenshot read or the chat)
+    sync_finished = Signal(bool)      # a screenshot read ended (True = it read the game)
+    tools_requested = Signal()
+    edit_character_requested = Signal(str)
+    delete_character_requested = Signal(str)      # plan usage read in the background after an answer (ChatGPT)
 
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, brain: Brain):
         super().__init__(None, Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
+        from . import terms
+        terms.LANG = settings["language"] or "he"
+        terms.setup()
         self.setObjectName("Overlay")
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAttribute(Qt.WA_MacAlwaysShowToolWindow)   # macOS hides tool windows of inactive apps
@@ -180,6 +188,10 @@ class Overlay(QWidget):
         self.history_btn = self._icon_button(theme.ICON["search"])
         self.history_btn.clicked.connect(self.history_requested.emit)
         tb.addWidget(self.history_btn)
+        self.tools_btn = self._icon_button(theme.ICON["tools"])
+        self.tools_btn.setToolTip(self.t("tools"))
+        self.tools_btn.clicked.connect(self.tools_requested.emit)
+        tb.addWidget(self.tools_btn)
         self.guides_btn = self._icon_button(theme.ICON["book"])
         self.guides_btn.clicked.connect(self.guides_requested.emit)
         tb.addWidget(self.guides_btn)
@@ -205,8 +217,19 @@ class Overlay(QWidget):
         ub.setContentsMargins(12, 6, 8, 6)
         ub.setSpacing(10)
         ub.addWidget(QLabel(theme.ICON["refresh"], objectName="InfoIcon"), 0, Qt.AlignVCenter)
+        col = QVBoxLayout()
+        col.setSpacing(4)
         self.update_label = QLabel(objectName="InfoText")
-        ub.addWidget(self.update_label, 1)
+        self.update_label.setWordWrap(True)
+        col.addWidget(self.update_label)
+        from PySide6.QtWidgets import QProgressBar
+        self.update_progress = QProgressBar(objectName="ExpBar")
+        self.update_progress.setRange(0, 1000)
+        self.update_progress.setTextVisible(False)
+        self.update_progress.setFixedHeight(6)
+        self.update_progress.hide()
+        col.addWidget(self.update_progress)
+        ub.addLayout(col, 1)
         self.update_btn = QPushButton(objectName="Primary")
         self.update_btn.setCursor(Qt.PointingHandCursor)
         self.update_btn.clicked.connect(self.update_requested.emit)
@@ -220,21 +243,16 @@ class Overlay(QWidget):
         self.profile_card.clicked.connect(self.character_menu)
         self.profile_card.setCursor(Qt.PointingHandCursor)
         lay.addWidget(self.profile_card)
-        from .plancard import PlanPanel, TipStrip
+        from .plancard import TipStrip
         self.tip_strip = TipStrip()
         self.tip_strip.asked.connect(self.ask)
         self.tip_strip.dismissed.connect(self._dismiss_tip)
         lay.addWidget(self.tip_strip)
-        self.plan_panel = PlanPanel()
-        self.plan_panel.asked.connect(self.ask)
-        self.plan_panel.what_now.connect(self.what_now)
-        self.plan_panel.guide_requested.connect(self.guide_requested.emit)
-        lay.addWidget(self.plan_panel)
         from .pinsview import PinsBar
         self.pins_bar = PinsBar()
         self.pins_bar.unpin.connect(self._unpin)
         lay.addWidget(self.pins_bar)
-        self.profile_card.plan_btn.toggled.connect(self._toggle_plan)
+        self.profile_card.now_btn.clicked.connect(self.what_now)
 
         # conversation
         self.scroll = QScrollArea()
@@ -292,6 +310,13 @@ class Overlay(QWidget):
         self.send_btn.clicked.connect(self._send_typed)
         self.send_btn.setEnabled(False)
         row.addWidget(self.send_btn)
+        # what the next question sends: the F9 screenshot goes with the first question only
+        self.shot_hint = QLabel(objectName="ShotHint")
+        self.shot_hint.setTextFormat(Qt.RichText)
+        self.shot_hint.setWordWrap(True)
+        self.shot_hint.linkActivated.connect(lambda _link: self.recapture())
+        self.shot_hint.hide()
+        lay.addWidget(self.shot_hint)
         lay.addWidget(self.capsule)
 
         self.grip = QSizeGrip(self)
@@ -319,9 +344,10 @@ class Overlay(QWidget):
         self.guides_btn.setToolTip(self.t("guides"))
         self.history_btn.setToolTip(self.t("history"))
         self.profile_card.refresh.setToolTip(self.t("refresh_tip"))
-        self.profile_card.plan_btn.setToolTip(self.t("plan_open"))
+        self.profile_card.now_btn.setText(self.t("plan_what_now"))
+        self.profile_card.now_btn.setToolTip(self.t("what_now_tip"))
         if getattr(self, "_update_version", None):
-            self.show_update(self._update_version)
+            self.show_update(self._update_version, getattr(self, "_update_state", "available"))
         self.profile_card.setToolTip(self.t("switch_character"))
         self.min_btn.setToolTip(self.t("minimize"))
         self.close_btn.setToolTip(self.t("close_chat").replace("F9", self.settings["hotkey_toggle"]))
@@ -329,10 +355,24 @@ class Overlay(QWidget):
         self._on_text(self.input.text())
         self.refresh_profile_chip()
 
-    def show_update(self, version: str):
-        self._update_version = version
-        self.update_label.setText(bidi.plain(self.t("update_bar", version=version), self.t.rtl))
-        self.update_btn.setText(bidi.plain(self.t("update_now"), self.t.rtl))
+    def show_update(self, version: str, state: str = "available", pct: float | None = None):
+        """The update bar: available (button) -> downloading (progress) -> installing; failed (retry)."""
+        self._update_version, self._update_state = version, state
+        t, rtl = self.t, self.t.rtl
+        text = {"available": t("update_bar_available", version=version),
+                "ready": t("update_bar", version=version),
+                "downloading": t("update_downloading", version=version, pct=round(pct or 0)),
+                "installing": t("update_installing", version=version),
+                "failed": t("update_failed")}[state]
+        self.update_label.setText(bidi.plain(text, rtl))
+        self.update_btn.setText(bidi.plain(t("update_retry" if state == "failed" else "update_now"), rtl))
+        self.update_btn.setVisible(state in ("available", "ready", "failed"))
+        self.update_progress.setVisible(state in ("downloading", "installing"))
+        if state == "downloading":
+            self.update_progress.setRange(0, 1000)
+            self.update_progress.setValue(round((pct or 0) * 10))
+        elif state == "installing":
+            self.update_progress.setRange(0, 0)          # busy: the installer takes over in a moment
         self.update_bar.show()
 
     def refresh_profile_chip(self):
@@ -384,19 +424,10 @@ class Overlay(QWidget):
         c = self.profiles.active
         if not c:
             self.tip_strip.show_tip(None, self.t, self.t.rtl)
-            self.plan_panel.hide()
             return
         self.profile_card.exp.show_progress(plan.progress(self.kb, c.level, c.exp_pct), self.t, self.t.rtl)
         dismissed = (self.settings["tips_dismissed"] or {}).get(c.id, {})
         self.tip_strip.show_tip(plan.tip(self.kb, c, self.t, dismissed), self.t, self.t.rtl)
-        if self.profile_card.plan_btn.isChecked():
-            self.plan_panel.fill(self.kb, c, self.t, self.t.rtl)
-
-    def _toggle_plan(self, on: bool):
-        c = self.profiles.active
-        if on and c:
-            self.plan_panel.fill(self.kb, c, self.t, self.t.rtl)
-        self.plan_panel.setVisible(on and c is not None)
 
     def _dismiss_tip(self, kind: str):
         c = self.profiles.active
@@ -407,9 +438,22 @@ class Overlay(QWidget):
         self.settings["tips_dismissed"] = data
         self.refresh_plan()
 
+    def ask_with_screenshot(self, question: str):
+        """Like "What now?": a fresh screenshot of the game, then the question."""
+        self.setWindowOpacity(0.0)
+        QTimer.singleShot(120, lambda: self._capture_and_ask(question))
+
+    def _capture_and_ask(self, question: str):
+        hwnd = osapi.find_game_window()
+        if hwnd:
+            self.game_hwnd = hwnd
+            self.shot = self.shot_provider(hwnd) if self.shot_provider else osapi.capture_game(hwnd)
+            self.shot_used = False
+        self.setWindowOpacity(1.0)
+        self.ask(question)
+
     def what_now(self):
         """'What now?': a fresh screenshot and the question, so Claude sees where the player is."""
-        self.profile_card.plan_btn.setChecked(False)
         self.setWindowOpacity(0.0)        # the chat is part of the screen: step aside for the shot
         QTimer.singleShot(120, self._what_now_capture)
 
@@ -434,25 +478,32 @@ class Overlay(QWidget):
         # mid-answer the reply still belongs to the current character
         busy = self.busy or getattr(self, "_syncing", False)
         active = self.profiles.active_id
-        for c in self.profiles.characters:
+        # the card already shows the current character: the menu lists only the others to switch to
+        others = [c for c in self.profiles.characters if c.id != active]
+        for c in others:
             img = character_image(c, self.profiles.avatar_path(c), self.kb)
             a = QAction(QIcon(str(img)) if img else QIcon(), bidi.plain(f"{c.name}  ·  Lv. {c.level} {c.job}",
                                                                            self.t.rtl), menu)
-            a.setCheckable(True)
-            a.setChecked(c.id == active)
-            if c.id == active:      # the portrait takes the check mark's place: bold marks the current one
-                f = a.font()
-                f.setBold(True)
-                a.setFont(f)
-            a.setEnabled(not busy or c.id == active)
+            a.setEnabled(not busy)
             a.triggered.connect(lambda _=False, cid=c.id: self.switch_character(cid))
             menu.addAction(a)
-        menu.addSeparator()
-        add = QAction(bidi.plain("＋  " + self.t("add_character"), self.t.rtl), menu)
+        if others:
+            menu.addSeparator()
+        if self.profiles.active is not None:
+            edit = QAction(theme.glyph_icon("edit"), bidi.plain(self.t("edit_character"), self.t.rtl), menu)
+            edit.setEnabled(not busy)
+            edit.triggered.connect(lambda: self.edit_character_requested.emit(active))
+            menu.addAction(edit)
+            delete = QAction(theme.glyph_icon("delete"), bidi.plain(self.t("delete_character"), self.t.rtl), menu)
+            delete.setEnabled(not busy)
+            delete.triggered.connect(lambda: self.delete_character_requested.emit(active))
+            menu.addAction(delete)
+            menu.addSeparator()
+        add = QAction(theme.glyph_icon("add"), bidi.plain(self.t("add_character"), self.t.rtl), menu)
         add.setEnabled(not busy)
         add.triggered.connect(self.add_character_requested.emit)
         menu.addAction(add)
-        share = QAction(bidi.plain("⧉  " + self.t("share_character"), self.t.rtl), menu)
+        share = QAction(theme.glyph_icon("copy"), bidi.plain(self.t("share_character"), self.t.rtl), menu)
         share.triggered.connect(self.copy_character_card)
         share.setEnabled(self.profiles.active is not None)
         menu.addAction(share)
@@ -536,6 +587,7 @@ class Overlay(QWidget):
 
     def open_overlay(self, shot: bytes | None, game_hwnd: int | None):
         self.shot, self.shot_used, self.game_hwnd = shot, False, game_hwnd
+        self._update_shot_hint()
         if not self.settings["window"]:
             self.place_default(game_hwnd)
         if self._session_started is None:
@@ -614,6 +666,23 @@ class Overlay(QWidget):
             return
         super().keyPressEvent(e)
 
+    def _update_shot_hint(self):
+        """Fresh screenshot: it goes with the next question. Used: say so, with a one-click retake.
+        No game open: explain how screenshots work, so the player knows before it matters."""
+        if not self.game_hwnd and not self.shot:
+            text = self.t("shot_hint_no_game")
+        elif self.shot and not self.shot_used:
+            text = self.t("shot_hint_ready")
+        else:
+            text = self.t("shot_hint_used") + f" <a href='shot:now' style='color:{theme.ORANGE_DEEP}; " \
+                                               f"text-decoration:none;'><b>{self.t('shot_hint_retake')}</b></a>"
+        import re
+        text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
+        d = "rtl" if self.t.rtl else "ltr"
+        from .. import glossary          # the same orange "?" badge as beside game terms
+        self.shot_hint.setText(f"<div dir='{d}' align='{'right' if self.t.rtl else 'left'}'>{glossary.MARK}&nbsp; {text}</div>")
+        self.shot_hint.show()
+
     def recapture(self):
         # the chat is part of the screen: step aside for a moment so the shot shows the game
         self.setWindowOpacity(0.0)
@@ -626,6 +695,7 @@ class Overlay(QWidget):
         self.shot_used = False
         self.setWindowOpacity(1.0)
         self.add_system("✓ " + self.t("recaptured") if self.shot else self.t("sync_no_game"))
+        self._update_shot_hint()
 
     # ------------------------------------------------------------------ feed
 
@@ -770,6 +840,7 @@ class Overlay(QWidget):
         if shot is None and not self.shot_used and not self.game_hwnd:
             self.add_system(self.t("no_game"))
         self.shot_used = True
+        self._update_shot_hint()
         if history:   # again for "Ask Claude anyway", so history search pairs the question with this answer
             history.append("user", f"[about {focus_name}] {question}" if focus_name else question)
         self._anchor = None
@@ -884,9 +955,10 @@ class Overlay(QWidget):
             QTimer.singleShot(0, self._keep_answer_readable)
 
     SYNC_QUESTION = ("[Profile sync, not a chat question] Look at the screenshot and read MY character's current "
-                     "level, job and EXP bar percentage (the HUD shows them). Reply with one short line in the "
+                     "level, job and EXP bar percentage (the HUD shows them), and if the stat window is open, its "
+                     "Accuracy, damage range and max HP/MP. Reply with one short line in the "
                      "profile's language, then @@META@@ with profile_update (level, job, base_class if visible, "
-                     "exp_percent) and avatar_box. If the game or the character is not visible, say so briefly "
+                     "exp_percent, stats) and avatar_box. If the game or the character is not visible, say so briefly "
                      "and leave profile_update empty.")
 
     def sync_profile(self):
@@ -909,6 +981,7 @@ class Overlay(QWidget):
             self._syncing = False
             self.profile_card.set_busy(False)
             self.add_system(self.t("sync_no_game"))
+            self.sync_finished.emit(False)
             return
         self._sync_shot = shot
         self._sync_thread = QThread(self)
@@ -925,8 +998,10 @@ class Overlay(QWidget):
         self.profile_card.set_busy(False)
         if ans.error:
             self.add_system(self.t("err_generic"))
+            self.sync_finished.emit(False)
             return
         if self.profiles.active_id != getattr(self, "_sync_cid", None):
+            self.sync_finished.emit(False)
             return             # the player switched character meanwhile: this read belongs to the other one
         changes = self.profiles.apply_update(ans.profile_update or {})
         if ans.avatar_box:
@@ -937,6 +1012,7 @@ class Overlay(QWidget):
             self.add_system(self.t("sync_nothing") if ans.profile_update or ans.avatar_box
                             else self.t("sync_not_found"))
         self.refresh_profile_chip()
+        self.sync_finished.emit(bool(ans.profile_update))
 
     def _on_done_main(self, ans: Answer):
         self._on_done(ans, self._pending_history)
@@ -1015,10 +1091,12 @@ class Overlay(QWidget):
             pass
 
     def _show_changes(self, changes):
+        if changes:
+            self.profile_changed.emit()        # the play tools (stats, EXP meter) follow the profile
         changes = [ch for ch in changes if ch[0] != "exp"]     # the EXP bar shows it; no chat line per percent
         self.refresh_plan()
         labels = {"level": "level", "job": "job", "base_class": "job", "map": "map",
-                  "quest+": "quest_started", "quest-": "quest_done", "note": "note"}
+                  "quest+": "quest_started", "quest-": "quest_done", "note": "note", "stats": "stats_word"}
         for field, value in changes:
             self.add_system(self.t("profile_updated", what=f"{self.t(labels[field])} {value}"))
             if self.stats:

@@ -75,6 +75,12 @@ def find_codex() -> str | None:
 
 def env(api_key: str | None = None) -> dict:
     e = child_env(POSIX_DIRS)
+    if sys.platform == "win32":
+        # Codex runs its shell commands in a restricted sandbox token, which may not start the Store's app
+        # aliases (…\Microsoft\WindowsApps\pwsh.exe: "CreateProcessAsUserW failed: 5"). Without them on PATH it
+        # uses Windows PowerShell from System32, which works, so the answer can read the knowledge base.
+        e["PATH"] = os.pathsep.join(d for d in e.get("PATH", "").split(os.pathsep)
+                                    if not d.rstrip("\\/").lower().endswith(r"\microsoft\windowsapps"))
     if api_key:
         e["CODEX_API_KEY"] = api_key
     else:

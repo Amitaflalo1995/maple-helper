@@ -12,7 +12,6 @@ from PySide6.QtWidgets import (QButtonGroup, QFrame, QGridLayout, QHBoxLayout, Q
 from .. import bidi, providers
 from .controls import Section, Segmented, Select, Stepper, Switch, rtl_buttons
 from .glass import GlassDialog
-from .widgets import CharacterRow
 from ..i18n import I18n
 from ..kb import KnowledgeBase
 from ..store import ASSETS, History, Profiles, Settings
@@ -557,20 +556,6 @@ class SettingsDialog(GlassDialog):
         scroll.setWidget(body)
         outer.addWidget(scroll, 1)
 
-        # characters first: the thing players change most
-        sec = Section(t("characters"), rtl)
-        self.chars_box = QWidget(objectName="Feed")
-        self.chars = QVBoxLayout(self.chars_box)
-        self.chars.setContentsMargins(0, 0, 0, 0)
-        self.chars.setSpacing(0)
-        sec.add_widget(self.chars_box)
-        self._fill_chars()
-        add = QPushButton("＋  " + t("add_character"), objectName="Link")
-        add.setCursor(Qt.PointingHandCursor)
-        add.clicked.connect(self._add_char)
-        sec.add_widget(add)
-        lay.addWidget(sec)
-
         # appearance
         sec = Section(t("sec_appearance"), rtl)
         self.appearance = Segmented([(t("appearance_dark_short"), "dark"), (t("appearance_light_short"), "light")],
@@ -893,54 +878,6 @@ class SettingsDialog(GlassDialog):
             ai.logout()
             self._account_bridge.account.emit({**ai.account(), "provider": ai.name})
         threading.Thread(target=work, daemon=True).start()
-
-    def _fill_chars(self):
-        while self.chars.count():
-            w = self.chars.takeAt(0).widget()
-            if w:
-                w.deleteLater()
-        for i, c in enumerate(self.profiles.characters):
-            if i:
-                sep = QFrame(objectName="Separator")
-                sep.setFixedHeight(1)
-                self.chars.addWidget(sep)
-            row = CharacterRow(c, self.profiles.avatar_path(c), self.kb, c.id == self.profiles.active_id,
-                               self.t.rtl, can_delete=True)
-            row.chosen.connect(self._choose_char)
-            row.edit_requested.connect(self._edit_char)
-            row.delete_requested.connect(self._delete_char)
-            self.chars.addWidget(row)
-
-    def _choose_char(self, cid: str):
-        self.profiles.set_active(cid)
-        self._fill_chars()
-        self.changed.emit()
-
-    def _edit_char(self, cid: str):
-        dlg = Onboarding(self.settings, self.profiles, self.kb, self.stylesheet_fn, edit_id=cid)
-        if dlg.exec():
-            self._fill_chars()
-            self.changed.emit()
-
-    def _delete_char(self, cid: str):
-        c = next((c for c in self.profiles.characters if c.id == cid), None)
-        if not c:
-            return
-        t = self.t
-        dlg = ConfirmDialog(t("delete_character"), t("delete_character_confirm", name=c.name), t("delete"),
-                            t("cancel"), t.rtl, self.stylesheet_fn(1.0))
-        if dlg.exec():
-            self.profiles.remove(cid)
-            if not self.profiles.characters:
-                # advice needs a character: offer to create one right away
-                Onboarding(self.settings, self.profiles, self.kb, self.stylesheet_fn, only_character=True).exec()
-            self._fill_chars()
-            self.changed.emit()
-
-    def _add_char(self):
-        dlg = Onboarding(self.settings, self.profiles, self.kb, self.stylesheet_fn, only_character=True)
-        if dlg.exec():
-            self._fill_chars()
 
     def _clear_history(self):
         c = self.profiles.active

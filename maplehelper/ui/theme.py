@@ -48,11 +48,12 @@ BORDER = "rgba(255,149,51,0.55)"
 
 FONT_FAMILY = "Rubik"
 ICON_FONT = "Segoe Fluent Icons"
-ICON = {"open": "\ue8a7", "refresh": "\ue72c", "info": "\ue946", "edit": "\ue70f", "delete": "\ue74d", "add": "\ue710", "minimize": "\ue921", "close": "\ue8bb", "settings": "\ue713", "camera": "\ue722", "mic": "\ue720", "send": "\ue74a", "stop": "\ue71a", "copy": "\ue8c8", "star": "\ue734", "star_on": "\ue735", "plan": "\ue8fd", "book": "\ue82d", "search": "\ue721"}
+ICON = {"open": "\ue8a7", "refresh": "\ue72c", "info": "\ue946", "edit": "\ue70f", "delete": "\ue74d", "add": "\ue710", "minimize": "\ue921", "close": "\ue8bb", "settings": "\ue713", "camera": "\ue722", "mic": "\ue720", "send": "\ue74a", "stop": "\ue71a", "copy": "\ue8c8", "star": "\ue734", "star_on": "\ue735", "plan": "\ue8fd", "book": "\ue82d", "search": "\ue721", "tools": "\ue90f", "timer": "\ue916", "play": "\ue768", "check": "\ue73e"}
 # the same keys without an icon font (a trailing U+FE0E asks for the plain glyph, not the color emoji)
 SYMBOL_ICONS = {"open": "\u2197", "refresh": "\u21bb", "info": "\u24d8", "edit": "\u270e", "delete": "\u232b", "add": "+", "minimize": "\u2013",
                 "close": "\u2715", "settings": "\u2699\ufe0e", "camera": "\ud83d\udcf7\ufe0e", "mic": "\ud83c\udf99\ufe0e", "send": "\u27a4", "stop": "\u25a0",
-                "copy": "\u29c9", "star": "\u2606", "star_on": "\u2605", "plan": "\u2261", "book": "\u2630", "search": "\u2315"}
+                "copy": "\u29c9", "star": "\u2606", "star_on": "\u2605", "plan": "\u2261", "book": "\u2630", "search": "\u2315",
+                "tools": "\u2692\ufe0e", "timer": "\u23f1\ufe0e", "play": "\u25b6\ufe0e", "check": "\u2713"}
 
 
 def set_mode(mode: str) -> None:
@@ -196,6 +197,28 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
                         min-height: 28px; max-height: 28px; padding: 0 13px; font-size: {s - 2}px; font-weight: 500; color: {c['text']}; }}
     QPushButton#Chip:hover {{ background: {c['fill3']}; }}
     QPushButton#Chip:pressed {{ background: {c['pressed']}; }}
+    QPushButton#Chip:checked {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFA24A, stop:1 {ORANGE_DEEP});
+                                border: 1px solid {ORANGE_DEEP}; color: white; font-weight: 700; }}
+    QPushButton#SubChip {{ background: transparent; border: 1px solid {c['stroke']}; border-radius: 10px;
+                           min-height: 26px; max-height: 26px; padding: 0 10px; font-size: {s - 3}px; font-weight: 500;
+                           color: {c['muted']}; }}
+    QPushButton#SubChip:hover {{ background: {c['fill3']}; color: {c['text']}; }}
+    QPushButton#SubChip:checked {{ background: rgba(255,149,51,0.14); border: 1.5px solid {ORANGE}; color: {ORANGE_DEEP};
+                                   font-weight: 700; }}
+    #Tag, #TagGood, #TagWarn, #TagAccent {{ font-size: {s - 3}px; font-weight: 600; border-radius: 8px; padding: 2px 8px; }}
+    #Tag {{ color: {c['muted']}; background: {c['fill3']}; }}
+    #TagGood {{ color: #2E9E5B; background: rgba(52,199,89,0.16); }}
+    #TagWarn {{ color: #C9620A; background: rgba(255,149,51,0.18); }}
+    #TagAccent {{ color: {ORANGE_DEEP}; background: rgba(255,149,51,0.12); }}
+    #BigStat {{ font-size: {s + 10}px; font-weight: 700; letter-spacing: -0.4px; color: {c['text']}; }}
+    #BigStatLabel {{ font-size: {s - 3}px; color: {c['muted']}; }}
+    QPushButton#NowChip {{ background: rgba(255,149,51,0.12); border: 1px solid rgba(255,149,51,0.55); border-radius: 12px;
+                           min-height: 24px; max-height: 24px; padding: 0 11px; font-size: {s - 2}px; font-weight: 600;
+                           color: {ORANGE_DEEP}; }}
+    QPushButton#NowChip:hover {{ background: rgba(255,149,51,0.22); }}
+    QPushButton#NowChip:pressed {{ background: rgba(255,149,51,0.32); }}
+    #ShotHint {{ color: {c['muted']}; font-size: {s - 3}px; padding: 0 6px 2px 6px; }}
+    #ToolHeader {{ font-size: {s - 1}px; color: {c['muted']}; }}
 
     #Capsule {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 21px; }}
     #Capsule[focus="true"] {{ border: 1px solid rgba(255,149,51,0.85); }}
@@ -290,3 +313,22 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
 
 def dialog_background() -> str:
     return "#1C1C1E" if MODE == "dark" else "#F2F2F7"
+
+
+def glyph_icon(name: str, color: str | None = None, px: int = 16):
+    """A menu icon drawn from the app's icon font (the same pencil / trash as the Settings screen)."""
+    from PySide6.QtCore import QRect, Qt
+    from PySide6.QtGui import QColor, QFont, QIcon, QPainter, QPixmap
+    scale = 3
+    pm = QPixmap(px * scale, px * scale)
+    pm.fill(Qt.transparent)
+    p = QPainter(pm)
+    p.setRenderHint(QPainter.Antialiasing)
+    f = QFont(ICON_FONT)
+    f.setPixelSize(int(px * scale * 0.8))
+    p.setFont(f)
+    p.setPen(QColor(color or P()["muted"]))
+    p.drawText(QRect(0, 0, px * scale, px * scale), Qt.AlignCenter, ICON[name])
+    p.end()
+    pm.setDevicePixelRatio(scale)
+    return QIcon(pm)

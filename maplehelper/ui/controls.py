@@ -86,6 +86,17 @@ class Segmented(QFrame):
             lay.addWidget(b, 1)
         self.group.buttonClicked.connect(lambda b: self.changed.emit(b.property("value")))
 
+    def showEvent(self, e):
+        # the chosen segment is bold: reserve that width, or "Kerning City" loses a letter when picked.
+        # Measured once styled (the stylesheet's size and letter spacing), not with the default font
+        from PySide6.QtGui import QFontMetrics
+        for b in self.group.buttons():
+            b.ensurePolished()
+            bold = b.font()
+            bold.setBold(True)
+            b.setMinimumWidth(QFontMetrics(bold).horizontalAdvance(b.text()) + 30)
+        super().showEvent(e)
+
     def value(self):
         b = self.group.checkedButton()
         return b.property("value") if b else None

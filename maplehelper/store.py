@@ -139,6 +139,10 @@ class Character:
     notes: list[str] = field(default_factory=list)
     avatar: str = ""              # file in AVATAR_DIR, cropped from the latest screenshot
     exp_pct: float | None = None  # EXP bar of the current level, read from a screenshot
+    stats: dict = field(default_factory=dict)          # from the stat window: acc, dmg_min, dmg_max, hp, mp
+    quests_done: list[str] = field(default_factory=list)   # quest keys the player marked done
+    town: str = ""                                    # citizenship town (Henesys / Kerning City), "" = not chosen
+    crafts: dict = field(default_factory=dict)        # crafting profession -> its level
     updated_at: float = field(default_factory=time.time)
 
     def summary(self) -> str:
@@ -147,9 +151,18 @@ class Character:
             parts.append(f"Last known map: {self.map}")
         if self.active_quests:
             parts.append("Active quests: " + ", ".join(self.active_quests))
+        st = self.stats or {}
+        if st:
+            bits = [f"ACC {st['acc']}" if st.get("acc") else "",
+                    f"damage {st['dmg_min']}-{st.get('dmg_max', st['dmg_min'])}" if st.get("dmg_min") else "",
+                    f"max HP {st['hp']}" if st.get("hp") else "", f"max MP {st['mp']}" if st.get("mp") else ""]
+            parts.append("Stats (stat window): " + ", ".join(b for b in bits if b))
         if self.notes:
             parts.append("Notes: " + "; ".join(self.notes[-10:]))
         return "\n".join(parts)
+
+
+STAT_KEYS = ("acc", "dmg_min", "dmg_max", "hp", "mp")
 
 
 class Profiles:
@@ -222,6 +235,16 @@ class Profiles:
             if q in c.active_quests:
                 c.active_quests.remove(q)
                 changed.append(("quest-", q))
+        stats = update.get("stats")
+        if isinstance(stats, dict):
+            clean = {k: int(v) for k, v in stats.items()
+                     if k in STAT_KEYS and isinstance(v, (int, float)) and 0 < v < 1_000_000}
+            if clean.get("dmg_min", 0) > clean.get("dmg_max", 10**9):
+                clean["dmg_min"], clean["dmg_max"] = clean["dmg_max"], clean["dmg_min"]
+            new = {**c.stats, **clean}
+            if new != c.stats:
+                c.stats = new
+                changed.append(("stats", ", ".join(f"{k} {v}" for k, v in clean.items())))
         pct = update.get("exp_percent")
         if isinstance(pct, (int, float)) and 0 <= pct <= 100 and pct != c.exp_pct:
             c.exp_pct = round(float(pct), 2)

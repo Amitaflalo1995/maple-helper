@@ -147,8 +147,29 @@ def newer_release(current: str) -> tuple[str, str] | None:
     return rel["tag_name"].lstrip("v"), rel.get("html_url") or f"https://github.com/{GITHUB_REPO}/releases/latest"
 
 
-def download_app_update(current: str) -> str | None:
+def _download(url: str, progress=None, timeout: int = 600) -> bytes | None:
+    """The whole file, reporting progress(done_bytes, total_bytes) as it arrives."""
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "MapleHelper"})
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            total = int(r.headers.get("Content-Length") or 0)
+            chunks, done = [], 0
+            while True:
+                chunk = r.read(256 * 1024)
+                if not chunk:
+                    break
+                chunks.append(chunk)
+                done += len(chunk)
+                if progress:
+                    progress(done, total)
+            return b"".join(chunks)
+    except (urllib.error.URLError, TimeoutError, ValueError, OSError):
+        return None
+
+
+def download_app_update(current: str, progress=None) -> str | None:
     """If GitHub has a newer release, download its installer. Returns the installer path.
+    progress(done_bytes, total_bytes) is called while it downloads.
 
     The installer is only kept when its SHA-256 matches the release's SHA256SUMS.txt:
     it is executed on the player's PC, so a truncated or corrupted download must never run.
@@ -160,7 +181,8 @@ def download_app_update(current: str) -> str | None:
     want = _published_sha256(rel, SETUP_ASSET) if asset else None
     if not want:
         return None
-    data = _get(asset["browser_download_url"], timeout=600)
+    url = asset["browser_download_url"]
+    data = _download(url, progress) if progress else _get(url, timeout=600)
     if not data or hashlib.sha256(data).hexdigest() != want:
         return None
     path = USER_KB.parent / "updates" / f"MapleHelper-Setup-{rel['tag_name']}.exe"
@@ -191,7 +213,9 @@ def installer_args(path: str, reopen: bool) -> list[str]:
     # the installer starts the app again when done: in the tray after a quiet update on quit,
     # with the chat open when the player pressed "Update now" (see [Run] in packaging/installer.iss)
     log = USER_KB.parent / "logs" / "update.log"          # why an update failed, if it ever does
-    args = [path, "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", f"/LOG={log}"]
+    # "Update now": /SILENT shows the installer's own progress window while the app is closed, so the
+    # player sees the update happen; an update on quit stays fully quiet (/VERYSILENT)
+    args = [path, "/SILENT" if reopen else "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", f"/LOG={log}"]
     if reopen:
         args.append("/LAUNCHARGS=--updated")
     return args

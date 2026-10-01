@@ -1,5 +1,26 @@
 [
  {
+  "version": "0.7.0",
+  "he": [
+   "כלי משחק חדשים (כפתור הכלים בצ'אט): איפה לאמן, מחשבון פגיעה ונזק, תוכנית בילד (AP / SP / ציוד), קווסטים ללבל שלך, קראפטינג, אזרחות, מחיר פריט, מד EXP ותיק וקניות.",
+   "בחירת מפלצות, מפות ופריטים מרשימה עם תמונות, וקווסטים עם תמונת ה-NPC, הפריטים והמפלצות.",
+   "קראפטינג: כל המתכונים של 6 המקצועות לפי רמה, הכי משתלמים קודם, ולכל מקצוע הסבר: מה מייצרים, מי המורה ובאיזו עיר, וקווסטי הפתיחה.",
+   "מחירים: מחירי NPC, וחציון מחירים חי מה-Free Market לפי דיווחי שחקנים ב-NiaMeowDB.",
+   "סימן ? כתום ליד מונחי משחק (ACC, Avoid, AP ועוד): מעבר עם העכבר מסביר מה זה.",
+   "עריכה ומחיקה של דמות ישר מהתפריט בכרטיס הדמות, ו\"מה עכשיו?\" בכרטיס.",
+   "עדכון חדש: רואים את התקדמות ההורדה וההתקנה, והאפליקציה נפתחת מחדש עם מה חדש."
+  ],
+  "en": [
+   "New play tools (the tools button in the chat): where to train, hit & damage calculator, build plan (AP / SP / gear), quests for your level, crafting, citizenship, item price, EXP meter and bag & shopping.",
+   "Pick monsters, maps and items from lists with pictures; quests show the NPC, items and monsters.",
+   "Crafting: every recipe of the 6 professions by level, best first, and each profession explained: what it makes, its teacher and town, and the starting quests.",
+   "Prices: NPC prices, and a live Free Market median from player reports on NiaMeowDB.",
+   "An orange ? beside game terms (ACC, Avoid, AP and more): hover it to see what it means.",
+   "Edit or delete a character right from the character card's menu, and \"What now?\" on the card.",
+   "New update flow: see the download and install progress, and the app reopens with what's new."
+  ]
+ },
+ {
   "version": "0.6.1",
   "he": [
    "מדריכים מלאים עם תמונות: דמויות, אייקונים של סקילים ופריטים, מפלצות, טבלאות וקופסאות טיפים, כמו באתר, ובעברית מלאה. מעבר עם העכבר על תמונה מגדיל אותה.",
