@@ -314,3 +314,13 @@ def test_switching_provider_swaps_the_backend(kb):
     assert isinstance(b.backend, claude.ClaudeBackend)
     b.provider = "codex"
     assert isinstance(b.backend, codex.CodexBackend)
+
+
+def test_chatgpt_account_shows_its_email(monkeypatch):
+    """`codex login status` has no email; the app-server's account/read has it."""
+    monkeypatch.setattr(codex, "app_server", lambda method, params=None, timeout=20:
+                        {"account": {"type": "chatgpt", "email": "p@x.com", "planType": "plus"}}
+                        if method == "account/read" else None)
+    assert codex.account_email() == "p@x.com"
+    monkeypatch.setattr(codex, "app_server", lambda *a, **k: {"account": {"type": "apiKey"}})
+    assert codex.account_email() is None

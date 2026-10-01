@@ -127,21 +127,55 @@ def parse_events(lines, stderr: str = "") -> RawResult:
     return RawResult(text=answer)
 
 
-LIMITS_REQUEST = ({"id": 1, "method": "initialize", "params": {"clientInfo": {"name": "maple_helper", "version": "1"}}},
-                  {"method": "initialized"}, {"id": 2, "method": "account/rateLimits/read"})
-
-
-def read_limits_reply(lines) -> dict | None:
-    """The usage from the app-server's reply to request 2 (other lines are notifications)."""
-    from .. import usage
+def reply_result(lines) -> dict | None:
+    """The app-server's result for request 2 (other lines are notifications); None on an error reply."""
     for line in lines:
         try:
             msg = json.loads(line)
         except (json.JSONDecodeError, UnicodeDecodeError):
             continue
         if isinstance(msg, dict) and msg.get("id") == 2:
-            return usage.parse_codex((msg.get("result") or {}).get("rateLimits"))
+            return msg.get("result") if isinstance(msg.get("result"), dict) else None
     return None
+
+
+def read_limits_reply(lines) -> dict | None:
+    """The usage from an account/rateLimits/read reply."""
+    from .. import usage
+    return usage.parse_codex((reply_result(lines) or {}).get("rateLimits"))
+
+
+def app_server(method: str, params: dict | None = None, timeout: float = 20) -> dict | None:
+    """One request to `codex app-server` (the official JSON-RPC interface of the Codex CLI)."""
+    exe = find_codex()
+    if not exe:
+        return None
+    try:
+        p = subprocess.Popen([exe, "app-server"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                             stderr=subprocess.DEVNULL, env=env(), creationflags=CREATE_NO_WINDOW)
+    except OSError:
+        return None
+    killer = threading.Timer(timeout, p.kill)
+    killer.start()
+    request = {"id": 2, "method": method, **({"params": params} if params is not None else {})}
+    try:
+        for msg in ({"id": 1, "method": "initialize", "params": {"clientInfo": {"name": "maple_helper", "version": "1"}}},
+                    {"method": "initialized"}, request):
+            p.stdin.write((json.dumps(msg) + "\n").encode("utf-8"))
+        p.stdin.flush()
+        return reply_result(p.stdout)
+    except OSError:
+        return None
+    finally:
+        killer.cancel()
+        p.kill()
+        p.wait()
+
+
+def account_email() -> str | None:
+    """The signed-in ChatGPT account's email (account/read); `codex login status` doesn't show it."""
+    acc = (app_server("account/read", {"refreshToken": False}) or {}).get("account") or {}
+    return acc.get("email") if acc.get("type") == "chatgpt" else None
 
 
 def parse_status(returncode: int, output: str) -> dict:
@@ -165,27 +199,8 @@ class Codex(Provider):
     def read_limits(self, timeout: float = 20) -> dict | None:
         """The ChatGPT plan usage (5-hour and weekly windows), from `codex app-server`'s
         account/rateLimits/read. None when not installed, signed out, on an API key, or on any error."""
-        exe = find_codex()
-        if not exe:
-            return None
-        try:
-            p = subprocess.Popen([exe, "app-server"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                 stderr=subprocess.DEVNULL, env=env(), creationflags=CREATE_NO_WINDOW)
-        except OSError:
-            return None
-        killer = threading.Timer(timeout, p.kill)
-        killer.start()
-        try:
-            for msg in LIMITS_REQUEST:
-                p.stdin.write((json.dumps(msg) + "\n").encode("utf-8"))
-            p.stdin.flush()
-            return read_limits_reply(p.stdout)
-        except OSError:
-            return None
-        finally:
-            killer.cancel()
-            p.kill()
-            p.wait()
+        from .. import usage
+        return usage.parse_codex((app_server("account/rateLimits/read", timeout=timeout) or {}).get("rateLimits"))
 
     def account(self) -> dict:
         exe = find_codex()
@@ -197,7 +212,10 @@ class Codex(Provider):
         except (OSError, subprocess.TimeoutExpired):
             return {"status": "logged_out", "email": None, "method": None}
         out = (r.stdout + r.stderr).decode("utf-8", errors="replace")   # the status goes to stderr
-        return parse_status(r.returncode, out)
+        acc = parse_status(r.returncode, out)
+        if acc["status"] == "ok" and acc["method"] == "chatgpt":
+            acc["email"] = account_email()
+        return acc
 
     def logout(self) -> bool:
         exe = find_codex()
