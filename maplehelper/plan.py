@@ -1,0 +1,176 @@
+"""The player's plan, straight from the knowledge base: EXP to the next level, where to train,
+the next job advancement, and the one tip worth showing right now.
+
+Sources are the KB's own guides (EXP table, best grind maps) and the job tree, so everything
+here is instant and costs no Claude usage.
+"""
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass, field
+from functools import lru_cache
+
+EXP_GUIDE = "guide/exp-table-level-1-to-100"
+GRIND_GUIDE = "guide/best-grind-maps-every-level"
+# main stat first; the second only as much as gear and accuracy need
+STATS = {"Beginner": ("STR", "DEX"), "Warrior": ("STR", "DEX"), "Magician": ("INT", "LUK"),
+         "Bowman": ("DEX", "STR"), "Thief": ("LUK", "DEX")}
+JOB_SOON = 2          # levels before an advancement when the tip appears
+MAP_TOO_EASY = 8      # the map's monsters this many levels below the player: suggest moving on
+
+
+@dataclass
+class Spot:
+    map: str
+    street: str
+    exp_hr: int
+    mob: str
+    mob_level: int
+    why: str
+
+
+@dataclass
+class Bracket:
+    lo: int
+    hi: int
+    spots: list[Spot] = field(default_factory=list)
+
+
+def _int(s: str) -> int | None:
+    digits = re.sub(r"[^\d]", "", s)
+    return int(digits) if digits else None
+
+
+@lru_cache(maxsize=4)
+def _exp_table(page: str) -> dict[int, int]:
+    table = {}
+    for line in page.splitlines():
+        cols = [c.strip() for c in line.split("|")]
+        if len(cols) >= 3 and cols[0].isdigit():
+            need = _int(cols[1])
+            if need:
+                table[int(cols[0])] = need
+    return table
+
+
+def exp_table(kb) -> dict[int, int]:
+    """level -> EXP needed for the next level."""
+    return _exp_table(kb.page(EXP_GUIDE))
+
+
+@lru_cache(maxsize=4)
+def _brackets(page: str) -> tuple[Bracket, ...]:
+    out: list[Bracket] = []
+    current = None
+    for line in page.splitlines():
+        m = re.fullmatch(r"Level (\d+)-(\d+)", line.strip())
+        if m:
+            lo, hi = int(m.group(1)), int(m.group(2))
+            current = next((b for b in out if (b.lo, b.hi) == (lo, hi)), None)
+            if current is None:
+                current = Bracket(lo, hi)
+                out.append(current)
+            continue
+        cols = [c.strip() for c in line.split(" | ")]
+        if current is None or len(cols) < 6 or cols[0] == "Map":
+            continue
+        mob = re.fullmatch(r"(.+?) \(lv(\d+)\)", cols[3])
+        exp_hr = _int(cols[2])
+        if mob and exp_hr and not any(s.map == cols[0] for s in current.spots):
+            current.spots.append(Spot(cols[0], cols[1], exp_hr, mob.group(1), int(mob.group(2)), cols[5]))
+    for b in out:
+        b.spots.sort(key=lambda s: -s.exp_hr)
+    return tuple(out)
+
+
+def brackets(kb) -> tuple[Bracket, ...]:
+    return _brackets(kb.page(GRIND_GUIDE))
+
+
+def spots_for(kb, level: int, n: int = 3) -> list[Spot]:
+    b = next((b for b in brackets(kb) if b.lo <= level <= b.hi), None)
+    return b.spots[:n] if b else []
+
+
+def route(kb, level: int, levels_ahead: int = 8) -> list[tuple[Bracket, Spot]]:
+    """The best spot of each level bracket from now to `levels_ahead` levels on."""
+    out = []
+    for b in brackets(kb):
+        if b.hi >= level and b.lo <= level + levels_ahead and b.spots:
+            out.append((b, b.spots[0]))
+    return out
+
+
+def monster_exp(kb, name: str) -> int | None:
+    key = next((k for k, e in kb.entities.items() if e["category"] == "monster" and e["name"] == name), None)
+    exp = ((kb.get(key) or {}).get("props") or {}).get("EXP") if key else None
+    return exp if isinstance(exp, (int, float)) and exp > 0 else None
+
+
+def progress(kb, level: int, exp_pct: float | None) -> dict | None:
+    """EXP left to the next level and how many of the bracket's main monster that is."""
+    need = exp_table(kb).get(level)
+    if not need or exp_pct is None:
+        return None
+    left = max(0, round(need * (1 - exp_pct / 100)))
+    out = {"pct": exp_pct, "need": need, "left": left}
+    spot = (spots_for(kb, level, 1) or [None])[0]
+    if spot:
+        mexp = monster_exp(kb, spot.mob)
+        if mexp:
+            out.update(mob=spot.mob, kills=-(-left // int(mexp)))
+    return out
+
+
+def next_job(base_class: str, job: str, level: int) -> tuple[list[str], int] | None:
+    """The next advancement: (job names to choose from, level), or None at the end of the tree."""
+    from .ui.dialogs import JOBS
+    tree = JOBS.get(base_class, [])
+    if base_class == "Beginner":
+        return (["Warrior", "Magician", "Bowman", "Thief"], 10) if level < 10 else None   # Magician from 8
+    current = next((lv for j, lv in tree if j == job), 0)
+    later = sorted({lv for _, lv in tree if lv > current})
+    if not later:
+        return None
+    lv = later[0]
+    return [j for j, need in tree if need == lv], lv
+
+
+def class_guide(kb, base_class: str, job: str) -> str | None:
+    """The KB guide for the player's job ("F/P Wizard" -> guide/fp-wizard-class-guide), else for the class."""
+    for name in (job, base_class):
+        key = "guide/" + re.sub(r"[^a-z0-9]+", "-", name.lower().replace("/", "")).strip("-") + "-class-guide"
+        if kb.get(key):
+            return key
+    return None
+
+
+@dataclass
+class Tip:
+    kind: str          # "job" | "map"
+    key: str           # i18n key of the text
+    args: dict
+    question: str      # what the chat asks Claude when the tip is tapped (player's language)
+
+
+def tip(kb, c, t, dismissed: dict | None = None) -> Tip | None:
+    """The single most useful tip right now, or None. A dismissed tip stays away until the next level."""
+    dismissed = dismissed or {}
+
+    def fresh(kind):
+        return dismissed.get(kind) != c.level
+
+    nxt = next_job(c.base_class, c.job, c.level)
+    if nxt and fresh("job") and nxt[1] - JOB_SOON <= c.level < nxt[1] + 3:
+        jobs, lv = nxt
+        names = " / ".join(jobs)
+        key = "tip_job_now" if c.level >= lv else "tip_job_soon"
+        return Tip("job", key, {"n": lv - c.level, "jobs": names, "level": lv},
+                   t("tip_job_q", jobs=names, level=lv))
+    if c.map and fresh("map"):
+        here = [s for b in brackets(kb) for s in b.spots if s.map.lower() == c.map.lower()]
+        best = (spots_for(kb, c.level, 1) or [None])[0]
+        if here and best and here[0].mob_level <= c.level - MAP_TOO_EASY and best.map != here[0].map:
+            return Tip("map", "tip_map", {"map": best.map, "mob": best.mob},
+                       t("tip_map_q", map=best.map))
+    return None

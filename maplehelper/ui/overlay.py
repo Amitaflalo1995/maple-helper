@@ -86,6 +86,7 @@ class FocusLineEdit(QLineEdit):
 
 
 class Overlay(QWidget):
+    guide_requested = Signal(str)
     saver_requested = Signal()
     wishlist_requested = Signal()
     closed = Signal()
@@ -210,6 +211,17 @@ class Overlay(QWidget):
         self.profile_card.clicked.connect(self.character_menu)
         self.profile_card.setCursor(Qt.PointingHandCursor)
         lay.addWidget(self.profile_card)
+        from .plancard import PlanPanel, TipStrip
+        self.tip_strip = TipStrip()
+        self.tip_strip.asked.connect(self.ask)
+        self.tip_strip.dismissed.connect(self._dismiss_tip)
+        lay.addWidget(self.tip_strip)
+        self.plan_panel = PlanPanel()
+        self.plan_panel.asked.connect(self.ask)
+        self.plan_panel.what_now.connect(self.what_now)
+        self.plan_panel.guide_requested.connect(self.guide_requested.emit)
+        lay.addWidget(self.plan_panel)
+        self.profile_card.plan_btn.toggled.connect(self._toggle_plan)
 
         # conversation
         self.scroll = QScrollArea()
@@ -292,6 +304,7 @@ class Overlay(QWidget):
         self.saver_badge.setToolTip(self.t("saver_hint"))
         self.wish_btn.setToolTip(self.t("wishlist"))
         self.profile_card.refresh.setToolTip(self.t("refresh_tip"))
+        self.profile_card.plan_btn.setToolTip(self.t("plan_open"))
         self.profile_card.setToolTip(self.t("switch_character"))
         self.min_btn.setToolTip(self.t("minimize"))
         self.close_btn.setToolTip(self.t("close_chat").replace("F9", self.settings["hotkey_toggle"]))
@@ -310,6 +323,47 @@ class Overlay(QWidget):
         self.profile_card.setVisible(c is not None)
         if c:
             self.profile_card.show_character(c, self.profiles.avatar_path(c), self.kb, self.t.rtl)
+        self.refresh_plan()
+
+    # ------------------------------------------------------------------ plan (EXP, tips, "My plan")
+
+    def refresh_plan(self):
+        from .. import plan
+        c = self.profiles.active
+        if not c:
+            self.tip_strip.show_tip(None, self.t, self.t.rtl)
+            self.plan_panel.hide()
+            return
+        self.profile_card.exp.show_progress(plan.progress(self.kb, c.level, c.exp_pct), self.t, self.t.rtl)
+        dismissed = (self.settings["tips_dismissed"] or {}).get(c.id, {})
+        self.tip_strip.show_tip(plan.tip(self.kb, c, self.t, dismissed), self.t, self.t.rtl)
+        if self.plan_panel.isVisible():
+            self.plan_panel.fill(self.kb, c, self.t, self.t.rtl)
+
+    def _toggle_plan(self, on: bool):
+        c = self.profiles.active
+        if on and c:
+            self.plan_panel.fill(self.kb, c, self.t, self.t.rtl)
+        self.plan_panel.setVisible(on and c is not None)
+
+    def _dismiss_tip(self, kind: str):
+        c = self.profiles.active
+        if not c:
+            return
+        data = dict(self.settings["tips_dismissed"] or {})
+        data[c.id] = {**data.get(c.id, {}), kind: c.level}
+        self.settings["tips_dismissed"] = data
+        self.refresh_plan()
+
+    def what_now(self):
+        """'What now?': a fresh screenshot and the question, so Claude sees where the player is."""
+        self.profile_card.plan_btn.setChecked(False)
+        hwnd = osapi.find_game_window()
+        if hwnd:
+            self.game_hwnd = hwnd
+            self.shot = self.shot_provider(hwnd) if self.shot_provider else osapi.capture_game(hwnd)
+            self.shot_used = False
+        self.ask(self.t("what_now_q"))
 
     def character_menu(self):
         """Click the character card: pick another character or add one, right from the chat."""
@@ -847,6 +901,8 @@ class Overlay(QWidget):
             pass
 
     def _show_changes(self, changes):
+        changes = [ch for ch in changes if ch[0] != "exp"]     # the EXP bar shows it; no chat line per percent
+        self.refresh_plan()
         labels = {"level": "level", "job": "job", "base_class": "job", "map": "map",
                   "quest+": "quest_started", "quest-": "quest_done", "note": "note"}
         for field, value in changes:

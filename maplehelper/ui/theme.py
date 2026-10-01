@@ -48,11 +48,11 @@ BORDER = "rgba(255,149,51,0.55)"
 
 FONT_FAMILY = "Rubik"
 ICON_FONT = "Segoe Fluent Icons"
-ICON = {"open": "\ue8a7", "refresh": "\ue72c", "info": "\ue946", "edit": "\ue70f", "delete": "\ue74d", "add": "\ue710", "minimize": "\ue921", "close": "\ue8bb", "settings": "\ue713", "camera": "\ue722", "mic": "\ue720", "send": "\ue74a", "stop": "\ue71a", "copy": "\ue8c8", "star": "\ue734", "star_on": "\ue735"}
+ICON = {"open": "\ue8a7", "refresh": "\ue72c", "info": "\ue946", "edit": "\ue70f", "delete": "\ue74d", "add": "\ue710", "minimize": "\ue921", "close": "\ue8bb", "settings": "\ue713", "camera": "\ue722", "mic": "\ue720", "send": "\ue74a", "stop": "\ue71a", "copy": "\ue8c8", "star": "\ue734", "star_on": "\ue735", "plan": "\ue8fd", "book": "\ue82d"}
 # the same keys without an icon font (a trailing U+FE0E asks for the plain glyph, not the color emoji)
 SYMBOL_ICONS = {"open": "\u2197", "refresh": "\u21bb", "info": "\u24d8", "edit": "\u270e", "delete": "\u232b", "add": "+", "minimize": "\u2013",
                 "close": "\u2715", "settings": "\u2699\ufe0e", "camera": "\ud83d\udcf7\ufe0e", "mic": "\ud83c\udf99\ufe0e", "send": "\u27a4", "stop": "\u25a0",
-                "copy": "\u29c9", "star": "\u2606", "star_on": "\u2605"}
+                "copy": "\u29c9", "star": "\u2606", "star_on": "\u2605", "plan": "\u2261", "book": "\u2630"}
 
 
 def set_mode(mode: str) -> None:
@@ -93,6 +93,13 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #Title {{ font-size: {s + 1}px; font-weight: 600; letter-spacing: -0.2px; color: {c['text']}; }}
     #SaverBadge {{ font-size: {s - 4}px; font-weight: 600; color: #2E9E5B; background: rgba(52,199,89,0.14);
                    border-radius: 8px; padding: 1px 7px; }}
+    QProgressBar#ExpBar {{ background: {c['fill3']}; border: none; border-radius: 3px; }}
+    QProgressBar#ExpBar::chunk {{ background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #FFA24A, stop:1 {ORANGE_DEEP});
+                                  border-radius: 3px; }}
+    #ExpText {{ color: {c['muted']}; font-size: {s - 3}px; }}
+    #PlanHead {{ color: {c['muted']}; font-size: {s - 2}px; font-weight: 600; padding-top: 6px; }}
+    QPushButton#PlanLink {{ background: transparent; border: none; padding: 2px 0; text-align: right; color: {c['text']}; }}
+    QPushButton#PlanLink:hover {{ color: {ORANGE}; }}
     #Version {{ font-size: {s - 3}px; font-weight: 300; color: {c['muted']}; background: transparent; }}
     #ProfilePill {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 12px;
                     min-height: 24px; max-height: 24px; padding: 0 11px; font-size: {s - 2}px; font-weight: 500; color: {c['text']}; }}
@@ -145,6 +152,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
                            max-height: 30px; }}
     QToolButton#Refresh:hover {{ background: {c['fill3']}; color: {ORANGE}; }}
     QToolButton#Refresh:disabled {{ color: {ORANGE}; }}
+    QToolButton#Refresh:checked {{ color: {ORANGE}; background: {c['fill3']}; }}
     #ProfileName {{ font-size: {s + 1}px; font-weight: 600; color: {c['text']}; }}
     #ProfileMeta {{ font-size: {s - 1}px; font-weight: 500; color: {c['muted']}; }}
     #BubbleUser {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFA24A, stop:1 {ORANGE_DEEP});

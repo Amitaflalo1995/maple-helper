@@ -391,6 +391,10 @@ class ProfileCard(QFrame):
         self.meta = QLabel(objectName="ProfileMeta")
         col.addWidget(self.name)
         col.addWidget(self.meta)
+        from .plancard import ExpBar
+        self.exp = ExpBar()
+        self.exp.hide()
+        col.addWidget(self.exp)
         row.addLayout(col, 1)
         from PySide6.QtWidgets import QToolButton
         from . import theme
@@ -398,6 +402,10 @@ class ProfileCard(QFrame):
         self.refresh.setCursor(Qt.PointingHandCursor)
         self.refresh.clicked.connect(self.refresh_requested.emit)
         row.addWidget(self.refresh, 0, Qt.AlignVCenter)
+        self.plan_btn = QToolButton(objectName="Refresh", text=theme.ICON["plan"])
+        self.plan_btn.setCursor(Qt.PointingHandCursor)
+        self.plan_btn.setCheckable(True)
+        row.addWidget(self.plan_btn, 0, Qt.AlignVCenter)
         self._spin_frames = ["\ue72c", "\ue895"]      # refresh / sync glyphs alternate while busy
         from PySide6.QtCore import QTimer
         self._spin = QTimer(self, interval=260, timeout=self._tick)
