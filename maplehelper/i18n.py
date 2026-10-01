@@ -313,10 +313,9 @@ STRINGS = {
     "quick_ask_ai": {"he": "לשאול את Claude בכל זאת", "en": "Ask Claude anyway"},
     "quick_ask_ai_codex": {"he": "לשאול את ChatGPT בכל זאת", "en": "Ask ChatGPT anyway"},
     "instant_answers": {"he": "תשובות מהירות מהמאגר", "en": "Instant answers from the database"},
-    "instant_answers_hint": {"he": "שאלות פשוטות (HP, דרופים, מיקום) נענות מיד, בלי Claude",
-                             "en": "Simple questions (HP, drops, location) are answered at once, without Claude"},
-    "instant_answers_hint_codex": {"he": "שאלות פשוטות (HP, דרופים, מיקום) נענות מיד, בלי ChatGPT",
-                                   "en": "Simple questions (HP, drops, location) are answered at once, without ChatGPT"},
+    "instant_answers_hint": {"he": "שאלות פשוטות (HP, דרופים, מיקום) נענות מיד מהמאגר, בלי לחכות ל-AI",
+                             "en": "Simple questions (HP, drops, location) are answered at once from the database, "
+                                   "without waiting for the AI"},
     # onboarding
     "ob_welcome": {"he": "ברוכים הבאים ל-Maple Helper", "en": "Welcome to Maple Helper"},
     "ob_choose_lang": {"he": "בחרו שפה", "en": "Choose a language"},
