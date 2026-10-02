@@ -390,7 +390,10 @@ class EntityCard(Selectable, QFrame):
         for k in ("Level", "HP", "EXP", "Required Level", "Attack", "Weapon Attack", "Magic Attack", "Defense"):
             if k in props and props[k] not in (None, "", 0):
                 label = {"Level": t("card_level"), "Required Level": t("card_req_level")}.get(k, k)
-                bits.append(f"{label}: {props[k]}")
+                # an English label with its value is one left-to-right piece ("HP: 233"): in a Hebrew line its colon
+                # otherwise lands on the wrong side ("233 :HP", seen live)
+                # (+ RLM: two English pieces side by side would otherwise merge into one run, in English order)
+                bits.append(f"‪{label}: {props[k]}‬‏" if label.isascii() else f"{label}: {props[k]}")
             if len(bits) >= 3:
                 break
         return " · ".join(bits)
