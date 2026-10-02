@@ -121,8 +121,11 @@ class ChipScroll(QScrollArea):
 
 
 def chip_text(name: str, fm, width: int = 140) -> str:
-    """A long card name shortened with "…" so one chip can't take the whole row."""
-    return fm.elidedText(name, Qt.ElideRight, width)
+    """A long card name shortened with "…" so one chip can't take the whole row. A guide's title loses the
+    game's name first ("MapleStory Classic Bandit Guide…" said nothing in 140 px, seen live)."""
+    import re
+    short = re.sub(r"(?i)\bMapleStory\s+Classic\b[:\s-]*", "", name).strip(" :-") or name
+    return fm.elidedText(short, Qt.ElideRight, width)
 
 
 def stats_text(t, value: str) -> str:
