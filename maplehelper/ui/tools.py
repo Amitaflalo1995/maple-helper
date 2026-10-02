@@ -542,7 +542,8 @@ class ToolsDialog(GlassDialog):
         if m.maps:
             maps_sec = Section(t("calc_maps_head_plain"), t.rtl)
             for mp, n in m.maps[:3]:
-                self._row(maps_sec, mp, tag(self._p(t("spot_crowd", n=n)), "Tag"))
+                # one English block: "Tree Dungeon, Forest Up North IV" kept its comma in place
+                self._row(maps_sec, bidi.ltr_name(mp, t.rtl), tag(self._p(t("spot_crowd", n=n)), "Tag"))
             self.calc_box.addWidget(maps_sec)
 
     # build ---------------------------------------------------------------
@@ -642,14 +643,15 @@ class ToolsDialog(GlassDialog):
         lay.addWidget(self.q_mode, 0, Qt.AlignHCenter)
         self.q_head = self._label("", "ToolHeader")
         lay.addWidget(self.q_head)
-        self.q_list = QVBoxLayout()
-        self.q_list.setSpacing(8)
-        lay.addLayout(self.q_list)
+        # "show done quests" right under the header: under a list of 50 it was out of reach
         self.q_done_toggle = self._done_toggle()
         lay.addWidget(self.q_done_toggle, 0, Qt.AlignHCenter)
         self.q_done = QVBoxLayout()
         self.q_done.setSpacing(8)
         lay.addLayout(self.q_done)
+        self.q_list = QVBoxLayout()
+        self.q_list.setSpacing(8)
+        lay.addLayout(self.q_list)
         lay.addStretch(1)
         return sc
 
@@ -777,14 +779,25 @@ class ToolsDialog(GlassDialog):
         if c and key not in c.quests_done:
             c.quests_done.append(key)
             self.profiles.save()
-        self.refresh()
+        self._refresh_in_place()
 
     def _quest_undo(self, key: str):
         c = self.c
         if c and key in c.quests_done:
             c.quests_done.remove(key)
             self.profiles.save()
+        self._refresh_in_place()
+
+    def _refresh_in_place(self):
+        """Redraw the page where the player is reading (the list is rebuilt: it jumped to its end, seen live)."""
+        from PySide6.QtWidgets import QScrollArea
+        page = self.stack.currentWidget()
+        bar = page.verticalScrollBar() if isinstance(page, QScrollArea) else None
+        at = bar.value() if bar else 0
         self.refresh()
+        if bar:
+            bar.setValue(at)
+            QTimer.singleShot(0, lambda: bar.setValue(at))      # again once the new cards have their size
 
     def _done_toggle(self) -> QPushButton:
         """ "Show done quests": the quests marked done, each with a way back to the list."""
@@ -1038,6 +1051,13 @@ class ToolsDialog(GlassDialog):
         clear(self.price_box)
         name = self.price_input.text().strip()
         key = self.kb._item_by_name.get(name.lower()) if name else None
+        if name and not key:
+            # part of a name, like the damage calculator takes it ("Blue Pot" -> Blue Potion): the shortest match
+            q = name.lower()
+            part = sorted((n for n in self.kb._item_by_name if q in n), key=lambda n: (len(n), n))
+            if part:
+                key = self.kb._item_by_name[part[0]]
+                name = (self.kb.get(key) or {}).get("name", name)
         if not key:
             if name:
                 self.price_box.addWidget(self._label(t("price_none"), "RowHint"))

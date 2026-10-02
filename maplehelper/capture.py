@@ -6,8 +6,10 @@ import io
 import mss
 from PIL import Image
 
-MAX_SIDE = 1280
-# the latest grab at full resolution: the portrait is cut from it (a name tag is ~10 px tall at 1280 px wide)
+# the most the AI takes in without shrinking it again: on a 3440 px ultrawide, 1280 left inventory icons
+# ~12 px wide and the AI couldn't tell them apart (live test)
+MAX_SIDE = 1568
+# the latest grab at full resolution: the portrait is cut from it (a name tag is ~10 px tall at that size)
 LAST_FULL: Image.Image | None = None
 
 
@@ -19,7 +21,7 @@ def grab_image(x: int, y: int, w: int, h: int) -> Image.Image:
 
 
 def grab_jpeg(rect: tuple[int, int, int, int]) -> bytes:
-    """JPEG of a screen rectangle (x, y, w, h), longest side 1280px."""
+    """JPEG of a screen rectangle (x, y, w, h), longest side MAX_SIDE."""
     global LAST_FULL
     img = grab_image(*rect)
     LAST_FULL = img.copy()

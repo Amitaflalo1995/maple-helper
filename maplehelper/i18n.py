@@ -396,7 +396,7 @@ STRINGS = {
     "price_placeholder": {"he": "בחרו פריט מהרשימה ({n} פריטים) או הקלידו שם", "en": "Pick an item from the list ({n} items) or type a name"},
     "price_none": {"he": "לא מצאתי פריט בשם הזה.", "en": "No item by that name."},
     "price_npc_buys": {"he": "**NPC קונה מכם:** {n} mesos", "en": "**An NPC pays you:** {n} mesos"},
-    "price_shop": {"he": "**בחנות:** {n} mesos (הכי זול אצל {npc}, {where})", "en": "**In a shop:** {n} mesos (cheapest at {npc}, {where})"},
+    "price_shop": {"he": "**בחנות:** {n} mesos (הכי זול אצל {npc} ב-{where})", "en": "**In a shop:** {n} mesos (cheapest at {npc}, {where})"},
     "price_no_npc": {"he": "אין לפריט מחיר NPC במאגר.", "en": "No NPC price for this item in the database."},
     "price_fm_loading": {"he": "**Free Market:** בודק…", "en": "**Free Market:** checking…"},
     "price_fm": {"he": "**Free Market:** בערך **{median} mesos** (חציון של {n} דיווחים, {low}-{high})", "en": "**Free Market:** about **{median} mesos** (median of {n} reports, {low}-{high})"},
