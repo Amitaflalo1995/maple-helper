@@ -1139,7 +1139,8 @@ class Overlay(QWidget):
     SYNC_QUESTION = ("[Profile sync, not a chat question] Look at the screenshot and read MY character's name, current "
                      "level, job and EXP bar percentage (the HUD shows them), and if the stat window is open, its "
                      "Accuracy, damage range and max HP/MP. Reply with one short line in the "
-                     "profile's language, then @@META@@ with profile_update (name, level, job, base_class if visible, "
+                     "profile's language, then @@META@@ with profile_update (name, level, job: copied exactly as the HUD writes "
+                     "it even if the profile calls it otherwise, base_class if visible, "
                      "exp_percent, stats) and avatar_box. If the game or the character is not visible, say so briefly "
                      "and leave profile_update empty.")
 
