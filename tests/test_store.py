@@ -243,3 +243,13 @@ def test_history_skips_lines_of_the_wrong_shape(isolated_store):
     with h.log.open("a", encoding="utf-8") as f:
         f.write('[1, 2]\n{"role": "user"}\n"text"\n')
     assert [r["text"] for r in h.recent()] == ["hi"]
+
+
+def test_history_file_is_trimmed(isolated_store, monkeypatch):
+    h = isolated_store.History("x")
+    monkeypatch.setattr(isolated_store.History, "MAX_BYTES", 2000)
+    monkeypatch.setattr(isolated_store.History, "KEEP_LINES", 10)
+    for i in range(100):
+        h.append("user", f"question {i}")
+    recs = h.recent(1000)
+    assert len(recs) <= 30 and recs[-1]["text"] == "question 99"

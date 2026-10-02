@@ -463,6 +463,21 @@ class History:
         rec = {"t": time.time(), "role": role, "text": text, "entities": entities or []}
         with self.log.open("a", encoding="utf-8") as f:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        self._trim()
+
+    MAX_BYTES = 4_000_000       # ~8,000 questions: every question reads the file, it mustn't grow forever
+    KEEP_LINES = 6000
+
+    def _trim(self) -> None:
+        try:
+            if self.log.stat().st_size <= self.MAX_BYTES:
+                return
+            lines = self.log.read_text(encoding="utf-8", errors="replace").splitlines()[-self.KEEP_LINES:]
+            tmp = self.log.with_suffix(".tmp")
+            tmp.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            tmp.replace(self.log)
+        except OSError:
+            pass
 
     def recent(self, n: int = RECENT) -> list[dict]:
         if not self.log.exists():
