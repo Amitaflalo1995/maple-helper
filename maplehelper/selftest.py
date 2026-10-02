@@ -18,7 +18,7 @@ MODULES = [
     "PySide6.QtWidgets", "PySide6.QtNetwork", "mss", "PIL.Image", "numpy", "keyring", "sounddevice",
     "faster_whisper", "ctranslate2",
     "maplehelper.app", "maplehelper.osapi", "maplehelper.brain", "maplehelper.voice", "maplehelper.providers",
-    "maplehelper.updater",
+    "maplehelper.updater", "maplehelper.inventory", "maplehelper.portrait", "maplehelper.jobs",
     "maplehelper.ui.overlay", "maplehelper.ui.dialogs", "maplehelper.ui.toast",
 ]
 if sys.platform == "darwin":
