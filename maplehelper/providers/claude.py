@@ -92,9 +92,9 @@ class Claude(Provider):
             return False
 
     def login(self) -> subprocess.Popen | None:
-        """Official sign-in flow (opens the browser); visible console for the code prompt if needed."""
+        """Official sign-in flow: opens the browser, no window of its own."""
         exe = find_claude()
-        return open_login(exe, ["auth", "login"]) if exe else None
+        return open_login(exe, ["auth", "login"], env()) if exe else None
 
     def install(self) -> subprocess.Popen:
         return run_installer(INSTALL_CMD, INSTALL_CMD_MAC)

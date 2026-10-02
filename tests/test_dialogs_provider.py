@@ -92,7 +92,7 @@ def test_onboarding_sign_in_lets_the_login_window_show_and_offers_reinstall(env,
     dlg._on_provider("codex")
     monkeypatch.setattr(type(providers.get("codex")), "login", lambda self: object())
     dlg._start_login()
-    assert not dlg.windowFlags() & Qt.WindowStaysOnTopHint      # the console/browser open over it
+    assert not dlg.windowFlags() & Qt.WindowStaysOnTopHint      # the browser opens over it
     assert not dlg.login_hint.isHidden() and "ChatGPT" in dlg.login_hint.text()
     assert not dlg.install_btn.isHidden()
     dlg._on_status("codex", "ok")
@@ -109,6 +109,26 @@ def test_onboarding_sign_in_that_cannot_start_says_so(env, monkeypatch):
     dlg._on_provider("codex")
     monkeypatch.setattr(type(providers.get("codex")), "login", lambda self: None)
     dlg._start_login()
-    assert "Couldn't open the ChatGPT sign-in" in dlg.login_hint.text()
+    assert "The ChatGPT sign-in didn't work" in dlg.login_hint.text()
+    assert not dlg.install_btn.isHidden()
+    dlg.close()
+
+
+def test_onboarding_reports_a_sign_in_that_ended_in_failure(env, monkeypatch):
+    from maplehelper import providers
+    from maplehelper.ui.dialogs import Onboarding
+    s, profiles, kb = env
+    dlg = Onboarding(s, profiles, kb, lambda *_: "")
+    dlg._on_provider("codex")
+
+    class Ended:
+        returncode = 1
+
+        def poll(self):
+            return 1
+    monkeypatch.setattr(type(providers.get("codex")), "login", lambda self: Ended())
+    dlg._start_login()
+    dlg._poll_tick()
+    assert "The ChatGPT sign-in didn't work" in dlg.login_hint.text()
     assert not dlg.install_btn.isHidden()
     dlg.close()

@@ -349,13 +349,40 @@ def test_codex_runs_without_the_store_alias_folder(monkeypatch):
 
 
 class TestSignIn:
-    def test_login_window_stays_open_when_the_sign_in_fails(self):
-        s = base.login_script(r"C:\Program Files\WindowsApps\OpenAI.Codex_1\app\resources\codex.exe", ["login"])
-        assert s.startswith(r"& 'C:\Program Files\WindowsApps\OpenAI.Codex_1\app\resources\codex.exe' login")
-        assert "pause" in s.split(";", 1)[1]
+    def test_login_runs_without_a_window_and_ends_a_waiting_one(self, monkeypatch):
+        started = []
 
-    def test_login_script_quotes_an_apostrophe_in_the_path(self):
-        assert base.login_script(r"C:\Users\O'Neil\codex.exe", ["login"]).startswith(r"& 'C:\Users\O''Neil\codex.exe'")
+        class FakeProc:
+            def __init__(self, cmd, **kw):
+                self.cmd, self.kw, self.killed, self.stdout = cmd, kw, False, iter([b"Starting login"])
+                started.append(self)
+
+            def poll(self):
+                return None
+
+            def wait(self):
+                return 0
+
+            def kill(self):
+                self.killed = True
+        monkeypatch.setattr(base.subprocess, "Popen", FakeProc)
+        first = base.open_login("codex.exe", ["login"])
+        assert first.cmd == ["codex.exe", "login"]
+        assert first.kw["creationflags"] == base.CREATE_NO_WINDOW and first.kw["stdin"] == base.subprocess.DEVNULL
+        base.open_login("codex.exe", ["login"])     # a second click
+        assert first.killed                          # frees the port the first one waits on
+        base.stop_login()
+        assert started[1].killed
+
+    def test_login_failed_only_after_a_non_zero_exit(self):
+        class P:
+            def __init__(self, rc):
+                self.returncode = rc
+
+            def poll(self):
+                return self.returncode
+        assert base.login_failed(P(1)) and not base.login_failed(P(0))
+        assert not base.login_failed(P(None)) and not base.login_failed(None)
 
     def test_login_that_cannot_start_returns_none(self, monkeypatch):
         def boom(*_a, **_k):

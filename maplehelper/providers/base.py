@@ -1,12 +1,17 @@
 """What every AI provider shares: process flags, finding the CLI, keyring storage, error codes."""
 from __future__ import annotations
 
+import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
+import threading
 from dataclasses import dataclass
 from pathlib import Path
+
+log = logging.getLogger(__name__)
 
 # no console window flashing up on Windows; elsewhere creationflags must stay 0
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
@@ -81,23 +86,44 @@ def in_terminal(command: str) -> subprocess.Popen:
                              "-e", 'tell application "Terminal" to activate'])
 
 
-def login_script(exe: str, args: list[str]) -> str:
-    """PowerShell for a CLI's sign-in: the window stays open when it fails (or the CLI can't start), so the
-    player sees why instead of a console that flashes away."""
-    return ("& '" + exe.replace("'", "''") + "' " + " ".join(args)
-            + "; if ($LASTEXITCODE -ne 0) { Write-Host ''; pause }")
+_login: subprocess.Popen | None = None
 
 
-def open_login(exe: str, args: list[str]) -> subprocess.Popen | None:
-    """The official sign-in (it opens the browser) in a visible window. None when it couldn't start."""
-    import shlex
+def open_login(exe: str, args: list[str], env: dict | None = None) -> subprocess.Popen | None:
+    """The official sign-in, with no console window: the CLI opens the browser itself and waits for it there.
+    Its output goes to the log (it says why, when a sign-in fails). None when it couldn't start."""
+    global _login
+    stop_login()   # one left waiting still holds its local port (Codex: 1455), so a new one would fail
     try:
-        if sys.platform == "darwin":
-            return in_terminal(" ".join(shlex.quote(a) for a in [exe, *args]))
-        return subprocess.Popen(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command",
-                                 login_script(exe, args)], creationflags=CREATE_NEW_CONSOLE)
+        p = subprocess.Popen([exe, *args], stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                             stderr=subprocess.STDOUT, env=env, creationflags=CREATE_NO_WINDOW)
     except OSError:
+        log.warning("sign-in can't start: %s", exe, exc_info=True)
         return None
+
+    def drain():
+        for line in p.stdout:
+            text = line.decode("utf-8", errors="replace").strip()
+            if text:   # the one-time sign-in links stay out of the log
+                log.info("sign-in: %s", re.sub(r"https?://\S+", "<link>", text))
+        if p.wait():
+            log.warning("sign-in ended with code %s", p.returncode)
+    threading.Thread(target=drain, daemon=True).start()
+    _login = p
+    return p
+
+
+def stop_login() -> None:
+    """End a sign-in that's still waiting for the browser (the player gave up or closed the window)."""
+    global _login
+    if _login and _login.poll() is None:
+        _login.kill()
+    _login = None
+
+
+def login_failed(p: subprocess.Popen | None) -> bool:
+    """The sign-in process ended without success (a successful one exits 0)."""
+    return p is not None and p.poll() is not None and p.returncode != 0
 
 
 def run_installer(win_cmd: str, mac_cmd: str) -> subprocess.Popen:
