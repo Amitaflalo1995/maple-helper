@@ -457,6 +457,11 @@ STRINGS = {
     "shop_go": {"he": "להכין רשימה", "en": "Make my list"},
     "shop_here": {"he": "המקום שבו אני מאמן", "en": "where I train"},
     "shop_q": {"he": "אני הולך לגרינד ב-{map} למשך {n} דקות. תכין לי רשימת קניות: כמה פוטים של HP ו-MP לקנות לפי הדמות שלי והמפלצות שם, איפה הכי זול לקנות אותם, ומה עוד כדאי לקחת. קצר וברשימה.", "en": "I'm going to grind at {map} for {n} minutes. Make me a shopping list: how many HP and MP potions to buy for my character and the monsters there, where they're cheapest, and anything else worth bringing. Short, as a list."},
+    "telemetry": {"he": "שליחת נתוני שימוש אנונימיים", "en": "Share anonymous usage stats"},
+    "telemetry_hint": {"he": "עוזר לנו לשפר את האפליקציה: רק באילו אפשרויות משתמשים. אף פעם לא שאלות, "
+                             "צילומי מסך או הקלטות",
+                       "en": "Helps us improve the app: only which features get used. "
+                             "Never your questions, screenshots or voice"},
     # onboarding
     "ob_welcome": {"he": "ברוכים הבאים ל-Maple Helper", "en": "Welcome to Maple Helper"},
     "ob_choose_lang": {"he": "בחרו שפה", "en": "Choose a language"},

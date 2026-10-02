@@ -9,7 +9,7 @@ from PySide6.QtGui import QAction, QGuiApplication, QIcon, QPainterPath, QPixmap
 from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QMenu, QPushButton,
                                QScrollArea, QSizeGrip, QToolButton, QVBoxLayout, QWidget)
 
-from .. import __version__, bidi, osapi, quick
+from .. import __version__, bidi, osapi, quick, telemetry
 from ..brain import Answer, Brain
 from ..i18n import STRINGS, I18n
 from ..kb import KnowledgeBase
@@ -852,6 +852,7 @@ class Overlay(QWidget):
                 if qa:
                     if history:
                         history.append("user", question)
+                    telemetry.track("question_asked", answered_by="instant", tagged=False)
                     self._show_quick(qa, question, history)
                     return True
         shot = None if self.shot_used else self.shot
@@ -860,6 +861,8 @@ class Overlay(QWidget):
             self.add_system(self.t("no_game"))
         self.shot_used = True
         self._update_shot_hint()
+        telemetry.track("question_asked", answered_by=self.settings["provider"], tagged=bool(focus),
+                        screenshot=shot is not None, saver=bool(self.settings["saver_mode"]), retry=force_claude)
         if history:   # again for "Ask Claude anyway", so history search pairs the question with this answer
             history.append("user", f"[about {focus_name}] {question}" if focus_name else question)
         self._anchor = None
