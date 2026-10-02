@@ -107,6 +107,8 @@ def explain(term: str, lang: str) -> str | None:
 MARK = "<b style='font-size:large;'>&nbsp;?</b>"
 
 _PATTERN = re.compile(r"(?<![\w.])(" + "|".join(re.escape(t) for t in sorted(TERMS, key=len, reverse=True)) + r")(?![\w])")
+# a term with its label colon ("HP: 7420"): the "?" goes after the colon, never between the label and it ("HP ?: 7420")
+_TERM_COLON = re.compile(_PATTERN.pattern + r"(:)?")
 
 
 def annotate(html_text: str, lang: str, color: str = "#F07A12", seen: set | None = None, limit: int = 6) -> str:
@@ -131,14 +133,16 @@ def annotate(html_text: str, lang: str, color: str = "#F07A12", seen: set | None
         # an English block inside Hebrew (LRE ... PDF, see bidi.py) must stay whole: a link in its middle
         # breaks the embedding ("Avoid 14" showed as "14 Avoid"), so its "?" go right after the block
         out, pos = [], 0
+        def sub(m):
+            whole = m.group(1) + (m.group(2) or "")
+            return whole + link(m.group(1)) if wanted(m.group(1)) else whole
+
         for run in re.finditer(f"{bidi.LRE}(.*?){bidi.PDF}", part, re.S):
-            out.append(_PATTERN.sub(lambda m: m.group(1) + link(m.group(1)) if wanted(m.group(1)) else m.group(1),
-                                    part[pos:run.start()]))
+            out.append(_TERM_COLON.sub(sub, part[pos:run.start()]))
             marks = "".join(link(m.group(1)) for m in _PATTERN.finditer(run.group(1)) if wanted(m.group(1)))
             out.append(run.group(0) + marks)
             pos = run.end()
-        out.append(_PATTERN.sub(lambda m: m.group(1) + link(m.group(1)) if wanted(m.group(1)) else m.group(1),
-                                part[pos:]))
+        out.append(_TERM_COLON.sub(sub, part[pos:]))
         return "".join(out)
 
     # only text between tags, never inside a tag or an existing link

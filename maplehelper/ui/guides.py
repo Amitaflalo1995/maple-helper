@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (QApplication, QButtonGroup, QFrame, QHBoxLayout, 
 
 from .. import bidi, guides
 from ..i18n import I18n
-from .controls import rtl_buttons
+from .controls import FlowLayout, rtl_buttons
 from .glass import GlassDialog
 
 
@@ -210,6 +210,14 @@ class GuidesDialog(GlassDialog):
         if open_key and kb.get(open_key):
             self.open_guide(open_key)
 
+    def keyPressEvent(self, e):
+        # Esc in an open guide goes back to the list (like "Back"); in the list it closes the window
+        if e.key() == Qt.Key_Escape and self.stack.currentIndex() == 1:
+            self.stack.setCurrentIndex(0)
+            e.accept()
+            return
+        super().keyPressEvent(e)
+
     # library ----------------------------------------------------------------
 
     def _library(self) -> QWidget:
@@ -223,8 +231,7 @@ class GuidesDialog(GlassDialog):
         self.search.setClearButtonEnabled(True)
         self.search.textChanged.connect(lambda *_: self._fill())
         lay.addWidget(self.search)
-        chips = QHBoxLayout()
-        chips.setSpacing(6)
+        chips = FlowLayout(spacing=6)        # wraps onto a second row: one row of five was 521 px wide
         self.cats = QButtonGroup(self)
         for cat in guides.CATEGORIES:
             b = QPushButton(bidi.plain(t(f"gcat_{cat}"), rtl), objectName="Chip")
@@ -233,7 +240,6 @@ class GuidesDialog(GlassDialog):
             b.setProperty("cat", cat)
             self.cats.addButton(b)
             chips.addWidget(b)
-        chips.addStretch(1)
         self.cats.buttons()[0].setChecked(True)
         self.cats.buttonClicked.connect(lambda *_: self._fill())
         lay.addLayout(chips)

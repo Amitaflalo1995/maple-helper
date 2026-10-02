@@ -212,7 +212,10 @@ class SessionCard(QFrame):
         head.setAlignment(self._align)
         col.addWidget(head)
         for ln in lines:
-            col.addWidget(self._line(ln))
+            if ln:
+                col.addWidget(self._line(ln))
+            else:
+                col.addSpacing(6)             # one character's lines apart from the next one's
         self._extra = QWidget()
         self._extra_lay = QVBoxLayout(self._extra)
         self._extra_lay.setContentsMargins(0, 6, 0, 0)
@@ -237,7 +240,10 @@ class SessionCard(QFrame):
             return
         if self._extra.isHidden() and not self._extra_lay.count():
             for text, name in self._details():
-                self._extra_lay.addWidget(self._line(text, name))
+                if text:
+                    self._extra_lay.addWidget(self._line(text, name))
+                else:
+                    self._extra_lay.addSpacing(6)
         opening = self._extra.isHidden()
         self._extra.setVisible(opening)
         self._toggle.setText(bidi.plain(self._less if opening else self._more, self._rtl))
@@ -624,11 +630,23 @@ class EntityTile(Selectable, QFrame):
             if not pm.isNull():
                 pic.setPixmap(pm.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         row.addWidget(pic)
-        name = QLabel(e.get("name", key), objectName="TileName")
-        name.setWordWrap(True)
-        # leading edge, not absolute: follows the chat when the player switches language
-        name.setAlignment(Qt.AlignLeading | Qt.AlignVCenter)
-        row.addWidget(name, 1)
+        self.name = QLabel(e.get("name", key), objectName="TileName")
+        self.name.setWordWrap(True)
+        self.name.setMinimumWidth(48)        # a long word ("Intermediate") never holds two tiles wider than the chat
+        row.addWidget(self.name, 1)
+        self._align_name()
+
+    def _align_name(self):
+        """The (English) name sits right beside its picture: on the right in a Hebrew chat. Qt resolves "leading"
+        by the text's own direction, so an English name went to the far left, away from its picture."""
+        rtl = self.layoutDirection() == Qt.RightToLeft
+        self.name.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
+
+    def changeEvent(self, e):
+        from PySide6.QtCore import QEvent
+        super().changeEvent(e)
+        if e.type() == QEvent.LayoutDirectionChange:     # follows the chat when the player switches language
+            self._align_name()
 
 
 

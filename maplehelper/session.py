@@ -68,17 +68,24 @@ def questions(summary: dict, history_for, limit: int = 30) -> dict[str, list[str
 
 
 def lines(summary: dict, t) -> list[str]:
-    """Readable lines for one summary (t = I18n)."""
+    """Readable lines for one summary (t = I18n). An empty line separates one character from the next; in Hebrew
+    every English name (a character, a quest) is one left-to-right block, or its brackets and order broke."""
+    from . import bidi
+    rtl = getattr(t, "rtl", False)
     out = []
-    for r in summary["chars"]:
+    for i, r in enumerate(summary["chars"]):
+        if i:
+            out.append("")
+        name = bidi.ltr_block(r["name"], rtl)
         if r["end_level"] != r["start_level"]:
-            out.append(t("sess_level", name=r["name"], a=r["start_level"], b=r["end_level"]))
+            out.append(t("sess_level", name=name, a=r["start_level"], b=r["end_level"]))
         else:
-            out.append(t("sess_char", name=r["name"], level=r["end_level"]))
+            out.append(t("sess_char", name=name, level=r["end_level"]))
         if r["end_job"] != r["start_job"]:
             out.append(t("sess_job", job=r["end_job"]))
         if r["quests_done"]:
-            out.append(t("sess_quests_done", n=len(r["quests_done"]), names=", ".join(r["quests_done"][:4])))
+            names = (bidi.RLM + ", ").join(bidi.ltr_block(q, rtl) for q in r["quests_done"][:4])
+            out.append(t("sess_quests_done", n=len(r["quests_done"]), names=names))
         if r["quests_started"]:
             out.append(t("sess_quests_started", n=len(r["quests_started"])))
         if r["questions"]:

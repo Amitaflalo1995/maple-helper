@@ -41,6 +41,17 @@ def P() -> dict:
     return PALETTES.get(MODE, PALETTES["dark"])
 
 
+ORANGE_TEXT_LIGHT = "#C9620A"     # orange as text on white: #FF9533 / #F07A12 are too faint to read there
+
+
+def accent_text(deep: bool = False) -> str:
+    """Orange for text (links, chips, small marks): the brand orange on dark glass, a darker one on light.
+    Orange fills (primary buttons, the user's bubble) keep the brand colors."""
+    if MODE == "light":
+        return ORANGE_TEXT_LIGHT
+    return ORANGE_DEEP if deep else ORANGE
+
+
 # legacy names still used by toasts/dialogs (resolved at call time through P())
 TEXT = "#F5F5F7"
 MUTED = "rgba(235,235,245,0.64)"
@@ -88,6 +99,7 @@ def app_font(size: int = 14) -> QFont:
 
 def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     s, c = size, P()
+    ot, otd = accent_text(), accent_text(deep=True)      # orange text: darker on white for contrast
     return f"""
     * {{ font-family: "{font_family}"; font-size: {s}px; color: {c['text']}; }}
     QWidget#Overlay, QWidget#Feed {{ background: transparent; }}
@@ -100,14 +112,14 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #ExpText {{ color: {c['muted']}; font-size: {s - 3}px; }}
     #PlanHead {{ color: {c['muted']}; font-size: {s - 2}px; font-weight: 600; padding-top: 6px; }}
     QPushButton#PlanLink {{ background: transparent; border: none; padding: 2px 0; text-align: left; color: {c['text']}; }}
-    QPushButton#PlanLink:hover {{ color: {ORANGE}; }}
+    QPushButton#PlanLink:hover {{ color: {ot}; }}
     QTextBrowser#GuideText {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 14px;
                                padding: 10px 12px; color: {c['text']}; selection-background-color: {ORANGE}; }}
     #PinAnswer {{ color: {c['text']}; font-size: {s - 1}px; }}
     QFrame#ShareCard {{ background: {c['fill1']}; border: 1px solid {c['stroke']}; border-radius: 18px; }}
     #ShareName {{ font-size: {s + 8}px; font-weight: 700; color: {c['text']}; }}
     #ShareMeta {{ font-size: {s + 1}px; font-weight: 500; color: {c['muted']}; }}
-    #ShareBrand {{ font-size: {s - 3}px; font-weight: 600; color: {ORANGE}; }}
+    #ShareBrand {{ font-size: {s - 3}px; font-weight: 600; color: {ot}; }}
     #Version {{ font-size: {s - 3}px; font-weight: 300; color: {c['muted']}; background: transparent; }}
     #ProfilePill {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 12px;
                     min-height: 24px; max-height: 24px; padding: 0 11px; font-size: {s - 2}px; font-weight: 500; color: {c['text']}; }}
@@ -118,7 +130,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QToolButton#Icon:hover {{ background: {c['fill2']}; color: {c['text']}; }}
     QToolButton#Icon:pressed {{ background: {c['fill3']}; }}
     QToolButton#Icon[active="true"] {{ color: #FF453A; }}
-    QToolButton#Icon[wished="true"] {{ color: {ORANGE}; }}
+    QToolButton#Icon[wished="true"] {{ color: {ot}; }}
     QToolButton#IconClose {{ font-family: "{ICON_FONT}"; font-size: 11px; color: {c['muted']}; background: transparent;
                              border: none; border-radius: 14px; min-width: 28px; min-height: 28px; }}
     QToolButton#IconClose:hover {{ background: #FF453A; color: #FFFFFF; }}
@@ -130,7 +142,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QScrollBar::add-line, QScrollBar::sub-line, QScrollBar::add-page, QScrollBar::sub-page {{ height: 0; background: none; }}
 
     #CharacterRow {{ background: transparent; border: none; }}
-    #Check {{ color: {ORANGE}; font-size: {s + 2}px; font-weight: 700; }}
+    #Check {{ color: {ot}; font-size: {s + 2}px; font-weight: 700; }}
     QPushButton#IconDanger {{ font-family: "{ICON_FONT}"; font-size: 13px; color: {c['muted']}; background: transparent;
                               border: none; border-radius: 13px; min-width: 26px; max-width: 26px;
                               min-height: 26px; max-height: 26px; }}
@@ -138,9 +150,9 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QPushButton#IconPlain {{ font-family: "{ICON_FONT}"; font-size: 13px; color: {c['muted']}; background: transparent;
                              border: none; border-radius: 13px; min-width: 26px; max-width: 26px;
                              min-height: 26px; max-height: 26px; }}
-    QPushButton#IconPlain:hover {{ color: {ORANGE}; background: {c['fill3']}; }}
+    QPushButton#IconPlain:hover {{ color: {ot}; background: {c['fill3']}; }}
     #Stepper {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 10px; }}
-    QToolButton#StepBtn {{ background: transparent; border: none; border-radius: 8px; color: {ORANGE};
+    QToolButton#StepBtn {{ background: transparent; border: none; border-radius: 8px; color: {ot};
                            font-size: {s + 4}px; font-weight: 600; min-width: 30px; min-height: 28px; }}
     QToolButton#StepBtn:hover {{ background: {c['fill3']}; }}
     QToolButton#StepBtn:pressed {{ background: {c['pressed']}; }}
@@ -150,7 +162,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
                  max-height: 28px; padding: 0 12px; font-weight: 500; color: {c['text']}; }}
     #InfoNote {{ background: {"rgba(255,149,51,0.12)" if MODE == "dark" else "rgba(255,149,51,0.10)"};
                  border: 1px solid rgba(255,149,51,0.35); border-radius: 12px; }}
-    #InfoIcon {{ font-family: "{ICON_FONT}"; font-size: 15px; color: {ORANGE}; }}
+    #InfoIcon {{ font-family: "{ICON_FONT}"; font-size: 15px; color: {ot}; }}
     #InfoText {{ color: {c['text']}; font-size: {s - 1}px; }}
     #JobHint {{ color: {c['muted']}; font-size: {s - 3}px; }}
     #ProfileCard {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 16px; }}
@@ -158,9 +170,9 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QToolButton#Refresh {{ font-family: "{ICON_FONT}"; font-size: 15px; color: {c['muted']}; background: transparent;
                            border: none; border-radius: 15px; min-width: 30px; max-width: 30px; min-height: 30px;
                            max-height: 30px; }}
-    QToolButton#Refresh:hover {{ background: {c['fill3']}; color: {ORANGE}; }}
-    QToolButton#Refresh:disabled {{ color: {ORANGE}; }}
-    QToolButton#Refresh:checked {{ color: {ORANGE}; background: {c['fill3']}; }}
+    QToolButton#Refresh:hover {{ background: {c['fill3']}; color: {ot}; }}
+    QToolButton#Refresh:disabled {{ color: {ot}; }}
+    QToolButton#Refresh:checked {{ color: {ot}; background: {c['fill3']}; }}
     #ProfileName {{ font-size: {s + 1}px; font-weight: 600; color: {c['text']}; }}
     #ProfileMeta {{ font-size: {s - 1}px; font-weight: 500; color: {c['muted']}; }}
     #BubbleUser {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFA24A, stop:1 {ORANGE_DEEP});
@@ -203,18 +215,18 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
                            min-height: 26px; max-height: 26px; padding: 0 10px; font-size: {s - 3}px; font-weight: 500;
                            color: {c['muted']}; }}
     QPushButton#SubChip:hover {{ background: {c['fill3']}; color: {c['text']}; }}
-    QPushButton#SubChip:checked {{ background: rgba(255,149,51,0.14); border: 1.5px solid {ORANGE}; color: {ORANGE_DEEP};
+    QPushButton#SubChip:checked {{ background: rgba(255,149,51,0.14); border: 1.5px solid {ORANGE}; color: {otd};
                                    font-weight: 700; }}
     #Tag, #TagGood, #TagWarn, #TagAccent {{ font-size: {s - 3}px; font-weight: 600; border-radius: 8px; padding: 2px 8px; }}
     #Tag {{ color: {c['muted']}; background: {c['fill3']}; }}
     #TagGood {{ color: #2E9E5B; background: rgba(52,199,89,0.16); }}
     #TagWarn {{ color: #C9620A; background: rgba(255,149,51,0.18); }}
-    #TagAccent {{ color: {ORANGE_DEEP}; background: rgba(255,149,51,0.12); }}
+    #TagAccent {{ color: {otd}; background: rgba(255,149,51,0.12); }}
     #BigStat {{ font-size: {s + 10}px; font-weight: 700; letter-spacing: -0.4px; color: {c['text']}; }}
     #BigStatLabel {{ font-size: {s - 3}px; color: {c['muted']}; }}
     QPushButton#NowChip {{ background: rgba(255,149,51,0.12); border: 1px solid rgba(255,149,51,0.55); border-radius: 12px;
                            min-height: 24px; max-height: 24px; padding: 0 11px; font-size: {s - 2}px; font-weight: 600;
-                           color: {ORANGE_DEEP}; }}
+                           color: {otd}; }}
     QPushButton#NowChip:hover {{ background: rgba(255,149,51,0.22); }}
     QPushButton#NowChip:pressed {{ background: rgba(255,149,51,0.32); }}
     #ShotHint {{ color: {c['muted']}; font-size: {s - 3}px; padding: 0 6px 2px 6px; }}
@@ -259,7 +271,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #PageBody {{ color: {c['muted']}; }}
     #FieldLabel {{ color: {c['muted']}; font-size: {s - 2}px; font-weight: 500; }}
     QPushButton#Link, QPushButton#LinkDanger {{ background: transparent; border: none; min-height: 34px;
-                        font-weight: 500; text-align: left; padding: 0; color: {ORANGE}; }}
+                        font-weight: 500; text-align: left; padding: 0; color: {ot}; }}
     QPushButton#LinkDanger {{ color: #FF453A; }}
     QPushButton#Link:pressed, QPushButton#LinkDanger:pressed {{ color: {c['muted']}; }}
 

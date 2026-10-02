@@ -33,7 +33,7 @@ _RUN = re.compile(
     # body; "1,500" keeps its comma, a@b.com its @, "11:41" its colon; ": " ends the block
     # ("ה-AI: Claude או Codex" is two blocks, not "AI: Claude" read backwards)
     r"(?:(?:[A-Za-z0-9.'’&/+\-–%#×_ ()@<>]|:(?! )|,(?=\d{3}\b))*"
-    r"[A-Za-z0-9%)>])?"                          # "Line 2 <Area 1>" stays one map name
+    r"(?:[A-Za-z0-9%)>]|(?<=\d)\+))?"            # "Line 2 <Area 1>" stays one map name; "ACC 40+" keeps its +
 )
 
 
@@ -48,7 +48,7 @@ def _balanced(run: str) -> str:
             if depth == 0:
                 break
             depth -= 1
-        if depth == 0 and (ch.isalnum() or ch in "%)>"):
+        if depth == 0 and (ch.isalnum() or ch in "%)>" or (ch == "+" and i and run[i - 1].isdigit())):
             last_ok = i + 1
     return run[:last_ok]
 

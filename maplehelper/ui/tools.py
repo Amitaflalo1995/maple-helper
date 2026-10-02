@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (QButtonGroup, QCompleter, QFrame, QGraphicsOpacit
 from .. import bidi, buildplan, combat, crafting, glossary, guides, market, plan, quests
 from ..i18n import I18n
 from . import terms, theme
-from .controls import Section, Segmented, Stepper, rtl_buttons
+from .controls import FlowLayout, Section, Segmented, Stepper, WrapLink, rtl_buttons
 from .glass import GlassDialog, no_default_buttons
 
 PAGES = ("train", "calc", "build", "quests", "crafting", "town", "prices", "exp", "more")
@@ -184,7 +184,7 @@ class ToolsDialog(GlassDialog):
     sync_requested = Signal()                 # read level/EXP/stats from a screenshot (the chat does it)
     market_ready = Signal(object)             # (item name, Market or None) from the background lookup
     ask_requested = Signal(str, bool)          # question for the chat, with a fresh screenshot?
-    detail_ask_requested = Signal(str)         # ...with a full-resolution screenshot (inventory icons)
+    detail_ask_requested = Signal(str, str)    # ...with a full-resolution screenshot (inventory icons); bubble label
     tag_requested = Signal(str)                # tag an entity (monster, quest) in the chat
     guide_requested = Signal(str)              # open a guide in the guides window
 
@@ -325,10 +325,13 @@ class ToolsDialog(GlassDialog):
             steppers[key] = st
         self.__dict__.setdefault("_steppers", []).append(steppers)
         sec.add_widget(self._label(t("my_stats_hint"), "RowHint"))
-        read = QPushButton(self._p(t("my_stats_read")), objectName="Link")
-        read.setCursor(Qt.PointingHandCursor)
+        read = WrapLink(t("my_stats_read"), t.rtl)          # a long link wraps instead of widening the window
         read.clicked.connect(self._read_screen)
-        sec.add_widget(read)
+        box = QWidget()
+        bl = QVBoxLayout(box)
+        bl.setContentsMargins(0, 8, 0, 8)
+        bl.addWidget(read)
+        sec.add_widget(box)
         return sec
 
     def _load_stats(self):
@@ -418,14 +421,15 @@ class ToolsDialog(GlassDialog):
         row.addWidget(pic, 0, Qt.AlignTop)
         col = QVBoxLayout()
         col.setSpacing(3)
-        name = QLabel(self._p(f"{m.name} · {t('lv_short', n=m.level)}"), objectName="CardName")
+        # "Name · Lv. N" as one English block, the same order as the wishlist's monsters (in Hebrew too)
+        name = QLabel(bidi.ltr_name(f"{m.name} · Lv. {m.level}", t.rtl), objectName="CardName")
+        name.setWordWrap(True)
         col.addWidget(name)
         # "… IV · Victoria Road", one English block (run by run, a Hebrew line put the region first)
         col.addWidget(self._label(bidi.ltr_block(self.kb.map_label(s.map), self.t.rtl), "CardSub"))
-        # two short rows of tags: why it's picked, then the numbers (one long row pushed the card wider)
-        why, nums = QHBoxLayout(), QHBoxLayout()
-        for line in (why, nums):
-            line.setSpacing(5)
+        # two groups of tags: why it's picked, then the numbers; each wraps when the window is narrow
+        # (one long row pushed the card, and the window, wider than 470 px)
+        why, nums = FlowLayout(spacing=5), FlowLayout(spacing=5)
         if best:
             why.addWidget(tag(self._p(t("spot_best")), "TagAccent"))
         if s.recommended:
@@ -438,7 +442,6 @@ class ToolsDialog(GlassDialog):
         nums.addWidget(tag(self._p(t("spot_crowd", n=m.maps[0][1])), "Tag"))
         for line in (why, nums):
             if line.count():
-                line.addStretch(1)
                 col.addLayout(line)
         info = []
         if s.hit < 0.999 and self._stats()[0]:
@@ -449,10 +452,12 @@ class ToolsDialog(GlassDialog):
         if info:
             col.addWidget(self._label("\n".join(info), "CardSub"))
         row.addLayout(col, 1)
+        # its own row under the tags, at the reading start: beside them it took the room the tags needed
         ask = QPushButton(self._p(t("ask_short")), objectName="Link")
         ask.setCursor(Qt.PointingHandCursor)
+        ask.setAutoDefault(False)
         ask.clicked.connect(lambda _=False, k=m.key: self.tag_requested.emit(k))
-        row.addWidget(ask, 0, Qt.AlignVCenter)
+        col.addWidget(ask, 0, Qt.AlignLeft)          # AlignLeft is the leading edge (mirrored in Hebrew)
         return card
 
     # calculator ----------------------------------------------------------
@@ -498,7 +503,7 @@ class ToolsDialog(GlassDialog):
             return
         acc, dmg = self._stats()
         magic = c.base_class == combat.MAGE
-        sec = Section(f"{m.name} · {t('lv_short', n=m.level)}", t.rtl)
+        sec = Section(bidi.ltr_block(f"{m.name} · Lv. {m.level}", t.rtl), t.rtl)
         nums = QHBoxLayout()
         for value, label in ((f"{m.hp:,}", "HP"), (f"{m.exp:,}", "EXP"), (str(m.avoid), "Avoid"),
                              (str(m.mdef if magic else m.pdef), "M.DEF" if magic else "P.DEF")):
@@ -576,6 +581,8 @@ class ToolsDialog(GlassDialog):
         if not c:
             self._set(self.build_head, t("tool_no_char"))
             self.build_view.setHtml("")
+            self._build_key = None
+            self.build_guide_btn.hide()          # no character, no guide to open
             return
         key, tables = buildplan.tables(self.kb, c.base_class, c.job, c.level, t.lang)
         self._build_key = key
@@ -837,8 +844,7 @@ class ToolsDialog(GlassDialog):
         sc, lay = scroll_page()
         # the professions live inside this tab's own card, in a lighter style than the main tabs
         sec = Section(t("craft_profession"), t.rtl)
-        grid = QGridLayout()
-        grid.setSpacing(6)
+        grid = FlowLayout(spacing=6)            # wraps: three long names on one row were wider than the window
         self.craft_pick = QButtonGroup(self)
         for i, prof in enumerate(crafting.PROFESSIONS):
             b = QPushButton(crafting.NAMES[prof], objectName="SubChip")
@@ -846,7 +852,7 @@ class ToolsDialog(GlassDialog):
             b.setCursor(Qt.PointingHandCursor)
             b.setProperty("prof", prof)
             self.craft_pick.addButton(b, i)
-            grid.addWidget(b, i // 3, i % 3)
+            grid.addWidget(b)
         self.craft_pick.button(0).setChecked(True)
         self.craft_pick.idClicked.connect(lambda *_: self._fill_crafting())
         holder = QWidget()
@@ -888,7 +894,7 @@ class ToolsDialog(GlassDialog):
         top = crafting.max_level(self.kb, prof)
         lv = int((c.crafts or {}).get(prof, 1))
         self.craft_level.blockSignals(True)
-        self.craft_level.hi = top
+        self.craft_level.setMaximum(top)          # the + button and the typed-value check follow the new top
         self.craft_level.setValue(min(lv, top))
         self.craft_level.blockSignals(False)
         _, nxt = crafting.for_level(self.kb, prof, min(lv, top))
@@ -956,14 +962,12 @@ class ToolsDialog(GlassDialog):
         col.setSpacing(4)
         outer.addLayout(col, 1)
         col.addWidget(self._label(f"**{r.name}**", "CardName"))
-        why = QHBoxLayout()
-        why.setSpacing(5)
+        why = FlowLayout(spacing=5)               # the tags wrap at a narrow width
         if best:
             why.addWidget(tag(self._p(t("craft_best")), "TagAccent"))
         why.addWidget(tag(self._p(t("craft_lv_tag", n=r.level)), "Tag"))     # the list spans several levels
         why.addWidget(tag(f"+{r.exp} EXP", "TagGood"))
         why.addWidget(tag(self._p(t("craft_cost", n=f"{r.catalyst:,}")), "Tag"))
-        why.addStretch(1)
         col.addLayout(why)
         col.addWidget(self._things_label(t("craft_needs"), [f"{name} x {n}" for n, name in r.ingredients]))
         net = t("craft_net_gain", n=f"{r.net:,}") if r.net >= 0 else t("craft_net_loss", n=f"{-r.net:,}")
@@ -1260,7 +1264,8 @@ class ToolsDialog(GlassDialog):
 
     def _sell_check(self):
         self.setWindowOpacity(0.0)           # the inventory must be in the screenshot, not this window
-        self.detail_ask_requested.emit(self.t("sell_q"))
+        # the chat bubble says "Inventory check", not the nine lines of instructions the AI gets
+        self.detail_ask_requested.emit(self.t("sell_q"), self.t("inv_check"))
         QTimer.singleShot(1500, lambda: self.setWindowOpacity(1.0))
 
     def _fill_more(self):
@@ -1272,9 +1277,11 @@ class ToolsDialog(GlassDialog):
                 self.shop_map.setCursorPosition(0)     # show the start of the map name
 
     def _shopping(self):
-        where = self.shop_map.text().strip() or self.t("shop_here")
+        where = self.shop_map.text().strip()
+        # no map picked: a sentence of its own ("grind at the place I train", not "at where I train")
+        q = self.t("shop_q", map=where, n=self.shop_len.value()) if where else self.t("shop_q_here", n=self.shop_len.value())
         # with a fresh screenshot: the HUD shows max HP/MP as they are right now (and the potions already in the
         # bag when the inventory is open), so the list fits the character at this moment (live feedback)
         self.setWindowOpacity(0.0)
-        self.ask_requested.emit(self.t("shop_q", map=where, n=self.shop_len.value()), True)
+        self.ask_requested.emit(q, True)
         QTimer.singleShot(1500, lambda: self.setWindowOpacity(1.0))

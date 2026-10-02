@@ -279,7 +279,12 @@ class Overlay(QWidget):
         tb.addWidget(self.version_label)
         self.saver_badge = QLabel(objectName="SaverBadge")
         self.saver_badge.hide()
+        self._saver_on = False
         tb.addWidget(self.saver_badge)
+        # the version and the saver badge never hold the window wide: _fit_header hides / shortens them when
+        # the header has no room (at 470 px with a large font the chat could not get that narrow)
+        for w in (self.version_label, self.saver_badge):
+            w.setMinimumWidth(1)
         tb.addStretch(1)
         self.history_btn = self._icon_button(theme.ICON["search"])
         self.history_btn.clicked.connect(self.history_requested.emit)
@@ -338,6 +343,11 @@ class Overlay(QWidget):
         self.profile_card.clicked.connect(self.character_menu)
         self.profile_card.setCursor(Qt.PointingHandCursor)
         lay.addWidget(self.profile_card)
+        # no character (the last one deleted, then "Add character" cancelled): the way back, where the card was
+        self.no_char_card = NoticeCard("", "", True)
+        self.no_char_card.clicked.connect(self.add_character_requested.emit)
+        self.no_char_card.hide()
+        lay.addWidget(self.no_char_card)
         from .plancard import TipStrip
         self.tip_strip = TipStrip()
         self.tip_strip.asked.connect(self.ask)
@@ -435,8 +445,29 @@ class Overlay(QWidget):
         m = self.SHADOW
         self.grip.move(self.width() - m - 18 if not self.t.rtl else m + 2, self.height() - m - 18)
 
+    def _fit_header(self):
+        """Version and saver badge only when the header has room: first the version goes, then the buttons move
+        closer, then the badge shrinks to its leaf (its tooltip still explains it)."""
+        tb = self.title_bar.layout()
+        room = self.title_bar.width()
+        self.saver_badge.setText("🍃 " + self.t("saver_on_badge"))
+        self.saver_badge.setVisible(self._saver_on)
+        self.version_label.show()
+        tb.setSpacing(8)
+        for step in ("version", "tight", "badge", "done"):
+            tb.invalidate()
+            if tb.sizeHint().width() <= room or step == "done":
+                return
+            if step == "version":
+                self.version_label.hide()
+            elif step == "tight":
+                tb.setSpacing(3)          # the header's buttons closer together
+            else:
+                self.saver_badge.setText("🍃")
+
     def resizeEvent(self, e):
         super().resizeEvent(e)
+        self._fit_header()
         self._place_grip()
         self.pins_bar.fit()             # the open pinned list stays a share of the conversation's height
         if self.isVisible():
@@ -457,8 +488,8 @@ class Overlay(QWidget):
         self.input.setPlaceholderText(bidi.plain(self._placeholder, self.t.rtl))
         self.recapture_btn.setToolTip(self.t("recapture"))
         self.settings_btn.setToolTip(self.t("settings"))
-        self.saver_badge.setText("🍃 " + self.t("saver_on_badge"))
         self.saver_badge.setToolTip(self.t.p("saver_hint", self.settings["provider"]))
+        self._fit_header()
         self.wish_btn.setToolTip(self.t("wishlist"))
         self.guides_btn.setToolTip(self.t("guides"))
         self.history_btn.setToolTip(self.t("history"))
@@ -466,7 +497,9 @@ class Overlay(QWidget):
         self.profile_card.now_btn.setText(self.t("plan_what_now"))
         self.profile_card.now_btn.setToolTip(self.t("what_now_tip"))
         if getattr(self, "_update_version", None):
-            self.show_update(self._update_version, getattr(self, "_update_state", "available"))
+            # the download's last percent too (a language switch showed 0% until the next progress report)
+            self.show_update(self._update_version, getattr(self, "_update_state", "available"),
+                             getattr(self, "_update_pct", None))
         self.profile_card.setToolTip(self.t("switch_character"))
         self.min_btn.setToolTip(self.t("minimize"))
         self.close_btn.setToolTip(self.t("close_chat").replace("F9", self.settings["hotkey_toggle"]))
@@ -480,7 +513,7 @@ class Overlay(QWidget):
 
     def show_update(self, version: str, state: str = "available", pct: float | None = None):
         """The update bar: available (button) -> downloading (progress) -> installing; failed (retry)."""
-        self._update_version, self._update_state = version, state
+        self._update_version, self._update_state, self._update_pct = version, state, pct
         t, rtl = self.t, self.t.rtl
         text = {"available": t("update_bar_available", version=version),
                 "ready": t("update_bar", version=version),
@@ -502,6 +535,8 @@ class Overlay(QWidget):
         WISHLIST.changed.emit()          # the stars follow the active character
         c = self.profiles.active
         self.profile_card.setVisible(c is not None)
+        self.no_char_card.set_texts(self.t("no_char_chat"), self.t("add_character"), self.t.rtl)
+        self.no_char_card.setVisible(c is None)
         if c:
             self.profile_card.show_character(c, self.profiles.avatar_path(c), self.kb, self.t.rtl)
         self.refresh_plan()
@@ -572,16 +607,17 @@ class Overlay(QWidget):
         self._busy_line = SystemLine(self.t("busy_wait"))
         self._add_widget(self._busy_line)
 
-    def ask_with_screenshot(self, question: str, detail: bool = False):
+    def ask_with_screenshot(self, question: str, detail: bool = False, shown: str | None = None):
         """Like "What now?": a fresh screenshot of the game, then the question. detail: also send the
-        screenshot at full resolution in tiles (inventory icons were unreadable on an ultrawide, live)."""
+        screenshot at full resolution in tiles (inventory icons were unreadable on an ultrawide, live).
+        shown: a short label for the chat bubble and the history when the question is the app's own long text."""
         if self._is_busy():               # the question would be dropped: don't flash the chat for a shot
             self._say_busy()
             return
         self.setWindowOpacity(0.0)
-        QTimer.singleShot(120, lambda: self._capture_and_ask(question, detail))
+        QTimer.singleShot(120, lambda: self._capture_and_ask(question, detail, shown))
 
-    def _capture_and_ask(self, question: str, detail: bool = False):
+    def _capture_and_ask(self, question: str, detail: bool = False, shown: str | None = None):
         from .. import capture
         capture.LAST_FULL = None          # never read the inventory off an older screenshot
         self._fresh_shot()
@@ -608,7 +644,7 @@ class Overlay(QWidget):
                 self.add_cards(uniq)
             else:
                 self.add_system(self.t("inv_not_found"))
-        self.ask(question)
+        self.ask(question, shown=shown)
 
     def continue_from(self, question: str, answer: str, keys: list):
         """An earlier exchange (from the history) back in the feed; the next question is asked as its follow-up."""
@@ -794,16 +830,20 @@ class Overlay(QWidget):
 
     def _show_last_session(self):
         """A new session starts: first, what happened in the previous one."""
+        from .. import pins
         last = self.settings["last_session"]
         if not last:
             return
         self.settings["last_session"] = None
 
         def details():
-            rows = []
+            rows, rtl = [], self.t.rtl
             for name, asked in session_questions(last, History).items():
-                rows.append((self.t("sess_asked", name=name), "CardName"))
-                rows += [("• " + q, "CardStat") for q in asked]
+                if rows:
+                    rows.append(("", ""))             # apart from the previous character's questions
+                rows.append((self.t("sess_asked", name=bidi.ltr_block(name, rtl)), "CardName"))
+                # an English question is one block ("Where is Pio?" showed as "?Where is Pio")
+                rows += [("• " + bidi.ltr_block(pins.shown_question(q), rtl), "CardStat") for q in asked]
             return rows or [(self.t("sess_no_details"), "CardStat")]
         self._add_widget(SessionCard(self.t("sess_title", minutes=last["minutes"]), session_lines(last, self.t),
                                      self.t.rtl, details, self.t("sess_more"), self.t("sess_less")))
@@ -874,8 +914,10 @@ class Overlay(QWidget):
         elif self.shot and not self.shot_used:
             text = self.t("shot_hint_ready").replace("F9", hk)
         else:
-            text = self.t("shot_hint_used") + f" <a href='shot:now' style='color:{theme.ORANGE_DEEP}; " \
-                                               f"text-decoration:none;'><b>{self.t('shot_hint_retake')}</b></a>"
+            # the retake link never splits over two lines (at 470 px "לצלם / מחדש" did)
+            retake = self.t("shot_hint_retake").replace(" ", "&nbsp;")
+            text = self.t("shot_hint_used") + f" <a href='shot:now' style='color:{theme.accent_text(deep=True)}; " \
+                                               f"text-decoration:none; white-space:nowrap;'><b>{retake}</b></a>"
         import re
         text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
         d = "rtl" if self.t.rtl else "ltr"
@@ -1042,24 +1084,27 @@ class Overlay(QWidget):
         elif q and self.ask(q):
             self.input.clear()
 
-    def ask(self, question: str, force_claude: bool = False) -> bool:
-        """Ask (instant answer or Claude). False when nothing was asked (busy, empty)."""
+    def ask(self, question: str, force_claude: bool = False, shown: str | None = None) -> bool:
+        """Ask (instant answer or Claude). False when nothing was asked (busy, empty).
+        shown: what the player's bubble and the history say instead of the question itself (the inventory check's
+        nine lines of instructions showed as a nine-line bubble); the AI still gets the whole question."""
         if self.busy or getattr(self, "_syncing", False) or not question.strip():
             return False
+        label = shown or question
         # the app-made context belongs to this question only, however it gets answered (an instant answer too)
         tiles, self._detail_tiles = getattr(self, "_detail_tiles", None), None
         hidden, self._hidden_context = getattr(self, "_hidden_context", None), None
-        self._last_question = question
+        self._last_question = label
         c = self.profiles.active
         self._asked_cid = c.id if c else None
         history = History(c.id) if c else None
         focus = list(self.focus_keys)
         focus_name = ", ".join(self.kb.get(k)["name"] for k in focus)
         if not force_claude:          # "Ask Claude anyway" re-asks a question already in the chat
-            self.add_bubble(question, "user", focus_name)
+            self.add_bubble(label, "user", focus_name)
             if self.stats:
                 self.stats.question(c)     # once per question, however it gets answered
-            if not focus and self.settings["instant_answers"]:
+            if not focus and not shown and self.settings["instant_answers"]:
                 qa = quick.answer(question, self.kb, self.t)
                 if qa:
                     if history:
@@ -1073,7 +1118,7 @@ class Overlay(QWidget):
         self.shot_used = True
         self._update_shot_hint()
         if history:   # again for "Ask Claude anyway", so history search pairs the question with this answer
-            history.append("user", f"[about {focus_name}] {question}" if focus_name else question)
+            history.append("user", f"[about {focus_name}] {label}" if focus_name else label)
         self._pending_bubble = self.add_bubble(self.t("thinking"), "assistant")
         self._start_reading(self._pending_bubble)
         self.busy = True
@@ -1135,7 +1180,8 @@ class Overlay(QWidget):
             self.add_notice(text, lambda t: t("saver_turn_on"), self.saver_requested.emit)
 
     def show_saver_badge(self, on: bool):
-        self.saver_badge.setVisible(on)
+        self._saver_on = on
+        self._fit_header()
 
     def _show_quick(self, qa, question: str, history):
         """An instant answer from the KB, with the way to Claude one tap away."""
@@ -1143,16 +1189,15 @@ class Overlay(QWidget):
         self._start_reading(b)
         b.add_pin(lambda: self.pin_answer(question, qa.text), self.t("pin"))
         row = QWidget()
-        rl = QHBoxLayout(row)
+        from .controls import FlowLayout
+        rl = FlowLayout(row, spacing=8, line_spacing=0)       # the link goes under the badge when the chat is narrow
         rl.setContentsMargins(4, 0, 4, 0)
-        rl.setSpacing(8)
         rl.addWidget(QLabel(bidi.plain(self.t("quick_badge"), self.t.rtl), objectName="SystemLine"))
         again = QPushButton(bidi.plain(self.t.p("quick_ask_ai", self.settings["provider"]), self.t.rtl),
                             objectName="Link")
         again.setCursor(Qt.PointingHandCursor)
         again.clicked.connect(lambda: again.setEnabled(not self.ask(question, force_claude=True)))
         rl.addWidget(again)
-        rl.addStretch(1)
         self._add_widget(row)
         if history:
             history.append("assistant", qa.text, qa.entities)

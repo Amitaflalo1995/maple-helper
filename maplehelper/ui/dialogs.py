@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (QButtonGroup, QFrame, QGridLayout, QHBoxLayout, Q
 
 from .. import bidi, providers
 from ..providers.base import login_failed, stop_login
-from .controls import Section, Segmented, Select, Stepper, Switch, rtl_buttons
+from .controls import AdaptiveRow, FlowLayout, Section, Segmented, Select, Stepper, Switch, rtl_buttons
 from .glass import GlassDialog, no_default_buttons
 from ..i18n import I18n
 from ..kb import KnowledgeBase
@@ -310,13 +310,17 @@ class Onboarding(GlassDialog):
         lay.addWidget(self.ai_body)
         lay.addSpacing(6)
         sec = self.account_sec = Section(self.t("sec_account"), rtl)
+        # the status on its own line, its actions on a row under it (three links beside it squeezed the status
+        # into a column one word wide and pushed the window past 470 px); the row wraps when it must
         status_row = QWidget()
-        srow = QHBoxLayout(status_row)
-        srow.setContentsMargins(0, 6, 0, 6)
-        srow.setSpacing(14)
+        scol = QVBoxLayout(status_row)
+        scol.setContentsMargins(0, 8, 0, 4)
+        scol.setSpacing(2)
         self.status_label = QLabel(bidi.plain(self.t("ob_checking"), rtl), objectName="RowLabel")
         self.status_label.setWordWrap(True)
-        srow.addWidget(self.status_label, 1)
+        scol.addWidget(self.status_label)
+        srow = FlowLayout(spacing=18, line_spacing=0)
+        scol.addLayout(srow)
         self.install_btn = QPushButton(objectName="Link")
         self.login_btn = QPushButton(objectName="Link")
         self.check_btn = QPushButton(self.t("ob_check"), objectName="Link")
@@ -336,9 +340,6 @@ class Onboarding(GlassDialog):
         lay.addWidget(sec)
         lay.addSpacing(8)
         sec = Section(self.t("ob_use_api_key"), rtl)
-        kbox = QWidget()
-        krow = QHBoxLayout(kbox)
-        krow.setContentsMargins(0, 10, 0, 10)
         self.key_edit = QLineEdit()
         self.key_edit.setEchoMode(QLineEdit.Password)
         self.key_edit.setLayoutDirection(Qt.LeftToRight)
@@ -346,8 +347,9 @@ class Onboarding(GlassDialog):
         self.key_btn = QPushButton(self.t("ob_check_key"), objectName="Secondary")
         self.key_btn.setCursor(Qt.PointingHandCursor)
         self.key_btn.clicked.connect(self._check_key)
-        krow.addWidget(self.key_edit, 1)
-        krow.addWidget(self.key_btn)
+        # the field takes the whole width; its button beside it only when there is room, else under it
+        kbox = AdaptiveRow(self.key_edit, self.key_btn, main_min=260)
+        kbox.setContentsMargins(0, 10, 0, 10)
         sec.add_widget(kbox)
         self.key_hint = QLabel(objectName="RowHint")
         self.key_hint.setWordWrap(True)
@@ -738,7 +740,8 @@ class SettingsDialog(GlassDialog):
         sec.add_row(t("ai_provider"), self.provider_pick)
         # the model acts right away too; under it, which model answered last
         self.model_pick = Select()
-        self.model_hint = sec.add_row(t("ai_model"), self.model_pick, hint=" ").findChild(QLabel, "RowHint")
+        # the hint under the whole row: beside the dropdown it was squeezed into a narrow column
+        self.model_hint = sec.add_row(t("ai_model"), self.model_pick, hint=" ", hint_below=True).findChild(QLabel, "RowHint")
         self.model_hint.setWordWrap(True)
         self.model_pick.picked.connect(self._on_model)
         self._model_values: list = []

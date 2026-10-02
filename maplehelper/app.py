@@ -649,22 +649,22 @@ class MapleHelperApp:
                               self.exp_meter, page)
             dlg.sync_requested.connect(self.overlay.sync_profile)
             dlg.ask_requested.connect(self.ask_from_tools)
-            dlg.detail_ask_requested.connect(lambda q: self.ask_from_tools(q, True, detail=True))
+            dlg.detail_ask_requested.connect(lambda q, shown: self.ask_from_tools(q, True, detail=True, shown=shown))
             dlg.tag_requested.connect(self.ask_about_guide)
             dlg.guide_requested.connect(self.show_guides)
             return dlg
         self.open_window("tools", make)
 
-    def ask_from_tools(self, question: str, with_screenshot: bool, detail: bool = False):
+    def ask_from_tools(self, question: str, with_screenshot: bool, detail: bool = False, shown: str | None = None):
         if not self.overlay.isVisible():
             self.overlay.toggle(self.capture)
         if self.overlay._is_busy():      # an answer is on its way: say so, don't drop the question silently
             self.overlay._say_busy()
             return
         if with_screenshot:
-            self.overlay.ask_with_screenshot(question, detail=detail)
+            self.overlay.ask_with_screenshot(question, detail=detail, shown=shown)
         else:
-            self.overlay.ask(question)
+            self.overlay.ask(question, shown=shown)
 
     def _tools_call(self, method: str, *args):
         tools = self.__dict__.get("_windows", {}).get("tools")

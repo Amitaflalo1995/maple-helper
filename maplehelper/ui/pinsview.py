@@ -77,7 +77,7 @@ class PinsBar(QFrame):
             bl.setContentsMargins(0, 0, 0, 0)
             bl.setSpacing(2)
             top = QHBoxLayout()
-            q = QLabel(bidi.plain(pins.shown_question(p.get("q") or ""), rtl), objectName="CardName")
+            q = QLabel(bidi.ltr_name(pins.shown_question(p.get("q") or ""), rtl), objectName="CardName")
             q.setWordWrap(True)
             top.addWidget(q, 1)
             x = QToolButton(objectName="Icon", text="✕")
@@ -222,7 +222,8 @@ class HistoryDialog(GlassDialog):
         # a long question (the inventory check's own text) is cut to a short title until the card opens
         question = pins.shown_question(p["q"])         # not the stored "[about Mano] …"
         short_q = short_text(question, 70)
-        qlb = QLabel(bidi.plain(short_q, rtl), objectName="CardName")
+        # an English question keeps its own order in Hebrew ("?What does Mano drop" read backwards)
+        qlb = QLabel(bidi.ltr_name(short_q, rtl), objectName="CardName")
         qlb.setWordWrap(True)
         qlb.setAlignment(align)
         top.addWidget(qlb, 1)
@@ -269,7 +270,7 @@ class HistoryDialog(GlassDialog):
                         cl.insertWidget(cl.indexOf(preview) + 1, pics)
                 full.setVisible(opened)
                 preview.setVisible(not opened)
-                qlb.setText(bidi.plain(question if opened else short_q, rtl))
+                qlb.setText(bidi.ltr_name(question if opened else short_q, rtl))
         card.mousePressEvent = toggle
         return card
 

@@ -127,14 +127,22 @@ class Section(QFrame):
         if self.header is not None:
             self.header.setText(bidi.plain(header.upper() if not self.rtl else header, self.rtl))
 
-    def add_row(self, label: str, control: QWidget | None = None, hint: str = "") -> QWidget:
+    def add_row(self, label: str, control: QWidget | None = None, hint: str = "", hint_below: bool = False) -> QWidget:
+        """hint_below: the hint goes under the whole row (label and control), not squeezed beside the control."""
         if self._count:
             sep = QFrame(objectName="Separator")
             sep.setFixedHeight(1)
             self.rows.addWidget(sep)
         row = QWidget()
-        lay = QHBoxLayout(row)
-        lay.setContentsMargins(0, 8, 0, 8)
+        if hint_below:
+            whole = QVBoxLayout(row)
+            whole.setContentsMargins(0, 8, 0, 8)
+            whole.setSpacing(4)
+            lay = QHBoxLayout()
+            whole.addLayout(lay)
+        else:
+            lay = QHBoxLayout(row)
+            lay.setContentsMargins(0, 8, 0, 8)
         col = QVBoxLayout()
         col.setSpacing(1)
         lb = QLabel(bidi.plain(label, self.rtl), objectName="RowLabel")
@@ -143,7 +151,7 @@ class Section(QFrame):
         if hint:
             hl = QLabel(bidi.plain(hint, self.rtl), objectName="RowHint")
             hl.setWordWrap(True)
-            col.addWidget(hl)
+            (whole if hint_below else col).addWidget(hl)
         lay.addLayout(col, 1)
         if control is not None:
             control.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
@@ -316,6 +324,15 @@ class Stepper(QFrame):
             self.setValue(lo)
         self._sync()
 
+    def setMaximum(self, hi: int):
+        """Raise/lower the ceiling: the typed-value check and the + button follow (a value above moves down, emits)."""
+        self.hi = hi
+        from PySide6.QtGui import QIntValidator
+        self.edit.setValidator(QIntValidator(self.lo, hi, self))
+        if self._v > hi:
+            self.setValue(hi)
+        self._sync()
+
     def setValue(self, v: int):
         v = max(self.lo, min(self.hi, int(v)))
         if v != self._v:
@@ -335,6 +352,156 @@ class Stepper(QFrame):
     def _sync(self):
         self.minus.setEnabled(self._v > self.lo)
         self.plus.setEnabled(self._v < self.hi)
+
+
+from PySide6.QtCore import QRect  # noqa: E402
+from PySide6.QtWidgets import QLayout  # noqa: E402
+
+
+class FlowLayout(QLayout):
+    """Items in a row from the leading edge (right in Hebrew), wrapping onto the next line when the row is full:
+    a row of tags or chips never makes the window wider than it is (one long row pushed it past 470 px)."""
+
+    def __init__(self, parent: QWidget | None = None, spacing: int = 6, line_spacing: int | None = None):
+        super().__init__(parent)
+        self._items = []
+        self._h = spacing
+        self._v = spacing if line_spacing is None else line_spacing
+        self.setContentsMargins(0, 0, 0, 0)
+
+    def addItem(self, item):
+        self._items.append(item)
+
+    def count(self):
+        return len(self._items)
+
+    def itemAt(self, i):
+        return self._items[i] if 0 <= i < len(self._items) else None
+
+    def takeAt(self, i):
+        return self._items.pop(i) if 0 <= i < len(self._items) else None
+
+    def expandingDirections(self):
+        return Qt.Orientation(0)
+
+    def hasHeightForWidth(self):
+        return True
+
+    def heightForWidth(self, width: int) -> int:
+        return self._arrange(QRect(0, 0, width, 0), apply=False)
+
+    def setGeometry(self, rect):
+        super().setGeometry(rect)
+        self._arrange(rect, apply=True)
+
+    def sizeHint(self):
+        return self.minimumSize()
+
+    def minimumSize(self):
+        size = QSize()
+        for item in self._items:
+            if not item.isEmpty():
+                size = size.expandedTo(item.minimumSize())
+        m = self.contentsMargins()
+        return size + QSize(m.left() + m.right(), m.top() + m.bottom())
+
+    def _rtl(self) -> bool:
+        w = self.parentWidget()
+        return (w.layoutDirection() if w is not None else Qt.LeftToRight) == Qt.RightToLeft
+
+    def _arrange(self, rect, apply: bool) -> int:
+        """Lines of items that fit the width; each line's items centered on its height. Returns the height used."""
+        m = self.contentsMargins()
+        area = rect.adjusted(m.left(), m.top(), -m.right(), -m.bottom())
+        lines, line, x = [], [], 0
+        for item in self._items:
+            if item.isEmpty():
+                continue
+            w = min(item.sizeHint().width(), max(1, area.width()))
+            if line and x + self._h + w > area.width():
+                lines.append(line)
+                line, x = [], 0
+            x += (self._h if line else 0) + w
+            line.append((item, w))
+        if line:
+            lines.append(line)
+        y, rtl = area.y(), self._rtl()
+        for line in lines:
+            h = max(item.sizeHint().height() for item, _ in line)
+            x = 0
+            for item, w in line:
+                ih = item.sizeHint().height()
+                left = area.right() - x - w + 1 if rtl else area.x() + x
+                if apply:
+                    item.setGeometry(QRect(left, y + (h - ih) // 2, w, ih))
+                x += w + self._h
+            y += h + self._v
+        used = y - self._v - area.y() if lines else 0
+        return used + m.top() + m.bottom()
+
+
+class AdaptiveRow(QWidget):
+    """A wide control (a text field) with a button: side by side when there is room, else the button goes under
+    the field at the leading edge (beside a field at 470 px it pushed the window wider)."""
+
+    def __init__(self, main: QWidget, side: QWidget, main_min: int = 240, spacing: int = 8):
+        super().__init__()
+        from PySide6.QtWidgets import QBoxLayout
+        self._main, self._side, self._main_min = main, side, main_min
+        self._lay = QBoxLayout(QBoxLayout.TopToBottom, self)
+        self._lay.setContentsMargins(0, 0, 0, 0)
+        self._lay.setSpacing(spacing)
+        self._lay.addWidget(main)
+        self._lay.addWidget(side, 0, Qt.AlignLeft)        # AlignLeft: the leading edge (mirrored in Hebrew)
+        self._wide = None
+
+    def minimumSizeHint(self):
+        return QSize(max(self._main.minimumSizeHint().width(), self._side.sizeHint().width()),
+                     super().minimumSizeHint().height())
+
+    def wide_enough(self, width: int) -> bool:
+        return width >= self._main_min + self._lay.spacing() + self._side.sizeHint().width()
+
+    def resizeEvent(self, e):
+        super().resizeEvent(e)
+        self._place(self.width())
+
+    def _place(self, width: int):
+        from PySide6.QtWidgets import QBoxLayout
+        wide = self.wide_enough(width)
+        if wide == self._wide:
+            return
+        self._wide = wide
+        self._lay.setDirection(QBoxLayout.LeftToRight if wide else QBoxLayout.TopToBottom)
+        self._lay.setStretchFactor(self._main, 1 if wide else 0)
+        self._lay.setAlignment(self._side, Qt.AlignVCenter if wide else Qt.AlignLeft)
+
+
+class WrapLink(QLabel):
+    """A link-styled action whose text wraps (a QPushButton#Link never does: a long one widened the window)."""
+
+    clicked = Signal()
+
+    def __init__(self, text: str = "", rtl: bool = False):
+        super().__init__()
+        self.setObjectName("WrapLink")
+        self.setWordWrap(True)
+        self.setTextFormat(Qt.RichText)
+        self.setCursor(Qt.PointingHandCursor)
+        self._rtl = rtl
+        self.set_text(text)
+
+    def set_text(self, text: str) -> None:
+        import html
+        d, side = ("rtl", "right") if self._rtl else ("ltr", "left")
+        self.setText(f"<div dir='{d}' align='{side}'><span style='color:{theme.accent_text()}; font-weight:500;'>"
+                     f"{html.escape(bidi.plain(text, self._rtl))}</span></div>")
+
+    def mouseReleaseEvent(self, e):
+        if e.button() == Qt.LeftButton and self.rect().contains(e.position().toPoint()):
+            self.clicked.emit()
+            return
+        super().mouseReleaseEvent(e)
 
 
 def rtl_buttons(root, rtl: bool) -> None:
