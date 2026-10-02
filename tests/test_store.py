@@ -167,8 +167,9 @@ def test_hud_job_names_keep_class_and_job_consistent(isolated_store):
     p.apply_update({"level": 15, "job": "Archer", "base_class": "Archer"})
     c = p.active
     assert (c.base_class, c.job, c.level) == ("Bowman", "Bowman", 15)
+    assert c.job_label == "Archer"           # the card says what the game says
     p.apply_update({"job": "Hunter"})
-    assert (p.active.base_class, p.active.job) == ("Bowman", "Hunter")
+    assert (p.active.base_class, p.active.job) == ("Bowman", "Hunter") and p.active.job_label == "Hunter"
     p.apply_update({"base_class": "Warrior", "level": 5})
     assert (p.active.base_class, p.active.job) == ("Warrior", "Beginner")
     p.apply_update({"job": "Not a job"})

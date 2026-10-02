@@ -501,7 +501,7 @@ class ProfileCard(QFrame):
         align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter
         self.name.setText(bidi.plain(c.name, rtl))
         self.name.setAlignment(align)
-        self.meta.setText(f"Lv. {c.level} · {c.job}")
+        self.meta.setText(f"Lv. {c.level} · {c.job_label}")
         self.meta.setAlignment(align)
         self.avatar.set_image(character_image(c, avatar_path, kb))
 
@@ -544,7 +544,7 @@ class CharacterRow(QFrame):
         align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter
         name = QLabel(bidi.plain(c.name, rtl), objectName="ProfileName")
         name.setAlignment(align)
-        meta = QLabel(f"Lv. {c.level} · {c.job}", objectName="ProfileMeta")
+        meta = QLabel(f"Lv. {c.level} · {c.job_label}", objectName="ProfileMeta")
         meta.setAlignment(align)
         col.addWidget(name)
         col.addWidget(meta)

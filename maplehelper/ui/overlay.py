@@ -598,7 +598,7 @@ class Overlay(QWidget):
         others = [c for c in self.profiles.characters if c.id != active]
         for c in others:
             img = character_image(c, self.profiles.avatar_path(c), self.kb)
-            a = QAction(QIcon(str(img)) if img else QIcon(), bidi.plain(f"{c.name}  ·  Lv. {c.level} {c.job}",
+            a = QAction(QIcon(str(img)) if img else QIcon(), bidi.plain(f"{c.name}  ·  Lv. {c.level} {c.job_label}",
                                                                            self.t.rtl), menu)
             a.setEnabled(not busy)
             a.triggered.connect(lambda _=False, cid=c.id: self.switch_character(cid))

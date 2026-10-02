@@ -157,8 +157,14 @@ class Character:
     stats: dict = field(default_factory=dict)          # from the stat window: acc, dmg_min, dmg_max, hp, mp
     quests_done: list[str] = field(default_factory=list)   # quest keys the player marked done
     town: str = ""                                    # citizenship town (Henesys / Kerning City), "" = not chosen
+    job_shown: str = ""     # the job as the game's HUD names it ("Archer" on an Old School server for a Bowman)
     crafts: dict = field(default_factory=dict)        # crafting profession -> its level
     updated_at: float = field(default_factory=time.time)
+
+    @property
+    def job_label(self) -> str:
+        """The job as the player sees it in game (the app works with the MapleStory Classic name inside)."""
+        return self.job_shown or self.job
 
     def summary(self) -> str:
         parts = [f"Name: {self.name}", f"Class: {self.base_class}", f"Job: {self.job}", f"Level: {self.level}"]
@@ -185,7 +191,11 @@ def _consistent_job(update: dict, c: "Character") -> dict:
     says "Archer": that once left a Bowman with the job Assassin)."""
     from .jobs import canonical_class, canonical_job, class_of, first_job
     update = dict(update)
-    job = canonical_job(update["job"]) if isinstance(update.get("job"), str) and update["job"].strip() else None
+    raw = " ".join(update["job"].split()) if isinstance(update.get("job"), str) else ""
+    job = canonical_job(raw) if raw else None
+    if job:
+        # keep the HUD's own word for it when it differs ("Archer"), shown on the card
+        update["job_shown"] = raw.title() if raw.lower() != job.lower() else ""
     cls = canonical_class(update["base_class"]) if isinstance(update.get("base_class"), str) else None
     update.pop("job", None)
     update.pop("base_class", None)
@@ -257,6 +267,8 @@ class Profiles:
     def edit(self, cid: str, name: str, base_class: str, job: str, level: int) -> None:
         c = next((c for c in self.characters if c.id == cid), None)
         if c:
+            if job != c.job:
+                c.job_shown = ""          # picked by hand: the app's own name
             c.name, c.base_class, c.job, c.level = name, base_class, job, level
             c.updated_at = time.time()
             self.save()
@@ -284,6 +296,9 @@ class Profiles:
             return []
         update = _consistent_job(update, c)
         changed = []
+        relabelled = "job_shown" in update and update["job_shown"] != c.job_shown
+        if relabelled:
+            c.job_shown = update["job_shown"]
         name = update.get("name")
         # the name on the HUD (a screenshot read): "Kalimero" typed at setup becomes the real "KalimeroZz"
         if isinstance(name, str) and re.fullmatch(r"[A-Za-z0-9]{2,16}", name.strip()) and name.strip() != c.name:
@@ -331,7 +346,7 @@ class Profiles:
         if isinstance(note, str) and note.strip() and note not in c.notes:
             c.notes.append(note)
             changed.append(("note", note))
-        if changed:
+        if changed or relabelled:
             c.updated_at = time.time()
             self.save()
         return changed
