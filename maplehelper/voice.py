@@ -26,6 +26,12 @@ class Transcriber:
     def loaded(self) -> bool:
         return self._model is not None
 
+    @staticmethod
+    def downloaded() -> bool:
+        """The model is on disk already (it stays in the data folder across app updates)."""
+        snaps = DATA_DIR / "models" / ("models--" + MODEL_ID.replace("/", "--")) / "snapshots"
+        return any(snaps.glob("*/model.bin"))
+
     def load(self):
         with self._lock:
             if self._model is not None:
@@ -53,7 +59,7 @@ class VoiceController(QObject):
     No key-state polling and no keyboard hook: nothing that looks like a macro tool to anti-cheat."""
 
     started = Signal()
-    state = Signal(str)          # listening | transcribing | loading | idle
+    state = Signal(str)          # listening | transcribing | loading | downloading | idle
     text = Signal(str)
     failed = Signal(str)
 
@@ -63,6 +69,18 @@ class VoiceController(QObject):
         self.transcriber = Transcriber()
         self._chunks: list[np.ndarray] = []
         self._stream = None
+
+    def preload(self):
+        """Load the model in the background when it's on disk already (the player has used voice before),
+        so the first question after a start or an update doesn't wait for it. Never downloads."""
+        if self.transcriber.downloaded() and not self.transcriber.loaded():
+            threading.Thread(target=self._preload, daemon=True).start()
+
+    def _preload(self):
+        try:
+            self.transcriber.load()
+        except Exception:
+            pass     # the first question tries again, and reports the error
 
     def set_key(self, key_name: str):
         self.key_name = key_name
@@ -97,7 +115,8 @@ class VoiceController(QObject):
         if len(audio) < SAMPLE_RATE * MIN_SECONDS:
             self.state.emit("idle")
             return
-        self.state.emit("transcribing" if self.transcriber.loaded() else "loading")
+        self.state.emit("transcribing" if self.transcriber.loaded() else
+                        "loading" if self.transcriber.downloaded() else "downloading")
         threading.Thread(target=self._run, args=(audio,), daemon=True).start()
 
     def _run(self, audio: np.ndarray):

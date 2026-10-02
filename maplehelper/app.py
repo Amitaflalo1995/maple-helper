@@ -133,6 +133,7 @@ class MapleHelperApp:
         self.pending_installer = None
         self._reopen_after_update = False
         QTimer.singleShot(4000, self.check_kb_update_silently)
+        QTimer.singleShot(6000, self.voice.preload)    # voice answers right away after a start or an update
         QTimer.singleShot(8000, updater.remove_old_installers)
         # a session can run for hours: look again every 3 hours
         self._update_timer = QTimer(interval=3 * 60 * 60 * 1000, timeout=self.check_kb_update_silently)
