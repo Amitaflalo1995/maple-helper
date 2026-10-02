@@ -26,16 +26,17 @@ def find_name_tags(rgb: np.ndarray) -> list[tuple[int, int, int, int]]:
     luma = f[..., 0] * 0.3 + f[..., 1] * 0.59 + f[..., 2] * 0.11 + 1.0
     ratio = luma[1:] / luma[:-1]                       # ratio[y] = row y+1 against row y
     white = (f.min(axis=2) >= 225) & (f.max(axis=2) - f.min(axis=2) < 30)
-    tops = {y + 1: _runs((ratio[y] > 0.22) & (ratio[y] < 0.65)) for y in range(ratio.shape[0])}
-    bottoms = {y: _runs((ratio[y] > 1.5) & (ratio[y] < 4.5)) for y in range(ratio.shape[0])}
+    bottom = (ratio > 1.5) & (ratio < 4.5)              # bottom[y]: row y is a plate's last one
     found = []
-    for y0, runs in tops.items():
-        for x0, n in runs:
+    for y in range(ratio.shape[0]):
+        y0 = y + 1                                     # a plate's first row (darker than the row above)
+        for x0, n in _runs((ratio[y] > 0.22) & (ratio[y] < 0.65)):
             for h in range(9, 61):
-                y1 = y0 + h - 1                        # the plate's last row
-                if y1 not in bottoms:
+                y1 = y0 + h - 1
+                if y1 >= bottom.shape[0]:
                     break
-                if any(abs(bx - x0) <= 5 and abs(bn - n) <= 10 for bx, bn in bottoms[y1]):
+                # most of its bottom edge: chat text or a sprite may cover part of it (seen live)
+                if bottom[y1, x0:x0 + n].mean() >= 0.55:
                     letters = white[y0:y1 + 1, x0:x0 + n].mean()
                     if 2.2 <= n / h <= 14 and 0.04 <= letters <= 0.5:
                         found.append((x0, y0, n, h))
@@ -43,12 +44,25 @@ def find_name_tags(rgb: np.ndarray) -> list[tuple[int, int, int, int]]:
     return found
 
 
-def portrait_rect(rgb: np.ndarray, box: list[float] | None) -> tuple[int, int, int, int] | None:
+def tag_fits_name(tag: tuple[int, int, int, int], name: str) -> bool:
+    """Could this plate hold that name? Its width grows with the name's length (the game's font is about
+    0.4 tag-heights a letter): another player's tag, or a box of the game's own UI, usually doesn't fit."""
+    _, _, w, h = tag
+    want = 0.40 * len(name) + 0.45
+    return abs(w / h - want) <= 0.22 * want
+
+
+def portrait_rect(rgb: np.ndarray, box: list[float] | None, name: str = "") -> tuple[int, int, int, int] | None:
     """Pixel rect (left, top, right, bottom) of the player's sprite, from the AI's rough box (fractions).
-    Without a box, only when the screenshot has exactly one name tag (just the player in sight)."""
+    With the character's name, only tags that can hold it count (other players stand around). Without a box,
+    only when exactly one tag is left."""
     H, W = rgb.shape[:2]
+
+    def fitting(tags):
+        return [t for t in tags if tag_fits_name(t, name)] if name else tags
+
     if box is None:
-        tags = find_name_tags(rgb)
+        tags = fitting(find_name_tags(rgb))
         if len(tags) != 1:
             return None
         tx, ty, tw, th = tags[0]
@@ -59,11 +73,11 @@ def portrait_rect(rgb: np.ndarray, box: list[float] | None) -> tuple[int, int, i
     rw, rh = max(w * W * 3, W * 0.06), max(h * H * 2.5, H * 0.12)
     left, top = int(max(0, cx - rw)), int(max(0, cy - rh))
     right, bottom = int(min(W, cx + rw)), int(min(H, cy + rh * 1.4))
-    tags = find_name_tags(rgb[top:bottom, left:right])
+    tags = fitting(find_name_tags(rgb[top:bottom, left:right]))
     if not tags:
         # the box was further off than that (live test: it pointed at a TAXI sign 400 px away): every tag on screen,
         # nearest to the box (other players have tags too, NPCs don't: theirs are opaque yellow plates)
-        tags, left, top = find_name_tags(rgb), 0, 0
+        tags, left, top = fitting(find_name_tags(rgb)), 0, 0
         if not tags:
             return None
     fx, fy = cx - left, (y + h) * H - top           # the box's feet

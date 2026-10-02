@@ -1312,7 +1312,8 @@ class Overlay(QWidget):
             # the full-resolution grab when it is the same picture (same shape): small name tags survive there
             same = full is not None and abs(full.width / full.height - img.width / img.height) < 0.01
             src = full.convert("RGB") if same else img
-            rect = portrait_rect(np.asarray(src), box)
+            c = self.profiles.active
+            rect = portrait_rect(np.asarray(src), box, c.name if c else "")
             if rect:
                 crop = src.crop(rect)
                 mask = sprite_mask(np.asarray(crop))

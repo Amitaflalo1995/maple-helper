@@ -59,3 +59,10 @@ def test_sprite_cut_out_of_its_background():
     crop[22:78, 32:68] = (200, 60, 60)                    # ...around the sprite
     m = sprite_mask(crop)
     assert m is not None and m[50, 50] and not m[5, 5] and m[20:80, 30:70].all() and m.sum() == 60 * 40
+
+
+def test_tag_width_must_fit_the_name():
+    from maplehelper.portrait import tag_fits_name
+    assert tag_fits_name((0, 0, 116, 26), "KalimeroZz")         # measured live
+    assert not tag_fits_name((0, 0, 74, 26), "KalimeroZz")      # a 6-letter name next to it
+    assert not tag_fits_name((0, 0, 122, 42), "KalimeroZz")     # a label box of the Stat window
