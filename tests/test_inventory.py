@@ -42,3 +42,17 @@ def test_slots_and_the_icon_are_found(tmp_path):
     slots = inventory.read(img, kb)
     assert [s.index for s in slots] == [2] and slots[0].matches[0][0] == "item/1"
     assert "Thing 1" in inventory.describe(slots, kb)
+
+
+def test_the_mouse_cursor_over_a_slot_is_no_item(tmp_path):
+    kb = _KB(tmp_path)
+    icon = Image.open(kb.image_path("item/0")).convert("RGBA")
+    img = Image.new("RGB", (600, 400), (40, 90, 160))
+    for r in range(3):
+        for c in range(4):
+            x, y = 50 + c * 96, 40 + r * 96
+            img.paste((224, 222, 212), (x, y, x + 83, y + 83))
+    big = icon.resize((60, 58), Image.NEAREST)
+    img.paste(big, (50 + 11, 40 + 12), big)
+    assert [s.index for s in inventory.read(img, kb)] == [1]
+    assert inventory.read(img, kb, cursor=(80, 70)) == []

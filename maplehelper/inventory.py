@@ -127,12 +127,16 @@ def warm(kb) -> None:
     _index(kb)
 
 
-def read(img: Image.Image, kb, top: int = 3) -> list[Slot]:
-    """Every filled slot of the inventory in a full-resolution screenshot, with its best database matches."""
+def read(img: Image.Image, kb, top: int = 3, cursor: tuple[int, int] | None = None) -> list[Slot]:
+    """Every filled slot of the inventory in a full-resolution screenshot, with its best database matches.
+    cursor: the mouse position in the image; the game's hand cursor over a slot is no item."""
     rgb = np.asarray(img.convert("RGB"))
     keys, vecs = _index(kb)
     out = []
     for i, (x, y, size) in enumerate(find_slots(rgb), 1):
+        # the hand sprite hangs below and right of the mouse point (~0.6 slot): any slot it touches
+        if cursor and x - size * 0.6 <= cursor[0] < x + size and y - size * 0.7 <= cursor[1] < y + size:
+            continue
         cell = img.crop((x, y, x + size, y + size))
         c = np.asarray(cell.convert("RGB")).astype(np.int16)
         edge = max(3, size // 12)

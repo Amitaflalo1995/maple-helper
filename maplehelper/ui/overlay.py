@@ -626,7 +626,8 @@ class Overlay(QWidget):
             self._detail_tiles = capture.detail_tiles(capture.LAST_FULL)
             # the inventory read from the pixels: every icon matched to the database's own pictures
             try:
-                slots = inventory.read(capture.LAST_FULL, self.kb) if capture.LAST_FULL is not None else []
+                slots = inventory.read(capture.LAST_FULL, self.kb, cursor=capture.LAST_CURSOR) \
+                    if capture.LAST_FULL is not None else []
             except Exception:      # noqa: BLE001 - the AI still gets the screenshot
                 slots = []
             try:

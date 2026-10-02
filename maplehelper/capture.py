@@ -11,6 +11,21 @@ from PIL import Image
 MAX_SIDE = 1568
 # the latest grab at full resolution: the portrait is cut from it (a name tag is ~10 px tall at that size)
 LAST_FULL: Image.Image | None = None
+# where the mouse was in that grab (image pixels): the game draws its own hand cursor, and over an inventory
+# slot it looked like an item (live test)
+LAST_CURSOR: tuple[int, int] | None = None
+
+
+def _cursor_in(x: int, y: int, w: int, h: int) -> tuple[int, int] | None:
+    import sys
+    if sys.platform != "win32":
+        return None
+    import ctypes
+    import ctypes.wintypes as wt
+    p = wt.POINT()
+    if not ctypes.windll.user32.GetCursorPos(ctypes.byref(p)):
+        return None
+    return (p.x - x, p.y - y) if 0 <= p.x - x < w and 0 <= p.y - y < h else None
 
 
 def grab_image(x: int, y: int, w: int, h: int) -> Image.Image:
@@ -40,9 +55,13 @@ def detail_tiles(img: Image.Image | None, width: int = 1200) -> list[bytes]:
 
 def grab_jpeg(rect: tuple[int, int, int, int]) -> bytes:
     """JPEG of a screen rectangle (x, y, w, h), longest side MAX_SIDE."""
-    global LAST_FULL
+    global LAST_FULL, LAST_CURSOR
     img = grab_image(*rect)
     LAST_FULL = img.copy()
+    try:
+        LAST_CURSOR = _cursor_in(*rect)
+    except Exception:      # noqa: BLE001
+        LAST_CURSOR = None
     img.thumbnail((MAX_SIDE, MAX_SIDE))
     buf = io.BytesIO()
     img.save(buf, "JPEG", quality=82)
