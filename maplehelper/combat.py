@@ -163,8 +163,22 @@ def landed(raw: float, defense: int, player_level: int, mob_level: int) -> float
     return max(1.0, raw * 100 / (defense + 100) * level_scale(player_level, mob_level))
 
 
+def damage_range(dmg_min: int | None, dmg_max: int | None) -> tuple[int, int] | None:
+    """The stat window's range as typed or read: swapped when min > max, a missing max taken as the min;
+    None without a usable minimum."""
+    lo, hi = int(dmg_min or 0), int(dmg_max or 0)
+    if hi and lo > hi:
+        lo, hi = hi, lo
+    if lo <= 0:
+        return None
+    return lo, max(lo, hi)
+
+
 def hits_to_kill(dmg_min: int, dmg_max: int, m: Monster, player_level: int, magic: bool = False) -> tuple[int, float]:
-    """(hits that always kill, average hits), from the damage range in the stat window."""
+    """(hits that always kill, average hits), from the damage range in the stat window.
+
+    That range is one basic attack, no skill multiplier (for a Magician it's the staff/wand swing, a physical
+    hit), so the counts are for basic attacks; magic=True only switches the defense to M.DEF."""
     defense = m.mdef if magic else m.pdef
     lo = landed(dmg_min, defense, player_level, m.level)
     avg = landed((dmg_min + dmg_max) / 2, defense, player_level, m.level)
@@ -183,29 +197,32 @@ class Spot:
     score: float           # EXP per swing: exp x hit / average hits
     acc_needed: int        # ACC to never miss at the player's level
     recommended: bool = False
+    fits: bool = True      # False: too many misses or basic-attack hits; shown only when nothing fits
 
 
 def spots(kb, level: int, acc: int | None = None, dmg: tuple[int, int] | None = None, magic: bool = False,
           below: int = 8, above: int = 6, n: int = 8) -> list[Spot]:
     """The best monsters to train on, best first: EXP per swing with your accuracy and damage.
 
-    Without stats, monsters are ranked by EXP per HP near the player's level."""
+    Without stats, monsters are ranked by EXP per HP near the player's level. The stat window's damage is a
+    basic attack (skills hit harder), so when no monster passes the miss/hits filters, the best of the rest
+    come back anyway, marked fits=False. A Magician's range is the staff swing, not a spell: it isn't used."""
     from . import plan
     guide = {s.map.lower() for s in plan.spots_for(kb, level, 5)}
-    out, seen = [], set()
+    if magic:
+        dmg = None
+    out, hard, seen = [], [], set()
     for m in sorted(monsters(kb), key=lambda m: -sum(c for _, c in m.maps)):
-        if not (level - below <= m.level <= level + above) or not m.maps or _NOT_GRIND_MOB.search(m.name):
+        if not (level - below <= m.level <= level + above) or not m.maps or special_monster(m.name):
             continue
         if m.name in seen:
             continue                      # the same monster again (another version of it)
         seen.add(m.name)
         hit = hit_chance(acc, level, m.level, m.avoid) if acc else 1.0
-        if acc and hit < 0.6:
-            continue                      # too many misses to be worth it
+        fits = not (acc and hit < 0.6)    # too many misses to be worth it
         if dmg and dmg[0] > 0:
-            hits, avg = hits_to_kill(dmg[0], max(dmg), m, level, magic)
-            if hits > 12:
-                continue                  # takes too long to kill
+            hits, avg = hits_to_kill(dmg[0], max(dmg), m, level)
+            fits = fits and hits <= 12    # takes too long to kill
             score = m.exp * hit / avg
         else:
             hits = avg = None
@@ -213,7 +230,9 @@ def spots(kb, level: int, acc: int | None = None, dmg: tuple[int, int] | None = 
         top_map, count = m.maps[0]
         score *= min(1.0, count / 20) ** 0.5   # a crowded map keeps you swinging; a sparse one makes you walk
         rec = any(mp.lower().startswith(g) or g.startswith(mp.lower()) for mp, _ in m.maps for g in guide)
-        out.append(Spot(m, top_map, hit, hits, avg, score, acc_needed(level, m.level, m.avoid), rec))
+        (out if fits else hard).append(Spot(m, top_map, hit, hits, avg, score, acc_needed(level, m.level, m.avoid),
+                                            rec, fits))
+    out = out or hard
     out.sort(key=lambda s: -s.score)
     return out[:n]
 

@@ -213,6 +213,19 @@ def _consistent_job(update: dict, c: "Character") -> dict:
     return update
 
 
+def same_character(saved: str, hud: str) -> bool:
+    """Is the name on the HUD the saved character's? The same name, or one cut short at setup
+    ("Kalimero" saved, "KalimeroZz" in game); any other name is another character."""
+    a, b = saved.strip().lower(), hud.strip().lower()
+    return a == b or (min(len(a), len(b)) >= 3 and (a.startswith(b) or b.startswith(a)))
+
+
+def hud_name(update) -> str | None:
+    """The character name a screenshot read, when it is a valid in-game name."""
+    name = update.get("name") if isinstance(update, dict) else None
+    return name.strip() if isinstance(name, str) and re.fullmatch(r"[A-Za-z0-9]{2,16}", name.strip()) else None
+
+
 def _str_list(v) -> list[str]:
     """Quest names from the AI: a list of strings (a bare string is one quest, not its letters)."""
     if isinstance(v, str):
@@ -285,6 +298,10 @@ class Profiles:
             self.active_id = self.characters[0].id if self.characters else None
         self.save()
 
+    def find_by_name(self, name: str) -> "Character | None":
+        n = name.strip().lower()
+        return next((c for c in self.characters if c.name.strip().lower() == n), None)
+
     def set_active(self, cid: str) -> None:
         self.active_id = cid
         self.save()
@@ -299,10 +316,11 @@ class Profiles:
         relabelled = "job_shown" in update and update["job_shown"] != c.job_shown
         if relabelled:
             c.job_shown = update["job_shown"]
-        name = update.get("name")
-        # the name on the HUD (a screenshot read): "Kalimero" typed at setup becomes the real "KalimeroZz"
-        if isinstance(name, str) and re.fullmatch(r"[A-Za-z0-9]{2,16}", name.strip()) and name.strip() != c.name:
-            c.name = name.strip()
+        name = hud_name(update)
+        # the name on the HUD (a screenshot read): "Kalimero" typed at setup becomes the real "KalimeroZz".
+        # Another name altogether is another character: the overlay asks first and never lands here with it
+        if name and name != c.name and same_character(c.name, name):
+            c.name = name
             changed.append(("name", c.name))
         for key in ("level", "job", "base_class", "map"):
             val = update.get(key)

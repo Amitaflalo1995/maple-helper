@@ -141,3 +141,26 @@ def test_language_switch_updates_tooltips_and_term_language(overlay):
     overlay.apply_language()
     assert overlay.tools_btn.toolTip() == "Play tools" and overlay.clear_tags_btn.toolTip() == "Clear all tags"
     assert terms.LANG == "en"
+
+
+def test_another_character_in_game_is_offered_not_overwritten(overlay):
+    """A new character in game while the app's active one is another: nothing changes until the player adds it."""
+    from maplehelper.brain import Answer
+    from maplehelper.ui.widgets import NoticeCard
+    before = overlay.profiles.active
+    ans = Answer(text="ok", profile_update={"name": "NewGuy99", "level": 3, "job": "Beginner"})
+    assert overlay._offer_other_character(ans, None, None)
+    assert overlay.profiles.active is before and before.name == "Elipaz" and before.level == 32
+    notices = overlay.findChildren(NoticeCard)
+    assert notices
+    notices[-1].clicked.emit()
+    notices[-1].clicked.emit()                       # a double click adds it once
+    new = overlay.profiles.active
+    assert new.name == "NewGuy99" and new.level == 3 and len(overlay.profiles.characters) == 2
+    # back on the first one, the same read offers to switch instead of adding again
+    overlay.switch_character(before.id)
+    assert overlay._offer_other_character(ans, None, None)
+    overlay.findChildren(NoticeCard)[-1].clicked.emit()
+    assert overlay.profiles.active.name == "NewGuy99" and len(overlay.profiles.characters) == 2
+    # the same character (a name cut short at setup) is no offer
+    assert not overlay._offer_other_character(Answer(text="ok", profile_update={"name": "NewGuy99x"}), None, None)

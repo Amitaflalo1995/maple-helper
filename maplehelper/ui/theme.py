@@ -99,7 +99,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
                                   border-radius: 3px; }}
     #ExpText {{ color: {c['muted']}; font-size: {s - 3}px; }}
     #PlanHead {{ color: {c['muted']}; font-size: {s - 2}px; font-weight: 600; padding-top: 6px; }}
-    QPushButton#PlanLink {{ background: transparent; border: none; padding: 2px 0; text-align: right; color: {c['text']}; }}
+    QPushButton#PlanLink {{ background: transparent; border: none; padding: 2px 0; text-align: left; color: {c['text']}; }}
     QPushButton#PlanLink:hover {{ color: {ORANGE}; }}
     QTextBrowser#GuideText {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 14px;
                                padding: 10px 12px; color: {c['text']}; selection-background-color: {ORANGE}; }}

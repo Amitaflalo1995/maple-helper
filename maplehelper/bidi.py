@@ -8,7 +8,9 @@ Rules (spec, "Hebrew, English and RTL"):
   behaves as one closed block: brackets, trailing punctuation and signs land
   where a Hebrew reader expects them.
   (Unicode isolates LRI…PDI would be the modern choice, but Qt's text engine
-  does not honor them; tests/test_bidi.py measures real glyph positions.)
+  does not honor them inside these runs; tests/test_bidi.py measures real glyph positions.)
+- A whole English name (a quest's "[Area] Name") goes in one LRI…PDI block
+  (ltr_block / ltr_name), also measured in tests/test_bidi.py.
 """
 from __future__ import annotations
 
@@ -16,6 +18,8 @@ import html
 import re
 
 LRE, PDF, RLM = "‪", "‬", "‏"  # left-to-right embedding, pop, right-to-left mark
+LRI, PDI = "⁦", "⁩"            # left-to-right isolate, pop (for a whole English name, see ltr_name)
+_ISOLATED = re.compile(f"({LRI}[^{PDI}]*{PDI})")
 RTL_CHARS = "֐-׿؀-ۿיִ-﷿ﹰ-﻿"
 _STRONG = re.compile(rf"[A-Za-z{RTL_CHARS}]")
 _RTL = re.compile(rf"[{RTL_CHARS}]")
@@ -71,7 +75,14 @@ def direction(text: str) -> str:
 
 
 def isolate_ltr_runs(text: str) -> str:
-    """Wrap English/number runs in LRE…PDF. Only for RTL paragraphs."""
+    """Wrap English/number runs in LRE…PDF. Only for RTL paragraphs.
+    A name already isolated as one block (ltr_block) is kept as it is."""
+    if LRI in text:
+        return "".join(part if part.startswith(LRI) else _isolate_runs(part) for part in _ISOLATED.split(text))
+    return _isolate_runs(text)
+
+
+def _isolate_runs(text: str) -> str:
     out, pos = [], 0
     for m in _RUN.finditer(text):
         run = _balanced(m.group(0).rstrip(" "))
@@ -140,3 +151,18 @@ def plain(text: str, rtl_ui: bool = False) -> str:
         # direction; the trailing mark keeps final punctuation ("?") on the left.
         return RLM + isolate_ltr_runs(text) + RLM
     return text
+
+
+def ltr_block(name: str, rtl_ui: bool) -> str:
+    """An English name (no Hebrew in it) as one left-to-right block for a Hebrew sentence. Run by run,
+    "[Construction Site B1] Shumi's Lost Coin" came out with its brackets thrown to the other end."""
+    if rtl_ui and name and not _RTL.search(name):
+        return f"{LRI}{name}{PDI}"
+    return name
+
+
+def ltr_name(name: str, rtl_ui: bool) -> str:
+    """A label that is only a name: one block when it's English, else plain()."""
+    if rtl_ui and name and not _RTL.search(name):
+        return RLM + ltr_block(name, rtl_ui) + RLM
+    return plain(name, rtl_ui)

@@ -207,6 +207,11 @@ class Select(QPushButton):
         self._items, self._index = [], -1
         self.setText("")
 
+    def show_none(self, prompt: str):
+        """No item chosen yet: show a prompt ("Pick a job") until the player picks one."""
+        self._index = -1
+        self.setText(prompt)
+
     def count(self):
         return len(self._items)
 

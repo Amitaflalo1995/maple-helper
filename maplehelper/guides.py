@@ -380,7 +380,7 @@ def for_you(kb, c) -> list[str]:
         if 21 <= c.level <= 30:
             picks.append("guide/kerning-city-party-quest-kpq-guide")
         picks.append("guide/exp-table-level-1-to-100")
-        if c.level >= 60:
+        if c.level >= 39:                  # the Hollow opens at Lv. 39 (its guide), not 60
             picks.append("guide/forgotten-hollow-the-new-endgame-area")
     else:
         picks += ["guide/beginners-guide-first-steps-in-maple-world", "guide/best-grind-maps-every-level"]

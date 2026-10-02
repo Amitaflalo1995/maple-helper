@@ -1190,6 +1190,10 @@ class Overlay(QWidget):
         if self.profiles.active_id != getattr(self, "_sync_cid", None):
             self.sync_finished.emit(False)
             return             # the player switched character meanwhile: this read belongs to the other one
+        if self._offer_other_character(ans, self._sync_shot, getattr(self, "_sync_full", None)):
+            self._sync_full = None
+            self.sync_finished.emit(False)
+            return             # another character is in game: the saved one stays as it is
         changes = self.profiles.apply_update(ans.profile_update or {})
         # finds the name tag even without a box
         avatar = self._update_avatar(self._sync_shot, ans.avatar_box, getattr(self, "_sync_full", None))
@@ -1235,12 +1239,48 @@ class Overlay(QWidget):
             self._add_widget(DropGroupCard(self.kb, g["monster"], g["items"]))
         if ans.entities:
             self.add_cards(ans.entities)
-        if self.profiles.active_id == getattr(self, "_asked_cid", None):
+        if self.profiles.active_id == getattr(self, "_asked_cid", None) and \
+                not self._offer_other_character(ans, getattr(self, "_question_shot", None), None):
             self._apply_profile_update(ans.profile_update)
             # a chat answer only fills a missing portrait: the AI's boxes are often off (live test: an NPC, a
             # treetop), so replacing a good portrait is left to the explicit ⟳ sync
             if ans.avatar_box and getattr(self, "_question_shot", None) and not self.profiles.avatar_path():
                 self._update_avatar(self._question_shot, ans.avatar_box)
+
+    def _offer_other_character(self, ans: Answer, shot: bytes | None, full) -> bool:
+        """The screenshot shows another character than the active one (a new one, or another saved one):
+        offer to add it / switch to it, and touch nothing until the player says so. True when it did."""
+        from ..store import hud_name, same_character
+        c = self.profiles.active
+        name = hud_name(ans.profile_update)
+        if not c or not name or same_character(c.name, name):
+            return False
+        update, box = dict(ans.profile_update), ans.avatar_box
+        existing = self.profiles.find_by_name(name)
+        done = []
+
+        def go():
+            if done:
+                return
+            done.append(True)
+            if existing:
+                self.switch_character(existing.id)
+            else:
+                self.profiles.add(name, "Beginner", "Beginner", 1)     # class, job, level come from the read
+                self.add_system(self.t("switched_character", name=name))
+            self._show_changes(self.profiles.apply_update(update))
+            if shot:
+                self._update_avatar(shot, box, full)
+            self.refresh_profile_chip()
+            self.profile_changed.emit()
+
+        if existing:
+            self.add_notice(lambda t: t("other_char_saved", name=name, current=c.name),
+                            lambda t: t("other_char_switch", name=name), go)
+        else:
+            self.add_notice(lambda t: t("other_char_new", name=name, current=c.name),
+                            lambda t: t("other_char_add", name=name), go)
+        return True
 
     def _apply_profile_update(self, update: dict):
         c = self.profiles.active

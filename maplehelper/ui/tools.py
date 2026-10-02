@@ -17,7 +17,7 @@ from .. import bidi, buildplan, combat, crafting, glossary, guides, market, plan
 from ..i18n import I18n
 from . import terms, theme
 from .controls import Section, Segmented, Stepper, rtl_buttons
-from .glass import GlassDialog
+from .glass import GlassDialog, no_default_buttons
 
 PAGES = ("train", "calc", "build", "quests", "crafting", "town", "prices", "exp", "more")
 MAX_QUESTS = 40
@@ -192,7 +192,7 @@ class ToolsDialog(GlassDialog):
         super().__init__(t("tools"), t.rtl)
         self.kb, self.profiles, self.settings, self.meter = kb, profiles, settings, exp_meter
         self.setStyleSheet(stylesheet)
-        self.resize(580, 800)
+        self.fit_screen(580, 800)
         rtl = t.rtl
         outer = QVBoxLayout(self.content)
         outer.setContentsMargins(0, 0, 0, 0)
@@ -219,6 +219,8 @@ class ToolsDialog(GlassDialog):
             self.pages[name] = w
             self.stack.addWidget(w)
         rtl_buttons(self, rtl)
+        # Enter in a search box runs that tab's search, never "click the first tab" (Where to train)
+        no_default_buttons(self)
         self.show_page(PAGES.index(page) if page in PAGES else 0)
 
     # common -------------------------------------------------------------
@@ -348,8 +350,8 @@ class ToolsDialog(GlassDialog):
     def _stats(self):
         s = (self.c.stats if self.c else {}) or {}
         acc = s.get("acc") or None
-        dmg = (s.get("dmg_min") or 0, s.get("dmg_max") or 0)
-        return acc, (dmg if dmg[0] > 0 else None)
+        # typed by hand: min above max is swapped, a max of 0 taken as the min (never a range like 200-10)
+        return acc, combat.damage_range(s.get("dmg_min"), s.get("dmg_max"))
 
     # where to train --------------------------------------------------------
 
@@ -383,10 +385,17 @@ class ToolsDialog(GlassDialog):
         head = " · ".join(bits)
         if not (acc and dmg):
             head += "\n" + t("train_need_stats")
+        elif magic:
+            head += "\n" + t("train_mage_note")       # the stat window's range is the staff swing, not a spell
+        else:
+            head += "\n" + t("train_basic_note")
         self._set(self.train_head, head)
         if not rows:
             self.train_list.addWidget(self._label(t("train_none"), "RowHint"))
             return
+        if not any(s.fits for s in rows):
+            # nothing passes the miss / hits limits: still the best options, with why they're shown
+            self.train_list.addWidget(self._label(t("train_stretch"), "RowHint"))
         for i, s in enumerate(rows):
             self.train_list.addWidget(self._spot_card(s, best=(i == 0)))
 
@@ -480,7 +489,9 @@ class ToolsDialog(GlassDialog):
             return
         m = self._calc_monster()
         if not m:
-            self.calc_box.addWidget(self._label(t("calc_none"), "RowHint"))
+            # nothing typed (and no monster near the level) isn't "no monster by that name"
+            typed = self.calc_input.text().strip()
+            self.calc_box.addWidget(self._label(t("calc_none") if typed else t("calc_pick"), "RowHint"))
             return
         acc, dmg = self._stats()
         magic = c.base_class == combat.MAGE
@@ -509,8 +520,10 @@ class ToolsDialog(GlassDialog):
                 self._row(sec, t("calc_hit"), tag(f"{round(hit * 100)}%", "TagGood" if hit >= 0.999 else "TagWarn"),
                           hint=hint)
         if dmg:
-            hits, avg = combat.hits_to_kill(dmg[0], dmg[1], m, c.level, magic)
-            self._row(sec, t("calc_hits"), tag(str(hits), "Tag"), hint=t("calc_hits_avg", n=f"{avg:.1f}"))
+            # the stat window's range is a basic attack: for a Magician the staff swing, a physical hit (P.DEF)
+            hits, avg = combat.hits_to_kill(dmg[0], dmg[1], m, c.level)
+            hint = t("calc_hits_avg", n=f"{avg:.1f}") + "\n" + t("calc_hits_mage" if magic else "calc_hits_basic")
+            self._row(sec, t("calc_hits"), tag(str(hits), "Tag"), hint=hint)
         if not (acc and dmg):
             sec.add_widget(self._label(t("calc_need_stats"), "RowHint"))
         self.calc_box.addWidget(sec)
@@ -563,7 +576,7 @@ class ToolsDialog(GlassDialog):
         key, tables = buildplan.tables(self.kb, c.base_class, c.job, c.level, t.lang)
         self._build_key = key
         self.build_guide_btn.setVisible(bool(key))
-        self._set(self.build_head, t("build_head", job=c.job or c.base_class, n=c.level))
+        self._set(self.build_head, t("build_head", job=c.job_label or c.base_class, n=c.level))
         if not tables:
             self.build_view.setHtml(f"<p>{t('build_none')}</p>")
             return
@@ -632,14 +645,21 @@ class ToolsDialog(GlassDialog):
         self.q_list = QVBoxLayout()
         self.q_list.setSpacing(8)
         lay.addLayout(self.q_list)
+        self.q_done_toggle = self._done_toggle()
+        lay.addWidget(self.q_done_toggle, 0, Qt.AlignHCenter)
+        self.q_done = QVBoxLayout()
+        self.q_done.setSpacing(8)
+        lay.addLayout(self.q_done)
         lay.addStretch(1)
         return sc
 
     def _fill_quests(self):
         t, c = self.t, self.c
         clear(self.q_list)
+        clear(self.q_done)
         if not c:
             self.q_head.setText("")
+            self.q_done_toggle.hide()
             self._no_character(self.q_list)
             return
         r = quests.for_level(self.kb, c.level, c.base_class, c.job, c.quests_done)
@@ -651,6 +671,7 @@ class ToolsDialog(GlassDialog):
             self.q_list.addWidget(self._label(t("q_none"), "RowHint"))
         for q in rows[:MAX_QUESTS]:
             self.q_list.addWidget(self._quest_card(q))
+        self._add_done(self.q_done_toggle, self.q_done, list(c.quests_done))
 
     def _picture_uri(self, kind: str, name: str) -> str | None:
         """The KB picture of a monster / item / NPC by its name, as a file URI."""
@@ -690,7 +711,7 @@ class ToolsDialog(GlassDialog):
         lb.setWordWrap(True)
         return lb
 
-    def _quest_card(self, q: quests.Quest) -> QFrame:
+    def _quest_card(self, q: quests.Quest, done: bool = False) -> QFrame:
         t = self.t
         card = QFrame(objectName="Card")
         outer = QHBoxLayout(card)
@@ -709,7 +730,8 @@ class ToolsDialog(GlassDialog):
         col.setSpacing(4)
         outer.addLayout(col, 1)
         top = QHBoxLayout()
-        name = QLabel(self._p(q.name), objectName="CardName")
+        # an English name is one block: "[Construction Site B1] Shumi's Lost Coin" keeps its brackets in place
+        name = QLabel(bidi.ltr_name(q.name, t.rtl), objectName="CardName")
         name.setWordWrap(True)
         top.addWidget(name, 1)
         top.addWidget(tag(self._p(t("lv_short", n=q.level)), "Tag"))
@@ -724,13 +746,24 @@ class ToolsDialog(GlassDialog):
         gets = q.rewards[:3]
         if gets or q.mesos:
             col.addWidget(self._things_label(t("q_gets_head"), gets, f"{q.mesos:,} mesos" if q.mesos else ""))
+        # "Pick one (class-specific)": the player's own class's choices, not the first class listed (Warrior)
+        pick = q.rewards_pick(self.c.base_class) if self.c else []
+        if pick:
+            shown = pick[:4] + ([t("pn_more", n=len(pick) - 4)] if len(pick) > 4 else [])
+            col.addWidget(self._things_label(t("q_pick_head"), shown))
         if q.after:
-            col.addWidget(self._label(t("q_after", name=q.after), "RowHint"))
+            col.addWidget(self._label(t("q_after", name=bidi.ltr_block(q.after, t.rtl)), "RowHint"))
         acts = QHBoxLayout()
-        done = QPushButton(self._p(t("q_mark_done")), objectName="Secondary")
-        done.setCursor(Qt.PointingHandCursor)
-        done.clicked.connect(lambda _=False, k=q.key: self._quest_done(k))
-        acts.addWidget(done)
+        if done:
+            # marked done by mistake (or a repeatable donation to do again): back to the list
+            btn = QPushButton(self._p(t("q_undo")), objectName="Secondary")
+            btn.clicked.connect(lambda _=False, k=q.key: self._quest_undo(k))
+        else:
+            btn = QPushButton(self._p(t("q_mark_done")), objectName="Secondary")
+            btn.clicked.connect(lambda _=False, k=q.key: self._quest_done(k))
+        btn.setCursor(Qt.PointingHandCursor)
+        btn.setAutoDefault(False)
+        acts.addWidget(btn)
         ask = QPushButton(self._p(t("ask_short")), objectName="Link")
         ask.setCursor(Qt.PointingHandCursor)
         ask.clicked.connect(lambda _=False, k=q.key: self.tag_requested.emit(k))
@@ -745,6 +778,34 @@ class ToolsDialog(GlassDialog):
             c.quests_done.append(key)
             self.profiles.save()
         self.refresh()
+
+    def _quest_undo(self, key: str):
+        c = self.c
+        if c and key in c.quests_done:
+            c.quests_done.remove(key)
+            self.profiles.save()
+        self.refresh()
+
+    def _done_toggle(self) -> QPushButton:
+        """ "Show done quests": the quests marked done, each with a way back to the list."""
+        b = QPushButton(objectName="Link")
+        b.setCheckable(True)
+        b.setCursor(Qt.PointingHandCursor)
+        b.setAutoDefault(False)
+        b.toggled.connect(lambda *_: self.refresh())
+        return b
+
+    def _add_done(self, toggle: QPushButton, layout: QVBoxLayout, keys: list[str]):
+        """The toggle's label, and when it's open the done quests (newest first) under the list."""
+        t = self.t
+        toggle.setVisible(bool(keys))
+        toggle.setText(self._p(t("q_hide_done" if toggle.isChecked() else "q_show_done", n=len(keys))))
+        if not (keys and toggle.isChecked()):
+            return
+        for k in reversed(keys[-MAX_QUESTS:]):
+            q = quests.quest(self.kb, k)
+            if q:
+                layout.addWidget(self._quest_card(q, done=True))
 
     # crafting ------------------------------------------------------------
 
@@ -807,15 +868,17 @@ class ToolsDialog(GlassDialog):
         self.craft_level.hi = top
         self.craft_level.setValue(min(lv, top))
         self.craft_level.blockSignals(False)
-        now, nxt = crafting.for_level(self.kb, prof, min(lv, top))
-        head = t("craft_head", prof=crafting.NAMES[prof], lv=lv, n=len(now.recipes) if now else 0)
+        _, nxt = crafting.for_level(self.kb, prof, min(lv, top))
+        # everything you can craft so far, not only what this exact level opened (newest first)
+        recipes = crafting.up_to(self.kb, prof, min(lv, top))
+        head = t("craft_head", prof=crafting.NAMES[prof], lv=lv, n=len(recipes))
         if nxt and nxt.needs_exp:
             head += "\n" + t("craft_next", lv=nxt.level, exp=f"{nxt.needs_exp:,}", char=nxt.char_level or "?")
         self._set(self.craft_head, head)
-        if not now or not now.recipes:
+        if not recipes:
             self.craft_list.addWidget(self._label(t("craft_none"), "RowHint"))
             return
-        for i, r in enumerate(now.recipes):
+        for i, r in enumerate(recipes):
             self.craft_list.addWidget(self._recipe_card(r, best=(i == 0)))
 
     def _craft_info_card(self, prof: str) -> QFrame:
@@ -874,6 +937,7 @@ class ToolsDialog(GlassDialog):
         why.setSpacing(5)
         if best:
             why.addWidget(tag(self._p(t("craft_best")), "TagAccent"))
+        why.addWidget(tag(self._p(t("craft_lv_tag", n=r.level)), "Tag"))     # the list spans several levels
         why.addWidget(tag(f"+{r.exp} EXP", "TagGood"))
         why.addWidget(tag(self._p(t("craft_cost", n=f"{r.catalyst:,}")), "Tag"))
         why.addStretch(1)
@@ -902,6 +966,11 @@ class ToolsDialog(GlassDialog):
         self.town_list = QVBoxLayout()
         self.town_list.setSpacing(8)
         lay.addLayout(self.town_list)
+        self.town_done_toggle = self._done_toggle()      # donations repeat: one marked done can come back
+        lay.addWidget(self.town_done_toggle, 0, Qt.AlignHCenter)
+        self.town_done = QVBoxLayout()
+        self.town_done.setSpacing(8)
+        lay.addLayout(self.town_done)
         lay.addStretch(1)
         return sc
 
@@ -915,6 +984,8 @@ class ToolsDialog(GlassDialog):
     def _fill_town(self):
         t, c = self.t, self.c
         clear(self.town_list)
+        clear(self.town_done)
+        self.town_done_toggle.hide()
         if not c:
             self._no_character(self.town_list)
             return
@@ -925,7 +996,7 @@ class ToolsDialog(GlassDialog):
             b.setChecked(b.property("value") == town or b.text() == town)
         self.town_pick.blockSignals(False)
         # the guide's advice, one sentence per line, the grades and towns in bold
-        lines = [t("town_recommended", town=rec, job=c.job or c.base_class)] if rec else []
+        lines = [t("town_recommended", town=rec, job=c.job_label or c.base_class)] if rec else []
         for para in paras[:2]:
             for sentence in re.split(r"(?<=[.!?])\s+", guides._ICON.sub("", para).strip()):
                 if sentence.strip():
@@ -940,6 +1011,9 @@ class ToolsDialog(GlassDialog):
             self.town_list.addWidget(self._label(t("q_none"), "RowHint"))
         for q in rows[:MAX_QUESTS]:
             self.town_list.addWidget(self._quest_card(q))
+        mine = [k for k in c.quests_done
+                if (q := quests.quest(self.kb, k)) and q.area == "Citizenship" and quests.town_of(self.kb, q) == town]
+        self._add_done(self.town_done_toggle, self.town_done, mine)
 
     # prices --------------------------------------------------------------
 
@@ -1113,13 +1187,15 @@ class ToolsDialog(GlassDialog):
         self.exp_measure.setEnabled(bool(m.get("start")))
         if self.meter.get("pending"):
             return
-        if m.get("start") and not r:
+        if r:
+            self._set(self.exp_status, t("exp_result", n=r["minutes"]))
+        elif m.get("start") and m.get("end"):
+            # a check gave no rate: either no EXP really came in, or a reading is past the KB's EXP table (Lv. 100+)
+            known = all(plan.exp_position(self.kb, lv, pct) is not None for _, lv, pct in (m["start"], m["end"]))
+            self._set(self.exp_status, t("exp_no_gain") if known else t("exp_no_table"))
+        elif m.get("start"):
             mins = max(0, round((time.time() - m["start"][0]) / 60))
             self._set(self.exp_status, t("exp_started", n=mins, pct=f"{m['start'][2]:.1f}%"))
-        elif r:
-            self._set(self.exp_status, t("exp_result", n=r["minutes"]))
-        elif m.get("end"):
-            self._set(self.exp_status, t("exp_no_gain"))
         else:
             self._set(self.exp_status, t("exp_idle"))
 

@@ -195,7 +195,7 @@ class GuidesDialog(GlassDialog):
         super().__init__(t("guides"), t.rtl)
         self.kb, self.c = kb, character
         self.setStyleSheet(stylesheet)
-        self.resize(560, 760)
+        self.fit_screen(560, 760)          # never taller than a small screen; the library and reader scroll
         self.all = guides.all_guides(kb)
         self.picks = guides.for_you(kb, character)
         self._reading: str | None = None

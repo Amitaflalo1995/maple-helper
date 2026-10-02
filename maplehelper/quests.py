@@ -23,6 +23,12 @@ class Quest:
     after: str = ""                     # a quest that must be done first
     needs: list[str] = field(default_factory=list)      # "Green Mushroom Cap x 20", "Defeat Blue Snail x 10"
     rewards: list[str] = field(default_factory=list)    # items (EXP and mesos are separate)
+    # "Pick one (class-specific)": the choices per class ("Warrior" -> [...]); you get one of your class's
+    class_rewards: dict[str, list[str]] = field(default_factory=dict)
+
+    def rewards_pick(self, base_class: str) -> list[str]:
+        """The class-specific reward choices for this class (empty for another class or a Beginner)."""
+        return self.class_rewards.get(base_class, [])
 
 
 def _section(lines: list[str], head: str, stops=("Pre-requisites", "Requirements", "Rewards", "Description",
@@ -38,7 +44,10 @@ def _section(lines: list[str], head: str, stops=("Pre-requisites", "Requirements
     return out
 
 
-_ITEM = re.compile(r"((?:Defeat |Collect )?[A-Z][^x]*?) x ([\d,]+)")
+# "Defeat Dark Axe Stump x 100 Dexterity Potion x 5": each name runs up to its own " x <count>"
+# (a lowercase x inside a name, "Axe" or "Dexterity", is part of the name)
+_ITEM = re.compile(r"((?:Defeat |Collect )?\S.*?) x ([\d,]+)(?!\S)")
+CLASSES = ("Warrior", "Magician", "Bowman", "Thief", "Pirate")
 
 
 @lru_cache(maxsize=1024)
@@ -60,10 +69,21 @@ def _quest(kb, key: str) -> Quest | None:
             q.after = ln[len("Quest Complete "):].strip()
     for ln in _section(lines, "Requirements"):
         q.needs += [f"{name.strip()} x {n}" for name, n in _ITEM.findall(ln)] or [ln]
+    pick = None                     # inside "Pick one (class-specific):", the class whose choices follow
     for ln in _section(lines, "Rewards"):
         if re.fullmatch(r"[\d,]+ EXP( [\d,]+ Mesos)?|[\d,]+ Mesos", ln):
             continue
-        q.rewards += [f"{name.strip()} x {n}" for name, n in _ITEM.findall(ln)]
+        if ln.startswith("Pick one (class-specific)"):
+            pick = ""
+            continue
+        if pick is not None and ln in CLASSES:
+            pick = ln
+            continue
+        items = [f"{name.strip()} x {n}" for name, n in _ITEM.findall(ln)]
+        if pick:
+            q.class_rewards.setdefault(pick, []).extend(items)
+        else:
+            q.rewards += items
     return q
 
 

@@ -53,7 +53,9 @@ class PinsBar(QFrame):
         self._items, self._t, self._rtl = items, t, rtl
         self.setVisible(bool(items))
         self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
-        self.head.setStyleSheet(f"text-align: {'right' if rtl else 'left'}; font-weight: 600;")
+        # "left" is the leading edge: Qt mirrors style-sheet alignment in a right-to-left UI ("right" put the
+        # Hebrew title on the left, seen live)
+        self.head.setStyleSheet("text-align: left; font-weight: 600;")
         self._refresh_head()
         while self.body_lay.count():
             w = self.body_lay.takeAt(0).widget()
@@ -214,7 +216,7 @@ def character_card_image(c, avatar, kb, progress: dict | None, t) -> QPixmap:
     col.setSpacing(3)
     name = QLabel(c.name, objectName="ShareName")
     col.addWidget(name)
-    col.addWidget(QLabel(f"Lv. {c.level} · {c.job}", objectName="ShareMeta"))
+    col.addWidget(QLabel(f"Lv. {c.level} · {c.job_label}", objectName="ShareMeta"))
     if progress:
         bar = QProgressBar(objectName="ExpBar")
         bar.setRange(0, 1000)

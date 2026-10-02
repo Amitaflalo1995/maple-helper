@@ -90,6 +90,13 @@ def for_level(kb, profession: str, level: int) -> tuple[Level | None, Level | No
     return now, nxt
 
 
+def up_to(kb, profession: str, level: int) -> list[Recipe]:
+    """Every recipe you can craft at your profession level (not only the ones that level opened):
+    the newest level first, best EXP per meso first within a level."""
+    out = [r for x in levels(kb, profession) if x.level <= level for r in x.recipes]
+    return sorted(out, key=lambda r: (-r.level, -r.exp_per_meso, -r.exp))
+
+
 # ------------------------------------------------------------------ who teaches it, where to work
 
 STATIONS = {"smithing": "Anvil", "weaponcrafting": "Weaponcrafting Station", "tailoring": "Sewing Machine",

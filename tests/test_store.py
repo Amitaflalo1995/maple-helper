@@ -181,3 +181,17 @@ def test_sync_takes_the_hud_name(isolated_store):
     p.add("Kalimero", "Bowman", "Bowman", 15)
     assert p.apply_update({"name": "KalimeroZz"}) == [("name", "KalimeroZz")]
     assert p.apply_update({"name": "not a name!"}) == [] and p.active.name == "KalimeroZz"
+
+
+def test_another_character_on_the_hud_is_not_the_active_one():
+    from maplehelper.store import hud_name, same_character
+    assert same_character("Kalimero", "KalimeroZz") and same_character("kalimerozz", "KalimeroZz")
+    assert not same_character("KalimeroZz", "NewGuy99") and not same_character("Al", "Alpha")
+    assert hud_name({"name": " NewGuy99 "}) == "NewGuy99" and hud_name({"name": "a b"}) is None
+
+
+def test_another_name_never_renames_the_active_character(isolated_store):
+    p = isolated_store.Profiles()
+    p.add("KalimeroZz", "Bowman", "Bowman", 15)
+    assert p.apply_update({"name": "NewGuy99"}) == [] and p.active.name == "KalimeroZz"
+    assert p.find_by_name("kalimerozz") is p.active

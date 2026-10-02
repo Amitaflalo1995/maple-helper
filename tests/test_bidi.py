@@ -125,6 +125,25 @@ HEBREW_MESSAGE_LINES = [
 ]
 
 
+def _reading_order(shown: str) -> str:
+    """The visible characters of a laid-out line, left to right."""
+    x = glyph_x(shown)
+    marks = (bidi.RLM, bidi.LRE, bidi.PDF, bidi.LRI, bidi.PDI)
+    return "".join(ch for _, ch in sorted((x[i], ch) for i, ch in enumerate(shown)
+                                          if i in x and ch.strip() and ch not in marks))
+
+
+def test_english_quest_name_with_brackets_stays_whole():
+    name = "[Construction Site B1] Shumi's Lost Coin"
+    # run by run, the brackets went to the other end: "Shumi'sLostCoin]ConstructionSiteB1["
+    assert _reading_order(bidi.ltr_name(name, True)) == name.replace(" ", "")
+    # inside a Hebrew sentence too ("After [Construction Site B1] Shumi's Lost Coin")
+    sentence = bidi.isolate_ltr_runs("אחרי הקווסט " + bidi.ltr_block(name, True))
+    assert _reading_order(sentence).startswith(name.replace(" ", ""))
+    assert bidi.ltr_name("קווסט Mai's Training", True) == bidi.plain("קווסט Mai's Training", True)
+    assert bidi.ltr_name(name, False) == name
+
+
 @pytest.mark.parametrize("line,checks", HEBREW_MESSAGE_LINES)
 def test_line_inside_hebrew_message(line, checks):
     shown = bidi.isolate_ltr_runs(line)

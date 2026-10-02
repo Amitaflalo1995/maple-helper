@@ -262,6 +262,10 @@ class MapleHelperApp:
         self.overlay.add_system(t("voice_mic_failed") if error.startswith("mic:") else t("voice_failed"))
 
     def on_voice_text(self, text: str):
+        if not text.strip():          # silence (or only noise): say so, instead of nothing happening
+            self.overlay.add_system(I18n(self.settings["language"])("voice_nothing")
+                                    .replace("F10", self.settings["hotkey_voice"]))
+            return
         fixed = self.kb.resolve_names(text)
         self.overlay.voice_text(fixed, send=self.settings["voice_send_immediately"])
 

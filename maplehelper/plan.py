@@ -136,9 +136,16 @@ def next_job(base_class: str, job: str, level: int) -> tuple[list[str], int] | N
     return [j for j, need in tree if need == lv], lv
 
 
+# a 3rd job's own 2nd job: its guide is the closest one there is (the class guide stops at 1st-job tables)
+JOB_BEFORE = {"Crusader": "Fighter", "White Knight": "Page", "Dragon Knight": "Spearman",
+              "F/P Mage": "F/P Wizard", "I/L Mage": "I/L Wizard", "Priest": "Cleric",
+              "Ranger": "Hunter", "Sniper": "Crossbowman", "Hermit": "Assassin", "Chief Bandit": "Bandit"}
+
+
 def class_guide(kb, base_class: str, job: str) -> str | None:
-    """The KB guide for the player's job ("F/P Wizard" -> guide/fp-wizard-class-guide), else for the class."""
-    for name in (job, base_class):
+    """The KB guide for the player's job ("F/P Wizard" -> guide/fp-wizard-class-guide), else for the job it
+    came from (Crusader -> Fighter), else for the class."""
+    for name in filter(None, (job, JOB_BEFORE.get(job), base_class)):
         key = "guide/" + re.sub(r"[^a-z0-9]+", "-", name.lower().replace("/", "")).strip("-") + "-class-guide"
         if kb.get(key):
             return key

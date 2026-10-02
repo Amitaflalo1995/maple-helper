@@ -153,6 +153,109 @@ def test_free_market_summary_keeps_the_exact_item():
     assert market.summarize([], "Work Gloves").count == 0
 
 
+def test_damage_range_typed_by_hand():
+    assert combat.damage_range(200, 10) == (10, 200)          # min above max: swapped
+    assert combat.damage_range(50, 0) == (50, 50)             # no max: the min
+    assert combat.damage_range(0, 100) is None and combat.damage_range(None, None) is None
+
+
+def test_quest_item_names_with_a_lowercase_x():
+    found = quests._ITEM.findall("Defeat Dark Axe Stump x 100 Defeat Drake x 50 Moon Rock x 1")
+    assert found == [("Defeat Dark Axe Stump", "100"), ("Defeat Drake", "50"), ("Moon Rock", "1")]
+    assert quests._ITEM.findall("Dexterity Potion x 5 Blue Potion x 30") == [("Dexterity Potion", "5"),
+                                                                             ("Blue Potion", "30")]
+    assert quests._ITEM.findall("Elixir x 15 Bottomwear HP Scroll: Greater x 1")[1] == ("Bottomwear HP Scroll: Greater", "1")
+
+
+@needs_kb
+def test_class_specific_rewards_follow_the_class():
+    from maplehelper.kb import KnowledgeBase
+    kb = KnowledgeBase(REAL_KB)
+    q = next(quests.quest(kb, k) for k, e in kb.entities.items() if e["name"] == "Welcome to the Hollow")
+    assert q.rewards_pick("Magician") == ["Wand Magic Attack Scroll: Greater x 1", "Staff Magic Attack Scroll: Greater x 1"]
+    assert "One-Handed Axe Attack Scroll: Greater x 1" in q.rewards_pick("Warrior")
+    assert q.rewards_pick("Beginner") == [] and not any("Scroll" in r for r in q.rewards)
+
+
+@needs_kb
+def test_training_spots_never_come_back_empty_for_stats():
+    from maplehelper.kb import KnowledgeBase
+    kb = KnowledgeBase(REAL_KB)
+    mage = combat.spots(kb, 30, acc=70, dmg=(15, 40), magic=True, n=6)       # the staff swing isn't a spell
+    assert mage and all(s.hits is None for s in mage)
+    weak = combat.spots(kb, 30, acc=73, dmg=(1, 2), n=6)                     # nothing dies in 12 basic hits
+    assert weak and not any(s.fits for s in weak) and weak == sorted(weak, key=lambda s: -s.score)
+    for lv in (1, 5, 10, 15):
+        assert not any(combat.special_monster(s.monster.name) for s in combat.spots(kb, lv, n=20))
+
+
+@needs_kb
+def test_crafting_lists_every_recipe_up_to_your_level():
+    from maplehelper import crafting
+    from maplehelper.kb import KnowledgeBase
+    kb = KnowledgeBase(REAL_KB)
+    rows = crafting.up_to(kb, "smithing", 3)
+    by_level = {lv.level: len(lv.recipes) for lv in crafting.levels(kb, "smithing")}
+    assert len(rows) == sum(n for lv, n in by_level.items() if lv <= 3)
+    assert {r.level for r in rows} == {lv for lv in by_level if lv <= 3}
+    assert [r.level for r in rows] == sorted((r.level for r in rows), reverse=True)     # newest first
+
+
+@needs_kb
+def test_guides_for_you_and_third_job_build():
+    from maplehelper import guides
+    from maplehelper.kb import KnowledgeBase
+    from maplehelper.store import Character
+    kb = KnowledgeBase(REAL_KB)
+    hollow = "guide/forgotten-hollow-the-new-endgame-area"
+    assert hollow in guides.for_you(kb, Character("1", "A", "Warrior", "Fighter", 39))
+    assert hollow not in guides.for_you(kb, Character("1", "A", "Warrior", "Fighter", 38))
+    assert plan.class_guide(kb, "Warrior", "Crusader") == "guide/fighter-class-guide"
+    assert plan.class_guide(kb, "Magician", "Priest") == "guide/cleric-class-guide"
+
+
+@needs_kb
+def test_tools_enter_quest_undo_and_empty_states(tmp_path, monkeypatch):
+    import sys
+    from PySide6.QtCore import Qt
+    from PySide6.QtTest import QTest
+    from PySide6.QtWidgets import QApplication
+    app = QApplication.instance() or QApplication(sys.argv)
+    from maplehelper import store
+    from maplehelper.kb import KnowledgeBase
+    from maplehelper.ui.tools import PAGES, ToolsDialog
+    monkeypatch.setattr(store.Profiles, "path", tmp_path / "profiles.json")
+    monkeypatch.setattr(store.Settings, "path", tmp_path / "settings.json")
+    p = store.Profiles()
+    c = p.add("Kiwi", "Magician", "Cleric", 30)
+    c.stats = {"acc": 70, "dmg_min": 40, "dmg_max": 15}
+    d = ToolsDialog(KnowledgeBase(REAL_KB), p, store.Settings(), "en", "", {}, "prices")
+    assert d._stats()[1] == (15, 40)
+    QTest.keyClicks(d.price_input, "Red Potion")
+    QTest.keyClick(d.price_input, Qt.Key_Return)          # runs this tab's search, doesn't jump to "Where to train"
+    assert d.stack.currentIndex() == PAGES.index("prices") and d.price_box.count() == 1
+    d.show_page(PAGES.index("calc"))
+    d.calc_input.setText("")
+    monkeypatch.setattr(d, "_calc_monster", lambda: None)
+    d._fill_calc()
+    assert "Pick a monster" in d.calc_box.itemAt(0).widget().text()
+    monkeypatch.undo()
+    d.show_page(PAGES.index("quests"))
+    first = quests.for_level(d.kb, 30, "Magician", "Cleric", [])["now"][0].key
+    d._quest_done(first)
+    assert first in c.quests_done and not d.q_done_toggle.isHidden()
+    d.q_done_toggle.setChecked(True)
+    assert d.q_done.count() == 1
+    d._quest_undo(first)
+    assert first not in c.quests_done and d.q_done_toggle.isHidden()
+    d.show_page(PAGES.index("exp"))
+    d.meter[c.id] = {"start": (0, 99, 90.0), "result": None, "end": (60, 100, 1.0)}   # across 99 -> 100
+    d._fill_exp()
+    assert "past Lv. 99" in d.exp_status.text()
+    d.close()
+    app.processEvents()
+
+
 @needs_kb
 def test_profession_info_names_teacher_town_and_quests():
     from maplehelper import crafting
