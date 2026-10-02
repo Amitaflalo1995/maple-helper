@@ -48,3 +48,14 @@ def test_box_far_off_still_finds_the_only_tag():
     far = [100 / W, 100 / H, 50 / W, 80 / H]               # pointed at a sign across the screen
     left, top, right, bottom = portrait_rect(img, far)
     assert left < 690 and right > 740 and 398 <= bottom <= 410
+
+
+def test_sprite_cut_out_of_its_background():
+    """Background flooded from the edges up to the dark outline: the outlined sprite stays, the scenery goes."""
+    from maplehelper.portrait import sprite_mask
+    crop = np.zeros((100, 100, 3), np.uint8)
+    crop[:] = (150, 210, 120)                            # grass behind
+    crop[20:80, 30:70] = (20, 20, 20)                     # outline...
+    crop[22:78, 32:68] = (200, 60, 60)                    # ...around the sprite
+    m = sprite_mask(crop)
+    assert m is not None and m[50, 50] and not m[5, 5] and m[20:80, 30:70].all() and m.sum() == 60 * 40

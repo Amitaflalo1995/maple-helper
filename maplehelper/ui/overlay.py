@@ -1266,7 +1266,7 @@ class Overlay(QWidget):
         import numpy as np
         from PIL import Image
 
-        from ..portrait import portrait_rect
+        from ..portrait import portrait_rect, sprite_mask
         try:
             img = Image.open(io.BytesIO(shot_jpeg)).convert("RGB")
             # the full-resolution grab when it is the same picture (same shape): small name tags survive there
@@ -1274,7 +1274,13 @@ class Overlay(QWidget):
             src = full.convert("RGB") if same else img
             rect = portrait_rect(np.asarray(src), box)
             if rect:
-                square = src.crop(rect).resize((128, 128), Image.LANCZOS)
+                crop = src.crop(rect)
+                mask = sprite_mask(np.asarray(crop))
+                if mask is not None:          # just the character on a transparent background, like the job art
+                    crop = crop.convert("RGBA")
+                    crop.putalpha(Image.fromarray((mask * 255).astype(np.uint8)))
+                # pixel art: NEAREST keeps it crisp when it grows, LANCZOS when it shrinks
+                square = crop.resize((128, 128), Image.NEAREST if crop.width < 128 else Image.LANCZOS)
                 buf = io.BytesIO()
                 square.save(buf, "PNG")
                 self.profiles.set_avatar(buf.getvalue())

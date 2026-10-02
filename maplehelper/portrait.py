@@ -75,3 +75,53 @@ def portrait_rect(rgb: np.ndarray, box: list[float] | None) -> tuple[int, int, i
     if rect[0] < 0 or rect[1] < 0 or rect[2] > W:
         return None
     return rect
+
+
+def _grow(seed: np.ndarray, free: np.ndarray) -> np.ndarray:
+    """Flood fill: every `free` pixel 4-connected to `seed`."""
+    m = seed & free
+    while True:
+        g = m.copy()
+        g[1:] |= m[:-1]
+        g[:-1] |= m[1:]
+        g[:, 1:] |= m[:, :-1]
+        g[:, :-1] |= m[:, 1:]
+        g &= free
+        if (g == m).all():
+            return m
+        m = g
+
+
+def _components(mask: np.ndarray) -> tuple[np.ndarray, int]:
+    lab = np.zeros(mask.shape, np.int32)
+    n = 0
+    for y, x in zip(*np.nonzero(mask)):
+        if lab[y, x]:
+            continue
+        n += 1
+        seed = np.zeros(mask.shape, bool)
+        seed[y, x] = True
+        lab[_grow(seed, mask & (lab == 0))] = n
+    return lab, n
+
+
+def sprite_mask(rgb: np.ndarray) -> np.ndarray | None:
+    """Which pixels of a portrait crop are the character: game sprites have a dark outline, so a flood from the
+    crop's edges that stops at dark pixels covers the background; pockets it can't reach (between a bow and its
+    string) go too when they have the background's colours. None when that doesn't look like a sprite."""
+    a = rgb.astype(np.int16)
+    wall = (a[..., 0] * 0.3 + a[..., 1] * 0.59 + a[..., 2] * 0.11) < 70
+    border = np.zeros(wall.shape, bool)
+    border[0, :] = border[-1, :] = border[:, 0] = border[:, -1] = True
+    bg = _grow(border, ~wall)
+    q = (a // 24).astype(np.int32)
+    key = q[..., 0] * 10000 + q[..., 1] * 100 + q[..., 2]
+    lab, n = _components(np.isin(key, np.unique(key[bg])) & ~bg & ~wall)
+    ids = np.flatnonzero(np.bincount(lab.ravel(), minlength=n + 1) >= 25)
+    bg |= np.isin(lab, ids[ids > 0])
+    lab, n = _components(~bg)
+    if not n:
+        return None
+    sizes = np.bincount(lab.ravel())[1:]
+    fg = lab == 1 + int(sizes.argmax())                 # the character; stray dark grass at the edges goes
+    return fg if 0.12 <= fg.mean() <= 0.8 else None
