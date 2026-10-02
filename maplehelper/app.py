@@ -676,6 +676,9 @@ class MapleHelperApp:
 
     def show_wishlist(self):
         keys = wishlist.items(self.settings, self.profiles.active_id)
+        old = self.__dict__.get("_windows", {}).get(f"wishlist:{self.profiles.active_id}")
+        if old is not None:
+            old.close()             # a star added meanwhile: show the list as it is now, not the open copy
         self.open_window(f"wishlist:{self.profiles.active_id}",
                          lambda: self._wishlist_dialog(keys))
 

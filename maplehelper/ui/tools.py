@@ -1264,4 +1264,8 @@ class ToolsDialog(GlassDialog):
 
     def _shopping(self):
         where = self.shop_map.text().strip() or self.t("shop_here")
-        self.ask_requested.emit(self.t("shop_q", map=where, n=self.shop_len.value()), False)
+        # with a fresh screenshot: the HUD shows max HP/MP as they are right now (and the potions already in the
+        # bag when the inventory is open), so the list fits the character at this moment (live feedback)
+        self.setWindowOpacity(0.0)
+        self.ask_requested.emit(self.t("shop_q", map=where, n=self.shop_len.value()), True)
+        QTimer.singleShot(1500, lambda: self.setWindowOpacity(1.0))
