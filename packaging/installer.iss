@@ -80,7 +80,8 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: 
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\Maple Helper.exe"
-Name: "{autodesktop}\{#AppName}"; Filename: "{app}\Maple Helper.exe"; Tasks: desktopicon
+; only on an install the player clicks through: a silent self-update brought back a shortcut they had deleted
+Name: "{autodesktop}\{#AppName}"; Filename: "{app}\Maple Helper.exe"; Tasks: desktopicon; Check: not WizardSilent
 
 [Run]
 Filename: "{app}\Maple Helper.exe"; Description: "{cm:LaunchProgram,{#AppName}}"; Flags: nowait postinstall skipifsilent
