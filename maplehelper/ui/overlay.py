@@ -576,16 +576,14 @@ class Overlay(QWidget):
             self._hidden_context = ("<inventory_read>\nThe app matched each filled inventory slot's icon to the "
                                     "database pictures (closest first; the first is almost always right):\n"
                                     + inventory.describe(slots, self.kb) + "\n</inventory_read>") if slots else None
-            self._inventory_found = [s.matches[0][0] for s in slots if s.matches]
-        self.ask(question)
-        found, self._inventory_found = getattr(self, "_inventory_found", None), None
-        if detail:
-            # what the app itself recognised, shown right away (the answer follows)
+            found = [s.matches[0][0] for s in slots if s.matches]
+            # what the app itself recognised, first; the question and the AI's advice follow
             if found:
                 self.add_system(self.t("inv_found", n=len(found)))
                 self.add_cards(list(dict.fromkeys(found)))
             else:
                 self.add_system(self.t("inv_not_found"))
+        self.ask(question)
 
     def what_now(self):
         """'What now?': a fresh screenshot and the question, so Claude sees where the player is."""
