@@ -44,6 +44,23 @@ def find_name_tags(rgb: np.ndarray) -> list[tuple[int, int, int, int]]:
     return found
 
 
+def find_cut_tags(rgb: np.ndarray, name: str) -> list[tuple[int, int, int, int]]:
+    """Tags whose lower part is hidden (the chat box covers the bottom of the screen, where players often stand):
+    only the top edge and the start of the letters show. Its height comes from its width and the name's length."""
+    f = rgb.astype(np.float32)
+    luma = f[..., 0] * 0.3 + f[..., 1] * 0.59 + f[..., 2] * 0.11 + 1.0
+    ratio = luma[1:] / luma[:-1]
+    white = (f.min(axis=2) >= 225) & (f.max(axis=2) - f.min(axis=2) < 30)
+    want = 0.40 * len(name) + 0.45
+    found = []
+    for y in range(ratio.shape[0] - 8):
+        for x0, n in _runs((ratio[y] > 0.3) & (ratio[y] < 0.5), lo=40):     # the plate's own darkening, ~0.4
+            h = int(round(n / want))
+            if 12 <= h <= 60 and white[y + 1 + h // 4:y + 1 + h // 2, x0:x0 + n].mean() >= 0.04:
+                found.append((x0, y + 1, n, h))
+    return found
+
+
 def tag_fits_name(tag: tuple[int, int, int, int], name: str) -> bool:
     """Could this plate hold that name? Its width grows with the name's length (the game's font is about
     0.4 tag-heights a letter): another player's tag, or a box of the game's own UI, usually doesn't fit."""
@@ -58,8 +75,12 @@ def portrait_rect(rgb: np.ndarray, box: list[float] | None, name: str = "") -> t
     only when exactly one tag is left."""
     H, W = rgb.shape[:2]
 
-    def fitting(tags):
-        return [t for t in tags if tag_fits_name(t, name)] if name else tags
+    def fitting(tags, region=None):
+        if not name:
+            return tags
+        fit = [t for t in tags if tag_fits_name(t, name)]
+        # none whole: one cut off by the chat box (its top edge and letters still show)
+        return fit or find_cut_tags(rgb if region is None else region, name)
 
     if box is None:
         tags = fitting(find_name_tags(rgb))
@@ -73,7 +94,8 @@ def portrait_rect(rgb: np.ndarray, box: list[float] | None, name: str = "") -> t
     rw, rh = max(w * W * 3, W * 0.06), max(h * H * 2.5, H * 0.12)
     left, top = int(max(0, cx - rw)), int(max(0, cy - rh))
     right, bottom = int(min(W, cx + rw)), int(min(H, cy + rh * 1.4))
-    tags = fitting(find_name_tags(rgb[top:bottom, left:right]))
+    sub = rgb[top:bottom, left:right]
+    tags = fitting(find_name_tags(sub), sub)
     if not tags:
         # the box was further off than that (live test: it pointed at a TAXI sign 400 px away): every tag on screen,
         # nearest to the box (other players have tags too, NPCs don't: theirs are opaque yellow plates)
