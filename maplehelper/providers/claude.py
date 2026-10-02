@@ -14,6 +14,7 @@ import os
 import subprocess
 import sys
 import threading
+import time
 from pathlib import Path
 
 from .. import usage
@@ -25,6 +26,7 @@ log = logging.getLogger(__name__)
 INSTALL_CMD = "irm https://claude.ai/install.ps1 | iex"
 INSTALL_CMD_MAC = "curl -fsSL https://claude.ai/install.sh | bash"
 # An app opened from Finder gets PATH=/usr/bin:/bin:/usr/sbin:/sbin, so the usual install spots are listed here.
+STALL_TIMEOUT_S = 150   # no output from the CLI for this long = stuck (tools and streaming print all along)
 POSIX_DIRS = ["~/.local/bin", "~/.claude/local", "/opt/homebrew/bin", "/usr/local/bin", "~/.npm-global/bin"]
 
 
@@ -37,10 +39,8 @@ def find_claude() -> str | None:
         Path(os.environ.get("APPDATA", "")) / "npm" / "node_modules" / "@anthropic-ai" / "claude-code" / "bin" / "claude.exe",
         Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "claude" / "claude.exe",
     ])
-    if exe:
-        return exe
-    import shutil
-    return shutil.which("claude")
+    # no fallback to an npm "claude.cmd": cmd.exe cuts the multi-line --system-prompt at its first newline
+    return exe
 
 
 def env() -> dict:
@@ -204,7 +204,26 @@ class ClaudeBackend:
         result = None
         limits = None
         model = None
-        for line in self._proc.stdout:
+        proc = self._proc
+        # stderr is drained alongside: a CLI that writes a lot there would otherwise block both sides
+        err_chunks: list[bytes] = []
+        err_reader = threading.Thread(target=lambda: err_chunks.extend(iter(lambda: proc.stderr.read(4096), b"")),
+                                      daemon=True)
+        err_reader.start()
+        # a stalled CLI (network retries, a hung login) must not leave the chat on "thinking" forever
+        last = [time.monotonic()]
+        stalled = threading.Event()
+
+        def watchdog():
+            while proc.poll() is None:
+                if time.monotonic() - last[0] > STALL_TIMEOUT_S:
+                    stalled.set()
+                    proc.kill()
+                    return
+                time.sleep(2)
+        threading.Thread(target=watchdog, daemon=True).start()
+        for line in proc.stdout:
+            last[0] = time.monotonic()
             try:
                 ev = json.loads(line)
             except json.JSONDecodeError:
@@ -225,8 +244,12 @@ class ClaudeBackend:
                 model = ev.get("model") or model
             elif t == "rate_limit_event":
                 limits = usage.parse(ev.get("rate_limit_info"))
-        self._proc.wait()
-        stderr = self._proc.stderr.read().decode("utf-8", errors="replace")
+        proc.wait()
+        err_reader.join(timeout=2)
+        stderr = b"".join(err_chunks).decode("utf-8", errors="replace")
+        if stalled.is_set():
+            log.warning("Claude Code stalled for %ss, stopped: %s", STALL_TIMEOUT_S, stderr[-1000:])
+            return RawResult(error="timeout", limits=limits)
         if not result:
             if not limits:
                 log.warning("no result from Claude Code (exit %s): %s", self._proc.returncode, stderr[-1500:])

@@ -138,7 +138,7 @@ class KnowledgeBase:
         taken: list[tuple[int, int]] = []
         for name, key in self._names:
             i = hay.find(f" {name} ")
-            if i < 0 and HEBREW.search(name) and len(name) >= 4:
+            if i < 0 and len(name) >= 4 and name in hay and HEBREW.search(name):   # substring first: cheap
                 # Hebrew prefixes: ב/ל/מ/ה/ו/ש/כ glued to the word ("לחילזון", "בהנסיס")
                 m = re.search(r"[ ][בלמהושכ]{1,2}" + re.escape(name) + r"[ ]", hay)
                 i = m.start() if m else -1

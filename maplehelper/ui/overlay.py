@@ -348,7 +348,7 @@ class Overlay(QWidget):
         self.recapture_btn.setToolTip(self.t("recapture"))
         self.settings_btn.setToolTip(self.t("settings"))
         self.saver_badge.setText("🍃 " + self.t("saver_on_badge"))
-        self.saver_badge.setToolTip(self.t("saver_hint"))
+        self.saver_badge.setToolTip(self.t.p("saver_hint", self.settings["provider"]))
         self.wish_btn.setToolTip(self.t("wishlist"))
         self.guides_btn.setToolTip(self.t("guides"))
         self.history_btn.setToolTip(self.t("history"))
@@ -1046,6 +1046,8 @@ class Overlay(QWidget):
         self._read_limits_after_answer()
         if ans.model:
             self.settings["last_model"] = {**(self.settings["last_model"] or {}), self.settings["provider"]: ans.model}
+        if not ans.error and not ans.text.strip():
+            ans.error = "no_result"            # only META came back: an error line, not an empty bubble
         if ans.error:
             import logging
             logging.getLogger(__name__).warning("answer failed: %s", ans.error)

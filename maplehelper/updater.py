@@ -51,24 +51,30 @@ def _get(url: str, timeout: int = 30) -> bytes | None:
         return None
 
 
-def update_kb() -> bool:
+def update_kb(before_swap=None) -> bool:
     """Download a newer knowledge base if one is published. Returns True when updated."""
+    return fetch_kb(before_swap) == "updated"
+
+
+def fetch_kb(before_swap=None) -> str:
+    """"updated", "uptodate" or "failed". before_swap() runs right before the folders are swapped (the app
+    stops the AI process working inside the KB there); returning False postpones the update."""
     if not MANIFEST_URL:
-        return False
+        return "uptodate"
     raw = _get(MANIFEST_URL, timeout=15)
     if not raw:
-        return False
+        return "failed"
     try:
         manifest = json.loads(raw)
     except json.JSONDecodeError:
-        return False
+        return "failed"
     if not isinstance(manifest, dict) or not manifest.get("url"):
-        return False
+        return "failed"
     if str(manifest.get("version", "")) <= local_version():
-        return False
+        return "uptodate"
     data = _get(manifest["url"], timeout=300)
     if not data or hashlib.sha256(data).hexdigest() != manifest.get("sha256"):
-        return False
+        return "failed"
     tmp = USER_KB.with_name("kb.new")
     shutil.rmtree(tmp, ignore_errors=True)
     try:
@@ -76,16 +82,19 @@ def update_kb() -> bool:
             z.extractall(tmp)
     except zipfile.BadZipFile:
         shutil.rmtree(tmp, ignore_errors=True)
-        return False
+        return "failed"
     if not (tmp / "index.json").exists():
         shutil.rmtree(tmp, ignore_errors=True)
-        return False
+        return "failed"
     meta_path = tmp / "meta.json"
     meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
     meta["version"] = manifest["version"]
     meta_path.write_text(json.dumps(meta, indent=1), encoding="utf-8")
     # swap by renames: on Windows a folder another process works in (the AI runs inside the KB)
     # can't be removed or renamed; then keep the current KB intact and try again next time
+    if before_swap is not None and before_swap() is False:
+        shutil.rmtree(tmp, ignore_errors=True)
+        return "failed"
     old = USER_KB.with_name("kb.old")
     shutil.rmtree(old, ignore_errors=True)
     try:
@@ -96,9 +105,9 @@ def update_kb() -> bool:
         if old.exists() and not USER_KB.exists():
             old.rename(USER_KB)
         shutil.rmtree(tmp, ignore_errors=True)
-        return False
+        return "failed"
     shutil.rmtree(old, ignore_errors=True)
-    return True
+    return "updated"
 
 
 # ---------------------------------------------------------------- app updates

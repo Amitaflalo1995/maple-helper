@@ -182,9 +182,16 @@ def split_meta(raw: str) -> tuple[str, dict]:
     text, _, meta = raw.partition(META)
     m = re.search(r"\{.*\}", meta, re.S)
     try:
-        return text.strip(), json.loads(m.group(0)) if m else {}
+        data = json.loads(m.group(0)) if m else {}
     except json.JSONDecodeError:
-        return text.strip(), {}
+        data = {}
+    if not isinstance(data, dict):
+        data = {}
+    # every field to the type the app expects: a malformed reply must never replace a good answer with an error
+    for key, typ in (("profile_update", dict), ("entities", list), ("drop_groups", list)):
+        if key in data and not isinstance(data[key], typ):
+            del data[key]
+    return text.strip(), data
 
 
 class Brain:
@@ -237,6 +244,8 @@ class Brain:
         if result.error:
             return Answer(error=result.error, limits=result.limits)
         text, meta = split_meta(result.text)
+        if not text and not meta:
+            return Answer(error="no_result", limits=result.limits)   # nothing at all came back: no empty bubble
         if not meta.get("profile_update"):
             stated = stated_level(question)
             if stated:

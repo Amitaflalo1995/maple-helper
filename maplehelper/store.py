@@ -43,9 +43,16 @@ for d in (SHOTS_DIR, HISTORY_DIR, AVATAR_DIR):
 
 def kb_dir() -> Path:
     """The newest knowledge base: a downloaded update wins over the bundled copy."""
-    if (USER_KB / "index.json").exists():
-        return USER_KB
-    return BUNDLED_KB
+    if (USER_KB / "index.json").exists() and _kb_version(USER_KB) >= _kb_version(BUNDLED_KB):
+        return USER_KB      # an app update may ship a newer KB than the one downloaded earlier
+    return BUNDLED_KB if (BUNDLED_KB / "index.json").exists() or not (USER_KB / "index.json").exists() else USER_KB
+
+
+def _kb_version(root: Path) -> str:
+    try:
+        return str(json.loads((root / "meta.json").read_text(encoding="utf-8")).get("version", ""))
+    except (OSError, ValueError, AttributeError):
+        return ""
 
 
 def _read_json(path: Path, default):
@@ -58,7 +65,14 @@ def _read_json(path: Path, default):
 def _write_json(path: Path, data) -> None:
     tmp = path.with_suffix(".tmp")
     tmp.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
-    tmp.replace(path)
+    for attempt in range(5):
+        try:
+            tmp.replace(path)
+            return
+        except PermissionError:     # antivirus / the search indexer holds the file for a moment
+            if attempt == 4:
+                raise
+            time.sleep(0.1)
 
 
 # ---------------------------------------------------------------- settings
@@ -165,6 +179,30 @@ class Character:
 STAT_KEYS = ("acc", "dmg_min", "dmg_max", "hp", "mp")
 
 
+def _str_list(v) -> list[str]:
+    """Quest names from the AI: a list of strings (a bare string is one quest, not its letters)."""
+    if isinstance(v, str):
+        v = [v]
+    return [q.strip() for q in v if isinstance(q, str) and q.strip()] if isinstance(v, list) else []
+
+
+_TYPES = {f.name: f.type for f in fields(Character)}
+
+
+def _sane(key: str, v) -> bool:
+    """A saved value of the right type: a bad one (once written from a malformed AI reply) is dropped on load."""
+    t = str(_TYPES.get(key, ""))
+    if t == "str":
+        return isinstance(v, str)
+    if t == "int":
+        return isinstance(v, int) and not isinstance(v, bool)
+    if t.startswith("list"):
+        return isinstance(v, list) and all(isinstance(x, str) for x in v)
+    if t == "dict":
+        return isinstance(v, dict)
+    return True
+
+
 class Profiles:
     path = DATA_DIR / "profiles.json"
 
@@ -173,7 +211,12 @@ class Profiles:
         known = {f.name for f in fields(Character)}
         # a newer version may have saved fields this one doesn't know (after a downgrade, or a preview build):
         # skip them instead of failing to start
-        self.characters = [Character(**{k: v for k, v in c.items() if k in known}) for c in raw.get("characters", [])]
+        self.characters = []
+        for c in raw.get("characters", []) if isinstance(raw.get("characters"), list) else []:
+            try:
+                self.characters.append(Character(**{k: v for k, v in c.items() if k in known and _sane(k, v)}))
+            except (TypeError, AttributeError):    # not a dict, or a required field is missing/broken
+                continue
         self.active_id = raw.get("active")
 
     @property
@@ -213,13 +256,15 @@ class Profiles:
     def apply_update(self, update: dict) -> list[tuple[str, object]]:
         """Apply a profile update from the assistant. Returns the changed (field, value) pairs."""
         c = self.active
-        if not c or not update:
+        if not c or not isinstance(update, dict) or not update:
             return []
         changed = []
         for key in ("level", "job", "base_class", "map"):
             val = update.get(key)
             if val in (None, "", 0):
                 continue
+            if key != "level" and not isinstance(val, str):
+                continue           # the AI wrote {"name": ...} or a list: never store it (it broke every start)
             if key == "level":
                 try:
                     val = int(val)
@@ -230,11 +275,11 @@ class Profiles:
             if getattr(c, key) != val:
                 setattr(c, key, val)
                 changed.append((key, val))
-        for q in update.get("quests_started", []) or []:
+        for q in _str_list(update.get("quests_started")):
             if q not in c.active_quests:
                 c.active_quests.append(q)
                 changed.append(("quest+", q))
-        for q in update.get("quests_completed", []) or []:
+        for q in _str_list(update.get("quests_completed")):
             if q in c.active_quests:
                 c.active_quests.remove(q)
                 changed.append(("quest-", q))
@@ -253,7 +298,7 @@ class Profiles:
             c.exp_pct = round(float(pct), 2)
             changed.append(("exp", c.exp_pct))
         note = update.get("note")
-        if note and note not in c.notes:
+        if isinstance(note, str) and note.strip() and note not in c.notes:
             c.notes.append(note)
             changed.append(("note", note))
         if changed:

@@ -1,12 +1,14 @@
 """Maple Helper entry point: tray icon, global hotkeys, overlay, voice, onboarding."""
 from __future__ import annotations
 
+import os
 import sys
 import threading
 import webbrowser
 
 from PySide6.QtCore import QLockFile, QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QAction, QIcon, QKeySequence
+from PySide6.QtNetwork import QLocalServer, QLocalSocket
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 from . import APP_NAME, __version__, osapi, providers, report, updater, whatsnew, wishlist
@@ -23,6 +25,7 @@ from .voice import VoiceController
 
 HOTKEY_TOGGLE = 1
 HOTKEY_VOICE = 2
+INSTANCE_SERVER = "MapleHelper-" + (os.environ.get("USERNAME") or os.environ.get("USER") or "app")
 BACKGROUND_ARG = "--background"   # start in the tray only (autostart at login, silent updates)
 UPDATED_ARG = "--updated"         # the installer reopens the app with it after "Update now": show what's new
 # the .ico carries every Windows size; macOS draws the menu bar and Dock from a PNG
@@ -147,7 +150,24 @@ class MapleHelperApp:
         QTimer.singleShot(1500, self.check_permissions)
         self.announce_whats_new(fresh_install)
         self.qapp.aboutToQuit.connect(self.shutdown)
+        self._listen_for_second_launch()
         return True
+
+    def _listen_for_second_launch(self):
+        """The app runs in the tray (autostart): opening it again from the desktop or Start menu shows the chat."""
+        QLocalServer.removeServer(INSTANCE_SERVER)        # a stale socket after a crash (macOS)
+        self._instance_server = QLocalServer(self.qapp)
+        self._instance_server.newConnection.connect(self._on_second_launch)
+        self._instance_server.listen(INSTANCE_SERVER)
+
+    def _on_second_launch(self):
+        while self._instance_server.hasPendingConnections():
+            self._instance_server.nextPendingConnection().deleteLater()
+        if not self.overlay.isVisible():
+            self.overlay.toggle(self.capture)
+        else:
+            self.overlay.raise_()
+            self.overlay.activateWindow()
 
     def announce_whats_new(self, fresh_install: bool):
         """First start after an app update: a note in the chat with a "What's new?" button."""
@@ -361,7 +381,10 @@ class MapleHelperApp:
         ai = providers.get(self.settings["provider"])
         info = report.system_info(__version__, updater.local_version(), f"{ai.label}: {ai.status()}")
         desktop = Path(QStandardPaths.writableLocation(QStandardPaths.DesktopLocation) or Path.home())
-        path = report.build_report(desktop, info, dict(self.settings.data))
+        try:
+            path = report.build_report(desktop, info, dict(self.settings.data))
+        except OSError:      # Desktop blocked (Controlled Folder Access) or a OneDrive folder offline
+            path = report.build_report(DATA_DIR, info, dict(self.settings.data))
         report.log.info("problem report written: %s", path.name)
         # show the file, selected, in Explorer / Finder
         subprocess.Popen(["explorer", "/select,", str(path)] if sys.platform == "win32" else ["open", "-R", str(path)])
@@ -428,17 +451,42 @@ class MapleHelperApp:
                 self.main_thread.call.emit(lambda: self.update_found(rel[0]))
             threading.Thread(target=app_update, daemon=True).start()
 
+        self._update_kb_in_background(interactive=False)
+
+    def _stop_ai_for_kb_swap(self) -> bool:
+        """Right before the KB folders swap: the warm AI process runs inside the KB, so stop it, unless the
+        player is waiting on an answer (then the 3-hourly timer tries again later)."""
         if self.overlay.busy or getattr(self.overlay, "_syncing", False):
-            return                      # the 3-hourly timer tries again later
+            return False
+        self.brain.shutdown()
+        return True
+
+    def _update_kb_in_background(self, interactive: bool):
+        if getattr(self, "_kb_updating", False):
+            return
+        self._kb_updating = True
 
         def work():
             before = updater.local_version()
-            self.brain.shutdown()       # the warm AI process runs inside the KB folder being replaced
-            if updater.update_kb():
+            try:
+                status = updater.fetch_kb(self._stop_ai_for_kb_swap)
+            except Exception:              # noqa: BLE001 - disk full etc.: never leave the flag stuck
+                report.log.exception("knowledge base update failed")
+                status = "failed"
+            self._kb_updating = False
+            if status == "updated":
                 report.log.info("knowledge base updated to %s", updater.local_version())
-                self.main_thread.call.emit(self.reload_kb)
-                self.main_thread.call.emit(lambda: self.kb_updated(before))
+            self.main_thread.call.emit(lambda: self._kb_update_done(status, before, interactive))
         threading.Thread(target=work, daemon=True).start()
+
+    def _kb_update_done(self, status: str, before: str, interactive: bool):
+        t = I18n(self.settings["language"])
+        if status == "updated":
+            self.reload_kb()
+            self.kb_updated(before, interactive=interactive)
+            threading.Thread(target=self.brain.prewarm, daemon=True).start()
+        elif interactive:
+            self.toast(t("kb_uptodate") if status == "uptodate" else t("kb_update_failed"))
 
     def announce_update(self, version: str, url: str):
         if getattr(self, "_mac_announced", None) == version:
@@ -469,7 +517,11 @@ class MapleHelperApp:
                     self.main_thread.call.emit(lambda p=pct: self.overlay.show_update(version, "downloading", p))
 
         def work():
-            path = updater.download_app_update(__version__, progress)
+            try:
+                path = updater.download_app_update(__version__, progress)
+            except Exception:              # noqa: BLE001 - disk full etc.: never leave "downloading" stuck
+                report.log.exception("app update download failed")
+                path = None
             self._downloading = False
             self.main_thread.call.emit(lambda: self.app_update_ready(path) if path else self._download_failed())
         threading.Thread(target=work, daemon=True).start()
@@ -514,13 +566,7 @@ class MapleHelperApp:
         QTimer.singleShot(1800, self.qapp.quit)
 
     def update_kb_interactive(self):
-        t = I18n(self.settings["language"])
-        before = updater.local_version()
-        if updater.update_kb():
-            self.reload_kb()
-            self.kb_updated(before, interactive=True)
-        else:
-            self.toast(t("kb_uptodate"))
+        self._update_kb_in_background(interactive=True)     # off the GUI thread: the zip is ~20 MB
 
     def kb_updated(self, before: str, interactive: bool = False):
         """Tell the player exactly what the update changed (patch notes), not just that it happened."""
@@ -668,7 +714,13 @@ def main():
     qapp.setApplicationDisplayName(APP_NAME)
     lock = QLockFile(str(DATA_DIR / "app.lock"))
     if not lock.tryLock(100):
-        return 0  # already running
+        # already running (often in the tray): ask it to show the chat, unless this start is itself a background one
+        if BACKGROUND_ARG not in sys.argv[1:]:
+            sock = QLocalSocket()
+            sock.connectToServer(INSTANCE_SERVER)
+            sock.waitForConnected(1000)
+            sock.disconnectFromServer()
+        return 0
     _hold_running_mutex()
     app = MapleHelperApp(qapp)
     if not app.start():

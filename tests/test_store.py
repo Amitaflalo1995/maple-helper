@@ -135,3 +135,26 @@ def test_damaged_install_is_explained_not_a_traceback(tmp_path, monkeypatch):
     assert "shiboken6.Shiboken" in (tmp_path / "logs" / "startup-error.log").read_text(encoding="utf-8")
     if sys.platform == "win32":
         assert shown and opened == [setupwait.DOWNLOAD_URL]
+
+
+def test_malformed_ai_profile_update_is_ignored(isolated_store):
+    """A reply with {"name": ...} or lists where text belongs once broke every later start."""
+    p = isolated_store.Profiles()
+    p.add("Amit", "Warrior", "Fighter", 30)
+    changed = p.apply_update({"map": {"name": "Henesys"}, "job": ["Page"], "note": ["x"],
+                              "quests_started": "Pio's Quest", "quests_completed": [{"name": "y"}]})
+    assert changed == [("quest+", "Pio's Quest")]
+    assert p.apply_update(["not", "a", "dict"]) == []
+    c = isolated_store.Profiles().active
+    assert c.map == "" and c.job == "Fighter" and c.active_quests == ["Pio's Quest"] and c.notes == []
+    assert "Pio's Quest" in c.summary()
+
+
+def test_profiles_drop_bad_saved_values_on_load(isolated_store):
+    isolated_store.Profiles.path.write_text(json.dumps({"active": "a", "characters": [
+        {"id": "a", "name": "Amit", "base_class": "Warrior", "job": "Fighter", "level": 30,
+         "map": {"name": "Henesys"}, "notes": [["x"]]},
+        "garbage", {"id": "b"}]}), encoding="utf-8")
+    p = isolated_store.Profiles()
+    assert [c.id for c in p.characters] == ["a"]
+    assert p.active.map == "" and p.active.notes == []

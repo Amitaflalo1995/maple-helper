@@ -78,3 +78,11 @@ class TestBuildPrompt:
         # the system prompt uses {{ }} escapes around the META JSON; a bad escape would raise here
         s = brain.SYSTEM_PROMPT.format(length=brain.LENGTH["short"])
         assert '{"entities"' in s and brain.META in s
+
+
+@pytest.mark.parametrize("meta", ['{"entities": null}', '{"profile_update": []}', '{"drop_groups": 5}', '[1, 2]'])
+def test_malformed_meta_keeps_the_answer(meta):
+    text, data = brain.split_meta("Go to Henesys.\n@@META@@\n" + meta)
+    assert text == "Go to Henesys."
+    assert all(not (k in data and not isinstance(data[k], t))
+               for k, t in (("entities", list), ("profile_update", dict), ("drop_groups", list)))
