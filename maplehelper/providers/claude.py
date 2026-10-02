@@ -11,15 +11,14 @@ import base64
 import json
 import logging
 import os
-import shlex
 import subprocess
 import sys
 import threading
 from pathlib import Path
 
 from .. import usage
-from .base import CREATE_NEW_CONSOLE, CREATE_NO_WINDOW, Provider, RawResult, classify_error, child_env, find_posix, \
-    find_windows_exe, http_ok, in_terminal, run_installer
+from .base import CREATE_NO_WINDOW, Provider, RawResult, classify_error, child_env, find_posix, \
+    find_windows_exe, http_ok, open_login, run_installer
 
 log = logging.getLogger(__name__)
 
@@ -71,7 +70,10 @@ class Claude(Provider):
             r = subprocess.run([exe, "auth", "status"], capture_output=True, timeout=20, env=env(),
                                creationflags=CREATE_NO_WINDOW)
             data = json.loads(r.stdout.decode("utf-8", errors="replace") or "{}")
-        except (OSError, subprocess.TimeoutExpired, json.JSONDecodeError):
+        except OSError:
+            # found but Windows won't start it: offer the installer, not a sign-in that can't open
+            return {"status": "not_installed", "email": None}
+        except (subprocess.TimeoutExpired, json.JSONDecodeError):
             return {"status": "logged_out", "email": None}
         if not data.get("loggedIn"):
             return {"status": "logged_out", "email": None}
@@ -92,11 +94,7 @@ class Claude(Provider):
     def login(self) -> subprocess.Popen | None:
         """Official sign-in flow (opens the browser); visible console for the code prompt if needed."""
         exe = find_claude()
-        if not exe:
-            return None
-        if sys.platform == "darwin":
-            return in_terminal(f"{shlex.quote(exe)} auth login")
-        return subprocess.Popen([exe, "auth", "login"], creationflags=CREATE_NEW_CONSOLE)
+        return open_login(exe, ["auth", "login"]) if exe else None
 
     def install(self) -> subprocess.Popen:
         return run_installer(INSTALL_CMD, INSTALL_CMD_MAC)

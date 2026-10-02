@@ -8,16 +8,18 @@ answer arrives whole (the last agent message of the run).
 from __future__ import annotations
 
 import json
+import logging
 import os
-import shlex
 import subprocess
 import sys
 import tempfile
 import threading
 from pathlib import Path
 
-from .base import CREATE_NEW_CONSOLE, CREATE_NO_WINDOW, Provider, RawResult, classify_error, child_env, find_posix, \
-    find_windows_exe, http_ok, in_terminal, run_installer
+from .base import CREATE_NO_WINDOW, Provider, RawResult, classify_error, child_env, find_posix, \
+    find_windows_exe, http_ok, open_login, run_installer
+
+log = logging.getLogger(__name__)
 
 INSTALL_CMD = "irm https://chatgpt.com/codex/install.ps1 | iex"
 INSTALL_CMD_MAC = "curl -fsSL https://chatgpt.com/codex/install.sh | sh"
@@ -223,7 +225,12 @@ class Codex(Provider):
         try:
             r = subprocess.run([exe, "login", "status"], capture_output=True, timeout=20, env=env(),
                                creationflags=CREATE_NO_WINDOW)
-        except (OSError, subprocess.TimeoutExpired):
+        except OSError:
+            # found but Windows won't start it (seen with the Store app's copy): as good as not installed,
+            # so the player gets the official installer instead of a sign-in button that does nothing
+            log.warning("codex can't start: %s", exe, exc_info=True)
+            return {"status": "not_installed", "email": None, "method": None}
+        except subprocess.TimeoutExpired:
             return {"status": "logged_out", "email": None, "method": None}
         out = (r.stdout + r.stderr).decode("utf-8", errors="replace")   # the status goes to stderr
         acc = parse_status(r.returncode, out)
@@ -245,11 +252,7 @@ class Codex(Provider):
     def login(self) -> subprocess.Popen | None:
         """Official ChatGPT sign-in (opens the browser) in a visible console."""
         exe = find_codex()
-        if not exe:
-            return None
-        if sys.platform == "darwin":
-            return in_terminal(f"{shlex.quote(exe)} login")
-        return subprocess.Popen([exe, "login"], creationflags=CREATE_NEW_CONSOLE)
+        return open_login(exe, ["login"]) if exe else None
 
     def install(self) -> subprocess.Popen:
         return run_installer(INSTALL_CMD, INSTALL_CMD_MAC)

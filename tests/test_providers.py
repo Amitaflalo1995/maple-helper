@@ -346,3 +346,30 @@ def test_codex_runs_without_the_store_alias_folder(monkeypatch):
     monkeypatch.setenv("PATH", ";".join([r"C:\Windows\System32", alias, r"C:\tools"]))
     path = codex.env()["PATH"].split(codex.os.pathsep)
     assert alias not in path and r"C:\Windows\System32" in path and r"C:\tools" in path
+
+
+class TestSignIn:
+    def test_login_window_stays_open_when_the_sign_in_fails(self):
+        s = base.login_script(r"C:\Program Files\WindowsApps\OpenAI.Codex_1\app\resources\codex.exe", ["login"])
+        assert s.startswith(r"& 'C:\Program Files\WindowsApps\OpenAI.Codex_1\app\resources\codex.exe' login")
+        assert "pause" in s.split(";", 1)[1]
+
+    def test_login_script_quotes_an_apostrophe_in_the_path(self):
+        assert base.login_script(r"C:\Users\O'Neil\codex.exe", ["login"]).startswith(r"& 'C:\Users\O''Neil\codex.exe'")
+
+    def test_login_that_cannot_start_returns_none(self, monkeypatch):
+        def boom(*_a, **_k):
+            raise OSError("Access is denied")
+        monkeypatch.setattr(base.subprocess, "Popen", boom)
+        monkeypatch.setattr(base.sys, "platform", "win32")
+        assert base.open_login("codex.exe", ["login"]) is None
+
+    @pytest.mark.parametrize("mod,prov", [(codex, "codex"), (claude, "claude")])
+    def test_a_cli_windows_cannot_start_counts_as_not_installed(self, mod, prov, monkeypatch):
+        # the Store app's codex.exe can refuse to start from outside the app: offer the installer, not a
+        # sign-in button that does nothing
+        def boom(*_a, **_k):
+            raise PermissionError(13, "Access is denied")
+        monkeypatch.setattr(mod, "find_codex" if prov == "codex" else "find_claude", lambda: "x.exe")
+        monkeypatch.setattr(mod.subprocess, "run", boom)
+        assert providers.get(prov).account()["status"] == "not_installed"

@@ -81,3 +81,34 @@ def test_settings_model_pick_applies_right_away(env):
     assert dlg.model_pick.text() == "Sonnet (recommended)" and "Sonnet 5" in dlg.model_hint.text()
     dlg._on_model(dlg._model_values.index("opus"))
     assert s["model"] == "opus" and seen == ["opus"]
+
+
+def test_onboarding_sign_in_lets_the_login_window_show_and_offers_reinstall(env, monkeypatch):
+    from PySide6.QtCore import Qt
+    from maplehelper import providers
+    from maplehelper.ui.dialogs import Onboarding
+    s, profiles, kb = env
+    dlg = Onboarding(s, profiles, kb, lambda *_: "")
+    dlg._on_provider("codex")
+    monkeypatch.setattr(type(providers.get("codex")), "login", lambda self: object())
+    dlg._start_login()
+    assert not dlg.windowFlags() & Qt.WindowStaysOnTopHint      # the console/browser open over it
+    assert not dlg.login_hint.isHidden() and "ChatGPT" in dlg.login_hint.text()
+    assert not dlg.install_btn.isHidden()
+    dlg._on_status("codex", "ok")
+    assert dlg.windowFlags() & Qt.WindowStaysOnTopHint          # back on top, connected
+    assert dlg.login_hint.isHidden() and dlg.install_btn.isHidden()
+    dlg.close()
+
+
+def test_onboarding_sign_in_that_cannot_start_says_so(env, monkeypatch):
+    from maplehelper import providers
+    from maplehelper.ui.dialogs import Onboarding
+    s, profiles, kb = env
+    dlg = Onboarding(s, profiles, kb, lambda *_: "")
+    dlg._on_provider("codex")
+    monkeypatch.setattr(type(providers.get("codex")), "login", lambda self: None)
+    dlg._start_login()
+    assert "Couldn't open the ChatGPT sign-in" in dlg.login_hint.text()
+    assert not dlg.install_btn.isHidden()
+    dlg.close()

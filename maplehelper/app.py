@@ -72,6 +72,7 @@ class MapleHelperApp:
         first = True
         while True:
             dlg = Onboarding(self.settings, self.profiles, self.kb, self.style)
+            dlg.report_requested.connect(self.make_report)
             if not first:
                 dlg.restart_on_language()
             self.bring_dialogs_forward()

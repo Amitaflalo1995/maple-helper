@@ -194,6 +194,8 @@ class CharacterForm(QWidget):
 class Onboarding(GlassDialog):
     """Language → AI connection (Claude or Codex) → character. Every step is required."""
 
+    report_requested = Signal()     # "Report a problem" on the connect page, before Settings exist
+
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, stylesheet_fn, only_character=False,
                  edit_id: str | None = None):
         self.t = I18n(settings["language"] or "he")
@@ -209,6 +211,7 @@ class Onboarding(GlassDialog):
         self._bridge.status.connect(self._on_status)
         self.provider = providers.get(settings["provider"]).name
         self._ai_ok = False
+        self._signing_in = False   # a sign-in/install window is open: keep the hint, re-check quietly
         self._build()
 
     def _build(self):
@@ -298,8 +301,8 @@ class Onboarding(GlassDialog):
         self.install_btn = QPushButton(objectName="Link")
         self.login_btn = QPushButton(objectName="Link")
         self.check_btn = QPushButton(self.t("ob_check"), objectName="Link")
-        self.install_btn.clicked.connect(lambda: (self._ai().install(), self._poll_status(90)))
-        self.login_btn.clicked.connect(lambda: (self._ai().login(), self._poll_status(120)))
+        self.install_btn.clicked.connect(self._start_install)
+        self.login_btn.clicked.connect(self._start_login)
         self.check_btn.clicked.connect(self._check_status)
         for b in (self.install_btn, self.login_btn, self.check_btn):
             b.setCursor(Qt.PointingHandCursor)
@@ -307,6 +310,10 @@ class Onboarding(GlassDialog):
         self.install_btn.hide()
         self.login_btn.hide()
         sec.add_widget(status_row)
+        self.login_hint = QLabel(objectName="RowHint")
+        self.login_hint.setWordWrap(True)
+        self.login_hint.hide()
+        sec.add_widget(self.login_hint)
         lay.addWidget(sec)
         lay.addSpacing(8)
         sec = Section(self.t("ob_use_api_key"), rtl)
@@ -324,6 +331,10 @@ class Onboarding(GlassDialog):
         sec.add_widget(kbox)
         lay.addWidget(sec)
         lay.addStretch(1)
+        report_btn = QPushButton(self.t("report_problem"), objectName="Link")
+        report_btn.setCursor(Qt.PointingHandCursor)
+        report_btn.clicked.connect(self.report_requested.emit)
+        lay.addWidget(report_btn, 0, Qt.AlignHCenter)
         self._label_ai_page()
         return w
 
@@ -345,6 +356,7 @@ class Onboarding(GlassDialog):
     def _on_provider(self, name: str):
         self.provider = self.settings["provider"] = name
         self._ai_ok = False
+        self._end_sign_in()
         self.install_btn.hide()
         self.login_btn.hide()
         self._label_ai_page()
@@ -406,8 +418,48 @@ class Onboarding(GlassDialog):
         self.settings["language"] = lang
         self._update_nav()
 
+    def _start_login(self):
+        self._begin_sign_in()
+        if self._ai().login() is None:
+            # the sign-in couldn't even start: say so, and offer the official installer instead
+            self._end_sign_in()
+            self.login_hint.setText(bidi.plain(self.t.p("ob_login_failed", self.provider), self.t.rtl))
+            self.login_hint.show()
+            self.install_btn.show()
+            return
+        self.login_hint.setText(bidi.plain(self.t.p("ob_login_wait", self.provider), self.t.rtl))
+        self.login_hint.show()
+        self.install_btn.show()     # the way out when no sign-in window shows up
+        self._poll_status(180)
+
+    def _start_install(self):
+        self._begin_sign_in()
+        self._ai().install()
+        self.login_hint.setText(bidi.plain(self.t("ob_install_wait"), self.t.rtl))
+        self.login_hint.show()
+        self._poll_status(240)
+
+    def _begin_sign_in(self):
+        """The sign-in console, the installer and the browser open as normal windows: stop staying on top
+        so they don't hide behind this one (where a click on "Sign in" looked like it did nothing)."""
+        self._signing_in = True
+        if self.windowFlags() & Qt.WindowStaysOnTopHint:
+            self.setWindowFlag(Qt.WindowStaysOnTopHint, False)
+            self.show()                                          # (changing a flag hides the window)
+
+    def _end_sign_in(self):
+        self._signing_in = False
+        if hasattr(self, "_poll_timer"):
+            self._poll_timer.stop()
+        if not self.windowFlags() & Qt.WindowStaysOnTopHint:
+            self.setWindowFlag(Qt.WindowStaysOnTopHint, True)   # (changing a flag hides the window)
+            self.show()
+            self.raise_()
+            self.activateWindow()
+
     def _check_status(self):
-        self.status_label.setText(bidi.plain(self.t("ob_checking"), self.t.rtl))
+        if not self._signing_in:
+            self.status_label.setText(bidi.plain(self.t("ob_checking"), self.t.rtl))
         ai = self._ai()
         threading.Thread(target=lambda: self._bridge.status.emit(ai.name, ai.status()), daemon=True).start()
 
@@ -421,6 +473,7 @@ class Onboarding(GlassDialog):
         self._poll_left -= 1
         if self._poll_left <= 0 or self._ai_ok:
             self._poll_timer.stop()
+            self._signing_in = False
             return
         self._check_status()
 
@@ -432,10 +485,15 @@ class Onboarding(GlassDialog):
         text = {"ok": t("ob_connected"), "logged_out": t.p("ob_not_logged", provider),
                 "not_installed": t.p("ob_not_installed", provider)}[st]
         self.status_label.setText(bidi.plain(text, t.rtl))
-        self.install_btn.setVisible(st == "not_installed")
         self.login_btn.setVisible(st == "logged_out")
         if self._ai_ok:
+            if self._signing_in:
+                self._end_sign_in()      # back on top, showing "Connected"
+            self.login_hint.hide()
+            self.install_btn.hide()
             self.settings.set_api_key_mode(provider, False)
+        elif not self._signing_in:
+            self.install_btn.setVisible(st == "not_installed")
         self._update_nav()
 
     def _check_key(self):
@@ -820,6 +878,7 @@ class SettingsDialog(GlassDialog):
         self.logout_btn.setVisible(connected)
         if self._login_timer.isActive() and st == "ok":
             self._login_timer.stop()
+            self._set_on_top(True)
         if was is not None and was != st and not api_key:
             self.account_changed.emit()
 
@@ -850,15 +909,26 @@ class SettingsDialog(GlassDialog):
         self.switch_btn.setEnabled(True)
         self._account_status = "logged_out"
         self.account_changed.emit()
-        self._ai().login()
+        if self._ai().login() is None:
+            self._set_account_text(self.t.p("ob_login_failed", self._ai().name))
+            return
+        self._set_on_top(False)   # the sign-in window and the browser must not open behind this one
         self._set_account_text(self.t("account_browser"))
         self._login_left = 60   # 3 minutes
         self._login_timer.start()
+
+    def _set_on_top(self, on: bool):
+        if bool(self.windowFlags() & Qt.WindowStaysOnTopHint) != on:
+            self.setWindowFlag(Qt.WindowStaysOnTopHint, on)
+            self.show()                                          # (changing a flag hides the window)
+            if on:
+                self.raise_()
 
     def _login_tick(self):
         self._login_left -= 1
         if self._login_left <= 0:
             self._login_timer.stop()
+            self._set_on_top(True)
         self._refresh_account()
 
     def _logout(self):
