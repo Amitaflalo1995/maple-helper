@@ -40,3 +40,11 @@ def test_portrait_sits_on_the_tag_even_with_an_off_box():
 def test_no_tag_no_guess():
     img = np.full((500, 800, 3), 180, np.uint8)
     assert portrait_rect(img, [0.4, 0.4, 0.05, 0.1]) is None and portrait_rect(img, None) is None
+
+
+def test_box_far_off_still_finds_the_only_tag():
+    img = _scene()
+    H, W = img.shape[:2]
+    far = [100 / W, 100 / H, 50 / W, 80 / H]               # pointed at a sign across the screen
+    left, top, right, bottom = portrait_rect(img, far)
+    assert left < 690 and right > 740 and 398 <= bottom <= 410

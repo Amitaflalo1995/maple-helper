@@ -1279,8 +1279,8 @@ class Overlay(QWidget):
                 self.profiles.set_avatar(buf.getvalue())
                 self.refresh_profile_chip()
                 return True
-            if not box:
-                return False
+            if not box or self.profiles.avatar_path():
+                return False    # no tag found: the AI's box alone is too often off to replace a portrait
             W, H = img.size
             x, y, w, h = box
             if not (0 <= x < 1 and 0 <= y < 1 and 0.005 < w < 0.15 and 0.01 < h < 0.3):

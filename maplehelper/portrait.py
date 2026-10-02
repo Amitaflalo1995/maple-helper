@@ -61,7 +61,11 @@ def portrait_rect(rgb: np.ndarray, box: list[float] | None) -> tuple[int, int, i
     right, bottom = int(min(W, cx + rw)), int(min(H, cy + rh * 1.4))
     tags = find_name_tags(rgb[top:bottom, left:right])
     if not tags:
-        return None
+        # the box was further off than that (live test: it pointed at a TAXI sign 400 px away): every tag on screen,
+        # nearest to the box (other players have tags too, NPCs don't: theirs are opaque yellow plates)
+        tags, left, top = find_name_tags(rgb), 0, 0
+        if not tags:
+            return None
     fx, fy = cx - left, (y + h) * H - top           # the box's feet
     tx, ty, tw, th = min(tags, key=lambda t: (t[0] + t[2] / 2 - fx) ** 2 + (t[1] - fy) ** 2)
     side = int(th * 5.4)
