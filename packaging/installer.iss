@@ -67,8 +67,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [InstallDelete]
-; the previous version's files go first: dropped KB pages, an old drops.tsv, stale Qt plugins
-Type: filesandordirs; Name: "{app}\_internal"
+; the previous version's bundled KB goes first (dropped pages, an old drops.tsv). Only the KB: removing all of
+; _internal would leave nothing that can even start if a silent update stopped halfway
+Type: filesandordirs; Name: "{app}\_internal\data\kb"
 
 [Files]
 Source: "..\dist\Maple Helper\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
