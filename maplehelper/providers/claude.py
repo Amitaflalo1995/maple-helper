@@ -178,9 +178,11 @@ class ClaudeBackend:
 
     def run(self, prompt: str, screenshot_jpeg: bytes | None, on_raw_delta=None) -> RawResult:
         content = []
-        if screenshot_jpeg:
-            content.append({"type": "image", "source": {"type": "base64", "media_type": "image/jpeg",
-                                                         "data": base64.b64encode(screenshot_jpeg).decode()}})
+        # one screenshot, or the screenshot and its full-resolution detail tiles
+        for jpeg in (screenshot_jpeg if isinstance(screenshot_jpeg, list) else [screenshot_jpeg]):
+            if jpeg:
+                content.append({"type": "image", "source": {"type": "base64", "media_type": "image/jpeg",
+                                                             "data": base64.b64encode(jpeg).decode()}})
         content.append({"type": "text", "text": prompt})
         msg = {"type": "user", "message": {"role": "user", "content": content}}
 

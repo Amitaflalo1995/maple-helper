@@ -184,6 +184,7 @@ class ToolsDialog(GlassDialog):
     sync_requested = Signal()                 # read level/EXP/stats from a screenshot (the chat does it)
     market_ready = Signal(object)             # (item name, Market or None) from the background lookup
     ask_requested = Signal(str, bool)          # question for the chat, with a fresh screenshot?
+    detail_ask_requested = Signal(str)         # ...with a full-resolution screenshot (inventory icons)
     tag_requested = Signal(str)                # tag an entity (monster, quest) in the chat
     guide_requested = Signal(str)              # open a guide in the guides window
 
@@ -1250,7 +1251,7 @@ class ToolsDialog(GlassDialog):
 
     def _sell_check(self):
         self.setWindowOpacity(0.0)           # the inventory must be in the screenshot, not this window
-        self.ask_requested.emit(self.t("sell_q"), True)
+        self.detail_ask_requested.emit(self.t("sell_q"))
         QTimer.singleShot(1500, lambda: self.setWindowOpacity(1.0))
 
     def _fill_more(self):

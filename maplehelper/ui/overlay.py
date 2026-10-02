@@ -554,16 +554,20 @@ class Overlay(QWidget):
         self._busy_line = SystemLine(self.t("busy_wait"))
         self._add_widget(self._busy_line)
 
-    def ask_with_screenshot(self, question: str):
-        """Like "What now?": a fresh screenshot of the game, then the question."""
+    def ask_with_screenshot(self, question: str, detail: bool = False):
+        """Like "What now?": a fresh screenshot of the game, then the question. detail: also send the
+        screenshot at full resolution in tiles (inventory icons were unreadable on an ultrawide, live)."""
         if self._is_busy():               # the question would be dropped: don't flash the chat for a shot
             self._say_busy()
             return
         self.setWindowOpacity(0.0)
-        QTimer.singleShot(120, lambda: self._capture_and_ask(question))
+        QTimer.singleShot(120, lambda: self._capture_and_ask(question, detail))
 
-    def _capture_and_ask(self, question: str):
+    def _capture_and_ask(self, question: str, detail: bool = False):
         self._fresh_shot()
+        if detail and self.shot:
+            from .. import capture
+            self._detail_tiles = capture.detail_tiles(capture.LAST_FULL)
         self.ask(question)
 
     def what_now(self):
@@ -1014,7 +1018,8 @@ class Overlay(QWidget):
         self.send_btn.setEnabled(False)
 
         self._thread = QThread(self)
-        self._worker = AskWorker(self.brain, question, c, history, shot, focus)
+        tiles, self._detail_tiles = getattr(self, "_detail_tiles", None), None
+        self._worker = AskWorker(self.brain, question, c, history, [shot, *tiles] if shot and tiles else shot, focus)
         self._worker.moveToThread(self._thread)
         self._thread.started.connect(self._worker.run)
         self._worker.delta.connect(self._on_delta)

@@ -20,6 +20,24 @@ def grab_image(x: int, y: int, w: int, h: int) -> Image.Image:
     return Image.frombytes("RGB", shot.size, shot.rgb)
 
 
+def detail_tiles(img: Image.Image | None, width: int = 1200) -> list[bytes]:
+    """The latest grab at full resolution, cut left to right into tiles the AI reads without shrinking them:
+    small things (inventory icons) stay legible on a wide screen. Nothing when the grab is small already."""
+    if img is None or max(img.size) <= MAX_SIDE:
+        return []
+    n = -(-img.width // width)
+    step = img.width / n
+    tiles = []
+    for i in range(n):
+        left, right = max(0, int(i * step) - 40), min(img.width, int((i + 1) * step) + 40)   # a little overlap
+        tile = img.crop((left, 0, right, img.height))
+        tile.thumbnail((MAX_SIDE, MAX_SIDE))
+        buf = io.BytesIO()
+        tile.save(buf, "JPEG", quality=85)
+        tiles.append(buf.getvalue())
+    return tiles
+
+
 def grab_jpeg(rect: tuple[int, int, int, int]) -> bytes:
     """JPEG of a screen rectangle (x, y, w, h), longest side MAX_SIDE."""
     global LAST_FULL

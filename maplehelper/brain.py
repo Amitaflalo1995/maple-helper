@@ -143,8 +143,12 @@ def build_prompt(question: str, character: Character | None, history: History | 
                 ctx.append(drops)
     if ctx:
         parts.append("<kb_context>\n" + "\n\n".join(ctx) + "\n</kb_context>")
-    parts.append("<screenshot>" + ("attached above" if has_screenshot else "not available") + "</screenshot>")
+    parts.append("<screenshot>" + ({True: "attached above", False: "not available"}.get(has_screenshot) or
+                                   f"attached above, followed by {has_screenshot} full-resolution parts of the same "
+                                   "screenshot (left to right) for reading small icons and text") + "</screenshot>")
     parts.append(f"<question>\n{question}\n</question>")
+    if re.search(r"[\u0590-\u05FF]", question):
+        parts.append("Reply in Hebrew.")      # it slipped into English once after a screenshot-heavy turn (live)
     parts.append(REPLY_RULES.format(length=LENGTH_LINES.get(length, 6)))
     return "\n\n".join(parts)
 
@@ -250,7 +254,9 @@ class Brain:
         if not self.backend.exe:
             return Answer(error="not_installed")
         self.kb.ensure_drop_table()
-        prompt = build_prompt(question, character, history, self.kb, screenshot_jpeg is not None, self.length, focus)
+        shots = screenshot_jpeg if isinstance(screenshot_jpeg, list) else [screenshot_jpeg] if screenshot_jpeg else []
+        has = (len(shots) - 1 or True) if shots else False      # True, or the number of detail tiles
+        prompt = build_prompt(question, character, history, self.kb, has, self.length, focus)
         raw_delta = (lambda raw: on_delta(streamed_text(raw))) if on_delta else None
         result = self.backend.run(prompt, screenshot_jpeg, raw_delta)
         if result.error:

@@ -86,3 +86,22 @@ def test_malformed_meta_keeps_the_answer(meta):
     assert text == "Go to Henesys."
     assert all(not (k in data and not isinstance(data[k], t))
                for k, t in (("entities", list), ("profile_update", dict), ("drop_groups", list)))
+
+
+def test_detail_tiles_cut_a_wide_grab_and_are_announced():
+    from PIL import Image
+
+    from maplehelper import capture
+    tiles = capture.detail_tiles(Image.new("RGB", (3440, 1440)))
+    assert len(tiles) == 3 and capture.detail_tiles(Image.new("RGB", (1280, 720))) == []
+    assert all(max(Image.open(__import__("io").BytesIO(t)).size) <= capture.MAX_SIDE for t in tiles)
+    p = brain.build_prompt("מה למכור?", None, None, _NoKb(), 3)
+    assert "3 full-resolution parts" in p and "Reply in Hebrew." in p
+
+
+class _NoKb:
+    def level_digest(self, *_):
+        return ""
+
+    def find_mentions(self, *_a, **_k):
+        return []

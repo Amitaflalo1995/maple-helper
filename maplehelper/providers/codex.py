@@ -95,8 +95,8 @@ def codex_command(exe: str, workdir, instructions: str, model: str | None = None
                   platform: str = sys.platform, extra: tuple = ()) -> list[str]:
     cmd = [exe, "exec"]
     if image:
-        # --image takes several values: anywhere later it would swallow the "-" stdin marker
-        cmd += ["--image", str(image)]
+        # --image takes several values (comma-separated): anywhere later it would swallow the "-" stdin marker
+        cmd += ["--image", ",".join(str(i) for i in image) if isinstance(image, list) else str(image)]
     # json.dumps gives a valid TOML basic string (same escapes), so newlines and quotes survive -c
     cmd += ["--json", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--skip-git-repo-check",
             "-s", "read-only", "-C", str(workdir), "-c", "developer_instructions=" + json.dumps(instructions)]
@@ -311,19 +311,22 @@ class CodexBackend:
 
     def run(self, prompt: str, screenshot_jpeg: bytes | None, on_raw_delta=None) -> RawResult:
         b = self.brain
-        image = None
+        images: list[str] = []
         try:
-            if screenshot_jpeg:
-                fd, image = tempfile.mkstemp(prefix="maplehelper-shot-", suffix=".jpg")
-                with os.fdopen(fd, "wb") as f:
-                    f.write(screenshot_jpeg)
+            for jpeg in (screenshot_jpeg if isinstance(screenshot_jpeg, list) else [screenshot_jpeg]):
+                if jpeg:
+                    fd, path = tempfile.mkstemp(prefix="maplehelper-shot-", suffix=".jpg")
+                    with os.fdopen(fd, "wb") as f:
+                        f.write(jpeg)
+                    images.append(path)
+            image = images if len(images) > 1 else (images[0] if images else None)
             cmd = codex_command(self.exe, b.kb.root, b.system_prompt() + TOOLS_NOTE, b.model, image)
             # a stalled CLI must not leave the chat on "thinking" forever
             r = self._exec(cmd, prompt, str(b.kb.root), b.api_key, timeout=ANSWER_TIMEOUT_S)
         finally:
-            if image:
+            for path in images:
                 try:
-                    os.remove(image)
+                    os.remove(path)
                 except OSError:
                     pass
         if r.text and on_raw_delta:

@@ -622,16 +622,17 @@ class MapleHelperApp:
                               self.exp_meter, page)
             dlg.sync_requested.connect(self.overlay.sync_profile)
             dlg.ask_requested.connect(self.ask_from_tools)
+            dlg.detail_ask_requested.connect(lambda q: self.ask_from_tools(q, True, detail=True))
             dlg.tag_requested.connect(self.ask_about_guide)
             dlg.guide_requested.connect(self.show_guides)
             return dlg
         self.open_window("tools", make)
 
-    def ask_from_tools(self, question: str, with_screenshot: bool):
+    def ask_from_tools(self, question: str, with_screenshot: bool, detail: bool = False):
         if not self.overlay.isVisible():
             self.overlay.toggle(self.capture)
         if with_screenshot:
-            self.overlay.ask_with_screenshot(question)
+            self.overlay.ask_with_screenshot(question, detail=detail)
         else:
             self.overlay.ask(question)
 
