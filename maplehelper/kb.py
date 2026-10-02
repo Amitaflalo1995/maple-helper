@@ -24,6 +24,16 @@ HEBREW = re.compile(r"[֐-׿]")
 
 
 _FINALS = str.maketrans("ךםןףץ", "כמנפצ")
+# Hebrew geresh / gershayim and the other look-alikes a phone or a keyboard types: "ג׳וניור" = "ג'וניור"
+_QUOTES = str.maketrans({"׳": "'", "`": "'", "´": "'", "’": "'", "‘": "'", "״": '"', "“": '"', "”": '"'})
+
+
+def fold_quotes(s: str) -> str:
+    return s.translate(_QUOTES)
+
+
+def _heb_letters(s: str) -> int:
+    return len(re.findall(r"[א-ת]", s))
 
 
 def _heb_loose(s: str) -> str:
@@ -32,16 +42,45 @@ def _heb_loose(s: str) -> str:
     s = s.translate(_FINALS)
     s = re.sub(r"יי+", "י", s)
     s = re.sub(r"וו+", "ו", s)
-    s = re.sub(r"(?<=[א-ת])[הא](?=\s|$)", "", s)
-    # definite article on every word: "החילזון האדום" = "חילזון אדום"
-    s = re.sub(r"(?:(?<=\s)|^)ה(?=[א-ת]{3,})", "", s)
-    return s
+    return re.sub(r"(?<=[א-ת])[הא](?=\s|$)", "", s)
+
+
+def _no_article(s: str) -> str:
+    """The definite article off every word: "החילזון האדום" = "חילזון אדום" (used only for long aliases:
+    "הנהר" is "the river", not River)."""
+    return re.sub(r"(?:(?<=\s)|^)ה(?=[א-ת]{3,})", "", s)
 
 
 def _norm(s: str) -> str:
-    s = s.lower().replace("’", "'")
-    s = re.sub(r"[^\w֐-׿' ]+", " ", s)
+    s = fold_quotes(s.lower())
+    # gershayim inside a Hebrew word stays ("צה"ל"); any other double quote is punctuation
+    s = re.sub(r'(?<![א-ת])"|"(?![א-ת])', " ", s)
+    s = re.sub(r"[^\w֐-׿'\" ]+", " ", s)
     return re.sub(r"\s+", " ", s).strip()
+
+
+# aliases.json ships with the knowledge base release: its few bad entries are corrected here, in code.
+# Common Hebrew words and generic nouns an alias must never be ("מאי" is May, "פסל" any statue, "השף" any chef):
+ALIAS_DROP = {
+    "בין", "אלי", "אליי", "מאי", "פי", "סר", "מקס", "אוק", "פיל", "הפיל",
+    "נהר", "הנהר", "פסל", "סדן", "צור", "הצור", "השף", "שף", "רוח רפאים", "טוויטר", "טיק טוק", "שוער", "ליצן",
+    "תיבת אוצר",
+}
+# alias -> entity key, over aliases.json (keys and names as in the KB's index.json)
+ALIAS_SET = {
+    "פטרייה רקובה": "monster/62",        # Rotten Mushroom (aliases.json gave this spelling to Rotten Mushmom)
+    "לטי": "monster/1011",               # Leatty (aliases.json: Dark Leatty, which keeps "דארק ליטי")
+    "ליטי": "monster/1011",
+    "ג'וניור סנטינל": "monster/1001",     # Jr. Sentinel, not the Maple Island "Tutorial Jr. Sentinel"
+    # the KB has "Jr. Boogie 1" and "Jr. Boogie 2" (the same stats and maps), no plain "Jr. Boogie"
+    "jr boogie": "monster/33", "ג'וניור בוגי": "monster/33",
+}
+# NPCs of the KB named like an everyday English word: an answer saying "Max HP" or "River" at a sentence start
+# names no NPC (the AI lists the NPCs it means in its META entities, those still get a card)
+COMMON_WORD_NPCS = {"Max", "River", "Anvil", "Oak", "Jack", "Pan", "Chef", "Statue", "Flint", "Rain", "Exit", "Silver"}
+NO_LOOSE_UNDER = 5    # Hebrew letters an alias needs for its spelling-tolerant form ("פיה" -> "פי" is no name)
+PREFIX_FROM = 4        # Hebrew letters a name needs before a glued prefix counts ("לאן" is not ל + "אן")
+_PREFIX = "[בלמהושכ]{1,2}"
 
 
 class KnowledgeBase:
@@ -57,7 +96,9 @@ class KnowledgeBase:
         if alias_file.exists():
             for key, names in json.loads(alias_file.read_text(encoding="utf-8")).items():
                 for n in names:
-                    self.aliases[_norm(n)] = key
+                    if _norm(n) not in ALIAS_DROP:
+                        self.aliases[_norm(n)] = key
+        self.aliases.update({_norm(a): k for a, k in ALIAS_SET.items() if k in self.entities})
 
     # ------------------------------------------------------------ basic access
 
@@ -119,54 +160,125 @@ class KnowledgeBase:
     # ------------------------------------------------------------ name lookup
 
     @cached_property
-    def _names(self) -> list[tuple[str, str]]:
-        """(normalized name, key) sorted longest-first, so 'Red Snail' wins over 'Snail'."""
+    def _names(self) -> list[tuple[str, str, bool]]:
+        """(normalized name, key, loose) sorted longest-first, so 'Red Snail' wins over 'Snail'.
+
+        loose=True is a long Hebrew alias's spelling-tolerant form, looked up in the question's loose copies;
+        a loose form two entities share, or that is another entity's exact name, is dropped (ambiguous)."""
         pairs = []
         for key, e in self.entities.items():
             n = _norm(e["name"])
             if len(n) >= 3:
-                pairs.append((n, key))
-        pairs += [(a, k) for a, k in self.aliases.items() if len(a) >= 2]
-        pairs += [(_heb_loose(a), k) for a, k in self.aliases.items() if len(a) >= 3 and _heb_loose(a) != a]
+                pairs.append((n, key, False))
+        pairs += [(a, k, False) for a, k in self.aliases.items() if len(a) >= 2]
+        exact = {n: k for n, k, _ in pairs}
+        loose: dict[str, set[str]] = {}
+        for a, k in self.aliases.items():
+            if HEBREW.search(a) and _heb_letters(a) >= NO_LOOSE_UNDER:
+                form = _heb_loose(a)
+                if _heb_letters(form) >= 3 and form not in ALIAS_DROP:
+                    loose.setdefault(form, set()).add(k)
+        pairs += [(f, next(iter(ks)), True) for f, ks in loose.items()
+                  if len(ks) == 1 and exact.get(f, next(iter(ks))) in ks]
         return sorted(pairs, key=lambda p: -len(p[0]))
 
-    def find_mentions(self, text: str, max_results: int = 5) -> list[str]:
-        """Entities named in free text (English names, Hebrew aliases, transliterations)."""
+    def _occurrence(self, hay: str, name: str, key: str, taken: list[tuple[int, int]]) -> tuple[int, int] | None:
+        """The first place `name` stands in `hay` (" word word ... ") outside the spans already taken, as a
+        (first word, last word + 1) range. Hebrew prefixes glue on to a long enough name ("לחילזון", "בהנסיס"),
+        and a monster's name may be plural ("fire boars", "תמנונים")."""
+        if name not in hay:
+            return None          # cheap: most names aren't in the question at all
+        heb = bool(HEBREW.search(name))
+        pre = f"(?:{_PREFIX})?" if heb and _heb_letters(name) >= PREFIX_FROM else ""
+        plural = ""
+        if key.startswith("monster/"):
+            plural = "(?:ימ|ות|ים)?" if heb else "(?:e?s)?"
+        for m in re.finditer(f"(?<= ){pre}{re.escape(name)}{plural}(?= )", hay):
+            w0 = hay.count(" ", 0, m.start()) - 1
+            span = (w0, w0 + name.count(" ") + 1)
+            if not any(a < span[1] and span[0] < b for a, b in taken):
+                return span
+        return None
+
+    def mention_spans(self, text: str, max_results: int = 5, answer: bool = False) -> list[tuple[str, int, int]]:
+        """(key, first word, last word + 1) of the entities named in free text, by the words of _norm(text).
+
+        The text is searched as typed, and (Hebrew) in two loose copies: spelling-tolerant, and that without the
+        definite article. The copies keep the words in place, so a name matched in one copy can't be counted
+        again from another, nor a shorter name inside it ("Red Snail" is not also "Snail").
+
+        answer=True reads an AI answer, where game names are written exactly: English names must match their
+        case ("your max HP" is not Max, "the river" not River), no loose Hebrew forms, no English aliases, and
+        an NPC named like an everyday word (COMMON_WORD_NPCS) never counts."""
         norm = _norm(text)
-        hay = f" {norm} {_heb_loose(norm)} " if HEBREW.search(norm) else f" {norm} "
-        found: list[str] = []
+        copies = [f" {norm} "]
+        if HEBREW.search(norm) and not answer:
+            loose = _heb_loose(norm)
+            copies += [f" {loose} ", f" {_no_article(loose)} "]
+        out: list[tuple[str, int, int]] = []
         taken: list[tuple[int, int]] = []
-        for name, key in self._names:
-            i = hay.find(f" {name} ")
-            if i < 0 and len(name) >= 4 and name in hay and HEBREW.search(name):   # substring first: cheap
-                # Hebrew prefixes: ב/ל/מ/ה/ו/ש/כ glued to the word ("לחילזון", "בהנסיס")
-                m = re.search(r"[ ][בלמהושכ]{1,2}" + re.escape(name) + r"[ ]", hay)
-                i = m.start() if m else -1
-            if i < 0:
-                continue
-            span = (i, i + len(name) + 2)
-            if any(a < span[1] and span[0] < b for a, b in taken):
-                continue  # inside a longer name already matched
-            taken.append(span)
-            if key not in found:
-                found.append(key)
-            if len(found) >= max_results:
+        for name, key, is_loose in self._names:
+            for i, hay in enumerate(copies):
+                if (i > 0) != is_loose:
+                    continue      # exact names in the text as typed; loose forms in the loose copies
+                span = self._occurrence(hay, name, key, taken)
+                if span and not HEBREW.search(name) and (answer or key in self._common_npcs) \
+                        and not self._written(text, key, name, answer):
+                    span = None       # a question's "max level" is no Max either; "where is Max" is
+                if span:
+                    taken.append(span)
+                    if key not in [k for k, _, _ in out]:
+                        out.append((key, *span))
+                    break
+            if len(out) >= max_results:
                 break
-        return found
+        return out
+
+    @cached_property
+    def _common_npcs(self) -> set[str]:
+        return {k for k, e in self.entities.items() if e.get("category") == "npc" and e.get("name") in COMMON_WORD_NPCS}
+
+    def _written(self, text: str, key: str, name: str, answer: bool = True) -> bool:
+        """An English entity name written as the game writes it (its own case). In an answer an NPC named like an
+        everyday word never counts (the AI lists the ones it means)."""
+        e = self.get(key) or {}
+        if _norm(e.get("name", "")) != name or answer and key in self._common_npcs:
+            return False          # an English alias, or an everyday word
+        words = re.escape(fold_quotes(e["name"])).replace(r"\ ", r"\s+")
+        plural = "(?:e?s)?" if key.startswith("monster/") else ""
+        return re.search(rf"(?<![\w]){words}{plural}(?![\w])", fold_quotes(text)) is not None
+
+    def find_mentions(self, text: str, max_results: int = 5, answer: bool = False) -> list[str]:
+        """Entities named in free text (English names, Hebrew aliases, transliterations); answer=True for an AI
+        answer's text (exact names only, see mention_spans)."""
+        return [k for k, _, _ in self.mention_spans(text, max_results, answer)]
+
+    @cached_property
+    def _resolve_pattern(self) -> re.Pattern | None:
+        """One pattern for every Hebrew alias, longest first (compiling one per alias took ~140 ms a call).
+        A glued prefix only before a long alias: "כאן" is not כ + "אן" (Anne), "מפיל" not מ + "פיל"."""
+        heb = sorted((a for a, k in self.aliases.items() if HEBREW.search(a) and self.get(k)), key=len, reverse=True)
+        if not heb:
+            return None
+        long = [a for a in heb if _heb_letters(a) >= PREFIX_FROM]
+        alt = "|".join(map(re.escape, heb))
+        pre = rf"(?P<pre>[ובלמהשכ]{{1,2}}(?=(?:{'|'.join(map(re.escape, long))})(?![֐-׿])))?" if long else ""
+        return re.compile(rf"(?<![֐-׿]){pre}(?P<name>{alt})(?![֐-׿])")
 
     def resolve_names(self, text: str) -> str:
-        """Replace Hebrew aliases/transliterations with official English names (used after speech-to-text)."""
-        out = text
-        for alias, key in sorted(self.aliases.items(), key=lambda p: -len(p[0])):
-            if not HEBREW.search(alias):
-                continue
-            e = self.get(key)
-            if e:
-                # keep a glued Hebrew prefix: "ובלו סנייל" → "ו-Blue Snail"
-                name = e["name"]
-                out = re.sub(rf"(?<![֐-׿])([ובלמהשכ]{{0,2}}){re.escape(alias)}(?![֐-׿])",
-                             lambda m, n=name: f"{m.group(1)}-{n}" if m.group(1) else n, out)
-        return out
+        """Replace Hebrew aliases/transliterations with official English names (used after speech-to-text).
+        The same safety as find_mentions: no dropped alias (ALIAS_DROP), a glued prefix only on a long name."""
+        out = fold_quotes(text)
+        if not HEBREW.search(out) or self._resolve_pattern is None:
+            return out
+
+        def name(m: re.Match) -> str:
+            # keep a glued Hebrew prefix: "ובלו סנייל" → "ו-Blue Snail"
+            en = self.get(self.aliases[m.group("name")])["name"]
+            pre = m.groupdict().get("pre")
+            return f"{pre}-{en}" if pre else en
+
+        return self._resolve_pattern.sub(name, out)
 
     # ------------------------------------------------------------ drops
 

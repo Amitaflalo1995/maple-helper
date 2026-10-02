@@ -814,13 +814,13 @@
    "img": "8ea44ba66a1c56.png",
    "w": 43,
    "h": 70,
-   "cap": "Skill Lv1500 x 300 px"
+   "cap": "Skill Lv1 500 x 300 px\n250 px left and right, 150 px up and down."
   },
   {
    "img": "8ea44ba66a1c56.png",
    "w": 43,
    "h": 70,
-   "cap": "Skill Lv20600 x 400 px"
+   "cap": "Skill Lv20 600 x 400 px\n300 px left and right, 200 px up and down. The dashed line shows the skill Lv1 area."
   },
   {
    "note": "**Haste was nerfed from old-school MapleStory.** The old version gave +40 Speed and +20 Jump (Ayumilove's 2008 skill list). Classic World max Haste gives +30 Speed and +10 Jump. Jump was cut in half, while Speed was reduced by 10."
@@ -949,5 +949,5 @@
   }
  ],
  "source": "https://meowdb.com/msclassic/guides/assassin-class-guide",
- "hash": "4fce25ab1ae4"
+ "hash": "4c0dc1be28cc"
 }

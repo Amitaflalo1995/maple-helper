@@ -1106,7 +1106,7 @@ class Overlay(QWidget):
             if self.stats:
                 self.stats.question(c)     # once per question, however it gets answered
             if not focus and not shown and self.settings["instant_answers"]:
-                qa = quick.answer(question, self.kb, self.t)
+                qa = quick.answer(question, self.kb, self.t, c)
                 if qa:
                     if history:
                         history.append("user", question)

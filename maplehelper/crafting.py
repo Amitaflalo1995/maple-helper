@@ -63,7 +63,8 @@ def _levels(page: str) -> tuple[Level, ...]:
         if cur and row and i + 2 < len(lines) and lines[i + 2].startswith("|"):
             ing = [(int(n), name.strip()) for n, name in re.findall(r"(\d+) x (.+?)(?=\s+\d+ x |$)", lines[i + 1])]
             vals = [v.strip() for v in lines[i + 2].strip("| ").split("|")]
-            if len(vals) >= 7 and not any(r.name == row.group(2).strip() for r in cur.recipes):
+            # the same row twice is skipped, but another recipe for the same item (other materials) is kept
+            if len(vals) >= 7 and not any((r.name, r.ingredients) == (row.group(2).strip(), ing) for r in cur.recipes):
                 cur.recipes.append(Recipe(row.group(2).strip(), cur.level, _int(vals[0]), _int(vals[1]), _int(vals[5]),
                                           _float(vals[6]), vals[7] if len(vals) > 7 else "", ing))
             i += 3

@@ -245,7 +245,9 @@ def test_tools_enter_quest_undo_and_empty_states(tmp_path, monkeypatch):
     d._quest_done(first)
     assert first in c.quests_done and not d.q_done_toggle.isHidden()
     d.q_done_toggle.setChecked(True)
-    assert d.q_done.count() == 1
+    # a small header, the one done quest's card, and the spacing under them (tools._add_done)
+    from PySide6.QtWidgets import QFrame
+    assert [type(d.q_done.itemAt(i).widget()) for i in range(d.q_done.count())].count(QFrame) == 1
     d._quest_undo(first)
     assert first not in c.quests_done and d.q_done_toggle.isHidden()
     d.show_page(PAGES.index("exp"))

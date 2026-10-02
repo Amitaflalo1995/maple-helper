@@ -18,7 +18,7 @@ def char(**kw):
 
 @pytest.mark.parametrize("base,job,level,expected", [
     ("Thief", "Thief", 29, (["Assassin", "Bandit"], 30)),
-    ("Thief", "Assassin", 34, (["Hermit", "Chief Bandit"], 70)),
+    ("Thief", "Assassin", 34, None),          # 3rd job isn't open yet (jobs.MAX_JOB_TIER)
     ("Magician", "F/P Mage", 80, None),
     ("Beginner", "Beginner", 7, (["Warrior", "Magician", "Bowman", "Thief"], 10)),
 ])

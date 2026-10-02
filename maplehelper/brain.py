@@ -122,7 +122,7 @@ def build_prompt(question: str, character: Character | None, history: History | 
             if k.startswith("monster/"):
                 sel.append(kb.drops_digest(k))
         ctx.append("<selected>\n" + "\n".join(x for x in sel if x) + "\n</selected>")
-    if REVERSE_WORDS.search(question):
+    if is_reverse(question, kb):
         items = item_keys_for_question(question, kb)
         groups = kb.drop_groups(items, limit=10)
         if groups:
@@ -173,6 +173,12 @@ ITEM_FAMILIES = [
     (r"עגיל|earrings?\b", "Earring"),
     (r"גלימ(ה|ות)|capes?\b", "Cape"),
 ]
+
+
+def is_reverse(question: str, kb: KnowledgeBase) -> bool:
+    """A "which monsters drop X" question. "what drops does Mano have?" names a monster: it asks Mano's drops."""
+    return bool(REVERSE_WORDS.search(question)) and \
+        not any(k.startswith("monster/") for k in kb.find_mentions(question, max_results=4))
 
 
 def item_keys_for_question(question: str, kb: KnowledgeBase) -> list[str]:
@@ -294,11 +300,11 @@ class Brain:
                 items = [i for i in g.get("items") or [] if isinstance(i, str) and kb_has(self.kb, i)]
                 if items:
                     groups.append({"monster": g["monster"], "items": items[:10]})
-        if REVERSE_WORDS.search(question) and not groups:
+        if not groups and is_reverse(question, self.kb):
             # the app builds the grouping itself: the question's items, else the items the answer names
             items = item_keys_for_question(question, self.kb) or \
                 [k for k in entities if k.startswith("item/")] or \
-                [k for k in self.kb.find_mentions(text, 12) if k.startswith("item/")]
+                [k for k in self.kb.find_mentions(text, 12, answer=True) if k.startswith("item/")]
             groups = self.kb.drop_groups(items)
         if groups:
             entities = []          # the grouped view replaces the flat cards
@@ -312,7 +318,8 @@ class Brain:
         if not groups:
             # cards for every in-game name the answer itself mentions, after the ones the AI listed (it listed only
             # Snail Shell for an answer naming Brown Skullcap, Green Skullcap and Snail, seen live)
-            named = [k for k in self.kb.find_mentions(text, max_results=12)
+            # (names as written: "your max HP" is no Max card, "בין לבל 10 ל-20" no Bain card)
+            named = [k for k in self.kb.find_mentions(text, max_results=12, answer=True)
                      if k.split("/")[0] in ("monster", "item", "npc", "map", "quest")]
             entities = entities + [k for k in named if k not in entities]
         box = meta.get("avatar_box")
@@ -344,7 +351,10 @@ class Brain:
 _LEVEL_PATTERNS = [
     r"(?:עליתי|הגעתי)\s+(?:ל|ללבל|לרמה)\s*-?\s*(\d{1,3})",
     r"(?:אני|עכשיו)\s+(?:ב)?(?:לבל|רמה)\s*(\d{1,3})",
-    r"(?:i'?m|i am|now|reached|hit)\s+(?:level|lvl|lv\.?)\s*(\d{1,3})",
+    # "now" only right after "I'm" ("now lv 30 quests?" asks about level 30), "hit" only as news ("just hit lvl 70",
+    # not "how long to hit level 30?" or "monsters that hit level 20 players hard")
+    r"(?:i'?m|i am)(?:\s+now)?\s+(?:level|lvl|lv\.?)\s*(\d{1,3})",
+    r"(?:reached|(?:just|finally)\s+hit)\s+(?:level|lvl|lv\.?)\s*(\d{1,3})",
 ]
 
 

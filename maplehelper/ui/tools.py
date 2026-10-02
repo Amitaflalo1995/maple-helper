@@ -517,8 +517,8 @@ class ToolsDialog(GlassDialog):
         magic = c.base_class == combat.MAGE
         sec = Section(bidi.ltr_block(f"{m.name} · Lv. {m.level}", t.rtl), t.rtl)
         nums = QHBoxLayout()
-        for value, label in ((f"{m.hp:,}", "HP"), (f"{m.exp:,}", "EXP"), (str(m.avoid), "Avoid"),
-                             (str(m.mdef if magic else m.pdef), "M.DEF" if magic else "P.DEF")):
+        # P.DEF for every class: the hits below are the stat window's basic attack, a Magician's staff swing too
+        for value, label in ((f"{m.hp:,}", "HP"), (f"{m.exp:,}", "EXP"), (str(m.avoid), "Avoid"), (str(m.pdef), "P.DEF")):
             nums.addLayout(self._big(value, label))
         holder = QWidget()
         holder.setLayout(nums)
@@ -686,7 +686,8 @@ class ToolsDialog(GlassDialog):
             self.q_done_toggle.hide()
             self._no_character(self.q_list)
             return
-        r = quests.for_level(self.kb, c.level, c.base_class, c.job, c.quests_done)
+        # profession quests follow the levels set on the crafting page; none set yet: shown, with their requirement
+        r = quests.for_level(self.kb, c.level, c.base_class, c.job, c.quests_done, crafts=c.crafts or None)
         mode = self.q_mode.value()
         rows = r[mode]
         # how many are marked done is on the toggle right under the header, not here again
@@ -713,10 +714,11 @@ class ToolsDialog(GlassDialog):
 
     def _thing_html(self, text: str) -> str:
         """ "Defeat Blue Snail x 10" / "Red Potion x 20" -> its picture, then the name (kept as one English block)."""
-        m = re.fullmatch(r"(Defeat |Collect )?(.+?) x ([\d,]+)", text.strip())
+        m = re.fullmatch(r"(Defeat |Collect )?(.+?) x ([\d,]+)( \([\d.]+%\))?", text.strip())
         if not m:
             return html.escape(text)
-        verb, name, n = m.groups()
+        verb, name, n, odds = m.groups()
+        n += odds or ""                 # a random reward keeps its odds: "Bronze Ore x7 (16.7%)"
         uri = self._picture_uri("monster" if verb == "Defeat " else "item", name) or \
             self._picture_uri("item" if verb == "Defeat " else "monster", name)
         img = f"<img src='{uri}' height='24' style='vertical-align: middle'>&nbsp;" if uri else ""
@@ -768,15 +770,26 @@ class ToolsDialog(GlassDialog):
         if q.needs:
             col.addWidget(self._things_label(t("q_needs_head"), q.needs[:4]))
         gets = q.rewards[:3]
-        if gets or q.mesos:
-            col.addWidget(self._things_label(t("q_gets_head"), gets, f"{q.mesos:,} mesos" if q.mesos else ""))
-        # "Pick one (class-specific)": the player's own class's choices, not the first class listed (Warrior)
-        pick = q.rewards_pick(self.c.base_class) if self.c else []
-        if pick:
-            shown = pick[:4] + ([t("pn_more", n=len(pick) - 4)] if len(pick) > 4 else [])
-            col.addWidget(self._things_label(t("q_pick_head"), shown))
+        extra = " · ".join(x for x in (f"{q.mesos:,} mesos" if q.mesos else "", f"+{q.fame} Fame" if q.fame else "") if x)
+        if gets or extra:
+            col.addWidget(self._things_label(t("q_gets_head"), gets, extra))
+        # "Pick one (class-specific)": the player's own class's choices (and "Any Class"), not the first class listed
+        base = self.c.base_class if self.c else ""
+        for head, things in (("q_pick_head", q.rewards_pick(base)), ("q_random_head", q.rewards_random(base))):
+            if things:
+                shown = things[:4] + ([t("pn_more", n=len(things) - 4)] if len(things) > 4 else [])
+                col.addWidget(self._things_label(t(head), shown))
+        hints = []
         if q.after:
-            col.addWidget(self._label(t("q_after", name=bidi.ltr_block(q.after, t.rtl)), "RowHint"))
+            hints.append(t("q_after", name=bidi.ltr_block(q.after, t.rtl)))
+        if q.complete_level > q.level:
+            hints.append(t("q_complete_lv", n=q.complete_level))
+        if q.grade:
+            hints.append(t("q_grade", town=q.grade[0], n=q.grade[1]))
+        if q.profession:
+            hints.append(t("q_profession", prof=q.profession[0], n=q.profession[1]))
+        if hints:
+            col.addWidget(self._label("\n".join(hints), "RowHint"))
         acts = QHBoxLayout()
         if done:
             # marked done by mistake (or a repeatable donation to do again): back to the list
@@ -1109,8 +1122,9 @@ class ToolsDialog(GlassDialog):
         lines = []
         if npc.sell_back is not None:
             lines.append(t("price_npc_buys", n=f"{npc.sell_back:,}"))
-        if npc.shops:
-            cheapest = npc.shops[0]
+        shops = [s for s in npc.shops if combat.released(s[1])]      # no El Nath / Orbis shop before they open
+        if shops:
+            cheapest = shops[0]
             lines.append(t("price_shop", n=f"{cheapest[2]:,}", npc=cheapest[0], where=cheapest[1].split(" · ")[-1]))
         if not lines:
             lines.append(t("price_no_npc"))

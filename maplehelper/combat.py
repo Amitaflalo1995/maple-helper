@@ -31,6 +31,12 @@ class Monster:
     pdef: int = 0
     mdef: int = 0
     maps: list[tuple[str, int]] = field(default_factory=list)     # (map, how many spawn there)
+    respawn: float = 0     # seconds until it comes back, the quickest of its maps (the page's "Respawn" column)
+
+    @property
+    def boss(self) -> bool:
+        """A boss or a once-an-hour spawn (Mano, Jr. Balrog): nothing to train on."""
+        return self.respawn >= BOSS_RESPAWN
 
 
 def _num(text: str) -> int | None:
@@ -46,15 +52,20 @@ def _after(lines: list[str], label: str) -> int | None:
     return None
 
 
-# maps nobody grinds on: job-advancement tests, party quest stages, event rooms
-_NOT_GRIND = re.compile(r"^(Warrior|Thief|Magician|Bowman|Pirate)'s |Accompaniment|KPQ|Party Quest|Test|Event|"
-                        r"Hidden Street$|Exam", re.I)
+# maps nobody can simply walk to: job-advancement tests, party quest stages, event rooms
+_CLOSED_MAP = re.compile(r"^(Warrior|Thief|Magician|Bowman|Pirate)'s |Accompaniment|KPQ|Party Quest|Test|Event|Exam",
+                         re.I)
+# ... and the ones nobody grinds on (those, and hidden streets)
+_NOT_GRIND = re.compile(_CLOSED_MAP.pattern + r"|Hidden Street$", re.I)
 _NOT_GRIND_MOB = re.compile(r"\(|\bFairy \d|Dummy", re.I)
 
 
 # Ossyria (Orbis, El Nath and beyond) is not initial-launch content (Nexon's August 2026 report, see the
 # release-date guide): the KB lists its maps from the test, but nobody can reach them yet
 NOT_YET = ("Orbis", "El Nath", "Ludibrium", "Aquarium", "Aqua Road", "Leafre", "Mu Lung", "Omega Sector")
+# a spawn this slow is a boss (the KB monster pages' "Respawn" column: Mano "1h-1h 30m", Jr. Balrog "3h",
+# Zombie Mushmom "1h-1h 30m"; field monsters come back in seconds, the slowest ones in 5-10m)
+BOSS_RESPAWN = 30 * 60
 
 
 def special_monster(name: str) -> bool:
@@ -62,24 +73,51 @@ def special_monster(name: str) -> bool:
     return bool(_NOT_GRIND_MOB.search(name)) or name.startswith("Tutorial")
 
 
+def released(place: str) -> bool:
+    """Not in a region that isn't out yet ("El Nath: El Nath Weapon Store · El Nath" is not)."""
+    return not any(r in place for r in NOT_YET)
+
+
+def reachable_map(name: str) -> bool:
+    """A map a player can go to now: not a test/PQ/event room, not in a region that isn't out yet."""
+    return not _CLOSED_MAP.search(name) and not any(r in name for r in NOT_YET)
+
+
 def grind_map(name: str) -> bool:
     return not _NOT_GRIND.search(name) and not any(r in name for r in NOT_YET)
 
 
-def _maps(page: str, n: int = 4) -> list[tuple[str, int]]:
+def respawn_seconds(text: str) -> float | None:
+    """The page's respawn cell in seconds, its quickest end: "~7.5s", "1m + ~7.5s", "30s-2m", "1h-1h 30m"."""
+    first = (text or "").split("-")[0]
+    parts = re.findall(r"([\d.]+)\s*([hms])", first)
+    if not parts:
+        return None
+    return sum(float(n) * {"h": 3600, "m": 60, "s": 1}[u] for n, u in parts)
+
+
+def _map_rows(page: str) -> list[list[str]]:
+    """The "Map Locations" table: "Map | Count | Share | Types | Mob Rate | Respawn" rows."""
     i = page.find("Map Locations")
     if i < 0:
         return []
-    out = []
+    rows = []
     for line in page[i:].split("\n")[2:]:
         if " | " not in line:
             break
         cols = [c.strip() for c in line.split(" | ")]
-        if len(cols) >= 2 and cols[1].isdigit() and grind_map(cols[0]):
-            out.append((cols[0], int(cols[1])))
-        if len(out) >= n:
-            break
-    return out
+        if len(cols) >= 2 and cols[1].isdigit():
+            rows.append(cols)
+    return rows
+
+
+def _maps(page: str, n: int = 4) -> list[tuple[str, int]]:
+    return [(c[0], int(c[1])) for c in _map_rows(page) if grind_map(c[0])][:n]
+
+
+def _respawn(page: str) -> float:
+    found = [s for c in _map_rows(page) if len(c) >= 6 and (s := respawn_seconds(c[-1])) is not None]
+    return min(found) if found else 0
 
 
 def monster(kb, key: str) -> Monster | None:
@@ -92,12 +130,13 @@ def _monster(kb, key: str) -> Monster | None:
     if not e or e.get("category") != "monster":
         return None
     p = e.get("props") or {}
-    lines = kb.page(key).splitlines()
+    page = kb.page(key)
+    lines = page.splitlines()
     level, hp, exp = p.get("Level"), p.get("HP"), p.get("EXP")
     if not all(isinstance(v, (int, float)) for v in (level, hp, exp)) or hp <= 0:
         return None
     return Monster(key, e["name"], int(level), int(hp), int(exp), _after(lines, "AVOID") or 0,
-                   _after(lines, "P.DEF") or 0, _after(lines, "M.DEF") or 0, _maps(kb.page(key)))
+                   _after(lines, "P.DEF") or 0, _after(lines, "M.DEF") or 0, _maps(page), _respawn(page))
 
 
 def monsters(kb) -> list[Monster]:
@@ -214,8 +253,8 @@ def spots(kb, level: int, acc: int | None = None, dmg: tuple[int, int] | None = 
         dmg = None
     out, hard, seen = [], [], set()
     for m in sorted(monsters(kb), key=lambda m: -sum(c for _, c in m.maps)):
-        if not (level - below <= m.level <= level + above) or not m.maps or special_monster(m.name):
-            continue
+        if not (level - below <= m.level <= level + above) or not m.maps or special_monster(m.name) or m.boss:
+            continue                      # bosses and hourly spawns (Mano, Jr. Balrog) are no training spot
         if m.name in seen:
             continue                      # the same monster again (another version of it)
         seen.add(m.name)

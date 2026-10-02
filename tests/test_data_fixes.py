@@ -1,0 +1,455 @@
+"""Game-data fixes: job tree, quest parsing, Hebrew name matching, instant answers, bosses, prices, guides.
+
+Values the app keeps as constants are checked against the real knowledge base when it is present."""
+import json
+import re
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+
+from maplehelper import combat, crafting, glossary, jobs, plan, quests, quick
+from maplehelper.i18n import I18n
+from maplehelper.kb import ALIAS_DROP, KnowledgeBase, _norm
+
+ROOT = Path(__file__).resolve().parent.parent
+REAL_KB = ROOT / "data" / "kb"
+needs_kb = pytest.mark.skipif(not (REAL_KB / "index.json").exists(), reason="no real knowledge base")
+SENTENCES = Path(__file__).parent / "fixtures" / "hebrew_gamer_sentences.txt"
+t = I18n("en")
+
+
+@pytest.fixture(scope="module")
+def real():
+    return KnowledgeBase(REAL_KB)
+
+
+def small_kb(tmp_path, entities: list[dict], aliases: dict, pages: dict | None = None) -> KnowledgeBase:
+    """A knowledge base of just these entities (key, name, category, props) and aliases."""
+    (tmp_path / "index.json").write_text(json.dumps(entities), encoding="utf-8")
+    (tmp_path / "aliases.json").write_text(json.dumps(aliases, ensure_ascii=False), encoding="utf-8")
+    for key, text in (pages or {}).items():
+        cat, slug = key.split("/")
+        (tmp_path / "pages" / cat).mkdir(parents=True, exist_ok=True)
+        (tmp_path / "pages" / cat / f"{slug}.md").write_text(text, encoding="utf-8")
+    return KnowledgeBase(tmp_path)
+
+
+def ent(key, name, **props):
+    return {"key": key, "name": name, "category": key.split("/")[0], "props": props}
+
+
+# ------------------------------------------------------------------ 1, 7, 17: the job tree
+
+def test_magician_first_job_is_level_10_like_every_class():
+    assert all(js[1][1] == 10 for c, js in jobs.JOBS.items() if c != "Beginner")
+    assert jobs.first_job("Magician", 9) == "Beginner" and jobs.first_job("Magician", 10) == "Magician"
+    assert plan.next_job("Beginner", "Beginner", 8) == (["Warrior", "Magician", "Bowman", "Thief"], 10)
+    from maplehelper.ui import dialogs
+    assert dialogs.JOBS is jobs.JOBS                   # one tree, not a copy that drifts
+
+
+def test_next_job_stops_at_the_second_job_while_third_job_is_closed(monkeypatch):
+    assert plan.next_job("Thief", "Thief", 29) == (["Assassin", "Bandit"], 30)
+    assert plan.next_job("Thief", "Assassin", 34) is None
+    assert plan.next_job("Magician", "Cleric", 69) is None
+    monkeypatch.setattr(jobs, "MAX_JOB_TIER", 3)       # the day 3rd job opens: one constant
+    assert plan.next_job("Thief", "Assassin", 34) == (["Hermit", "Chief Bandit"], 70)
+
+
+@pytest.mark.parametrize("raw,job", [
+    ("Wizard (Fire,Poison)", "F/P Wizard"), ("FP Wizard", "F/P Wizard"), ("IL Wizard", "I/L Wizard"),
+    ("Fire Poison Wizard", "F/P Wizard"), ("Wizard (Ice, Lightning)", "I/L Wizard"), ("Bowmen", "Bowman"),
+    ("Crossbowmen", "Crossbowman"), ("Spear man", "Spearman"), ("f/p wizard", "F/P Wizard"), ("Archer", "Bowman"),
+    ("Chief  Bandit", "Chief Bandit"), ("Pirate", None),
+])
+def test_canonical_job_names(raw, job):
+    assert jobs.canonical_job(raw) == job
+
+
+@needs_kb
+def test_job_tree_matches_the_knowledge_base(real):
+    classes = {e["name"].removesuffix(" skills") for e in real.entities.values() if e["category"] == "class"}
+    assert {j for js in jobs.JOBS.values() for j, _ in js} <= classes
+    glossary_page = real.page("guide/maplestory-classic-glossary")
+    assert "The first real job you pick at level 10: Warrior, Magician, Bowman, Thief" in glossary_page
+    for cls in ("warrior", "magician", "bowman", "thief"):
+        assert "at level 30" in real.page(f"class/{cls}")
+    assert "advance again at level 70" in real.page("class/bowman")
+    assert {lv for js in jobs.JOBS.values() for _, lv in js} == {1, 10, 30, 70}
+    # MAX_JOB_TIER = 2 because of this line
+    assert "Third job isn't available at launch" in real.page("guide/attacks-you-can-use-mid-jump")
+    assert jobs.MAX_JOB_TIER == 2
+
+
+# ------------------------------------------------------------------ 2, 3, 10, 11, 23: quests
+
+QUEST = """---
+{}
+---
+
+# Test
+Pre-requisites
+Level Lv. 12+
+Henesys: Citizenship grade 9 Level 52+ to complete Quest Complete First Greeting with Chief Stan
+Quest Complete Another Quest
+Profession Smithing Lv. 5+ (learn crafting)
+Requirements
+Defeat Snail x 10
+Rewards
+4,387 EXP 1,053 Mesos + 3 Fame
+Red Potion x 5
+Pick one (class-specific):
+Any Class
+Hero's Gladius x 1 Skull Earrings x 1
+Random reward - one of:
+Beginner
+Old Wisconsin x 1 100 %
+Warrior
+Bronze Ore x 7 16.7 % Iron Ore x 7 16.7 %
+Description
+01 Words.
+"""
+
+
+class FakeKB:
+    """Just enough of a KnowledgeBase for quests (hashable, like the real one: quests caches per kb)."""
+
+    def __init__(self, entities: dict, pages: dict):
+        self.entities, self._pages, self._npc_by_name = entities, pages, {}
+
+    def get(self, key):
+        return self.entities.get(key)
+
+    def page(self, key):
+        return self._pages.get(key, "")
+
+
+def quest_kb(**props):
+    e = {"category": "quest", "name": "Test", "props": {"Minimum Level": 12, "Area": "Citizenship", **props}}
+    return FakeKB({"quest/1": e}, {"quest/1": QUEST})
+
+
+def test_quest_page_parsing():
+    quests._quest.cache_clear()
+    q = quests.quest(quest_kb(), "quest/1")
+    assert (q.level, q.complete_level, q.opens_at()) == (12, 52, 52)
+    assert q.grade == ("Henesys", 9) and q.profession == ("Smithing", 5) and q.fame == 3
+    assert q.afters == ["First Greeting with Chief Stan", "Another Quest"]          # every prerequisite
+    assert q.rewards == ["Red Potion x 5"]                                           # the sure ones only
+    assert q.rewards_pick("Thief") == ["Hero's Gladius x 1", "Skull Earrings x 1"]   # "Any Class": pick ONE
+    assert q.rewards_random("Warrior") == ["Bronze Ore x 7 (16.7%)", "Iron Ore x 7 (16.7%)"]
+    assert q.rewards_random("Beginner") == ["Old Wisconsin x 1 (100%)"] and q.rewards_random("Thief") == []
+    quests._quest.cache_clear()
+
+
+def test_a_quest_finished_at_a_higher_level_waits_for_it():
+    quests._quest.cache_clear()
+    kb = quest_kb(Area="Victoria Island")
+    assert quests.for_level(kb, 20)["now"] == []                                  # taken at 12, done at 52
+    assert [q.key for q in quests.for_level(kb, 50)["soon"]] == ["quest/1"]
+    assert [q.key for q in quests.for_level(kb, 52)["now"]] == ["quest/1"]
+    kb = quest_kb()
+    assert quests.citizenship(kb, "", 30) == [] and quests.citizenship(kb, "", 52)
+    quests._quest.cache_clear()
+
+
+def test_profession_quests_follow_the_craft_level():
+    quests._quest.cache_clear()
+    kb = quest_kb(Area="Crafting")
+    assert quests.for_level(kb, 55, crafts={"smithing": 4})["now"] == []
+    assert quests.for_level(kb, 55, crafts={"smithing": 5})["now"]
+    assert quests.for_level(kb, 55, crafts=None)["now"]               # no craft levels set: shown, labelled
+    quests._quest.cache_clear()
+
+
+def test_quest_without_a_level_line_is_level_1():
+    quests._quest.cache_clear()
+    e = {"category": "quest", "name": "Mirror", "props": {"EXP Reward": 2}}
+    kb = FakeKB({"quest/9": e}, {"quest/9": "---\n{}\n---\nPre-requisites\nQuest Complete A\nRewards\n2 EXP\n"})
+    q = quests.quest(kb, "quest/9")
+    assert q.level == 1 and q.afters == ["A"]
+    assert [x.key for x in quests.for_level(kb, 3)["now"]] == ["quest/9"]
+    quests._quest.cache_clear()
+
+
+def test_beginner_quests_for_a_character_still_a_beginner():
+    q = quests.Quest("quest/2", "Mai's Training", 3, job="Beginner only")
+    assert quests.job_fits(q, "Beginner", "Beginner")
+    assert quests.job_fits(q, "Magician", "Beginner")          # class picked ahead, still a Beginner
+    assert not quests.job_fits(q, "Magician", "Magician")
+
+
+@needs_kb
+def test_real_quest_rewards(real):
+    quests._quest.cache_clear()
+    by_name = {e["name"]: k for k, e in real.entities.items() if e["category"] == "quest"}
+    jane = quests.quest(real, by_name["Jane and the Mushroom"])
+    assert jane.rewards == [] and len(jane.rewards_random("Warrior")) == 14
+    gladius = quests.quest(real, by_name["Hero's Gladius"])
+    assert gladius.rewards == [] and gladius.rewards_pick("Warrior") == ["Hero's Gladius x 1", "Skull Earrings x 1"]
+    dolls = quests.quest(real, by_name["Collecting 200 Cursed Dolls"])
+    assert dolls.fame == 3 and dolls.rewards_random("Magician") == ["Dark Guiltian x 1 (100%)"]
+    stan = quests.quest(real, by_name["First Greeting with Chief Stan"])
+    assert stan.complete_level == 32 and stan.grade == ("Henesys", 5)
+    assert stan not in quests.citizenship(real, "Henesys", 20) and stan in quests.citizenship(real, "Henesys", 32)
+    smith = quests.quest(real, by_name["A Blacksmith in My Own Right!"])
+    assert smith.profession == ("Smithing", 5)
+    assert all(quests.quest(real, k) for k in by_name.values())          # every quest page parses (322)
+    quests._quest.cache_clear()
+
+
+# ------------------------------------------------------------------ 4, 5, 13, 14: names in Hebrew text
+
+def test_hebrew_quote_marks_fold():
+    assert _norm("ג׳וניור") == _norm("ג'וניור") == _norm("ג`וניור") == "ג'וניור"
+    assert _norm('צה״ל') == 'צה"ל' and _norm('"Mar" the Fairy') == "mar the fairy"
+
+
+def test_short_aliases_have_no_loose_form_and_no_prefix(tmp_path):
+    kb = small_kb(tmp_path, [ent("npc/1", "Pia"), ent("npc/2", "Anne"), ent("monster/3", "Snail", Level=1),
+                             ent("npc/4", "Ali"), ent("map/5", "Henesys")],
+                  {"npc/1": ["פיה"], "npc/2": ["אן"], "monster/3": ["חילזון"], "npc/4": ["אלי"], "map/5": ["הנסיס"]})
+    assert kb.find_mentions("כמה אייץ' פי יש לחילזון") == ["monster/3"]     # "פי" is no loose "פיה"
+    assert kb.find_mentions("לאן ללכת") == [] and kb.find_mentions("מה יש כאן") == []   # no ל/כ + "אן"
+    assert kb.find_mentions("תכתוב אלי") == []                                # a stop-listed word
+    assert kb.find_mentions("איפה הפיה") == []                                # article only before long aliases
+    assert kb.find_mentions("מה יש בהנסיס") == ["map/5"]
+    assert kb.find_mentions("איפה החילזון") == ["monster/3"]                  # long alias: the article goes
+    assert kb.resolve_names("מה יש כאן ולאן") == "מה יש כאן ולאן"
+    assert kb.resolve_names("מה מפיל חילזון בהנסיס") == "מה מפיל Snail ב-Henesys"
+
+
+def test_generic_words_are_dropped_and_overrides_apply(tmp_path):
+    kb = small_kb(tmp_path, [ent("npc/507", "River"), ent("monster/62", "Rotten Mushroom", Level=56),
+                             ent("monster/700003", "Rotten Mushmom", Level=60), ent("monster/1", "Tutorial Jr. Sentinel"),
+                             ent("monster/1001", "Jr. Sentinel", Level=26)],
+                  {"npc/507": ["ריבר", "נהר"], "monster/62": ["פטריה רקובה"],
+                   "monster/700003": ["מושמום רקוב", "פטרייה רקובה"],
+                   "monster/1001": ["ג'וניור סנטינל"], "monster/1": ["ג'וניור סנטינל"]})
+    assert "נהר" in ALIAS_DROP and kb.find_mentions("הנהר כאן יפה") == [] and kb.find_mentions("ריבר") == ["npc/507"]
+    assert kb.find_mentions("מה הלבל של פטרייה רקובה") == ["monster/62"]
+    assert kb.find_mentions("מה הלבל של פטריה רקובה") == ["monster/62"]
+    assert kb.find_mentions("כמה חיים יש לג׳וניור סנטינל") == ["monster/1001"]
+
+
+def test_a_name_inside_a_longer_one_counts_once(tmp_path):
+    kb = small_kb(tmp_path, [ent("monster/2", "Snail", Level=1), ent("monster/4", "Red Snail", Level=4)],
+                  {"monster/2": ["חילזון"], "monster/4": ["חילזון אדום"]})
+    assert kb.find_mentions("Red Snail") == ["monster/4"]
+    assert kb.find_mentions("החילזון האדום") == ["monster/4"]            # not also Snail from the loose copy
+    assert kb.find_mentions("חילזון אדום") == ["monster/4"]
+    assert kb.find_mentions("חילזון אדום וחילזון") == ["monster/4", "monster/2"]   # a second, separate one counts
+
+
+def test_monster_names_in_the_plural(tmp_path):
+    kb = small_kb(tmp_path, [ent("monster/12", "Octopus", Level=12), ent("monster/9", "Fire Boar", Level=32)],
+                  {"monster/12": ["תמנון"]})
+    assert kb.find_mentions("איפה יש תמנונים") == ["monster/12"]
+    assert kb.find_mentions("where to find fire boars") == ["monster/9"]
+
+
+def test_answer_text_matches_exact_names_only(tmp_path):
+    kb = small_kb(tmp_path, [ent("npc/428", "Max"), ent("npc/507", "River"), ent("map/1", "Perion"),
+                             ent("monster/1090", "Bain")], {"monster/1090": ["ביין"]})
+    assert kb.find_mentions("Your max HP is 500. Max HP grows.", answer=True) == []
+    assert kb.find_mentions("It is a long way to the river, go to Perion.", answer=True) == ["map/1"]
+    assert kb.find_mentions("הכי טוב לגרינד בין לבל 10 ל-20", answer=True) == []
+    assert kb.find_mentions("what is the max level") == [] and kb.find_mentions("where is Max") == ["npc/428"]
+
+
+@needs_kb
+def test_ordinary_hebrew_sentences_name_nothing(real):
+    """~100 everyday gamer sentences: only real game names (as players say them) may match."""
+    allowed = {  # sentence -> the names it really says
+        "כמה אייץ' פי יש לחילזון": ["Snail"], "כמה אייץ' פי יש למאנו": ["Mano"],
+        "אני רוצה ללכת לקרנינג": ["Kerning City"], "זה כמו בטי בופ": ["Betty"], "נבה זה שם יפה": ["Neve"],
+        "רנה שלחה לי הודעה": ["Rene"], "יש לי חזיר בבית": ["Pig"], "יש פה עין מרושעת": ["Evil Eye"],
+        "ראיתי סרט על זומבי קטן": ["Minor Zombie"], "זה שעון רפאים?": ["Phantom Watch"],
+        "תמנון זה חיה מגניבה": ["Octopus"],
+    }
+    lines = [s.strip() for s in SENTENCES.read_text(encoding="utf-8").splitlines() if s.strip()]
+    assert len(lines) >= 100
+    wrong = {}
+    for s in lines:
+        got = [real.get(k)["name"] for k in real.find_mentions(s)]
+        if got != allowed.get(s, []):
+            wrong[s] = got
+    assert wrong == {}
+
+
+@needs_kb
+@pytest.mark.parametrize("text,name", [
+    ("כמה חיים יש לחילזון", "Snail"), ("מה הלבל של החילזון האדום", "Red Snail"), ("מה יש בהנסיס", "Henesys"),
+    ("איפה יש תמנונים", "Octopus"), ("כמה חיים יש לג׳וניור סנטינל", "Jr. Sentinel"),
+    ("מה הלבל של פטרייה רקובה", "Rotten Mushroom"), ("איפה ליטי", "Leatty"), ("מה מפיל לטי", "Leatty"),
+    ("כמה חיים לג'וניור בוגי", "Jr. Boogie 1"), ("Jr Boogie hp", "Jr. Boogie 1"), ("מה מפיל מאנו", "Mano"),
+])
+def test_real_names_still_match(real, text, name):
+    assert [real.get(k)["name"] for k in real.find_mentions(text)] == [name]
+
+
+@needs_kb
+def test_voice_resolution_uses_the_same_safety(real):
+    assert real.resolve_names("מה מפיל מאנו") == "מה מפיל Mano"
+    for s in ("מה יש כאן", "לאן ללכת עכשיו", "תגיד אלי", "בחודש מאי", "זה כפול", "הנהר כאן"):
+        assert real.resolve_names(s) == s
+    assert real.resolve_names("ובלו סנייל בהנסיס") == "ו-Blue Snail ב-Henesys"
+
+
+# ------------------------------------------------------------------ 6, 12, 15, 16, 25: instant answers
+
+def test_an_unknown_word_before_the_name_is_no_sure_answer(kb):
+    assert quick.answer("Red Snail hp", kb, t)
+    assert quick.answer("Mossy Snail hp", kb, t) is None and quick.answer("Ghost Snail hp", kb, t) is None
+    assert quick.answer("what is the hp of Snail", kb, t)
+
+
+def test_drop_answers_carry_the_caveat_and_say_1_item(kb, monkeypatch):
+    monkeypatch.setattr(kb, "monster_drops", lambda key: ["item/2000000"])
+    a = quick.answer("Red Snail drops", kb, t)
+    assert a and a.text.startswith("Red Snail drops 1 item:") and t("quick_drops_note") in a.text
+    assert I18n("he")("quick_drops", name="X", n=1) == "X מפיל פריט אחד:"
+
+
+@needs_kb
+def test_instant_answers_on_the_real_kb(real):
+    c = SimpleNamespace(level=30, base_class="Warrior")
+    acc = quick.answer("accuracy needed for lupin", real, t, c)
+    lupin = combat.monster(real, next(k for k, e in real.entities.items() if e["name"] == "Lupin"))
+    assert acc and f"**{combat.acc_needed(30, lupin.level, lupin.avoid)} ACC**" in acc.text and "Lv. 30" in acc.text
+    assert quick.answer("כמה דיוק צריך בשביל לופין", real, t, c).text == acc.text
+    assert quick.answer("lupin avoid", real, t).text == f"Lupin · Avoid: {lupin.avoid}"
+    assert "M.DEF" in quick.answer("Lupin magic defense", real, t).text
+    sells = quick.answer("who sells red potion", real, t)
+    assert sells and sells.text.startswith("Where to buy Red Potion:") and "50 mesos" in sells.text
+    assert not any(r in sells.text for r in combat.NOT_YET)
+    where = quick.answer("where is Red Snail", real, t)
+    assert where and " · " in where.text.split("\n")[1]                  # "map · region" (kb.map_label)
+    assert quick.answer("where is Leatty", real, t) is None              # only El Nath / Orbis maps
+    assert quick.answer("where is King Slime", real, t) is None          # only its party quest stage
+    assert quick.answer("כמה חיים לג׳וניור סנטינל", real, t).text == "Jr. Sentinel · HP: 531"
+    assert quick.answer("Jr Boogie hp", real, t).text.startswith("Jr. Boogie 1 · HP:")
+    assert quick.answer("Ghost Stump level", real, t) is None
+    assert quick.answer("איפה יש תמנונים", real, t).entities == [
+        next(k for k, e in real.entities.items() if e["name"] == "Octopus" and e["category"] == "monster")]
+    assert quick.answer("what is the max hp of mano", real, t).text == "Mano · HP: 7420"
+
+
+# ------------------------------------------------------------------ AI answers: cards, reverse drops, stated level
+
+def test_a_named_monster_makes_no_reverse_drop_question(kb):
+    from maplehelper import brain
+    assert not brain.is_reverse("what drops does Red Snail have?", kb)
+    assert brain.is_reverse("which monsters drop Red Potion?", kb)
+
+
+@pytest.mark.parametrize("text,level", [
+    ("how long to hit level 30?", None), ("best way to hit level 70", None), ("how fast can I hit lv 30", None),
+    ("which monsters hit level 20 players hard", None), ("now lv 30 quests?", None),
+    ("I'm now level 31", 31), ("just hit lvl 70!", 70), ("Im level 30", 30),
+])
+def test_stated_level_reads_news_not_questions(text, level):
+    from maplehelper import brain
+    assert brain.stated_level(text) == level
+
+
+# ------------------------------------------------------------------ 8, 24: training spots and the island
+
+def test_respawn_cells_read_as_seconds():
+    assert combat.respawn_seconds("~7.5s") == 7.5 and combat.respawn_seconds("1m + ~7.5s") == 67.5
+    assert combat.respawn_seconds("30s-2m") == 30 and combat.respawn_seconds("1h-1h 30m") == 3600
+    assert combat.respawn_seconds("3h") == 10800 and combat.respawn_seconds("") is None
+    assert combat.Monster("m/1", "Boss", 80, 1, 1, respawn=10800).boss and not combat.Monster("m/2", "Mob", 1, 1, 1).boss
+
+
+@needs_kb
+def test_bosses_are_no_training_spot(real):
+    bosses = {m.name for m in combat.monsters(real) if m.boss}
+    assert {"Mano", "Jr. Balrog", "Zombie Mushmom"} <= bosses and "Lupin" not in bosses
+    for lv in (20, 45, 55, 80):
+        assert not any(s.monster.boss for s in combat.spots(real, lv, n=20))
+    # the respawn column the rule reads (pages/monster/<id>.md "Map Locations")
+    assert any(re.search(r"\| 3h\s*$", real.page(k), re.M) for k, e in real.entities.items() if e["name"] == "Jr. Balrog")
+
+
+@needs_kb
+def test_below_level_8_the_plan_stays_on_maple_island(real):
+    for lv in (1, 4, 7):
+        p = plan.progress(real, lv, 50.0)
+        mob = next(k for k, e in real.entities.items() if e["name"] == p["mob"] and e["category"] == "monster")
+        assert all(m.endswith(" Maple Road") for m in real._top_maps(mob))
+    assert plan.progress(real, 9, 50.0)["mob"] == plan.spots_for(real, 9, 1)[0].mob
+    assert "you'll likely be lv 8" in real.page("guide/beginners-guide-first-steps-in-maple-world")
+
+
+# ------------------------------------------------------------------ 18-19: glossary
+
+def test_glossary_sp_and_acc():
+    assert "1 per level up" in glossary.explain("SP", "en") and "3 per level" in glossary.explain("SP", "en")
+    assert "נקודה אחת בכל עליית לבל" in glossary.explain("SP", "he")
+    assert "3x its Avoid" in glossary.explain("ACC", "en") and "פי 3" in glossary.explain("ACC", "he")
+
+
+@needs_kb
+def test_glossary_numbers_come_from_the_kb(real):
+    assert "1 per level-up" in real.page("guide/beginners-guide-first-steps-in-maple-world")
+    assert "3 SP per level" in real.page("guide/maplestory-classic-glossary")
+    # never-miss ACC over Avoid at an equal level, from the class guide's table: a bit over 3x every time
+    rows = re.findall(r"^[\w. ]+ \| \d+ \| (\d+) \| (\d+) ACC$", real.page("guide/cleric-class-guide"), re.M)
+    assert rows and all(3 < int(acc) / int(avoid) < 3.5 for avoid, acc in rows)
+
+
+# ------------------------------------------------------------------ 21: crafting
+
+def test_recipes_with_the_same_output_and_other_materials_are_kept():
+    page = ("---\n{}\n---\nLv. 1\nneeds 50 EXP · char Lv. 10\n"
+            "1 | Bronze Plate\n2 x Bronze Ore\n| 5 | 100 | x | x | x | -10 | 0.5 | Farm only |\n"
+            "1 | Bronze Plate\n3 x Iron Ore\n| 5 | 100 | x | x | x | -10 | 0.5 | Farm only |\n"
+            "1 | Bronze Plate\n2 x Bronze Ore\n| 5 | 100 | x | x | x | -10 | 0.5 | Farm only |\n")
+    crafting._levels.cache_clear()
+    recipes = crafting._levels(page)[0].recipes
+    assert [r.ingredients for r in recipes] == [[(2, "Bronze Ore")], [(3, "Iron Ore")]]
+
+
+@needs_kb
+def test_recipe_counts_match_the_pages(real):
+    for prof in crafting.PROFESSIONS:
+        total = re.search(r"(\d+) recipes", real.page(f"crafting/efficiency__{prof}"))
+        assert sum(len(lv.recipes) for lv in crafting.levels(real, prof)) == int(total.group(1)), prof
+
+
+# ------------------------------------------------------------------ 22: prices
+
+@needs_kb
+def test_released_filters_unreleased_shops(real):
+    from maplehelper import market
+    red_cross = market.npc_prices(real, real._item_by_name["red cross shield"])
+    open_shops = [s for s in red_cross.shops if combat.released(s[1])]
+    assert open_shops and all("Orbis" not in s[1] for s in open_shops)
+    assert not combat.released("El Nath: El Nath Weapon Store · El Nath")
+
+
+# ------------------------------------------------------------------ 26: guide captions
+
+def test_figure_captions_keep_their_lines(monkeypatch, tmp_path):
+    import sys
+    sys.path.insert(0, str(ROOT / "tools"))
+    import build_guides as bg
+    images = bg.Images(tmp_path)
+    monkeypatch.setattr(images, "get", lambda src, max_w=360: ("p.png", 43, 70))
+    page = ("<html><body><main><h1>G</h1><p>Intro.</p><p>Body.</p><figure><svg></svg><img src='/a.png' width='43'>"
+            "<figcaption><strong>Skill Lv1</strong><span>500 x 300 px</span></figcaption>"
+            "<p>250 px left and right, 150 px up and down.</p></figure></main></body></html>")
+    blocks = bg.convert(page, images)["blocks"]
+    assert blocks == [{"p": "Body."}, {"img": "p.png", "w": 43, "h": 70,
+                       "cap": "**Skill Lv1** 500 x 300 px\n250 px left and right, 150 px up and down."}]
+
+
+def test_haste_captions_are_whole_in_both_languages():
+    for slug in ("assassin-class-guide", "bandit-class-guide", "fighter-class-guide"):
+        for lang in ("en", "he"):
+            g = json.loads((ROOT / "assets" / "guides" / lang / f"{slug}.json").read_text(encoding="utf-8"))
+            caps = [b["cap"] for b in g["blocks"] if b.get("img") == "8ea44ba66a1c56.png"]
+            assert len(caps) == 2 and all("\n" in c and "px" in c.split("\n")[-1] for c in caps), (slug, lang)
+            assert not any(re.search(r"Lv\d+\d{3} x", c) for c in caps)
