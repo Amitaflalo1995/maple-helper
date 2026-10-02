@@ -192,8 +192,9 @@ class GlassDialog(QDialog):
         self.close_btn = QToolButton(objectName="IconClose", text=theme.ICON["close"])
         self.close_btn.setCursor(Qt.PointingHandCursor)
         self.close_btn.clicked.connect(self.reject)
-        self.close_btn.setVisible(closable)
         bl.addWidget(self.close_btn)
+        # only once it's in the bar: shown while it had no parent, it flashed as a tiny window of its own
+        self.close_btn.setVisible(closable)
         root.addWidget(bar)
         self.content = QWidget(objectName="Feed")
         root.addWidget(self.content, 1)

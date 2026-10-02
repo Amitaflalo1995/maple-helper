@@ -1,5 +1,14 @@
 [
  {
+  "version": "0.7.7",
+  "he": [
+   "תוקן: בפתיחת חלון (כלי משחק, מדריכים, הגדרות) כבר לא מהבהב לרגע חלון קטן."
+  ],
+  "en": [
+   "Fixed: opening a window (play tools, guides, settings) no longer flashes a tiny window for a moment."
+  ]
+ },
+ {
   "version": "0.7.6",
   "he": [
    "בדיקת האינבנטורי מזהה בעצמה כל פריט בתיק לפי התמונות במאגר, ומציגה את הפריטים לפני עצת ה-AI.",
