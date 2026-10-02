@@ -1,5 +1,16 @@
 [
  {
+  "version": "0.7.4",
+  "he": [
+   "שאלה בקול עובדת מיד גם אחרי עדכון או הפעלה מחדש: מודל הדיבור נטען ברקע כשהאפליקציה עולה.",
+   "מודל הדיבור לא יורד שוב אחרי עדכונים. ההודעה \"מוריד את מודל הדיבור\" מופיעה עכשיו רק בפעם הראשונה."
+  ],
+  "en": [
+   "Voice questions work right away after an update or a restart: the voice model loads in the background when the app starts.",
+   "The voice model is never downloaded again after updates. The \"Downloading the voice model\" notice now shows only the first time."
+  ]
+ },
+ {
   "version": "0.7.3",
   "he": [
    "ההתחברות ל-ChatGPT ול-Claude עובדת חלק יותר: נפתח רק הדפדפן, בלי חלון שחור, וחלון ההתחברות כבר לא מסתתר מאחורי Maple Helper.",

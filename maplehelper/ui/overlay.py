@@ -1127,13 +1127,14 @@ class Overlay(QWidget):
     # ------------------------------------------------------------------ voice
 
     def voice_state(self, state: str):
-        """listening | transcribing | idle | loading"""
+        """listening | transcribing | idle | loading (from disk) | downloading (first use)"""
         self.mic_btn.setProperty("active", "true" if state.startswith("listening") else "false")
         self.mic_btn.style().unpolish(self.mic_btn)
         self.mic_btn.style().polish(self.mic_btn)
         text = {"listening": self.t("listening", key=self.settings["hotkey_voice"]),
                 "transcribing": self.t("transcribing"),
-                "loading": self.t("voice_loading")}.get(state, self._placeholder)
+                "loading": self.t("voice_loading"),
+                "downloading": self.t("voice_downloading")}.get(state, self._placeholder)
         self.input.setPlaceholderText(bidi.plain(text, self.t.rtl))
 
     def voice_text(self, text: str, send: bool):
