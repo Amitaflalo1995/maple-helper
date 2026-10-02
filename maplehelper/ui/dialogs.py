@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (QButtonGroup, QFrame, QGridLayout, QHBoxLayout, Q
                                QScrollArea, QStackedWidget, QVBoxLayout, QWidget)
 
 from .. import bidi, providers
+from ..providers.base import login_failed, stop_login
 from .controls import Section, Segmented, Select, Stepper, Switch, rtl_buttons
 from .glass import GlassDialog
 from ..i18n import I18n
@@ -211,7 +212,8 @@ class Onboarding(GlassDialog):
         self._bridge.status.connect(self._on_status)
         self.provider = providers.get(settings["provider"]).name
         self._ai_ok = False
-        self._signing_in = False   # a sign-in/install window is open: keep the hint, re-check quietly
+        self._signing_in = False   # a sign-in/install is under way: keep the hint, re-check quietly
+        self.finished.connect(lambda *_: stop_login())
         self._build()
 
     def _build(self):
@@ -420,7 +422,8 @@ class Onboarding(GlassDialog):
 
     def _start_login(self):
         self._begin_sign_in()
-        if self._ai().login() is None:
+        self._login_proc = self._ai().login()
+        if self._login_proc is None:
             # the sign-in couldn't even start: say so, and offer the official installer instead
             self._end_sign_in()
             self.login_hint.setText(bidi.plain(self.t.p("ob_login_failed", self.provider), self.t.rtl))
@@ -474,6 +477,12 @@ class Onboarding(GlassDialog):
         if self._poll_left <= 0 or self._ai_ok:
             self._poll_timer.stop()
             self._signing_in = False
+            return
+        if login_failed(getattr(self, "_login_proc", None)):
+            self._login_proc = None
+            self._end_sign_in()
+            self.login_hint.setText(bidi.plain(self.t.p("ob_login_failed", self.provider), self.t.rtl))
+            self.install_btn.show()
             return
         self._check_status()
 
@@ -684,6 +693,8 @@ class SettingsDialog(GlassDialog):
         self._account_bridge.account.connect(self._on_account)
         self._account_bridge.logged_out.connect(self._start_login)
         self._account_status = None
+        self._login_proc = None
+        self.finished.connect(lambda *_: stop_login())
         self._login_timer = QTimer(self, interval=3000)
         self._login_timer.timeout.connect(self._login_tick)
         self._refresh_account()
@@ -909,7 +920,8 @@ class SettingsDialog(GlassDialog):
         self.switch_btn.setEnabled(True)
         self._account_status = "logged_out"
         self.account_changed.emit()
-        if self._ai().login() is None:
+        self._login_proc = self._ai().login()
+        if self._login_proc is None:
             self._set_account_text(self.t.p("ob_login_failed", self._ai().name))
             return
         self._set_on_top(False)   # the sign-in window and the browser must not open behind this one
@@ -926,9 +938,13 @@ class SettingsDialog(GlassDialog):
 
     def _login_tick(self):
         self._login_left -= 1
+        if login_failed(self._login_proc):
+            self._login_left = 0
+            self._set_account_text(self.t.p("ob_login_failed", self._ai().name))
         if self._login_left <= 0:
             self._login_timer.stop()
             self._set_on_top(True)
+            return
         self._refresh_account()
 
     def _logout(self):

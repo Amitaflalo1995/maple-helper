@@ -250,9 +250,9 @@ class Codex(Provider):
             return False
 
     def login(self) -> subprocess.Popen | None:
-        """Official ChatGPT sign-in (opens the browser) in a visible console."""
+        """Official ChatGPT sign-in: opens the browser, no window of its own."""
         exe = find_codex()
-        return open_login(exe, ["login"]) if exe else None
+        return open_login(exe, ["login"], env()) if exe else None
 
     def install(self) -> subprocess.Popen:
         return run_installer(INSTALL_CMD, INSTALL_CMD_MAC)
