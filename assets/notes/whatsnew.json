@@ -2,10 +2,12 @@
  {
   "version": "0.7.7",
   "he": [
-   "תוקן: בפתיחת חלון (כלי משחק, מדריכים, הגדרות) כבר לא מהבהב לרגע חלון קטן."
+   "תוקן: בפתיחת חלון (כלי משחק, מדריכים, הגדרות) כבר לא מהבהב לרגע חלון קטן.",
+   "עדכון אוטומטי כבר לא מחזיר את קיצור הדרך בשולחן העבודה אם מחקתם אותו."
   ],
   "en": [
-   "Fixed: opening a window (play tools, guides, settings) no longer flashes a tiny window for a moment."
+   "Fixed: opening a window (play tools, guides, settings) no longer flashes a tiny window for a moment.",
+   "An automatic update no longer brings back the desktop shortcut if you deleted it."
   ]
  },
  {
