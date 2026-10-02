@@ -207,3 +207,21 @@ def test_alt_with_a_longer_name_is_never_merged(isolated_store):
     assert p.active.name == "Amit"
     assert not same_character("Amit", "AmitBow", seen=False, others=("AmitBow",))
     assert same_character("Kalimero", "KalimeroZz") and not same_character("KalimeroZz", "Kalimero")
+
+
+def test_damaged_files_never_crash_the_start(isolated_store):
+    p = isolated_store.Settings.path
+    p.write_bytes(b"\xff\xfe broken")
+    assert isolated_store.Settings()["hotkey_toggle"] == "F9"
+    p.write_text("[1, 2]", encoding="utf-8")
+    assert isolated_store.Settings()["hotkey_toggle"] == "F9"
+    isolated_store.Profiles.path.write_text("[1]", encoding="utf-8")
+    assert isolated_store.Profiles().characters == []
+
+
+def test_last_good_copy_is_used(isolated_store):
+    s = isolated_store.Settings()
+    s["language"] = "en"
+    s["language"] = "he"                       # the second save keeps the first as .bak
+    isolated_store.Settings.path.write_text("", encoding="utf-8")   # a power cut emptied it
+    assert isolated_store.Settings()["language"] == "en"

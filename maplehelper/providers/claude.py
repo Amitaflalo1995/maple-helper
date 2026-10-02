@@ -282,10 +282,15 @@ class ClaudeBackend:
             return None
         cmd = [self.exe, "-p", "--restricted", "--strict-mcp-config", "--tools", "", "--model", "haiku",
                "--no-session-persistence", "--system-prompt", instructions]
+        e = env()
+        if self.brain.api_key:                 # the same account choice as the answers (see _spawn)
+            e["ANTHROPIC_API_KEY"] = self.brain.api_key
+        else:
+            e.pop("ANTHROPIC_API_KEY", None)
         try:
             r = subprocess.run(cmd, input=text.encode("utf-8"), capture_output=True, timeout=timeout,
-                               env=env(), creationflags=CREATE_NO_WINDOW)
+                               env=e, creationflags=CREATE_NO_WINDOW)
             out = r.stdout.decode("utf-8", errors="replace").strip()
-            return out or None
+            return out if r.returncode == 0 and out else None      # an error message is no summary
         except (OSError, subprocess.TimeoutExpired):
             return None

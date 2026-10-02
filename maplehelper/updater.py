@@ -54,6 +54,19 @@ def _get(url: str, timeout: int = 30) -> bytes | None:
         return None
 
 
+def _rename(src, dst, tries: int = 10) -> None:
+    """A rename that waits out an antivirus scanning the freshly unpacked files."""
+    import time
+    for attempt in range(tries):
+        try:
+            src.rename(dst)
+            return
+        except OSError:
+            if attempt == tries - 1:
+                raise
+            time.sleep(0.3)
+
+
 def update_kb(before_swap=None) -> bool:
     """Download a newer knowledge base if one is published. Returns True when updated."""
     return fetch_kb(before_swap) == "updated"
@@ -102,11 +115,14 @@ def fetch_kb(before_swap=None) -> str:
     shutil.rmtree(old, ignore_errors=True)
     try:
         if USER_KB.exists():
-            USER_KB.rename(old)
-        tmp.rename(USER_KB)
+            _rename(USER_KB, old)
+        _rename(tmp, USER_KB)
     except OSError:
         if old.exists() and not USER_KB.exists():
-            old.rename(USER_KB)
+            try:
+                _rename(old, USER_KB)
+            except OSError:
+                pass        # the app falls back to the bundled KB (kb_dir) on its next reload
         shutil.rmtree(tmp, ignore_errors=True)
         return "failed"
     shutil.rmtree(old, ignore_errors=True)

@@ -113,3 +113,8 @@ def test_app_context_never_drives_the_heuristics():
                            extra="<continuing>Player: אני לבל 16</continuing>")
     assert "<continuing>" in p and p.index("<continuing>") < p.index("<question>")
     assert brain.stated_level("איפה כדאי לי להתאמן?") is None
+
+
+@pytest.mark.parametrize("text", ["what should I do once I'm level 30?", "when im level 70 which job", "כשאני אגיע ללבל 30 מה לעשות?"])
+def test_plans_are_no_stated_level(text):
+    assert brain.stated_level(text) is None

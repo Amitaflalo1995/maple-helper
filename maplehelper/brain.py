@@ -279,7 +279,8 @@ class Brain:
         text, meta = split_meta(result.text)
         if not text and not meta:
             return Answer(error="no_result", limits=result.limits)   # nothing at all came back: no empty bubble
-        if not meta.get("profile_update"):
+        if "profile_update" not in meta:
+            # only when the AI sent no update at all: it saw the question and judged "{}" (nothing changed)
             stated = stated_level(question)
             if stated:
                 meta.setdefault("profile_update", {})["level"] = stated
@@ -347,8 +348,15 @@ _LEVEL_PATTERNS = [
 ]
 
 
+# a plan, not a fact; Hebrew words at a word start only ("עכשיו" contains "כש")
+_HYPOTHETICAL = re.compile(r"\b(?:when|once|if|until|after|before)\b|(?:^|\s)(?:כש|אם\s|עד\sש|אחרי\sש|לפני\sש)", re.I)
+
+
 def stated_level(text: str) -> int | None:
-    """A level the player states about themselves ("עליתי ללבל 16", "I'm level 16")."""
+    """A level the player states about themselves ("עליתי ללבל 16", "I'm level 16"); never a plan ("what should
+    I do once I'm level 30?" once set the profile to 30)."""
+    if _HYPOTHETICAL.search(text):
+        return None
     for pat in _LEVEL_PATTERNS:
         m = re.search(pat, text, re.I)
         if m and 1 <= int(m.group(1)) <= 250:

@@ -532,8 +532,12 @@ class MapleHelperApp:
         if status == "updated":
             self.reload_kb()
             self.kb_updated(before, interactive=interactive)
-        elif interactive:
-            self.toast(t({"uptodate": "kb_uptodate", "postponed": "kb_update_postponed"}.get(status, "kb_update_failed")))
+        else:
+            if status == "failed":
+                self.reload_kb()        # the swap may have failed halfway: point at whatever KB exists now
+            if interactive:
+                self.toast(t({"uptodate": "kb_uptodate", "postponed": "kb_update_postponed"}.get(status,
+                                                                                               "kb_update_failed")))
         threading.Thread(target=self.brain.prewarm, daemon=True).start()     # whatever happened, warm again
 
     def announce_update(self, version: str, url: str):
@@ -741,6 +745,14 @@ class MapleHelperApp:
     def shutdown(self):
         try:
             self.overlay.save_session_summary()   # quitting ends the session: show it next time
+        except Exception:
+            pass
+        try:
+            self.brain.cancel()                  # an answer in progress ends now...
+            for th in (getattr(self.overlay, "_thread", None), getattr(self.overlay, "_sync_thread", None)):
+                if th is not None and th.isRunning():
+                    th.quit()
+                    th.wait(2000)               # ...and its thread with it (a running QThread at exit crashes)
         except Exception:
             pass
         try:

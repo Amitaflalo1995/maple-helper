@@ -105,7 +105,8 @@ def open_login(exe: str, args: list[str], env: dict | None = None) -> subprocess
         for line in p.stdout:
             text = line.decode("utf-8", errors="replace").strip()
             if text:   # the one-time sign-in links stay out of the log
-                log.info("sign-in: %s", re.sub(r"https?://\S+", "<link>", text))
+                text = re.sub(r"https?://\S+", "<link>", text)
+                log.info("sign-in: %s", re.sub(r"[\w.+-]+@[\w-]+\.[\w.]+", "<email>", text))   # no email in reports
         if p.wait():
             log.warning("sign-in ended with code %s", p.returncode)
     threading.Thread(target=drain, daemon=True).start()

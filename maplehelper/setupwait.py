@@ -77,6 +77,20 @@ def _language() -> str:
         return "he"
 
 
+STARTUP_TEXT = {
+    "he": "Maple Helper לא הצליח לעלות. הפרטים נשמרו בקובץ:\n%s\n\nאפשר לשלוח אותו אלינו (דיווח על תקלה), "
+          "או לנסות להפעיל מחדש את המחשב.",
+    "en": "Maple Helper couldn't start. The details were saved to:\n%s\n\nYou can send it to us (Report a problem), "
+          "or try restarting the PC.",
+}
+
+
+def _damaged(exc: BaseException) -> bool:
+    """A file of the install is missing or broken (reinstalling helps), not some other startup error."""
+    import zlib
+    return isinstance(exc, (ImportError, EOFError, zlib.error)) or "bad marshal" in str(exc)
+
+
 def report_broken_install(exc: BaseException) -> None:
     """A frozen build that can't import its own modules (a file is missing): explain and offer a reinstall,
     instead of PyInstaller's bare traceback window. Standard library only: Qt itself may be what's missing."""
@@ -94,6 +108,17 @@ def report_broken_install(exc: BaseException) -> None:
     MB_YESNO, MB_ICONERROR, MB_SETFOREGROUND, IDYES = 0x4, 0x10, 0x10000, 6
     MB_RIGHT, MB_RTLREADING = 0x80000, 0x100000
     lang = _language()
+    if not _damaged(exc):
+        # a reinstall wouldn't help (e.g. the data folder can't be written): say what happened instead
+        try:
+            from .store import DATA_DIR
+            where = str(DATA_DIR / "logs" / "startup-error.log")
+        except Exception:
+            where = "startup-error.log"
+        rtl = MB_RIGHT | MB_RTLREADING if lang == "he" else 0
+        ctypes.windll.user32.MessageBoxW(None, STARTUP_TEXT.get(lang, STARTUP_TEXT["en"]) % where, "Maple Helper",
+                                         MB_ICONERROR | MB_SETFOREGROUND | rtl)
+        return
     # one language per box: Hebrew in a left-to-right box came out scrambled (seen in testing)
     flags = MB_YESNO | MB_ICONERROR | MB_SETFOREGROUND | (MB_RIGHT | MB_RTLREADING if lang == "he" else 0)
     answer = ctypes.windll.user32.MessageBoxW(None, BROKEN_TEXT.get(lang, BROKEN_TEXT["en"]), "Maple Helper", flags)

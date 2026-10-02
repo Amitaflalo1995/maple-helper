@@ -57,15 +57,29 @@ def _kb_version(root: Path) -> str:
 
 
 def _read_json(path: Path, default):
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return default
+    """The file's JSON when it has the default's type; else its last good copy (.bak); else the default."""
+    for p in (path, path.with_suffix(path.suffix + ".bak")):
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, ValueError):          # missing, half-written, not UTF-8 (a power cut)
+            continue
+        if isinstance(data, type(default)):
+            return data
+    return default
 
 
 def _write_json(path: Path, data) -> None:
     tmp = path.with_suffix(".tmp")
-    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(json.dumps(data, ensure_ascii=False, indent=1))
+        f.flush()
+        os.fsync(f.fileno())                # on disk before the rename: a power cut can't leave it empty
+    if path.exists():
+        try:
+            import shutil
+            shutil.copyfile(path, path.with_suffix(path.suffix + ".bak"))    # the last good copy
+        except OSError:
+            pass
     for attempt in range(5):
         try:
             tmp.replace(path)
@@ -423,7 +437,8 @@ class History:
     def recent(self, n: int = RECENT) -> list[dict]:
         if not self.log.exists():
             return []
-        lines = self.log.read_text(encoding="utf-8").splitlines()[-n:]
+        # errors="replace": a line cut off mid-character by a crash must not break every question
+        lines = self.log.read_text(encoding="utf-8", errors="replace").splitlines()[-n:]
         out = []
         for ln in lines:
             try:
@@ -441,5 +456,5 @@ class History:
         _write_json(self.summaries_path, s[-10:])
 
     def clear(self) -> None:
-        for p in (self.log, self.summaries_path):
-            p.unlink(missing_ok=True)
+        for p in (self.log, self.summaries_path, self.summaries_path.with_suffix(".json.bak")):
+            p.unlink(missing_ok=True)       # the backup copy too, or cleared summaries would come back

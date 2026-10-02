@@ -66,6 +66,10 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
+[InstallDelete]
+; the previous version's files go first: dropped KB pages, an old drops.tsv, stale Qt plugins
+Type: filesandordirs; Name: "{app}\_internal"
+
 [Files]
 Source: "..\dist\Maple Helper\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 

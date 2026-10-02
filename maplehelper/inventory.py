@@ -8,6 +8,7 @@ same pictures, only scaled.
 from __future__ import annotations
 
 import io
+import threading
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -88,23 +89,29 @@ def _icon_vector(path) -> np.ndarray | None:
 
 
 _INDEX: dict[str, tuple[list[str], np.ndarray]] = {}
+_INDEX_LOCK = threading.Lock()     # the background warm-up and a read must not both build it
 
 
 def _index(kb) -> tuple[list[str], np.ndarray]:
     # by folder and size: a KB update keeps the folder but changes its items (a stale key broke describe())
     root = f"{getattr(kb, 'root', '')}|{len(kb.entities)}|{id(kb)}"
-    if root not in _INDEX:
-        _INDEX.clear()
-        keys, vecs = [], []
-        for k, e in kb.entities.items():
-            if e.get("category") != "item":
-                continue
-            path = kb.image_path(k)
-            v = _icon_vector(path) if path else None
-            if v is not None:
-                keys.append(k)
-                vecs.append(v)
-        _INDEX[root] = (keys, np.stack(vecs) if vecs else np.zeros((0, SIZE, SIZE, 3), np.float32))
+    with _INDEX_LOCK:
+        return _INDEX.get(root) or _build_index(kb, root)
+
+
+def _build_index(kb, root: str) -> tuple[list[str], np.ndarray]:
+    """Every item picture as a comparable vector (called under _INDEX_LOCK)."""
+    _INDEX.clear()
+    keys, vecs = [], []
+    for k, e in kb.entities.items():
+        if e.get("category") != "item":
+            continue
+        path = kb.image_path(k)
+        v = _icon_vector(path) if path else None
+        if v is not None:
+            keys.append(k)
+            vecs.append(v)
+    _INDEX[root] = (keys, np.stack(vecs) if vecs else np.zeros((0, SIZE, SIZE, 3), np.float32))
     return _INDEX[root]
 
 
