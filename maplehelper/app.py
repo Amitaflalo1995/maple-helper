@@ -669,10 +669,17 @@ class MapleHelperApp:
             return
         pairs = pins.conversations(History(c.id).recent(100000))
         def make():
-            dlg = HistoryDialog(pairs, c.name, self.settings["language"], self.style())
+            dlg = HistoryDialog(pairs, c.name, self.settings["language"], self.style(), self.kb)
             dlg.pin_requested.connect(lambda q, a, cid=c.id: self.overlay.pin_answer(q, a, cid))
+            dlg.continue_requested.connect(self.continue_conversation)
             return dlg
         self.open_window(f"history:{c.id}", make)
+
+    def continue_conversation(self, question: str, answer: str, keys: list):
+        """From the history: the exchange back in the chat, and the next question follows on from it."""
+        if not self.overlay.isVisible():
+            self.overlay.toggle(self.capture)
+        self.overlay.continue_from(question, answer, keys)
 
     def show_wishlist(self):
         keys = wishlist.items(self.settings, self.profiles.active_id)

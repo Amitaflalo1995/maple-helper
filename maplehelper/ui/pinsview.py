@@ -132,14 +132,19 @@ class _FitScroll(QScrollArea):
 
 
 class HistoryDialog(GlassDialog):
-    """Search everything asked with this character: 'what did I ask about Mano last week?'"""
+    """Search everything asked with this character: 'what did I ask about Mano last week?'
+
+    Airy by design (live feedback: a wall of full answers was hard to read): one card per question with a
+    two-line preview and the pictures of what it was about; tap to read the whole answer, and pick the
+    conversation up again in the chat."""
 
     pin_requested = Signal(str, str)
+    continue_requested = Signal(str, str, list)      # question, answer, card keys
 
-    def __init__(self, pairs: list[dict], name: str, lang: str, stylesheet: str):
+    def __init__(self, pairs: list[dict], name: str, lang: str, stylesheet: str, kb=None):
         self.t = t = I18n(lang or "he")
         super().__init__(t("history_title", name=name), t.rtl)
-        self.pairs = pairs
+        self.pairs, self.kb = pairs, kb
         self.setStyleSheet(stylesheet)
         self.resize(540, 720)
         outer = QVBoxLayout(self.content)
@@ -158,11 +163,19 @@ class HistoryDialog(GlassDialog):
         body = QWidget(objectName="Feed")
         self.rows = QVBoxLayout(body)
         self.rows.setContentsMargins(0, 0, 6, 0)
-        self.rows.setSpacing(8)
+        self.rows.setSpacing(10)
         scroll.setWidget(body)
         outer.addWidget(scroll, 1)
         rtl_buttons(self, t.rtl)
         self._fill()
+
+    def _day(self, ts: float) -> str:
+        day = time.strftime("%Y-%m-%d", time.localtime(ts))
+        if day == time.strftime("%Y-%m-%d"):
+            return self.t("day_today")
+        if day == time.strftime("%Y-%m-%d", time.localtime(time.time() - 86400)):
+            return self.t("day_yesterday")
+        return time.strftime("%d.%m.%Y", time.localtime(ts))
 
     def _fill(self):
         t, rtl = self.t, self.t.rtl
@@ -174,29 +187,102 @@ class HistoryDialog(GlassDialog):
         q = self.search.text().strip()
         hits = pins.search(self.pairs, q)
         self.count.setText(bidi.plain(t("history_count", n=len(hits)), rtl))
+        align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute
+        last_day = None
         for p in hits[:80]:
-            card = QFrame(objectName="Card")
-            cl = QVBoxLayout(card)
-            cl.setContentsMargins(12, 8, 12, 8)
-            cl.setSpacing(3)
-            top = QHBoxLayout()
-            when = QLabel(time.strftime("%d.%m.%Y %H:%M", time.localtime(p["t"])), objectName="CardSub")
-            top.addWidget(when)
-            top.addStretch(1)
-            pin = QToolButton(objectName="Icon", text="📌")
-            pin.setToolTip(t("pin"))
-            pin.setCursor(Qt.PointingHandCursor)
-            pin.clicked.connect(lambda _=False, p=p, b=pin: (self.pin_requested.emit(p["q"], p["a"]), b.setEnabled(False)))
-            top.addWidget(pin)
-            cl.addLayout(top)
-            qlb = QLabel(bidi.plain(p["q"], rtl), objectName="CardName")
-            qlb.setWordWrap(True)
-            cl.addWidget(qlb)
-            cl.addWidget(_answer_label(p["a"]))
-            self.rows.addWidget(card)
+            day = self._day(p["t"])
+            if day != last_day:
+                head = QLabel(bidi.plain(day, rtl), objectName="SectionHeader")
+                head.setAlignment(align)
+                self.rows.addSpacing(4)
+                self.rows.addWidget(head)
+                last_day = day
+            self.rows.addWidget(self._card(p, align))
         if not hits:
             self.rows.addWidget(QLabel(bidi.plain(t("history_none"), rtl), objectName="RowHint"))
         self.rows.addStretch(1)
+
+    def _card(self, p: dict, align) -> QFrame:
+        t, rtl = self.t, self.t.rtl
+        card = QFrame(objectName="Card")
+        card.setCursor(Qt.PointingHandCursor)
+        cl = QVBoxLayout(card)
+        cl.setContentsMargins(16, 12, 16, 12)
+        cl.setSpacing(6)
+        top = QHBoxLayout()
+        qlb = QLabel(bidi.plain(p["q"], rtl), objectName="CardName")
+        qlb.setWordWrap(True)
+        qlb.setAlignment(align)
+        top.addWidget(qlb, 1)
+        when = QLabel(time.strftime("%H:%M", time.localtime(p["t"])), objectName="CardSub")
+        top.addWidget(when, 0, Qt.AlignTop)
+        cl.addLayout(top)
+        # two lines of the answer, plain: the whole answer opens on a tap
+        plain = " ".join(p["a"].replace("**", "").split())
+        preview = QLabel(bidi.plain(plain[:150] + ("…" if len(plain) > 150 else ""), rtl), objectName="CardSub")
+        preview.setWordWrap(True)
+        preview.setAlignment(align)
+        cl.addWidget(preview)
+        pics = self._pictures(p.get("entities") or [])
+        if pics:
+            cl.addWidget(pics)
+        full = QWidget()
+        fl = QVBoxLayout(full)
+        fl.setContentsMargins(0, 6, 0, 0)
+        fl.setSpacing(10)
+        fl.addWidget(_answer_label(p["a"]))
+        actions = QHBoxLayout()
+        go = QPushButton(bidi.plain(t("history_continue"), rtl), objectName="Primary")
+        go.setCursor(Qt.PointingHandCursor)
+        go.setAutoDefault(False)
+        go.clicked.connect(lambda _=False, p=p: self.continue_requested.emit(p["q"], p["a"], list(p.get("entities") or [])))
+        actions.addWidget(go)
+        actions.addStretch(1)
+        pin = QPushButton(bidi.plain("📌 " + t("pin"), rtl), objectName="Link")
+        pin.setCursor(Qt.PointingHandCursor)
+        pin.setAutoDefault(False)
+        pin.clicked.connect(lambda _=False, p=p, b=pin: (self.pin_requested.emit(p["q"], p["a"]), b.setEnabled(False)))
+        actions.addWidget(pin)
+        fl.addLayout(actions)
+        full.hide()
+        cl.addWidget(full)
+
+        def toggle(e, full=full, preview=preview):
+            if e.button() == Qt.LeftButton:
+                full.setVisible(not full.isVisible())
+                preview.setVisible(not full.isVisible())
+        card.mousePressEvent = toggle
+        return card
+
+    def _pictures(self, keys: list[str]) -> QWidget | None:
+        """Small pictures of the monsters / items / NPCs the answer was about."""
+        kb = self.kb
+        if kb is None:
+            return None
+        row_w = QWidget()
+        row = QHBoxLayout(row_w)
+        row.setContentsMargins(0, 2, 0, 0)
+        row.setSpacing(6)
+        shown = 0
+        for k in keys:
+            e = kb.get(k)
+            path = kb.image_path(k) if e else None
+            pm = QPixmap(str(path)) if path else QPixmap()
+            if pm.isNull():
+                continue
+            lb = QLabel()
+            lb.setFixedSize(30, 30)
+            lb.setAlignment(Qt.AlignCenter)
+            lb.setPixmap(pm.scaled(30, 30, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            lb.setToolTip(e.get("name", k))
+            row.addWidget(lb)
+            shown += 1
+            if shown == 8:
+                break
+        if not shown:
+            return None
+        row.addStretch(1)
+        return row_w
 
 
 def character_card_image(c, avatar, kb, progress: dict | None, t) -> QPixmap:

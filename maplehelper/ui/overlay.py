@@ -585,6 +585,21 @@ class Overlay(QWidget):
                 self.add_system(self.t("inv_not_found"))
         self.ask(question)
 
+    def continue_from(self, question: str, answer: str, keys: list):
+        """An earlier exchange (from the history) back in the feed; the next question is asked as its follow-up."""
+        self.add_bubble(question, "user")
+        bubble = self.add_bubble(answer, "assistant")
+        self._start_reading(bubble)
+        keys = [k for k in keys if self.kb.get(k)]
+        if keys:
+            self.add_cards(keys)
+        self.add_system(self.t("history_continued"))
+        self._hidden_context = ("<continuing>\nThe player picked this earlier exchange up again; the question "
+                                f"follows on from it.\nPlayer: {question[:600]}\nHelper: {answer[:1500]}\n</continuing>")
+        self.raise_()
+        self.activateWindow()
+        self.input.setFocus()
+
     def what_now(self):
         """'What now?': a fresh screenshot and the question, so Claude sees where the player is."""
         self.ask_with_screenshot(self.t("what_now_q"))

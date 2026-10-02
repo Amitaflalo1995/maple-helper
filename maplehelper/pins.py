@@ -34,7 +34,8 @@ def conversations(records: list[dict]) -> list[dict]:
         if r.get("role") == "user":
             q = r
         elif r.get("role") == "assistant" and q is not None:
-            out.append({"q": q.get("text", ""), "a": r.get("text", ""), "t": r.get("t", q.get("t", 0))})
+            out.append({"q": q.get("text", ""), "a": r.get("text", ""), "t": r.get("t", q.get("t", 0)),
+                        "entities": r.get("entities") or []})
             q = None
     return out
 
