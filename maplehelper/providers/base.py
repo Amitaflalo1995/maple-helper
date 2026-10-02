@@ -81,6 +81,25 @@ def in_terminal(command: str) -> subprocess.Popen:
                              "-e", 'tell application "Terminal" to activate'])
 
 
+def login_script(exe: str, args: list[str]) -> str:
+    """PowerShell for a CLI's sign-in: the window stays open when it fails (or the CLI can't start), so the
+    player sees why instead of a console that flashes away."""
+    return ("& '" + exe.replace("'", "''") + "' " + " ".join(args)
+            + "; if ($LASTEXITCODE -ne 0) { Write-Host ''; pause }")
+
+
+def open_login(exe: str, args: list[str]) -> subprocess.Popen | None:
+    """The official sign-in (it opens the browser) in a visible window. None when it couldn't start."""
+    import shlex
+    try:
+        if sys.platform == "darwin":
+            return in_terminal(" ".join(shlex.quote(a) for a in [exe, *args]))
+        return subprocess.Popen(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command",
+                                 login_script(exe, args)], creationflags=CREATE_NEW_CONSOLE)
+    except OSError:
+        return None
+
+
 def run_installer(win_cmd: str, mac_cmd: str) -> subprocess.Popen:
     """Run an official installer in a visible console so the player sees its progress."""
     if sys.platform == "darwin":
