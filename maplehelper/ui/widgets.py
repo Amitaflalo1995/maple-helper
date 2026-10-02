@@ -593,9 +593,8 @@ class EntityTile(Selectable, QFrame):
         row.addWidget(pic)
         name = QLabel(e.get("name", key), objectName="TileName")
         name.setWordWrap(True)
-        from PySide6.QtWidgets import QApplication
-        rtl = QApplication.layoutDirection() == Qt.RightToLeft
-        name.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
+        # leading edge, not absolute: follows the chat when the player switches language
+        name.setAlignment(Qt.AlignLeading | Qt.AlignVCenter)
         row.addWidget(name, 1)
 
 
