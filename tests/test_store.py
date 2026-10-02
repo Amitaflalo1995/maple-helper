@@ -173,3 +173,10 @@ def test_hud_job_names_keep_class_and_job_consistent(isolated_store):
     assert (p.active.base_class, p.active.job) == ("Warrior", "Beginner")
     p.apply_update({"job": "Not a job"})
     assert p.active.job == "Beginner"
+
+
+def test_sync_takes_the_hud_name(isolated_store):
+    p = isolated_store.Profiles()
+    p.add("Kalimero", "Bowman", "Bowman", 15)
+    assert p.apply_update({"name": "KalimeroZz"}) == [("name", "KalimeroZz")]
+    assert p.apply_update({"name": "not a name!"}) == [] and p.active.name == "KalimeroZz"

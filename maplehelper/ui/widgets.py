@@ -110,6 +110,9 @@ class BubbleRow(QWidget):
         self.bubble = bubble
         lay = QHBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
+        # the bubble's text width must never hold the feed wide: when the chat narrows (or its scrollbar appears) the
+        # row shrinks first, then refits the bubble (else a long question was cut off at the edge, seen live)
+        self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
         # the layout mirrors in an RTL UI, so "trailing" is the left edge there
         if bubble.role == "user":
             lay.addSpacing(48)

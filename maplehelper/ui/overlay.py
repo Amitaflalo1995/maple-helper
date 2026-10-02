@@ -1136,10 +1136,10 @@ class Overlay(QWidget):
             self._pending_bubble.set_text(text)
             QTimer.singleShot(0, self._keep_answer_readable)
 
-    SYNC_QUESTION = ("[Profile sync, not a chat question] Look at the screenshot and read MY character's current "
+    SYNC_QUESTION = ("[Profile sync, not a chat question] Look at the screenshot and read MY character's name, current "
                      "level, job and EXP bar percentage (the HUD shows them), and if the stat window is open, its "
                      "Accuracy, damage range and max HP/MP. Reply with one short line in the "
-                     "profile's language, then @@META@@ with profile_update (level, job, base_class if visible, "
+                     "profile's language, then @@META@@ with profile_update (name, level, job, base_class if visible, "
                      "exp_percent, stats) and avatar_box. If the game or the character is not visible, say so briefly "
                      "and leave profile_update empty.")
 
@@ -1166,6 +1166,8 @@ class Overlay(QWidget):
             self.sync_finished.emit(False)
             return
         self._sync_shot = shot
+        from .. import capture
+        self._sync_full = capture.LAST_FULL       # the same grab at full resolution, for the portrait
         self._sync_thread = QThread(self)
         self._sync_cid = self.profiles.active_id
         self._sync_worker = AskWorker(self.brain, self.SYNC_QUESTION, self.profiles.active, None, shot)
@@ -1188,12 +1190,13 @@ class Overlay(QWidget):
             self.sync_finished.emit(False)
             return             # the player switched character meanwhile: this read belongs to the other one
         changes = self.profiles.apply_update(ans.profile_update or {})
-        if ans.avatar_box:
-            self._update_avatar(self._sync_shot, ans.avatar_box)
+        # finds the name tag even without a box
+        avatar = self._update_avatar(self._sync_shot, ans.avatar_box, getattr(self, "_sync_full", None))
+        self._sync_full = None
         if changes:
             self._show_changes(changes)
         else:
-            self.add_system(self.t("sync_nothing") if ans.profile_update or ans.avatar_box
+            self.add_system(self.t("sync_nothing") if ans.profile_update or ans.avatar_box or avatar
                             else self.t("sync_not_found"))
         self.refresh_profile_chip()
         self.sync_finished.emit(bool(ans.profile_update))
@@ -1254,18 +1257,36 @@ class Overlay(QWidget):
             return
         self._show_changes(self.profiles.apply_update(update))
 
-    def _update_avatar(self, shot_jpeg: bytes, box: list) -> None:
-        """Crop the player's own sprite (box from the AI, fractions of the image) into the portrait."""
+    def _update_avatar(self, shot_jpeg: bytes, box: list | None, full=None) -> bool:
+        """Crop the player's own sprite into the portrait: on their name tag (found in the pixels, near the AI's
+        rough box), else the AI's box itself when it looks like a sprite. True when the portrait changed."""
         import io
+
+        import numpy as np
         from PIL import Image
+
+        from ..portrait import portrait_rect
         try:
             img = Image.open(io.BytesIO(shot_jpeg)).convert("RGB")
+            # the full-resolution grab when it is the same picture (same shape): small name tags survive there
+            same = full is not None and abs(full.width / full.height - img.width / img.height) < 0.01
+            src = full.convert("RGB") if same else img
+            rect = portrait_rect(np.asarray(src), box)
+            if rect:
+                square = src.crop(rect).resize((128, 128), Image.LANCZOS)
+                buf = io.BytesIO()
+                square.save(buf, "PNG")
+                self.profiles.set_avatar(buf.getvalue())
+                self.refresh_profile_chip()
+                return True
+            if not box:
+                return False
             W, H = img.size
             x, y, w, h = box
             if not (0 <= x < 1 and 0 <= y < 1 and 0.005 < w < 0.15 and 0.01 < h < 0.3):
-                return          # far bigger than a character sprite: a misread
+                return False    # far bigger than a character sprite: a misread
             if not 0.6 <= (h * H) / (w * W) <= 4:
-                return          # sprites stand upright: not a wide strip of scenery
+                return False    # sprites stand upright: not a wide strip of scenery
             pad_w, pad_h = w * 0.25, h * 0.12
             left, top = max(0, (x - pad_w) * W), max(0, (y - pad_h) * H)
             right, bottom = min(W, (x + w + pad_w) * W), min(H, (y + h + pad_h) * H)
@@ -1278,15 +1299,16 @@ class Overlay(QWidget):
             square.save(buf, "PNG")
             self.profiles.set_avatar(buf.getvalue())
             self.refresh_profile_chip()
+            return True
         except Exception:
-            pass
+            return False
 
     def _show_changes(self, changes):
         if changes:
             self.profile_changed.emit()        # the play tools (stats, EXP meter) follow the profile
         changes = [ch for ch in changes if ch[0] != "exp"]     # the EXP bar shows it; no chat line per percent
         self.refresh_plan()
-        labels = {"level": "level", "job": "job", "base_class": "ob_class", "map": "map",
+        labels = {"name": "ob_char_name", "level": "level", "job": "job", "base_class": "ob_class", "map": "map",
                   "quest+": "quest_started", "quest-": "quest_done", "note": "note", "stats": "stats_word"}
         for field, value in changes:
             shown = stats_text(self.t, value) if field == "stats" else value     # not "dmg_min 30"

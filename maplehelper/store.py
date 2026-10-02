@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import time
 import uuid
@@ -283,6 +284,11 @@ class Profiles:
             return []
         update = _consistent_job(update, c)
         changed = []
+        name = update.get("name")
+        # the name on the HUD (a screenshot read): "Kalimero" typed at setup becomes the real "KalimeroZz"
+        if isinstance(name, str) and re.fullmatch(r"[A-Za-z0-9]{2,16}", name.strip()) and name.strip() != c.name:
+            c.name = name.strip()
+            changed.append(("name", c.name))
         for key in ("level", "job", "base_class", "map"):
             val = update.get(key)
             if val in (None, "", 0):
