@@ -179,6 +179,29 @@ class Character:
 STAT_KEYS = ("acc", "dmg_min", "dmg_max", "hp", "mp")
 
 
+def _consistent_job(update: dict, c: "Character") -> dict:
+    """Class and job as the app names them, and never a job of another class (the HUD of an Old School server
+    says "Archer": that once left a Bowman with the job Assassin)."""
+    from .jobs import canonical_class, canonical_job, class_of, first_job
+    update = dict(update)
+    job = canonical_job(update["job"]) if isinstance(update.get("job"), str) and update["job"].strip() else None
+    cls = canonical_class(update["base_class"]) if isinstance(update.get("base_class"), str) else None
+    update.pop("job", None)
+    update.pop("base_class", None)
+    if job and class_of(job):
+        cls = class_of(job)            # the job says which class it is
+    if cls:
+        update["base_class"] = cls
+    if job:
+        update["job"] = job
+    new_cls = cls or c.base_class
+    level = update.get("level") if isinstance(update.get("level"), int) else c.level
+    current = job or c.job
+    if new_cls in ("Warrior", "Magician", "Bowman", "Thief") and class_of(current) not in (None, new_cls):
+        update["job"] = first_job(new_cls, level)
+    return update
+
+
 def _str_list(v) -> list[str]:
     """Quest names from the AI: a list of strings (a bare string is one quest, not its letters)."""
     if isinstance(v, str):
@@ -258,6 +281,7 @@ class Profiles:
         c = self.active
         if not c or not isinstance(update, dict) or not update:
             return []
+        update = _consistent_job(update, c)
         changed = []
         for key in ("level", "job", "base_class", "map"):
             val = update.get(key)

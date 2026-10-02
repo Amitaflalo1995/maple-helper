@@ -1233,7 +1233,9 @@ class Overlay(QWidget):
             self.add_cards(ans.entities)
         if self.profiles.active_id == getattr(self, "_asked_cid", None):
             self._apply_profile_update(ans.profile_update)
-            if ans.avatar_box and getattr(self, "_question_shot", None):
+            # a chat answer only fills a missing portrait: the AI's boxes are often off (live test: an NPC, a
+            # treetop), so replacing a good portrait is left to the explicit ⟳ sync
+            if ans.avatar_box and getattr(self, "_question_shot", None) and not self.profiles.avatar_path():
                 self._update_avatar(self._question_shot, ans.avatar_box)
 
     def _apply_profile_update(self, update: dict):
@@ -1260,8 +1262,10 @@ class Overlay(QWidget):
             img = Image.open(io.BytesIO(shot_jpeg)).convert("RGB")
             W, H = img.size
             x, y, w, h = box
-            if not (0 <= x < 1 and 0 <= y < 1 and 0.005 < w < 0.5 and 0.01 < h < 0.6):
-                return
+            if not (0 <= x < 1 and 0 <= y < 1 and 0.005 < w < 0.15 and 0.01 < h < 0.3):
+                return          # far bigger than a character sprite: a misread
+            if not 0.6 <= (h * H) / (w * W) <= 4:
+                return          # sprites stand upright: not a wide strip of scenery
             pad_w, pad_h = w * 0.25, h * 0.12
             left, top = max(0, (x - pad_w) * W), max(0, (y - pad_h) * H)
             right, bottom = min(W, (x + w + pad_w) * W), min(H, (y + h + pad_h) * H)
@@ -1282,7 +1286,7 @@ class Overlay(QWidget):
             self.profile_changed.emit()        # the play tools (stats, EXP meter) follow the profile
         changes = [ch for ch in changes if ch[0] != "exp"]     # the EXP bar shows it; no chat line per percent
         self.refresh_plan()
-        labels = {"level": "level", "job": "job", "base_class": "job", "map": "map",
+        labels = {"level": "level", "job": "job", "base_class": "ob_class", "map": "map",
                   "quest+": "quest_started", "quest-": "quest_done", "note": "note", "stats": "stats_word"}
         for field, value in changes:
             shown = stats_text(self.t, value) if field == "stats" else value     # not "dmg_min 30"

@@ -55,8 +55,9 @@ After the answer, output a line containing only @@META@@ followed by one JSON ob
   When the answer is a LIST of items (drops, quest rewards, shop stock, what to buy/equip), include EVERY item's key
   so the app can show each one with its picture. Find keys by grepping index.json for the item names.
 - avatar_box (only with a screenshot, only if clearly visible): [x, y, w, h] as fractions (0-1) of the screenshot, a snug box
-  around the PLAYER'S OWN character sprite (find the name tag under it matching the profile name), head to feet, excluding
-  the name tag. Omit it if unsure.
+  around the PLAYER'S OWN character sprite, head to feet, excluding the name tag. Find it by its name tag: the same name
+  as the HUD's character name (bottom left, next to the level). NPCs stand around too: their name tags are on a yellow
+  plate, often with a second title line (e.g. "Cody / Wizet Wizard"); never box an NPC. Omit it if unsure.
 - drop_groups (only for "which monsters drop X" questions): [{{"monster": "monster/12", "items": ["item/5", ...]}}, ...]
   lowest monster level first, max 8 groups.
 - profile_update: only facts the player stated or the screenshot clearly shows: "level" (int), "job", "base_class", "map", "quests_started" [..], "quests_completed" [..], "exp_percent" (number 0-100, the EXP bar's percentage, only if the screenshot shows it), "stats" (only if the in-game stat window is open in the screenshot: {{"acc": total Accuracy, "dmg_min": and "dmg_max": the attack/damage range it shows, "hp": max HP, "mp": max MP}}), "note" (a lasting preference or goal). Empty object if nothing changed.

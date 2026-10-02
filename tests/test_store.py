@@ -158,3 +158,18 @@ def test_profiles_drop_bad_saved_values_on_load(isolated_store):
     p = isolated_store.Profiles()
     assert [c.id for c in p.characters] == ["a"]
     assert p.active.map == "" and p.active.notes == []
+
+
+def test_hud_job_names_keep_class_and_job_consistent(isolated_store):
+    """An Old School HUD says "Archer": the class becomes Bowman and an old Thief job doesn't survive."""
+    p = isolated_store.Profiles()
+    p.add("Kalimero", "Thief", "Assassin", 30)
+    p.apply_update({"level": 15, "job": "Archer", "base_class": "Archer"})
+    c = p.active
+    assert (c.base_class, c.job, c.level) == ("Bowman", "Bowman", 15)
+    p.apply_update({"job": "Hunter"})
+    assert (p.active.base_class, p.active.job) == ("Bowman", "Hunter")
+    p.apply_update({"base_class": "Warrior", "level": 5})
+    assert (p.active.base_class, p.active.job) == ("Warrior", "Beginner")
+    p.apply_update({"job": "Not a job"})
+    assert p.active.job == "Beginner"
