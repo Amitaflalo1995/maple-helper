@@ -1,5 +1,18 @@
 [
  {
+  "version": "0.7.3",
+  "he": [
+   "ההתחברות ל-ChatGPT ול-Claude עובדת חלק יותר: נפתח רק הדפדפן, בלי חלון שחור, וחלון ההתחברות כבר לא מסתתר מאחורי Maple Helper.",
+   "אם ההתחברות לא מצליחה, רואים את זה מיד ומקבלים כפתור להתקנה מחדש. במסך החיבור נוסף גם כפתור \"דיווח על תקלה\".",
+   "חלון ההתקנה של עדכונים מופיע עכשיו בשפה של האפליקציה."
+  ],
+  "en": [
+   "Signing in to ChatGPT and Claude is smoother: only your browser opens, no black window, and the sign-in no longer hides behind Maple Helper.",
+   "If the sign-in doesn't work, you see it right away with a button to reinstall. The connect screen also has \"Report a problem\" now.",
+   "The installer window for updates now shows in the app's language."
+  ]
+ },
+ {
   "version": "0.7.2",
   "he": [
    "החלפת שפה בהגדרות מחליפה עכשיו את הכל, גם את ההודעות בצ'אט ואת ההסבר על צילום המסך."
