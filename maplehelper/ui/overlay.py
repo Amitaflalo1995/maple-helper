@@ -1006,15 +1006,20 @@ class Overlay(QWidget):
             self.add_system(self.t("sync_no_game"))
             self.sync_finished.emit(False)
             return
-        self._sync_shot = shot
-        self._sync_thread = QThread(self)
-        self._sync_cid = self.profiles.active_id
-        self._sync_worker = AskWorker(self.brain, self.SYNC_QUESTION, self.profiles.active, None, shot)
-        self._sync_worker.moveToThread(self._sync_thread)
-        self._sync_thread.started.connect(self._sync_worker.run)
-        self._sync_worker.done.connect(self._on_sync_done)      # bound method → runs on the GUI thread
-        self._sync_worker.done.connect(self._sync_thread.quit)
-        self._sync_thread.start()
+        try:
+            self._sync_shot = shot
+            self._sync_thread = QThread(self)
+            self._sync_cid = self.profiles.active_id
+            self._sync_worker = AskWorker(self.brain, self.SYNC_QUESTION, self.profiles.active, None, shot)
+            self._sync_worker.moveToThread(self._sync_thread)
+            self._sync_thread.started.connect(self._sync_worker.run)
+            self._sync_worker.done.connect(self._on_sync_done)      # bound method → runs on the GUI thread
+            self._sync_worker.done.connect(self._sync_thread.quit)
+            self._sync_thread.start()
+        except Exception:
+            import logging
+            logging.getLogger(__name__).exception("profile refresh could not start")
+            self._on_sync_done(Answer(error="internal"))
 
     def _on_sync_done(self, ans: Answer):
         self._syncing = False

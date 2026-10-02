@@ -19,7 +19,7 @@ from PySide6.QtCore import QObject, Signal
 
 from .capture import grab_image, grab_jpeg
 
-GAME_TITLES = ("MapleStory Classic", "MapleStory", "Classic World")
+GAME_TITLES = ("MapleStory Classic", "MapleStory", "Classic World", "MapleRoyals")
 # virtual key codes (HIToolbox kVK_F1...). Macs send F-keys only with fn held, unless
 # "Use F1, F2, etc. keys as standard function keys" is on (System Settings > Keyboard).
 KEYCODES = {"F1": 122, "F2": 120, "F3": 99, "F4": 118, "F5": 96, "F6": 97,
