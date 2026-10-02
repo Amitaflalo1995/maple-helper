@@ -7,7 +7,7 @@ import threading
 import webbrowser
 
 from PySide6.QtCore import QLockFile, QObject, Qt, QTimer, Signal
-from PySide6.QtGui import QAction, QIcon, QKeySequence
+from PySide6.QtGui import QAction, QIcon
 from PySide6.QtNetwork import QLocalServer, QLocalSocket
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
@@ -308,9 +308,10 @@ class MapleHelperApp:
         menu.addAction(header)
         menu.addSeparator()
         key = self.settings["hotkey_toggle"]
-        a_show = QAction(t("tray_open"), menu, triggered=lambda: self.overlay.toggle(self.capture))
-        a_show.setShortcut(QKeySequence(key))          # shown in the menu's shortcut column
-        a_show.setShortcutVisibleInContextMenu(True)
+        # the key in the label itself: the menu's shortcut column glued it to the text in Hebrew ("הצ'אטF9", seen live)
+        from . import bidi
+        a_show = QAction(bidi.plain(f"{t('tray_open')}  ·  {key}", t.rtl), menu,
+                         triggered=lambda: self.overlay.toggle(self.capture))
         a_set = QAction(t("tray_settings"), menu, triggered=self.open_settings)
         a_quit = QAction(t("tray_quit"), menu, triggered=self.qapp.quit)
         menu.addAction(a_show)
