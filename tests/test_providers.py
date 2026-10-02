@@ -400,3 +400,18 @@ class TestSignIn:
         monkeypatch.setattr(mod, "find_codex" if prov == "codex" else "find_claude", lambda: "x.exe")
         monkeypatch.setattr(mod.subprocess, "run", boom)
         assert providers.get(prov).account()["status"] == "not_installed"
+
+
+def test_claude_found_beside_an_npm_shim(tmp_path, monkeypatch):
+    """A custom npm prefix: PATH has claude.cmd, the real claude.exe is in node_modules next to it."""
+    import sys
+
+    from maplehelper.providers import base, claude
+    if sys.platform != "win32":
+        return
+    exe = tmp_path / "node_modules" / "@anthropic-ai" / "claude-code" / "bin" / "claude.exe"
+    exe.parent.mkdir(parents=True)
+    exe.write_bytes(b"")
+    monkeypatch.setattr(claude, "find_windows_exe", lambda *a: None)
+    monkeypatch.setattr(base.shutil, "which", lambda _n: str(tmp_path / "claude.cmd"))
+    assert claude.find_claude() == str(exe)

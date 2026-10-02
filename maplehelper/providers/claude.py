@@ -39,8 +39,17 @@ def find_claude() -> str | None:
         Path(os.environ.get("APPDATA", "")) / "npm" / "node_modules" / "@anthropic-ai" / "claude-code" / "bin" / "claude.exe",
         Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "claude" / "claude.exe",
     ])
-    # no fallback to an npm "claude.cmd": cmd.exe cuts the multi-line --system-prompt at its first newline
-    return exe
+    if exe:
+        return exe
+    # an npm install elsewhere (a custom prefix): PATH has its claude.cmd shim, the real .exe sits beside it.
+    # Never the .cmd itself: cmd.exe cuts the multi-line --system-prompt at its first newline
+    import shutil
+    shim = shutil.which("claude")
+    if shim:
+        real = Path(shim).parent / "node_modules" / "@anthropic-ai" / "claude-code" / "bin" / "claude.exe"
+        if real.exists():
+            return str(real)
+    return None
 
 
 def env() -> dict:
