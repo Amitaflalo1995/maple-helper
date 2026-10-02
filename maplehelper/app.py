@@ -11,7 +11,7 @@ from PySide6.QtGui import QAction, QIcon
 from PySide6.QtNetwork import QLocalServer, QLocalSocket
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
-from . import APP_NAME, __version__, osapi, providers, report, updater, whatsnew, wishlist
+from . import APP_NAME, __version__, osapi, providers, report, telemetry, updater, whatsnew, wishlist
 from .brain import Brain
 from .i18n import I18n
 from .kb import KnowledgeBase
@@ -119,6 +119,9 @@ class MapleHelperApp:
             # set up already (language, AI): only a character is missing
             self.style()
             Onboarding(self.settings, self.profiles, self.kb, self.style, only_character=True).exec()
+        telemetry.init(self.settings, __version__)
+        telemetry.track("app_started", fresh_install=fresh_install, background=BACKGROUND_ARG in sys.argv[1:],
+                        provider=self.settings["provider"], language=self.settings["language"])
         self.brain = Brain(self.kb, provider=self.settings["provider"], length=self.settings["answer_length"])
         self.apply_ai_settings()
         threading.Thread(target=self.brain.prewarm, daemon=True).start()   # first answer without startup delay
@@ -155,6 +158,7 @@ class MapleHelperApp:
         self.voice.state.connect(lambda s: self.overlay.voice_state(s))
         self.voice.text.connect(self.on_voice_text)
         self.voice.failed.connect(self.on_voice_failed)
+        self.voice.text.connect(lambda _: telemetry.track("voice_used"))
         self.overlay.mic_clicked.connect(self.voice.toggle)
 
         self.make_tray()
@@ -204,6 +208,8 @@ class MapleHelperApp:
         self.settings["seen_version"] = __version__
         if fresh_install:
             return            # a new player gets the welcome screen, not a changelog
+        if seen != __version__:
+            telemetry.track("app_updated", from_version=seen)
         notes = whatsnew.since(seen, __version__)
         if notes:
             self.overlay.add_notice(lambda t: t("whats_new_notice", version=__version__), lambda t: t("whats_new_show"),
@@ -493,6 +499,7 @@ class MapleHelperApp:
         threading.Thread(target=self.brain.prewarm, daemon=True).start()
 
     def on_settings_changed(self):
+        telemetry.set_enabled(self.settings["telemetry"])
         self.overlay.apply_language()
         self._reopen_windows_in_new_look()
         self.overlay.setStyleSheet(self.style())
@@ -787,6 +794,7 @@ class MapleHelperApp:
         self.overlay.kb = self.kb
 
     def shutdown(self):
+        telemetry.flush()
         try:
             self.overlay.save_session_summary()   # quitting ends the session: show it next time
         except Exception:

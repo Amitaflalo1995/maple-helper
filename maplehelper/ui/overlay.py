@@ -9,7 +9,7 @@ from PySide6.QtGui import QAction, QGuiApplication, QIcon, QPainterPath, QPixmap
 from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QMenu, QPushButton,
                                QScrollArea, QSizeGrip, QSizePolicy, QToolButton, QVBoxLayout, QWidget)
 
-from .. import __version__, bidi, osapi, quick
+from .. import __version__, bidi, osapi, quick, telemetry
 from ..brain import Answer, Brain
 from ..i18n import STRINGS, I18n
 from ..kb import KnowledgeBase
@@ -1325,6 +1325,7 @@ class Overlay(QWidget):
                 if qa:
                     if history:
                         history.append("user", question)
+                    telemetry.track("question_asked", answered_by="instant", tagged=False)
                     self._show_quick(qa, question, history)
                     return True
         shot = None if self.shot_used else self.shot
@@ -1333,6 +1334,8 @@ class Overlay(QWidget):
             self.add_system(lambda t: t("no_game"))
         self.shot_used = True
         self._update_shot_hint()
+        telemetry.track("question_asked", answered_by=self.settings["provider"], tagged=bool(focus),
+                        screenshot=shot is not None, saver=bool(self.settings["saver_mode"]), retry=force_claude)
         stored = f"[about {focus_name}] {label}" if focus_name else label
         if history and not (force_claude and self._just_answered(history, stored)):
             # "Ask Claude anyway" right under the instant answer: the question is already the one before it (the
@@ -1512,22 +1515,27 @@ class Overlay(QWidget):
             self.add_system(lambda t: t("sync_no_game"))
             self.sync_finished.emit(False)
             return
-        self._sync_shot = shot
-        from .. import capture
-        self._sync_full = capture.LAST_FULL       # the same grab at full resolution, for the portrait
-        self._sync_thread = QThread(self)
-        self._sync_cid = self.profiles.active_id
-        # reading a name, a level and a bar off a screenshot: no knowledge base, no file tools (it went looking
-        # through the pages). The player's own model: measured 2026-10-02, Sonnet answered this read in ~3 s and
-        # Haiku in 13-50 s, so the "light" model is no faster here
-        self._sync_worker = AskWorker(self.brain, self.SYNC_QUESTION, self.profiles.active, None, shot, light=True)
-        self._sync_worker.moveToThread(self._sync_thread)
-        self._sync_thread.started.connect(self._sync_worker.run)
-        self._sync_worker.done.connect(self._on_sync_done)      # bound method → runs on the GUI thread
-        self._sync_worker.done.connect(self._sync_thread.quit)
-        self._sync_thread.finished.connect(self._sync_worker.deleteLater)
-        self._sync_thread.finished.connect(self._sync_thread.deleteLater)
-        self._sync_thread.start()
+        try:
+            self._sync_shot = shot
+            from .. import capture
+            self._sync_full = capture.LAST_FULL       # the same grab at full resolution, for the portrait
+            self._sync_thread = QThread(self)
+            self._sync_cid = self.profiles.active_id
+            # reading a name, a level and a bar off a screenshot: no knowledge base, no file tools (it went looking
+            # through the pages). The player's own model: measured 2026-10-02, Sonnet answered this read in ~3 s and
+            # Haiku in 13-50 s, so the "light" model is no faster here
+            self._sync_worker = AskWorker(self.brain, self.SYNC_QUESTION, self.profiles.active, None, shot, light=True)
+            self._sync_worker.moveToThread(self._sync_thread)
+            self._sync_thread.started.connect(self._sync_worker.run)
+            self._sync_worker.done.connect(self._on_sync_done)      # bound method → runs on the GUI thread
+            self._sync_worker.done.connect(self._sync_thread.quit)
+            self._sync_thread.finished.connect(self._sync_worker.deleteLater)
+            self._sync_thread.finished.connect(self._sync_thread.deleteLater)
+            self._sync_thread.start()
+        except Exception:
+            import logging
+            logging.getLogger(__name__).exception("profile refresh could not start")
+            self._on_sync_done(Answer(error="internal"))
 
     def _sync_ended(self):
         self._syncing = False

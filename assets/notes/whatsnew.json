@@ -1,5 +1,18 @@
 [
  {
+  "version": "0.7.5",
+  "he": [
+   "האפליקציה מזהה עכשיו גם חלונות של MapleRoyals ב-Windows וב-macOS לצילום מסך ולרענון הדמות.",
+   "כפתור רענון הדמות כבר לא נשאר תקוע אם הפעלת בקשת ה-AI נכשלת, ואפשר לנסות שוב.",
+   "אפשר לבחור בהגדרות לשתף נתוני שימוש אנונימיים כדי לעזור לשפר את האפליקציה."
+  ],
+  "en": [
+   "The app now detects MapleRoyals windows on Windows and macOS for screenshots and character refresh.",
+   "Character refresh no longer stays stuck if starting the AI request fails, so you can try again.",
+   "You can opt in to anonymous usage statistics in Settings to help improve the app."
+  ]
+ },
+ {
   "version": "0.7.4",
   "he": [
    "שאלה בקול עובדת מיד גם אחרי עדכון או הפעלה מחדש: מודל הדיבור נטען ברקע כשהאפליקציה עולה.",

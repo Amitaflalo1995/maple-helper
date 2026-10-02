@@ -522,6 +522,11 @@ STRINGS = {
     "shop_q_here": {"he": "אני רוצה לעשות גרינד במפה הנוכחית שלי, למשך {n} דקות. תכין לי רשימת קניות: כמה פוטים של HP ו-MP לקנות לפי הדמות שלי והמפלצות שם, איפה הכי זול לקנות אותם, ומה עוד כדאי לקחת. תקרא את ה-HP/MP המקסימלי שלי מה-HUD בצילום (ואם האינבנטורי פתוח, כמה פוטים כבר יש לי). קצר וברשימה.", "en": "I'm going to grind where I'm training now, for {n} minutes. Make me a shopping list: how many HP and MP potions to buy for my character and the monsters there, where they're cheapest, and anything else worth bringing. Read my max HP/MP from the HUD in the screenshot (and the potions I already have, if the inventory is open). Short, as a list."},
     "inv_check": {"he": "בדיקת האינבנטורי", "en": "Inventory check"},
     "shop_q": {"he": "אני רוצה לעשות גרינד ב-{map} למשך {n} דקות. תכין לי רשימת קניות: כמה פוטים של HP ו-MP לקנות לפי הדמות שלי והמפלצות שם, איפה הכי זול לקנות אותם, ומה עוד כדאי לקחת. תקרא את ה-HP/MP המקסימלי שלי מה-HUD בצילום (ואם האינבנטורי פתוח, כמה פוטים כבר יש לי). קצר וברשימה.", "en": "I'm going to grind at {map} for {n} minutes. Make me a shopping list: how many HP and MP potions to buy for my character and the monsters there, where they're cheapest, and anything else worth bringing. Read my max HP/MP from the HUD in the screenshot (and the potions I already have, if the inventory is open). Short, as a list."},
+    "telemetry": {"he": "שליחת נתוני שימוש אנונימיים", "en": "Share anonymous usage stats"},
+    "telemetry_hint": {"he": "עוזר לנו לשפר את האפליקציה: רק באילו אפשרויות משתמשים. אף פעם לא שאלות, "
+                             "צילומי מסך או הקלטות",
+                       "en": "Helps us improve the app: only which features get used. "
+                             "Never your questions, screenshots or voice"},
     # onboarding
     "ob_welcome": {"he": "ברוכים הבאים ל-Maple Helper", "en": "Welcome to Maple Helper"},
     "ob_connect": {"he": "חיבור ה-AI", "en": "Connect your AI"},

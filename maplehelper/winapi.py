@@ -20,7 +20,7 @@ from .capture import grab_image, grab_jpeg
 user32 = ctypes.windll.user32
 dwmapi = ctypes.windll.dwmapi
 
-GAME_TITLES = ("MapleStory Classic", "MapleStory", "Classic World")
+GAME_TITLES = ("MapleStory Classic", "MapleStory", "Classic World", "MapleRoyals")
 VK = {f"F{i}": 0x6F + i for i in range(1, 13)}   # F1=0x70 ... F12=0x7B
 APP_ID = "MapleHelper.App"
 RUN_KEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
