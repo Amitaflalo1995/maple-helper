@@ -57,7 +57,7 @@ class Market:
 def summarize(rows: list[dict], name: str) -> Market:
     prices, times = [], []
     for r in rows:
-        if (r.get("itemName") or "").strip().lower() != name.strip().lower():
+        if not isinstance(r, dict) or str(r.get("itemName") or "").strip().lower() != name.strip().lower():
             continue                            # the search is "contains": keep this exact item
         each = r.get("priceEach") or r.get("price")
         if isinstance(each, (int, float)) and each > 0:
@@ -88,7 +88,8 @@ def free_market(name: str, timeout: float = 10) -> Market | None:
             data = json.loads(r.read().decode("utf-8"))
     except Exception:
         return None
-    out = summarize(data.get("rows") or [], name)
+    rows = data.get("rows") if isinstance(data, dict) else None
+    out = summarize(rows if isinstance(rows, list) else [], name)
     _cache[name.lower()] = (time.time(), out)
     return out
 

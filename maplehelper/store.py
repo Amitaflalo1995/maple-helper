@@ -267,7 +267,34 @@ def _sane(key: str, v) -> bool:
         return isinstance(v, list) and all(isinstance(x, str) for x in v)
     if t == "dict":
         return isinstance(v, dict)
+    if t == "bool":
+        return isinstance(v, bool)
+    if t.startswith("float"):         # exp_pct: a number or None
+        return v is None or (isinstance(v, (int, float)) and not isinstance(v, bool))
     return True
+
+
+def _repair(c: dict) -> dict | None:
+    """A saved character with a damaged required field is repaired, not dropped: dropping it lost the character
+    for good on the next save (found in testing)."""
+    from .jobs import canonical_class, canonical_job, first_job
+    if not isinstance(c, dict) or not isinstance(c.get("id"), str) or not c["id"]:
+        return None
+    if not isinstance(c.get("name"), str) or not c["name"].strip():
+        return None          # no name at all: not a character the player made
+    c = dict(c)
+    try:
+        c["level"] = max(1, min(250, int(float(c.get("level")))))
+    except (TypeError, ValueError):
+        c["level"] = 1
+    if not isinstance(c.get("base_class"), str) or not canonical_class(c["base_class"]):
+        c["base_class"] = "Beginner"
+    if not isinstance(c.get("job"), str) or not canonical_job(c["job"]):
+        c["job"] = first_job(c["base_class"], c["level"])
+    if isinstance(c.get("stats"), dict):      # numbers only: a string here broke the play tools
+        c["stats"] = {k: int(v) for k, v in c["stats"].items()
+                      if isinstance(v, (int, float)) and not isinstance(v, bool)}
+    return c
 
 
 class Profiles:
@@ -280,9 +307,12 @@ class Profiles:
         # skip them instead of failing to start
         self.characters = []
         for c in raw.get("characters", []) if isinstance(raw.get("characters"), list) else []:
+            c = _repair(c)
+            if c is None:
+                continue
             try:
                 self.characters.append(Character(**{k: v for k, v in c.items() if k in known and _sane(k, v)}))
-            except (TypeError, AttributeError):    # not a dict, or a required field is missing/broken
+            except (TypeError, AttributeError):    # still unusable
                 continue
         self.active_id = raw.get("active")
 
@@ -442,9 +472,12 @@ class History:
         out = []
         for ln in lines:
             try:
-                out.append(json.loads(ln))
+                rec = json.loads(ln)
             except json.JSONDecodeError:
-                pass
+                continue
+            # a valid line of the wrong shape must not break every question either
+            if isinstance(rec, dict) and isinstance(rec.get("text"), str) and rec.get("role") in ("user", "assistant"):
+                out.append(rec)
         return out
 
     def summaries(self) -> list[str]:

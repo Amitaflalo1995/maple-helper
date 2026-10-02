@@ -20,7 +20,8 @@ def make_zip(files: dict[str, str]) -> bytes:
     return buf.getvalue()
 
 
-GOOD_ZIP = make_zip({"index.json": "[]", "meta.json": '{"source": "test"}', "pages/monster/1.md": "# x"})
+NEW_INDEX = '[{"key": "monster/1", "category": "monster", "name": "x"}]'
+GOOD_ZIP = make_zip({"index.json": NEW_INDEX, "meta.json": '{"source": "test"}', "pages/monster/1.md": "# x"})
 
 
 @pytest.fixture
@@ -51,7 +52,7 @@ def test_newer_kb_is_installed_and_versioned(env):
     user_kb, _, publish = env
     publish()
     assert updater.update_kb() is True
-    assert json.loads((user_kb / "index.json").read_text(encoding="utf-8")) == []
+    assert json.loads((user_kb / "index.json").read_text(encoding="utf-8")) == json.loads(NEW_INDEX)
     assert updater.local_version() == "2026.02.01.0000"
     assert not user_kb.with_name("kb.new").exists()
 

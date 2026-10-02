@@ -32,6 +32,30 @@ UPDATED_ARG = "--updated"         # the installer reopens the app with it after 
 APP_ICON = "app.ico" if sys.platform == "win32" else "icon-256.png"
 
 
+def _remove_stray_screenshots() -> None:
+    """Screenshots handed to ChatGPT live in %TEMP% only for one answer; a quit mid-answer left them there."""
+    import glob
+    import tempfile
+    import time
+    for f in glob.glob(os.path.join(tempfile.gettempdir(), "maplehelper-shot-*.jpg")):
+        try:
+            if time.time() - os.path.getmtime(f) > 3600:
+                os.remove(f)
+        except OSError:
+            pass
+
+
+def load_kb() -> KnowledgeBase:
+    """The newest KB; the bundled one when the downloaded copy can't be read (one bad release mustn't stop
+    every start)."""
+    from .store import BUNDLED_KB
+    try:
+        return KnowledgeBase()
+    except Exception:      # noqa: BLE001
+        report.log.exception("knowledge base unreadable, using the bundled one")
+        return KnowledgeBase(BUNDLED_KB)
+
+
 class _MainThread(QObject):
     """Background checks emit here; Qt delivers the call on the GUI thread (queued connection).
 
@@ -49,7 +73,7 @@ class MapleHelperApp:
         self.qapp = qapp
         self.settings = Settings()
         self.profiles = Profiles()
-        self.kb = KnowledgeBase()
+        self.kb = load_kb()
         self.font_family = theme.load_fonts()
         theme.FONT_FAMILY = self.font_family
         qapp.setWindowIcon(QIcon(str(ASSETS / "brand" / APP_ICON)))
@@ -140,6 +164,7 @@ class MapleHelperApp:
         QTimer.singleShot(4000, self.check_kb_update_silently)
         QTimer.singleShot(6000, self.voice.preload)    # voice answers right away after a start or an update
         QTimer.singleShot(8000, updater.remove_old_installers)
+        QTimer.singleShot(9000, _remove_stray_screenshots)
         from . import inventory     # the icon index for "check the inventory", built before it's needed
         QTimer.singleShot(10000, lambda: threading.Thread(target=inventory.warm, args=(self.kb,), daemon=True).start())
         # a session can run for hours: look again every 3 hours
@@ -385,6 +410,11 @@ class MapleHelperApp:
                              t("cancel"), t.rtl, self.style()).exec():
             return
         self.profiles.remove(cid)
+        # nothing of the deleted character stays behind: its pinned answers, tracked items and hidden tips
+        for key in ("pins", "wishlist", "tips_dismissed"):
+            data = dict(self.settings[key] or {})
+            if data.pop(cid, None) is not None:
+                self.settings[key] = data
         if not self.profiles.characters:
             # advice needs a character: offer to create one right away
             Onboarding(self.settings, self.profiles, self.kb, self.style, only_character=True).exec()
@@ -536,8 +566,9 @@ class MapleHelperApp:
             self.reload_kb()
             self.kb_updated(before, interactive=interactive)
         else:
-            if status == "failed":
-                self.reload_kb()        # the swap may have failed halfway: point at whatever KB exists now
+            from .store import kb_dir
+            if status == "failed" and kb_dir() != self.kb.root:
+                self.reload_kb()        # the swap failed halfway and the folder changed: use what exists now
             if interactive:
                 self.toast(t({"uptodate": "kb_uptodate", "postponed": "kb_update_postponed"}.get(status,
                                                                                                "kb_update_failed")))
@@ -749,7 +780,7 @@ class MapleHelperApp:
                                                                  self.kb))
 
     def reload_kb(self):
-        self.kb = KnowledgeBase()
+        self.kb = load_kb()
         from . import inventory
         threading.Thread(target=inventory.warm, args=(self.kb,), daemon=True).start()   # the new KB's icons
         self.brain.kb = self.kb

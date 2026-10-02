@@ -96,12 +96,13 @@ class VoiceController(QObject):
         try:
             import sounddevice as sd
             self._chunks = []
-            self._stream = sd.InputStream(samplerate=SAMPLE_RATE, channels=1, dtype="float32",
-                                          callback=lambda data, *_: self._chunks.append(data.copy()))
-            self._stream.start()
+            stream = sd.InputStream(samplerate=SAMPLE_RATE, channels=1, dtype="float32",
+                                    callback=lambda data, *_: self._chunks.append(data.copy()))
+            stream.start()
         except Exception as e:
-            self.failed.emit(f"mic: {e}")
+            self.failed.emit(f"mic: {e}")      # not kept: the next press starts again instead of "stopping"
             return
+        self._stream = stream
         self.started.emit()
         self.state.emit("listening")
 

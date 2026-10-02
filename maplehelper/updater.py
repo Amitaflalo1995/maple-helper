@@ -99,7 +99,13 @@ def fetch_kb(before_swap=None) -> str:
     except zipfile.BadZipFile:
         shutil.rmtree(tmp, ignore_errors=True)
         return "failed"
-    if not (tmp / "index.json").exists():
+    try:
+        # it must load, not just exist: a bad release would otherwise stop every start
+        index = json.loads((tmp / "index.json").read_text(encoding="utf-8"))
+        if not (isinstance(index, list) and index and all(isinstance(e, dict) and e.get("key") and e.get("category")
+                                                         for e in index)):
+            raise ValueError("index.json has no usable entries")
+    except (OSError, ValueError):
         shutil.rmtree(tmp, ignore_errors=True)
         return "failed"
     meta_path = tmp / "meta.json"

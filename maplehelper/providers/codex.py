@@ -284,12 +284,15 @@ class CodexBackend:
             self._proc.kill()
 
     def _exec(self, cmd: list[str], stdin_text: str, cwd: str, api_key: str | None,
-              timeout: int | None = None) -> RawResult:
+              timeout: int | None = None, answer: bool = True) -> RawResult:
+        """answer=False (a summary): not tracked as the answer cancel() stops (it killed the summary instead)."""
         try:
-            self._proc = p = subprocess.Popen(cmd, cwd=cwd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                              stderr=subprocess.PIPE, env=env(api_key), creationflags=CREATE_NO_WINDOW)
+            p = subprocess.Popen(cmd, cwd=cwd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, env=env(api_key), creationflags=CREATE_NO_WINDOW)
         except OSError as e:
             return RawResult(error=f"launch_failed: {e}")
+        if answer:
+            self._proc = p
         # Codex logs to stderr while it works: drain it so a full pipe never stalls the run
         err: list[bytes] = []
         reader = threading.Thread(target=lambda: err.append(p.stderr.read()), daemon=True)
@@ -340,5 +343,5 @@ class CodexBackend:
         with tempfile.TemporaryDirectory(prefix="maplehelper-summary-") as empty:
             cmd = codex_command(self.exe, empty, instructions, self.brain.model,
                                 extra=("-c", 'model_reasoning_effort="low"'))
-            r = self._exec(cmd, text, empty, self.brain.api_key, timeout=timeout)
+            r = self._exec(cmd, text, empty, self.brain.api_key, timeout=timeout, answer=False)
         return r.text.strip() or None

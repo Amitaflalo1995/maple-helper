@@ -225,3 +225,21 @@ def test_last_good_copy_is_used(isolated_store):
     s["language"] = "he"                       # the second save keeps the first as .bak
     isolated_store.Settings.path.write_text("", encoding="utf-8")   # a power cut emptied it
     assert isolated_store.Settings()["language"] == "en"
+
+
+def test_a_damaged_required_field_repairs_the_character(isolated_store):
+    """An old corruption (job saved as an object, level 31.0) must not lose the whole character."""
+    isolated_store.Profiles.path.write_text(json.dumps({"active": "a", "characters": [
+        {"id": "a", "name": "Amit", "base_class": "Thief", "job": {"x": 1}, "level": 31.0,
+         "exp_pct": "12", "stats": {"acc": "50", "hp": 900}}]}), encoding="utf-8")
+    c = isolated_store.Profiles().active
+    assert c and c.name == "Amit" and c.level == 31 and c.job == "Thief" and c.exp_pct is None
+    assert c.stats == {"hp": 900}
+
+
+def test_history_skips_lines_of_the_wrong_shape(isolated_store):
+    h = isolated_store.History("x")
+    h.append("user", "hi")
+    with h.log.open("a", encoding="utf-8") as f:
+        f.write('[1, 2]\n{"role": "user"}\n"text"\n')
+    assert [r["text"] for r in h.recent()] == ["hi"]
