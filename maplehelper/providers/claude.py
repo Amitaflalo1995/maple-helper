@@ -135,11 +135,14 @@ class ClaudeBackend:
         b = self.brain
         return (self.exe, b.model, b.length, b.api_key, str(b.kb.root))
 
-    def _spawn(self) -> subprocess.Popen:
+    def _spawn(self, model: str | None = None, tools: bool = True) -> subprocess.Popen:
+        """model / tools: a one-off call's own (the ⟳ sync: Haiku, no file tools); the warm process uses the
+        player's model with the knowledge-base tools."""
         b = self.brain
         cmd = [self.exe, "-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose",
-               "--include-partial-messages", "--restricted", "--strict-mcp-config", "--tools", "Read,Grep,Glob",
-               "--model", b.model or "sonnet", "--no-session-persistence", "--system-prompt", b.system_prompt()]
+               "--include-partial-messages", "--restricted", "--strict-mcp-config",
+               "--tools", "Read,Grep,Glob" if tools else "",
+               "--model", model or b.model or "sonnet", "--no-session-persistence", "--system-prompt", b.system_prompt()]
         e = env()
         if b.api_key:
             e["ANTHROPIC_API_KEY"] = b.api_key
@@ -190,7 +193,9 @@ class ClaudeBackend:
         if self._proc and self._proc.poll() is None:
             self._proc.kill()
 
-    def run(self, prompt: str, screenshot_jpeg: bytes | None, on_raw_delta=None) -> RawResult:
+    def run(self, prompt: str, screenshot_jpeg: bytes | None, on_raw_delta=None, model: str | None = None,
+            tools: bool = True) -> RawResult:
+        """model / tools: see _spawn. The warm process serves only a call with the player's own setup."""
         content = []
         # one screenshot, or the screenshot and its full-resolution detail tiles
         for jpeg in (screenshot_jpeg if isinstance(screenshot_jpeg, list) else [screenshot_jpeg]):
@@ -200,8 +205,9 @@ class ClaudeBackend:
         content.append({"type": "text", "text": prompt})
         msg = {"type": "user", "message": {"role": "user", "content": content}}
 
+        own = (model in (None, self.brain.model)) and tools        # the player's setup: the warm process fits
         try:
-            self._proc = self._take_warm() or self._spawn()
+            self._proc = (self._take_warm() if own else None) or self._spawn(model, tools)
         except OSError as e:
             log.error("could not start Claude Code: %s", e)
             return RawResult(error=f"launch_failed: {e}")
@@ -210,11 +216,12 @@ class ClaudeBackend:
             self._proc.stdin.close()
         except OSError:
             # the warm process died meanwhile: start fresh once
-            self._proc = self._spawn()
+            self._proc = self._spawn(model, tools)
             self._proc.stdin.write((json.dumps(msg) + "\n").encode("utf-8"))
             self._proc.stdin.close()
         # get the next one ready while the player reads this answer
-        threading.Thread(target=self.prewarm, daemon=True).start()
+        if own:
+            threading.Thread(target=self.prewarm, daemon=True).start()
 
         current = ""       # text of the assistant message being streamed
         result = None

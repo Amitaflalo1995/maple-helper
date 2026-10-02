@@ -147,8 +147,9 @@ def to_html(g: Guide, labels: dict, rtl: bool = False) -> str:
 
     def para(text: str) -> str:
         return bidi.paragraph_html(text, "rtl" if rtl and bidi._RTL.search(text) else None)
-    if g.intro:
-        out.append(f"<p{side}><i>{_cell(g.intro, rtl)}</i></p>")
+    if g.intro:      # (no italics in Hebrew: Qt only slants the letters)
+        intro = _cell(g.intro, rtl)
+        out.append(f"<p{side}>{f'<b>{intro}</b>' if rtl else f'<i>{intro}</i>'}</p>")
     for name, items in ((labels["pros"], g.pros), (labels["cons"], g.cons)):
         if items:
             out.append(f"<h3{side}>{html.escape(name)}</h3><ul{side}>"
@@ -305,7 +306,9 @@ def book_html(b: dict, mode: str = "light", rtl_ui: bool = False) -> str:
         out.append(f"<img src='{(IMAGES / b['hero']).as_uri()}' align='{'left' if he else 'right'}' height='120'>")
     if b.get("intro"):
         r = rtl_of(b["intro"])
-        out.append(f"<p {'dir=rtl align=right' if r else ''}><i>{_rich(b['intro'], r)}</i></p>")
+        # Hebrew has no italics (Qt slants the letters, a fake italic): a Hebrew intro stands out by weight instead
+        intro = f"<span style='font-weight: 500;'>{_rich(b['intro'], r)}</span>" if r else f"<i>{_rich(b['intro'], r)}</i>"
+        out.append(f"<p {'dir=rtl align=right' if r else ''} style='margin: 4px 0 10px 0;'>{intro}</p>")
     for blk in b.get("blocks", []):
         if "h2" in blk:
             out.append(para(blk["h2"], "h2", "margin: 18px 0 6px 0;"))
@@ -320,8 +323,9 @@ def book_html(b: dict, mode: str = "light", rtl_ui: bool = False) -> str:
                        f"{_rich(blk['note'], r)}</p></td></tr></table>")
         elif "ul" in blk or "ol" in blk:
             tag = "ul" if "ul" in blk else "ol"
-            items = "".join(f"<li {'dir=rtl align=right' if rtl_of(i) else ''}>{_rich(i, rtl_of(i))}</li>"
-                            for i in blk[tag])
+            # a little air between the bullets: a run of long items read as one block
+            items = "".join(f"<li {'dir=rtl align=right' if rtl_of(i) else ''} style='margin-bottom: 4px;'>"
+                            f"{_rich(i, rtl_of(i))}</li>" for i in blk[tag])
             out.append(f"<{tag} {side} style='margin: 2px 0 8px 0;'>{items}</{tag}>")
         elif "table" in blk:
             rows = blk["table"]

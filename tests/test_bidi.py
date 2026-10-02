@@ -144,6 +144,70 @@ def test_english_quest_name_with_brackets_stays_whole():
     assert bidi.ltr_name(name, False) == name
 
 
+# KB names whose ", " / ": " / "[ ]" split the English runs: "Tree Dungeon, Monkey Forest I" came out as
+# "Monkey Forest I, Tree Dungeon" and "Final Attack: Sword" as "Sword: Final Attack" in a Hebrew answer
+KB_NAMES = ["Tree Dungeon, Monkey Forest I", "[Construction Site B1] Shumi's Lost Coin", "Final Attack: Sword",
+            "One-Handed Sword Attack Scroll: Lesser", "MapleStory Classic Warrior Guide: Lv 1-30"]
+NAME_SENTENCES = ["הכי כדאי לאמן ב-{} או בבית.", "את הקווסט {} לוקחים מ-Shumi.", "בלבל 30 כדאי ללמוד {}.",
+                  "{} הוא הכי טוב", "קראו את {}, Red Snail ו-Blue Snail."]
+
+
+@pytest.fixture
+def kb_names():
+    bidi.set_names(KB_NAMES + ["Henesys", "קווסט בעברית: שם"])
+    yield
+    bidi.set_names([])
+
+
+@pytest.mark.parametrize("name", KB_NAMES)
+@pytest.mark.parametrize("sentence", NAME_SENTENCES)
+def test_kb_name_with_punctuation_stays_whole_in_hebrew(kb_names, name, sentence):
+    line = sentence.format(name)      # a line of a Hebrew answer: RTL (paragraph_direction)
+    assert bidi.paragraph_direction(line, "rtl") == "rtl"
+    shown = bidi.isolate_ltr_runs(line)
+    order = _reading_order(shown)
+    assert name.replace(" ", "") in order, f"{name!r} scrambled in {line!r}: {order}"
+    if "Red Snail" in line:   # the other English names in the line still read in Hebrew order
+        assert order.index("BlueSnail") < order.index("RedSnail")
+
+
+def test_kb_names_in_answer_html(kb_names):
+    body = bidi.to_html("הכי כדאי לאמן ב-Tree Dungeon, Monkey Forest I.\nאחר כך Final Attack: Sword.")
+    assert f"{bidi.LRI}Tree Dungeon, Monkey Forest I{bidi.PDI}" in body
+    assert f"{bidi.LRI}Final Attack: Sword{bidi.PDI}" in body
+    # only names that need it (plain "Henesys" stays a run), never a Hebrew one, never inside a longer word
+    assert bidi.LRI not in bidi.isolate_ltr_runs("לכו ל-Henesys")
+    assert bidi.LRI not in bidi.isolate_ltr_runs("Final Attack: Swordsman ב-Henesys")
+    # an English answer is left alone
+    assert bidi.LRI not in bidi.to_html("Learn Final Attack: Sword at level 30.")
+
+
+def test_kb_registers_names_for_hebrew_answers(tmp_path):
+    import json
+
+    from maplehelper.kb import KnowledgeBase
+    rows = [{"key": f"map/{i}", "name": n, "category": "map"} for i, n in enumerate(KB_NAMES + ["Henesys"])]
+    (tmp_path / "index.json").write_text(json.dumps(rows), encoding="utf-8")
+    try:
+        bidi.set_names([])
+        KnowledgeBase(tmp_path)
+        for n in KB_NAMES:
+            assert bidi.isolate_ltr_runs(f"לכו ל-{n} עכשיו").count(bidi.LRI) == 1
+        assert bidi.LRI not in bidi.isolate_ltr_runs("לכו ל-Henesys עכשיו")
+    finally:
+        bidi.set_names([])
+
+
+@pytest.mark.parametrize("line,name", [
+    ("את הקווסט [Construction Site B1] Shumi's Lost Coin לוקחים מ-Shumi.", "[ConstructionSiteB1]Shumi'sLostCoin"),
+    ('השלט "Lith Harbor" ליד הנמל.', '"LithHarbor"'),
+    ("המפה [Area 1] Line 2 טובה", "[Area1]Line2"),
+])
+def test_brackets_and_quotes_inside_a_run(line, name):
+    # without any KB names: "[ ]" and '"' belong to the English run (no bracket thrown to the other end)
+    assert name in _reading_order(bidi.isolate_ltr_runs(line))
+
+
 @pytest.mark.parametrize("line,checks", HEBREW_MESSAGE_LINES)
 def test_line_inside_hebrew_message(line, checks):
     shown = bidi.isolate_ltr_runs(line)

@@ -61,8 +61,8 @@ class GlassBackdrop(QObject):
 
 from PySide6.QtCore import QMetaMethod, QRectF, Qt  # noqa: E402
 from PySide6.QtGui import QColor, QCursor, QGuiApplication, QLinearGradient, QPainter, QPainterPath, QPen  # noqa: E402
-from PySide6.QtWidgets import (QDialog, QHBoxLayout, QLabel, QLineEdit, QPushButton, QToolButton,  # noqa: E402
-                               QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractScrollArea, QDialog, QHBoxLayout, QLabel, QLineEdit,  # noqa: E402
+                               QPushButton, QToolButton, QVBoxLayout, QWidget)
 
 from . import theme  # noqa: E402
 
@@ -145,6 +145,20 @@ def no_default_buttons(root) -> None:
         b.setDefault(False)
 
 
+def first_control(root):
+    """The first widget inside `root` that Tab would reach (visible, enabled), in focus-chain order."""
+    w = root.nextInFocusChain()
+    for _ in range(2000):
+        if w is None or w is root:
+            return None
+        # (a scroll area takes Tab focus too, but it's no control)
+        if (root.isAncestorOf(w) and w.isVisible() and w.isEnabled() and not isinstance(w, QAbstractScrollArea)
+                and w.focusPolicy().value & Qt.TabFocus.value):
+            return w
+        w = w.nextInFocusChain()
+    return None
+
+
 def _handles_enter(w) -> bool:
     """A text field that does something of its own on Enter (search, next step, check the key)."""
     return isinstance(w, QLineEdit) and w.isSignalConnected(QMetaMethod.fromSignal(w.returnPressed))
@@ -183,6 +197,20 @@ class GlassDialog(QDialog):
         root.addWidget(bar)
         self.content = QWidget(objectName="Feed")
         root.addWidget(self.content, 1)
+
+    initial_focus = None       # the control a window opens focused on (a search field); else its first control
+
+    def showEvent(self, e):
+        super().showEvent(e)
+        # Qt focuses the first widget in the chain, the title bar's X: Space or Enter then closed the window
+        QTimer.singleShot(0, self._focus_first)
+
+    def _focus_first(self) -> None:
+        w = self.initial_focus
+        if w is None or not w.isVisible() or not w.isEnabled():
+            w = first_control(self.content)
+        if w is not None and (self.focusWidget() in (None, self.close_btn) or not self.focusWidget().isVisible()):
+            w.setFocus(Qt.OtherFocusReason)
 
     def fit_screen(self, width: int, height: int) -> None:
         """Open at (width, height), but never taller than the screen: on a small or scaled display the

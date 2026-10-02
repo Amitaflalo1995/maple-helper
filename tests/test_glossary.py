@@ -21,3 +21,15 @@ def test_marks_go_after_an_english_block_in_hebrew():
     out = glossary.annotate(line, "he")
     run = f"{bidi.LRE}Avoid 14{bidi.PDF}"
     assert run in out and out.index("g:Avoid") > out.index(run)
+
+
+def test_no_mark_inside_a_kb_name_block():
+    # "Bottomwear HP Scroll: Chaos" is one block in a Hebrew line (bidi.set_names): its HP is part of a name
+    bidi.set_names(["Bottomwear HP Scroll: Chaos"])
+    try:
+        line = bidi.isolate_ltr_runs("קנו Bottomwear HP Scroll: Chaos ואז HP 50")
+        out = glossary.annotate(line, "he")
+        assert f"{bidi.LRI}Bottomwear HP Scroll: Chaos{bidi.PDI}" in out
+        assert out.count("g:HP") == 1 and out.index("g:HP") > out.index(bidi.PDI)
+    finally:
+        bidi.set_names([])

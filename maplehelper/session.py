@@ -76,7 +76,7 @@ def lines(summary: dict, t) -> list[str]:
     for i, r in enumerate(summary["chars"]):
         if i:
             out.append("")
-        name = bidi.ltr_block(r["name"], rtl)
+        name = bidi.name_block(r["name"], rtl)       # a Hebrew name in an English line is one block too
         if r["end_level"] != r["start_level"]:
             out.append(t("sess_level", name=name, a=r["start_level"], b=r["end_level"]))
         else:

@@ -18,6 +18,7 @@ from .store import Character, History
 log = logging.getLogger(__name__)
 
 META = "@@META@@"
+_FOCUS_TAG = re.compile(r"^\s*\[about [^\]]*\]\s*")      # "[about Mano] " the chat puts before a tagged question
 REVERSE_WORDS = re.compile(r"(מאיז[הו]|מאילו|איזה|אילו)\s+מפלצ|מי\s+מפיל|which\s+monsters?|who\s+drops|what\s+drops", re.I)
 DROP_WORDS = re.compile(r"דרופ|מפיל|נופל|שנופל|drops?\b|loot", re.I)
 SUMMARY_PROMPT = ("Summarize this MapleStory Classic helper conversation in 2-3 sentences for future context: "
@@ -88,12 +89,17 @@ REPLY_RULES = """<reply_rules>
   ("Blue Snail Shell", not "קונכיית חילזון כחול"), even inside a Hebrew sentence.
 - Locations, drops and stats only from the context or the knowledge base (Grep pages/monster/*.md for "Map Locations" if needed).
 - Then the line @@META@@ and the JSON object. Always include it, even when empty. If the player states a new level/job, put it in profile_update.
+- profile_update describes ONLY the character in <player_profile>. If the player says they are on another character,
+  or the screenshot's HUD shows another name, put that character's facts in profile_update WITH its "name" (the app
+  offers to add it or switch to it), and never word it as a change of the profile's character.
 </reply_rules>"""
 LENGTH_LINES = {"short": 6, "detailed": 15}
 
 
 def build_prompt(question: str, character: Character | None, history: History | None, kb: KnowledgeBase,
-                 has_screenshot: bool, length: str = "short", focus=None, extra: str | None = None) -> str:
+                 has_screenshot: bool, length: str = "short", focus=None, extra: str | None = None,
+                 kb_context: bool = True) -> str:
+    """kb_context=False: no knowledge-base pre-fetch (a screenshot read needs only the profile and the picture)."""
     parts = []
     if character:
         parts.append(f"<player_profile>\n{character.summary()}\n</player_profile>")
@@ -104,10 +110,17 @@ def build_prompt(question: str, character: Character | None, history: History | 
         if summ:
             parts.append("<earlier_sessions>\n" + "\n".join(summ[-3:]) + "\n</earlier_sessions>")
         recent = history.recent()
+        # the chat writes the question to the history before the AI runs: it goes once, in <question>
+        if recent and recent[-1].get("role") == "user" and _FOCUS_TAG.sub("", recent[-1]["text"]).strip() == question.strip():
+            recent = recent[:-1]
         if recent:
             convo = "\n".join(f"{'Player' if r['role'] == 'user' else 'Helper'}: {r['text'][:600]}" for r in recent)
             parts.append(f"<recent_conversation>\n{convo}\n</recent_conversation>")
     ctx = []
+    if not kb_context:
+        question_parts = [f"<screenshot>{'attached above' if has_screenshot else 'not available'}</screenshot>",
+                          f"<question>\n{question}\n</question>", REPLY_RULES.format(length=LENGTH_LINES["short"])]
+        return "\n\n".join(parts + question_parts)
     if character:
         digest = kb.level_digest(character.level)
         if digest:
@@ -209,7 +222,41 @@ def split_meta(raw: str) -> tuple[str, dict]:
     for key, typ in (("profile_update", dict), ("entities", list), ("drop_groups", list)):
         if key in data and not isinstance(data[key], typ):
             del data[key]
+    _numbers(data.get("profile_update"))
     return text.strip(), data
+
+
+def _whole(v) -> int | None:
+    """12, 12.0 and "12" (or "1,234") as an int; never a bool (True is no level 1), a fraction or a word."""
+    if isinstance(v, bool):
+        return None
+    if isinstance(v, int):
+        return v
+    if isinstance(v, float):
+        return int(v) if v.is_integer() else None
+    if isinstance(v, str) and re.fullmatch(r"\s*\d{1,3}(?:,\d{3})*\s*|\s*\d+\s*", v):
+        return int(v.replace(",", ""))
+    return None
+
+
+def _numbers(update) -> None:
+    """profile_update's level and stats as ints (the AI writes "12" or 12.0 too): the chat compares the level with
+    the saved one (a lower level asks first), which a string slipped past."""
+    if not isinstance(update, dict):
+        return
+    if "level" in update:
+        lv = _whole(update["level"])
+        if lv is None:
+            del update["level"]
+        else:
+            update["level"] = lv
+    stats = update.get("stats")
+    if "stats" in update:
+        clean = {k: n for k, v in stats.items() if (n := _whole(v)) is not None} if isinstance(stats, dict) else {}
+        if clean:
+            update["stats"] = clean
+        else:
+            del update["stats"]
 
 
 def streamed_text(raw: str) -> str:
@@ -268,18 +315,25 @@ class Brain:
         self.backend.cancel()
 
     def ask(self, question: str, character: Character | None, history: History | None,
-            screenshot_jpeg: bytes | None, on_delta=None, focus=None, extra: str | None = None) -> Answer:
-        """extra: context for the prompt only; every heuristic below reads the player's own question"""
-        """Blocking call; on_delta(visible_text_so_far) is invoked while the answer streams."""
+            screenshot_jpeg: bytes | None, on_delta=None, focus=None, extra: str | None = None,
+            model: str | None = None, light: bool = False) -> Answer:
+        """Blocking call; on_delta(visible_text_so_far) is invoked while the answer streams.
+        extra: context for the prompt only; every heuristic below reads the player's own question.
+        model: another model for this one call (None: the player's). light: a screenshot read (the ⟳ sync): no
+        knowledge-base pre-fetch and no file tools, so a light model answers in seconds instead of ~40 s."""
         if not self.backend.exe:
             return Answer(error="not_installed")
         self.kb.ensure_drop_table()
         shots = screenshot_jpeg if isinstance(screenshot_jpeg, list) else [screenshot_jpeg] if screenshot_jpeg else []
         # True (one screenshot), or the number of detail tiles that follow it (an int, never 1 == True)
         has = (len(shots) - 1 if len(shots) > 1 else True) if shots else False
-        prompt = build_prompt(question, character, history, self.kb, has, self.length, focus, extra)
+        prompt = build_prompt(question, character, history, self.kb, has, "short" if light else self.length, focus,
+                              extra, kb_context=not light)
         raw_delta = (lambda raw: on_delta(streamed_text(raw))) if on_delta else None
-        result = self.backend.run(prompt, screenshot_jpeg, raw_delta)
+        if model or light:
+            result = self.backend.run(prompt, screenshot_jpeg, raw_delta, model=model, tools=not light)
+        else:
+            result = self.backend.run(prompt, screenshot_jpeg, raw_delta)
         if result.error:
             return Answer(error=result.error, limits=result.limits)
         text, meta = split_meta(result.text)

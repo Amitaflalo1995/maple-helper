@@ -207,6 +207,7 @@ class GuidesDialog(GlassDialog):
         self.stack.addWidget(self._library())
         self.stack.addWidget(self._reader())
         rtl_buttons(self, t.rtl)
+        self.initial_focus = self.search      # (an opened guide: its first control, "Back")
         if open_key and kb.get(open_key):
             self.open_guide(open_key)
 

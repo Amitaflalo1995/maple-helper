@@ -312,7 +312,9 @@ class CodexBackend:
         reader.join(timeout=5)
         return parse_events(lines, b"".join(err).decode("utf-8", errors="replace"))
 
-    def run(self, prompt: str, screenshot_jpeg: bytes | None, on_raw_delta=None) -> RawResult:
+    def run(self, prompt: str, screenshot_jpeg: bytes | None, on_raw_delta=None, model: str | None = None,
+            tools: bool = True) -> RawResult:
+        """model: this call's own (None: the player's). tools is Claude's: Codex reads files only when asked to."""
         b = self.brain
         images: list[str] = []
         try:
@@ -323,7 +325,7 @@ class CodexBackend:
                         f.write(jpeg)
                     images.append(path)
             image = images if len(images) > 1 else (images[0] if images else None)
-            cmd = codex_command(self.exe, b.kb.root, b.system_prompt() + TOOLS_NOTE, b.model, image)
+            cmd = codex_command(self.exe, b.kb.root, b.system_prompt() + TOOLS_NOTE, model or b.model, image)
             # a stalled CLI must not leave the chat on "thinking" forever
             r = self._exec(cmd, prompt, str(b.kb.root), b.api_key, timeout=ANSWER_TIMEOUT_S)
         finally:

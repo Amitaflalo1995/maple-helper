@@ -229,15 +229,12 @@ def _consistent_job(update: dict, c: "Character") -> dict:
 
 
 def same_character(saved: str, hud: str, seen: bool = False, others: tuple[str, ...] = ()) -> bool:
-    """Is the name on the HUD the saved character's? The same name; or, until the HUD confirmed it once, a longer
-    name it was cut short from at setup ("Kalimero" typed, "KalimeroZz" in game). Never another saved character's
-    name ("Amit" and the alt "AmitBow" are two characters)."""
-    a, b = saved.strip().lower(), hud.strip().lower()
-    if a == b:
-        return True
-    if seen or any(o.strip().lower() == b for o in others):
-        return False
-    return len(a) >= 3 and b.startswith(a)
+    """Is the name on the HUD the saved character's? Only the same name (letter case aside). A longer name that
+    starts with it is asked about, never taken: "Ayash" (Lv. 131 Night Lord) was silently renamed to the alt
+    "Ayashii" and overwritten with the alt's class and level (a player's report). The chat offers "this is the same
+    character (update the name)" for "Kalimero" typed at setup and "KalimeroZz" in game.
+    (seen / others are kept for the callers; an exact match never depends on them.)"""
+    return saved.strip().lower() == hud.strip().lower()
 
 
 def hud_name(update) -> str | None:
@@ -356,6 +353,18 @@ class Profiles:
     def find_by_name(self, name: str) -> "Character | None":
         n = name.strip().lower()
         return next((c for c in self.characters if c.name.strip().lower() == n), None)
+
+    def confirm_hud_name(self, name: str) -> list[tuple[str, object]]:
+        """The player said the HUD's other name is the active character's ("this is the same character"): it takes
+        that name, confirmed (name_seen), so the next read matches it exactly."""
+        c = self.active
+        if not c or not hud_name({"name": name}):
+            return []
+        changed = [("name", name)] if c.name != name else []
+        c.name, c.name_seen = name, True
+        c.updated_at = time.time()
+        self.save()
+        return changed
 
     def set_active(self, cid: str) -> None:
         self.active_id = cid

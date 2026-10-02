@@ -7,7 +7,9 @@ from __future__ import annotations
 
 import sys
 
-from PySide6.QtGui import QFont, QFontDatabase
+from PySide6.QtCore import QEvent, QObject, QRectF, Qt
+from PySide6.QtGui import QColor, QFont, QFontDatabase, QPainter, QPen
+from PySide6.QtWidgets import QAbstractButton, QApplication, QSlider, QWidget
 
 from ..store import ASSETS
 
@@ -100,7 +102,9 @@ def app_font(size: int = 14) -> QFont:
 def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     s, c = size, P()
     ot, otd = accent_text(), accent_text(deep=True)      # orange text: darker on white for contrast
+    install_focus_ring()
     return f"""
+    QPushButton, QToolButton {{ outline: none; }}
     * {{ font-family: "{font_family}"; font-size: {s}px; color: {c['text']}; }}
     QWidget#Overlay, QWidget#Feed {{ background: transparent; }}
     #Title {{ font-size: {s + 1}px; font-weight: 600; letter-spacing: -0.2px; color: {c['text']}; }}
@@ -239,15 +243,18 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QToolButton#Send {{ font-family: "{ICON_FONT}"; font-size: 13px; color: #FFFFFF; border: none; border-radius: 15px;
                         min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;
                         background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFA24A, stop:1 {ORANGE_DEEP}); }}
+    QToolButton#Send:hover {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFB066, stop:1 #F58A2A); }}
     QToolButton#Send:pressed {{ background: {ORANGE_DEEP}; }}
     QToolButton#Send:disabled {{ background: {c['fill2']}; color: {c['faint']}; }}
 
     QPushButton#Primary {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFA24A, stop:1 {ORANGE_DEEP});
                            color: #FFFFFF; border: none; border-radius: 12px; min-height: 26px; padding: 4px 18px; font-weight: 600; }}
+    QPushButton#Primary:hover {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFB066, stop:1 #F58A2A); }}
     QPushButton#Primary:pressed {{ background: {ORANGE_DEEP}; }}
     QPushButton#Primary:disabled {{ background: {c['fill2']}; color: {c['faint']}; }}
     QPushButton#Danger {{ background: #FF3B30; color: #FFFFFF; border: none; border-radius: 12px; min-height: 26px;
                           padding: 4px 18px; font-weight: 600; }}
+    QPushButton#Danger:hover {{ background: #FF5147; }}
     QPushButton#Danger:pressed {{ background: #D70015; }}
     QPushButton#Secondary {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 12px; min-height: 26px; padding: 4px 18px; }}
     QPushButton#Secondary:hover {{ background: {c['fill3']}; }}
@@ -273,7 +280,10 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QPushButton#Link, QPushButton#LinkDanger {{ background: transparent; border: none; min-height: 34px;
                         font-weight: 500; text-align: left; padding: 0; color: {ot}; }}
     QPushButton#LinkDanger {{ color: #FF453A; }}
+    QPushButton#Link:hover {{ color: {otd}; text-decoration: underline; }}
+    QPushButton#LinkDanger:hover {{ color: #FF3B30; text-decoration: underline; }}
     QPushButton#Link:pressed, QPushButton#LinkDanger:pressed {{ color: {c['muted']}; }}
+    QPushButton#Link:disabled, QPushButton#LinkDanger:disabled {{ color: {c['faint']}; text-decoration: none; }}
 
     #Segmented {{ background: {"rgba(118,118,128,0.24)" if MODE == "dark" else "#E3E3E8"}; border: none;
                   border-radius: 10px; }}
@@ -324,6 +334,75 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QToolTip {{ background: {"#2C2C2E" if MODE == "dark" else "#FFFFFF"}; color: {c['text']};
                 border: 1px solid {c['stroke']}; border-radius: 6px; padding: 4px 8px; }}
     """
+
+
+_FOCUS_RING = None
+
+
+def install_focus_ring() -> None:
+    """A subtle orange ring on the button that has keyboard focus (Tab / Shift+Tab), like the web's
+    :focus-visible: a click gives no ring. Drawn by a see-through child over the button's own edge, so no
+    layout moves and no tight parent clips it (a QFocusFrame outside the button was cut off in a chat row)."""
+    global _FOCUS_RING
+    app = QApplication.instance()
+    if app is None or _FOCUS_RING is not None:
+        return
+    _FOCUS_RING = FocusRing(app)
+    app.installEventFilter(_FOCUS_RING)
+
+
+class _Ring(QWidget):
+    def __init__(self, target):
+        super().__init__(target)
+        self.setObjectName("FocusRing")
+        self.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.setAttribute(Qt.WA_NoSystemBackground)
+        self.setFocusPolicy(Qt.NoFocus)
+        self.setGeometry(target.rect())
+
+    def paintEvent(self, e):
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+        color = QColor(ORANGE if MODE == "dark" else ORANGE_DEEP)
+        color.setAlphaF(0.9)
+        p.setPen(QPen(color, 2))
+        r = QRectF(self.rect()).adjusted(1, 1, -1, -1)
+        radius = min(r.height() / 2, 13)
+        p.drawRoundedRect(r, radius, radius)
+        p.end()
+
+
+class FocusRing(QObject):
+    KEYBOARD = (Qt.TabFocusReason, Qt.BacktabFocusReason)
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.ring: _Ring | None = None
+
+    def _hide(self) -> None:
+        try:
+            if self.ring is not None:
+                self.ring.deleteLater()
+        except RuntimeError:          # its button is gone (a closed window), and the ring with it
+            pass
+        self.ring = self.target = None
+
+    target = None
+
+    def eventFilter(self, obj, e):
+        t = e.type()
+        if t in (QEvent.FocusIn, QEvent.FocusOut) and isinstance(obj, (QAbstractButton, QSlider)):
+            self._hide()
+            if t == QEvent.FocusIn and e.reason() in self.KEYBOARD:
+                self.ring, self.target = _Ring(obj), obj
+                self.ring.show()
+                self.ring.raise_()
+        elif t == QEvent.Resize and obj is self.target and self.target is not None:
+            try:
+                self.ring.setGeometry(obj.rect())
+            except RuntimeError:
+                self.ring = self.target = None
+        return False
 
 
 def dialog_background() -> str:

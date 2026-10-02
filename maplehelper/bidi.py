@@ -19,38 +19,65 @@ import re
 
 LRE, PDF, RLM = "‪", "‬", "‏"  # left-to-right embedding, pop, right-to-left mark
 LRI, PDI = "⁦", "⁩"            # left-to-right isolate, pop (for a whole English name, see ltr_name)
+RLI = "⁧"                  # right-to-left isolate: a Hebrew name inside an English line (name_block)
 _ISOLATED = re.compile(f"({LRI}[^{PDI}]*{PDI})")
+_ANY_ISOLATE = re.compile(f"[{LRI}{RLI}][^{PDI}]*{PDI}")
 RTL_CHARS = "֐-׿؀-ۿיִ-﷿ﹰ-﻿"
 _STRONG = re.compile(rf"[A-Za-z{RTL_CHARS}]")
 _RTL = re.compile(rf"[{RTL_CHARS}]")
 
-# An LTR run: starts with a Latin letter, a digit, or a sign followed by a digit;
-# may contain spaces and inner punctuation; ends with a letter, digit, % or ).
+# An LTR run: starts with a Latin letter, a digit, a "[" or a sign followed by a digit;
+# may contain spaces and inner punctuation; ends with a letter, digit, %, ) or ].
 _RUN = re.compile(
-    # start: a letter, a digit, or a sign/$/# right before a digit; but a hyphen glued to a Hebrew
-    # letter ("ב-84%", "ל-30") is the Hebrew prefix hyphen, not a minus sign
-    rf"(?:(?<![{RTL_CHARS}])[+\-±](?=\d)|[$#](?=\d)|\d|[A-Za-z])"
+    # start: a letter, a digit, a "[" or '"' before a letter/digit ("[Construction Site B1] ..."), or a
+    # sign/$/# right before a digit; but a hyphen glued to a Hebrew letter ("ב-84%", "ל-30") is the Hebrew
+    # prefix hyphen, not a minus sign
+    rf"(?:(?<![{RTL_CHARS}])[+\-±](?=\d)|[$#](?=\d)|[\[\"](?=[A-Za-z0-9])|\d|[A-Za-z])"
     # body; "1,500" keeps its comma, a@b.com its @, "11:41" its colon; ": " ends the block
     # ("ה-AI: Claude או Codex" is two blocks, not "AI: Claude" read backwards)
-    r"(?:(?:[A-Za-z0-9.'’&/+\-–%#×_ ()@<>]|:(?! )|,(?=\d{3}\b))*"
-    r"(?:[A-Za-z0-9%)>]|(?<=\d)\+))?"            # "Line 2 <Area 1>" stays one map name; "ACC 40+" keeps its +
+    r"(?:(?:[A-Za-z0-9.'’&/+\-–%#×_  ()\[\]\"@<>]|:(?! )|,(?=\d{3}\b))*"   # (no-break space: i18n.WHOLE_NAMES)
+    r"(?:[A-Za-z0-9%)\]\">]|(?<=\d)\+))?"        # "Line 2 <Area 1>" stays one map name; "ACC 40+" keeps its +
 )
+
+_OPEN, _CLOSE = "([", ")]"
 
 
 def _balanced(run: str) -> str:
-    """Trim a run so its brackets are balanced: 'Ellinia (Victoria Road)' stays whole,
-    'Lv. 10)' loses the stray ')' and 'Axe Stump (' loses the dangling '('."""
-    depth, last_ok = 0, 0
+    """Trim a run so its brackets and quotes are balanced: 'Ellinia (Victoria Road)' and '[Area] Name' stay
+    whole, 'Lv. 10)' loses the stray ')', 'Axe Stump (' the dangling '(' and 'Red Snail"' its lone quote."""
+    depth, last_ok, quoted = 0, 0, False
     for i, ch in enumerate(run):
-        if ch == "(":
+        if ch in _OPEN:
             depth += 1
-        elif ch == ")":
+        elif ch in _CLOSE:
             if depth == 0:
                 break
             depth -= 1
-        if depth == 0 and (ch.isalnum() or ch in "%)>" or (ch == "+" and i and run[i - 1].isdigit())):
+        elif ch == '"':
+            quoted = not quoted
+        if depth == 0 and not quoted and (ch.isalnum() or ch in '%)]>"' or (ch == "+" and i and run[i - 1].isdigit())):
             last_ok = i + 1
     return run[:last_ok]
+
+
+# KB names that the run rules above can't keep whole: "Tree Dungeon, Monkey Forest I" (", " splits a run, see
+# "Red Snail, Blue Snail"), "Final Attack: Sword" (": " ends a block). The knowledge base registers its names
+# here (set_names); an RTL paragraph shows each one as a single left-to-right block (ltr_block).
+_BREAKS = re.compile(r', |: |[\[\]"]')
+_NAMES: re.Pattern | None = None
+
+
+def set_names(names) -> None:
+    """The English names (from the knowledge base) to keep as one block in a Hebrew line."""
+    global _NAMES
+    keep = sorted({n for n in names if n and not _RTL.search(n) and _BREAKS.search(n)}, key=len, reverse=True)
+    _NAMES = re.compile(r"(?<![\w\[])(?:" + "|".join(map(re.escape, keep)) + r")(?![\w\]])") if keep else None
+
+
+def _block_names(text: str) -> str:
+    if _NAMES is None or not _BREAKS.search(text):
+        return text
+    return _NAMES.sub(lambda m: f"{LRI}{m.group(0)}{PDI}", text)
 
 
 _WORD = re.compile(rf"[A-Za-z{RTL_CHARS}]+")
@@ -62,8 +89,10 @@ def direction(text: str) -> str:
     Starts from the first strong character (Unicode rule P2), but a Hebrew
     sentence that merely opens with an English name ("Red Snail הוא…",
     "(Lv. 10) מפלצת") stays RTL: if at least 40% of its words are Hebrew,
-    the paragraph is Hebrew.
+    the paragraph is Hebrew. A name in its own isolate (name_block) doesn't count, as in Unicode's rule.
     """
+    rest = _ANY_ISOLATE.sub(" ", text)
+    text = rest if _STRONG.search(rest) else text          # (only a name: its own direction)
     m = _STRONG.search(text)
     if not m:
         return "ltr"
@@ -76,7 +105,10 @@ def direction(text: str) -> str:
 
 def isolate_ltr_runs(text: str) -> str:
     """Wrap English/number runs in LRE…PDF. Only for RTL paragraphs.
-    A name already isolated as one block (ltr_block) is kept as it is."""
+    A name already isolated as one block (ltr_block), or a KB name the runs would split (set_names), is kept
+    as one block."""
+    if _NAMES is not None:
+        text = "".join(part if part.startswith(LRI) else _block_names(part) for part in _ISOLATED.split(text))
     if LRI in text:
         return "".join(part if part.startswith(LRI) else _isolate_runs(part) for part in _ISOLATED.split(text))
     return _isolate_runs(text)
@@ -129,9 +161,11 @@ def message_direction(text: str) -> str:
     return "rtl" if words and rtl_words / len(words) >= 0.2 else "ltr"
 
 
-def to_html(text: str) -> str:
-    """Multi-paragraph message → HTML. Blank lines become small gaps; bullets keep their marker."""
-    msg_dir = message_direction(text)
+def to_html(text: str, msg_dir: str | None = None) -> str:
+    """Multi-paragraph message → HTML. Blank lines become small gaps; bullets keep their marker.
+    msg_dir: the message's language when the caller knows it (an instant answer is written in the UI's language;
+    its list of English map names outvoted its one Hebrew line, and the list went left)."""
+    msg_dir = msg_dir or message_direction(text)
     parts = []
     for line in text.strip().split("\n"):
         line = line.rstrip()
@@ -158,6 +192,17 @@ def ltr_block(name: str, rtl_ui: bool) -> str:
     "[Construction Site B1] Shumi's Lost Coin" came out with its brackets thrown to the other end."""
     if rtl_ui and name and not _RTL.search(name):
         return f"{LRI}{name}{PDI}"
+    return name
+
+
+def name_block(name: str, rtl_ui: bool) -> str:
+    """A name (a character's, a quest's) as one block in a sentence of the UI language: an English name in a
+    Hebrew sentence (ltr_block), or a Hebrew name in an English one ("אליפז: level 3 → 5" was laid out right to
+    left, the whole line reversed)."""
+    if rtl_ui:
+        return ltr_block(name, True)
+    if name and _RTL.search(name):
+        return f"{RLI}{name}{PDI}"
     return name
 
 

@@ -145,9 +145,10 @@ def annotate(html_text: str, lang: str, color: str = "#F07A12", seen: set | None
             whole = m.group(1) + (m.group(2) or "")
             return whole + link(m.group(1)) if wanted(m.group(1)) else whole
 
-        for run in re.finditer(f"{bidi.LRE}(.*?){bidi.PDF}", part, re.S):
+        # a KB name kept whole (LRI ... PDI: "Bottomwear HP Scroll: Chaos") is a name, not a use of its terms
+        for run in re.finditer(f"{bidi.LRE}(.*?){bidi.PDF}|{bidi.LRI}.*?{bidi.PDI}", part, re.S):
             out.append(_TERM_COLON.sub(sub, part[pos:run.start()]))
-            marks = "".join(link(m.group(1)) for m in _PATTERN.finditer(run.group(1)) if wanted(m.group(1)))
+            marks = "".join(link(m.group(1)) for m in _PATTERN.finditer(run.group(1) or "") if wanted(m.group(1)))
             out.append(run.group(0) + marks)
             pos = run.end()
         out.append(_TERM_COLON.sub(sub, part[pos:]))

@@ -54,6 +54,28 @@ def scroll_page() -> tuple[QScrollArea, QVBoxLayout]:
 
 
 NAME_ROLE = Qt.UserRole + 1
+PATH_ROLE = Qt.UserRole + 2
+
+
+class _LazyIcons(QStandardItemModel):
+    """Pictures loaded when the list first shows their row: scaling ~3,000 item pictures up front took half a
+    second of the Tools window's opening."""
+
+    def __init__(self, parent, size: int):
+        super().__init__(parent)
+        self._size = size
+        self._icons: dict[str, QIcon] = {}
+
+    def data(self, index, role=Qt.DisplayRole):
+        if role == Qt.DecorationRole:
+            path = super().data(index, PATH_ROLE)
+            if not path:
+                return None
+            if path not in self._icons:
+                pm = QPixmap(path)
+                self._icons[path] = QIcon(pm.scaled(self._size, self._size, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            return self._icons[path]
+        return super().data(index, role)
 
 
 class EntityPicker(QLineEdit):
@@ -65,15 +87,15 @@ class EntityPicker(QLineEdit):
         super().__init__()
         self.setPlaceholderText(placeholder)
         self.setClearButtonEnabled(True)
-        model = QStandardItemModel(self)
+        model = _LazyIcons(self, icon)
         for shown, name, path in rows:
             item = QStandardItem(shown)
             item.setData(name, NAME_ROLE)
             if path:
-                item.setIcon(QIcon(QPixmap(str(path)).scaled(icon, icon, Qt.KeepAspectRatio, Qt.SmoothTransformation)))
+                item.setData(str(path), PATH_ROLE)      # the picture itself: when its row is first shown
             item.setEditable(False)
             model.appendRow(item)
-        comp = QCompleter(model, self)
+        comp = QCompleter(self)
         comp.setCompletionRole(NAME_ROLE)
         comp.setCaseSensitivity(Qt.CaseInsensitive)
         comp.setFilterMode(Qt.MatchContains)
@@ -81,6 +103,9 @@ class EntityPicker(QLineEdit):
         comp.popup().setIconSize(QSize(icon, icon))
         comp.popup().setTextElideMode(Qt.ElideNone)       # long map names stay whole (two lines, see map_rows)
         comp.popup().setWordWrap(True)
+        # every row's height from the first one: otherwise the list measures (and loads the picture of) all
+        # ~2,500 rows before it shows nine
+        comp.popup().setUniformItemSizes(True)
         c = theme.P()
         bg = "#2C2C2E" if theme.MODE == "dark" else "#FFFFFF"
         comp.popup().setStyleSheet(
@@ -88,6 +113,7 @@ class EntityPicker(QLineEdit):
             f" padding: 4px; outline: none; }}"
             f"QListView::item {{ padding: 4px 6px; border-radius: 8px; color: {c['text']}; }}"
             f"QListView::item:selected, QListView::item:hover {{ background: rgba(255,149,51,0.22); color: {c['text']}; }}")
+        comp.setModel(model)          # after the style: polishing a full list measured every row
         comp.activated.connect(lambda *_: QTimer.singleShot(0, self._chosen))
         self.setCompleter(comp)
         self.returnPressed.connect(self.picked.emit)
@@ -277,7 +303,8 @@ class ToolsDialog(GlassDialog):
     def _p(self, text: str) -> str:
         return bidi.plain(text, self.t.rtl)
 
-    def _html(self, text: str) -> str:
+    def _html(self, text: str, seen: set | None = None) -> str:
+        """seen: the terms already explained in this view (one "?" per term on a page, not one per label)."""
         d = "rtl" if self.t.rtl else "ltr"
         out = []
         for line in (text or "").split("\n"):
@@ -285,16 +312,16 @@ class ToolsDialog(GlassDialog):
                 out.append("<p style='margin:0; font-size:5px;'>&nbsp;</p>")
                 continue
             out.append(bidi.paragraph_html(line, d).replace("margin:0 0 4px 0;", "margin:0 0 3px 0; line-height:135%;"))
-        return glossary.annotate("".join(out), self.t.lang)
+        return glossary.annotate("".join(out), self.t.lang, seen=seen)
 
-    def _set(self, label: QLabel, text: str):
-        label.setText(self._html(text))
+    def _set(self, label: QLabel, text: str, seen: set | None = None):
+        label.setText(self._html(text, seen))
 
-    def _label(self, text: str, obj: str = "RowLabel", wrap: bool = True) -> QLabel:
+    def _label(self, text: str, obj: str = "RowLabel", wrap: bool = True, seen: set | None = None) -> QLabel:
         lb = QLabel(objectName=obj)
         lb.setTextFormat(Qt.RichText)
         lb.setWordWrap(wrap)
-        self._set(lb, text)
+        self._set(lb, text, seen)
         return terms.watch(lb, self.t.lang)
 
     def _row(self, sec: Section, label: str, control: QWidget | None = None, hint: str = "") -> QWidget:
@@ -791,6 +818,7 @@ class ToolsDialog(GlassDialog):
         if hints:
             col.addWidget(self._label("\n".join(hints), "RowHint"))
         acts = QHBoxLayout()
+        acts.setSpacing(16)        # the link has no padding of its own: apart from the button, not glued to it
         if done:
             # marked done by mistake (or a repeatable donation to do again): back to the list
             btn = QPushButton(self._p(t("q_undo")), objectName="Secondary")
@@ -1072,7 +1100,9 @@ class ToolsDialog(GlassDialog):
     def _page_prices(self):
         t = self.t
         sc, lay = scroll_page()
-        lay.addWidget(self._label(t("prices_intro"), "ToolHeader"))
+        # a term gets its "?" once on this page: in the intro, not again in the card, the market line and the hint
+        self._price_seen: set = set()
+        lay.addWidget(self._label(t("prices_intro"), "ToolHeader", seen=self._price_seen))
         rows = item_rows(self.kb)
         self.price_input = EntityPicker(rows, self._p(t("price_placeholder", n=f"{len(rows):,}")), icon=32)
         self.price_input.picked.connect(self._fill_prices)
@@ -1080,7 +1110,7 @@ class ToolsDialog(GlassDialog):
         self.price_box = QVBoxLayout()
         self.price_box.setSpacing(12)
         lay.addLayout(self.price_box)
-        lay.addWidget(self._label(t("price_hint"), "RowHint"))
+        lay.addWidget(self._label(t("price_hint"), "RowHint", seen=set(self._price_seen)))
         lay.addStretch(1)
         self.market_ready.connect(self._on_market)
         return sc
@@ -1118,18 +1148,26 @@ class ToolsDialog(GlassDialog):
         col = QVBoxLayout()
         col.setSpacing(6)
         outer.addLayout(col, 1)
-        col.addWidget(self._label(f"**{name}**", "CardName"))
+        seen = self._card_seen = set(self._price_seen)
+        col.addWidget(self._label(f"**{name}**", "CardName", seen=seen))
         lines = []
         if npc.sell_back is not None:
             lines.append(t("price_npc_buys", n=f"{npc.sell_back:,}"))
         shops = [s for s in npc.shops if combat.released(s[1])]      # no El Nath / Orbis shop before they open
         if shops:
             cheapest = shops[0]
-            lines.append(t("price_shop", n=f"{cheapest[2]:,}", npc=cheapest[0], where=cheapest[1].split(" · ")[-1]))
+            line = t("price_shop", n=f"{cheapest[2]:,}", npc=cheapest[0], where=cheapest[1].split(" · ")[-1])
+            rank = npc.ranks.get(cheapest[:2])        # a town shop's item for a citizen grade and up
+            lines.append(line + (" " + t("price_rank", rank=rank) if rank else ""))
+        # NPCs the page lists without a price still sell it: name them
+        unpriced = [s for s in npc.unpriced if combat.released(s[1])][:3]
+        if unpriced:
+            who = ", ".join(f"{n} ({w.split(' · ')[-1]})" for n, w in unpriced)
+            lines.append(t("price_sold_by_also" if shops else "price_sold_by", npcs=who))
         if not lines:
             lines.append(t("price_no_npc"))
-        col.addWidget(self._label("\n".join(lines), "RowLabel"))
-        self.fm_label = self._label(t("price_fm_loading"), "RowLabel")
+        col.addWidget(self._label("\n".join(lines), "RowLabel", seen=seen))
+        self.fm_label = self._label(t("price_fm_loading"), "RowLabel", seen=set(seen))
         col.addWidget(self.fm_label)
         web = QPushButton(self._p(t("price_open_site")), objectName="Link")
         web.setCursor(Qt.PointingHandCursor)
@@ -1152,7 +1190,7 @@ class ToolsDialog(GlassDialog):
         else:
             text = t("price_fm", median=f"{m.median:,}", n=m.count, low=f"{m.low:,}", high=f"{m.high:,}")
         try:
-            self._set(self.fm_label, text)
+            self._set(self.fm_label, text, set(getattr(self, "_card_seen", ())))
         except RuntimeError:
             pass                        # the card was redrawn meanwhile
 

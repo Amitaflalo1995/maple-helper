@@ -36,7 +36,8 @@ def remove(settings, cid: str | None, answer: str) -> None:
 
 
 def conversations(records: list[dict]) -> list[dict]:
-    """History records -> [{q, a, t}] question/answer pairs, oldest first."""
+    """History records -> [{q, a, t}] question/answer pairs, oldest first. Two answers in a row answer the same
+    question (an instant answer, then "Ask Claude anyway")."""
     out, q = [], None
     for r in records:
         if r.get("role") == "user":
@@ -44,7 +45,6 @@ def conversations(records: list[dict]) -> list[dict]:
         elif r.get("role") == "assistant" and q is not None:
             out.append({"q": q.get("text", ""), "a": r.get("text", ""), "t": r.get("t", q.get("t", 0)),
                         "entities": r.get("entities") or []})
-            q = None
     return out
 
 

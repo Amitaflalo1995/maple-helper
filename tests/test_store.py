@@ -179,13 +179,16 @@ def test_hud_job_names_keep_class_and_job_consistent(isolated_store):
 def test_sync_takes_the_hud_name(isolated_store):
     p = isolated_store.Profiles()
     p.add("Kalimero", "Bowman", "Bowman", 15)
-    assert p.apply_update({"name": "KalimeroZz"}) == [("name", "KalimeroZz")]
-    assert p.apply_update({"name": "not a name!"}) == [] and p.active.name == "KalimeroZz"
+    # a longer HUD name is never taken silently (the chat asks: "this is the same character?"), letter case is
+    assert p.apply_update({"name": "KalimeroZz"}) == [] and p.active.name == "Kalimero"
+    assert p.apply_update({"name": "KALIMERO"}) == [("name", "KALIMERO")]
+    assert p.apply_update({"name": "not a name!"}) == [] and p.active.name == "KALIMERO"
 
 
 def test_another_character_on_the_hud_is_not_the_active_one():
     from maplehelper.store import hud_name, same_character
-    assert same_character("Kalimero", "KalimeroZz") and same_character("kalimerozz", "KalimeroZz")
+    assert same_character("kalimerozz", "KalimeroZz") and not same_character("Kalimero", "KalimeroZz")
+    assert not same_character("Ayash", "Ayashii") and not same_character("Ayash", "Ayashii", seen=False)
     assert not same_character("KalimeroZz", "NewGuy99") and not same_character("Al", "Alpha")
     assert hud_name({"name": " NewGuy99 "}) == "NewGuy99" and hud_name({"name": "a b"}) is None
 
@@ -206,7 +209,7 @@ def test_alt_with_a_longer_name_is_never_merged(isolated_store):
     assert p.apply_update({"name": "AmitBow", "level": 31}) == [("level", 31)] or p.active.name == "Amit"
     assert p.active.name == "Amit"
     assert not same_character("Amit", "AmitBow", seen=False, others=("AmitBow",))
-    assert same_character("Kalimero", "KalimeroZz") and not same_character("KalimeroZz", "Kalimero")
+    assert not same_character("Kalimero", "KalimeroZz") and not same_character("KalimeroZz", "Kalimero")
 
 
 def test_damaged_files_never_crash_the_start(isolated_store):

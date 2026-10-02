@@ -45,9 +45,11 @@ def on_solid_background(pm: QPixmap, radius: float) -> QPixmap:
 class Bubble(QFrame):
     """A chat message. Direction is decided per paragraph, not by the UI language."""
 
-    def __init__(self, text: str, role: str, ui_rtl: bool, tag: str = ""):  # tag: "Mano, Blue Snail"
+    def __init__(self, text: str, role: str, ui_rtl: bool, tag: str = "", direction: str | None = None):
+        # tag: "Mano, Blue Snail"; direction: the message's language when known ("rtl" for a Hebrew instant answer)
         super().__init__()
         self.role = role
+        self._dir = direction
         self.setObjectName("BubbleUser" if role == "user" else "BubbleBot")
         lay = QVBoxLayout(self)
         lay.setContentsMargins(13, 8, 13, 9)
@@ -79,7 +81,7 @@ class Bubble(QFrame):
         if not text:
             self.label.setText("")
             return
-        body = bidi.to_html(text)
+        body = bidi.to_html(text, self._dir)
         if self.role != "user":
             from . import terms
             from .. import glossary
@@ -134,20 +136,30 @@ class SystemLine(QLabel):
         self.setWordWrap(True)
         self.setAlignment(Qt.AlignHCenter)
 
+    def set_text(self, text: str) -> None:
+        """Shown again in a new language when the player switches it."""
+        self.setText(bidi.plain(text))
+
 
 class NoticeCard(QFrame):
     """An orange note in the conversation with one action (e.g. "what changed?")."""
 
     clicked = Signal()
+    clicked2 = Signal()        # the second action, when there is one
 
-    def __init__(self, text: str, action: str, rtl: bool):
+    def __init__(self, text: str, action: str, rtl: bool, stacked: bool = False, action2: str = ""):
         super().__init__(objectName="InfoNote")
         from . import theme
         self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
+        # the button always under the text (the same in both languages); two actions sit side by side under it
+        self._stacked = stacked or bool(action2)
         lay = QHBoxLayout(self)
         lay.setContentsMargins(12, 8, 12, 8)
         lay.setSpacing(10)
-        lay.addWidget(QLabel(theme.ICON["info"], objectName="InfoIcon"), 0, Qt.AlignVCenter)
+        # ⓘ beside the first line of the text, not the middle of a three-line note
+        self.icon = QLabel(theme.ICON["info"], objectName="InfoIcon")
+        self.icon.setContentsMargins(0, 1, 0, 0)
+        lay.addWidget(self.icon, 0, Qt.AlignTop)
         # the action sits beside the text when there is room, else on its own row under it (at 470 px a button
         # beside the text took half the card and cut the text, seen live)
         self._col = QVBoxLayout()
@@ -164,14 +176,29 @@ class NoticeCard(QFrame):
         self.btn = QPushButton(objectName="Link")
         self.btn.setCursor(Qt.PointingHandCursor)
         self.btn.clicked.connect(self.clicked.emit)
+        self.btn2 = None
+        if action2:
+            self.btn2 = QPushButton(objectName="Link")
+            self.btn2.setCursor(Qt.PointingHandCursor)
+            self.btn2.clicked.connect(self.clicked2.emit)
+            # the two side by side, wrapping onto a second line in a narrow chat (in one row they held it wide)
+            from .controls import FlowLayout
+            holder = QWidget()
+            self._row2 = FlowLayout(holder, spacing=18, line_spacing=0)
+            self._row2.setContentsMargins(0, 0, 0, 0)
+            self._row2.addWidget(self.btn)
+            self._row2.addWidget(self.btn2)
+            self._col.addWidget(holder)
         self._below = None
-        self.set_texts(text, action, rtl)
+        self.set_texts(text, action, rtl, action2)
 
-    def set_texts(self, text: str, action: str, rtl: bool):
+    def set_texts(self, text: str, action: str, rtl: bool, action2: str = ""):
         """Shown again in a new language when the player switches it."""
         self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
         self.msg.setText(bidi.plain(text, rtl))
         self.btn.setText(bidi.plain(action, rtl))
+        if self.btn2 is not None and action2:
+            self.btn2.setText(bidi.plain(action2, rtl))
         self._place_button()
 
     @staticmethod
@@ -181,7 +208,9 @@ class NoticeCard(QFrame):
         return button_width * 4 > card_width - 40
 
     def _place_button(self):
-        below = self.button_below(self.width(), self.btn.sizeHint().width())
+        if self.btn2 is not None:      # two actions: on their own wrapping row under the text, placed once
+            return
+        below = self._stacked or self.button_below(self.width(), self.btn.sizeHint().width())
         if below == self._below:
             return
         self._below = below
@@ -508,6 +537,10 @@ class ProfileCard(QFrame):
         self.exp = ExpBar()
         self.exp.hide()
         col.addWidget(self.exp)
+        # what the ⟳ is doing right now ("Reading the screen…"): a spinning icon alone said nothing for 40 s
+        self.status = QLabel(objectName="ExpText")
+        self.status.hide()
+        col.addWidget(self.status)
         row.addLayout(col, 1)
         from PySide6.QtWidgets import QToolButton
         from . import theme
@@ -524,7 +557,7 @@ class ProfileCard(QFrame):
         self._spin = QTimer(self, interval=260, timeout=self._tick)
         self._frame = 0
 
-    def set_busy(self, busy: bool, tip: str = "") -> None:
+    def set_busy(self, busy: bool, tip: str = "", status: str = "") -> None:
         from . import theme
         self.refresh.setEnabled(not busy)
         if busy:
@@ -534,6 +567,10 @@ class ProfileCard(QFrame):
             self.refresh.setText(theme.ICON["refresh"])
         if tip:
             self.refresh.setToolTip(tip)
+        rtl = self.layoutDirection() == Qt.RightToLeft
+        self.status.setText(bidi.plain(status, rtl) if busy and status else "")
+        self.status.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
+        self.status.setVisible(bool(busy and status))
 
     def _tick(self):
         self._frame = (self._frame + 1) % len(self._spin_frames)

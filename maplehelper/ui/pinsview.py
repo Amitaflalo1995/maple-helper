@@ -162,8 +162,12 @@ class HistoryDialog(GlassDialog):
         self.search = QLineEdit()
         self.search.setPlaceholderText(bidi.plain(t("history_search"), t.rtl))
         self.search.setClearButtonEnabled(True)
-        self.search.textChanged.connect(lambda *_: self._fill())
+        # rebuilt once typing pauses, not on every key (each pass rebuilds up to PAGE cards)
+        self._debounce = QTimer(self, singleShot=True, interval=self.DEBOUNCE_MS, timeout=self._new_search)
+        self.search.textChanged.connect(lambda *_: self._debounce.start())
         outer.addWidget(self.search)
+        self.initial_focus = self.search
+        self._shown = self.PAGE
         self.count = QLabel(objectName="RowHint")
         outer.addWidget(self.count)
         scroll = QScrollArea()
@@ -186,6 +190,17 @@ class HistoryDialog(GlassDialog):
             return self.t("day_yesterday")
         return time.strftime("%d.%m.%Y", time.localtime(ts))
 
+    PAGE = 80              # cards built at a time; "Show more" adds the next PAGE
+    DEBOUNCE_MS = 150
+
+    def _new_search(self):
+        self._shown = self.PAGE
+        self._fill()
+
+    def _more(self):
+        self._shown += self.PAGE
+        self._fill()
+
     def _fill(self):
         t, rtl = self.t, self.t.rtl
         while self.rows.count():
@@ -195,10 +210,13 @@ class HistoryDialog(GlassDialog):
                 item.widget().deleteLater()
         q = self.search.text().strip()
         hits = pins.search(self.pairs, q)
-        self.count.setText(bidi.plain(t("history_count", n=len(hits)), rtl))
+        shown = min(len(hits), self._shown)
+        # "80 of 200": the list shows the newest PAGE, the rest behind "Show more"
+        count = t("history_count", n=len(hits)) if shown == len(hits) else t("history_count_of", n=shown, total=len(hits))
+        self.count.setText(bidi.plain(count, rtl))
         align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute
         last_day = None
-        for p in hits[:80]:
+        for p in hits[:shown]:
             day = self._day(p["t"])
             if day != last_day:
                 head = QLabel(bidi.plain(day, rtl), objectName="SectionHeader")
@@ -207,6 +225,14 @@ class HistoryDialog(GlassDialog):
                 self.rows.addWidget(head)
                 last_day = day
             self.rows.addWidget(self._card(p, align))
+        if shown < len(hits):
+            more = QPushButton(bidi.plain(t("history_more", n=min(self.PAGE, len(hits) - shown)), rtl),
+                               objectName="Secondary")
+            more.setCursor(Qt.PointingHandCursor)
+            more.setAutoDefault(False)
+            more.clicked.connect(self._more)
+            self.more_btn = more
+            self.rows.addWidget(more, 0, Qt.AlignHCenter)
         if not hits:
             self.rows.addWidget(QLabel(bidi.plain(t("history_none"), rtl), objectName="RowHint"))
         self.rows.addStretch(1)
@@ -231,7 +257,8 @@ class HistoryDialog(GlassDialog):
         top.addWidget(when, 0, Qt.AlignTop)
         cl.addLayout(top)
         # two lines of the answer, plain: the whole answer opens on a tap
-        preview = QLabel(bidi.plain(short_text(p["a"].replace("**", ""), 110), rtl), objectName="CardSub")
+        # an English answer keeps its "…" at its own end (ltr_name: one block), not on the Hebrew side
+        preview = QLabel(bidi.ltr_name(short_text(p["a"].replace("**", ""), 110), rtl), objectName="CardSub")
         preview.setWordWrap(True)
         preview.setAlignment(align)
         cl.addWidget(preview)

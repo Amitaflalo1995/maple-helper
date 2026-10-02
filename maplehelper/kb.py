@@ -11,6 +11,7 @@ import re
 from functools import cached_property
 from pathlib import Path
 
+from . import bidi
 from .store import ASSETS, kb_dir
 
 FALLBACK_DIR = ASSETS / "fallback"
@@ -99,6 +100,8 @@ class KnowledgeBase:
                     if _norm(n) not in ALIAS_DROP:
                         self.aliases[_norm(n)] = key
         self.aliases.update({_norm(a): k for a, k in ALIAS_SET.items() if k in self.entities})
+        # names with ", " ": " or "[ ]" ("Tree Dungeon, Monkey Forest I") stay one block in a Hebrew answer
+        bidi.set_names(e.get("name", "") for e in self.entities.values())
 
     # ------------------------------------------------------------ basic access
 

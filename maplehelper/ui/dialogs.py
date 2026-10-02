@@ -264,8 +264,9 @@ class Onboarding(GlassDialog):
             logo.setPixmap(QPixmap(str(wm)).scaled(260, 260, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         logo.setAlignment(Qt.AlignCenter)
         lay.addWidget(logo)
-        for line in ("העוזר האישי שלכם ב-MapleStory Classic", "Your personal MapleStory Classic assistant"):
-            lb = _body(line)
+        # both languages: the player hasn't picked one yet
+        for lang in ("he", "en"):
+            lb = _body(I18n(lang)("app_tagline"))
             lb.setAlignment(Qt.AlignHCenter)
             lay.addWidget(lb)
         lay.addSpacing(16)
@@ -335,6 +336,7 @@ class Onboarding(GlassDialog):
         self.key_edit.setEchoMode(QLineEdit.Password)
         self.key_edit.setLayoutDirection(Qt.LeftToRight)
         self.key_edit.returnPressed.connect(self._check_key)      # Enter checks the pasted key
+        self.key_edit.textChanged.connect(self._key_direction)
         self.key_btn = QPushButton(self.t("ob_check_key"), objectName="Secondary")
         self.key_btn.setCursor(Qt.PointingHandCursor)
         self.key_btn.clicked.connect(self._check_key)
@@ -358,6 +360,12 @@ class Onboarding(GlassDialog):
     def _ai(self):
         return providers.get(self.provider)
 
+    def _key_direction(self, *_):
+        """The key itself is English (left to right); the empty field shows the hint in the UI's direction."""
+        rtl = self.t.rtl and not self.key_edit.text()
+        self.key_edit.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
+        self.key_edit.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
+
     def _label_ai_page(self):
         """Texts of the connect page for the chosen provider."""
         t, p = self.t, self.provider
@@ -366,7 +374,14 @@ class Onboarding(GlassDialog):
         self.install_btn.setText(t.p("ob_install", p))
         self.login_btn.setText(t.p("ob_login", p))
         self.key_edit.clear()
-        self.key_edit.setPlaceholderText(t.p("ob_api_key_hint", p))
+        # a Hebrew hint reads right to left while the field is empty (_key_direction), and the key's prefix
+        # ("sk-ant-") stays one block in it, not "ב--sk-ant" (ltr_block inside the Hebrew sentence)
+        hint = t.p("ob_api_key_hint", p)
+        if t.rtl:
+            prefix = "sk-ant-" if "sk-ant-" in hint else "sk-"
+            hint = bidi.plain(hint.replace(prefix, bidi.ltr_block(prefix, True)), True)
+        self.key_edit.setPlaceholderText(hint)
+        self._key_direction()
         self.key_hint.hide()
         if getattr(self, "privacy_label", None):          # the done page is built after this one
             self.privacy_label.setText(bidi.plain(t.p("ob_privacy", p), t.rtl))
@@ -640,12 +655,14 @@ class ConfirmDialog(GlassDialog):
         yes = QPushButton(confirm, objectName="Danger" if danger else "Primary")
         for b in (no, yes):
             b.setCursor(Qt.PointingHandCursor)
-        no.clicked.connect(self.reject)
-        yes.clicked.connect(self.accept)
+        self.choice = None          # "yes" / "no" (a button), None (closed with X or Esc: neither)
+        no.clicked.connect(lambda: (setattr(self, "choice", "no"), self.reject()))
+        yes.clicked.connect(lambda: (setattr(self, "choice", "yes"), self.accept()))
         row.addWidget(no)
         row.addWidget(yes)
         lay.addLayout(row)
         rtl_buttons(self, rtl)
+        self.initial_focus = no      # the safe answer has the focus (Enter / Space never confirms by accident)
         no.setFocus()
 
 
@@ -842,6 +859,9 @@ class SettingsDialog(GlassDialog):
         for pick in (self.hk_toggle, self.hk_voice):
             pick.currentIndexChanged.connect(self._check_keys)
         self._check_keys()
+        self._initial = self._values()          # the X asks before dropping changes from here on
+        self.close_btn.clicked.disconnect()
+        self.close_btn.clicked.connect(self._close_clicked)
 
     def _keys_clash(self) -> bool:
         return self.hk_toggle.currentText() == self.hk_voice.currentText()
@@ -1003,12 +1023,19 @@ class SettingsDialog(GlassDialog):
         return True
 
     def _switch_account(self):
-        """Sign out, then run the official sign-in so another account can be chosen in the browser."""
+        """Sign out, then run the official sign-in so another account can be chosen in the browser.
+        Signed in, it asks first like "Sign out" (both end the current sign-in); signed out, the same button is
+        "Sign in" and just goes."""
+        t, ai = self.t, self._ai()
+        if self._account_status == "ok" or self.settings.api_key_mode(ai.name):
+            dlg = ConfirmDialog(t("account_switch"), t.p("account_switch_confirm", ai.name), t("account_switch"),
+                                t("cancel"), t.rtl, self.stylesheet_fn(1.0), danger=False)
+            if not dlg.exec():
+                return
         self.switch_btn.setEnabled(False)
         self.logout_btn.hide()
         self._set_account_text(self.t("account_signing_out"))
         self._drop_api_key()
-        ai = self._ai()
 
         def work():
             ai.logout()
@@ -1102,12 +1129,9 @@ class SettingsDialog(GlassDialog):
             History(c.id).clear()
             self.history_cleared.emit()
 
-    def _save(self):
-        if self._keys_clash():
-            self._check_keys()
-            return
-        s = self.settings
-        s.data.update({
+    def _values(self) -> dict:
+        """What Save would store (the AI account and model act at once, they're not in here)."""
+        return {
             "language": self.lang.value(),
             "appearance": self.appearance.value(),
             "font_size": self.font.value(),
@@ -1118,7 +1142,32 @@ class SettingsDialog(GlassDialog):
             "saver_mode": self.saver.isChecked(),
             "answer_length": self.length.value(),
             "start_with_windows": self.autostart.isChecked(),
-        })
+        }
+
+    def unsaved(self) -> bool:
+        return self._values() != getattr(self, "_initial", self._values())
+
+    def _close_clicked(self):
+        """The X with unsaved changes asks: save them, or not (closing the question keeps Settings open).
+        (Esc does nothing here, esc_closes; the app closing the window itself never asks.)"""
+        if self.unsaved():
+            t = self.t
+            dlg = ConfirmDialog(t("settings_unsaved"), t("settings_unsaved_body"), t("save"), t("discard"), t.rtl,
+                                self.stylesheet_fn(1.0), danger=False)
+            dlg.exec()
+            if dlg.choice == "yes":
+                self._save()
+                return
+            if dlg.choice is None:
+                return                  # closed the question: back to Settings
+        self.reject()
+
+    def _save(self):
+        if self._keys_clash():
+            self._check_keys()
+            return
+        s = self.settings
+        s.data.update(self._values())
         s.save()
         self.changed.emit()
         self.accept()
