@@ -566,9 +566,26 @@ class Overlay(QWidget):
     def _capture_and_ask(self, question: str, detail: bool = False):
         self._fresh_shot()
         if detail and self.shot:
-            from .. import capture
+            from .. import capture, inventory
             self._detail_tiles = capture.detail_tiles(capture.LAST_FULL)
+            # the inventory read from the pixels: every icon matched to the database's own pictures
+            try:
+                slots = inventory.read(capture.LAST_FULL, self.kb) if capture.LAST_FULL is not None else []
+            except Exception:      # noqa: BLE001 - the AI still gets the screenshot
+                slots = []
+            self._hidden_context = ("<inventory_read>\nThe app matched each filled inventory slot's icon to the "
+                                    "database pictures (closest first; the first is almost always right):\n"
+                                    + inventory.describe(slots, self.kb) + "\n</inventory_read>") if slots else None
+            self._inventory_found = [s.matches[0][0] for s in slots if s.matches]
         self.ask(question)
+        found, self._inventory_found = getattr(self, "_inventory_found", None), None
+        if detail:
+            # what the app itself recognised, shown right away (the answer follows)
+            if found:
+                self.add_system(self.t("inv_found", n=len(found)))
+                self.add_cards(list(dict.fromkeys(found)))
+            else:
+                self.add_system(self.t("inv_not_found"))
 
     def what_now(self):
         """'What now?': a fresh screenshot and the question, so Claude sees where the player is."""
@@ -1019,7 +1036,9 @@ class Overlay(QWidget):
 
         self._thread = QThread(self)
         tiles, self._detail_tiles = getattr(self, "_detail_tiles", None), None
-        self._worker = AskWorker(self.brain, question, c, history, [shot, *tiles] if shot and tiles else shot, focus)
+        hidden, self._hidden_context = getattr(self, "_hidden_context", None), None
+        asked = f"{question}\n\n{hidden}" if hidden else question       # the bubble shows the question alone
+        self._worker = AskWorker(self.brain, asked, c, history, [shot, *tiles] if shot and tiles else shot, focus)
         self._worker.moveToThread(self._thread)
         self._thread.started.connect(self._worker.run)
         self._worker.delta.connect(self._on_delta)

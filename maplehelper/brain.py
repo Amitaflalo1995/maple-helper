@@ -290,10 +290,12 @@ class Brain:
             if monsters:
                 drops = self.kb.monster_drops(monsters[0])
                 entities = [monsters[0]] + drops
-        if not entities:
-            # fallback: cards for the in-game names that appear in the answer itself
-            entities = [k for k in self.kb.find_mentions(text, max_results=12)
-                        if k.split("/")[0] in ("monster", "item", "npc", "map", "quest")]
+        if not groups:
+            # cards for every in-game name the answer itself mentions, after the ones the AI listed (it listed only
+            # Snail Shell for an answer naming Brown Skullcap, Green Skullcap and Snail, seen live)
+            named = [k for k in self.kb.find_mentions(text, max_results=12)
+                     if k.split("/")[0] in ("monster", "item", "npc", "map", "quest")]
+            entities = entities + [k for k in named if k not in entities]
         box = meta.get("avatar_box")
         if not (isinstance(box, list) and len(box) == 4 and all(isinstance(v, (int, float)) for v in box)):
             box = None

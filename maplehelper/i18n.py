@@ -317,6 +317,12 @@ STRINGS = {
                              "אותו ואיפה, ותקבלו הודעה כשעדכון מאגר משנה אותו.",
                        "en": "No items yet. Tap ☆ on an item's card to follow it: see here who drops it and where, "
                              "and get a note when a database update changes it."},
+    "inv_found": {"he": "זיהיתי {n} פריטים בתיק:", "en": "I recognised {n} items in the inventory:"},
+    "inv_found_one": {"he": "זיהיתי פריט אחד בתיק:", "en": "I recognised 1 item in the inventory:"},
+    "inv_not_found": {"he": "לא מצאתי את חלון האינבנטורי בצילום. פתחו אותו במשחק (מקש I) ונסו שוב",
+                      "en": "I couldn't find the inventory window in the screenshot. Open it in game (I key) and try again"},
+    "wish_ask": {"he": "איפה הכי כדאי לי לצוד {monster} כדי להשיג {item}? כמה בערך צריך להרוג?",
+                 "en": "Where's the best place for me to hunt {monster} to get {item}? About how many kills does it take?"},
     "wish_dropped_by": {"he": "מפילים:", "en": "Dropped by:"},
     "wish_no_droppers": {"he": "לא ידוע על מפלצת שמפילה אותו (אולי הוא נקנה בחנות או מתקבל מקווסט).",
                          "en": "No known monster drops it (it may come from a shop or a quest)."},

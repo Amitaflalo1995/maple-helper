@@ -1,8 +1,9 @@
 """The wishlist window: each wished item, who drops it (lowest level first) and where they live."""
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QPixmap
+from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 
 from .. import bidi
 from ..i18n import I18n
@@ -15,11 +16,14 @@ SHOWN_DROPPERS = 5
 
 
 class WishlistDialog(GlassDialog):
+    ask_requested = Signal(str)          # a question for the chat (where to hunt a dropper)
+
     def __init__(self, keys: list[str], kb: KnowledgeBase, lang: str, stylesheet: str):
         self.t = t = I18n(lang or "he")
         super().__init__(t("wishlist"), t.rtl)
         self.setStyleSheet(stylesheet)
         self.resize(500, 640)
+        self.kb = kb
         rtl = t.rtl
         outer = QVBoxLayout(self.content)
         outer.setContentsMargins(0, 0, 0, 0)
@@ -38,28 +42,25 @@ class WishlistDialog(GlassDialog):
             empty = QLabel(bidi.plain(t("wishlist_empty"), rtl), objectName="DialogBody")
             empty.setWordWrap(True)
             lay.addWidget(empty)
-        align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute
+        self._align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute
         for k in keys:
             lay.addWidget(EntityCard(kb, k, t.lang))
             droppers = kb.droppers.get(k, [])
-            if droppers:
-                lines = [t("wish_dropped_by")]
-                for m in droppers[:SHOWN_DROPPERS]:
-                    e = kb.get(m) or {}
-                    lvl = (e.get("props") or {}).get("Level")
-                    maps = kb._top_maps(m, n=1)
-                    lines.append(f"• {e.get('name', m)}" + (f" (Lv. {lvl})" if lvl else "")
-                                 + (f" · {maps[0]}" if maps else ""))
-                if len(droppers) > SHOWN_DROPPERS:
-                    lines.append(t("pn_more", n=len(droppers) - SHOWN_DROPPERS))
-            else:
-                lines = [t("wish_no_droppers")]
-            for ln in lines:
-                lb = QLabel(bidi.plain(ln, rtl), objectName="CardStat")
-                lb.setWordWrap(True)
-                lb.setAlignment(align)
-                lb.setContentsMargins(12, 0, 12, 0)
-                lay.addWidget(lb)
+            head = QLabel(bidi.plain(t("wish_dropped_by") if droppers else t("wish_no_droppers"), rtl),
+                          objectName="ToolHeader")
+            head.setWordWrap(True)
+            head.setAlignment(self._align)
+            head.setContentsMargins(4, 4, 4, 0)
+            lay.addWidget(head)
+            item = (kb.get(k) or {}).get("name", k)
+            # each dropper as a row with its picture, level, map and a way to ask the chat about it (live feedback:
+            # a small text list was hard to read and led nowhere)
+            for m in droppers[:SHOWN_DROPPERS]:
+                lay.addWidget(self._dropper(m, item))
+            if len(droppers) > SHOWN_DROPPERS:
+                more = QLabel(bidi.plain(t("pn_more", n=len(droppers) - SHOWN_DROPPERS), rtl), objectName="RowHint")
+                more.setAlignment(self._align)
+                lay.addWidget(more)
             lay.addSpacing(10)
         lay.addStretch(1)
 
@@ -74,3 +75,40 @@ class WishlistDialog(GlassDialog):
         row.addStretch(1)
         outer.addLayout(row)
         rtl_buttons(self, rtl)
+
+    def _dropper(self, m: str, item: str) -> QFrame:
+        t, kb = self.t, self.kb
+        e = kb.get(m) or {}
+        name = e.get("name", m)
+        lvl = (e.get("props") or {}).get("Level")
+        maps = kb._top_maps(m, n=1)
+        card = QFrame(objectName="Card")
+        row = QHBoxLayout(card)
+        row.setContentsMargins(12, 8, 12, 8)
+        row.setSpacing(10)
+        pic = QLabel()
+        pic.setFixedSize(44, 44)
+        pic.setAlignment(Qt.AlignCenter)
+        path = kb.picture(m)
+        if path:
+            pm = QPixmap(str(path))
+            if not pm.isNull():
+                pic.setPixmap(pm.scaled(44, 44, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        row.addWidget(pic, 0, Qt.AlignTop)
+        col = QVBoxLayout()
+        col.setSpacing(2)
+        title = QLabel(bidi.ltr_name(name + (f" · Lv. {lvl}" if lvl else ""), t.rtl), objectName="CardName")
+        title.setAlignment(self._align)
+        col.addWidget(title)
+        if maps:
+            where = QLabel(bidi.ltr_name(maps[0], t.rtl), objectName="CardSub")
+            where.setWordWrap(True)
+            where.setAlignment(self._align)
+            col.addWidget(where)
+        row.addLayout(col, 1)
+        ask = QPushButton(bidi.plain(t("ask_short"), t.rtl), objectName="Link")
+        ask.setCursor(Qt.PointingHandCursor)
+        ask.setAutoDefault(False)
+        ask.clicked.connect(lambda: self.ask_requested.emit(t("wish_ask", monster=name, item=item)))
+        row.addWidget(ask, 0, Qt.AlignVCenter)
+        return card

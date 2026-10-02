@@ -675,10 +675,15 @@ class MapleHelperApp:
         self.open_window(f"history:{c.id}", make)
 
     def show_wishlist(self):
-        from .ui.wishlist import WishlistDialog
         keys = wishlist.items(self.settings, self.profiles.active_id)
         self.open_window(f"wishlist:{self.profiles.active_id}",
-                         lambda: WishlistDialog(keys, self.kb, self.settings["language"], self.style()))
+                         lambda: self._wishlist_dialog(keys))
+
+    def _wishlist_dialog(self, keys):
+        from .ui.wishlist import WishlistDialog
+        dlg = WishlistDialog(keys, self.kb, self.settings["language"], self.style())
+        dlg.ask_requested.connect(lambda q: self.ask_from_tools(q, False))
+        return dlg
 
     def show_patch_notes(self, entries: list[dict] | None = None):
         if entries is None:
