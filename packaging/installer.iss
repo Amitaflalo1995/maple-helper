@@ -89,7 +89,10 @@ Filename: "{app}\Maple Helper.exe"; Description: "{cm:LaunchProgram,{#AppName}}"
 Filename: "{app}\Maple Helper.exe"; Parameters: "{param:LAUNCHARGS|--background}"; Flags: nowait; Check: WizardSilent
 
 [UninstallDelete]
-Type: filesandordirs; Name: "{app}"
+; only what the app itself made: the player may have picked a folder that holds other things (D:\Games), and
+; deleting all of {app} wiped them (found in testing)
+Type: filesandordirs; Name: "{app}\_internal"
+Type: dirifempty; Name: "{app}"
 
 [Messages]
 hebrew.WelcomeLabel1=ברוכים הבאים ל-Maple Helper
@@ -151,7 +154,21 @@ begin
   // still running (hung on quit): stop it, a file in use can't be replaced and a silent setup would abort halfway
   if CheckForMutexes('MapleHelperRunning') then
   begin
-    Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /T /IM "Maple Helper.exe"', '', SW_HIDE, ewWaitUntilTerminated, i);
+    // no /T: this setup runs as the app's child, and killing the tree killed the update itself (found in testing)
+    Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM "Maple Helper.exe"', '', SW_HIDE, ewWaitUntilTerminated, i);
+    Sleep(1500);
+  end;
+  Result := True;
+end;
+
+// Uninstalling while the app runs left its files behind (in use): close it first
+function InitializeUninstall(): Boolean;
+var
+  i: Integer;
+begin
+  if CheckForMutexes('MapleHelperRunning') then
+  begin
+    Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM "Maple Helper.exe"', '', SW_HIDE, ewWaitUntilTerminated, i);
     Sleep(1500);
   end;
   Result := True;

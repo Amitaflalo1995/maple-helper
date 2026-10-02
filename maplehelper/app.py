@@ -327,6 +327,7 @@ class MapleHelperApp:
                                     if r == QSystemTrayIcon.Trigger else None)
         self.tray.show()
         self._tray_menu = menu
+        self._add_announced_item()
 
     def open_settings(self):
         def make():
@@ -485,8 +486,9 @@ class MapleHelperApp:
     # ------------------------------------------------------------------ knowledge base updates
 
     def check_kb_update_silently(self):
-        if getattr(sys, "frozen", False) and osapi.IS_MAC:
-            # no silent self-update on macOS (the installer is a Windows .exe): point at the new DMG instead
+        if getattr(sys, "frozen", False) and (osapi.IS_MAC or not updater.installed_copy()):
+            # no silent self-update on macOS (the installer is a Windows .exe) or for a portable copy: point at
+            # the new release instead
             def mac_update():
                 rel = updater.newer_release(__version__)
                 if rel:
@@ -544,9 +546,19 @@ class MapleHelperApp:
     def announce_update(self, version: str, url: str):
         if getattr(self, "_mac_announced", None) == version:
             return                       # the 3-hourly check found the same version again
-        self._mac_announced = version
+        self._mac_announced, self._announced_url = version, url
         t = I18n(self.settings["language"])
-        self.toast(t("update_available", version=version), t("update_available_mac"), timeout_ms=20000)
+        self.toast(t("update_available", version=version), t("update_available_mac" if osapi.IS_MAC else "update_available_win"),
+                   timeout_ms=20000)
+        self._add_announced_item()
+
+    def _add_announced_item(self):
+        """The "update available" tray item (macOS / portable); make_tray adds it again after a rebuild."""
+        version = getattr(self, "_mac_announced", None)
+        if not version or not getattr(self, "_tray_menu", None):
+            return
+        t = I18n(self.settings["language"])
+        url = self._announced_url
         a = QAction(t("update_available", version=version), self._tray_menu, triggered=lambda: webbrowser.open(url))
         self._tray_menu.insertAction(self._tray_menu.actions()[2], a)   # right under the header
 
@@ -765,6 +777,9 @@ class MapleHelperApp:
         except Exception:
             pass
         if getattr(self, "pending_installer", None):
+            from .setupwait import setup_running
+            if setup_running():
+                return                  # an installer is closing us right now (it is the update)
             if updater.windows_shutting_down():
                 # Qt quits on shutdown/sign-out too: the next start downloads nothing and offers it again
                 report.log.info("update postponed: Windows is shutting down")

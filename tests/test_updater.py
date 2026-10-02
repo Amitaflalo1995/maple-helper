@@ -265,3 +265,17 @@ def test_installer_window_speaks_the_apps_language():
     """The update window follows the app's language, not Windows' (an English player saw a Hebrew installer)."""
     assert "/LANG=english" in updater.installer_args("C:/x/MapleHelper-Setup-v0.7.3.exe", reopen=True, lang="en")
     assert "/LANG=hebrew" in updater.installer_args("C:/x/MapleHelper-Setup-v0.7.3.exe", reopen=True, lang="he")
+
+
+def test_version_parts_are_padded():
+    assert updater._version_tuple("1.0") == updater._version_tuple("1.0.0") == (1, 0, 0)
+    assert updater._version_tuple("v0.7.5") > updater._version_tuple("0.7.4")
+
+
+def test_only_an_installed_copy_self_updates(tmp_path, monkeypatch):
+    import sys
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "executable", str(tmp_path / "Maple Helper.exe"))
+    assert not updater.installed_copy()               # portable zip: no uninstaller beside it
+    (tmp_path / "unins000.exe").write_bytes(b"")
+    assert updater.installed_copy()

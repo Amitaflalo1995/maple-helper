@@ -136,7 +136,18 @@ SUMS_ASSET = "SHA256SUMS.txt"     # "<sha256>  <file name>" lines, published wit
 
 
 def _version_tuple(v: str) -> tuple[int, ...]:
-    return tuple(int(x) for x in re.findall(r"\d+", v)[:3]) or (0,)
+    """'1.0' and '1.0.0' compare equal (padded to three parts)."""
+    parts = [int(x) for x in re.findall(r"\d+", v)[:3]]
+    return tuple(parts + [0] * (3 - len(parts)))
+
+
+def installed_copy() -> bool:
+    """Run from an installed copy (its uninstaller next to it), not the portable zip: only that one self-updates.
+    A portable copy updating itself installed a second copy elsewhere and kept re-downloading (found in testing)."""
+    if not getattr(sys, "frozen", False):
+        return False
+    from pathlib import Path
+    return (Path(sys.executable).parent / "unins000.exe").exists()
 
 
 def _asset(rel: dict, name: str) -> dict | None:
@@ -220,7 +231,9 @@ def download_app_update(current: str, progress=None) -> str | None:
     if not data or hashlib.sha256(data).hexdigest() != want:
         return None
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(data)
+    part = path.with_suffix(".part")
+    part.write_bytes(data)
+    part.replace(path)          # whole or not at all: a cut write never looks like a ready installer
     return str(path)
 
 
