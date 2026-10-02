@@ -22,28 +22,66 @@ def _label(text: str = "", name: str | None = None, rich: bool = False, wrap: bo
     return lb
 
 
+def on_solid_background(pm: QPixmap, radius: float) -> QPixmap:
+    """A grabbed card drawn over the chat's own solid color: the card itself is see-through glass, and
+    pasted into Discord or WhatsApp it would be light text on nothing (unreadable in dark mode)."""
+    from PySide6.QtCore import QRectF
+    from PySide6.QtGui import QColor, QPainter, QPainterPath
+    from . import theme
+    out = QPixmap(pm.size())
+    out.setDevicePixelRatio(pm.devicePixelRatio())
+    out.fill(Qt.transparent)
+    p = QPainter(out)
+    p.setRenderHint(QPainter.Antialiasing)
+    size = pm.deviceIndependentSize()
+    path = QPainterPath()
+    path.addRoundedRect(QRectF(0, 0, size.width(), size.height()), radius, radius)
+    p.fillPath(path, QColor(*theme.P()["glass"]))        # opaque: the color under the glass in the chat
+    p.drawPixmap(0, 0, pm)
+    p.end()
+    return out
+
+
 class Bubble(QFrame):
     """A chat message. Direction is decided per paragraph, not by the UI language."""
 
-    def __init__(self, text: str, role: str, ui_rtl: bool, tag: str = ""):  # tag: "Mano, Blue Snail"
+    def __init__(self, text: str, role: str, ui_rtl: bool, tag: str = "", direction: str | None = None):
+        # tag: "Mano, Blue Snail"; direction: the message's language when known ("rtl" for a Hebrew instant answer)
         super().__init__()
         self.role = role
+        self._dir = direction
         self.setObjectName("BubbleUser" if role == "user" else "BubbleBot")
         lay = QVBoxLayout(self)
         lay.setContentsMargins(13, 8, 13, 9)
+        self.tag_label = None
         if tag:
-            t = QLabel("↩ " + tag, objectName="BubbleTag")
-            lay.addWidget(t)
+            self.tag_label = QLabel("↩ " + tag, objectName="BubbleTag")
+            self.tag_label.setWordWrap(True)    # five tagged names must not stretch the bubble past the chat
+            lay.addWidget(self.tag_label)
         self.label = _label(rich=True)
         self.label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
         lay.addWidget(self.label)
         self.set_text(text)
 
+    def fit_width(self, row_width: int) -> None:
+        """Your own messages: as wide as their text, up to ~78% of the feed. (Qt's word-wrap guess
+        makes a short question a tall, thin column.)"""
+        m = self.layout().contentsMargins()
+        fm = self.label.fontMetrics()
+        text_w = max((fm.horizontalAdvance(ln) for ln in (self._text or "").splitlines()), default=0) + 4
+        if self.tag_label:
+            text_w = max(text_w, self.tag_label.fontMetrics().horizontalAdvance(self.tag_label.text()) + 4)
+        cap = int(row_width * self.MAX_SHARE) - m.left() - m.right()
+        self.label.setMinimumWidth(max(0, min(text_w, cap)))
+
+    MAX_SHARE = 0.78
+
     def set_text(self, text: str) -> None:
+        self._text = text
         if not text:
             self.label.setText("")
             return
-        body = bidi.to_html(text)
+        body = bidi.to_html(text, self._dir)
         if self.role != "user":
             from . import terms
             from .. import glossary
@@ -71,8 +109,12 @@ class BubbleRow(QWidget):
 
     def __init__(self, bubble: Bubble, ui_rtl: bool):
         super().__init__()
+        self.bubble = bubble
         lay = QHBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
+        # the bubble's text width must never hold the feed wide: when the chat narrows (or its scrollbar appears) the
+        # row shrinks first, then refits the bubble (else a long question was cut off at the edge, seen live)
+        self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
         # the layout mirrors in an RTL UI, so "trailing" is the left edge there
         if bubble.role == "user":
             lay.addSpacing(48)
@@ -80,6 +122,11 @@ class BubbleRow(QWidget):
             lay.addWidget(bubble, 0)
         else:
             lay.addWidget(bubble, 1)
+
+    def resizeEvent(self, e):
+        super().resizeEvent(e)
+        if self.bubble.role == "user" and e.oldSize().width() != e.size().width():
+            self.bubble.fit_width(self.width())
 
 
 class SystemLine(QLabel):
@@ -89,34 +136,94 @@ class SystemLine(QLabel):
         self.setWordWrap(True)
         self.setAlignment(Qt.AlignHCenter)
 
+    def set_text(self, text: str) -> None:
+        """Shown again in a new language when the player switches it."""
+        self.setText(bidi.plain(text))
+
 
 class NoticeCard(QFrame):
     """An orange note in the conversation with one action (e.g. "what changed?")."""
 
     clicked = Signal()
+    clicked2 = Signal()        # the second action, when there is one
 
-    def __init__(self, text: str, action: str, rtl: bool):
+    def __init__(self, text: str, action: str, rtl: bool, stacked: bool = False, action2: str = ""):
         super().__init__(objectName="InfoNote")
         from . import theme
         self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
+        # the button always under the text (the same in both languages); two actions sit side by side under it
+        self._stacked = stacked or bool(action2)
         lay = QHBoxLayout(self)
         lay.setContentsMargins(12, 8, 12, 8)
         lay.setSpacing(10)
-        lay.addWidget(QLabel(theme.ICON["info"], objectName="InfoIcon"), 0, Qt.AlignVCenter)
+        # ⓘ beside the first line of the text, not the middle of a three-line note
+        self.icon = QLabel(theme.ICON["info"], objectName="InfoIcon")
+        self.icon.setContentsMargins(0, 1, 0, 0)
+        lay.addWidget(self.icon, 0, Qt.AlignTop)
+        # the action sits beside the text when there is room, else on its own row under it (at 470 px a button
+        # beside the text took half the card and cut the text, seen live)
+        self._col = QVBoxLayout()
+        self._col.setContentsMargins(0, 0, 0, 0)
+        self._col.setSpacing(0)
+        self._top = QHBoxLayout()
+        self._top.setContentsMargins(0, 0, 0, 0)
+        self._top.setSpacing(10)
         self.msg = QLabel(objectName="InfoText")
         self.msg.setWordWrap(True)
-        lay.addWidget(self.msg, 1)
+        self._top.addWidget(self.msg, 1)
+        self._col.addLayout(self._top)
+        lay.addLayout(self._col, 1)
         self.btn = QPushButton(objectName="Link")
         self.btn.setCursor(Qt.PointingHandCursor)
         self.btn.clicked.connect(self.clicked.emit)
-        lay.addWidget(self.btn, 0, Qt.AlignVCenter)
-        self.set_texts(text, action, rtl)
+        self.btn2 = None
+        if action2:
+            self.btn2 = QPushButton(objectName="Link")
+            self.btn2.setCursor(Qt.PointingHandCursor)
+            self.btn2.clicked.connect(self.clicked2.emit)
+            # the two side by side, wrapping onto a second line in a narrow chat (in one row they held it wide)
+            from .controls import FlowLayout
+            holder = QWidget()
+            self._row2 = FlowLayout(holder, spacing=18, line_spacing=0)
+            self._row2.setContentsMargins(0, 0, 0, 0)
+            self._row2.addWidget(self.btn)
+            self._row2.addWidget(self.btn2)
+            self._col.addWidget(holder)
+        self._below = None
+        self.set_texts(text, action, rtl, action2)
 
-    def set_texts(self, text: str, action: str, rtl: bool):
+    def set_texts(self, text: str, action: str, rtl: bool, action2: str = ""):
         """Shown again in a new language when the player switches it."""
         self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
         self.msg.setText(bidi.plain(text, rtl))
         self.btn.setText(bidi.plain(action, rtl))
+        if self.btn2 is not None and action2:
+            self.btn2.setText(bidi.plain(action2, rtl))
+        self._place_button()
+
+    @staticmethod
+    def button_below(card_width: int, button_width: int) -> bool:
+        """Under the text when the button would take more than a quarter of the card (beside it, the text wraps
+        into a narrow column)."""
+        return button_width * 4 > card_width - 40
+
+    def _place_button(self):
+        if self.btn2 is not None:      # two actions: on their own wrapping row under the text, placed once
+            return
+        below = self._stacked or self.button_below(self.width(), self.btn.sizeHint().width())
+        if below == self._below:
+            return
+        self._below = below
+        self._top.removeWidget(self.btn)
+        self._col.removeWidget(self.btn)
+        if below:      # AlignLeft is the leading edge (mirrored in a Hebrew card)
+            self._col.addWidget(self.btn, 0, Qt.AlignLeft)
+        else:
+            self._top.addWidget(self.btn, 0, Qt.AlignVCenter)
+
+    def resizeEvent(self, e):
+        super().resizeEvent(e)
+        self._place_button()
 
 
 class SessionCard(QFrame):
@@ -134,7 +241,10 @@ class SessionCard(QFrame):
         head.setAlignment(self._align)
         col.addWidget(head)
         for ln in lines:
-            col.addWidget(self._line(ln))
+            if ln:
+                col.addWidget(self._line(ln))
+            else:
+                col.addSpacing(6)             # one character's lines apart from the next one's
         self._extra = QWidget()
         self._extra_lay = QVBoxLayout(self._extra)
         self._extra_lay.setContentsMargins(0, 6, 0, 0)
@@ -159,7 +269,10 @@ class SessionCard(QFrame):
             return
         if self._extra.isHidden() and not self._extra_lay.count():
             for text, name in self._details():
-                self._extra_lay.addWidget(self._line(text, name))
+                if text:
+                    self._extra_lay.addWidget(self._line(text, name))
+                else:
+                    self._extra_lay.addSpacing(6)
         opening = self._extra.isHidden()
         self._extra.setVisible(opening)
         self._toggle.setText(bidi.plain(self._less if opening else self._more, self._rtl))
@@ -167,17 +280,16 @@ class SessionCard(QFrame):
 
 # ------------------------------------------------------------------ entity cards
 
-CARD_FIELDS = {
-    "monster": [("Level", "level"), ("HP", "HP"), ("EXP", "EXP")],
-    "item": [("Level", "level"), ("Attack", "ATT"), ("Defense", "DEF")],
-}
-FIELD_LABELS_HE = {"level": "לבל", "HP": "HP", "EXP": "EXP", "ATT": "ATT", "DEF": "DEF"}
-CATEGORY_LABELS = {
-    "monster": ("מפלצת", "Monster"), "item": ("פריט", "Item"), "map": ("מפה", "Map"),
-    "npc": ("NPC", "NPC"), "quest": ("קווסט", "Quest"), "skill": ("סקיל", "Skill"),
-    "class": ("קלאס", "Class"), "guide": ("מדריך", "Guide"), "shop": ("חנות", "Shop"),
-    "crafting": ("Crafting", "Crafting"), "formula": ("נוסחה", "Formula"),
-}
+def card_subtitle(t, category: str, kind: str | None) -> str:
+    """'Monster', 'Item · Etc / Monster Drop': the category in the UI language, then the database's type
+    unless it only repeats the category (a monster's type is "Monster")."""
+    key = f"cat_{category}"
+    label = t(key) if t(key) != key else category
+    from ..i18n import STRINGS
+    names = {category.lower(), label.lower(), *(s.lower() for s in STRINGS.get(key, {}).values())}
+    if kind and kind.strip().lower() not in names:
+        return f"{label} · {kind}"
+    return label
 
 
 class _Selection(QObject):
@@ -245,9 +357,11 @@ class EntityCard(Selectable, QFrame):
 
     def __init__(self, kb: KnowledgeBase, key: str, lang: str):
         super().__init__()
+        from ..i18n import I18n
         self.setObjectName("Card")
         self._init_selectable(key)
-        self.setToolTip("לחצו כדי לשאול עליה" if lang == "he" else "Tap to ask about it")
+        self._t = t = I18n(lang)
+        self.setToolTip(t("card_ask_tip"))
         e = kb.get(key) or {}
         self.url = e.get("url")
         he = lang == "he"
@@ -273,17 +387,14 @@ class EntityCard(Selectable, QFrame):
         name.setAlignment(Qt.AlignLeft if not he else Qt.AlignRight)
         col.addWidget(name)
 
-        cat = e.get("category", "")
-        sub = CATEGORY_LABELS.get(cat, (cat, cat))[0 if he else 1]
-        if e.get("type"):
-            sub = f"{sub} · {e['type']}"
+        sub = card_subtitle(t, e.get("category", ""), e.get("type"))
         # in Hebrew every line starts on the right, even an all-English one like "NPC"
         side = (Qt.AlignRight if he else Qt.AlignLeft) | Qt.AlignAbsolute
         sub_label = _label(bidi.plain(sub, he), "CardSub")
         sub_label.setAlignment(side)
         col.addWidget(sub_label)
 
-        stats = self._stats(e, he)
+        stats = self._stats(e, t)
         if stats:
             stat_label = _label(bidi.plain(stats, he), "CardStat")
             stat_label.setAlignment(side)
@@ -293,8 +404,6 @@ class EntityCard(Selectable, QFrame):
         row.addLayout(col, 1)
         from PySide6.QtWidgets import QToolButton
         from . import theme
-        from ..i18n import I18n
-        self._t = I18n(lang)
         self._buttons = QWidget()
         bl = QVBoxLayout(self._buttons)
         bl.setContentsMargins(0, 0, 0, 0)
@@ -337,19 +446,22 @@ class EntityCard(Selectable, QFrame):
         self.setProperty("selected", "false")
         self.style().unpolish(self)
         self.style().polish(self)
-        pm = self.grab()
+        pm = on_solid_background(self.grab(), 14)
         self._buttons.setVisible(True)
         QApplication.clipboard().setPixmap(pm)
         QToolTip.showText(QCursor.pos(), self._t("copied"), self)
 
     @staticmethod
-    def _stats(e: dict, he: bool) -> str:
+    def _stats(e: dict, t) -> str:
         props = e.get("props") or {}
         bits = []
         for k in ("Level", "HP", "EXP", "Required Level", "Attack", "Weapon Attack", "Magic Attack", "Defense"):
             if k in props and props[k] not in (None, "", 0):
-                label = {"Level": "לבל", "Required Level": "לבל נדרש"}.get(k, k) if he else k
-                bits.append(f"{label}: {props[k]}")
+                label = {"Level": t("card_level"), "Required Level": t("card_req_level")}.get(k, k)
+                # an English label with its value is one left-to-right piece ("HP: 233"): in a Hebrew line its colon
+                # otherwise lands on the wrong side ("233 :HP", seen live)
+                # (+ RLM: two English pieces side by side would otherwise merge into one run, in English order)
+                bits.append(f"‪{label}: {props[k]}‬‏" if label.isascii() else f"{label}: {props[k]}")
             if len(bits) >= 3:
                 break
         return " · ".join(bits)
@@ -425,6 +537,10 @@ class ProfileCard(QFrame):
         self.exp = ExpBar()
         self.exp.hide()
         col.addWidget(self.exp)
+        # what the ⟳ is doing right now ("Reading the screen…"): a spinning icon alone said nothing for 40 s
+        self.status = QLabel(objectName="ExpText")
+        self.status.hide()
+        col.addWidget(self.status)
         row.addLayout(col, 1)
         from PySide6.QtWidgets import QToolButton
         from . import theme
@@ -441,7 +557,7 @@ class ProfileCard(QFrame):
         self._spin = QTimer(self, interval=260, timeout=self._tick)
         self._frame = 0
 
-    def set_busy(self, busy: bool, tip: str = "") -> None:
+    def set_busy(self, busy: bool, tip: str = "", status: str = "") -> None:
         from . import theme
         self.refresh.setEnabled(not busy)
         if busy:
@@ -451,6 +567,10 @@ class ProfileCard(QFrame):
             self.refresh.setText(theme.ICON["refresh"])
         if tip:
             self.refresh.setToolTip(tip)
+        rtl = self.layoutDirection() == Qt.RightToLeft
+        self.status.setText(bidi.plain(status, rtl) if busy and status else "")
+        self.status.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
+        self.status.setVisible(bool(busy and status))
 
     def _tick(self):
         self._frame = (self._frame + 1) % len(self._spin_frames)
@@ -460,7 +580,7 @@ class ProfileCard(QFrame):
         align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter
         self.name.setText(bidi.plain(c.name, rtl))
         self.name.setAlignment(align)
-        self.meta.setText(f"Lv. {c.level} · {c.job}")
+        self.meta.setText(f"Lv. {c.level} · {c.job_label}")
         self.meta.setAlignment(align)
         self.avatar.set_image(character_image(c, avatar_path, kb))
 
@@ -503,7 +623,7 @@ class CharacterRow(QFrame):
         align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter
         name = QLabel(bidi.plain(c.name, rtl), objectName="ProfileName")
         name.setAlignment(align)
-        meta = QLabel(f"Lv. {c.level} · {c.job}", objectName="ProfileMeta")
+        meta = QLabel(f"Lv. {c.level} · {c.job_label}", objectName="ProfileMeta")
         meta.setAlignment(align)
         col.addWidget(name)
         col.addWidget(meta)
@@ -547,12 +667,23 @@ class EntityTile(Selectable, QFrame):
             if not pm.isNull():
                 pic.setPixmap(pm.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         row.addWidget(pic)
-        name = QLabel(e.get("name", key), objectName="TileName")
-        name.setWordWrap(True)
-        from PySide6.QtWidgets import QApplication
-        rtl = QApplication.layoutDirection() == Qt.RightToLeft
-        name.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
-        row.addWidget(name, 1)
+        self.name = QLabel(e.get("name", key), objectName="TileName")
+        self.name.setWordWrap(True)
+        self.name.setMinimumWidth(48)        # a long word ("Intermediate") never holds two tiles wider than the chat
+        row.addWidget(self.name, 1)
+        self._align_name()
+
+    def _align_name(self):
+        """The (English) name sits right beside its picture: on the right in a Hebrew chat. Qt resolves "leading"
+        by the text's own direction, so an English name went to the far left, away from its picture."""
+        rtl = self.layoutDirection() == Qt.RightToLeft
+        self.name.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
+
+    def changeEvent(self, e):
+        from PySide6.QtCore import QEvent
+        super().changeEvent(e)
+        if e.type() == QEvent.LayoutDirectionChange:     # follows the chat when the player switches language
+            self._align_name()
 
 
 

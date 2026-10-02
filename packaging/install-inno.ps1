@@ -3,7 +3,8 @@
 $ErrorActionPreference = "Stop"
 choco upgrade innosetup --yes --no-progress
 if ($LASTEXITCODE -ne 0) { throw "choco upgrade innosetup failed" }
-$iscc = @("${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:ProgramFiles\Inno Setup 6\ISCC.exe") |
-    Where-Object { Test-Path $_ } | Select-Object -First 1
+# any major version's folder ("Inno Setup 6", "Inno Setup 7"): choco installs the latest
+$iscc = @("${env:ProgramFiles(x86)}", "$env:ProgramFiles") | ForEach-Object { Get-ChildItem "$_\Inno Setup *\ISCC.exe" -ErrorAction SilentlyContinue } |
+    Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName
 if (-not $iscc) { throw "ISCC.exe not found after installing Inno Setup" }
 Write-Host "Inno Setup: $((Get-Item $iscc).VersionInfo.ProductVersion) at $iscc"

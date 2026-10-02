@@ -74,6 +74,13 @@ class Toast(QWidget):
         close.setCursor(Qt.PointingHandCursor)
         close.clicked.connect(self.dismiss)
         row.addWidget(close, 0, Qt.AlignTop)
+        # the text column's exact width before any adjustSize(): the height then comes from the wrapped text
+        # (measured at a guessed width, the message's last line was cut off)
+        close.ensurePolished()
+        col_w = WIDTH - 2 * 12 - 4 - 40 - close.sizeHint().width() - 3 * 12
+        for lb in card.findChildren(QLabel):
+            if lb.wordWrap():
+                lb.setFixedWidth(col_w)
 
         self._timer = QTimer(self, singleShot=True, interval=timeout_ms, timeout=self.dismiss)
 

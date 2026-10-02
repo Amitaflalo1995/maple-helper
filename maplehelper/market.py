@@ -21,6 +21,8 @@ _cache: dict[str, tuple[float, dict | None]] = {}
 class NpcPrices:
     sell_back: int | None                       # what an NPC pays you
     shops: list[tuple[str, str, int]] = field(default_factory=list)   # (NPC, where, price), cheapest first
+    unpriced: list[tuple[str, str]] = field(default_factory=list)     # (NPC, where): sells it, no price in the page
+    ranks: dict[tuple[str, str], str] = field(default_factory=dict)   # (NPC, where) -> citizen grade its price needs
 
 
 def _int(text: str) -> int | None:
@@ -28,21 +30,33 @@ def _int(text: str) -> int | None:
     return int(m.group(0).replace(",", "")) if m else None
 
 
+# the price line under a town shop: "COT2 prices Citizen of Honor +" (that citizen grade and up; the KB's item pages,
+# e.g. pages/item/274.md, Max City General Store), or a bare "COT2 prices"
+_RANK = re.compile(r"^COT2 prices\s+(.+?)\s*\+?\s*$")
+
+
 def npc_prices(kb, key: str) -> NpcPrices:
     lines = [ln.strip() for ln in kb.page(key).split("\n---", 2)[-1].splitlines()]
     sell = next((_int(ln) for ln in lines if ln.startswith("NPC Sell-back")), None)
-    shops = []
+    out = NpcPrices(sell)
     if "Where to buy" in lines:
         i = lines.index("Where to buy") + 1
-        # blocks of: "<NPC> <role> [cheapest]" / "<map> · <town>" / "<price>" / "mesos"
+        # blocks of: "<NPC> <role> [cheapest]" / "<map> · <town>" / "<price>" / "mesos" [/ "COT2 prices [grade +]"]
+        # the price is "-" for a few NPCs the page lists without one (pages/item/241.md: Jane, Lith Harbor)
         while i + 3 < len(lines) and lines[i + 3] == "mesos":
             npc = re.sub(r"\s+cheapest$", "", lines[i]).strip()
-            price = _int(lines[i + 2])
+            where, price = lines[i + 1], _int(lines[i + 2])
             if price is not None:
-                shops.append((npc, lines[i + 1], price))
-            i += 5 if i + 4 < len(lines) and lines[i + 4].startswith("COT2") else 4
-    shops.sort(key=lambda s: s[2])
-    return NpcPrices(sell, shops)
+                out.shops.append((npc, where, price))
+            elif npc:
+                out.unpriced.append((npc, where))
+            nxt = lines[i + 4] if i + 4 < len(lines) else ""
+            rank = _RANK.match(nxt)
+            if rank:
+                out.ranks[(npc, where)] = rank.group(1)
+            i += 5 if nxt.startswith("COT2") else 4
+    out.shops.sort(key=lambda s: s[2])
+    return out
 
 
 @dataclass
@@ -57,7 +71,7 @@ class Market:
 def summarize(rows: list[dict], name: str) -> Market:
     prices, times = [], []
     for r in rows:
-        if (r.get("itemName") or "").strip().lower() != name.strip().lower():
+        if not isinstance(r, dict) or str(r.get("itemName") or "").strip().lower() != name.strip().lower():
             continue                            # the search is "contains": keep this exact item
         each = r.get("priceEach") or r.get("price")
         if isinstance(each, (int, float)) and each > 0:
@@ -88,7 +102,8 @@ def free_market(name: str, timeout: float = 10) -> Market | None:
             data = json.loads(r.read().decode("utf-8"))
     except Exception:
         return None
-    out = summarize(data.get("rows") or [], name)
+    rows = data.get("rows") if isinstance(data, dict) else None
+    out = summarize(rows if isinstance(rows, list) else [], name)
     _cache[name.lower()] = (time.time(), out)
     return out
 

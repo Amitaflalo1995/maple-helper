@@ -59,9 +59,10 @@ class GlassBackdrop(QObject):
 
 # ---------------------------------------------------------------- shared painting
 
-from PySide6.QtCore import QRectF, Qt  # noqa: E402
-from PySide6.QtGui import QColor, QLinearGradient, QPainter, QPainterPath, QPen  # noqa: E402
-from PySide6.QtWidgets import QDialog, QHBoxLayout, QLabel, QToolButton, QVBoxLayout, QWidget  # noqa: E402
+from PySide6.QtCore import QMetaMethod, QRectF, Qt  # noqa: E402
+from PySide6.QtGui import QColor, QCursor, QGuiApplication, QLinearGradient, QPainter, QPainterPath, QPen  # noqa: E402
+from PySide6.QtWidgets import (QAbstractScrollArea, QDialog, QHBoxLayout, QLabel, QLineEdit,  # noqa: E402
+                               QPushButton, QToolButton, QVBoxLayout, QWidget)
 
 from . import theme  # noqa: E402
 
@@ -133,8 +134,41 @@ class _DragBar(QWidget):
         self._grab = None
 
 
+SCREEN_MARGIN = 48        # room kept free above and below a window that would not fit the screen
+
+
+def no_default_buttons(root) -> None:
+    """Qt makes every push button in a dialog an "auto default": Enter anywhere then clicks the first one
+    (a tab chip, "Back"). Turn that off; a window names its own Enter button (GlassDialog.enter_button)."""
+    for b in root.findChildren(QPushButton):
+        b.setAutoDefault(False)
+        b.setDefault(False)
+
+
+def first_control(root):
+    """The first widget inside `root` that Tab would reach (visible, enabled), in focus-chain order."""
+    w = root.nextInFocusChain()
+    for _ in range(2000):
+        if w is None or w is root:
+            return None
+        # (a scroll area takes Tab focus too, but it's no control)
+        if (root.isAncestorOf(w) and w.isVisible() and w.isEnabled() and not isinstance(w, QAbstractScrollArea)
+                and w.focusPolicy().value & Qt.TabFocus.value):
+            return w
+        w = w.nextInFocusChain()
+    return None
+
+
+def _handles_enter(w) -> bool:
+    """A text field that does something of its own on Enter (search, next step, check the key)."""
+    return isinstance(w, QLineEdit) and w.isSignalConnected(QMetaMethod.fromSignal(w.returnPressed))
+
+
 class GlassDialog(QDialog):
     """Frameless glass window with the app's own title bar (title + close). Put content in self.content."""
+
+    esc_closes = True          # False: Esc does nothing (it must not quit onboarding or drop unsaved settings)
+    enter_button = None        # the button Enter clicks when no text field handles it (None: Enter does nothing)
 
     def __init__(self, title: str, rtl: bool, show_in_captures: bool = False, closable: bool = True,
                  strength: float = 0.6):
@@ -163,6 +197,41 @@ class GlassDialog(QDialog):
         root.addWidget(bar)
         self.content = QWidget(objectName="Feed")
         root.addWidget(self.content, 1)
+
+    initial_focus = None       # the control a window opens focused on (a search field); else its first control
+
+    def showEvent(self, e):
+        super().showEvent(e)
+        # Qt focuses the first widget in the chain, the title bar's X: Space or Enter then closed the window
+        QTimer.singleShot(0, self._focus_first)
+
+    def _focus_first(self) -> None:
+        w = self.initial_focus
+        if w is None or not w.isVisible() or not w.isEnabled():
+            w = first_control(self.content)
+        if w is not None and (self.focusWidget() in (None, self.close_btn) or not self.focusWidget().isVisible()):
+            w.setFocus(Qt.OtherFocusReason)
+
+    def fit_screen(self, width: int, height: int) -> None:
+        """Open at (width, height), but never taller than the screen: on a small or scaled display the
+        bottom buttons (Save, Next) must stay visible; the content scrolls instead."""
+        screen = QGuiApplication.screenAt(QCursor.pos()) or QGuiApplication.primaryScreen()
+        if screen is not None:
+            height = min(height, max(320, screen.availableGeometry().height() - SCREEN_MARGIN))
+        self.resize(width, height)
+
+    def keyPressEvent(self, e):
+        if e.key() == Qt.Key_Escape and not self.esc_closes:
+            e.accept()
+            return
+        if e.key() in (Qt.Key_Return, Qt.Key_Enter) and not (e.modifiers() & ~Qt.KeypadModifier):
+            # Enter does what this window says (or nothing), never "click the first button Qt found"
+            b = self.enter_button
+            if not _handles_enter(self.focusWidget()) and b is not None and b.isVisible() and b.isEnabled():
+                b.click()
+            e.accept()
+            return
+        super().keyPressEvent(e)
 
     def paintEvent(self, e):
         paint_glass(self, None)

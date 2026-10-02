@@ -30,10 +30,12 @@ def touched(entries: list[dict], keys: list[str], kb) -> list[str]:
             hit.append(name)
     for e in entries:
         for kind in ("added", "removed", "changed", "updated"):
-            for r in e.get(kind, []):
+            for r in (e.get(kind) or []) if isinstance(e, dict) else []:
+                if not isinstance(r, dict):
+                    continue
                 if r.get("key") in names:
                     add(r.get("name"))
-                for item in r.get("drops_added", []) + r.get("drops_removed", []):
+                for item in (r.get("drops_added") or []) + (r.get("drops_removed") or []):
                     if item in wanted:
                         add(item)
     return hit

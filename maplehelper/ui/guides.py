@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (QApplication, QButtonGroup, QFrame, QHBoxLayout, 
 
 from .. import bidi, guides
 from ..i18n import I18n
-from .controls import rtl_buttons
+from .controls import FlowLayout, rtl_buttons
 from .glass import GlassDialog
 
 
@@ -195,7 +195,7 @@ class GuidesDialog(GlassDialog):
         super().__init__(t("guides"), t.rtl)
         self.kb, self.c = kb, character
         self.setStyleSheet(stylesheet)
-        self.resize(560, 760)
+        self.fit_screen(560, 760)          # never taller than a small screen; the library and reader scroll
         self.all = guides.all_guides(kb)
         self.picks = guides.for_you(kb, character)
         self._reading: str | None = None
@@ -207,8 +207,17 @@ class GuidesDialog(GlassDialog):
         self.stack.addWidget(self._library())
         self.stack.addWidget(self._reader())
         rtl_buttons(self, t.rtl)
+        self.initial_focus = self.search      # (an opened guide: its first control, "Back")
         if open_key and kb.get(open_key):
             self.open_guide(open_key)
+
+    def keyPressEvent(self, e):
+        # Esc in an open guide goes back to the list (like "Back"); in the list it closes the window
+        if e.key() == Qt.Key_Escape and self.stack.currentIndex() == 1:
+            self.stack.setCurrentIndex(0)
+            e.accept()
+            return
+        super().keyPressEvent(e)
 
     # library ----------------------------------------------------------------
 
@@ -223,8 +232,7 @@ class GuidesDialog(GlassDialog):
         self.search.setClearButtonEnabled(True)
         self.search.textChanged.connect(lambda *_: self._fill())
         lay.addWidget(self.search)
-        chips = QHBoxLayout()
-        chips.setSpacing(6)
+        chips = FlowLayout(spacing=6)        # wraps onto a second row: one row of five was 521 px wide
         self.cats = QButtonGroup(self)
         for cat in guides.CATEGORIES:
             b = QPushButton(bidi.plain(t(f"gcat_{cat}"), rtl), objectName="Chip")
@@ -233,7 +241,6 @@ class GuidesDialog(GlassDialog):
             b.setProperty("cat", cat)
             self.cats.addButton(b)
             chips.addWidget(b)
-        chips.addStretch(1)
         self.cats.buttons()[0].setChecked(True)
         self.cats.buttonClicked.connect(lambda *_: self._fill())
         lay.addLayout(chips)

@@ -63,7 +63,8 @@ def _levels(page: str) -> tuple[Level, ...]:
         if cur and row and i + 2 < len(lines) and lines[i + 2].startswith("|"):
             ing = [(int(n), name.strip()) for n, name in re.findall(r"(\d+) x (.+?)(?=\s+\d+ x |$)", lines[i + 1])]
             vals = [v.strip() for v in lines[i + 2].strip("| ").split("|")]
-            if len(vals) >= 7 and not any(r.name == row.group(2).strip() for r in cur.recipes):
+            # the same row twice is skipped, but another recipe for the same item (other materials) is kept
+            if len(vals) >= 7 and not any((r.name, r.ingredients) == (row.group(2).strip(), ing) for r in cur.recipes):
                 cur.recipes.append(Recipe(row.group(2).strip(), cur.level, _int(vals[0]), _int(vals[1]), _int(vals[5]),
                                           _float(vals[6]), vals[7] if len(vals) > 7 else "", ing))
             i += 3
@@ -88,6 +89,13 @@ def for_level(kb, profession: str, level: int) -> tuple[Level | None, Level | No
         if x:
             x.recipes.sort(key=lambda r: (-r.exp_per_meso, -r.exp))
     return now, nxt
+
+
+def up_to(kb, profession: str, level: int) -> list[Recipe]:
+    """Every recipe you can craft at your profession level (not only the ones that level opened):
+    the newest level first, best EXP per meso first within a level."""
+    out = [r for x in levels(kb, profession) if x.level <= level for r in x.recipes]
+    return sorted(out, key=lambda r: (-r.level, -r.exp_per_meso, -r.exp))
 
 
 # ------------------------------------------------------------------ who teaches it, where to work

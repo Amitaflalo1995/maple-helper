@@ -20,6 +20,7 @@ from .base import CREATE_NO_WINDOW, Provider, RawResult, classify_error, child_e
     find_windows_exe, http_ok, open_login, run_installer
 
 log = logging.getLogger(__name__)
+ANSWER_TIMEOUT_S = 300
 
 INSTALL_CMD = "irm https://chatgpt.com/codex/install.ps1 | iex"
 INSTALL_CMD_MAC = "curl -fsSL https://chatgpt.com/codex/install.sh | sh"
@@ -94,8 +95,8 @@ def codex_command(exe: str, workdir, instructions: str, model: str | None = None
                   platform: str = sys.platform, extra: tuple = ()) -> list[str]:
     cmd = [exe, "exec"]
     if image:
-        # --image takes several values: anywhere later it would swallow the "-" stdin marker
-        cmd += ["--image", str(image)]
+        # --image takes several values (comma-separated): anywhere later it would swallow the "-" stdin marker
+        cmd += ["--image", ",".join(str(i) for i in image) if isinstance(image, list) else str(image)]
     # json.dumps gives a valid TOML basic string (same escapes), so newlines and quotes survive -c
     cmd += ["--json", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--skip-git-repo-check",
             "-s", "read-only", "-C", str(workdir), "-c", "developer_instructions=" + json.dumps(instructions)]
@@ -128,10 +129,9 @@ def parse_events(lines, stderr: str = "") -> RawResult:
             failed = True
             errors.append(str((ev.get("error") or {}).get("message", "")))
     detail = "\n".join(errors) + "\n" + stderr
-    if failed:
-        return RawResult(error=classify_error(detail) or "api_error")
-    if answer is None:
-        return RawResult(error=classify_error(detail) or "no_result")
+    if failed or answer is None:
+        log.warning("Codex gave no answer: %s", detail.strip()[-1500:])   # the cause, for "Report a problem"
+        return RawResult(error=classify_error(detail) or ("api_error" if failed else "no_result"))
     return RawResult(text=answer)
 
 
@@ -284,12 +284,15 @@ class CodexBackend:
             self._proc.kill()
 
     def _exec(self, cmd: list[str], stdin_text: str, cwd: str, api_key: str | None,
-              timeout: int | None = None) -> RawResult:
+              timeout: int | None = None, answer: bool = True) -> RawResult:
+        """answer=False (a summary): not tracked as the answer cancel() stops (it killed the summary instead)."""
         try:
-            self._proc = p = subprocess.Popen(cmd, cwd=cwd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                              stderr=subprocess.PIPE, env=env(api_key), creationflags=CREATE_NO_WINDOW)
+            p = subprocess.Popen(cmd, cwd=cwd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, env=env(api_key), creationflags=CREATE_NO_WINDOW)
         except OSError as e:
             return RawResult(error=f"launch_failed: {e}")
+        if answer:
+            self._proc = p
         # Codex logs to stderr while it works: drain it so a full pipe never stalls the run
         err: list[bytes] = []
         reader = threading.Thread(target=lambda: err.append(p.stderr.read()), daemon=True)
@@ -297,8 +300,11 @@ class CodexBackend:
         killer = threading.Timer(timeout, p.kill) if timeout else None
         if killer:
             killer.start()
-        p.stdin.write(stdin_text.encode("utf-8"))
-        p.stdin.close()
+        try:
+            p.stdin.write(stdin_text.encode("utf-8"))
+            p.stdin.close()
+        except OSError:        # it exited at once (e.g. an older CLI rejecting a flag): stderr says why
+            pass
         lines = list(p.stdout)
         p.wait()
         if killer:
@@ -306,20 +312,26 @@ class CodexBackend:
         reader.join(timeout=5)
         return parse_events(lines, b"".join(err).decode("utf-8", errors="replace"))
 
-    def run(self, prompt: str, screenshot_jpeg: bytes | None, on_raw_delta=None) -> RawResult:
+    def run(self, prompt: str, screenshot_jpeg: bytes | None, on_raw_delta=None, model: str | None = None,
+            tools: bool = True) -> RawResult:
+        """model: this call's own (None: the player's). tools is Claude's: Codex reads files only when asked to."""
         b = self.brain
-        image = None
+        images: list[str] = []
         try:
-            if screenshot_jpeg:
-                fd, image = tempfile.mkstemp(prefix="maplehelper-shot-", suffix=".jpg")
-                with os.fdopen(fd, "wb") as f:
-                    f.write(screenshot_jpeg)
-            cmd = codex_command(self.exe, b.kb.root, b.system_prompt() + TOOLS_NOTE, b.model, image)
-            r = self._exec(cmd, prompt, str(b.kb.root), b.api_key)
+            for jpeg in (screenshot_jpeg if isinstance(screenshot_jpeg, list) else [screenshot_jpeg]):
+                if jpeg:
+                    fd, path = tempfile.mkstemp(prefix="maplehelper-shot-", suffix=".jpg")
+                    with os.fdopen(fd, "wb") as f:
+                        f.write(jpeg)
+                    images.append(path)
+            image = images if len(images) > 1 else (images[0] if images else None)
+            cmd = codex_command(self.exe, b.kb.root, b.system_prompt() + TOOLS_NOTE, model or b.model, image)
+            # a stalled CLI must not leave the chat on "thinking" forever
+            r = self._exec(cmd, prompt, str(b.kb.root), b.api_key, timeout=ANSWER_TIMEOUT_S)
         finally:
-            if image:
+            for path in images:
                 try:
-                    os.remove(image)
+                    os.remove(path)
                 except OSError:
                     pass
         if r.text and on_raw_delta:
@@ -333,5 +345,5 @@ class CodexBackend:
         with tempfile.TemporaryDirectory(prefix="maplehelper-summary-") as empty:
             cmd = codex_command(self.exe, empty, instructions, self.brain.model,
                                 extra=("-c", 'model_reasoning_effort="low"'))
-            r = self._exec(cmd, text, empty, self.brain.api_key, timeout=timeout)
+            r = self._exec(cmd, text, empty, self.brain.api_key, timeout=timeout, answer=False)
         return r.text.strip() or None

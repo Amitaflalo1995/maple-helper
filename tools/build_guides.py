@@ -274,10 +274,17 @@ class Converter:
         if t == "figure":
             img = find(n, lambda k: k.tag == "img")
             cap = find(n, lambda k: k.tag == "figcaption")
+            # the caption as inline text (its spans and lines kept apart: "Skill Lv1" / "500 x 300 px" were glued
+            # into "Skill Lv1500 x 300 px"), then any other text of the figure ("250 px left and right, ...")
+            def other(k) -> bool:
+                return isinstance(k, str) or (k is not cap and k.tag != "img" and
+                                              not find(k, lambda x: x is cap or x.tag == "img"))
+            parts = ([self.inline(cap)] if cap is not None else []) + [self.inline(k) for k in n.kids if other(k)]
+            text = squash("\n".join(p for p in parts if p.strip())) or None
             if img is not None:
-                self.picture(img, squash(plain(cap)) if cap is not None else None)
-            elif cap is not None:
-                self.add("p", plain(cap))
+                self.picture(img, text)
+            elif text:
+                self.add("p", text)
             return
         if "link-row" in n.classes:
             # buttons to the site's tools ("Open Accuracy Simulator") go; links to other guides stay

@@ -7,7 +7,9 @@ from __future__ import annotations
 
 import sys
 
-from PySide6.QtGui import QFont, QFontDatabase
+from PySide6.QtCore import QEvent, QObject, QRectF, Qt
+from PySide6.QtGui import QColor, QFont, QFontDatabase, QPainter, QPen
+from PySide6.QtWidgets import QAbstractButton, QApplication, QSlider, QWidget
 
 from ..store import ASSETS
 
@@ -39,6 +41,17 @@ MODE = "dark"
 
 def P() -> dict:
     return PALETTES.get(MODE, PALETTES["dark"])
+
+
+ORANGE_TEXT_LIGHT = "#C9620A"     # orange as text on white: #FF9533 / #F07A12 are too faint to read there
+
+
+def accent_text(deep: bool = False) -> str:
+    """Orange for text (links, chips, small marks): the brand orange on dark glass, a darker one on light.
+    Orange fills (primary buttons, the user's bubble) keep the brand colors."""
+    if MODE == "light":
+        return ORANGE_TEXT_LIGHT
+    return ORANGE_DEEP if deep else ORANGE
 
 
 # legacy names still used by toasts/dialogs (resolved at call time through P())
@@ -88,7 +101,10 @@ def app_font(size: int = 14) -> QFont:
 
 def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     s, c = size, P()
+    ot, otd = accent_text(), accent_text(deep=True)      # orange text: darker on white for contrast
+    install_focus_ring()
     return f"""
+    QPushButton, QToolButton {{ outline: none; }}
     * {{ font-family: "{font_family}"; font-size: {s}px; color: {c['text']}; }}
     QWidget#Overlay, QWidget#Feed {{ background: transparent; }}
     #Title {{ font-size: {s + 1}px; font-weight: 600; letter-spacing: -0.2px; color: {c['text']}; }}
@@ -99,15 +115,15 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
                                   border-radius: 3px; }}
     #ExpText {{ color: {c['muted']}; font-size: {s - 3}px; }}
     #PlanHead {{ color: {c['muted']}; font-size: {s - 2}px; font-weight: 600; padding-top: 6px; }}
-    QPushButton#PlanLink {{ background: transparent; border: none; padding: 2px 0; text-align: right; color: {c['text']}; }}
-    QPushButton#PlanLink:hover {{ color: {ORANGE}; }}
+    QPushButton#PlanLink {{ background: transparent; border: none; padding: 2px 0; text-align: left; color: {c['text']}; }}
+    QPushButton#PlanLink:hover {{ color: {ot}; }}
     QTextBrowser#GuideText {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 14px;
                                padding: 10px 12px; color: {c['text']}; selection-background-color: {ORANGE}; }}
     #PinAnswer {{ color: {c['text']}; font-size: {s - 1}px; }}
     QFrame#ShareCard {{ background: {c['fill1']}; border: 1px solid {c['stroke']}; border-radius: 18px; }}
     #ShareName {{ font-size: {s + 8}px; font-weight: 700; color: {c['text']}; }}
     #ShareMeta {{ font-size: {s + 1}px; font-weight: 500; color: {c['muted']}; }}
-    #ShareBrand {{ font-size: {s - 3}px; font-weight: 600; color: {ORANGE}; }}
+    #ShareBrand {{ font-size: {s - 3}px; font-weight: 600; color: {ot}; }}
     #Version {{ font-size: {s - 3}px; font-weight: 300; color: {c['muted']}; background: transparent; }}
     #ProfilePill {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 12px;
                     min-height: 24px; max-height: 24px; padding: 0 11px; font-size: {s - 2}px; font-weight: 500; color: {c['text']}; }}
@@ -118,7 +134,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QToolButton#Icon:hover {{ background: {c['fill2']}; color: {c['text']}; }}
     QToolButton#Icon:pressed {{ background: {c['fill3']}; }}
     QToolButton#Icon[active="true"] {{ color: #FF453A; }}
-    QToolButton#Icon[wished="true"] {{ color: {ORANGE}; }}
+    QToolButton#Icon[wished="true"] {{ color: {ot}; }}
     QToolButton#IconClose {{ font-family: "{ICON_FONT}"; font-size: 11px; color: {c['muted']}; background: transparent;
                              border: none; border-radius: 14px; min-width: 28px; min-height: 28px; }}
     QToolButton#IconClose:hover {{ background: #FF453A; color: #FFFFFF; }}
@@ -130,7 +146,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QScrollBar::add-line, QScrollBar::sub-line, QScrollBar::add-page, QScrollBar::sub-page {{ height: 0; background: none; }}
 
     #CharacterRow {{ background: transparent; border: none; }}
-    #Check {{ color: {ORANGE}; font-size: {s + 2}px; font-weight: 700; }}
+    #Check {{ color: {ot}; font-size: {s + 2}px; font-weight: 700; }}
     QPushButton#IconDanger {{ font-family: "{ICON_FONT}"; font-size: 13px; color: {c['muted']}; background: transparent;
                               border: none; border-radius: 13px; min-width: 26px; max-width: 26px;
                               min-height: 26px; max-height: 26px; }}
@@ -138,9 +154,9 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QPushButton#IconPlain {{ font-family: "{ICON_FONT}"; font-size: 13px; color: {c['muted']}; background: transparent;
                              border: none; border-radius: 13px; min-width: 26px; max-width: 26px;
                              min-height: 26px; max-height: 26px; }}
-    QPushButton#IconPlain:hover {{ color: {ORANGE}; background: {c['fill3']}; }}
+    QPushButton#IconPlain:hover {{ color: {ot}; background: {c['fill3']}; }}
     #Stepper {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 10px; }}
-    QToolButton#StepBtn {{ background: transparent; border: none; border-radius: 8px; color: {ORANGE};
+    QToolButton#StepBtn {{ background: transparent; border: none; border-radius: 8px; color: {ot};
                            font-size: {s + 4}px; font-weight: 600; min-width: 30px; min-height: 28px; }}
     QToolButton#StepBtn:hover {{ background: {c['fill3']}; }}
     QToolButton#StepBtn:pressed {{ background: {c['pressed']}; }}
@@ -150,7 +166,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
                  max-height: 28px; padding: 0 12px; font-weight: 500; color: {c['text']}; }}
     #InfoNote {{ background: {"rgba(255,149,51,0.12)" if MODE == "dark" else "rgba(255,149,51,0.10)"};
                  border: 1px solid rgba(255,149,51,0.35); border-radius: 12px; }}
-    #InfoIcon {{ font-family: "{ICON_FONT}"; font-size: 15px; color: {ORANGE}; }}
+    #InfoIcon {{ font-family: "{ICON_FONT}"; font-size: 15px; color: {ot}; }}
     #InfoText {{ color: {c['text']}; font-size: {s - 1}px; }}
     #JobHint {{ color: {c['muted']}; font-size: {s - 3}px; }}
     #ProfileCard {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 16px; }}
@@ -158,9 +174,9 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QToolButton#Refresh {{ font-family: "{ICON_FONT}"; font-size: 15px; color: {c['muted']}; background: transparent;
                            border: none; border-radius: 15px; min-width: 30px; max-width: 30px; min-height: 30px;
                            max-height: 30px; }}
-    QToolButton#Refresh:hover {{ background: {c['fill3']}; color: {ORANGE}; }}
-    QToolButton#Refresh:disabled {{ color: {ORANGE}; }}
-    QToolButton#Refresh:checked {{ color: {ORANGE}; background: {c['fill3']}; }}
+    QToolButton#Refresh:hover {{ background: {c['fill3']}; color: {ot}; }}
+    QToolButton#Refresh:disabled {{ color: {ot}; }}
+    QToolButton#Refresh:checked {{ color: {ot}; background: {c['fill3']}; }}
     #ProfileName {{ font-size: {s + 1}px; font-weight: 600; color: {c['text']}; }}
     #ProfileMeta {{ font-size: {s - 1}px; font-weight: 500; color: {c['muted']}; }}
     #BubbleUser {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFA24A, stop:1 {ORANGE_DEEP});
@@ -203,18 +219,18 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
                            min-height: 26px; max-height: 26px; padding: 0 10px; font-size: {s - 3}px; font-weight: 500;
                            color: {c['muted']}; }}
     QPushButton#SubChip:hover {{ background: {c['fill3']}; color: {c['text']}; }}
-    QPushButton#SubChip:checked {{ background: rgba(255,149,51,0.14); border: 1.5px solid {ORANGE}; color: {ORANGE_DEEP};
+    QPushButton#SubChip:checked {{ background: rgba(255,149,51,0.14); border: 1.5px solid {ORANGE}; color: {otd};
                                    font-weight: 700; }}
     #Tag, #TagGood, #TagWarn, #TagAccent {{ font-size: {s - 3}px; font-weight: 600; border-radius: 8px; padding: 2px 8px; }}
     #Tag {{ color: {c['muted']}; background: {c['fill3']}; }}
     #TagGood {{ color: #2E9E5B; background: rgba(52,199,89,0.16); }}
     #TagWarn {{ color: #C9620A; background: rgba(255,149,51,0.18); }}
-    #TagAccent {{ color: {ORANGE_DEEP}; background: rgba(255,149,51,0.12); }}
+    #TagAccent {{ color: {otd}; background: rgba(255,149,51,0.12); }}
     #BigStat {{ font-size: {s + 10}px; font-weight: 700; letter-spacing: -0.4px; color: {c['text']}; }}
     #BigStatLabel {{ font-size: {s - 3}px; color: {c['muted']}; }}
     QPushButton#NowChip {{ background: rgba(255,149,51,0.12); border: 1px solid rgba(255,149,51,0.55); border-radius: 12px;
                            min-height: 24px; max-height: 24px; padding: 0 11px; font-size: {s - 2}px; font-weight: 600;
-                           color: {ORANGE_DEEP}; }}
+                           color: {otd}; }}
     QPushButton#NowChip:hover {{ background: rgba(255,149,51,0.22); }}
     QPushButton#NowChip:pressed {{ background: rgba(255,149,51,0.32); }}
     #ShotHint {{ color: {c['muted']}; font-size: {s - 3}px; padding: 0 6px 2px 6px; }}
@@ -227,21 +243,26 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QToolButton#Send {{ font-family: "{ICON_FONT}"; font-size: 13px; color: #FFFFFF; border: none; border-radius: 15px;
                         min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;
                         background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFA24A, stop:1 {ORANGE_DEEP}); }}
+    QToolButton#Send:hover {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFB066, stop:1 #F58A2A); }}
     QToolButton#Send:pressed {{ background: {ORANGE_DEEP}; }}
     QToolButton#Send:disabled {{ background: {c['fill2']}; color: {c['faint']}; }}
 
     QPushButton#Primary {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFA24A, stop:1 {ORANGE_DEEP});
                            color: #FFFFFF; border: none; border-radius: 12px; min-height: 26px; padding: 4px 18px; font-weight: 600; }}
+    QPushButton#Primary:hover {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFB066, stop:1 #F58A2A); }}
     QPushButton#Primary:pressed {{ background: {ORANGE_DEEP}; }}
     QPushButton#Primary:disabled {{ background: {c['fill2']}; color: {c['faint']}; }}
     QPushButton#Danger {{ background: #FF3B30; color: #FFFFFF; border: none; border-radius: 12px; min-height: 26px;
                           padding: 4px 18px; font-weight: 600; }}
+    QPushButton#Danger:hover {{ background: #FF5147; }}
     QPushButton#Danger:pressed {{ background: #D70015; }}
     QPushButton#Secondary {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 12px; min-height: 26px; padding: 4px 18px; }}
     QPushButton#Secondary:hover {{ background: {c['fill3']}; }}
     QPushButton#Quick {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 14px; min-height: 30px; padding: 4px 12px; }}
-    QPushButton#Quick:hover {{ background: {c['fill3']}; }}
-    QPushButton#Quick:checked {{ background: rgba(255,149,51,0.12); border: 2px solid {ORANGE}; font-weight: 600; }}
+    QPushButton#Quick:hover, QToolButton#ClassTile:hover {{ background: {c['fill3']}; }}
+    QPushButton#Quick:checked, QToolButton#ClassTile:checked {{ background: rgba(255,149,51,0.12); border: 2px solid {ORANGE}; font-weight: 600; }}
+    QToolButton#ClassTile {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 14px; padding: 4px 4px;
+                             color: {c['text']}; }}
     QLineEdit {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 10px; padding: 7px 10px; }}
     QLineEdit:focus {{ border: 1px solid rgba(255,149,51,0.85); }}
 
@@ -252,13 +273,17 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #RowLabel {{ color: {c['text']}; }}
     #DialogBody {{ font-size: {s + 1}px; color: {c['text']}; line-height: 140%; }}
     #RowHint {{ color: {c['muted']}; font-size: {s - 3}px; }}
+    #WarnHint {{ color: {ORANGE if MODE == "dark" else "#C9620A"}; font-size: {s - 3}px; font-weight: 500; }}
     #PageTitle {{ font-size: {s + 8}px; font-weight: 700; letter-spacing: -0.3px; color: {c['text']}; }}
     #PageBody {{ color: {c['muted']}; }}
     #FieldLabel {{ color: {c['muted']}; font-size: {s - 2}px; font-weight: 500; }}
     QPushButton#Link, QPushButton#LinkDanger {{ background: transparent; border: none; min-height: 34px;
-                        font-weight: 500; text-align: left; padding: 0; color: {ORANGE}; }}
+                        font-weight: 500; text-align: left; padding: 0; color: {ot}; }}
     QPushButton#LinkDanger {{ color: #FF453A; }}
+    QPushButton#Link:hover {{ color: {otd}; text-decoration: underline; }}
+    QPushButton#LinkDanger:hover {{ color: #FF3B30; text-decoration: underline; }}
     QPushButton#Link:pressed, QPushButton#LinkDanger:pressed {{ color: {c['muted']}; }}
+    QPushButton#Link:disabled, QPushButton#LinkDanger:disabled {{ color: {c['faint']}; text-decoration: none; }}
 
     #Segmented {{ background: {"rgba(118,118,128,0.24)" if MODE == "dark" else "#E3E3E8"}; border: none;
                   border-radius: 10px; }}
@@ -309,6 +334,75 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QToolTip {{ background: {"#2C2C2E" if MODE == "dark" else "#FFFFFF"}; color: {c['text']};
                 border: 1px solid {c['stroke']}; border-radius: 6px; padding: 4px 8px; }}
     """
+
+
+_FOCUS_RING = None
+
+
+def install_focus_ring() -> None:
+    """A subtle orange ring on the button that has keyboard focus (Tab / Shift+Tab), like the web's
+    :focus-visible: a click gives no ring. Drawn by a see-through child over the button's own edge, so no
+    layout moves and no tight parent clips it (a QFocusFrame outside the button was cut off in a chat row)."""
+    global _FOCUS_RING
+    app = QApplication.instance()
+    if app is None or _FOCUS_RING is not None:
+        return
+    _FOCUS_RING = FocusRing(app)
+    app.installEventFilter(_FOCUS_RING)
+
+
+class _Ring(QWidget):
+    def __init__(self, target):
+        super().__init__(target)
+        self.setObjectName("FocusRing")
+        self.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.setAttribute(Qt.WA_NoSystemBackground)
+        self.setFocusPolicy(Qt.NoFocus)
+        self.setGeometry(target.rect())
+
+    def paintEvent(self, e):
+        p = QPainter(self)
+        p.setRenderHint(QPainter.Antialiasing)
+        color = QColor(ORANGE if MODE == "dark" else ORANGE_DEEP)
+        color.setAlphaF(0.9)
+        p.setPen(QPen(color, 2))
+        r = QRectF(self.rect()).adjusted(1, 1, -1, -1)
+        radius = min(r.height() / 2, 13)
+        p.drawRoundedRect(r, radius, radius)
+        p.end()
+
+
+class FocusRing(QObject):
+    KEYBOARD = (Qt.TabFocusReason, Qt.BacktabFocusReason)
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.ring: _Ring | None = None
+
+    def _hide(self) -> None:
+        try:
+            if self.ring is not None:
+                self.ring.deleteLater()
+        except RuntimeError:          # its button is gone (a closed window), and the ring with it
+            pass
+        self.ring = self.target = None
+
+    target = None
+
+    def eventFilter(self, obj, e):
+        t = e.type()
+        if t in (QEvent.FocusIn, QEvent.FocusOut) and isinstance(obj, (QAbstractButton, QSlider)):
+            self._hide()
+            if t == QEvent.FocusIn and e.reason() in self.KEYBOARD:
+                self.ring, self.target = _Ring(obj), obj
+                self.ring.show()
+                self.ring.raise_()
+        elif t == QEvent.Resize and obj is self.target and self.target is not None:
+            try:
+                self.ring.setGeometry(obj.rect())
+            except RuntimeError:
+                self.ring = self.target = None
+        return False
 
 
 def dialog_background() -> str:

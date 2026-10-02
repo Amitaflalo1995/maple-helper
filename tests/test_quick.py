@@ -64,7 +64,7 @@ def test_defense_reads_physical_defense(kb):
     # monsters carry "Physical Defense" (and "Magic Defense"), never a plain "Defense"
     kb.get("monster/130101")["props"]["Physical Defense"] = 20
     ans = quick.answer("Red Snail defense", kb, t)
-    assert ans and "Defense: 20" in ans.text
+    assert ans and "P.DEF: 20" in ans.text
 
 
 def test_two_questions_in_one_go_to_claude(kb):

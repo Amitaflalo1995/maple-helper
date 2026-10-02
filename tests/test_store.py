@@ -117,3 +117,142 @@ def test_launch_waits_for_a_running_update(monkeypatch):
     assert setupwait.wait_for_setup(limit_s=5, step_s=0) is True
     monkeypatch.setattr(setupwait, "setup_running", lambda: False)
     assert setupwait.wait_for_setup(limit_s=5, step_s=0) is False
+
+
+def test_damaged_install_is_explained_not_a_traceback(tmp_path, monkeypatch):
+    """A missing file of the install (e.g. shiboken6.Shiboken) shows a reinstall prompt and logs the error."""
+    import ctypes
+    import sys
+    import webbrowser
+
+    from maplehelper import setupwait, store
+    monkeypatch.setattr(store, "DATA_DIR", tmp_path)
+    shown, opened = [], []
+    if sys.platform == "win32":
+        monkeypatch.setattr(ctypes.windll.user32, "MessageBoxW", lambda *a: shown.append(a) or 6)
+    monkeypatch.setattr(webbrowser, "open", opened.append)
+    setupwait.report_broken_install(ModuleNotFoundError("No module named 'shiboken6.Shiboken'"))
+    assert "shiboken6.Shiboken" in (tmp_path / "logs" / "startup-error.log").read_text(encoding="utf-8")
+    if sys.platform == "win32":
+        assert shown and opened == [setupwait.DOWNLOAD_URL]
+
+
+def test_malformed_ai_profile_update_is_ignored(isolated_store):
+    """A reply with {"name": ...} or lists where text belongs once broke every later start."""
+    p = isolated_store.Profiles()
+    p.add("Amit", "Warrior", "Fighter", 30)
+    changed = p.apply_update({"map": {"name": "Henesys"}, "job": ["Page"], "note": ["x"],
+                              "quests_started": "Pio's Quest", "quests_completed": [{"name": "y"}]})
+    assert changed == [("quest+", "Pio's Quest")]
+    assert p.apply_update(["not", "a", "dict"]) == []
+    c = isolated_store.Profiles().active
+    assert c.map == "" and c.job == "Fighter" and c.active_quests == ["Pio's Quest"] and c.notes == []
+    assert "Pio's Quest" in c.summary()
+
+
+def test_profiles_drop_bad_saved_values_on_load(isolated_store):
+    isolated_store.Profiles.path.write_text(json.dumps({"active": "a", "characters": [
+        {"id": "a", "name": "Amit", "base_class": "Warrior", "job": "Fighter", "level": 30,
+         "map": {"name": "Henesys"}, "notes": [["x"]]},
+        "garbage", {"id": "b"}]}), encoding="utf-8")
+    p = isolated_store.Profiles()
+    assert [c.id for c in p.characters] == ["a"]
+    assert p.active.map == "" and p.active.notes == []
+
+
+def test_hud_job_names_keep_class_and_job_consistent(isolated_store):
+    """An Old School HUD says "Archer": the class becomes Bowman and an old Thief job doesn't survive."""
+    p = isolated_store.Profiles()
+    p.add("Kalimero", "Thief", "Assassin", 30)
+    p.apply_update({"level": 15, "job": "Archer", "base_class": "Archer"})
+    c = p.active
+    assert (c.base_class, c.job, c.level) == ("Bowman", "Bowman", 15)
+    assert c.job_label == "Archer"           # the card says what the game says
+    p.apply_update({"job": "Hunter"})
+    assert (p.active.base_class, p.active.job) == ("Bowman", "Hunter") and p.active.job_label == "Hunter"
+    p.apply_update({"base_class": "Warrior", "level": 5})
+    assert (p.active.base_class, p.active.job) == ("Warrior", "Beginner")
+    p.apply_update({"job": "Not a job"})
+    assert p.active.job == "Beginner"
+
+
+def test_sync_takes_the_hud_name(isolated_store):
+    p = isolated_store.Profiles()
+    p.add("Kalimero", "Bowman", "Bowman", 15)
+    # a longer HUD name is never taken silently (the chat asks: "this is the same character?"), letter case is
+    assert p.apply_update({"name": "KalimeroZz"}) == [] and p.active.name == "Kalimero"
+    assert p.apply_update({"name": "KALIMERO"}) == [("name", "KALIMERO")]
+    assert p.apply_update({"name": "not a name!"}) == [] and p.active.name == "KALIMERO"
+
+
+def test_another_character_on_the_hud_is_not_the_active_one():
+    from maplehelper.store import hud_name, same_character
+    assert same_character("kalimerozz", "KalimeroZz") and not same_character("Kalimero", "KalimeroZz")
+    assert not same_character("Ayash", "Ayashii") and not same_character("Ayash", "Ayashii", seen=False)
+    assert not same_character("KalimeroZz", "NewGuy99") and not same_character("Al", "Alpha")
+    assert hud_name({"name": " NewGuy99 "}) == "NewGuy99" and hud_name({"name": "a b"}) is None
+
+
+def test_another_name_never_renames_the_active_character(isolated_store):
+    p = isolated_store.Profiles()
+    p.add("KalimeroZz", "Bowman", "Bowman", 15)
+    assert p.apply_update({"name": "NewGuy99"}) == [] and p.active.name == "KalimeroZz"
+    assert p.find_by_name("kalimerozz") is p.active
+
+
+def test_alt_with_a_longer_name_is_never_merged(isolated_store):
+    """'Amit' and the alt 'AmitBow' are two characters once the HUD confirmed 'Amit', or when both are saved."""
+    from maplehelper.store import same_character
+    p = isolated_store.Profiles()
+    p.add("Amit", "Bowman", "Bowman", 45)
+    p.apply_update({"name": "Amit"})                      # the HUD confirms the name
+    assert p.apply_update({"name": "AmitBow", "level": 31}) == [("level", 31)] or p.active.name == "Amit"
+    assert p.active.name == "Amit"
+    assert not same_character("Amit", "AmitBow", seen=False, others=("AmitBow",))
+    assert not same_character("Kalimero", "KalimeroZz") and not same_character("KalimeroZz", "Kalimero")
+
+
+def test_damaged_files_never_crash_the_start(isolated_store):
+    p = isolated_store.Settings.path
+    p.write_bytes(b"\xff\xfe broken")
+    assert isolated_store.Settings()["hotkey_toggle"] == "F9"
+    p.write_text("[1, 2]", encoding="utf-8")
+    assert isolated_store.Settings()["hotkey_toggle"] == "F9"
+    isolated_store.Profiles.path.write_text("[1]", encoding="utf-8")
+    assert isolated_store.Profiles().characters == []
+
+
+def test_last_good_copy_is_used(isolated_store):
+    s = isolated_store.Settings()
+    s["language"] = "en"
+    s["language"] = "he"                       # the second save keeps the first as .bak
+    isolated_store.Settings.path.write_text("", encoding="utf-8")   # a power cut emptied it
+    assert isolated_store.Settings()["language"] == "en"
+
+
+def test_a_damaged_required_field_repairs_the_character(isolated_store):
+    """An old corruption (job saved as an object, level 31.0) must not lose the whole character."""
+    isolated_store.Profiles.path.write_text(json.dumps({"active": "a", "characters": [
+        {"id": "a", "name": "Amit", "base_class": "Thief", "job": {"x": 1}, "level": 31.0,
+         "exp_pct": "12", "stats": {"acc": "50", "hp": 900}}]}), encoding="utf-8")
+    c = isolated_store.Profiles().active
+    assert c and c.name == "Amit" and c.level == 31 and c.job == "Thief" and c.exp_pct is None
+    assert c.stats == {"hp": 900}
+
+
+def test_history_skips_lines_of_the_wrong_shape(isolated_store):
+    h = isolated_store.History("x")
+    h.append("user", "hi")
+    with h.log.open("a", encoding="utf-8") as f:
+        f.write('[1, 2]\n{"role": "user"}\n"text"\n')
+    assert [r["text"] for r in h.recent()] == ["hi"]
+
+
+def test_history_file_is_trimmed(isolated_store, monkeypatch):
+    h = isolated_store.History("x")
+    monkeypatch.setattr(isolated_store.History, "MAX_BYTES", 2000)
+    monkeypatch.setattr(isolated_store.History, "KEEP_LINES", 10)
+    for i in range(100):
+        h.append("user", f"question {i}")
+    recs = h.recent(1000)
+    assert len(recs) <= 30 and recs[-1]["text"] == "question 99"

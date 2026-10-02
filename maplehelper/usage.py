@@ -19,7 +19,8 @@ def parse(info: dict | None) -> dict | None:
     """{"five_hour": {"used": 0.7, "resets": 1790845200}, "seven_day": {...}} from a rate_limit_info."""
     if not isinstance(info, dict):
         return None
-    windows = info.get("unifiedWindows") or {}
+    windows = info.get("unifiedWindows")
+    windows = windows if isinstance(windows, dict) else {}      # outside data: never trust its shape
     out = {}
     for name in WINDOWS:
         w = windows.get(name)
@@ -59,7 +60,11 @@ def current(settings, now: float | None = None, provider: str | None = None) -> 
     u = settings["usage"] or {}
     if provider and u.get("provider", "claude") != provider:
         return {}
-    return {k: v for k, v in u.items() if k in WINDOWS and not (v.get("resets") and v["resets"] <= now)}
+    def live(v) -> bool:
+        r = v.get("resets") if isinstance(v, dict) else None
+        return isinstance(v, dict) and isinstance(v.get("used"), (int, float)) and \
+            not (isinstance(r, (int, float)) and r <= now)
+    return {k: v for k, v in u.items() if k in WINDOWS and live(v)}
 
 
 def level(settings, now: float | None = None, provider: str | None = None) -> str:
@@ -69,7 +74,7 @@ def level(settings, now: float | None = None, provider: str | None = None) -> st
 
 
 def reset_clock(resets: float | None) -> str:
-    return time.strftime("%H:%M", time.localtime(resets)) if resets else ""
+    return time.strftime("%H:%M", time.localtime(resets)) if isinstance(resets, (int, float)) and resets else ""
 
 
 def lines(settings, t, now: float | None = None, provider: str = "claude") -> list[str]:

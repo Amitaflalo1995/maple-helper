@@ -1,12 +1,14 @@
 """Maple Helper entry point: tray icon, global hotkeys, overlay, voice, onboarding."""
 from __future__ import annotations
 
+import os
 import sys
 import threading
 import webbrowser
 
 from PySide6.QtCore import QLockFile, QObject, Qt, QTimer, Signal
-from PySide6.QtGui import QAction, QIcon, QKeySequence
+from PySide6.QtGui import QAction, QIcon
+from PySide6.QtNetwork import QLocalServer, QLocalSocket
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 from . import APP_NAME, __version__, osapi, providers, report, telemetry, updater, whatsnew, wishlist
@@ -23,10 +25,35 @@ from .voice import VoiceController
 
 HOTKEY_TOGGLE = 1
 HOTKEY_VOICE = 2
+INSTANCE_SERVER = "MapleHelper-" + (os.environ.get("USERNAME") or os.environ.get("USER") or "app")
 BACKGROUND_ARG = "--background"   # start in the tray only (autostart at login, silent updates)
 UPDATED_ARG = "--updated"         # the installer reopens the app with it after "Update now": show what's new
 # the .ico carries every Windows size; macOS draws the menu bar and Dock from a PNG
 APP_ICON = "app.ico" if sys.platform == "win32" else "icon-256.png"
+
+
+def _remove_stray_screenshots() -> None:
+    """Screenshots handed to ChatGPT live in %TEMP% only for one answer; a quit mid-answer left them there."""
+    import glob
+    import tempfile
+    import time
+    for f in glob.glob(os.path.join(tempfile.gettempdir(), "maplehelper-shot-*.jpg")):
+        try:
+            if time.time() - os.path.getmtime(f) > 3600:
+                os.remove(f)
+        except OSError:
+            pass
+
+
+def load_kb() -> KnowledgeBase:
+    """The newest KB; the bundled one when the downloaded copy can't be read (one bad release mustn't stop
+    every start)."""
+    from .store import BUNDLED_KB
+    try:
+        return KnowledgeBase()
+    except Exception:      # noqa: BLE001
+        report.log.exception("knowledge base unreadable, using the bundled one")
+        return KnowledgeBase(BUNDLED_KB)
 
 
 class _MainThread(QObject):
@@ -46,12 +73,13 @@ class MapleHelperApp:
         self.qapp = qapp
         self.settings = Settings()
         self.profiles = Profiles()
-        self.kb = KnowledgeBase()
+        self.kb = load_kb()
         self.font_family = theme.load_fonts()
         theme.FONT_FAMILY = self.font_family
         qapp.setWindowIcon(QIcon(str(ASSETS / "brand" / APP_ICON)))
         qapp.setQuitOnLastWindowClosed(False)
         self.main_thread = _MainThread()
+        self._look = (self.settings["language"], self.settings["appearance"], self.settings["font_size"])
 
     # ------------------------------------------------------------------ startup
 
@@ -129,6 +157,7 @@ class MapleHelperApp:
         self.voice.started.connect(self.on_voice_start)
         self.voice.state.connect(lambda s: self.overlay.voice_state(s))
         self.voice.text.connect(self.on_voice_text)
+        self.voice.failed.connect(self.on_voice_failed)
         self.voice.text.connect(lambda _: telemetry.track("voice_used"))
         self.overlay.mic_clicked.connect(self.voice.toggle)
 
@@ -139,6 +168,9 @@ class MapleHelperApp:
         QTimer.singleShot(4000, self.check_kb_update_silently)
         QTimer.singleShot(6000, self.voice.preload)    # voice answers right away after a start or an update
         QTimer.singleShot(8000, updater.remove_old_installers)
+        QTimer.singleShot(9000, _remove_stray_screenshots)
+        from . import inventory     # the icon index for "check the inventory", built before it's needed
+        QTimer.singleShot(10000, lambda: threading.Thread(target=inventory.warm, args=(self.kb,), daemon=True).start())
         # a session can run for hours: look again every 3 hours
         self._update_timer = QTimer(interval=3 * 60 * 60 * 1000, timeout=self.check_kb_update_silently)
         self._update_timer.start()
@@ -151,7 +183,24 @@ class MapleHelperApp:
         QTimer.singleShot(1500, self.check_permissions)
         self.announce_whats_new(fresh_install)
         self.qapp.aboutToQuit.connect(self.shutdown)
+        self._listen_for_second_launch()
         return True
+
+    def _listen_for_second_launch(self):
+        """The app runs in the tray (autostart): opening it again from the desktop or Start menu shows the chat."""
+        QLocalServer.removeServer(INSTANCE_SERVER)        # a stale socket after a crash (macOS)
+        self._instance_server = QLocalServer(self.qapp)
+        self._instance_server.newConnection.connect(self._on_second_launch)
+        self._instance_server.listen(INSTANCE_SERVER)
+
+    def _on_second_launch(self):
+        while self._instance_server.hasPendingConnections():
+            self._instance_server.nextPendingConnection().deleteLater()
+        if not self.overlay.isVisible():
+            self.overlay.toggle(self.capture)
+        else:
+            self.overlay.raise_()
+            self.overlay.activateWindow()
 
     def announce_whats_new(self, fresh_install: bool):
         """First start after an app update: a note in the chat with a "What's new?" button."""
@@ -238,7 +287,19 @@ class MapleHelperApp:
         if not self.overlay.isVisible():
             self.overlay.toggle(self.capture)
 
+    def on_voice_failed(self, error: str):
+        """No microphone, a blocked one, or the speech model failed to download/load: say so, don't go silent."""
+        report.log.warning("voice failed: %s", error)
+        t = I18n(self.settings["language"])
+        if not self.overlay.isVisible():
+            self.overlay.toggle(self.capture)
+        self.overlay.add_system(t("voice_mic_failed") if error.startswith("mic:") else t("voice_failed"))
+
     def on_voice_text(self, text: str):
+        if not text.strip():          # silence (or only noise): say so, instead of nothing happening
+            self.overlay.add_system(I18n(self.settings["language"])("voice_nothing")
+                                    .replace("F10", self.settings["hotkey_voice"]))
+            return
         fixed = self.kb.resolve_names(text)
         self.overlay.voice_text(fixed, send=self.settings["voice_send_immediately"])
 
@@ -278,9 +339,10 @@ class MapleHelperApp:
         menu.addAction(header)
         menu.addSeparator()
         key = self.settings["hotkey_toggle"]
-        a_show = QAction(t("tray_open"), menu, triggered=lambda: self.overlay.toggle(self.capture))
-        a_show.setShortcut(QKeySequence(key))          # shown in the menu's shortcut column
-        a_show.setShortcutVisibleInContextMenu(True)
+        # the key in the label itself: the menu's shortcut column glued it to the text in Hebrew ("הצ'אטF9", seen live)
+        from . import bidi
+        a_show = QAction(bidi.plain(f"{t('tray_open')}  ·  {key}", t.rtl), menu,
+                         triggered=lambda: self.overlay.toggle(self.capture))
         a_set = QAction(t("tray_settings"), menu, triggered=self.open_settings)
         a_quit = QAction(t("tray_quit"), menu, triggered=self.qapp.quit)
         menu.addAction(a_show)
@@ -296,6 +358,7 @@ class MapleHelperApp:
                                     if r == QSystemTrayIcon.Trigger else None)
         self.tray.show()
         self._tray_menu = menu
+        self._add_announced_item()
 
     def open_settings(self):
         def make():
@@ -309,6 +372,25 @@ class MapleHelperApp:
             dlg.whats_new_requested.connect(lambda: self.show_whats_new())
             return dlg
         self.open_window("settings", make, on_close=self.overlay.refresh_profile_chip)
+
+    def _reopen_windows_in_new_look(self):
+        """A language or appearance change: the other open windows (tools, guides, history...) were built in the
+        old one (the tools window stayed Hebrew after a switch to English, seen live). Reopen them."""
+        look = (self.settings["language"], self.settings["appearance"], self.settings["font_size"])
+        if getattr(self, "_look", look) == look:
+            self._look = look
+            return
+        self._look = look
+        reopen = {"tools": self.show_tools, "guides": self.show_guides, "patch_notes": self.show_patch_notes,
+                  "whats_new": self.show_whats_new}
+        for kind, dlg in list(self.__dict__.get("_windows", {}).items()):
+            if kind == "settings" or dlg is None:
+                continue
+            dlg.close()
+            again = reopen.get(kind) or (self.show_history if kind.startswith("history:") else
+                                         self.show_wishlist if kind.startswith("wishlist:") else None)
+            if again:
+                QTimer.singleShot(0, lambda f=again: f())
 
     def add_character(self):
         before = self.profiles.active_id
@@ -334,6 +416,11 @@ class MapleHelperApp:
                              t("cancel"), t.rtl, self.style()).exec():
             return
         self.profiles.remove(cid)
+        # nothing of the deleted character stays behind: its pinned answers, tracked items and hidden tips
+        for key in ("pins", "wishlist", "tips_dismissed"):
+            data = dict(self.settings[key] or {})
+            if data.pop(cid, None) is not None:
+                self.settings[key] = data
         if not self.profiles.characters:
             # advice needs a character: offer to create one right away
             Onboarding(self.settings, self.profiles, self.kb, self.style, only_character=True).exec()
@@ -360,14 +447,29 @@ class MapleHelperApp:
 
     def make_report(self):
         """Zip the log and diagnostics onto the desktop and show the file, ready to send."""
-        import subprocess
         from pathlib import Path
         from PySide6.QtCore import QStandardPaths
         t = I18n(self.settings["language"])
         ai = providers.get(self.settings["provider"])
-        info = report.system_info(__version__, updater.local_version(), f"{ai.label}: {ai.status()}")
         desktop = Path(QStandardPaths.writableLocation(QStandardPaths.DesktopLocation) or Path.home())
-        path = report.build_report(desktop, info, dict(self.settings.data))
+        self.toast(t("report_preparing"))
+
+        def work():
+            try:
+                status = ai.status()
+            except Exception as e:      # noqa: BLE001 - the report is most needed when things are broken
+                status = f"error: {e!r}"
+            self.main_thread.call.emit(lambda: self._write_report(desktop, f"{ai.label}: {status}"))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _write_report(self, desktop, ai_status: str):
+        import subprocess
+        t = I18n(self.settings["language"])
+        info = report.system_info(__version__, updater.local_version(), ai_status)
+        try:
+            path = report.build_report(desktop, info, dict(self.settings.data))
+        except OSError:      # Desktop blocked (Controlled Folder Access) or a OneDrive folder offline
+            path = report.build_report(DATA_DIR, info, dict(self.settings.data))
         report.log.info("problem report written: %s", path.name)
         # show the file, selected, in Explorer / Finder
         subprocess.Popen(["explorer", "/select,", str(path)] if sys.platform == "win32" else ["open", "-R", str(path)])
@@ -399,6 +501,7 @@ class MapleHelperApp:
     def on_settings_changed(self):
         telemetry.set_enabled(self.settings["telemetry"])
         self.overlay.apply_language()
+        self._reopen_windows_in_new_look()
         self.overlay.setStyleSheet(self.style())
         self.overlay.apply_capture_mode()
         self.apply_saver_mode()
@@ -420,8 +523,9 @@ class MapleHelperApp:
     # ------------------------------------------------------------------ knowledge base updates
 
     def check_kb_update_silently(self):
-        if getattr(sys, "frozen", False) and osapi.IS_MAC:
-            # no silent self-update on macOS (the installer is a Windows .exe): point at the new DMG instead
+        if getattr(sys, "frozen", False) and (osapi.IS_MAC or not updater.installed_copy()):
+            # no silent self-update on macOS (the installer is a Windows .exe) or for a portable copy: point at
+            # the new release instead
             def mac_update():
                 rel = updater.newer_release(__version__)
                 if rel:
@@ -435,24 +539,64 @@ class MapleHelperApp:
                 self.main_thread.call.emit(lambda: self.update_found(rel[0]))
             threading.Thread(target=app_update, daemon=True).start()
 
+        self._update_kb_in_background(interactive=False)
+
+    def _stop_ai_for_kb_swap(self) -> bool:
+        """Right before the KB folders swap: the warm AI process runs inside the KB, so stop it, unless the
+        player is waiting on an answer (then the 3-hourly timer tries again later)."""
         if self.overlay.busy or getattr(self.overlay, "_syncing", False):
-            return                      # the 3-hourly timer tries again later
+            return False
+        self.brain.drop_warm()      # not shutdown(): that also cancels, and a question may start right now
+        return True
+
+    def _update_kb_in_background(self, interactive: bool):
+        if getattr(self, "_kb_updating", False):
+            return
+        self._kb_updating = True
 
         def work():
             before = updater.local_version()
-            self.brain.shutdown()       # the warm AI process runs inside the KB folder being replaced
-            if updater.update_kb():
+            try:
+                status = updater.fetch_kb(self._stop_ai_for_kb_swap)
+            except Exception:              # noqa: BLE001 - disk full etc.: never leave the flag stuck
+                report.log.exception("knowledge base update failed")
+                status = "failed"
+            self._kb_updating = False
+            if status == "updated":
                 report.log.info("knowledge base updated to %s", updater.local_version())
-                self.main_thread.call.emit(self.reload_kb)
-                self.main_thread.call.emit(lambda: self.kb_updated(before))
+            self.main_thread.call.emit(lambda: self._kb_update_done(status, before, interactive))
         threading.Thread(target=work, daemon=True).start()
+
+    def _kb_update_done(self, status: str, before: str, interactive: bool):
+        t = I18n(self.settings["language"])
+        if status == "updated":
+            self.reload_kb()
+            self.kb_updated(before, interactive=interactive)
+        else:
+            from .store import kb_dir
+            if status == "failed" and kb_dir() != self.kb.root:
+                self.reload_kb()        # the swap failed halfway and the folder changed: use what exists now
+            if interactive:
+                self.toast(t({"uptodate": "kb_uptodate", "postponed": "kb_update_postponed"}.get(status,
+                                                                                               "kb_update_failed")))
+        threading.Thread(target=self.brain.prewarm, daemon=True).start()     # whatever happened, warm again
 
     def announce_update(self, version: str, url: str):
         if getattr(self, "_mac_announced", None) == version:
             return                       # the 3-hourly check found the same version again
-        self._mac_announced = version
+        self._mac_announced, self._announced_url = version, url
         t = I18n(self.settings["language"])
-        self.toast(t("update_available", version=version), t("update_available_mac"), timeout_ms=20000)
+        self.toast(t("update_available", version=version), t("update_available_mac" if osapi.IS_MAC else "update_available_win"),
+                   timeout_ms=20000)
+        self._add_announced_item()
+
+    def _add_announced_item(self):
+        """The "update available" tray item (macOS / portable); make_tray adds it again after a rebuild."""
+        version = getattr(self, "_mac_announced", None)
+        if not version or not getattr(self, "_tray_menu", None):
+            return
+        t = I18n(self.settings["language"])
+        url = self._announced_url
         a = QAction(t("update_available", version=version), self._tray_menu, triggered=lambda: webbrowser.open(url))
         self._tray_menu.insertAction(self._tray_menu.actions()[2], a)   # right under the header
 
@@ -476,7 +620,11 @@ class MapleHelperApp:
                     self.main_thread.call.emit(lambda p=pct: self.overlay.show_update(version, "downloading", p))
 
         def work():
-            path = updater.download_app_update(__version__, progress)
+            try:
+                path = updater.download_app_update(__version__, progress)
+            except Exception:              # noqa: BLE001 - disk full etc.: never leave "downloading" stuck
+                report.log.exception("app update download failed")
+                path = None
             self._downloading = False
             self.main_thread.call.emit(lambda: self.app_update_ready(path) if path else self._download_failed())
         threading.Thread(target=work, daemon=True).start()
@@ -521,13 +669,7 @@ class MapleHelperApp:
         QTimer.singleShot(1800, self.qapp.quit)
 
     def update_kb_interactive(self):
-        t = I18n(self.settings["language"])
-        before = updater.local_version()
-        if updater.update_kb():
-            self.reload_kb()
-            self.kb_updated(before, interactive=True)
-        else:
-            self.toast(t("kb_uptodate"))
+        self._update_kb_in_background(interactive=True)     # off the GUI thread: the zip is ~20 MB
 
     def kb_updated(self, before: str, interactive: bool = False):
         """Tell the player exactly what the update changed (patch notes), not just that it happened."""
@@ -558,18 +700,22 @@ class MapleHelperApp:
                               self.exp_meter, page)
             dlg.sync_requested.connect(self.overlay.sync_profile)
             dlg.ask_requested.connect(self.ask_from_tools)
+            dlg.detail_ask_requested.connect(lambda q, shown: self.ask_from_tools(q, True, detail=True, shown=shown))
             dlg.tag_requested.connect(self.ask_about_guide)
             dlg.guide_requested.connect(self.show_guides)
             return dlg
         self.open_window("tools", make)
 
-    def ask_from_tools(self, question: str, with_screenshot: bool):
+    def ask_from_tools(self, question: str, with_screenshot: bool, detail: bool = False, shown: str | None = None):
         if not self.overlay.isVisible():
             self.overlay.toggle(self.capture)
+        if self.overlay._is_busy():      # an answer is on its way: say so, don't drop the question silently
+            self.overlay._say_busy()
+            return
         if with_screenshot:
-            self.overlay.ask_with_screenshot(question)
+            self.overlay.ask_with_screenshot(question, detail=detail, shown=shown)
         else:
-            self.overlay.ask(question)
+            self.overlay.ask(question, shown=shown)
 
     def _tools_call(self, method: str, *args):
         tools = self.__dict__.get("_windows", {}).get("tools")
@@ -604,16 +750,35 @@ class MapleHelperApp:
             return
         pairs = pins.conversations(History(c.id).recent(100000))
         def make():
-            dlg = HistoryDialog(pairs, c.name, self.settings["language"], self.style())
+            dlg = HistoryDialog(pairs, c.name, self.settings["language"], self.style(), self.kb)
             dlg.pin_requested.connect(lambda q, a, cid=c.id: self.overlay.pin_answer(q, a, cid))
+            dlg.continue_requested.connect(self.continue_conversation)
             return dlg
         self.open_window(f"history:{c.id}", make)
 
+    def continue_conversation(self, question: str, answer: str, keys: list):
+        """From the history: the exchange back in the chat, and the next question follows on from it."""
+        if not self.overlay.isVisible():
+            self.overlay.toggle(self.capture)
+        c = self.profiles.active
+        history = self.__dict__.get("_windows", {}).get(f"history:{c.id}") if c else None
+        if history is not None:
+            history.close()           # the conversation goes on in the chat, not behind the history window
+        self.overlay.continue_from(question, answer, keys)
+
     def show_wishlist(self):
-        from .ui.wishlist import WishlistDialog
         keys = wishlist.items(self.settings, self.profiles.active_id)
+        old = self.__dict__.get("_windows", {}).get(f"wishlist:{self.profiles.active_id}")
+        if old is not None:
+            old.close()             # a star added meanwhile: show the list as it is now, not the open copy
         self.open_window(f"wishlist:{self.profiles.active_id}",
-                         lambda: WishlistDialog(keys, self.kb, self.settings["language"], self.style()))
+                         lambda: self._wishlist_dialog(keys))
+
+    def _wishlist_dialog(self, keys):
+        from .ui.wishlist import WishlistDialog
+        dlg = WishlistDialog(keys, self.kb, self.settings["language"], self.style())
+        dlg.ask_requested.connect(lambda q: self.ask_from_tools(q, False))
+        return dlg
 
     def show_patch_notes(self, entries: list[dict] | None = None):
         if entries is None:
@@ -622,7 +787,9 @@ class MapleHelperApp:
                                                                  self.kb))
 
     def reload_kb(self):
-        self.kb = KnowledgeBase()
+        self.kb = load_kb()
+        from . import inventory
+        threading.Thread(target=inventory.warm, args=(self.kb,), daemon=True).start()   # the new KB's icons
         self.brain.kb = self.kb
         self.overlay.kb = self.kb
 
@@ -630,6 +797,14 @@ class MapleHelperApp:
         telemetry.flush()
         try:
             self.overlay.save_session_summary()   # quitting ends the session: show it next time
+        except Exception:
+            pass
+        try:
+            self.brain.cancel()                  # an answer in progress ends now...
+            for th in (getattr(self.overlay, "_thread", None), getattr(self.overlay, "_sync_thread", None)):
+                if th is not None and th.isRunning():
+                    th.quit()
+                    th.wait(2000)               # ...and its thread with it (a running QThread at exit crashes)
         except Exception:
             pass
         try:
@@ -641,6 +816,13 @@ class MapleHelperApp:
         except Exception:
             pass
         if getattr(self, "pending_installer", None):
+            from .setupwait import setup_running
+            if setup_running():
+                return                  # an installer is closing us right now (it is the update)
+            if updater.windows_shutting_down():
+                # Qt quits on shutdown/sign-out too: the next start downloads nothing and offers it again
+                report.log.info("update postponed: Windows is shutting down")
+                return
             updater.run_installer_silently(self.pending_installer, reopen=getattr(self, "_reopen_after_update", False),
                                            lang=self.settings["language"] or "he")
 
@@ -676,7 +858,13 @@ def main():
     qapp.setApplicationDisplayName(APP_NAME)
     lock = QLockFile(str(DATA_DIR / "app.lock"))
     if not lock.tryLock(100):
-        return 0  # already running
+        # already running (often in the tray): ask it to show the chat, unless this start is itself a background one
+        if BACKGROUND_ARG not in sys.argv[1:]:
+            sock = QLocalSocket()
+            sock.connectToServer(INSTANCE_SERVER)
+            sock.waitForConnected(1000)
+            sock.disconnectFromServer()
+        return 0
     _hold_running_mutex()
     app = MapleHelperApp(qapp)
     if not app.start():
