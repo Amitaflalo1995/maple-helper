@@ -1572,8 +1572,9 @@ class Overlay(QWidget):
             self._syncing = False
             if changes:
                 self._show_changes(changes)
-            else:
-                key = "sync_nothing" if ans.profile_update or ans.avatar_box or avatar else "sync_not_found"
+            if not [ch for ch in changes if ch[0] != "exp"]:
+                # nothing that shows as its own line (an EXP change only moves the bar): still say it worked
+                key = "sync_nothing" if ans.profile_update or ans.avatar_box or avatar or changes else "sync_not_found"
                 self.add_system(lambda t: t(key))
             self.refresh_profile_chip()
             self.sync_finished.emit(bool(ans.profile_update))
