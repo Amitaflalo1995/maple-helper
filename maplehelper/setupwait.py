@@ -34,3 +34,34 @@ def wait_for_setup(limit_s: float = 180, step_s: float = 0.5) -> bool:
         waited = True
         time.sleep(step_s)
     return waited
+
+
+DOWNLOAD_URL = "https://github.com/Amitaflalo1995/maple-helper/releases/latest/download/MapleHelper-Setup.exe"
+BROKEN_TEXT = (
+    "חלק מהקבצים של Maple Helper חסרים או פגומים (כנראה עדכון שנקטע, או אנטי-וירוס שחסם קובץ).\n"
+    "ללחוץ 'כן' כדי להוריד את ההתקנה מחדש? ההגדרות והדמויות שלכם יישמרו.\n\n"
+    "Some Maple Helper files are missing or damaged (probably an interrupted update, or an antivirus "
+    "blocked a file).\nClick 'Yes' to download the installer again? Your settings and characters are kept."
+)
+
+
+def report_broken_install(exc: BaseException) -> None:
+    """A frozen build that can't import its own modules (a file is missing): explain and offer a reinstall,
+    instead of PyInstaller's bare traceback window. Standard library only: Qt itself may be what's missing."""
+    import traceback
+    try:
+        from .store import DATA_DIR
+        logs = DATA_DIR / "logs"
+        logs.mkdir(parents=True, exist_ok=True)
+        (logs / "startup-error.log").write_text("".join(traceback.format_exception(exc)), encoding="utf-8")
+    except Exception:
+        pass
+    if sys.platform != "win32":
+        return
+    import ctypes
+    MB_YESNO, MB_ICONERROR, MB_SETFOREGROUND, IDYES = 0x4, 0x10, 0x10000, 6
+    answer = ctypes.windll.user32.MessageBoxW(None, BROKEN_TEXT, "Maple Helper",
+                                              MB_YESNO | MB_ICONERROR | MB_SETFOREGROUND)
+    if answer == IDYES:
+        import webbrowser
+        webbrowser.open(DOWNLOAD_URL)

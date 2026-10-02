@@ -103,5 +103,11 @@ begin
     Sleep(500);
     i := i + 1;
   end;
+  // still running (hung on quit): stop it, a file in use can't be replaced and a silent setup would abort halfway
+  if CheckForMutexes('MapleHelperRunning') then
+  begin
+    Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /T /IM "Maple Helper.exe"', '', SW_HIDE, ewWaitUntilTerminated, i);
+    Sleep(1500);
+  end;
   Result := True;
 end;

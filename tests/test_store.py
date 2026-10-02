@@ -117,3 +117,21 @@ def test_launch_waits_for_a_running_update(monkeypatch):
     assert setupwait.wait_for_setup(limit_s=5, step_s=0) is True
     monkeypatch.setattr(setupwait, "setup_running", lambda: False)
     assert setupwait.wait_for_setup(limit_s=5, step_s=0) is False
+
+
+def test_damaged_install_is_explained_not_a_traceback(tmp_path, monkeypatch):
+    """A missing file of the install (e.g. shiboken6.Shiboken) shows a reinstall prompt and logs the error."""
+    import ctypes
+    import sys
+    import webbrowser
+
+    from maplehelper import setupwait, store
+    monkeypatch.setattr(store, "DATA_DIR", tmp_path)
+    shown, opened = [], []
+    if sys.platform == "win32":
+        monkeypatch.setattr(ctypes.windll.user32, "MessageBoxW", lambda *a: shown.append(a) or 6)
+    monkeypatch.setattr(webbrowser, "open", opened.append)
+    setupwait.report_broken_install(ModuleNotFoundError("No module named 'shiboken6.Shiboken'"))
+    assert "shiboken6.Shiboken" in (tmp_path / "logs" / "startup-error.log").read_text(encoding="utf-8")
+    if sys.platform == "win32":
+        assert shown and opened == [setupwait.DOWNLOAD_URL]
