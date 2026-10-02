@@ -37,12 +37,22 @@ def wait_for_setup(limit_s: float = 900, step_s: float = 0.5) -> bool:
 
 
 DOWNLOAD_URL = "https://github.com/Amitaflalo1995/maple-helper/releases/latest/download/MapleHelper-Setup.exe"
-BROKEN_TEXT = (
-    "חלק מהקבצים של Maple Helper חסרים או פגומים (כנראה עדכון שנקטע, או אנטי-וירוס שחסם קובץ).\n"
-    "ללחוץ 'כן' כדי להתקין מחדש? ההגדרות והדמויות שלכם יישמרו.\n\n"
-    "Some Maple Helper files are missing or damaged (probably an interrupted update, or an antivirus "
-    "blocked a file).\nClick 'Yes' to reinstall? Your settings and characters are kept."
-)
+BROKEN_TEXT = {
+    "he": "חלק מהקבצים של Maple Helper חסרים או פגומים: כנראה עדכון שנקטע, או אנטי-וירוס שחסם קובץ.\n\n"
+          "להתקין מחדש? ההגדרות והדמויות שלכם יישמרו.",
+    "en": "Some Maple Helper files are missing or damaged (probably an interrupted update, or an antivirus "
+          "blocked a file).\n\nReinstall now? Your settings and characters are kept.",
+}
+
+
+def _language() -> str:
+    """The app's language from settings.json (standard library only: Qt may be what's missing)."""
+    import json
+    try:
+        from .store import DATA_DIR
+        return json.loads((DATA_DIR / "settings.json").read_text(encoding="utf-8")).get("language") or "he"
+    except Exception:
+        return "he"
 
 
 def report_broken_install(exc: BaseException) -> None:
@@ -60,8 +70,11 @@ def report_broken_install(exc: BaseException) -> None:
         return
     import ctypes
     MB_YESNO, MB_ICONERROR, MB_SETFOREGROUND, IDYES = 0x4, 0x10, 0x10000, 6
-    answer = ctypes.windll.user32.MessageBoxW(None, BROKEN_TEXT, "Maple Helper",
-                                              MB_YESNO | MB_ICONERROR | MB_SETFOREGROUND)
+    MB_RIGHT, MB_RTLREADING = 0x80000, 0x100000
+    lang = _language()
+    # one language per box: Hebrew in a left-to-right box came out scrambled (seen in testing)
+    flags = MB_YESNO | MB_ICONERROR | MB_SETFOREGROUND | (MB_RIGHT | MB_RTLREADING if lang == "he" else 0)
+    answer = ctypes.windll.user32.MessageBoxW(None, BROKEN_TEXT.get(lang, BROKEN_TEXT["en"]), "Maple Helper", flags)
     if answer != IDYES:
         return
     # the update that broke it is usually still downloaded (and was checksum-verified then): run it again
