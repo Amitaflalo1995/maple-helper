@@ -269,6 +269,9 @@ class Brain:
             if stated:
                 meta.setdefault("profile_update", {})["level"] = stated
         entities = [k for k in meta.get("entities", []) if isinstance(k, str) and kb_has(self.kb, k)][:12]
+        # only cards for what the answer actually talks about (a follow-up on snails got a Mano card, live)
+        low = text.lower()
+        entities = [k for k in entities if str((self.kb.get(k) or {}).get("name", "")).lower() in low]
         groups = []
         for g in meta.get("drop_groups") or []:
             if isinstance(g, dict) and kb_has(self.kb, str(g.get("monster", ""))):

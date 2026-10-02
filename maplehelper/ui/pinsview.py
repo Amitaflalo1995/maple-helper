@@ -210,7 +210,9 @@ class HistoryDialog(GlassDialog):
         cl.setContentsMargins(16, 12, 16, 12)
         cl.setSpacing(6)
         top = QHBoxLayout()
-        qlb = QLabel(bidi.plain(p["q"], rtl), objectName="CardName")
+        # a long question (the inventory check's own text) is cut to a short title until the card opens
+        short_q = p["q"] if len(p["q"]) <= 110 else p["q"][:110].rsplit(" ", 1)[0] + "…"
+        qlb = QLabel(bidi.plain(short_q, rtl), objectName="CardName")
         qlb.setWordWrap(True)
         qlb.setAlignment(align)
         top.addWidget(qlb, 1)
@@ -247,10 +249,11 @@ class HistoryDialog(GlassDialog):
         full.hide()
         cl.addWidget(full)
 
-        def toggle(e, full=full, preview=preview):
+        def toggle(e, full=full, preview=preview, qlb=qlb):
             if e.button() == Qt.LeftButton:
                 full.setVisible(not full.isVisible())
                 preview.setVisible(not full.isVisible())
+                qlb.setText(bidi.plain(p["q"] if full.isVisible() else short_q, rtl))
         card.mousePressEvent = toggle
         return card
 
