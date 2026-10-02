@@ -6,10 +6,13 @@ The zip is unpacked into %APPDATA%/MapleHelper/kb, which then wins over the bund
 from __future__ import annotations
 
 import hashlib
-import re
+import http.client
 import io
+import re
+import sys
 import json
 import shutil
+import time
 import urllib.error
 import urllib.request
 import zipfile
@@ -47,7 +50,7 @@ def _get(url: str, timeout: int = 30) -> bytes | None:
         req = urllib.request.Request(url, headers={"User-Agent": "MapleHelper"})
         with urllib.request.urlopen(req, timeout=timeout) as r:
             return r.read()
-    except (urllib.error.URLError, TimeoutError, ValueError):
+    except (urllib.error.URLError, http.client.HTTPException, TimeoutError, ValueError, OSError):
         return None
 
 
@@ -172,7 +175,7 @@ def _download(url: str, progress=None, timeout: int = 600) -> bytes | None:
                 if progress:
                     progress(done, total)
             return b"".join(chunks)
-    except (urllib.error.URLError, TimeoutError, ValueError, OSError):
+    except (urllib.error.URLError, http.client.HTTPException, TimeoutError, ValueError, OSError):
         return None
 
 
@@ -190,11 +193,16 @@ def download_app_update(current: str, progress=None) -> str | None:
     want = _published_sha256(rel, SETUP_ASSET) if asset else None
     if not want:
         return None
+    path = USER_KB.parent / "updates" / f"MapleHelper-Setup-{rel['tag_name']}.exe"
+    try:
+        if path.exists() and hashlib.sha256(path.read_bytes()).hexdigest() == want:
+            return str(path)       # downloaded before (an update skipped at shutdown): no second download
+    except OSError:
+        pass
     url = asset["browser_download_url"]
     data = _download(url, progress) if progress else _get(url, timeout=600)
     if not data or hashlib.sha256(data).hexdigest() != want:
         return None
-    path = USER_KB.parent / "updates" / f"MapleHelper-Setup-{rel['tag_name']}.exe"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(data)
     return str(path)
@@ -221,15 +229,34 @@ def installer_version(path: str) -> str:
 def installer_args(path: str, reopen: bool, lang: str = "he") -> list[str]:
     # the installer starts the app again when done: in the tray after a quiet update on quit,
     # with the chat open when the player pressed "Update now" (see [Run] in packaging/installer.iss)
-    log = USER_KB.parent / "logs" / "update.log"          # why an update failed, if it ever does
+    # why an update failed, if it ever does: one log per run (Inno overwrites its log), the last few kept
+    logs = USER_KB.parent / "logs"
+    for old in sorted(logs.glob("update-*.log"))[:-2] if logs.exists() else []:
+        try:
+            old.unlink()
+        except OSError:
+            pass
+    log = logs / f"update-{time.strftime('%Y%m%d-%H%M%S')}.log"
     # "Update now": /SILENT shows the installer's own progress window while the app is closed, so the
     # player sees the update happen; an update on quit stays fully quiet (/VERYSILENT)
-    args = [path, "/SILENT" if reopen else "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", f"/LOG={log}",
+    # "Update now" keeps Inno's message boxes: a file held by an antivirus scan then offers Retry, where a
+    # suppressed box answers Abort and leaves a half-replaced install
+    args = [path, "/SILENT" if reopen else "/VERYSILENT", *([] if reopen else ["/SUPPRESSMSGBOXES"]),
+            "/NORESTART", f"/LOG={log}",
             # the installer's window in the app's language, not Windows' ([Languages] in installer.iss)
             "/LANG=" + ("english" if lang == "en" else "hebrew")]
     if reopen:
         args.append("/LAUNCHARGS=--updated")
     return args
+
+
+def windows_shutting_down() -> bool:
+    """Windows is shutting down or signing out: an installer started now would be killed halfway."""
+    if sys.platform != "win32":
+        return False
+    import ctypes
+    SM_SHUTTINGDOWN = 0x2000
+    return bool(ctypes.windll.user32.GetSystemMetrics(SM_SHUTTINGDOWN))
 
 
 def run_installer_silently(path: str, reopen: bool = False, lang: str = "he") -> None:

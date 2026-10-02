@@ -20,6 +20,7 @@ from .base import CREATE_NO_WINDOW, Provider, RawResult, classify_error, child_e
     find_windows_exe, http_ok, open_login, run_installer
 
 log = logging.getLogger(__name__)
+ANSWER_TIMEOUT_S = 300
 
 INSTALL_CMD = "irm https://chatgpt.com/codex/install.ps1 | iex"
 INSTALL_CMD_MAC = "curl -fsSL https://chatgpt.com/codex/install.sh | sh"
@@ -128,10 +129,9 @@ def parse_events(lines, stderr: str = "") -> RawResult:
             failed = True
             errors.append(str((ev.get("error") or {}).get("message", "")))
     detail = "\n".join(errors) + "\n" + stderr
-    if failed:
-        return RawResult(error=classify_error(detail) or "api_error")
-    if answer is None:
-        return RawResult(error=classify_error(detail) or "no_result")
+    if failed or answer is None:
+        log.warning("Codex gave no answer: %s", detail.strip()[-1500:])   # the cause, for "Report a problem"
+        return RawResult(error=classify_error(detail) or ("api_error" if failed else "no_result"))
     return RawResult(text=answer)
 
 
@@ -297,8 +297,11 @@ class CodexBackend:
         killer = threading.Timer(timeout, p.kill) if timeout else None
         if killer:
             killer.start()
-        p.stdin.write(stdin_text.encode("utf-8"))
-        p.stdin.close()
+        try:
+            p.stdin.write(stdin_text.encode("utf-8"))
+            p.stdin.close()
+        except OSError:        # it exited at once (e.g. an older CLI rejecting a flag): stderr says why
+            pass
         lines = list(p.stdout)
         p.wait()
         if killer:
@@ -315,7 +318,8 @@ class CodexBackend:
                 with os.fdopen(fd, "wb") as f:
                     f.write(screenshot_jpeg)
             cmd = codex_command(self.exe, b.kb.root, b.system_prompt() + TOOLS_NOTE, b.model, image)
-            r = self._exec(cmd, prompt, str(b.kb.root), b.api_key)
+            # a stalled CLI must not leave the chat on "thinking" forever
+            r = self._exec(cmd, prompt, str(b.kb.root), b.api_key, timeout=ANSWER_TIMEOUT_S)
         finally:
             if image:
                 try:

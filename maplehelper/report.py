@@ -57,6 +57,7 @@ def build_report(out_dir: Path, info: dict, settings: dict) -> Path:
     with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
         z.writestr("info.json", json.dumps(info, ensure_ascii=False, indent=1))
         z.writestr("settings.json", json.dumps(clean, ensure_ascii=False, indent=1))
-        for f in sorted(LOG_DIR.glob("maplehelper.log*")):
+        for f in sorted(LOG_DIR.glob("maplehelper.log*")) + sorted(LOG_DIR.glob("update-*.log"))[-2:] + \
+                sorted(LOG_DIR.glob("startup-error.log")):
             z.write(f, f"logs/{f.name}")
     return path

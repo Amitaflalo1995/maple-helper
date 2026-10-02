@@ -67,6 +67,10 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "..\dist\Maple Helper\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
+[Registry]
+; "Start with Windows" (written by the app): removed on uninstall, never created here
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: none; ValueName: "Maple Helper"; Flags: uninsdeletevalue dontcreatekey
+
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\Maple Helper.exe"
 Name: "{autodesktop}\{#AppName}"; Filename: "{app}\Maple Helper.exe"; Tasks: desktopicon

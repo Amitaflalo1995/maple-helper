@@ -136,12 +136,13 @@ def run_installer(win_cmd: str, mac_cmd: str) -> subprocess.Popen:
 
 
 def http_ok(url: str, headers: dict) -> bool:
+    import http.client
     import urllib.error
     import urllib.request
     try:
         with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=15) as r:
             return r.status == 200
-    except (urllib.error.URLError, TimeoutError):
+    except (urllib.error.URLError, http.client.HTTPException, TimeoutError, OSError):
         return False
 
 

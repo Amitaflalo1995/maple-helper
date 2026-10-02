@@ -129,6 +129,7 @@ class MapleHelperApp:
         self.voice.started.connect(self.on_voice_start)
         self.voice.state.connect(lambda s: self.overlay.voice_state(s))
         self.voice.text.connect(self.on_voice_text)
+        self.voice.failed.connect(self.on_voice_failed)
         self.overlay.mic_clicked.connect(self.voice.toggle)
 
         self.make_tray()
@@ -252,6 +253,14 @@ class MapleHelperApp:
         if not self.overlay.isVisible():
             self.overlay.toggle(self.capture)
 
+    def on_voice_failed(self, error: str):
+        """No microphone, a blocked one, or the speech model failed to download/load: say so, don't go silent."""
+        report.log.warning("voice failed: %s", error)
+        t = I18n(self.settings["language"])
+        if not self.overlay.isVisible():
+            self.overlay.toggle(self.capture)
+        self.overlay.add_system(t("voice_mic_failed") if error.startswith("mic:") else t("voice_failed"))
+
     def on_voice_text(self, text: str):
         fixed = self.kb.resolve_names(text)
         self.overlay.voice_text(fixed, send=self.settings["voice_send_immediately"])
@@ -374,13 +383,25 @@ class MapleHelperApp:
 
     def make_report(self):
         """Zip the log and diagnostics onto the desktop and show the file, ready to send."""
-        import subprocess
         from pathlib import Path
         from PySide6.QtCore import QStandardPaths
         t = I18n(self.settings["language"])
         ai = providers.get(self.settings["provider"])
-        info = report.system_info(__version__, updater.local_version(), f"{ai.label}: {ai.status()}")
         desktop = Path(QStandardPaths.writableLocation(QStandardPaths.DesktopLocation) or Path.home())
+        self.toast(t("report_preparing"))
+
+        def work():
+            try:
+                status = ai.status()
+            except Exception as e:      # noqa: BLE001 - the report is most needed when things are broken
+                status = f"error: {e!r}"
+            self.main_thread.call.emit(lambda: self._write_report(desktop, f"{ai.label}: {status}"))
+        threading.Thread(target=work, daemon=True).start()
+
+    def _write_report(self, desktop, ai_status: str):
+        import subprocess
+        t = I18n(self.settings["language"])
+        info = report.system_info(__version__, updater.local_version(), ai_status)
         try:
             path = report.build_report(desktop, info, dict(self.settings.data))
         except OSError:      # Desktop blocked (Controlled Folder Access) or a OneDrive folder offline
@@ -679,6 +700,10 @@ class MapleHelperApp:
         except Exception:
             pass
         if getattr(self, "pending_installer", None):
+            if updater.windows_shutting_down():
+                # Qt quits on shutdown/sign-out too: the next start downloads nothing and offers it again
+                report.log.info("update postponed: Windows is shutting down")
+                return
             updater.run_installer_silently(self.pending_installer, reopen=getattr(self, "_reopen_after_update", False),
                                            lang=self.settings["language"] or "he")
 

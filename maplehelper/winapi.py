@@ -55,6 +55,8 @@ def find_game_window() -> int | None:
         return True
 
     user32.EnumWindows(EnumWindowsProc(cb), 0)
+    # the game itself before a browser tab / Discord / folder that merely mentions it ("MapleStory - Google Chrome")
+    found.sort(key=lambda h: (_title(h) not in GAME_TITLES, any(s in _title(h) for s in (" - ", " | ", " — "))))
     return found[0] if found else None
 
 
