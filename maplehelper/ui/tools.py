@@ -256,11 +256,23 @@ class ToolsDialog(GlassDialog):
                 self._set(self.exp_status, self.t("exp_failed"))
         self.refresh()
 
+    def _step_aside(self, then) -> None:
+        """Out of the screenshot, then `then()` (the chat captures ~120 ms later), back after 1.5 s. Hidden, not
+        see-through: a window at opacity 0 still left traces over the inventory slots (a fake item, seen live)."""
+        self.hide()
+        QTimer.singleShot(60, then)
+        QTimer.singleShot(1500, self._come_back)
+
+    def _come_back(self):
+        try:
+            self.show()
+            self.raise_()
+        except RuntimeError:      # closed meanwhile
+            pass
+
     def _read_screen(self):
         """The chat reads the game from a screenshot; this window steps aside so it isn't in the picture."""
-        self.setWindowOpacity(0.0)
-        self.sync_requested.emit()
-        QTimer.singleShot(1500, lambda: self.setWindowOpacity(1.0))
+        self._step_aside(self.sync_requested.emit)
 
     def _p(self, text: str) -> str:
         return bidi.plain(text, self.t.rtl)
@@ -1263,10 +1275,9 @@ class ToolsDialog(GlassDialog):
         return sc
 
     def _sell_check(self):
-        self.setWindowOpacity(0.0)           # the inventory must be in the screenshot, not this window
-        # the chat bubble says "Inventory check", not the nine lines of instructions the AI gets
-        self.detail_ask_requested.emit(self.t("sell_q"), self.t("inv_check"))
-        QTimer.singleShot(1500, lambda: self.setWindowOpacity(1.0))
+        # the inventory must be in the screenshot, not this window; the chat bubble says "Inventory check",
+        # not the nine lines of instructions the AI gets
+        self._step_aside(lambda: self.detail_ask_requested.emit(self.t("sell_q"), self.t("inv_check")))
 
     def _fill_more(self):
         c = self.c
@@ -1282,6 +1293,4 @@ class ToolsDialog(GlassDialog):
         q = self.t("shop_q", map=where, n=self.shop_len.value()) if where else self.t("shop_q_here", n=self.shop_len.value())
         # with a fresh screenshot: the HUD shows max HP/MP as they are right now (and the potions already in the
         # bag when the inventory is open), so the list fits the character at this moment (live feedback)
-        self.setWindowOpacity(0.0)
-        self.ask_requested.emit(q, True)
-        QTimer.singleShot(1500, lambda: self.setWindowOpacity(1.0))
+        self._step_aside(lambda: self.ask_requested.emit(q, True))
