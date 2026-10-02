@@ -21,7 +21,9 @@ AppSupportURL=https://github.com/Amitaflalo1995/maple-helper/issues
 DefaultDirName={localappdata}\Programs\Maple Helper
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
-DisableDirPage=yes
+; the player may pick the folder (live feedback); updates keep using it (UsePreviousAppDir)
+DisableDirPage=auto
+UsePreviousAppDir=yes
 PrivilegesRequired=lowest
 OutputDir=..\dist
 OutputBaseFilename=MapleHelper-Setup
@@ -39,7 +41,7 @@ WizardBackColorDynamicDark=#1C1C1E
 WizardBackImageFile=installer-art\back-light.png
 WizardBackImageFileDynamicDark=installer-art\back-dark.png
 WizardImageFile=installer-art\side.png
-WizardImageFileDynamicDark=installer-art\side.png
+WizardImageFileDynamicDark=installer-art\side-dark.png
 WizardSmallImageFile=installer-art\small.png
 WizardSmallImageFileDynamicDark=installer-art\small.png
 WizardImageAlphaFormat=defined
@@ -86,13 +88,37 @@ Type: filesandordirs; Name: "{app}"
 
 [Messages]
 hebrew.WelcomeLabel1=ברוכים הבאים ל-Maple Helper
-hebrew.WelcomeLabel2=העוזר האישי שלכם ב-MapleStory.%n%nההתקנה לוקחת פחות מדקה ולא דורשת הרשאות מנהל.
+hebrew.WelcomeLabel2=העוזר האישי שלכם ב-MapleStory Classic, ישר מעל המשחק.%n%nההתקנה לוקחת פחות מדקה ולא דורשת הרשאות מנהל.
 hebrew.FinishedHeadingLabel=Maple Helper מוכן!
-hebrew.FinishedLabel=בכניסה הראשונה נחבר את ה-AI שלכם (Claude או Codex) וניצור את הדמות שלכם.%n%nבתוך המשחק, לחצו F9 כדי לפתוח ולסגור את הצ'אט.
+hebrew.FinishedLabel=בכניסה הראשונה נחבר את ה-AI שלכם (Claude או ChatGPT) וניצור את הדמות שלכם.%n%nבתוך המשחק, לחצו F9 כדי לפתוח ולסגור את הצ'אט.
+; the player is addressed in plural, like everywhere in the app (the stock Hebrew texts use the singular)
+hebrew.ClickNext=לחצו 'הבא' כדי להמשיך, או 'ביטול' כדי לצאת.
+hebrew.ClickFinish=לחצו 'סיום' כדי לסגור.
+hebrew.WizardSelectDir=איפה להתקין?
+hebrew.SelectDirDesc=בחרו את התיקייה של [name]
+hebrew.SelectDirLabel3=[name] יותקן בתיקייה הזו. אפשר להשאיר אותה כמו שהיא.
+hebrew.SelectDirBrowseLabel=כדי לבחור תיקייה אחרת לחצו 'עיון'. כדי להמשיך לחצו 'הבא'.
+hebrew.WizardSelectTasks=עוד כמה אפשרויות
+hebrew.SelectTasksDesc=מה עוד להוסיף?
+hebrew.SelectTasksLabel2=בחרו מה להוסיף בזמן ההתקנה, ואז לחצו 'הבא'.
+hebrew.AdditionalIcons=קיצורי דרך:
+hebrew.CreateDesktopIcon=קיצור דרך על &שולחן העבודה
+hebrew.WizardReady=מוכנים להתקנה
+hebrew.ReadyLabel1=הכל מוכן להתקנת [name].
+hebrew.ReadyLabel2a=לחצו 'התקן' כדי להתחיל, או 'הקודם' כדי לשנות משהו.
+hebrew.ReadyLabel2b=לחצו 'התקן' כדי להתחיל.
+hebrew.ReadyMemoDir=תיקיית ההתקנה:
+hebrew.ReadyMemoTasks=אפשרויות נוספות:
+hebrew.WizardInstalling=מתקינים...
+hebrew.InstallingLabel=רק רגע, [name] מותקן על המחשב.
+hebrew.LaunchProgram=לפתוח את %1 עכשיו
+english.WelcomeLabel2=Your personal MapleStory Classic assistant, right over the game.%n%nSetup takes under a minute and needs no admin rights.
+english.FinishedLabel=On first launch we'll connect your AI (Claude or ChatGPT) and set up your character.%n%nIn game, press F9 to open and close the chat.
+english.WizardSelectDir=Where to install?
+english.SelectDirLabel3=[name] will be installed in this folder. You can leave it as it is.
+english.LaunchProgram=Open %1 now
 english.WelcomeLabel1=Welcome to Maple Helper
-english.WelcomeLabel2=Your personal MapleStory assistant.%n%nSetup takes under a minute and needs no admin rights.
 english.FinishedHeadingLabel=Maple Helper is ready!
-english.FinishedLabel=On first launch we'll connect your AI (Claude or Codex) and set up your character.%n%nIn game, press F9 to open and close the chat.
 
 [Code]
 // An update runs right after the app quits: wait (up to 30 s) until it has really exited,
@@ -102,6 +128,13 @@ var
   i: Integer;
 begin
   i := 0;
+  // only a silent self-update waits here: a player who runs the installer by hand would stare at nothing for
+  // 30 s (seen in testing); the wizard's own "close applications" step handles a running app then
+  if not WizardSilent then
+  begin
+    Result := True;
+    exit;
+  end;
   while CheckForMutexes('MapleHelperRunning') and (i < 60) do
   begin
     Sleep(500);
