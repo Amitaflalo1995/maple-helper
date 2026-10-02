@@ -719,6 +719,8 @@ class SettingsDialog(GlassDialog):
         sec = Section(t("sec_system"), rtl)
         self.autostart = Switch(settings["start_with_windows"])
         sec.add_row(t("start_at_login" if sys.platform == "darwin" else "start_with_windows"), self.autostart)
+        self.telemetry = Switch(settings["telemetry"])
+        sec.add_row(t("telemetry"), self.telemetry, hint=t("telemetry_hint"))
         lay.addWidget(sec)
 
         # data
@@ -989,6 +991,7 @@ class SettingsDialog(GlassDialog):
             "saver_mode": self.saver.isChecked(),
             "answer_length": self.length.value(),
             "start_with_windows": self.autostart.isChecked(),
+            "telemetry": self.telemetry.isChecked(),
         })
         s.save()
         self.changed.emit()
