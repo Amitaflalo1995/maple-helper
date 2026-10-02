@@ -260,7 +260,7 @@ class ToolsDialog(GlassDialog):
         """Out of the screenshot, then `then()` (the chat captures ~120 ms later), back after 1.5 s. Hidden, not
         see-through: a window at opacity 0 still left traces over the inventory slots (a fake item, seen live)."""
         self.hide()
-        QTimer.singleShot(60, then)
+        QTimer.singleShot(450, then)      # after Windows' own fade-out of the hidden window (~250 ms)
         QTimer.singleShot(1500, self._come_back)
 
     def _come_back(self):
