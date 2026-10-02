@@ -1,9 +1,17 @@
 """Answers the player pinned, per character, so a quest route or a build stays one tap away."""
 from __future__ import annotations
 
+import re
 import time
 
 MAX_PINS = 12
+_FOCUS_TAG = re.compile(r"^\s*\[about [^\]]*\]\s*")
+
+
+def shown_question(question: str) -> str:
+    """A stored question as the player asked it: the history keeps "[about Mano] what does it drop?" (the card the
+    question was about, for the AI), the player only wrote "what does it drop?"."""
+    return _FOCUS_TAG.sub("", question or "", count=1) or question or ""
 
 
 def items(settings, cid: str | None) -> list[dict]:

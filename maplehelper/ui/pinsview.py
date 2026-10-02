@@ -14,6 +14,15 @@ from .controls import rtl_buttons
 from .glass import GlassDialog
 
 
+def short_text(text: str, limit: int) -> str:
+    """One line of `text` (whitespace collapsed), cut at a word to about `limit` characters."""
+    flat = " ".join((text or "").split())
+    if len(flat) <= limit:
+        return flat
+    cut = flat[:limit].rsplit(" ", 1)[0] if " " in flat[:limit] else flat[:limit]
+    return cut.rstrip(" ,.:;-–") + "…"
+
+
 def _answer_label(text: str) -> QLabel:
     lb = QLabel(bidi.to_html(text), objectName="PinAnswer")
     lb.setTextFormat(Qt.RichText)
@@ -68,7 +77,7 @@ class PinsBar(QFrame):
             bl.setContentsMargins(0, 0, 0, 0)
             bl.setSpacing(2)
             top = QHBoxLayout()
-            q = QLabel(bidi.plain(p.get("q") or "", rtl), objectName="CardName")
+            q = QLabel(bidi.plain(pins.shown_question(p.get("q") or ""), rtl), objectName="CardName")
             q.setWordWrap(True)
             top.addWidget(q, 1)
             x = QToolButton(objectName="Icon", text="✕")
@@ -211,7 +220,8 @@ class HistoryDialog(GlassDialog):
         cl.setSpacing(6)
         top = QHBoxLayout()
         # a long question (the inventory check's own text) is cut to a short title until the card opens
-        short_q = p["q"] if len(p["q"]) <= 110 else p["q"][:110].rsplit(" ", 1)[0] + "…"
+        question = pins.shown_question(p["q"])         # not the stored "[about Mano] …"
+        short_q = short_text(question, 70)
         qlb = QLabel(bidi.plain(short_q, rtl), objectName="CardName")
         qlb.setWordWrap(True)
         qlb.setAlignment(align)
@@ -220,11 +230,11 @@ class HistoryDialog(GlassDialog):
         top.addWidget(when, 0, Qt.AlignTop)
         cl.addLayout(top)
         # two lines of the answer, plain: the whole answer opens on a tap
-        plain = " ".join(p["a"].replace("**", "").split())
-        preview = QLabel(bidi.plain(plain[:150] + ("…" if len(plain) > 150 else ""), rtl), objectName="CardSub")
+        preview = QLabel(bidi.plain(short_text(p["a"].replace("**", ""), 110), rtl), objectName="CardSub")
         preview.setWordWrap(True)
         preview.setAlignment(align)
         cl.addWidget(preview)
+        # the pictures under the preview; opened, under the whole answer (above it they split the title from it)
         pics = self._pictures(p.get("entities") or [])
         if pics:
             cl.addWidget(pics)
@@ -243,17 +253,23 @@ class HistoryDialog(GlassDialog):
         pin = QPushButton(bidi.plain("📌 " + t("pin"), rtl), objectName="Link")
         pin.setCursor(Qt.PointingHandCursor)
         pin.setAutoDefault(False)
-        pin.clicked.connect(lambda _=False, p=p, b=pin: (self.pin_requested.emit(p["q"], p["a"]), b.setEnabled(False)))
+        pin.clicked.connect(lambda _=False, b=pin: (self.pin_requested.emit(question, p["a"]), b.setEnabled(False)))
         actions.addWidget(pin)
         fl.addLayout(actions)
         full.hide()
         cl.addWidget(full)
 
-        def toggle(e, full=full, preview=preview, qlb=qlb):
+        def toggle(e, full=full, preview=preview, qlb=qlb, pics=pics):
             if e.button() == Qt.LeftButton:
-                full.setVisible(not full.isVisible())
-                preview.setVisible(not full.isVisible())
-                qlb.setText(bidi.plain(p["q"] if full.isVisible() else short_q, rtl))
+                opened = not full.isVisible()
+                if pics:
+                    if opened:
+                        fl.insertWidget(1, pics)       # right after the answer
+                    else:
+                        cl.insertWidget(cl.indexOf(preview) + 1, pics)
+                full.setVisible(opened)
+                preview.setVisible(not opened)
+                qlb.setText(bidi.plain(question if opened else short_q, rtl))
         card.mousePressEvent = toggle
         return card
 
@@ -269,7 +285,9 @@ class HistoryDialog(GlassDialog):
         shown = 0
         for k in keys:
             e = kb.get(k)
-            path = kb.image_path(k) if e else None
+            if not e or k.startswith("map/"):      # a map's picture is a whole minimap: a sliver at 30 px
+                continue
+            path = kb.picture(k)
             pm = QPixmap(str(path)) if path else QPixmap()
             if pm.isNull():
                 continue

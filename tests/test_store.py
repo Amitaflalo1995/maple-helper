@@ -195,3 +195,15 @@ def test_another_name_never_renames_the_active_character(isolated_store):
     p.add("KalimeroZz", "Bowman", "Bowman", 15)
     assert p.apply_update({"name": "NewGuy99"}) == [] and p.active.name == "KalimeroZz"
     assert p.find_by_name("kalimerozz") is p.active
+
+
+def test_alt_with_a_longer_name_is_never_merged(isolated_store):
+    """'Amit' and the alt 'AmitBow' are two characters once the HUD confirmed 'Amit', or when both are saved."""
+    from maplehelper.store import same_character
+    p = isolated_store.Profiles()
+    p.add("Amit", "Bowman", "Bowman", 45)
+    p.apply_update({"name": "Amit"})                      # the HUD confirms the name
+    assert p.apply_update({"name": "AmitBow", "level": 31}) == [("level", 31)] or p.active.name == "Amit"
+    assert p.active.name == "Amit"
+    assert not same_character("Amit", "AmitBow", seen=False, others=("AmitBow",))
+    assert same_character("Kalimero", "KalimeroZz") and not same_character("KalimeroZz", "Kalimero")

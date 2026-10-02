@@ -60,7 +60,7 @@ def update_kb(before_swap=None) -> bool:
 
 
 def fetch_kb(before_swap=None) -> str:
-    """"updated", "uptodate" or "failed". before_swap() runs right before the folders are swapped (the app
+    """"updated", "uptodate", "postponed" or "failed". before_swap() runs right before the folders are swapped (the app
     stops the AI process working inside the KB there); returning False postpones the update."""
     if not MANIFEST_URL:
         return "uptodate"
@@ -97,7 +97,7 @@ def fetch_kb(before_swap=None) -> str:
     # can't be removed or renamed; then keep the current KB intact and try again next time
     if before_swap is not None and before_swap() is False:
         shutil.rmtree(tmp, ignore_errors=True)
-        return "failed"
+        return "postponed"            # an answer is running: the 3-hourly check tries again
     old = USER_KB.with_name("kb.old")
     shutil.rmtree(old, ignore_errors=True)
     try:

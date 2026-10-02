@@ -30,8 +30,8 @@ OutputBaseFilename=MapleHelper-Setup
 SetupIconFile=..\assets\brand\app.ico
 UninstallDisplayIcon={app}\Maple Helper.exe
 UninstallDisplayName={#AppName}
-; look: Windows 11 style that follows the system light/dark setting, like the app itself,
-; over a frosted image of the game world; mascot and app icon from the brand
+; look: Windows 11 style that follows the system light/dark setting, like the app itself:
+; the app's surfaces with a soft orange light, its logo and icon (installer-art, made from assets/brand)
 WizardStyle=modern dynamic windows11
 ShowLanguageDialog=no
 DisableWelcomePage=no
@@ -101,8 +101,6 @@ hebrew.SelectDirBrowseLabel=כדי לבחור תיקייה אחרת לחצו 'ע
 hebrew.WizardSelectTasks=עוד כמה אפשרויות
 hebrew.SelectTasksDesc=מה עוד להוסיף?
 hebrew.SelectTasksLabel2=בחרו מה להוסיף בזמן ההתקנה, ואז לחצו 'הבא'.
-hebrew.AdditionalIcons=קיצורי דרך:
-hebrew.CreateDesktopIcon=קיצור דרך על &שולחן העבודה
 hebrew.WizardReady=מוכנים להתקנה
 hebrew.ReadyLabel1=הכל מוכן להתקנת [name].
 hebrew.ReadyLabel2a=לחצו 'התקן' כדי להתחיל, או 'הקודם' כדי לשנות משהו.
@@ -111,14 +109,19 @@ hebrew.ReadyMemoDir=תיקיית ההתקנה:
 hebrew.ReadyMemoTasks=אפשרויות נוספות:
 hebrew.WizardInstalling=מתקינים...
 hebrew.InstallingLabel=רק רגע, [name] מותקן על המחשב.
-hebrew.LaunchProgram=לפתוח את %1 עכשיו
 english.WelcomeLabel2=Your personal MapleStory Classic assistant, right over the game.%n%nSetup takes under a minute and needs no admin rights.
 english.FinishedLabel=On first launch we'll connect your AI (Claude or ChatGPT) and set up your character.%n%nIn game, press F9 to open and close the chat.
 english.WizardSelectDir=Where to install?
 english.SelectDirLabel3=[name] will be installed in this folder. You can leave it as it is.
-english.LaunchProgram=Open %1 now
 english.WelcomeLabel1=Welcome to Maple Helper
 english.FinishedHeadingLabel=Maple Helper is ready!
+
+[CustomMessages]
+; these are Inno's custom messages (the [Messages] section ignores them)
+hebrew.AdditionalIcons=קיצורי דרך:
+hebrew.CreateDesktopIcon=קיצור דרך על &שולחן העבודה
+hebrew.LaunchProgram=לפתוח את %1 עכשיו
+english.LaunchProgram=Open %1 now
 
 [Code]
 // An update runs right after the app quits: wait (up to 30 s) until it has really exited,

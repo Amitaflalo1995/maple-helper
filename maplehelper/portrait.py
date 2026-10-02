@@ -51,6 +51,8 @@ def find_cut_tags(rgb: np.ndarray, name: str) -> list[tuple[int, int, int, int]]
     luma = f[..., 0] * 0.3 + f[..., 1] * 0.59 + f[..., 2] * 0.11 + 1.0
     ratio = luma[1:] / luma[:-1]
     white = (f.min(axis=2) >= 225) & (f.max(axis=2) - f.min(axis=2) < 30)
+    if len(name) < 4:
+        return []        # a short name's plate is too small to tell from scenery by its top edge alone
     want = 0.40 * len(name) + 0.45
     found = []
     for y in range(ratio.shape[0] - 8):
@@ -79,11 +81,12 @@ def portrait_rect(rgb: np.ndarray, box: list[float] | None, name: str = "") -> t
         if not name:
             return tags
         fit = [t for t in tags if tag_fits_name(t, name)]
-        # none whole: one cut off by the chat box (its top edge and letters still show)
-        return fit or find_cut_tags(rgb if region is None else region, name)
+        # none whole: one cut off by the chat box (its top edge and letters still show), only near the AI's box:
+        # across the whole screen a top edge alone matches scenery too
+        return fit or (find_cut_tags(region, name) if region is not None else [])
 
     if box is None:
-        tags = fitting(find_name_tags(rgb))
+        tags = fitting(find_name_tags(rgb), rgb)
         if len(tags) != 1:
             return None
         tx, ty, tw, th = tags[0]

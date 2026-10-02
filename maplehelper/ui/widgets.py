@@ -148,13 +148,23 @@ class NoticeCard(QFrame):
         lay.setContentsMargins(12, 8, 12, 8)
         lay.setSpacing(10)
         lay.addWidget(QLabel(theme.ICON["info"], objectName="InfoIcon"), 0, Qt.AlignVCenter)
+        # the action sits beside the text when there is room, else on its own row under it (at 470 px a button
+        # beside the text took half the card and cut the text, seen live)
+        self._col = QVBoxLayout()
+        self._col.setContentsMargins(0, 0, 0, 0)
+        self._col.setSpacing(0)
+        self._top = QHBoxLayout()
+        self._top.setContentsMargins(0, 0, 0, 0)
+        self._top.setSpacing(10)
         self.msg = QLabel(objectName="InfoText")
         self.msg.setWordWrap(True)
-        lay.addWidget(self.msg, 1)
+        self._top.addWidget(self.msg, 1)
+        self._col.addLayout(self._top)
+        lay.addLayout(self._col, 1)
         self.btn = QPushButton(objectName="Link")
         self.btn.setCursor(Qt.PointingHandCursor)
         self.btn.clicked.connect(self.clicked.emit)
-        lay.addWidget(self.btn, 0, Qt.AlignVCenter)
+        self._below = None
         self.set_texts(text, action, rtl)
 
     def set_texts(self, text: str, action: str, rtl: bool):
@@ -162,6 +172,29 @@ class NoticeCard(QFrame):
         self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
         self.msg.setText(bidi.plain(text, rtl))
         self.btn.setText(bidi.plain(action, rtl))
+        self._place_button()
+
+    @staticmethod
+    def button_below(card_width: int, button_width: int) -> bool:
+        """Under the text when the button would take more than a quarter of the card (beside it, the text wraps
+        into a narrow column)."""
+        return button_width * 4 > card_width - 40
+
+    def _place_button(self):
+        below = self.button_below(self.width(), self.btn.sizeHint().width())
+        if below == self._below:
+            return
+        self._below = below
+        self._top.removeWidget(self.btn)
+        self._col.removeWidget(self.btn)
+        if below:      # AlignLeft is the leading edge (mirrored in a Hebrew card)
+            self._col.addWidget(self.btn, 0, Qt.AlignLeft)
+        else:
+            self._top.addWidget(self.btn, 0, Qt.AlignVCenter)
+
+    def resizeEvent(self, e):
+        super().resizeEvent(e)
+        self._place_button()
 
 
 class SessionCard(QFrame):

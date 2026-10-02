@@ -22,7 +22,7 @@ STRINGS = {
                          "en": "Couldn't start the microphone. Check that it's connected and that Maple Helper may use it (Windows Settings > Privacy > Microphone)"},
     "other_char_new": {"he": "במשחק מופיעה דמות אחרת, {name}, ולא {current}. את {current} לא שיניתי.",
                        "en": "The game shows another character, {name}, not {current}. I left {current} as it is."},
-    "other_char_add": {"he": "הוספת {name} כדמות חדשה", "en": "Add {name} as a new character"},
+    "other_char_add": {"he": "הוספת {name}", "en": "Add {name}"},
     "other_char_saved": {"he": "במשחק מופיעה {name}, לא {current}. את {current} לא שיניתי.",
                          "en": "The game shows {name}, not {current}. I left {current} as it is."},
     "other_char_switch": {"he": "מעבר ל-{name}", "en": "Switch to {name}"},
@@ -56,7 +56,7 @@ STRINGS = {
                        "en": "Couldn't spot your character on screen. Make sure the game is open and the character is visible."},
     "sync_no_game": {"he": "חלון המשחק לא נמצא. פתחו את המשחק ונסו שוב.", "en": "Game window not found. Open the game and try again."},
     "refresh_tip": {"he": "עדכון הלבל, הג'וב והתמונה מהמשחק", "en": "Update level, job and portrait from the game"},
-    "profile_updated": {"he": "✓ עודכן: {what}", "en": "✓ Updated: {what}"},
+    "profile_updated": {"he": "✓ עודכן: {label} {value}", "en": "✓ Updated · {label}: {value}"},
     "confirm_profile": {"he": "נראה שהלבל ירד ל-{level}. לעדכן?", "en": "Looks like your level dropped to {level}. Update?"},
     "yes": {"he": "כן", "en": "Yes"},
     "no": {"he": "לא", "en": "No"},
@@ -232,6 +232,7 @@ STRINGS = {
                           "en": "Send {name} to whoever helps you with the app. It has no chats, screenshots or personal details."},
     "update_kb": {"he": "עדכון המאגר", "en": "Update database"},
     "kb_uptodate": {"he": "המאגר מעודכן", "en": "Database is up to date"},
+    "kb_update_postponed": {"he": "המאגר יתעדכן בעוד רגע, אחרי שהתשובה תסתיים", "en": "The database will update in a moment, once the answer is done"},
     "kb_update_failed": {"he": "לא הצלחנו לעדכן את המאגר עכשיו. ננסה שוב בהמשך", "en": "Couldn't update the database right now. We'll try again later"},
     "kb_updated": {"he": "המאגר עודכן", "en": "Database updated"},
     "kb_updated_open": {"he": "פתחו את הצ'אט כדי לראות מה השתנה.",   # the toast's title already says "updated"
@@ -357,7 +358,7 @@ STRINGS = {
     "lv_short": {"he": "Lv. {n}", "en": "Lv. {n}"},
     "dmg_short": {"he": "נזק {lo}-{hi}", "en": "damage {lo}-{hi}"},
     "ask_short": {"he": "לשאול בצ'אט", "en": "Ask in chat"},
-    "stats_word": {"he": "סטטים", "en": "stats"},
+    "stats_word": {"he": "סטטים", "en": "Stats"},
     "my_stats": {"he": "הסטטים שלי", "en": "My stats"},
     "stat_acc": {"he": "Accuracy (ACC)", "en": "Accuracy (ACC)"},
     "stat_dmg_min": {"he": "נזק מינימלי", "en": "Min damage"},
@@ -366,6 +367,9 @@ STRINGS = {
     "my_stats_read": {"he": "לקרוא מצילום מסך (פתחו קודם את חלון ה-Stat)", "en": "Read from a screenshot (open the Stat window first)"},
     "train_need_stats": {"he": "**רוצים חישוב מדויק?** מלאו למטה ACC ונזק,\nותראו כמה פעמים תפגעו ובכמה מכות תהרגו.", "en": "**Want exact numbers?** Add your ACC and damage below\nto see your hit chance and hits per kill."},
     "train_none": {"he": "אין עדיין במאגר מפלצות קרובות ללבל שלכם.", "en": "The database has no monsters near your level yet."},
+    # a Magician's hits are spells: only the misses can be too many
+    "train_stretch_magician": {"he": "אף מפלצת כאן לא מתאימה בדיוק למספרים שלכם (יותר מדי פספוסים), אז אלה הכי קרובות.",
+                               "en": "No monster here quite fits your numbers (too many misses), so these are the closest."},
     "train_stretch": {"he": "אף מפלצת כאן לא מתאימה בדיוק למספרים שלכם (יותר מדי פספוסים או מכות רגילות), אז אלה הכי קרובות. עם סקילים זה הולך מהר יותר.", "en": "No monster here quite fits your numbers (too many misses or basic hits), so these are the closest. Skills make it faster."},
     "train_basic_note": {"he": "מספר המכות הוא למכה רגילה מחלון ה-Stat, בלי סקילים.", "en": "Hit counts are for a basic attack from the Stat window, without skills."},
     "train_mage_note": {"he": "לקוסמים הנזק בחלון ה-Stat הוא מכת מטה ולא כישוף, אז מספר המכות לא מוצג.", "en": "For a Magician the Stat window's damage is a staff swing, not a spell, so hit counts aren't shown."},
@@ -454,7 +458,7 @@ STRINGS = {
     "q_soon": {"he": "בקרוב", "en": "Coming up"},
     "q_head_now": {"he": "**{n} קווסטים** שאפשר לקחת ב-Lv. {lv}\nהכי משתלמים ב-EXP קודם", "en": "**{n} quests** you can take at Lv. {lv}\nBest EXP first"},
     "q_head_soon": {"he": "**{n} קווסטים** שנפתחים בלבלים הקרובים", "en": "**{n} quests** opening in the next levels"},
-    "q_done_count": {"he": "{n} סומנו כגמורים", "en": "{n} marked done"},
+    "q_done_head": {"he": "סומנו כגמורים", "en": "Marked done"},
     "q_none": {"he": "אין כאן קווסטים כרגע.", "en": "No quests here right now."},
     "q_needs": {"he": "צריך: {what}", "en": "Needs: {what}"},
     "q_gets": {"he": "מקבלים: {what}", "en": "Rewards: {what}"},
@@ -506,6 +510,7 @@ STRINGS = {
     "ob_login": {"he": "התחברות לחשבון Claude", "en": "Sign in to Claude"},
     "ob_login_codex": {"he": "התחברות עם ChatGPT", "en": "Sign in with ChatGPT"},
     "ob_check": {"he": "בדיקת החיבור", "en": "Check connection"},
+    "ob_check_key": {"he": "בדיקת המפתח", "en": "Check key"},
     "ob_login_wait": {"he": "נפתח דפדפן: מתחברים שם לחשבון Claude, וזה מתעדכן כאן לבד. הדפדפן לא נפתח? אפשר להתקין את Claude Code מחדש בכפתור שלמעלה.",
                       "en": "Your browser opened: sign in to Claude there, and this updates by itself. No browser? You can reinstall Claude Code with the button above."},
     "ob_login_wait_codex": {"he": "נפתח דפדפן: מתחברים שם לחשבון ChatGPT, וזה מתעדכן כאן לבד. הדפדפן לא נפתח? אפשר להתקין את ChatGPT מחדש בכפתור שלמעלה.",
@@ -554,7 +559,6 @@ STRINGS = {
                     "en": "One key can't both open the chat and start talking. Pick a different key for one of them."},
     "hotkey_taken": {"he": "המקש {key} תפוס על ידי תוכנה אחרת. בחרו מקש אחר בהגדרות.",
                      "en": "{key} is taken by another program. Pick another key in settings."},
-    # chat: when n == 1, I18n picks "<key>_one" ("1 result", not "1 results")
     "busy_wait": {"he": "רגע, עוד עונה על השאלה הקודמת. אפשר לשאול שוב כשהתשובה מסתיימת.",
                   "en": "One moment, still answering the previous question. Ask again when it's done."},
     "card_ask_tip": {"he": "לחצו כדי לשאול על זה", "en": "Tap to ask about it"},
@@ -562,6 +566,7 @@ STRINGS = {
     "card_req_level": {"he": "לבל נדרש", "en": "Required Level"},
     "stat_hp": {"he": "HP", "en": "HP"},
     "stat_mp": {"he": "MP", "en": "MP"},
+    # chat: when n == 1, I18n picks "<key>_one" ("1 result", not "1 results")
     "history_count_one": {"he": "תוצאה אחת", "en": "1 result"},
     "tip_job_soon_one": {"he": "עוד לבל אחד לג'וב הבא ({jobs}). לחצו כדי לדעת איך מתכוננים",
                          "en": "1 level to your next job ({jobs}). Tap to see how to prepare"},
@@ -579,7 +584,6 @@ STRINGS = {
     "q_head_now_one": {"he": "**קווסט אחד** שאפשר לקחת ב-Lv. {lv}",
                        "en": "**1 quest** you can take at Lv. {lv}"},
     "q_head_soon_one": {"he": "**קווסט אחד** שנפתח בלבלים הקרובים", "en": "**1 quest** opening in the next levels"},
-    "q_done_count_one": {"he": "אחד סומן כגמור", "en": "1 marked done"},
 }
 
 

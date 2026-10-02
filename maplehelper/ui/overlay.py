@@ -27,16 +27,17 @@ class AskWorker(QObject):
     delta = Signal(str)
     done = Signal(object)
 
-    def __init__(self, brain: Brain, question: str, character, history, shot: bytes | None, focus=None):
+    def __init__(self, brain: Brain, question: str, character, history, shot: bytes | None, focus=None,
+                 extra: str | None = None):
         super().__init__()
         self.brain, self.question, self.character, self.history, self.shot = brain, question, character, history, shot
-        self.focus = focus
+        self.focus, self.extra = focus, extra
 
     def run(self):
         # whatever happens, the chat gets an answer back (never stuck on "thinking")
         try:
             ans = self.brain.ask(self.question, self.character, self.history, self.shot, on_delta=self.delta.emit,
-                                 focus=self.focus)
+                                 focus=self.focus, extra=self.extra)
         except Exception as e:  # noqa: BLE001
             ans = Answer(error=f"internal: {e}")
         self.done.emit(ans)
@@ -134,8 +135,24 @@ def stats_text(t, value: str) -> str:
     for bit in str(value).split(", "):
         key, _, num = bit.partition(" ")
         label = t(f"stat_{key}")
-        parts.append(f"{label if label != f'stat_{key}' else key} {num}".strip())
+        # a no-break space: a wrap never leaves "HP" at a line's end and its "900" on the next (seen live)
+        piece = f"{label if label != f'stat_{key}' else key} {num}".strip()
+        # an English label with its number is one left-to-right piece in a Hebrew line;
+        # the RLM keeps the ", " after it in the Hebrew flow (as EntityCard._stats does)
+        parts.append(bidi.ltr_block(piece, True) + bidi.RLM if t.rtl and piece.replace(" ", " ").isascii()
+                     else piece)
     return ", ".join(parts)
+
+
+PROFILE_LABELS = {"name": "ob_char_name", "level": "level", "job": "job", "base_class": "ob_class", "map": "map",
+                  "quest+": "quest_started", "quest-": "quest_done", "note": "note", "stats": "stats_word"}
+
+
+def change_line(t, field: str, value) -> str:
+    """'✓ Updated · Map: Tree Dungeon, Monkey Forest I' for one profile change. An English value is one block in a
+    Hebrew line ("Monkey Forest I ,Tree Dungeon" came out reversed, seen live)."""
+    shown = stats_text(t, value) if field == "stats" else bidi.ltr_block(str(value), t.rtl)    # not "dmg_min 30"
+    return t("profile_updated", label=t(PROFILE_LABELS[field]), value=shown)
 
 
 def visible_rect(rect: QRect, screens: list[QRect]) -> QRect | None:
@@ -363,6 +380,7 @@ class Overlay(QWidget):
         fb.setSpacing(6)
         self.focus_label = QLabel(objectName="FocusText")
         fb.addWidget(self.focus_label)
+        fb.addSpacing(6)        # a chip cut at the row's edge must not touch the label (seen live)
         # the chips scroll sideways instead of widening the window (a row of 5 names is wider than the chat)
         self.focus_scroll = ChipScroll()
         chips = QWidget()
@@ -564,32 +582,41 @@ class Overlay(QWidget):
         QTimer.singleShot(120, lambda: self._capture_and_ask(question, detail))
 
     def _capture_and_ask(self, question: str, detail: bool = False):
+        from .. import capture
+        capture.LAST_FULL = None          # never read the inventory off an older screenshot
         self._fresh_shot()
-        if detail and self.shot:
-            from .. import capture, inventory
+        if detail and self.shot and not self.shot_used and capture.LAST_FULL is not None:
+            from .. import inventory
             self._detail_tiles = capture.detail_tiles(capture.LAST_FULL)
             # the inventory read from the pixels: every icon matched to the database's own pictures
             try:
                 slots = inventory.read(capture.LAST_FULL, self.kb) if capture.LAST_FULL is not None else []
             except Exception:      # noqa: BLE001 - the AI still gets the screenshot
                 slots = []
+            try:
+                described = inventory.describe(slots, self.kb)
+            except Exception:      # noqa: BLE001
+                described = ""
             self._hidden_context = ("<inventory_read>\nThe app matched each filled inventory slot's icon to the "
                                     "database pictures (closest first; the first is almost always right):\n"
-                                    + inventory.describe(slots, self.kb) + "\n</inventory_read>") if slots else None
+                                    + described + "\n</inventory_read>") if described else None
             found = [s.matches[0][0] for s in slots if s.matches]
             # what the app itself recognised, first; the question and the AI's advice follow
-            if found:
-                self.add_system(self.t("inv_found", n=len(found)))
-                self.add_cards(list(dict.fromkeys(found)))
+            uniq = list(dict.fromkeys(found))     # 3 slots of Red Potion are one item, as the cards show it
+            if uniq:
+                self.add_system(self.t("inv_found", n=len(uniq)))
+                self.add_cards(uniq)
             else:
                 self.add_system(self.t("inv_not_found"))
         self.ask(question)
 
     def continue_from(self, question: str, answer: str, keys: list):
         """An earlier exchange (from the history) back in the feed; the next question is asked as its follow-up."""
-        self.add_bubble(question, "user")
+        from .. import pins
+        self.add_bubble(pins.shown_question(question), "user")     # not the stored "[about Mano] …"
         bubble = self.add_bubble(answer, "assistant")
-        self._start_reading(bubble)
+        if not self._is_busy():      # while an answer streams, the view keeps following that one
+            self._start_reading(bubble)
         keys = [k for k in keys if self.kb.get(k)]
         if keys:
             self.add_cards(keys)
@@ -668,6 +695,7 @@ class Overlay(QWidget):
     def switch_character(self, cid: str):
         if cid == self.profiles.active_id:
             return
+        self._hidden_context = self._detail_tiles = None      # one character's context never reaches another's
         self.profiles.set_active(cid)
         self.refresh_profile_chip()
         c = self.profiles.active
@@ -889,6 +917,7 @@ class Overlay(QWidget):
         a.start()
 
     def clear_feed(self):
+        self._hidden_context = self._detail_tiles = None      # a cleared chat leaves nothing for the next question
         self._anchor = None
         self._pending_bubble = None
         self._reading = None
@@ -1017,6 +1046,9 @@ class Overlay(QWidget):
         """Ask (instant answer or Claude). False when nothing was asked (busy, empty)."""
         if self.busy or getattr(self, "_syncing", False) or not question.strip():
             return False
+        # the app-made context belongs to this question only, however it gets answered (an instant answer too)
+        tiles, self._detail_tiles = getattr(self, "_detail_tiles", None), None
+        hidden, self._hidden_context = getattr(self, "_hidden_context", None), None
         self._last_question = question
         c = self.profiles.active
         self._asked_cid = c.id if c else None
@@ -1048,10 +1080,8 @@ class Overlay(QWidget):
         self.send_btn.setEnabled(False)
 
         self._thread = QThread(self)
-        tiles, self._detail_tiles = getattr(self, "_detail_tiles", None), None
-        hidden, self._hidden_context = getattr(self, "_hidden_context", None), None
-        asked = f"{question}\n\n{hidden}" if hidden else question       # the bubble shows the question alone
-        self._worker = AskWorker(self.brain, asked, c, history, [shot, *tiles] if shot and tiles else shot, focus)
+        self._worker = AskWorker(self.brain, question, c, history, [shot, *tiles] if shot and tiles else shot, focus,
+                                 extra=hidden)
         self._worker.moveToThread(self._thread)
         self._thread.started.connect(self._worker.run)
         self._worker.delta.connect(self._on_delta)
@@ -1293,7 +1323,7 @@ class Overlay(QWidget):
         from ..store import hud_name, same_character
         c = self.profiles.active
         name = hud_name(ans.profile_update)
-        if not c or not name or same_character(c.name, name):
+        if not c or not name or same_character(c.name, name, c.name_seen, self.profiles.other_names(c)):
             return False
         update, box = dict(ans.profile_update), ans.avatar_box
         existing = self.profiles.find_by_name(name)
@@ -1396,11 +1426,8 @@ class Overlay(QWidget):
             self.profile_changed.emit()        # the play tools (stats, EXP meter) follow the profile
         changes = [ch for ch in changes if ch[0] != "exp"]     # the EXP bar shows it; no chat line per percent
         self.refresh_plan()
-        labels = {"name": "ob_char_name", "level": "level", "job": "job", "base_class": "ob_class", "map": "map",
-                  "quest+": "quest_started", "quest-": "quest_done", "note": "note", "stats": "stats_word"}
         for field, value in changes:
-            shown = stats_text(self.t, value) if field == "stats" else value     # not "dmg_min 30"
-            self.add_system(self.t("profile_updated", what=f"{self.t(labels[field])} {shown}"))
+            self.add_system(change_line(self.t, field, value))
             if self.stats:
                 self.stats.change(self.profiles.active, field, value)
         if changes:

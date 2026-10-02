@@ -6,7 +6,7 @@ wait_for_setup()     # before Qt / numpy load: an update may be replacing them r
 
 try:
     from maplehelper.app import main  # noqa: E402
-except (ImportError, OSError) as e:   # a file of the install is missing or damaged (e.g. shiboken6.Shiboken)
+except Exception as e:   # noqa: BLE001 - a missing or damaged file of the install (e.g. shiboken6.Shiboken)
     report_broken_install(e)
     sys.exit(1)
 

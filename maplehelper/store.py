@@ -158,6 +158,7 @@ class Character:
     quests_done: list[str] = field(default_factory=list)   # quest keys the player marked done
     town: str = ""                                    # citizenship town (Henesys / Kerning City), "" = not chosen
     job_shown: str = ""     # the job as the game's HUD names it ("Archer" on an Old School server for a Bowman)
+    name_seen: bool = False  # the name was read off the HUD once: from then on only that exact name is this character
     crafts: dict = field(default_factory=dict)        # crafting profession -> its level
     updated_at: float = field(default_factory=time.time)
 
@@ -213,11 +214,16 @@ def _consistent_job(update: dict, c: "Character") -> dict:
     return update
 
 
-def same_character(saved: str, hud: str) -> bool:
-    """Is the name on the HUD the saved character's? The same name, or one cut short at setup
-    ("Kalimero" saved, "KalimeroZz" in game); any other name is another character."""
+def same_character(saved: str, hud: str, seen: bool = False, others: tuple[str, ...] = ()) -> bool:
+    """Is the name on the HUD the saved character's? The same name; or, until the HUD confirmed it once, a longer
+    name it was cut short from at setup ("Kalimero" typed, "KalimeroZz" in game). Never another saved character's
+    name ("Amit" and the alt "AmitBow" are two characters)."""
     a, b = saved.strip().lower(), hud.strip().lower()
-    return a == b or (min(len(a), len(b)) >= 3 and (a.startswith(b) or b.startswith(a)))
+    if a == b:
+        return True
+    if seen or any(o.strip().lower() == b for o in others):
+        return False
+    return len(a) >= 3 and b.startswith(a)
 
 
 def hud_name(update) -> str | None:
@@ -282,6 +288,8 @@ class Profiles:
         if c:
             if job != c.job:
                 c.job_shown = ""          # picked by hand: the app's own name
+            if name != c.name:
+                c.name_seen = False       # renamed by hand: the HUD may confirm it again
             c.name, c.base_class, c.job, c.level = name, base_class, job, level
             c.updated_at = time.time()
             self.save()
@@ -297,6 +305,9 @@ class Profiles:
         if self.active_id == cid:
             self.active_id = self.characters[0].id if self.characters else None
         self.save()
+
+    def other_names(self, c: "Character") -> tuple[str, ...]:
+        return tuple(o.name for o in self.characters if o is not c)
 
     def find_by_name(self, name: str) -> "Character | None":
         n = name.strip().lower()
@@ -319,9 +330,12 @@ class Profiles:
         name = hud_name(update)
         # the name on the HUD (a screenshot read): "Kalimero" typed at setup becomes the real "KalimeroZz".
         # Another name altogether is another character: the overlay asks first and never lands here with it
-        if name and name != c.name and same_character(c.name, name):
-            c.name = name
-            changed.append(("name", c.name))
+        if name and same_character(c.name, name, c.name_seen, self.other_names(c)):
+            if name != c.name:
+                c.name = name
+                changed.append(("name", c.name))
+            if not c.name_seen:
+                c.name_seen, relabelled = True, True
         for key in ("level", "job", "base_class", "map"):
             val = update.get(key)
             if val in (None, "", 0):

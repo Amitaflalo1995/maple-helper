@@ -10,8 +10,8 @@ import time
 
 from PySide6.QtCore import QEvent, QPoint, QSize, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
-from PySide6.QtWidgets import (QButtonGroup, QCompleter, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
-                               QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QButtonGroup, QCompleter, QFrame, QGraphicsOpacityEffect, QGridLayout, QHBoxLayout,
+                               QLabel, QLineEdit, QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
 
 from .. import bidi, buildplan, combat, crafting, glossary, guides, market, plan, quests
 from ..i18n import I18n
@@ -396,7 +396,8 @@ class ToolsDialog(GlassDialog):
             return
         if not any(s.fits for s in rows):
             # nothing passes the miss / hits limits: still the best options, with why they're shown
-            self.train_list.addWidget(self._label(t("train_stretch"), "RowHint"))
+            # (a Magician's hits are spells: "too many basic hits" and "skills make it faster" don't apply)
+            self.train_list.addWidget(self._label(t("train_stretch_magician" if magic else "train_stretch"), "RowHint"))
         for i, s in enumerate(rows):
             self.train_list.addWidget(self._spot_card(s, best=(i == 0)))
 
@@ -419,7 +420,8 @@ class ToolsDialog(GlassDialog):
         col.setSpacing(3)
         name = QLabel(self._p(f"{m.name} · {t('lv_short', n=m.level)}"), objectName="CardName")
         col.addWidget(name)
-        col.addWidget(self._label(s.map, "CardSub"))
+        # "… IV · Victoria Road", one English block (run by run, a Hebrew line put the region first)
+        col.addWidget(self._label(bidi.ltr_block(self.kb.map_label(s.map), self.t.rtl), "CardSub"))
         # two short rows of tags: why it's picked, then the numbers (one long row pushed the card wider)
         why, nums = QHBoxLayout(), QHBoxLayout()
         for line in (why, nums):
@@ -544,7 +546,7 @@ class ToolsDialog(GlassDialog):
             maps_sec = Section(t("calc_maps_head_plain"), t.rtl)
             for mp, n in m.maps[:3]:
                 # one English block: "Tree Dungeon, Forest Up North IV" kept its comma in place
-                self._row(maps_sec, bidi.ltr_name(mp, t.rtl), tag(self._p(t("spot_crowd", n=n)), "Tag"))
+                self._row(maps_sec, bidi.ltr_name(self.kb.map_label(mp), t.rtl), tag(self._p(t("spot_crowd", n=n)), "Tag"))
             self.calc_box.addWidget(maps_sec)
 
     # build ---------------------------------------------------------------
@@ -668,8 +670,8 @@ class ToolsDialog(GlassDialog):
         r = quests.for_level(self.kb, c.level, c.base_class, c.job, c.quests_done)
         mode = self.q_mode.value()
         rows = r[mode]
-        self._set(self.q_head, t(f"q_head_{mode}", n=len(rows), lv=c.level) +
-                  ("\n" + t("q_done_count", n=r["done"]) if r["done"] else ""))
+        # how many are marked done is on the toggle right under the header, not here again
+        self._set(self.q_head, t(f"q_head_{mode}", n=len(rows), lv=c.level))
         if not rows:
             self.q_list.addWidget(self._label(t("q_none"), "RowHint"))
         for q in rows[:MAX_QUESTS]:
@@ -801,7 +803,7 @@ class ToolsDialog(GlassDialog):
             QTimer.singleShot(0, lambda: bar.setValue(at))      # again once the new cards have their size
 
     def _done_toggle(self) -> QPushButton:
-        """ "Show done quests": the quests marked done, each with a way back to the list."""
+        """The "show quests marked done (n)" toggle; open, _add_done lists those quests under it."""
         b = QPushButton(objectName="Link")
         b.setCheckable(True)
         b.setCursor(Qt.PointingHandCursor)
@@ -810,16 +812,23 @@ class ToolsDialog(GlassDialog):
         return b
 
     def _add_done(self, toggle: QPushButton, layout: QVBoxLayout, keys: list[str]):
-        """The toggle's label, and when it's open the done quests (newest first) under the list."""
+        """The toggle's label (with how many are done), and when it's open the done quests (newest first) right
+        under the toggle: a small header, then muted cards, each with a way back to the list."""
         t = self.t
         toggle.setVisible(bool(keys))
         toggle.setText(self._p(t("q_hide_done" if toggle.isChecked() else "q_show_done", n=len(keys))))
         if not (keys and toggle.isChecked()):
             return
-        for k in reversed(keys[-MAX_QUESTS:]):
-            q = quests.quest(self.kb, k)
-            if q:
-                layout.addWidget(self._quest_card(q, done=True))
+        cards = [self._quest_card(q, done=True) for k in reversed(keys[-MAX_QUESTS:]) if (q := quests.quest(self.kb, k))]
+        if not cards:
+            return
+        layout.addWidget(self._label(t("q_done_head"), "PlanHead"))
+        for card in cards:
+            fade = QGraphicsOpacityEffect(card)       # muted: done, not something to do
+            fade.setOpacity(0.6)
+            card.setGraphicsEffect(fade)
+            layout.addWidget(card)
+        layout.addSpacing(12)                         # apart from what follows (the quests to take)
 
     # crafting ------------------------------------------------------------
 

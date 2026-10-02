@@ -278,6 +278,25 @@ class KnowledgeBase:
                 break
         return maps
 
+    @cached_property
+    def _regions(self) -> list[str]:
+        """The regions the map pages name ("Location Maple Road / Maple Island" → "Maple Road"), longest first."""
+        found = set()
+        for p in (self.root / "pages" / "map").glob("*.md"):
+            m = re.search(r"^Location (.+?) / ", p.read_text(encoding="utf-8"), re.M)
+            if m:
+                found.add(m.group(1).strip())
+        return sorted(found, key=len, reverse=True)
+
+    def map_label(self, raw: str) -> str:
+        """A monster page's map cell glues the region to the map's name ("Snail Hunting Ground I Maple Road"):
+        "Snail Hunting Ground I · Maple Road" when it ends with a known region, else as it is."""
+        for region in self._regions:
+            name = raw[:-len(region)].rstrip()
+            if raw.endswith(" " + region) and name:
+                return f"{name} · {region}"
+        return raw
+
     def level_digest(self, level: int, below: int = 5, above: int = 8) -> str:
         rows = [r for r in self._monsters if level - below <= r["level"] <= level + above]
         if not rows:

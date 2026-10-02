@@ -176,6 +176,11 @@ class ClaudeBackend:
             self._warm.kill()
         self._warm = None
 
+    def drop_warm(self) -> None:
+        """Stop only the process waiting for the next question (an answer in progress goes on)."""
+        with self._warm_lock:
+            self._discard_warm()
+
     def shutdown(self) -> None:
         with self._warm_lock:
             self._discard_warm()

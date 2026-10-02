@@ -10,6 +10,8 @@ from PySide6.QtCore import QRect  # noqa: E402
 from maplehelper.brain import META, streamed_text  # noqa: E402
 from maplehelper.i18n import STRINGS, I18n  # noqa: E402
 
+NBSP = chr(0xA0)
+
 
 # ------------------------------------------------------------------ pure helpers
 
@@ -34,7 +36,7 @@ def test_singular_variants_have_a_base_string(key):
 
 def test_stat_changes_in_words():
     from maplehelper.ui.overlay import stats_text
-    assert stats_text(I18n("en"), "acc 55, dmg_min 30, dmg_max 80") == \
+    assert stats_text(I18n("en"), "acc 55, dmg_min 30, dmg_max 80").replace(NBSP, " ") == \
         "Accuracy (ACC) 55, Min damage 30, Max damage 80"
     assert "dmg_min" not in stats_text(I18n("he"), "dmg_min 30")
 
@@ -162,5 +164,89 @@ def test_another_character_in_game_is_offered_not_overwritten(overlay):
     assert overlay._offer_other_character(ans, None, None)
     overlay.findChildren(NoticeCard)[-1].clicked.emit()
     assert overlay.profiles.active.name == "NewGuy99" and len(overlay.profiles.characters) == 2
-    # the same character (a name cut short at setup) is no offer
-    assert not overlay._offer_other_character(Answer(text="ok", profile_update={"name": "NewGuy99x"}), None, None)
+    # once the HUD confirmed "NewGuy99", a longer name is another character (an alt), not a rename
+    assert overlay._offer_other_character(Answer(text="ok", profile_update={"name": "NewGuy99x"}), None, None)
+    # the exact name is no offer
+    assert not overlay._offer_other_character(Answer(text="ok", profile_update={"name": "NewGuy99"}), None, None)
+
+
+# ------------------------------------------------------------------ review round: display fixes
+
+def test_profile_change_lines_keep_english_values_in_one_block():
+    from maplehelper import bidi
+    from maplehelper.ui.overlay import change_line, stats_text
+    en, he = I18n("en"), I18n("he")
+    assert change_line(en, "map", "Tree Dungeon, Monkey Forest I") == "✓ Updated · Map: Tree Dungeon, Monkey Forest I"
+    assert change_line(en, "stats", "hp 900") == f"✓ Updated · Stats: HP{NBSP}900"
+    # Hebrew: the English map name is one isolated block ("Monkey Forest I ,Tree Dungeon" came out reversed)
+    assert f"{bidi.LRI}Tree Dungeon, Monkey Forest I{bidi.PDI}" in change_line(he, "map", "Tree Dungeon, Monkey Forest I")
+    # each English stat with its number is one piece, followed by an RLM; Hebrew labels stay plain
+    shown = stats_text(he, "acc 55, dmg_min 30, hp 900")
+    assert f"{bidi.LRI}Accuracy (ACC){NBSP}55{bidi.PDI}{bidi.RLM}" in shown
+    assert f"{bidi.LRI}HP{NBSP}900{bidi.PDI}{bidi.RLM}" in shown        # never wrapped between "HP" and "900"
+    assert f"נזק מינימלי{NBSP}30" in shown
+
+
+def test_notice_button_goes_under_the_text_when_narrow():
+    from maplehelper.ui.widgets import NoticeCard
+    assert NoticeCard.button_below(420, 100)          # at 470 px "Add Kalimba" would squeeze the text
+    assert not NoticeCard.button_below(720, 100)
+
+
+def test_history_shows_the_question_without_the_focus_tag():
+    from maplehelper import pins
+    from maplehelper.ui.pinsview import short_text
+    assert pins.shown_question("[about Mano] what does it drop?") == "what does it drop?"
+    assert pins.shown_question("what about [about Mano]?") == "what about [about Mano]?"   # only a leading tag
+    assert pins.shown_question("[about Mano]") == "[about Mano]"                            # never empty
+    assert short_text("a  b\n\nc", 70) == "a b c"
+    cut = short_text("word " * 30, 70)
+    assert cut.endswith("…") and len(cut) <= 71 and not cut[:-1].endswith(" ")
+
+
+def test_continue_from_history_strips_the_tag_and_keeps_following_a_streaming_answer(overlay):
+    from maplehelper.ui.widgets import Bubble
+    pending = overlay.add_bubble("…", "assistant")
+    overlay._start_reading(pending)
+    overlay.busy = True
+    overlay.continue_from("[about Mano] what does it drop?", "Mano drops a shell.", [])
+    assert overlay._reading is pending
+    users = [b for b in overlay.findChildren(Bubble) if b.role == "user"]
+    assert "[about" not in users[-1].label.text() and "what does it drop?" in users[-1].label.text()
+    overlay.busy = False
+    overlay.continue_from("again?", "Yes.", [])
+    assert overlay._reading is not pending
+
+
+def test_magician_stretch_hint_mentions_only_misses():
+    for lang in ("he", "en"):
+        s = I18n(lang)("train_stretch_magician")
+        assert "רגילות" not in s and "basic" not in s and "סקילים" not in s and "Skills" not in s
+
+
+def test_dropper_map_line_splits_the_region(kb_copy):
+    from maplehelper.kb import KnowledgeBase
+    d = kb_copy / "pages" / "map"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "999.md").write_text("# Snail Hunting Ground I\n\nLocation Maple Road / Maple Island\n", encoding="utf-8")
+    kb = KnowledgeBase(kb_copy)
+    assert kb.map_label("Snail Hunting Ground I Maple Road") == "Snail Hunting Ground I · Maple Road"
+    assert kb.map_label("Somewhere Else") == "Somewhere Else"
+    assert kb.map_label("Maple Road") == "Maple Road"
+
+
+def test_ask_in_chat_while_busy_says_so_and_continue_closes_the_history():
+    from types import SimpleNamespace
+
+    from maplehelper.app import MapleHelperApp
+    calls = []
+    ov = SimpleNamespace(isVisible=lambda: True, _is_busy=lambda: True, _say_busy=lambda: calls.append("busy"),
+                         ask=lambda q: calls.append("ask"), continue_from=lambda *a: calls.append("continue"))
+    history = SimpleNamespace(close=lambda: calls.append("closed"))
+    fake = SimpleNamespace(overlay=ov, profiles=SimpleNamespace(active=SimpleNamespace(id="c1")),
+                           _windows={"history:c1": history})
+    MapleHelperApp.ask_from_tools(fake, "Who drops it?", False)
+    assert calls == ["busy"]                         # not silently dropped
+    calls.clear()
+    MapleHelperApp.continue_conversation(fake, "q", "a", [])
+    assert calls == ["closed", "continue"]

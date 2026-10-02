@@ -7,7 +7,7 @@ import threading
 from PySide6.QtCore import QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
-                               QScrollArea, QStackedWidget, QVBoxLayout, QWidget)
+                               QScrollArea, QSizePolicy, QStackedWidget, QToolButton, QVBoxLayout, QWidget)
 
 from .. import bidi, providers
 from ..providers.base import login_failed, stop_login
@@ -80,17 +80,20 @@ class CharacterForm(QWidget):
         self.class_group = QButtonGroup(self)
         self.class_group.setExclusive(True)
         for i, cls in enumerate(JOBS):
-            b = QPushButton()
+            # the picture above the name: beside it, a tile at 470 px had no room left ("Warrior" was cut, seen live)
+            b = QToolButton(objectName="ClassTile")
             b.setCheckable(True)
-            b.setObjectName("Quick")
+            b.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+            b.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)     # three per row share the width
             b.setMinimumHeight(72)
+            b.setCursor(Qt.PointingHandCursor)
             img = kb.image_path(f"class/{cls.lower()}")
             label = cls if t.lang == "en" else f"{CLASS_HE[cls]}\n{cls}"
             b.setText(label)
             if img:
                 from PySide6.QtGui import QIcon
                 b.setIcon(QIcon(str(img)))
-                b.setIconSize(QPixmap(str(img)).size().scaled(40, 40, Qt.KeepAspectRatio))
+                b.setIconSize(QPixmap(str(img)).size().scaled(36, 36, Qt.KeepAspectRatio))
             b.setProperty("cls", cls)
             self.class_group.addButton(b)
             grid.addWidget(b, i // 3, i % 3)
@@ -340,7 +343,7 @@ class Onboarding(GlassDialog):
         self.key_edit.setEchoMode(QLineEdit.Password)
         self.key_edit.setLayoutDirection(Qt.LeftToRight)
         self.key_edit.returnPressed.connect(self._check_key)      # Enter checks the pasted key
-        self.key_btn = QPushButton(self.t("ob_check"), objectName="Secondary")
+        self.key_btn = QPushButton(self.t("ob_check_key"), objectName="Secondary")
         self.key_btn.setCursor(Qt.PointingHandCursor)
         self.key_btn.clicked.connect(self._check_key)
         krow.addWidget(self.key_edit, 1)
@@ -710,7 +713,7 @@ class SettingsDialog(GlassDialog):
         self.hk_voice.addItems(fkeys)
         self.hk_voice.setCurrentText(settings["hotkey_voice"])
         sec.add_row(t("hotkey_voice"), self.hk_voice)
-        self.keys_error = QLabel(bidi.plain(t("hotkey_same"), rtl), objectName="RowHint")
+        self.keys_error = QLabel(bidi.plain(t("hotkey_same"), rtl), objectName="WarnHint")   # a warning, not a hint
         self.keys_error.setWordWrap(True)
         self.keys_error.setContentsMargins(0, 4, 0, 4)
         self.keys_error.hide()

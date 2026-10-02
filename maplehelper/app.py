@@ -55,6 +55,7 @@ class MapleHelperApp:
         qapp.setWindowIcon(QIcon(str(ASSETS / "brand" / APP_ICON)))
         qapp.setQuitOnLastWindowClosed(False)
         self.main_thread = _MainThread()
+        self._look = (self.settings["language"], self.settings["appearance"], self.settings["font_size"])
 
     # ------------------------------------------------------------------ startup
 
@@ -139,6 +140,8 @@ class MapleHelperApp:
         QTimer.singleShot(4000, self.check_kb_update_silently)
         QTimer.singleShot(6000, self.voice.preload)    # voice answers right away after a start or an update
         QTimer.singleShot(8000, updater.remove_old_installers)
+        from . import inventory     # the icon index for "check the inventory", built before it's needed
+        QTimer.singleShot(10000, lambda: threading.Thread(target=inventory.warm, args=(self.kb,), daemon=True).start())
         # a session can run for hours: look again every 3 hours
         self._update_timer = QTimer(interval=3 * 60 * 60 * 1000, timeout=self.check_kb_update_silently)
         self._update_timer.start()
@@ -337,6 +340,25 @@ class MapleHelperApp:
             return dlg
         self.open_window("settings", make, on_close=self.overlay.refresh_profile_chip)
 
+    def _reopen_windows_in_new_look(self):
+        """A language or appearance change: the other open windows (tools, guides, history...) were built in the
+        old one (the tools window stayed Hebrew after a switch to English, seen live). Reopen them."""
+        look = (self.settings["language"], self.settings["appearance"], self.settings["font_size"])
+        if getattr(self, "_look", look) == look:
+            self._look = look
+            return
+        self._look = look
+        reopen = {"tools": self.show_tools, "guides": self.show_guides, "patch_notes": self.show_patch_notes,
+                  "whats_new": self.show_whats_new}
+        for kind, dlg in list(self.__dict__.get("_windows", {}).items()):
+            if kind == "settings" or dlg is None:
+                continue
+            dlg.close()
+            again = reopen.get(kind) or (self.show_history if kind.startswith("history:") else
+                                         self.show_wishlist if kind.startswith("wishlist:") else None)
+            if again:
+                QTimer.singleShot(0, lambda f=again: f())
+
     def add_character(self):
         before = self.profiles.active_id
         if Onboarding(self.settings, self.profiles, self.kb, self.style, only_character=True).exec():
@@ -440,6 +462,7 @@ class MapleHelperApp:
 
     def on_settings_changed(self):
         self.overlay.apply_language()
+        self._reopen_windows_in_new_look()
         self.overlay.setStyleSheet(self.style())
         self.overlay.apply_capture_mode()
         self.apply_saver_mode()
@@ -483,7 +506,7 @@ class MapleHelperApp:
         player is waiting on an answer (then the 3-hourly timer tries again later)."""
         if self.overlay.busy or getattr(self.overlay, "_syncing", False):
             return False
-        self.brain.shutdown()
+        self.brain.drop_warm()      # not shutdown(): that also cancels, and a question may start right now
         return True
 
     def _update_kb_in_background(self, interactive: bool):
@@ -509,9 +532,9 @@ class MapleHelperApp:
         if status == "updated":
             self.reload_kb()
             self.kb_updated(before, interactive=interactive)
-            threading.Thread(target=self.brain.prewarm, daemon=True).start()
         elif interactive:
-            self.toast(t("kb_uptodate") if status == "uptodate" else t("kb_update_failed"))
+            self.toast(t({"uptodate": "kb_uptodate", "postponed": "kb_update_postponed"}.get(status, "kb_update_failed")))
+        threading.Thread(target=self.brain.prewarm, daemon=True).start()     # whatever happened, warm again
 
     def announce_update(self, version: str, url: str):
         if getattr(self, "_mac_announced", None) == version:
@@ -631,6 +654,9 @@ class MapleHelperApp:
     def ask_from_tools(self, question: str, with_screenshot: bool, detail: bool = False):
         if not self.overlay.isVisible():
             self.overlay.toggle(self.capture)
+        if self.overlay._is_busy():      # an answer is on its way: say so, don't drop the question silently
+            self.overlay._say_busy()
+            return
         if with_screenshot:
             self.overlay.ask_with_screenshot(question, detail=detail)
         else:
@@ -679,6 +705,10 @@ class MapleHelperApp:
         """From the history: the exchange back in the chat, and the next question follows on from it."""
         if not self.overlay.isVisible():
             self.overlay.toggle(self.capture)
+        c = self.profiles.active
+        history = self.__dict__.get("_windows", {}).get(f"history:{c.id}") if c else None
+        if history is not None:
+            history.close()           # the conversation goes on in the chat, not behind the history window
         self.overlay.continue_from(question, answer, keys)
 
     def show_wishlist(self):
@@ -703,6 +733,8 @@ class MapleHelperApp:
 
     def reload_kb(self):
         self.kb = KnowledgeBase()
+        from . import inventory
+        threading.Thread(target=inventory.warm, args=(self.kb,), daemon=True).start()   # the new KB's icons
         self.brain.kb = self.kb
         self.overlay.kb = self.kb
 

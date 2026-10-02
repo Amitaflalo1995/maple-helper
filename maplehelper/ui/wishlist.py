@@ -101,7 +101,7 @@ class WishlistDialog(GlassDialog):
         title.setAlignment(self._align)
         col.addWidget(title)
         if maps:
-            where = QLabel(bidi.ltr_name(maps[0], t.rtl), objectName="CardSub")
+            where = QLabel(bidi.ltr_name(kb.map_label(maps[0]), t.rtl), objectName="CardSub")
             where.setWordWrap(True)
             where.setAlignment(self._align)
             col.addWidget(where)

@@ -29,11 +29,33 @@ def setup_running() -> bool:
 def wait_for_setup(limit_s: float = 900, step_s: float = 0.5) -> bool:
     """Wait while an update installs (up to limit_s). True when we had to wait."""
     waited = False
-    end = time.monotonic() + limit_s
-    while setup_running() and time.monotonic() < end:
+    start = time.monotonic()
+    told = False
+    while setup_running() and time.monotonic() - start < limit_s:
         waited = True
+        if not told and time.monotonic() - start > 8:
+            told = True
+            _tell_waiting()      # an installer window left open would otherwise mean a silent, long wait
         time.sleep(step_s)
     return waited
+
+
+WAITING_TEXT = {
+    "he": "Maple Helper מתעדכן או מותקן כרגע. הוא ייפתח מעצמו כשההתקנה תסתיים.",
+    "en": "Maple Helper is being updated or installed right now. It opens by itself when that's done.",
+}
+
+
+def _tell_waiting() -> None:
+    """A small note while we wait (in its own thread: the wait goes on, and ends when the setup does)."""
+    if sys.platform != "win32":
+        return
+    import ctypes
+    import threading
+    lang = _language()
+    flags = 0x40 | 0x10000 | (0x80000 | 0x100000 if lang == "he" else 0)   # info, foreground, RTL in Hebrew
+    threading.Thread(target=lambda: ctypes.windll.user32.MessageBoxW(None, WAITING_TEXT.get(lang, WAITING_TEXT["en"]),
+                                                                     "Maple Helper", flags), daemon=True).start()
 
 
 DOWNLOAD_URL = "https://github.com/Amitaflalo1995/maple-helper/releases/latest/download/MapleHelper-Setup.exe"

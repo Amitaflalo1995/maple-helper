@@ -91,8 +91,10 @@ _INDEX: dict[str, tuple[list[str], np.ndarray]] = {}
 
 
 def _index(kb) -> tuple[list[str], np.ndarray]:
-    root = str(getattr(kb, "root", ""))
+    # by folder and size: a KB update keeps the folder but changes its items (a stale key broke describe())
+    root = f"{getattr(kb, 'root', '')}|{len(kb.entities)}|{id(kb)}"
     if root not in _INDEX:
+        _INDEX.clear()
         keys, vecs = [], []
         for k, e in kb.entities.items():
             if e.get("category") != "item":
@@ -111,6 +113,11 @@ class Slot:
     index: int                      # 1-based, left to right, top to bottom
     picture: bytes                  # the icon as the game shows it (PNG)
     matches: list[tuple[str, float]] = field(default_factory=list)   # (item key, distance), best first
+
+
+def warm(kb) -> None:
+    """Build the icon index ahead of time (2,700 pictures, ~1 s): the first inventory check doesn't wait."""
+    _index(kb)
 
 
 def read(img: Image.Image, kb, top: int = 3) -> list[Slot]:
@@ -149,6 +156,6 @@ def describe(slots: list[Slot], kb) -> str:
     """The reading for the AI: per slot, the likely items (closest first)."""
     lines = []
     for s in slots:
-        names = ", ".join(f"{kb.get(k)['name']} [{k}]" for k, _ in s.matches)
+        names = ", ".join(f"{kb.get(k)['name']} [{k}]" for k, _ in s.matches if kb.get(k))
         lines.append(f"Slot {s.index}: {names or 'unknown'}")
     return "\n".join(lines)

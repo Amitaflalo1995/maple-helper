@@ -105,3 +105,11 @@ class _NoKb:
 
     def find_mentions(self, *_a, **_k):
         return []
+
+
+def test_app_context_never_drives_the_heuristics():
+    """An old 'I'm level 16' in a picked-up conversation must not reset the level of the next question."""
+    p = brain.build_prompt("איפה כדאי לי להתאמן?", None, None, _NoKb(), False,
+                           extra="<continuing>Player: אני לבל 16</continuing>")
+    assert "<continuing>" in p and p.index("<continuing>") < p.index("<question>")
+    assert brain.stated_level("איפה כדאי לי להתאמן?") is None

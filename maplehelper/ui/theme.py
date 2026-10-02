@@ -240,8 +240,10 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QPushButton#Secondary {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 12px; min-height: 26px; padding: 4px 18px; }}
     QPushButton#Secondary:hover {{ background: {c['fill3']}; }}
     QPushButton#Quick {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 14px; min-height: 30px; padding: 4px 12px; }}
-    QPushButton#Quick:hover {{ background: {c['fill3']}; }}
-    QPushButton#Quick:checked {{ background: rgba(255,149,51,0.12); border: 2px solid {ORANGE}; font-weight: 600; }}
+    QPushButton#Quick:hover, QToolButton#ClassTile:hover {{ background: {c['fill3']}; }}
+    QPushButton#Quick:checked, QToolButton#ClassTile:checked {{ background: rgba(255,149,51,0.12); border: 2px solid {ORANGE}; font-weight: 600; }}
+    QToolButton#ClassTile {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 14px; padding: 4px 4px;
+                             color: {c['text']}; }}
     QLineEdit {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 10px; padding: 7px 10px; }}
     QLineEdit:focus {{ border: 1px solid rgba(255,149,51,0.85); }}
 
@@ -252,6 +254,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #RowLabel {{ color: {c['text']}; }}
     #DialogBody {{ font-size: {s + 1}px; color: {c['text']}; line-height: 140%; }}
     #RowHint {{ color: {c['muted']}; font-size: {s - 3}px; }}
+    #WarnHint {{ color: {ORANGE if MODE == "dark" else "#C9620A"}; font-size: {s - 3}px; font-weight: 500; }}
     #PageTitle {{ font-size: {s + 8}px; font-weight: 700; letter-spacing: -0.3px; color: {c['text']}; }}
     #PageBody {{ color: {c['muted']}; }}
     #FieldLabel {{ color: {c['muted']}; font-size: {s - 2}px; font-weight: 500; }}

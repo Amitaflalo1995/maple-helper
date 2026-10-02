@@ -93,7 +93,7 @@ LENGTH_LINES = {"short": 6, "detailed": 15}
 
 
 def build_prompt(question: str, character: Character | None, history: History | None, kb: KnowledgeBase,
-                 has_screenshot: bool, length: str = "short", focus=None) -> str:
+                 has_screenshot: bool, length: str = "short", focus=None, extra: str | None = None) -> str:
     parts = []
     if character:
         parts.append(f"<player_profile>\n{character.summary()}\n</player_profile>")
@@ -143,9 +143,16 @@ def build_prompt(question: str, character: Character | None, history: History | 
                 ctx.append(drops)
     if ctx:
         parts.append("<kb_context>\n" + "\n\n".join(ctx) + "\n</kb_context>")
-    parts.append("<screenshot>" + ({True: "attached above", False: "not available"}.get(has_screenshot) or
-                                   f"attached above, followed by {has_screenshot} full-resolution parts of the same "
-                                   "screenshot (left to right) for reading small icons and text") + "</screenshot>")
+    if has_screenshot is True:
+        shot = "attached above"
+    elif not has_screenshot:
+        shot = "not available"
+    else:      # the number of full-resolution tiles that follow it
+        shot = (f"attached above, followed by {has_screenshot} full-resolution parts of the same screenshot "
+                "(left to right) for reading small icons and text")
+    parts.append(f"<screenshot>{shot}</screenshot>")
+    if extra:
+        parts.append(extra)          # app-made context (inventory read, a picked-up conversation): prompt only
     parts.append(f"<question>\n{question}\n</question>")
     if re.search(r"[\u0590-\u05FF]", question):
         parts.append("Reply in Hebrew.")      # it slipped into English once after a screenshot-heavy turn (live)
@@ -242,6 +249,12 @@ class Brain:
     def shutdown(self) -> None:
         self.backend.shutdown()
 
+    def drop_warm(self) -> None:
+        """Stop the waiting process only, never an answer the player is reading (the KB swap needs the folder)."""
+        drop = getattr(self.backend, "drop_warm", None)
+        if drop:
+            drop()
+
     def available(self) -> bool:
         return self.backend.exe is not None
 
@@ -249,14 +262,16 @@ class Brain:
         self.backend.cancel()
 
     def ask(self, question: str, character: Character | None, history: History | None,
-            screenshot_jpeg: bytes | None, on_delta=None, focus=None) -> Answer:
+            screenshot_jpeg: bytes | None, on_delta=None, focus=None, extra: str | None = None) -> Answer:
+        """extra: context for the prompt only; every heuristic below reads the player's own question"""
         """Blocking call; on_delta(visible_text_so_far) is invoked while the answer streams."""
         if not self.backend.exe:
             return Answer(error="not_installed")
         self.kb.ensure_drop_table()
         shots = screenshot_jpeg if isinstance(screenshot_jpeg, list) else [screenshot_jpeg] if screenshot_jpeg else []
-        has = (len(shots) - 1 or True) if shots else False      # True, or the number of detail tiles
-        prompt = build_prompt(question, character, history, self.kb, has, self.length, focus)
+        # True (one screenshot), or the number of detail tiles that follow it (an int, never 1 == True)
+        has = (len(shots) - 1 if len(shots) > 1 else True) if shots else False
+        prompt = build_prompt(question, character, history, self.kb, has, self.length, focus, extra)
         raw_delta = (lambda raw: on_delta(streamed_text(raw))) if on_delta else None
         result = self.backend.run(prompt, screenshot_jpeg, raw_delta)
         if result.error:
