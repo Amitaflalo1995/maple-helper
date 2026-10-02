@@ -60,7 +60,7 @@ STRINGS = {
     "note": {"he": "הערה", "en": "Note"},
     # last-session summary (in Hebrew the arrow points left: the text reads right to left)
     "exp_line": {"he": "{pct}% · נשארו {left} EXP ללבל הבא", "en": "{pct}% · {left} EXP to the next level"},
-    "exp_line_kills": {"he": "{pct}% · עוד {left} EXP, בערך {n} {mob}", "en": "{pct}% · {left} EXP to go, about {n} {mob}"},
+    "exp_line_kills": {"he": "{pct}% · נשארו {left} EXP ללבל הבא (כ-{n} הריגות של {mob})", "en": "{pct}% · {left} EXP to the next level (about {n} {mob} kills)"},
     "plan_what_now": {"he": "מה עכשיו?", "en": "What now?"},
     "what_now_tip": {"he": "מצלם את המסך ושואל מה הכי כדאי לעשות כרגע", "en": "Takes a screenshot and asks what's best to do right now"},
     "what_now_q": {"he": "מה הכי כדאי לי לעשות עכשיו? (לפי הדמות שלי, הקווסטים והמסך)",
