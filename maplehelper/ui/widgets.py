@@ -22,6 +22,26 @@ def _label(text: str = "", name: str | None = None, rich: bool = False, wrap: bo
     return lb
 
 
+def on_solid_background(pm: QPixmap, radius: float) -> QPixmap:
+    """A grabbed card drawn over the chat's own solid color: the card itself is see-through glass, and
+    pasted into Discord or WhatsApp it would be light text on nothing (unreadable in dark mode)."""
+    from PySide6.QtCore import QRectF
+    from PySide6.QtGui import QColor, QPainter, QPainterPath
+    from . import theme
+    out = QPixmap(pm.size())
+    out.setDevicePixelRatio(pm.devicePixelRatio())
+    out.fill(Qt.transparent)
+    p = QPainter(out)
+    p.setRenderHint(QPainter.Antialiasing)
+    size = pm.deviceIndependentSize()
+    path = QPainterPath()
+    path.addRoundedRect(QRectF(0, 0, size.width(), size.height()), radius, radius)
+    p.fillPath(path, QColor(*theme.P()["glass"]))        # opaque: the color under the glass in the chat
+    p.drawPixmap(0, 0, pm)
+    p.end()
+    return out
+
+
 class Bubble(QFrame):
     """A chat message. Direction is decided per paragraph, not by the UI language."""
 
@@ -31,15 +51,31 @@ class Bubble(QFrame):
         self.setObjectName("BubbleUser" if role == "user" else "BubbleBot")
         lay = QVBoxLayout(self)
         lay.setContentsMargins(13, 8, 13, 9)
+        self.tag_label = None
         if tag:
-            t = QLabel("↩ " + tag, objectName="BubbleTag")
-            lay.addWidget(t)
+            self.tag_label = QLabel("↩ " + tag, objectName="BubbleTag")
+            self.tag_label.setWordWrap(True)    # five tagged names must not stretch the bubble past the chat
+            lay.addWidget(self.tag_label)
         self.label = _label(rich=True)
         self.label.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
         lay.addWidget(self.label)
         self.set_text(text)
 
+    def fit_width(self, row_width: int) -> None:
+        """Your own messages: as wide as their text, up to ~78% of the feed. (Qt's word-wrap guess
+        makes a short question a tall, thin column.)"""
+        m = self.layout().contentsMargins()
+        fm = self.label.fontMetrics()
+        text_w = max((fm.horizontalAdvance(ln) for ln in (self._text or "").splitlines()), default=0) + 4
+        if self.tag_label:
+            text_w = max(text_w, self.tag_label.fontMetrics().horizontalAdvance(self.tag_label.text()) + 4)
+        cap = int(row_width * self.MAX_SHARE) - m.left() - m.right()
+        self.label.setMinimumWidth(max(0, min(text_w, cap)))
+
+    MAX_SHARE = 0.78
+
     def set_text(self, text: str) -> None:
+        self._text = text
         if not text:
             self.label.setText("")
             return
@@ -71,6 +107,7 @@ class BubbleRow(QWidget):
 
     def __init__(self, bubble: Bubble, ui_rtl: bool):
         super().__init__()
+        self.bubble = bubble
         lay = QHBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         # the layout mirrors in an RTL UI, so "trailing" is the left edge there
@@ -80,6 +117,11 @@ class BubbleRow(QWidget):
             lay.addWidget(bubble, 0)
         else:
             lay.addWidget(bubble, 1)
+
+    def resizeEvent(self, e):
+        super().resizeEvent(e)
+        if self.bubble.role == "user" and e.oldSize().width() != e.size().width():
+            self.bubble.fit_width(self.width())
 
 
 class SystemLine(QLabel):
@@ -167,17 +209,16 @@ class SessionCard(QFrame):
 
 # ------------------------------------------------------------------ entity cards
 
-CARD_FIELDS = {
-    "monster": [("Level", "level"), ("HP", "HP"), ("EXP", "EXP")],
-    "item": [("Level", "level"), ("Attack", "ATT"), ("Defense", "DEF")],
-}
-FIELD_LABELS_HE = {"level": "לבל", "HP": "HP", "EXP": "EXP", "ATT": "ATT", "DEF": "DEF"}
-CATEGORY_LABELS = {
-    "monster": ("מפלצת", "Monster"), "item": ("פריט", "Item"), "map": ("מפה", "Map"),
-    "npc": ("NPC", "NPC"), "quest": ("קווסט", "Quest"), "skill": ("סקיל", "Skill"),
-    "class": ("קלאס", "Class"), "guide": ("מדריך", "Guide"), "shop": ("חנות", "Shop"),
-    "crafting": ("Crafting", "Crafting"), "formula": ("נוסחה", "Formula"),
-}
+def card_subtitle(t, category: str, kind: str | None) -> str:
+    """'Monster', 'Item · Etc / Monster Drop': the category in the UI language, then the database's type
+    unless it only repeats the category (a monster's type is "Monster")."""
+    key = f"cat_{category}"
+    label = t(key) if t(key) != key else category
+    from ..i18n import STRINGS
+    names = {category.lower(), label.lower(), *(s.lower() for s in STRINGS.get(key, {}).values())}
+    if kind and kind.strip().lower() not in names:
+        return f"{label} · {kind}"
+    return label
 
 
 class _Selection(QObject):
@@ -245,9 +286,11 @@ class EntityCard(Selectable, QFrame):
 
     def __init__(self, kb: KnowledgeBase, key: str, lang: str):
         super().__init__()
+        from ..i18n import I18n
         self.setObjectName("Card")
         self._init_selectable(key)
-        self.setToolTip("לחצו כדי לשאול עליה" if lang == "he" else "Tap to ask about it")
+        self._t = t = I18n(lang)
+        self.setToolTip(t("card_ask_tip"))
         e = kb.get(key) or {}
         self.url = e.get("url")
         he = lang == "he"
@@ -273,17 +316,14 @@ class EntityCard(Selectable, QFrame):
         name.setAlignment(Qt.AlignLeft if not he else Qt.AlignRight)
         col.addWidget(name)
 
-        cat = e.get("category", "")
-        sub = CATEGORY_LABELS.get(cat, (cat, cat))[0 if he else 1]
-        if e.get("type"):
-            sub = f"{sub} · {e['type']}"
+        sub = card_subtitle(t, e.get("category", ""), e.get("type"))
         # in Hebrew every line starts on the right, even an all-English one like "NPC"
         side = (Qt.AlignRight if he else Qt.AlignLeft) | Qt.AlignAbsolute
         sub_label = _label(bidi.plain(sub, he), "CardSub")
         sub_label.setAlignment(side)
         col.addWidget(sub_label)
 
-        stats = self._stats(e, he)
+        stats = self._stats(e, t)
         if stats:
             stat_label = _label(bidi.plain(stats, he), "CardStat")
             stat_label.setAlignment(side)
@@ -293,8 +333,6 @@ class EntityCard(Selectable, QFrame):
         row.addLayout(col, 1)
         from PySide6.QtWidgets import QToolButton
         from . import theme
-        from ..i18n import I18n
-        self._t = I18n(lang)
         self._buttons = QWidget()
         bl = QVBoxLayout(self._buttons)
         bl.setContentsMargins(0, 0, 0, 0)
@@ -337,18 +375,18 @@ class EntityCard(Selectable, QFrame):
         self.setProperty("selected", "false")
         self.style().unpolish(self)
         self.style().polish(self)
-        pm = self.grab()
+        pm = on_solid_background(self.grab(), 14)
         self._buttons.setVisible(True)
         QApplication.clipboard().setPixmap(pm)
         QToolTip.showText(QCursor.pos(), self._t("copied"), self)
 
     @staticmethod
-    def _stats(e: dict, he: bool) -> str:
+    def _stats(e: dict, t) -> str:
         props = e.get("props") or {}
         bits = []
         for k in ("Level", "HP", "EXP", "Required Level", "Attack", "Weapon Attack", "Magic Attack", "Defense"):
             if k in props and props[k] not in (None, "", 0):
-                label = {"Level": "לבל", "Required Level": "לבל נדרש"}.get(k, k) if he else k
+                label = {"Level": t("card_level"), "Required Level": t("card_req_level")}.get(k, k)
                 bits.append(f"{label}: {props[k]}")
             if len(bits) >= 3:
                 break

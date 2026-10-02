@@ -116,14 +116,17 @@ def _hovered(link: str, lang: str):
         hide()
 
 
-def watch(label: QLabel, lang: str) -> QLabel:
-    """A rich-text label whose "?" links explain their term on hover and on click."""
+def watch(label: QLabel, lang: str | None = None) -> QLabel:
+    """A rich-text label whose "?" links explain their term on hover and on click.
+
+    The explanation is in the UI language at the moment it pops up (LANG), so a label made before a
+    language switch explains in the new one; `lang` is accepted for older callers and not used."""
     label.setTextFormat(Qt.RichText)
     label.setOpenExternalLinks(False)
     label.setMouseTracking(True)
     label.setTextInteractionFlags(Qt.LinksAccessibleByMouse)
-    label.linkHovered.connect(lambda link: _hovered(link, lang))
-    label.linkActivated.connect(lambda link: show(link, lang))
+    label.linkHovered.connect(lambda link: _hovered(link, LANG))
+    label.linkActivated.connect(lambda link: show(link, LANG))
     return label
 
 

@@ -7,7 +7,7 @@ from PySide6.QtCore import (QEasingCurve, QObject, QParallelAnimationGroup, QPoi
                             Qt, QThread, QTimer, Signal)
 from PySide6.QtGui import QAction, QGuiApplication, QIcon, QPainterPath, QPixmap
 from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QMenu, QPushButton,
-                               QScrollArea, QSizeGrip, QToolButton, QVBoxLayout, QWidget)
+                               QScrollArea, QSizeGrip, QSizePolicy, QToolButton, QVBoxLayout, QWidget)
 
 from .. import __version__, bidi, osapi, quick
 from ..brain import Answer, Brain
@@ -85,6 +85,71 @@ class FocusLineEdit(QLineEdit):
         self.focus_changed.emit(False)
 
 
+class ChipScroll(QScrollArea):
+    """One row of tag chips that scrolls sideways (the mouse wheel too) and never sets the window's width."""
+
+    def __init__(self):
+        super().__init__()
+        self.setWidgetResizable(True)
+        self.setFrameShape(QFrame.NoFrame)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Fixed)
+        self._to_end = False
+        self.horizontalScrollBar().rangeChanged.connect(self._on_range)
+
+    def show_end(self):
+        """Scroll to the newest chip, once the row has been laid out with it."""
+        self._to_end = True
+        self._on_range()
+
+    def _on_range(self, *_):
+        if self._to_end:
+            self.horizontalScrollBar().setValue(self.horizontalScrollBar().maximum())
+
+    def fit_height(self, chips: list[QWidget]):
+        # from the chips themselves: just added, they are not shown yet and the layout counts them as empty
+        self.setFixedHeight(max((c.sizeHint().height() for c in chips), default=0))
+
+    def wheelEvent(self, e):
+        # only a horizontal bar here: a plain (vertical) wheel turn moves it
+        d = e.angleDelta()
+        bar = self.horizontalScrollBar()
+        self._to_end = False
+        bar.setValue(bar.value() - (d.y() or d.x()))
+        e.accept()
+
+
+def chip_text(name: str, fm, width: int = 140) -> str:
+    """A long card name shortened with "…" so one chip can't take the whole row."""
+    return fm.elidedText(name, Qt.ElideRight, width)
+
+
+def stats_text(t, value: str) -> str:
+    """'acc 55, dmg_min 30' (the store's summary of a stats change) in the player's words."""
+    parts = []
+    for bit in str(value).split(", "):
+        key, _, num = bit.partition(" ")
+        label = t(f"stat_{key}")
+        parts.append(f"{label if label != f'stat_{key}' else key} {num}".strip())
+    return ", ".join(parts)
+
+
+def visible_rect(rect: QRect, screens: list[QRect]) -> QRect | None:
+    """`rect` moved fully onto the screen it is mostly on; None when it isn't on any screen (a monitor was
+    unplugged since it was saved)."""
+    best, area = None, 0
+    for s in screens:
+        r = s.intersected(rect)
+        if r.width() * r.height() > area:
+            best, area = s, r.width() * r.height()
+    if best is None:
+        return None
+    x = min(max(rect.x(), best.left()), best.right() - rect.width() + 1)
+    y = min(max(rect.y(), best.top()), best.bottom() - rect.height() + 1)
+    return QRect(x, y, rect.width(), rect.height())
+
+
 def _alive(w) -> bool:
     """False once Qt deleted the widget (e.g. the chat was cleared)."""
     try:
@@ -133,6 +198,8 @@ class Overlay(QWidget):
         self._session_started: float | None = None
         self.stats: SessionStats | None = None
         self._anim: QParallelAnimationGroup | None = None
+        self._growing = False                   # the open animation is scaling the window up
+        self._target_geometry = QRect()
         self.bubble = MiniBubble()
         self.bubble.clicked.connect(self.restore_from_bubble)
         self.bubble.moved.connect(lambda pt: self.settings.__setitem__("bubble_pos", {"x": pt.x(), "y": pt.y()}))
@@ -198,7 +265,6 @@ class Overlay(QWidget):
         self.history_btn.clicked.connect(self.history_requested.emit)
         tb.addWidget(self.history_btn)
         self.tools_btn = self._icon_button(theme.ICON["tools"])
-        self.tools_btn.setToolTip(self.t("tools"))
         self.tools_btn.clicked.connect(self.tools_requested.emit)
         tb.addWidget(self.tools_btn)
         self.guides_btn = self._icon_button(theme.ICON["book"])
@@ -274,9 +340,17 @@ class Overlay(QWidget):
         self.feed_lay.addStretch(1)
         self.scroll.setWidget(self.feed)
         lay.addWidget(self.scroll, 1)
-        self._follow = True          # keep the newest content in view (off once an answer outgrows the view)
+        # the open pinned list takes at most a share of the conversation's height, never all of it
+        self.pins_bar.room = lambda: self.scroll.height() + (self.pins_bar.scroll.height()
+                                                             if self.pins_bar.scroll.isVisible() else 0)
+        self._follow = True          # keep the newest content in view (off once the player scrolls up)
         self._anchor = None          # the answer being read: stay at its first line
-        self.scroll.verticalScrollBar().rangeChanged.connect(self._on_range)
+        self._reading = None         # the newest answer's bubble (AI or instant), for the anchor
+        self._reader_scrolled = False    # the player scrolled during this answer: leave the view alone
+        bar = self.scroll.verticalScrollBar()
+        bar.rangeChanged.connect(self._on_range)
+        # wheel, drag, keys and clicks on the bar (not our own setValue): the player takes over
+        bar.actionTriggered.connect(lambda _a: QTimer.singleShot(0, self._user_scrolled))
 
         # tagged cards: "asking about:" + a chip per card (tap a card again or its ✕ to untag)
         self.focus_keys: list[str] = []
@@ -286,13 +360,17 @@ class Overlay(QWidget):
         fb.setSpacing(6)
         self.focus_label = QLabel(objectName="FocusText")
         fb.addWidget(self.focus_label)
-        self.focus_chips = QHBoxLayout()
+        # the chips scroll sideways instead of widening the window (a row of 5 names is wider than the chat)
+        self.focus_scroll = ChipScroll()
+        chips = QWidget()
+        self.focus_chips = QHBoxLayout(chips)
+        self.focus_chips.setContentsMargins(0, 0, 0, 0)
         self.focus_chips.setSpacing(6)
-        fb.addLayout(self.focus_chips, 1)
-        clear_all = self._icon_button(theme.ICON["close"])
-        clear_all.setToolTip(self.t("untag_all"))
-        clear_all.clicked.connect(lambda: self.set_tags([]))
-        fb.addWidget(clear_all)
+        self.focus_scroll.setWidget(chips)
+        fb.addWidget(self.focus_scroll, 1)
+        self.clear_tags_btn = self._icon_button(theme.ICON["close"])
+        self.clear_tags_btn.clicked.connect(lambda: self.set_tags([]))
+        fb.addWidget(self.clear_tags_btn)
         self.focus_bar.hide()
         lay.addWidget(self.focus_bar)
         SELECTION.picked.connect(self.toggle_tag)
@@ -332,16 +410,27 @@ class Overlay(QWidget):
         self.grip.setFixedSize(16, 16)
         self.grip.setStyleSheet("background: transparent;")
 
-    def resizeEvent(self, e):
-        super().resizeEvent(e)
+    def _place_grip(self):
         m = self.SHADOW
         self.grip.move(self.width() - m - 18 if not self.t.rtl else m + 2, self.height() - m - 18)
+
+    def resizeEvent(self, e):
+        super().resizeEvent(e)
+        self._place_grip()
+        self.pins_bar.fit()             # the open pinned list stays a share of the conversation's height
         if self.isVisible():
             QTimer.singleShot(300, self.save_geometry)
 
     def apply_language(self):
+        from . import terms
         self.t = I18n(self.settings["language"] or "he")
+        terms.LANG = self.t.lang            # the "?" explanations follow the switch too
         self.setLayoutDirection(Qt.RightToLeft if self.t.rtl else Qt.LeftToRight)
+        self._place_grip()                  # the resize corner changes sides with the language
+        self.tools_btn.setToolTip(self.t("tools"))
+        self.clear_tags_btn.setToolTip(self.t("untag_all"))
+        if self.focus_keys:
+            self._render_tags()
         hk_voice = self.settings["hotkey_voice"]
         self._placeholder = self.t("input_placeholder").replace("F10", hk_voice)
         self.input.setPlaceholderText(bidi.plain(self._placeholder, self.t.rtl))
@@ -451,33 +540,47 @@ class Overlay(QWidget):
         self.settings["tips_dismissed"] = data
         self.refresh_plan()
 
+    def _is_busy(self) -> bool:
+        return self.busy or getattr(self, "_syncing", False)
+
+    def _say_busy(self):
+        """A question that can't go yet says so (once, not a line per Enter press)."""
+        line = getattr(self, "_busy_line", None)
+        if line is not None and _alive(line) and self.feed_lay.indexOf(line) == self.feed_lay.count() - 2:
+            return
+        self._busy_line = SystemLine(self.t("busy_wait"))
+        self._add_widget(self._busy_line)
+
     def ask_with_screenshot(self, question: str):
         """Like "What now?": a fresh screenshot of the game, then the question."""
+        if self._is_busy():               # the question would be dropped: don't flash the chat for a shot
+            self._say_busy()
+            return
         self.setWindowOpacity(0.0)
         QTimer.singleShot(120, lambda: self._capture_and_ask(question))
 
     def _capture_and_ask(self, question: str):
-        hwnd = osapi.find_game_window()
-        if hwnd:
-            self.game_hwnd = hwnd
-            self.shot = self.shot_provider(hwnd) if self.shot_provider else osapi.capture_game(hwnd)
-            self.shot_used = False
-        self.setWindowOpacity(1.0)
+        self._fresh_shot()
         self.ask(question)
 
     def what_now(self):
         """'What now?': a fresh screenshot and the question, so Claude sees where the player is."""
-        self.setWindowOpacity(0.0)        # the chat is part of the screen: step aside for the shot
-        QTimer.singleShot(120, self._what_now_capture)
+        self.ask_with_screenshot(self.t("what_now_q"))
 
-    def _what_now_capture(self):
-        hwnd = osapi.find_game_window()
-        if hwnd:
-            self.game_hwnd = hwnd
-            self.shot = self.shot_provider(hwnd) if self.shot_provider else osapi.capture_game(hwnd)
-            self.shot_used = False
-        self.setWindowOpacity(1.0)
-        self.ask(self.t("what_now_q"))
+    def _fresh_shot(self):
+        """Take the game screenshot while the chat steps aside; the chat comes back whatever happens
+        (an invisible always-on-top window would swallow every click on the game)."""
+        try:
+            hwnd = osapi.find_game_window()
+            if hwnd:
+                self.game_hwnd = hwnd
+                self.shot = self.shot_provider(hwnd) if self.shot_provider else osapi.capture_game(hwnd)
+                self.shot_used = False
+        except Exception:      # noqa: BLE001 - no screenshot is better than a stuck, invisible chat
+            import logging
+            logging.getLogger(__name__).warning("screenshot failed", exc_info=True)
+        finally:
+            self.setWindowOpacity(1.0)
 
     def character_menu(self):
         """Click the character card: pick another character or add one, right from the chat."""
@@ -565,7 +668,8 @@ class Overlay(QWidget):
         self.setGeometry(a.right() - w - 24, a.top() + 60, w, h)
 
     def save_geometry(self):
-        g = self.geometry()
+        # mid-open the window is still scaled down: remember the size it is growing to
+        g = self._target_geometry if self._growing else self.geometry()
         self.settings["window"] = {"x": g.x(), "y": g.y(), "w": g.width(), "h": g.height()}
 
     # ------------------------------------------------------------------ show / hide
@@ -574,6 +678,10 @@ class Overlay(QWidget):
         """The material arrives: opacity and a small scale settle together (critically damped, no bounce)."""
         if self._anim:
             self._anim.stop()           # interruptible: start from wherever it is now
+        if self._growing:
+            # stopped mid-grow (a quick F9 double-tap): the real size first, or the shrunken one sticks
+            self._growing = False
+            self.setGeometry(self._target_geometry)
         g = self.geometry()
         small = QRect(g.x() + round(g.width() * 0.015), g.y() + round(g.height() * 0.015),
                       round(g.width() * 0.97), round(g.height() * 0.97))
@@ -593,6 +701,8 @@ class Overlay(QWidget):
             grow.setEndValue(g)
             grow.setEasingCurve(QEasingCurve.OutCubic)
             grp.addAnimation(grow)
+            self._growing = True
+            grp.finished.connect(lambda: setattr(self, "_growing", False))
         if on_done:
             grp.finished.connect(on_done)
         self._anim = grp
@@ -648,8 +758,11 @@ class Overlay(QWidget):
     def minimize(self):
         """Shrink to the bubble, which appears where the chat's header was."""
         pos = self.settings["bubble_pos"]
-        if pos:
-            self.bubble.move(pos["x"], pos["y"])
+        # a saved spot on a monitor that is gone (or half off one) would hide the only way back
+        spot = visible_rect(QRect(pos["x"], pos["y"], self.bubble.width(), self.bubble.height()),
+                            [s.availableGeometry() for s in QGuiApplication.screens()]) if pos else None
+        if spot:
+            self.bubble.move(spot.topLeft())
         else:
             g = self.geometry()
             x = g.left() + self.SHADOW if self.t.rtl else g.right() - self.bubble.width() - self.SHADOW
@@ -658,11 +771,19 @@ class Overlay(QWidget):
         self.bubble.show()
         self.bubble.raise_()
 
+    def _safe_shot(self, hwnd):
+        """A failed capture opens the chat without a screenshot rather than not at all."""
+        try:
+            return self.shot_provider(hwnd) if self.shot_provider else None
+        except Exception:      # noqa: BLE001
+            import logging
+            logging.getLogger(__name__).warning("screenshot failed", exc_info=True)
+            return None
+
     def restore_from_bubble(self):
         self.bubble.hide()
         hwnd = osapi.find_game_window()
-        shot = self.shot_provider(hwnd) if self.shot_provider else None
-        self.open_overlay(shot, hwnd)
+        self.open_overlay(self._safe_shot(hwnd), hwnd)
 
     def toggle(self, shot_provider):
         self.shot_provider = shot_provider
@@ -671,7 +792,7 @@ class Overlay(QWidget):
         else:
             self.bubble.hide()
             hwnd = osapi.find_game_window()
-            self.open_overlay(shot_provider(hwnd), hwnd)
+            self.open_overlay(self._safe_shot(hwnd), hwnd)
 
     def keyPressEvent(self, e):
         # Esc deliberately does nothing: F9 or the window buttons close the chat.
@@ -682,10 +803,11 @@ class Overlay(QWidget):
     def _update_shot_hint(self):
         """Fresh screenshot: it goes with the next question. Used: say so, with a one-click retake.
         No game open: explain how screenshots work, so the player knows before it matters."""
+        hk = self.settings["hotkey_toggle"]
         if not self.game_hwnd and not self.shot:
-            text = self.t("shot_hint_no_game")
+            text = self.t("shot_hint_no_game").replace("F9", hk)
         elif self.shot and not self.shot_used:
-            text = self.t("shot_hint_ready")
+            text = self.t("shot_hint_ready").replace("F9", hk)
         else:
             text = self.t("shot_hint_used") + f" <a href='shot:now' style='color:{theme.ORANGE_DEEP}; " \
                                                f"text-decoration:none;'><b>{self.t('shot_hint_retake')}</b></a>"
@@ -702,11 +824,15 @@ class Overlay(QWidget):
         QTimer.singleShot(120, self._do_recapture)
 
     def _do_recapture(self):
-        hwnd = osapi.find_game_window() or self.game_hwnd
-        self.game_hwnd = hwnd
-        self.shot = osapi.capture_game(hwnd) if hwnd else None
+        try:
+            hwnd = osapi.find_game_window() or self.game_hwnd
+            self.game_hwnd = hwnd
+            self.shot = osapi.capture_game(hwnd) if hwnd else None
+        except Exception:      # noqa: BLE001 - the chat must come back even when the capture fails
+            self.shot = None
+        finally:
+            self.setWindowOpacity(1.0)
         self.shot_used = False
-        self.setWindowOpacity(1.0)
         self.add_system("✓ " + self.t("recaptured") if self.shot else self.t("sync_no_game"))
         self._update_shot_hint()
 
@@ -728,6 +854,7 @@ class Overlay(QWidget):
     def clear_feed(self):
         self._anchor = None
         self._pending_bubble = None
+        self._reading = None
         while self.feed_lay.count() > 1:
             w = self.feed_lay.takeAt(0).widget()
             if w:
@@ -745,25 +872,39 @@ class Overlay(QWidget):
 
     def set_tags(self, keys: list[str]):
         """Tag cards to ask about; the bar shows a chip per card."""
+        added = [k for k in keys if k not in self.focus_keys]
         self.focus_keys = [k for k in keys if self.kb.get(k)]
+        self._render_tags()
+        if self.focus_keys:
+            self.input.setFocus()
+        if added and self.focus_keys and self.focus_keys[-1] in added:     # the new chip may be past the edge
+            self.focus_scroll.show_end()
+        SELECTION.changed.emit(self.focus_keys)
+
+    def _render_tags(self):
+        """The chips, in the current language (a language switch draws them again)."""
         while self.focus_chips.count():
             w = self.focus_chips.takeAt(0).widget()
             if w:
+                w.hide()            # gone now, not at the next event loop (it would sit over the new chips)
                 w.deleteLater()
+        chips = []
         for k in self.focus_keys:
+            name = self.kb.get(k)["name"]
             chip = QPushButton(objectName="TagChip")
             chip.setIcon(QIcon(str(self.kb.picture(k))))
-            chip.setText(self.kb.get(k)["name"] + "  ✕")
+            chip.ensurePolished()           # the stylesheet's font, so the "…" lands where it is drawn
+            chip.setText(chip_text(name, chip.fontMetrics()) + "  ✕")
             chip.setCursor(Qt.PointingHandCursor)
-            chip.setToolTip(self.t("untag"))
+            chip.setToolTip(f"{name} · {self.t('untag')}")
             chip.clicked.connect(lambda _=False, k=k: self.toggle_tag(k))
             self.focus_chips.addWidget(chip)
+            chips.append(chip)
         self.focus_chips.addStretch(1)
+        self.focus_scroll.fit_height(chips)
         self.focus_label.setText(bidi.plain(self.t("asking_about_short"), self.t.rtl))
+        self.clear_tags_btn.setToolTip(self.t("untag_all"))
         self.focus_bar.setVisible(bool(self.focus_keys))
-        if self.focus_keys:
-            self.input.setFocus()
-        SELECTION.changed.emit(self.focus_keys)
 
     def set_focus(self, key: str):   # kept for callers that tag a single card
         self.set_tags([key] if key else [])
@@ -830,7 +971,9 @@ class Overlay(QWidget):
 
     def _send_typed(self):
         q = self.input.text().strip()
-        if q and self.ask(q):
+        if q and self._is_busy():
+            self._say_busy()            # the text stays in the field for when the answer is done
+        elif q and self.ask(q):
             self.input.clear()
 
     def ask(self, question: str, force_claude: bool = False) -> bool:
@@ -862,9 +1005,8 @@ class Overlay(QWidget):
         self._update_shot_hint()
         if history:   # again for "Ask Claude anyway", so history search pairs the question with this answer
             history.append("user", f"[about {focus_name}] {question}" if focus_name else question)
-        self._anchor = None
-        self._follow = True
         self._pending_bubble = self.add_bubble(self.t("thinking"), "assistant")
+        self._start_reading(self._pending_bubble)
         self.busy = True
         self.send_btn.setEnabled(False)
 
@@ -878,6 +1020,9 @@ class Overlay(QWidget):
         self._pending_history = history
         self._worker.done.connect(self._on_done_main)
         self._worker.done.connect(self._thread.quit)
+        # one thread per question: free it (and its worker) once it ends, not when the app quits
+        self._thread.finished.connect(self._worker.deleteLater)
+        self._thread.finished.connect(self._thread.deleteLater)
         self._thread.start()
         return True
 
@@ -924,9 +1069,8 @@ class Overlay(QWidget):
 
     def _show_quick(self, qa, question: str, history):
         """An instant answer from the KB, with the way to Claude one tap away."""
-        self._anchor = None
-        self._follow = True
         b = self.add_bubble(qa.text, "assistant")
+        self._start_reading(b)
         b.add_pin(lambda: self.pin_answer(question, qa.text), self.t("pin"))
         row = QWidget()
         rl = QHBoxLayout(row)
@@ -946,10 +1090,20 @@ class Overlay(QWidget):
             self._add_widget(DropGroupCard(self.kb, g["monster"], g["items"]))
         if qa.entities and not qa.drop_groups:     # the drop groups already show the item
             self.add_cards(qa.entities)
+        # like an AI answer: a long one stays at its first line instead of scrolling past it
+        QTimer.singleShot(0, self._keep_answer_readable)
+        QTimer.singleShot(250, self._keep_answer_readable)   # after the cards' layout settles
+
+    def _user_scrolled(self):
+        """Back at the bottom: follow new content again. Anywhere else: stay where the player put it."""
+        bar = self.scroll.verticalScrollBar()
+        self._anchor = None
+        self._reader_scrolled = True
+        self._follow = bar.value() >= bar.maximum() - 24
 
     def _on_range(self, _lo: int, hi: int):
         bar = self.scroll.verticalScrollBar()
-        if self._anchor is not None:
+        if self._anchor is not None and _alive(self._anchor):
             bar.setValue(min(hi, self._anchor_top()))
         elif self._follow:
             bar.setValue(hi)
@@ -958,11 +1112,19 @@ class Overlay(QWidget):
         row = self._anchor
         return max(0, row.mapTo(self.feed, row.rect().topLeft()).y() - 8) if row else 0
 
+    def _start_reading(self, bubble):
+        """A new answer: show it as it grows, until the player scrolls."""
+        self._anchor = None
+        self._follow = True
+        self._reader_scrolled = False
+        self._reading = bubble
+
     def _keep_answer_readable(self):
         """Once the answer (plus what follows it) is taller than the view, pin its first line to the top."""
-        if not self._pending_bubble:
+        b = self._reading
+        if b is None or not _alive(b) or self._reader_scrolled:
             return
-        row = self._pending_bubble.parentWidget()
+        row = b.parentWidget()
         top = row.mapTo(self.feed, row.rect().topLeft()).y()
         below = self.feed.height() - top
         if below > self.scroll.viewport().height() - 16:
@@ -1011,6 +1173,8 @@ class Overlay(QWidget):
         self._sync_thread.started.connect(self._sync_worker.run)
         self._sync_worker.done.connect(self._on_sync_done)      # bound method → runs on the GUI thread
         self._sync_worker.done.connect(self._sync_thread.quit)
+        self._sync_thread.finished.connect(self._sync_worker.deleteLater)
+        self._sync_thread.finished.connect(self._sync_thread.deleteLater)
         self._sync_thread.start()
 
     def _on_sync_done(self, ans: Answer):
@@ -1041,6 +1205,7 @@ class Overlay(QWidget):
         self.busy = False
         if self._pending_bubble is None:          # the feed was cleared meanwhile
             self._pending_bubble = self.add_bubble("", "assistant")
+            self._start_reading(self._pending_bubble)
         self._on_text(self.input.text())
         self._note_usage(ans.limits)
         self._read_limits_after_answer()
@@ -1120,7 +1285,8 @@ class Overlay(QWidget):
         labels = {"level": "level", "job": "job", "base_class": "job", "map": "map",
                   "quest+": "quest_started", "quest-": "quest_done", "note": "note", "stats": "stats_word"}
         for field, value in changes:
-            self.add_system(self.t("profile_updated", what=f"{self.t(labels[field])} {value}"))
+            shown = stats_text(self.t, value) if field == "stats" else value     # not "dmg_min 30"
+            self.add_system(self.t("profile_updated", what=f"{self.t(labels[field])} {shown}"))
             if self.stats:
                 self.stats.change(self.profiles.active, field, value)
         if changes:

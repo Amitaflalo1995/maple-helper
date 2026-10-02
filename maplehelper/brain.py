@@ -194,6 +194,17 @@ def split_meta(raw: str) -> tuple[str, dict]:
     return text.strip(), data
 
 
+def streamed_text(raw: str) -> str:
+    """The visible part of a reply still streaming: before @@META@@, and without a marker that has only
+    partly arrived (the stream can end a chunk on "…answer.\\n@@ME")."""
+    text = raw.split(META)[0]
+    for n in range(len(META) - 1, 0, -1):
+        if text.endswith(META[:n]):
+            text = text[:-n]
+            break
+    return text.strip()
+
+
 class Brain:
     def __init__(self, kb: KnowledgeBase, provider: str = providers.DEFAULT, model: str | None = None,
                  length: str = "short", api_key: str | None = None):
@@ -239,7 +250,7 @@ class Brain:
             return Answer(error="not_installed")
         self.kb.ensure_drop_table()
         prompt = build_prompt(question, character, history, self.kb, screenshot_jpeg is not None, self.length, focus)
-        raw_delta = (lambda raw: on_delta(raw.split(META)[0].strip())) if on_delta else None
+        raw_delta = (lambda raw: on_delta(streamed_text(raw))) if on_delta else None
         result = self.backend.run(prompt, screenshot_jpeg, raw_delta)
         if result.error:
             return Answer(error=result.error, limits=result.limits)

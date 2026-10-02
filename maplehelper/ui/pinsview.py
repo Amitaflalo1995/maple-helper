@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import time
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import QSize, Qt, QTimer, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QLineEdit, QProgressBar, QPushButton, QScrollArea,
                                QToolButton, QVBoxLayout, QWidget)
@@ -38,10 +38,13 @@ class PinsBar(QFrame):
         self.col.addWidget(self.head)
         self.body = QWidget()
         self.body_lay = QVBoxLayout(self.body)
-        self.body_lay.setContentsMargins(0, 0, 0, 0)
+        self.body_lay.setContentsMargins(0, 0, 6, 0)
         self.body_lay.setSpacing(8)
-        self.body.hide()
-        self.col.addWidget(self.body)
+        # long answers scroll inside the bar: open, it takes at most ~40% of the chat, never the whole feed
+        self.scroll = _FitScroll(on_width=self.fit)
+        self.scroll.setWidget(self.body)
+        self.scroll.hide()
+        self.col.addWidget(self.scroll)
         self.hide()
         self._items: list[dict] = []
         self._t = I18n("he")
@@ -74,14 +77,56 @@ class PinsBar(QFrame):
             bl.addLayout(top)
             bl.addWidget(_answer_label(p["a"]))
             self.body_lay.addWidget(box)
+        self.fit()
 
     def _refresh_head(self):
-        arrow = "▴" if self.body.isVisible() else "▾"
+        arrow = "▴" if self.scroll.isVisible() else "▾"
         self.head.setText(bidi.plain(f"📌 {self._t('pinned', n=len(self._items))} {arrow}", getattr(self, "_rtl", True)))
 
     def _toggle(self):
-        self.body.setVisible(not self.body.isVisible())
+        self.scroll.setVisible(not self.scroll.isVisible())
         self._refresh_head()
+        self.fit()
+        QTimer.singleShot(0, self.fit)      # again once the chat has made room for it
+
+    MAX_SHARE = 0.4      # of the room it shares with the conversation
+    room = None          # the chat sets it: px that the open list and the conversation share
+
+    def fit(self):
+        """As tall as the pinned answers, up to MAX_SHARE of the room; the rest scrolls."""
+        if self.scroll.isHidden():
+            return
+        room = self.room() if self.room else self.window().height()
+        cap = max(80, int(room * self.MAX_SHARE))
+        w = self.scroll.viewport().width() or self.width()
+        lay = self.body.layout()
+        want = lay.heightForWidth(w) if lay.hasHeightForWidth() else self.body.sizeHint().height()
+        self.scroll.want = min(max(want, 0), cap)
+        self.scroll.setMinimumHeight(min(48, self.scroll.want))
+        self.scroll.setMaximumHeight(self.scroll.want)
+        self.scroll.updateGeometry()
+
+
+
+class _FitScroll(QScrollArea):
+    """A scroll area that asks for exactly `want` pixels of height (and can shrink when the window is short)."""
+
+    want = 0
+
+    def __init__(self, on_width=None):
+        super().__init__()
+        self._on_width = on_width
+        self.setWidgetResizable(True)
+        self.setFrameShape(QFrame.NoFrame)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+    def sizeHint(self):
+        return QSize(super().sizeHint().width(), self.want)
+
+    def resizeEvent(self, e):
+        super().resizeEvent(e)
+        if self._on_width and e.oldSize().width() != e.size().width():   # wrapped text: new width, new height
+            self._on_width()
 
 
 class HistoryDialog(GlassDialog):
@@ -193,4 +238,5 @@ def character_card_image(c, avatar, kb, progress: dict | None, t) -> QPixmap:
     lay.addLayout(col, 1)
     w.adjustSize()
     w.ensurePolished()
-    return w.grab()
+    from .widgets import on_solid_background
+    return on_solid_background(w.grab(), 18)
