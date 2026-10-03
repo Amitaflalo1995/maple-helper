@@ -186,6 +186,11 @@ def type_into_console(pid: int, text: str) -> bool:
                 k32.AttachConsole(-1)                  # ATTACH_PARENT_PROCESS: back to the terminal it ran in
 
 
+def login_waiting() -> bool:
+    """A sign-in started and still waiting for the browser (a second click must not start another)."""
+    return _login is not None and _login.poll() is None
+
+
 def stop_login() -> None:
     """End a sign-in that's still waiting for the browser (the player gave up or closed the window)."""
     global _login

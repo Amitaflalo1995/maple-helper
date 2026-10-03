@@ -385,3 +385,32 @@ def test_brain_finds_a_cli_installed_after_it_started(kb, monkeypatch):
     assert not b.available()
     found[0] = __file__                      # installed from Settings meanwhile
     assert b.available() and b.backend.exe == __file__
+
+
+def test_a_second_sign_in_click_does_not_open_a_second_browser(env, monkeypatch):
+    """Grok's sign-in opened the browser twice: "Sign in" signed out first (seconds), and a second click meanwhile
+    started a second sign-in. Signed out, it now goes straight to the sign-in, and a waiting one isn't restarted."""
+    from maplehelper import providers
+    from maplehelper.providers import base
+    from maplehelper.ui.dialogs import SettingsDialog
+    s, profiles, kb = env
+    s["provider"] = "codex"
+    starts, logouts = [], []
+
+    class Waiting:
+        returncode = None
+
+        def poll(self):
+            return None
+
+        def kill(self):
+            pass
+    monkeypatch.setattr(type(providers.get("codex")), "login",
+                        lambda self: starts.append(1) or setattr(base, "_login", Waiting()) or base._login)
+    monkeypatch.setattr(type(providers.get("codex")), "logout", lambda self: logouts.append(1) or True)
+    dlg = SettingsDialog(s, profiles, kb, lambda *_: "")
+    dlg._on_account({"status": "logged_out", "email": None, "provider": "codex"})
+    dlg._switch_account()
+    dlg._switch_account()                    # a second click while the first waits for the browser
+    assert starts == [1] and logouts == []
+    base._login = None

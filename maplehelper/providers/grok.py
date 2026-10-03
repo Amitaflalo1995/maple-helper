@@ -10,8 +10,8 @@ locked down:
   * reads only in the knowledge base and the screenshot folder: on Windows a PreToolUse hook of ours
     denies every other path (Grok's own read_file reads anything otherwise, its sandbox doesn't apply
     there); on macOS the "strict" sandbox profile.
-Sign-in: `grok login --device-auth` prints a link that already carries the code; the app opens it and
-waits for the player to approve in the browser (no code to paste). The sign-in lives in our home.
+Sign-in: `grok login --device-auth` opens a link that already carries the code in the browser (the app
+opens it only when grok says it couldn't) and waits for the player to approve there (no code to paste). The sign-in lives in our home.
 """
 from __future__ import annotations
 
@@ -350,14 +350,17 @@ class Grok(Provider):
         if not exe:
             return None
         grok_home().mkdir(parents=True, exist_ok=True)
-        opened = threading.Event()
+        url = []
 
         def on_line(text: str):
+            # grok opens the link in the browser itself (the app opening it too made two tabs); only when it
+            # says it couldn't does the app open it
             m = LOGIN_URL.search(text)
-            if m and not opened.is_set():
-                opened.set()
+            if m and not url:
+                url.append(m.group(0))
+            elif "could not open browser" in text.lower() and url:
                 import webbrowser
-                webbrowser.open(m.group(0))
+                webbrowser.open(url[0])
         return base.open_login(exe, ["login", "--device-auth"], env(), cwd=str(home()), on_line=on_line)
 
     def install(self) -> Installer:

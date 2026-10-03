@@ -155,9 +155,11 @@ class TestAccount:
         assert providers.get("grok").login() == "proc"
         assert seen["args"] == ["login", "--device-auth"] and seen["env"]["GROK_HOME"] == str(home / ".grok")
         url = "https://accounts.x.ai/oauth2/device?user_code=ABCD-1234"
-        for line in ("To sign in, open this URL in your browser:", url, url):
+        for line in ("To sign in, open this URL in your browser:", url, "Confirm this code in your browser:"):
             seen["on_line"](line)
-        assert opened == [url]
+        assert opened == []                     # grok opens it itself: the app opening it too made two tabs
+        seen["on_line"]("  (Could not open browser automatically — open the URL above manually.)")
+        assert opened == [url]                  # only when grok couldn't
 
 
 class FakePopen:
@@ -211,10 +213,12 @@ class TestBackend:
 
     def test_api_key_and_summary(self, kb, home, monkeypatch):
         b = self.make(kb, monkeypatch, stream(START, delta("• Hunt"), OK), api_key="xai-1")
+        monkeypatch.setattr(grok, "_models_cache", [("grok-4.6", "grok-4.6"), ("grok-4.6-fast", "grok-4.6-fast")])
         assert b.backend.summarize("Summarize.", "long text") == "• Hunt"
         p = FakePopen.calls[0]
         assert p.kw["env"]["XAI_API_KEY"] == "xai-1" and p.cmd[p.cmd.index("--system-prompt-override") + 1] == "Summarize."
         assert "read_file" in p.cmd[p.cmd.index("--disallowed-tools") + 1]       # a summary reads nothing
+        assert p.cmd[p.cmd.index("--model") + 1] == "grok-4.6-fast"              # on the light model
 
     def test_not_installed(self, kb, home, monkeypatch):
         b = self.make(kb, monkeypatch)

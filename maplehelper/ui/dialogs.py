@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (QButtonGroup, QFrame, QGridLayout, QHBoxLayout, Q
                                QScrollArea, QSizePolicy, QStackedWidget, QToolButton, QVBoxLayout, QWidget)
 
 from .. import bidi, providers
-from ..providers.base import login_failed, stop_login
+from ..providers.base import login_failed, login_waiting, stop_login
 from .controls import AdaptiveRow, FlowLayout, Section, Segmented, Select, Stepper, Switch, rtl_buttons
 from .glass import GlassDialog, no_default_buttons
 from ..i18n import I18n
@@ -592,6 +592,8 @@ class Onboarding(GlassDialog):
         self._update_nav()
 
     def _start_login(self):
+        if login_waiting():
+            return                 # one is waiting for the browser already: a second opened another tab
         self._begin_sign_in()
         self._login_proc = self._ai().login()
         if self._login_proc is None:
@@ -1237,11 +1239,18 @@ class SettingsDialog(GlassDialog):
         Signed in, it asks first like "Sign out" (both end the current sign-in); signed out, the same button is
         "Sign in" and just goes."""
         t, ai = self.t, self._ai()
-        if self._account_status == "ok" or self.settings.api_key_mode(ai.name):
-            dlg = ConfirmDialog(t("account_switch"), t.p("account_switch_confirm", ai.name), t("account_switch"),
-                                t("cancel"), t.rtl, self.stylesheet_fn(1.0), danger=False)
-            if not dlg.exec():
-                return
+        if login_waiting():
+            return                 # a sign-in is waiting for the browser already: a second opened another tab
+        connected = self._account_status == "ok" or self.settings.api_key_mode(ai.name)
+        if not connected:
+            # signed out: nothing to sign out of first (that took seconds, and a second click meanwhile started
+            # a second sign-in, each opening its own browser tab)
+            self._start_login()
+            return
+        dlg = ConfirmDialog(t("account_switch"), t.p("account_switch_confirm", ai.name), t("account_switch"),
+                            t("cancel"), t.rtl, self.stylesheet_fn(1.0), danger=False)
+        if not dlg.exec():
+            return
         self.switch_btn.setEnabled(False)
         self.logout_btn.hide()
         self._set_account_text(self.t("account_signing_out"))
