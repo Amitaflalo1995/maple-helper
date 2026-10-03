@@ -10,6 +10,8 @@ import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 
+from . import sources
+
 FM_URL = "https://meowdb.com/msclassic/api/market-listings/browse"
 FM_PAGE = "https://meowdb.com/msclassic/free-market"
 UA = "Maple Helper (https://github.com/Maple-Helper/maple-helper)"
@@ -23,13 +25,18 @@ class NpcPrices:
     shops: list[tuple[str, str, int]] = field(default_factory=list)   # (NPC, where, price), cheapest first
     unpriced: list[tuple[str, str]] = field(default_factory=list)     # (NPC, where): sells it, no price in the page
     ranks: dict[tuple[str, str], str] = field(default_factory=dict)   # (NPC, where) -> citizen grade its price needs
-    # (NPC, where) whose price the KB labels "COT2 prices": the second closed test's price, not a confirmed launch
-    # price (the release guide: "Do not turn COT2 omissions into launch facts")
-    cot2: set[tuple[str, str]] = field(default_factory=set)
+    # (NPC, where) -> the build the KB labels its price with ("COT2 prices": the second closed test's price, not a
+    # confirmed launch price; the release guide: "Do not turn COT2 omissions into launch facts"). Read from the
+    # page, so "Launch prices" after launch is that label with no app update.
+    labels: dict[tuple[str, str], str] = field(default_factory=dict)
 
     def test_price(self, shop: tuple) -> bool:
-        """A shop (NPC, where, ...) whose price is one from the COT2 test."""
-        return tuple(shop[:2]) in self.cot2
+        """A shop (NPC, where, ...) whose price the KB labels with a build."""
+        return tuple(shop[:2]) in self.labels
+
+    def source(self, shop: tuple) -> str:
+        """The source tag of a shop's price: its build label, else MeowDB's own (sources.py)."""
+        return self.labels.get(tuple(shop[:2])) or sources.MEOWDB
 
 
 def _int(text: str) -> int | None:
@@ -38,8 +45,7 @@ def _int(text: str) -> int | None:
 
 
 # the price line under a town shop: "COT2 prices Citizen of Honor +" (that citizen grade and up; the KB's item pages,
-# e.g. pages/item/274.md, Max City General Store), or a bare "COT2 prices"
-_RANK = re.compile(r"^COT2 prices\s+(.+?)\s*\+?\s*$")
+# e.g. pages/item/274.md, Max City General Store), or a bare "COT2 prices" (sources.price_label reads the build)
 
 
 def npc_prices(kb, key: str) -> NpcPrices:
@@ -58,12 +64,13 @@ def npc_prices(kb, key: str) -> NpcPrices:
             elif npc:
                 out.unpriced.append((npc, where))
             nxt = lines[i + 4] if i + 4 < len(lines) else ""
-            if nxt.startswith("COT2 prices"):
-                out.cot2.add((npc, where))
-            rank = _RANK.match(nxt)
-            if rank:
-                out.ranks[(npc, where)] = rank.group(1)
-            i += 5 if nxt.startswith("COT2") else 4
+            label = sources.price_label(nxt)
+            if label:
+                out.labels[(npc, where)] = label
+                rank = sources.price_rest(nxt).rstrip("+ ").strip()
+                if rank and not rank.endswith("→"):
+                    out.ranks[(npc, where)] = rank
+            i += 5 if label else 4
     out.shops.sort(key=lambda s: s[2])
     return out
 

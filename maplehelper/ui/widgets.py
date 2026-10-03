@@ -288,6 +288,69 @@ class SessionCard(QFrame):
         return lb
 
 
+# ------------------------------------------------------------------ source and "updated" chips
+
+def tip_html(text: str, rtl: bool) -> str:
+    """A tooltip, line by line in the UI's direction (an English change line inside stays one block)."""
+    return bidi.to_html(text, "rtl" if rtl else "ltr")
+
+
+def source_tag(t, source: str, stamp=None) -> QLabel:
+    """A small chip saying where a datum comes from ("COT2", "MSEA", "קהילה"); the tooltip says what that means,
+    and for a build's values what changed from the build before ("ACC 62 → 64 (COT1 → COT2)")."""
+    from .. import sources
+    lb = QLabel(bidi.plain(sources.tag(t, source), t.rtl), objectName="SourceTag")
+    lb.setAlignment(Qt.AlignCenter)
+    lb.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    text = sources.stamp_tip(t, source, stamp)
+    lb.setToolTip(tip_html(text, t.rtl))
+    lb.setAccessibleName(f"{sources.tag(t, source)}: {text}")
+    return lb
+
+
+def source_tags(t, srcs, stamp=None) -> list[QLabel]:
+    """One chip per distinct source, in the order given."""
+    return [source_tag(t, s, stamp) for s in dict.fromkeys(s for s in srcs if s)]
+
+
+def updated_tag(t, kb, key: str) -> QLabel | None:
+    """The "Updated" chip of an entity a KB update changed in the last week (recent.py), with what changed."""
+    from .. import recent
+    r = recent.of(kb, key) if key else None
+    if not r or not recent.lines(t, kb, r):
+        return None
+    lb = QLabel(bidi.plain(t("updated_tag"), t.rtl), objectName="UpdatedTag")
+    lb.setAlignment(Qt.AlignCenter)
+    lb.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    text = recent.tip(t, kb, r)
+    lb.setToolTip(tip_html(text, t.rtl))
+    lb.setAccessibleName(text)
+    return lb
+
+
+def chip_row(chips: list[QWidget], text: QWidget | None = None, spacing: int = 6, lead: bool = False) -> QHBoxLayout:
+    """[text] [chip] [chip], anchored at the reading start (mirrored in Hebrew): the chips follow the data they
+    label, never pushed to the far edge. lead=True puts the chips first, before a long line that wraps (the line
+    then takes the rest of the width; after it, a wrapping line left the chips nowhere fixed)."""
+    row = QHBoxLayout()
+    row.setContentsMargins(0, 0, 0, 0)
+    row.setSpacing(spacing)
+    if lead:
+        for c in chips:
+            row.addWidget(c, 0, Qt.AlignTop)
+        if text is not None:
+            row.addWidget(text, 1)
+        else:
+            row.addStretch(1)
+        return row
+    if text is not None:
+        row.addWidget(text, 0, Qt.AlignVCenter)
+    for c in chips:
+        row.addWidget(c, 0, Qt.AlignVCenter)
+    row.addStretch(1)
+    return row
+
+
 # ------------------------------------------------------------------ entity cards
 
 def card_subtitle(t, category: str, kind: str | None) -> str:
@@ -419,10 +482,18 @@ class EntityCard(Selectable, QFrame):
         col.addWidget(sub_label)
 
         stats = self._stats(e, t)
+        # the stat line says where its numbers come from (the page's build, "COT2", else MeowDB's own), and an
+        # entity a KB update changed this week says so: on the stat line, else under the subtitle
+        from .. import sources
+        updated = updated_tag(t, kb, key)
         if stats:
             stat_label = _label(bidi.plain(stats, he), "CardStat")
             stat_label.setAlignment(side)
-            col.addWidget(stat_label)
+            stamp = sources.stat_source(kb, key)
+            self.source_chip = source_tag(t, stamp.source if stamp else sources.MEOWDB, stamp)
+            col.addLayout(chip_row([self.source_chip] + ([updated] if updated else []), stat_label))
+        elif updated:
+            col.addLayout(chip_row([updated]))
         credit = _label("NiaMeowDB (meowdb.com)", "CardCredit")
         col.addWidget(credit)
         row.addLayout(col, 1)
@@ -870,7 +941,7 @@ class EntityTile(Selectable, QFrame):
 class TileGrid(QFrame):
     """Two-column grid of item tiles with a credit line."""
 
-    def __init__(self, kb, keys: list[str], title: str = "", rtl: bool | None = None):
+    def __init__(self, kb, keys: list[str], title: str = "", rtl: bool | None = None, t=None, srcs=()):
         super().__init__(objectName="TileGrid")
         from PySide6.QtWidgets import QApplication, QGridLayout
         from .. import bidi
@@ -881,11 +952,18 @@ class TileGrid(QFrame):
         outer = QVBoxLayout(self)
         outer.setContentsMargins(8, 8, 8, 6)
         outer.setSpacing(4)
+        # srcs: where the tiles come from (a monster's drops: "MSEA", "community"), one chip beside the title
+        chips = source_tags(t, srcs) if t is not None else []
         if title:
-            t = QLabel(bidi.plain(title, rtl), objectName="TileGridTitle")
-            t.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
-            t.setContentsMargins(4, 0, 4, 2)
-            outer.addWidget(t)
+            head = QLabel(bidi.plain(title, rtl), objectName="TileGridTitle")
+            head.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
+            head.setContentsMargins(4, 0, 4, 2)
+            if chips:
+                outer.addLayout(chip_row(chips, head))
+            else:
+                outer.addWidget(head)
+        elif chips:
+            outer.addLayout(chip_row(chips))
         grid = QGridLayout()
         grid.setSpacing(6)
         for i, k in enumerate(keys):
@@ -898,7 +976,7 @@ class TileGrid(QFrame):
 class DropGroupCard(QFrame):
     """A monster and the items it drops: header row (picture, name, level) + item tiles."""
 
-    def __init__(self, kb, monster: str, items: list[str]):
+    def __init__(self, kb, monster: str, items: list[str], t=None, srcs: dict | None = None):
         super().__init__(objectName="TileGrid")
         from PySide6.QtWidgets import QApplication, QGridLayout
         rtl = QApplication.layoutDirection() == Qt.RightToLeft
@@ -931,12 +1009,25 @@ class DropGroupCard(QFrame):
         sub = QLabel(f"Lv. {lv}" if lv else "", objectName="CardSub")
         sub.setAlignment(align)
         col.addWidget(name)
-        col.addWidget(sub)
+        # every drop says which list it is on (srcs: item -> "MSEA" / "community", kb.drop_group): one chip for
+        # the group, or one per list when it mixes both
+        from .. import sources
+        srcs = srcs or {i: kb.drop_source(monster, i) or sources.MSEA for i in items}
+        items = sorted(items, key=lambda i: srcs.get(i) != sources.COMMUNITY)       # players' own sightings first
+        chips = source_tags(t, [srcs.get(i) for i in items]) if t is not None else []
+        if chips:
+            col.addLayout(chip_row(chips, sub))
+        else:
+            col.addWidget(sub)
         head.addLayout(col, 1)
         grid = QGridLayout()
         grid.setSpacing(6)
+        mixed = len(set(srcs.get(i) for i in items)) > 1
         for i, k in enumerate(items):
-            grid.addWidget(EntityTile(kb, k), i // 2, i % 2)
+            tile = EntityTile(kb, k)
+            if mixed and t is not None:
+                tile.setToolTip(f"{tile.toolTip()} · {sources.tag(t, srcs.get(k) or sources.MSEA)}")
+            grid.addWidget(tile, i // 2, i % 2)
         outer.addLayout(grid)
 
 

@@ -19,7 +19,7 @@ from . import theme
 from .glass import paint_glass
 from .minibubble import MiniBubble
 from .widgets import (SELECTION, WISHLIST, Bubble, BubbleRow, DropGroupCard, EntityCard, NoticeCard, ProfileCard,
-                      CharacterChoice, SessionCard, SplitMenu, SystemLine, TileGrid,
+                      CharacterChoice, SessionCard, SplitMenu, SystemLine, TileGrid, source_tags,
                       character_image)
 
 
@@ -1493,22 +1493,26 @@ class Overlay(QWidget):
             self._add_redrawn(lambda t, k=k: EntityCard(self.kb, k, t.lang))
         # tiles go in titled groups, so nothing looks like it belongs to the card above unless it does;
         # a group is named by its title's string key (the title itself is drawn in the language of the moment)
+        # a monster's drops are grouped by the list they are on (players' Classic sightings, the MSEA reference
+        # list), each group with its source chip
         groups: dict[tuple, list[str]] = {}
         monster = heads[0] if heads and heads[0].startswith("monster/") else None
+        lists = self.kb.drop_lists(monster) if monster else {}
         if monster:
-            groups[("tiles_drops", self.kb.get(monster)["name"])] = []        # its drops first
-        drops = set(self.kb.monster_drops(monster)) if monster else set()
+            for src in lists:
+                groups[("tiles_drops", self.kb.get(monster)["name"], src)] = []        # its drops first
         for k in rest:
-            if k in drops:
-                title = ("tiles_drops", self.kb.get(monster)["name"])
+            src = next((s for s, ks in lists.items() if k in ks), None)
+            if src:
+                title = ("tiles_drops", self.kb.get(monster)["name"], src)
             else:
                 kind = "tiles_" + k.split("/")[0]
-                title = (kind if kind in STRINGS else "tiles_other", None)
+                title = (kind if kind in STRINGS else "tiles_other", None, None)
             groups.setdefault(title, []).append(k)
-        for (key, name), ks in groups.items():
+        for (key, name, src), ks in groups.items():
             if ks:
-                self._add_redrawn(lambda t, key=key, name=name, ks=ks: TileGrid(
-                    self.kb, ks, t(key, name=name) if name else t(key), t.rtl))
+                self._add_redrawn(lambda t, key=key, name=name, ks=ks, src=src: TileGrid(
+                    self.kb, ks, t(key, name=name) if name else t(key), t.rtl, t=t, srcs=[src] if src else ()))
 
     def _add_redrawn(self, make) -> QWidget:
         """A feed row built by make(t), built again in the new language on a switch (cards and tile groups kept
@@ -1723,6 +1727,11 @@ class Overlay(QWidget):
         rl = FlowLayout(row, spacing=8, line_spacing=0)       # the link goes under the badge when the chat is narrow
         rl.setContentsMargins(4, 0, 4, 0)
         rl.addWidget(QLabel(bidi.plain(self.t("quick_badge"), self.t.rtl), objectName="SystemLine"))
+        # where the answer's data comes from ("COT2" stats, "MSEA" drops, a shop's "COT2" price), beside the badge
+        from .. import sources
+        stamp = sources.stat_source(self.kb, qa.entities[0]) if qa.entities else None
+        for chip in source_tags(self.t, getattr(qa, "sources", ()), stamp):
+            rl.addWidget(chip)
         again = QPushButton(bidi.plain(self.t.p("quick_ask_ai", self.settings["provider"]), self.t.rtl),
                             objectName="Link")
         again.setCursor(Qt.PointingHandCursor)
@@ -1732,7 +1741,7 @@ class Overlay(QWidget):
         if history:
             history.append("assistant", qa.text, qa.entities)
         for g in qa.drop_groups:
-            self._add_widget(DropGroupCard(self.kb, g["monster"], g["items"]))
+            self._add_widget(DropGroupCard(self.kb, g["monster"], g["items"], self.t, g.get("sources")))
         if qa.entities and not qa.drop_groups:     # the drop groups already show the item
             self.add_cards(qa.entities)
         # like an AI answer: a long one stays at its first line instead of scrolling past it
@@ -1950,7 +1959,7 @@ class Overlay(QWidget):
         if history:
             history.append("assistant", ans.text, ans.entities)
         for g in ans.drop_groups:
-            self._add_widget(DropGroupCard(self.kb, g["monster"], g["items"]))
+            self._add_widget(DropGroupCard(self.kb, g["monster"], g["items"], self.t, g.get("sources")))
         if ans.entities:
             self.add_cards(ans.entities)
         if self.profiles.active_id == getattr(self, "_asked_cid", None) and \

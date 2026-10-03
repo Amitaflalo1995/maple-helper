@@ -5,13 +5,13 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 
-from .. import availability, bidi
+from .. import availability, bidi, quick, sources
 from ..i18n import I18n
 from ..kb import KnowledgeBase
 from .controls import rtl_buttons
 from .glass import GlassDialog
 from .patchnotes import gutter
-from .widgets import EntityCard
+from .widgets import EntityCard, chip_row, source_tag, source_tags, updated_tag
 
 SHOWN_DROPPERS = 5
 
@@ -49,14 +49,22 @@ class WishlistDialog(GlassDialog):
             droppers = kb.droppers.get(k, [])
             head = QLabel(bidi.plain(t("wish_dropped_by") if droppers else t("wish_no_droppers"), rtl),
                           objectName="ToolHeader")
-            head.setWordWrap(True)
+            head.setWordWrap(bool(not droppers))
             head.setAlignment(self._align)
             head.setContentsMargins(4, 4, 4, 0)
-            lay.addWidget(head)
+            # each drop's list (the MSEA reference list, players' Classic sightings): one chip beside "Dropped by"
+            # when every dropper's drop is on the same list, else one on each dropper's row
+            srcs = {m: kb.drop_source(m, k) or sources.MSEA for m in droppers}
+            self._mixed = len(set(srcs.values())) > 1
+            chips = [] if self._mixed else source_tags(t, srcs.values())
+            if chips:
+                lay.addLayout(chip_row(chips, head))
+            else:
+                lay.addWidget(head)
             if droppers:
                 # the drop lists include the MSEA reference drops, not all confirmed for Classic: said here as the
                 # instant answers say it under the same data
-                note = QLabel(bidi.plain(t("quick_drops_note"), rtl), objectName="RowHint")
+                note = QLabel(bidi.plain(quick.drops_note(t, srcs.values()), rtl), objectName="RowHint")
                 note.setWordWrap(True)
                 note.setAlignment(self._align)
                 note.setContentsMargins(4, 0, 4, 0)
@@ -65,7 +73,7 @@ class WishlistDialog(GlassDialog):
             # each dropper as a row with its picture, level, map and a way to ask the chat about it (live feedback:
             # a small text list was hard to read and led nowhere)
             for m in droppers[:SHOWN_DROPPERS]:
-                lay.addWidget(self._dropper(m, item))
+                lay.addWidget(self._dropper(m, item, srcs[m] if self._mixed else None))
             if len(droppers) > SHOWN_DROPPERS:
                 more = QLabel(bidi.plain(t("pn_more", n=len(droppers) - SHOWN_DROPPERS), rtl), objectName="RowHint")
                 more.setAlignment(self._align)
@@ -85,7 +93,7 @@ class WishlistDialog(GlassDialog):
         outer.addLayout(row)
         rtl_buttons(self, rtl)
 
-    def _dropper(self, m: str, item: str) -> QFrame:
+    def _dropper(self, m: str, item: str, source: str | None = None) -> QFrame:
         t, kb = self.t, self.kb
         e = kb.get(m) or {}
         name = e.get("name", m)
@@ -111,7 +119,12 @@ class WishlistDialog(GlassDialog):
         col.setSpacing(2)
         title = QLabel(bidi.ltr_name(name + (f" · Lv. {lvl}" if lvl else ""), t.rtl), objectName="CardName")
         title.setAlignment(self._align)
-        col.addWidget(title)
+        # this row's own drop list when the droppers mix them, and a KB update this week that changed the monster
+        chips = ([source_tag(t, source)] if source else []) + [c for c in [updated_tag(t, kb, m)] if c]
+        if chips:
+            col.addLayout(chip_row(chips, title))
+        else:
+            col.addWidget(title)
         if maps:
             where = QLabel(bidi.ltr_name(kb.map_label(maps[0]), t.rtl), objectName="CardSub")
             where.setWordWrap(True)

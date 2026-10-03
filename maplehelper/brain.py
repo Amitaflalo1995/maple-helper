@@ -11,7 +11,8 @@ import logging
 import re
 from dataclasses import dataclass, field
 
-from . import availability, providers
+from . import availability, providers, sources
+from . import recent as kb_changes      # ("recent" is the conversation in build_prompt)
 from .kb import KnowledgeBase
 from .store import Character, History
 
@@ -35,17 +36,25 @@ Knowledge base: the current directory is the full NiaMeowDB (meowdb.com) databas
 - Use the pre-fetched context first. Use Grep/Glob/Read only for what is missing. Never write text before a tool call.
 - Never invent facts, numbers, drops or locations. If the data does not say, say so briefly.
 
-Which monsters drop something: drops.tsv (monster, level, key, item, item type, item key) lists the monster→item drops
-of the monsters in the game. Grep it for the item name or the item type (e.g. "Throwing Star", "Scroll", "Potion"). Answer
+Which monsters drop something: drops.tsv (monster, level, key, item, item type, item key, source) lists the monster→item
+drops of the monsters in the game; source is the list the drop is on ("MSEA" or "community", see Drops below). Grep it for the item name or the item type (e.g. "Throwing Star", "Scroll", "Potion"). Answer
 grouped per monster (monster → the items it drops), lowest level first, and return the grouping as META "drop_groups".
 An item page's "Dropped By" list names every monster that ever dropped it: one drops.tsv doesn't list for that item is
 not in the game, so never name it as a source.
 
-Drops: a monster page lists its drops ("Drops (MS Classic)" confirmed by players, and "MSEA reference drops"). drops.tsv
-and the pre-fetched drop lists are the MSEA reference drops: what the monster dropped in old MapleSEA, which the KB calls
-historical reference, not confirmed for Classic. Whenever you name drops from them, say so in a few words.
-When asked what a monster drops, list the drops by name (grouped: Etc / Use / Equipment is fine), say which list they
-come from, and return every dropped item's key in entities.
+Drops: a monster page lists its drops in two lists under "Drops (MS Classic)": "Community sourced" (drops players
+saw in Classic themselves: community) and "MSEA reference drops" (what the monster dropped in old MapleSEA, which the KB
+calls historical reference, not confirmed for Classic). drops.tsv's source column and the pre-fetched drop lists say
+which list each drop is on. When asked what a monster drops, list the drops by name (grouped: Etc / Use / Equipment is
+fine), say which list they come from, and return every dropped item's key in entities.
+
+Sources: the app tags every number it shows with where it comes from, and so do you. A pre-fetched page starts with a
+"[sources: ...]" line: stats and NPC shop prices carry the build the KB labels them with ("COT2" = the second closed
+test, not confirmed for launch; a later KB may say "Launch"), drops their list, Free Market prices are community
+reports, the game's scope is official (Nexon), and anything unlabeled is MeowDB's own. Whenever you state drops,
+prices or stats, name their source in a word or two right after them: "(MSEA)", "(community)", "(COT2)", "(official)",
+"(MeowDB)". "Recent KB change" lines are things a knowledge-base update changed this week: when they bear on the answer,
+point the change out briefly (old → new).
 
 Advice must fit the player's level and job. If the profile lacks level or job, ask for it before recommending.
 
@@ -88,6 +97,9 @@ class Answer:
     profile_update: dict = field(default_factory=dict)
     avatar_box: list | None = None
     drop_groups: list = field(default_factory=list)
+    # where an instant answer's data comes from (sources.py: "COT2", "MSEA", "community", "MeowDB", ...): chips
+    # beside its badge
+    sources: list = field(default_factory=list)
     error: str | None = None
     cost_usd: float | None = None
     limits: dict | None = None          # Claude plan usage (usage.parse of Claude Code's rate_limit_event)
@@ -103,6 +115,7 @@ REPLY_RULES = """<reply_rules>
 - NEVER translate game names: items, monsters, maps, NPCs, skills and quests stay in English exactly as in the data
   ("Blue Snail Shell", not "קונכיית חילזון כחול"), even inside a Hebrew sentence.
 - Locations, drops and stats only from the context or the knowledge base (Grep pages/monster/*.md for "Map Locations" if needed).
+- Name the source of every drop list, price and stat you state, briefly: "(MSEA)", "(community)", "(COT2)", "(official)".
 - Then the line @@META@@ and the JSON object. Always include it, even when empty. If the player states a new level/job, put it in profile_update.
 - profile_update describes ONLY the character in <player_profile>. If the player says they are on another character,
   or the screenshot's HUD shows another name, put that character's facts in profile_update WITH its "name" (the app
@@ -123,6 +136,10 @@ def _page(kb: KnowledgeBase, key: str, limit: int) -> str:
     body = kb.page_body(key, limit=limit)
     if body and key.startswith("item/"):
         body = _mark_droppers(kb, body)
+    if body:
+        # what each kind of data on the page is (its build, drop list, ...), so the answer can name it
+        note = sources.page_note(kb, key)
+        body = f"{note}\n{body}" if note else body
     if body and not availability.of(kb).entity_open(key):
         return f"[{key}] ({NOT_OUT})\n{body}"
     return f"[{key}]\n{body}" if body else ""
@@ -201,13 +218,15 @@ def build_prompt(question: str, character: Character | None, history: History | 
         items = item_keys_for_question(question, kb)
         groups = kb.drop_groups(items, limit=10)
         if groups:
-            lines = ["Which monsters drop it (from drops.tsv: MSEA reference drop lists, not confirmed for Classic; "
-                     "lowest level first; names and keys as in game):"]
+            lines = ["Which monsters drop it (from drops.tsv; each drop with its list: MSEA = the reference list, not "
+                     "confirmed for Classic, community = players saw it in Classic; lowest level first; names and keys "
+                     "as in game):"]
             for g in groups:
                 m = kb.get(g["monster"])
                 lv = (m.get("props") or {}).get("Level", "?")
                 lines.append(f"- {m['name']} (Lv {lv}) [{g['monster']}]: "
-                             + ", ".join(f"{kb.get(i)['name']} [{i}]" for i in g["items"]))
+                             + ", ".join(f"{kb.get(i)['name']} [{i}] ({g['sources'].get(i, sources.MSEA)})"
+                                         for i in g["items"]))
             ctx.append("\n".join(lines))
     for key in kb.find_mentions(question, max_results=4):
         body = _page(kb, key, 2500)
@@ -217,6 +236,11 @@ def build_prompt(question: str, character: Character | None, history: History | 
             drops = kb.drops_digest(key)
             if drops:
                 ctx.append(drops)
+    # what a KB update changed this week in the entities above (and the level digest's monsters)
+    shown = re.findall(r"\[((?:monster|item|npc|map|quest|skill)/[^\]\s]+)\]", "\n".join(ctx))
+    changes = kb_changes.ai_lines(kb, shown)
+    if changes:
+        ctx.append("\n".join(changes))
     if ctx:
         parts.append("<kb_context>\n" + "\n\n".join(ctx) + "\n</kb_context>")
     if has_screenshot is True:
@@ -375,7 +399,8 @@ class Brain:
         El Nath, or offers a 3rd job, while the KB says they aren't out."""
         from . import availability
         try:
-            return ("\n\nGame scope (from the knowledge base, the only source of truth): "
+            return ("\n\nGame scope (from the knowledge base, the only source of truth; its release guide is built "
+                    "from Nexon's official statements, so this is official): "
                     + availability.of(self.kb).scope_note())
         except Exception:      # noqa: BLE001 - a KB without the release guide: no scope line rather than no answer
             return ""
@@ -468,7 +493,7 @@ class Brain:
             if isinstance(g, dict) and kb_has(self.kb, str(g.get("monster", ""))) and isinstance(g.get("items"), list):
                 items = [i for i in g["items"] if isinstance(i, str) and kb_has(self.kb, i)]
                 if items:
-                    groups.append({"monster": g["monster"], "items": items[:10]})
+                    groups.append(self.kb.drop_group(g["monster"], items[:10]))
         if not groups and is_reverse(question, self.kb):
             # the app builds the grouping itself: the question's items, else the items the answer names
             items = item_keys_for_question(question, self.kb) or \

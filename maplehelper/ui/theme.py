@@ -272,6 +272,11 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #TagGood {{ color: {good}; background: rgba(52,199,89,0.16); }}
     #TagWarn {{ color: #C9620A; background: rgba(255,149,51,0.18); }}
     #TagAccent {{ color: {otd}; background: rgba(255,149,51,0.12); }}
+    /* where a datum comes from (sources.py): quieter than the tags above, an outline beside the data */
+    #SourceTag {{ font-size: {s - 4}px; font-weight: 600; color: {c['muted']}; background: transparent;
+                  border: 1px solid {c['stroke']}; border-radius: 7px; padding: 0px 5px; }}
+    #UpdatedTag {{ font-size: {s - 4}px; font-weight: 700; color: {otd}; background: rgba(255,149,51,0.14);
+                   border: 1px solid rgba(255,149,51,0.45); border-radius: 7px; padding: 0px 5px; }}
     #BigStat {{ font-size: {s + 10}px; font-weight: 700; letter-spacing: -0.4px; color: {c['text']}; }}
     #BigStatLabel {{ font-size: {s - 3}px; color: {c['muted']}; }}
     QPushButton#NowChip {{ background: rgba(255,149,51,0.12); border: 1px solid rgba(255,149,51,0.55); border-radius: 12px;

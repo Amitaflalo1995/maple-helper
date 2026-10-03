@@ -70,18 +70,21 @@ def test_quest_card_shows_prerequisites_and_gender_rewards(tools):
 def test_cot2_label_beside_the_shop_price(tools, kb, monkeypatch):
     from maplehelper import combat
     shop = ("Mia", "Henesys · Potion Shop", 50)
-    prices = market.NpcPrices(None, shops=[shop], cot2={shop[:2]})
+    prices = market.NpcPrices(None, shops=[shop], labels={shop[:2]: "COT2"})
     monkeypatch.setattr(market, "npc_prices", lambda *a: prices)
     monkeypatch.setattr(combat, "released", lambda *a: True)
     monkeypatch.setattr(market, "free_market", lambda n: None)
     d = tools(page="prices")
     d.price_input.setText("Red Potion")
     d._fill_prices()
-    assert "(cheapest at Mia, Potion Shop) (COT2 test price)" in texts(d.pages["prices"])
+    # the price's own label is its chip, at the line's start, the test's meaning in its tooltip
+    assert "(cheapest at Mia, Potion Shop)" in texts(d.pages["prices"])
+    assert [c.text() for c in d.price_chips] == ["COT2"] and "second closed test" in d.price_chips[0].toolTip()
+    assert d.fm_chip.text() == "Community"
     a = quick.answer("where to buy red potion", kb, I18n("en"))
     assert a and "Mia · Henesys · Potion Shop · 50 mesos (COT2 test price)" in a.text
     # a price the KB doesn't label stays plain
-    prices.cot2.clear()
+    prices.labels.clear()
     a = quick.answer("where to buy red potion", kb, I18n("en"))
     assert a and "COT2" not in a.text
 

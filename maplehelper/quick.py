@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 
-from . import availability, combat, market
+from . import availability, combat, market, sources
 from .brain import Answer
 from .kb import KnowledgeBase, _norm, fold_quotes
 
@@ -79,6 +79,15 @@ def _maps(kb: KnowledgeBase, key: str, n: int = 3) -> list[str]:
     return [kb.map_label(m) for m in kb._top_maps(key, 12) if combat.reachable_map(kb, m)][:n]
 
 
+def drops_note(t, srcs) -> str:
+    """The line under a drop answer: which list the drops are from (the MSEA reference list, players' Classic
+    sightings, or both)."""
+    kinds = set(srcs)
+    if kinds == {sources.COMMUNITY}:
+        return t("quick_drops_note_community")
+    return t("quick_drops_note_both") if sources.COMMUNITY in kinds else t("quick_drops_note")
+
+
 def answer(question: str, kb: KnowledgeBase, t, char=None) -> Answer | None:
     """An Answer from the KB alone, or None when Claude should answer. char: the active character (its level
     for "how much ACC do I need" questions), or None."""
@@ -104,36 +113,42 @@ def answer(question: str, kb: KnowledgeBase, t, char=None) -> Answer | None:
         # and a price the KB labels as the COT2 test's is said to be one, not given as the launch price
         lines = [f"• {npc} · {where} · {price:,} mesos"
                  + (" " + t("price_rank", rank=prices.ranks[(npc, where)]) if (npc, where) in prices.ranks else "")
-                 + (" " + t("price_cot2") if prices.test_price((npc, where)) else "")
+                 + (" " + sources.price_note(t, prices.labels[(npc, where)]) if prices.test_price((npc, where)) else "")
                  for npc, where, price in shops[:3]]
-        return Answer(text=t("quick_sells", name=name) + "\n" + "\n".join(lines), entities=[key])
+        return Answer(text=t("quick_sells", name=name) + "\n" + "\n".join(lines), entities=[key],
+                      sources=[prices.source(s) for s in shops[:3]])
     if cat == "item" and (WHO.search(q) or DROPS.search(q)):
         groups = kb.drop_groups([key], limit=6)
         if not groups:
             return None
-        return Answer(text=t("quick_who_drops", name=name, n=len(groups)) + "\n" + t("quick_drops_note"),
-                      entities=[key], drop_groups=groups)
+        srcs = [s for g in groups for s in g["sources"].values()]
+        return Answer(text=t("quick_who_drops", name=name, n=len(groups)) + "\n" + drops_note(t, srcs),
+                      entities=[key], drop_groups=groups, sources=srcs)
     if cat != "monster":
         return None
     if not availability.of(kb).monster_key_open(key):
         # the KB doesn't confirm it in the game (Ossyria, no map at all): say so, never its stats as if it were
-        return Answer(text=t("quick_not_in_game", name=name), entities=[])
+        # (what is out comes from the release guide's official statements and the map pages: availability.py)
+        return Answer(text=t("quick_not_in_game", name=name), entities=[], sources=[sources.OFFICIAL])
     acc = bool(ACC_NEEDED.search(q))
     asks = [bool(DROPS.search(q) and not WHO.search(q)), bool(WHERE.search(q)),
             acc or any(rx.search(q) for rx, _, _ in STATS)]
     if sum(asks) > 1:
         return None          # "Mano's level and drops": answering only half would look like the whole answer
     if DROPS.search(q) and not WHO.search(q):
-        drops = kb.monster_drops(key)
+        lists = kb.drop_lists(key)
+        drops = [k for ks in lists.values() for k in ks]
         if not drops:
             return None
-        return Answer(text=t("quick_drops", name=name, n=len(drops)) + "\n" + t("quick_drops_note"),
-                      entities=[key] + drops)
+        srcs = [s for s, ks in lists.items() if ks]
+        return Answer(text=t("quick_drops", name=name, n=len(drops)) + "\n" + drops_note(t, srcs),
+                      entities=[key] + drops, sources=srcs)
     if WHERE.search(q):
         maps = _maps(kb, key)
         if not maps:
             return None      # only unreachable maps (or none): Claude can explain
-        return Answer(text=t("quick_where", name=name) + "\n" + "\n".join(f"• {m}" for m in maps), entities=[key])
+        return Answer(text=t("quick_where", name=name) + "\n" + "\n".join(f"• {m}" for m in maps), entities=[key],
+                      sources=[sources.MEOWDB])
     if acc:
         m = combat.monster(kb, key)
         if not m:
@@ -143,12 +158,15 @@ def answer(question: str, kb: KnowledgeBase, t, char=None) -> Answer | None:
         lv = int(next(g for g in asked.groups() if g)) if asked else int(getattr(char, "level", 0) or 0) or m.level
         if not 1 <= lv <= 250:
             return None
+        # worked out from the monster's own level and Avoid: those carry its page's source
         if m.avoid <= 0:
-            return Answer(text=t("quick_acc_none", name=name), entities=[key])
+            return Answer(text=t("quick_acc_none", name=name), entities=[key], sources=[sources.source_of(kb, key)])
         return Answer(text=t("quick_acc", name=name, lv=lv, n=combat.acc_needed(lv, m.level, m.avoid),
-                             n90=combat.acc_needed(lv, m.level, m.avoid, 0.9)), entities=[key])
+                             n90=combat.acc_needed(lv, m.level, m.avoid, 0.9)), entities=[key],
+                      sources=[sources.source_of(kb, key)])
     props = e.get("props") or {}
     asked = [(k, label) for rx, k, label in STATS if rx.search(q) and props.get(k) not in (None, "")]
     if asked:
-        return Answer(text="\n".join(f"{name} · {label}: {props[k]}" for k, label in asked), entities=[key])
+        return Answer(text="\n".join(f"{name} · {label}: {props[k]}" for k, label in asked), entities=[key],
+                      sources=[sources.source_of(kb, key)])
     return None

@@ -11,7 +11,7 @@ import re
 from functools import cached_property
 from pathlib import Path
 
-from . import bidi
+from . import bidi, sources
 from .store import ASSETS, kb_dir
 
 FALLBACK_DIR = ASSETS / "fallback"
@@ -85,6 +85,7 @@ NO_LOOSE_UNDER = 5    # Hebrew letters an alias needs for its spelling-tolerant 
 _VARIANT = re.compile(r"\s*\(.*?\)|\s+Instance \d+$")
 PREFIX_FROM = 4        # Hebrew letters a name needs before a glued prefix counts ("לאן" is not ל + "אן")
 _PREFIX = "[בלמהושכ]{1,2}"
+DROPS_MARK = "drops.tsv lists only monsters the KB confirms are in the game (availability.py), with a source column\n"
 NAMES_TABLE = "names.tsv"     # key, category, name, type: one line per entity, for the AI to grep (see ensure_drop_table)
 
 
@@ -338,25 +339,49 @@ class KnowledgeBase:
                 out.setdefault(e["name"].strip().lower(), k)
         return out
 
-    def monster_drops(self, key: str) -> list[str]:
-        """Item keys a monster drops, read from its page (confirmed Classic drops + MSEA reference list)."""
+    def drop_lists(self, key: str) -> dict[str, list[str]]:
+        """A monster's drops by the list its page puts them in: {sources.COMMUNITY: [...], sources.MSEA: [...]}.
+
+        The page's "Drops (MS Classic)" block holds two lists: "Community sourced", the drops players have seen
+        in Classic themselves, then "MSEA reference drops", old MapleSEA's table that the KB calls historical
+        reference. Read as one list, an MSEA drop was shown as if confirmed for Classic (and the other way)."""
+        memo = self.__dict__.setdefault("_drop_lists", {})
+        if key in memo:
+            return memo[key]
         body = self.page(key)
+        out: dict[str, list[str]] = {sources.COMMUNITY: [], sources.MSEA: []}
         i = body.find("Drops (MS Classic)")
-        if i < 0:
-            return []
-        end = len(body)
-        for marker in ("Associated Quests", "Map Locations"):
-            j = body.find(marker, i)
-            if 0 < j < end:
-                end = j
-        found = []
-        lines = body[i:end].split("\n")
-        for n, line in enumerate(lines):
-            k = self._drop_item(line.strip().lower(), lines[n + 1].strip() if n + 1 < len(lines) else "",
-                                self.get(key)["name"])
-            if k and k not in found:
-                found.append(k)
-        return found
+        if i >= 0:
+            end = len(body)
+            for marker in ("Associated Quests", "Map Locations", "Respawn Timer", "Change history"):
+                j = body.find(marker, i)
+                if 0 < j < end:
+                    end = j
+            block = body[i:end]
+            m = re.search(r"^MSEA reference drops\s*$", block, re.M | re.I)
+            parts = {sources.COMMUNITY: block[:m.start()] if m else block, sources.MSEA: block[m.end():] if m else ""}
+            name = self.get(key)["name"]
+            for src, text in parts.items():
+                lines = text.split("\n")
+                for n, line in enumerate(lines):
+                    k = self._drop_item(line.strip().lower(), lines[n + 1].strip() if n + 1 < len(lines) else "", name)
+                    if k and k not in out[src] and not (src == sources.MSEA and k in out[sources.COMMUNITY]):
+                        out[src].append(k)
+        memo[key] = out
+        return out
+
+    def monster_drops(self, key: str) -> list[str]:
+        """Item keys a monster drops, both lists: the community's Classic drops first, then the MSEA reference
+        list (drop_lists / drop_source say which list each comes from)."""
+        lists = self.drop_lists(key)
+        return lists[sources.COMMUNITY] + lists[sources.MSEA]
+
+    def drop_source(self, monster: str, item: str) -> str | None:
+        """The list a monster's drop is on (sources.COMMUNITY or sources.MSEA), or None when it isn't."""
+        for src, keys in self.drop_lists(monster).items():
+            if item in keys:
+                return src
+        return None
 
     @cached_property
     def _monsters_by_name(self) -> dict[str, list[str]]:
@@ -426,11 +451,17 @@ class KnowledgeBase:
                     groups[m].append(i)
         lvl = lambda k: (self.get(k).get("props") or {}).get("Level") or 999  # noqa: E731
         ordered = sorted(groups, key=lvl)[:limit]
-        return [{"monster": m, "items": groups[m]} for m in ordered]
+        return [self.drop_group(m, groups[m]) for m in ordered]
+
+    def drop_group(self, monster: str, items: list[str]) -> dict:
+        """{"monster", "items", "sources": {item: its list}}: every drop shown says which list it comes from."""
+        return {"monster": monster, "items": items,
+                "sources": {i: self.drop_source(monster, i) or sources.MSEA for i in items}}
 
     def ensure_drop_table(self) -> None:
         """Write drops.tsv next to index.json so Claude can grep 'which monsters drop X' in one step: only monsters
-        the KB confirms are in the game. A table from before that rule (no drops.ingame mark beside it) is redone.
+        the KB confirms are in the game, each drop with the list it is on. A table from before those rules (no
+        drops.ingame mark beside it, or an older mark) is redone.
         names.tsv beside it is the index's names and keys, one entity per line."""
         path = self.root / "drops.tsv"
         mark = self.root / "drops.ingame"
@@ -438,33 +469,39 @@ class KnowledgeBase:
         idx = self.root / "index.json"
         try:
             if (path.exists() and mark.exists() and names.exists() and idx.exists()
-                    and path.stat().st_mtime >= idx.stat().st_mtime):
+                    and path.stat().st_mtime >= idx.stat().st_mtime
+                    and mark.read_text(encoding="utf-8") == DROPS_MARK):
                 return
-            mark.write_text("drops.tsv lists only monsters the KB confirms are in the game (availability.py)\n",
-                            encoding="utf-8")
+            mark.write_text(DROPS_MARK, encoding="utf-8")
             # index.json is one 1.3 MB line: Gemini's grep can't read a line that long ("bufio.Scanner: token too
             # long", answers took 30-140 s) and any other grep hit returns all of it. One entity per line instead.
             rows = ["key\tcategory\tname\ttype"]
             rows += [f"{k}\t{e.get('category', '')}\t{e.get('name', '')}\t{e.get('type') or ''}" for k, e in self.entities.items()]
             names.write_text("\n".join(rows), encoding="utf-8")
-            lines = ["monster\tmonster_level\tmonster_key\titem\titem_type\titem_key"]
+            # source: the list the drop is on, "MSEA" (reference) or "community" (players saw it in Classic)
+            lines = ["monster\tmonster_level\tmonster_key\titem\titem_type\titem_key\tsource"]
             for ikey, monsters in self.droppers.items():
                 it = self.get(ikey)
                 for m in monsters:
                     me = self.get(m)
                     lv = (me.get("props") or {}).get("Level", "")
-                    lines.append(f"{me['name']}\t{lv}\t{m}\t{it['name']}\t{it.get('type') or ''}\t{ikey}")
+                    lines.append(f"{me['name']}\t{lv}\t{m}\t{it['name']}\t{it.get('type') or ''}\t{ikey}\t"
+                                 f"{self.drop_source(m, ikey) or sources.MSEA}")
             path.write_text("\n".join(lines), encoding="utf-8")
         except OSError:
             pass
 
     def drops_digest(self, key: str) -> str:
-        drops = self.monster_drops(key)
-        if not drops:
-            return ""
+        """A monster's drops for the AI, list by list, each said for what it is."""
+        lists = self.drop_lists(key)
         e = self.get(key)
-        names = ", ".join(f"{self.get(k)['name']} [{k}]" for k in drops)
-        return f"Drops of {e['name']} (MSEA reference list; names and keys exactly as in the game): {names}"
+        out = []
+        for src, head in ((sources.COMMUNITY, "community-confirmed in Classic (players saw them drop)"),
+                          (sources.MSEA, "MSEA reference list: old MapleSEA, not confirmed for Classic")):
+            if lists[src]:
+                names = ", ".join(f"{self.get(k)['name']} [{k}]" for k in lists[src])
+                out.append(f"Drops of {e['name']}, {head}; names and keys exactly as in the game: {names}")
+        return "\n".join(out)
 
     # ------------------------------------------------------------ level digest
 

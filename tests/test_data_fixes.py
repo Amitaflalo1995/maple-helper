@@ -308,9 +308,10 @@ def test_an_unknown_word_before_the_name_is_no_sure_answer(kb):
 
 
 def test_drop_answers_carry_the_caveat_and_say_1_item(kb, monkeypatch):
-    monkeypatch.setattr(kb, "monster_drops", lambda key: ["item/2000000"])
+    monkeypatch.setattr(kb, "drop_lists", lambda key: {"community": [], "MSEA": ["item/2000000"]})
     a = quick.answer("Red Snail drops", kb, t)
     assert a and a.text.startswith("Red Snail drops 1 item:") and t("quick_drops_note") in a.text
+    assert a.sources == ["MSEA"]
     assert I18n("he")("quick_drops", name="X", n=1) == "X מפיל פריט אחד:"
 
 

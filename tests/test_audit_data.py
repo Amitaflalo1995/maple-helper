@@ -10,7 +10,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from maplehelper import guides, market, quests
+from maplehelper import sources, guides, market, quests
 from maplehelper.i18n import I18n
 from maplehelper.kb import KnowledgeBase
 
@@ -107,9 +107,9 @@ def test_citizenship_openers_and_npcs_without_a_town(real):
 def test_shop_prices_keep_the_kbs_cot2_label(real):
     # pages/item/274.md: "3,000 / mesos / COT2 prices Citizen of Honor +"
     p = market.npc_prices(real, "item/274")
-    assert p.shops and all(p.test_price(s) for s in p.shops)
+    assert p.shops and all(p.test_price(s) and p.source(s) == "COT2" for s in p.shops)
     assert "COT2" in t("price_hint") and "COT2" in I18n("he")("price_hint")
-    assert "COT2" in t("price_cot2")
+    assert sources.price_note(t, "COT2") == "(COT2 test price)"
 
 
 # ------------------------------------------------------------------ guides

@@ -19,7 +19,7 @@ from .store import ASSETS, DATA_DIR, History, Profiles, Settings
 from .ui import theme
 from .ui.dialogs import Onboarding, SettingsDialog
 from .ui.overlay import Overlay
-from .ui.patchnotes import PatchNotesDialog, WhatsNewDialog, summary
+from .ui.patchnotes import PatchNotesDialog, WhatsNewDialog, update_notice
 from .ui.toast import notify
 from .voice import VoiceController
 
@@ -775,12 +775,10 @@ class MapleHelperApp:
         if interactive:
             self.show_patch_notes(entries)
             return
-        hits = wishlist.touched(entries, wishlist.items(self.settings, self.profiles.active_id), self.kb)
-        if hits:
-            self.overlay.add_notice(lambda t: t("wish_kb_hit", names=", ".join(hits)), lambda t: t("patch_notes_show"),
-                                    lambda: self.show_patch_notes(entries))
-        # in the chat, where the player looks next; a dialog over the game would interrupt play
-        self.overlay.add_notice(lambda t: t("patch_notes_summary", summary=summary(t, entries)),
+        # in the chat, where the player looks next; a dialog over the game would interrupt play. What touches the
+        # active character (gear for them, monsters in their training range, wished items) is said first, by name
+        self.overlay.add_notice(lambda t: update_notice(t, entries, self.kb, self.profiles.active,
+                                                        wishlist.items(self.settings, self.profiles.active_id)),
                                 lambda t: t("patch_notes_show"),
                                 lambda: self.show_patch_notes(entries))
         if not self.overlay.isVisible():
@@ -894,8 +892,9 @@ class MapleHelperApp:
     def show_patch_notes(self, entries: list[dict] | None = None):
         if entries is None:
             entries = updater.changelog()[:5]
-        self.open_window("patch_notes", lambda: PatchNotesDialog(entries, self.settings["language"], self.style(),
-                                                                 self.kb))
+        self.open_window("patch_notes", lambda: PatchNotesDialog(
+            entries, self.settings["language"], self.style(), self.kb, self.profiles.active,
+            wishlist.items(self.settings, self.profiles.active_id)))
 
     def reload_kb(self):
         self.kb = load_kb()
