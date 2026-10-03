@@ -5,7 +5,7 @@ import time
 
 from PySide6.QtCore import (QEasingCurve, QObject, QParallelAnimationGroup, QPoint, QPropertyAnimation, QRect, QRectF,
                             Qt, QThread, QTimer, Signal)
-from PySide6.QtGui import QAction, QGuiApplication, QIcon, QPainterPath, QPixmap
+from PySide6.QtGui import QGuiApplication, QIcon, QPainterPath, QPixmap
 from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QPushButton,
                                QScrollArea, QSizePolicy, QToolButton, QVBoxLayout, QWidget, QWidgetAction)
 
@@ -910,23 +910,12 @@ class Overlay(QWidget):
             a.setDefaultWidget(holder)
             menu.addAction(a)
         if self.profiles.active is not None:
-            edit = QAction(theme.glyph_icon("edit"), bidi.plain(self.t("edit_character"), self.t.rtl), menu)
-            edit.setEnabled(not busy)
-            edit.triggered.connect(lambda: self.edit_character_requested.emit(active))
-            menu.addAction(edit)
-            delete = QAction(theme.glyph_icon("delete"), bidi.plain(self.t("delete_character"), self.t.rtl), menu)
-            delete.setEnabled(not busy)
-            delete.triggered.connect(lambda: self.delete_character_requested.emit(active))
-            menu.addAction(delete)
+            menu.add_row("edit", self.t("edit_character"), lambda: self.edit_character_requested.emit(active), not busy)
+            menu.add_row("delete", self.t("delete_character"),
+                         lambda: self.delete_character_requested.emit(active), not busy)
             menu.addSeparator()
-        add = QAction(theme.glyph_icon("add"), bidi.plain(self.t("add_character"), self.t.rtl), menu)
-        add.setEnabled(not busy)
-        add.triggered.connect(self.add_character_requested.emit)
-        menu.addAction(add)
-        share = QAction(theme.glyph_icon("copy"), bidi.plain(self.t("share_character"), self.t.rtl), menu)
-        share.triggered.connect(self.copy_character_card)
-        share.setEnabled(self.profiles.active is not None)
-        menu.addAction(share)
+        menu.add_row("add", self.t("add_character"), self.add_character_requested.emit, not busy)
+        menu.add_row("copy", self.t("share_character"), self.copy_character_card, self.profiles.active is not None)
         card = self.profile_card
         menu.setMinimumWidth(card.width() + 10)
         # the menu's 5 px padding sits outside the card's edges, so its cards line up with this one

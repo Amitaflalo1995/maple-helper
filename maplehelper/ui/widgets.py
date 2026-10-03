@@ -598,10 +598,46 @@ class SplitMenu(QMenu):
         super().__init__(parent)
         self.setObjectName("SplitMenu")
 
+    def add_row(self, icon_name: str, text: str, on_click, enabled: bool = True) -> None:
+        """A menu line laid out by us: in Hebrew the icon on the right and the text right beside it (a QMenu
+        item with this panel left the Hebrew text at the far left, away from its icon)."""
+        from . import theme
+        row = QFrame(objectName="MenuRow")
+        row.setProperty("panel", True)
+        row.setCursor(Qt.PointingHandCursor)
+        row.setEnabled(enabled)
+        lay = QHBoxLayout(row)
+        lay.setContentsMargins(12, 6, 12, 6)
+        lay.setSpacing(10)
+        icon = QLabel()
+        icon.setPixmap(theme.glyph_icon(icon_name).pixmap(16, 16))
+        lay.addWidget(icon)
+        label = QLabel(bidi.plain(text, self.layoutDirection() == Qt.RightToLeft), objectName="MenuRowText")
+        label.setAlignment((Qt.AlignRight if self.layoutDirection() == Qt.RightToLeft else Qt.AlignLeft)
+                           | Qt.AlignAbsolute | Qt.AlignVCenter)
+        lay.addWidget(label, 1)
+        holder = QWidget()
+        holder.setProperty("panel", True)
+        hl = QVBoxLayout(holder)
+        hl.setContentsMargins(5, 0, 5, 0)
+        hl.addWidget(row)
+
+        def clicked(e, row=row):
+            if e.button() == Qt.LeftButton and row.isEnabled() and row.rect().contains(e.position().toPoint()):
+                self.close()
+                on_click()
+        row.mouseReleaseEvent = clicked
+        a = QWidgetAction(self)
+        a.setDefaultWidget(holder)
+        self.addAction(a)
+
     def paintEvent(self, e):
         from . import theme
-        plain = [self.actionGeometry(a) for a in self.actions()
-                 if not (isinstance(a, QWidgetAction) and a.defaultWidget() is not None) and a.isVisible()]
+
+        def in_panel(a) -> bool:
+            w = a.defaultWidget() if isinstance(a, QWidgetAction) else None
+            return w is None or bool(w.property("panel"))
+        plain = [self.actionGeometry(a) for a in self.actions() if in_panel(a) and a.isVisible()]
         if plain:
             top = min(r.top() for r in plain) - 5
             # the menu's 5 px padding is outside the panel: it lines up with the cards (and the card above)
