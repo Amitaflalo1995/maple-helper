@@ -1145,6 +1145,7 @@ class ToolsDialog(GlassDialog):
         col.addWidget(self._things_label(t("craft_needs"), [f"{name} x {n}" for n, name in r.ingredients]))
         net = t("craft_net_gain", n=f"{r.net:,}") if r.net >= 0 else t("craft_net_loss", n=f"{-r.net:,}")
         col.addWidget(self._label(net, "RowHint"))
+        col.addWidget(self._ask_link(lambda: self.ask_requested.emit(t("craft_ask_recipe", item=r.name), False)))
         return card
 
     # citizenship ---------------------------------------------------------

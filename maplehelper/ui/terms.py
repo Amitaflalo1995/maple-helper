@@ -6,11 +6,8 @@ window, which stay on top of the game."""
 from __future__ import annotations
 
 import html
-import os
-import tempfile
-from pathlib import Path
 
-from PySide6.QtCore import QPoint, QRect, Qt, QTimer
+from PySide6.QtCore import QBuffer, QByteArray, QIODevice, QPoint, QRect, Qt, QTimer
 from PySide6.QtGui import QColor, QCursor, QFont, QGuiApplication, QPainter, QPixmap
 from PySide6.QtWidgets import QLabel
 
@@ -21,19 +18,13 @@ LANG = "he"          # the UI language; the chat sets it at start
 BADGE_PX = 15
 
 
-def _badge_file() -> str | None:
-    """Draw the "?" badge once (needs a running Qt app) and hand its file to the glossary's links."""
+def _badge_uri() -> str | None:
+    """Draw the "?" badge once (needs a running Qt app) and hand it to the glossary's links as a data: URI.
+
+    Kept in memory, never in a file: a shared temp file was redrawn or deleted by another process (a test
+    run, a second copy) and every "?" in the open app became an empty dot or a broken-page icon."""
     if QGuiApplication.instance() is None:
         return None
-    # one file per running app: a shared name was redrawn by another process (a test run, with no fonts)
-    # and every "?" in the open app turned into an empty orange dot
-    tmp = Path(tempfile.gettempdir())
-    for old in tmp.glob("maplehelper-term-badge*.png"):
-        try:
-            old.unlink()
-        except OSError:       # still shown by another running copy
-            pass
-    path = tmp / f"maplehelper-term-badge-{os.getpid()}.png"
     scale = 3                                   # drawn large, shown at BADGE_PX: crisp on any screen
     size = BADGE_PX * scale
     pm = QPixmap(size, size)
@@ -50,13 +41,16 @@ def _badge_file() -> str | None:
     p.setPen(QColor("white"))
     p.drawText(QRect(0, 0, size, size), Qt.AlignCenter, "?")
     p.end()
-    pm.save(str(path), "PNG")
-    return path.as_uri()
+    data = QByteArray()
+    buf = QBuffer(data)
+    buf.open(QIODevice.WriteOnly)
+    pm.save(buf, "PNG")
+    return "data:image/png;base64," + bytes(data.toBase64()).decode()
 
 
 def setup():
     """Use the image badge in every annotated text from now on."""
-    uri = _badge_file()
+    uri = _badge_uri()
     if uri:
         glossary.MARK = (f"<img src='{uri}' width='{BADGE_PX}' height='{BADGE_PX}' "
                          f"style='vertical-align: middle'>")
