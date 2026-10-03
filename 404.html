@@ -4,16 +4,17 @@
 <meta charset="utf-8">
 <title>Maple Helper</title>
 <meta name="robots" content="noindex">
-<link rel="canonical" href="https://amitaflalo1995.github.io/maple-helper-site/">
-<meta http-equiv="refresh" content="0; url=https://amitaflalo1995.github.io/maple-helper-site/">
+<link rel="canonical" href="https://www.maplehelper.app/">
+<meta http-equiv="refresh" content="0; url=https://www.maplehelper.app/">
 <script>
-  // the site moved to its own repository: keep the page the visitor asked for (/maple-helper/en/ -> /maple-helper-site/en/)
+  // the site lives at www.maplehelper.app: English at /, Hebrew at /he/ (the old /maple-helper/ home was Hebrew)
   var rest = location.pathname.replace(/^\/maple-helper\/?/, "");
-  location.replace("https://amitaflalo1995.github.io/maple-helper-site/" + rest + location.search + location.hash);
+  var to = rest === "" ? "he/" : rest.replace(/^en\/?/, "");
+  location.replace("https://www.maplehelper.app/" + to + location.search + location.hash);
 </script>
 </head>
 <body style="font-family: system-ui, sans-serif; text-align: center; padding: 3em;">
-<p>האתר עבר לכתובת חדשה: <a href="https://amitaflalo1995.github.io/maple-helper-site/">amitaflalo1995.github.io/maple-helper-site</a></p>
-<p lang="en" dir="ltr">The site moved: <a href="https://amitaflalo1995.github.io/maple-helper-site/en/">amitaflalo1995.github.io/maple-helper-site</a></p>
+<p>האתר עבר לכתובת חדשה: <a href="https://www.maplehelper.app/he/">www.maplehelper.app</a></p>
+<p lang="en" dir="ltr">The site moved: <a href="https://www.maplehelper.app/">www.maplehelper.app</a></p>
 </body>
 </html>
