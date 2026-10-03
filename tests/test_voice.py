@@ -28,7 +28,8 @@ def test_first_question_says_loading_not_downloading_when_on_disk(on_disk, state
         def stop(self): pass
         def close(self): pass
     vc._stream = Stream()
-    vc._chunks = [np.zeros((voice.SAMPLE_RATE, 1), dtype=np.float32)]
+    # a little noise, as any real mic gives: pure digital silence is macOS's "no microphone permission"
+    vc._chunks = [np.full((voice.SAMPLE_RATE, 1), 0.01, dtype=np.float32)]
     states = []
     vc.state.connect(states.append)
     vc._stop()
