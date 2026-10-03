@@ -339,6 +339,36 @@ def test_inventory_read_runs_in_a_worker_and_cards_come_first(overlay, monkeypat
     assert any("1" in ln or "אחד" in ln for ln in lines(overlay))     # "I recognized 1 item" before the question
 
 
+def test_look_alike_items_get_no_card_and_the_player_is_asked_to_hover(overlay, monkeypatch):
+    """Every scroll of a tier has one picture: the app doesn't pick one. It says the slot is one of N look-alikes
+    and asks for the mouse on the item (its tooltip names it), then F5 checks again without a click."""
+    from PySide6.QtGui import QKeyEvent
+    from maplehelper.ui import overlay as ov_mod
+    t = I18n("he")
+    look_alikes = [("item/2000000", 0.0), ("item/2000001", 0.0), ("item/2000002", 0.0)]
+    slots = [SimpleNamespace(index=4, matches=look_alikes, status="ambiguous"),
+             SimpleNamespace(index=9, matches=look_alikes, status="ambiguous"),
+             SimpleNamespace(index=2, matches=[("item/2000000", 50.0)], status="unknown")]
+    cards = []
+    monkeypatch.setattr(overlay, "add_cards", lambda keys: cards.append(keys))
+    overlay._show_inventory_read(slots)
+    import re
+    plain = lambda s: re.sub("[‎‏‪-‮⁦-⁩]", "", s)     # noqa: E731
+    shown = [plain(ln) for ln in lines(overlay)]
+    assert not cards                                            # no card for a guess
+    assert any("4, 9" in ln and "3" in ln and "Red Potion" in ln for ln in shown)
+    assert plain(t("inv_unknown", n=1, slots="2")) in shown and plain(t("inv_hover")) in shown
+    assert plain(t("inv_not_found")) not in shown
+    asked = []
+    monkeypatch.setattr(overlay, "ask_with_screenshot", lambda q, detail=False, shown=None: asked.append((q, detail)))
+    overlay.keyPressEvent(QKeyEvent(QKeyEvent.KeyPress, Qt.Key_F5, Qt.NoModifier))
+    assert asked == [(t("sell_q"), True)]
+    from PySide6.QtTest import QTest
+    QTest.keyClick(overlay.input, Qt.Key_F5)                   # typing in the chat, the mouse on the game
+    assert asked == [(t("sell_q"), True)] * 2
+    assert ov_mod.read_inventory.__doc__ and "inventory_read" in ov_mod.read_inventory.__doc__
+
+
 def test_portrait_is_cropped_in_a_worker(overlay, monkeypatch):
     import threading
 

@@ -432,6 +432,61 @@ def test_released_filters_unreleased_shops(real):
     assert not combat.released(real, "El Nath")
 
 
+# ------------------------------------------------------------------ items in the game (availability.item_open)
+
+def _guide_kb(tmp_path, items: dict[str, str]) -> KnowledgeBase:
+    """A KB with a release guide (Victoria Island in, Ossyria out), two towns, a quest at each, and these item pages."""
+    guide = ("Confirmed content\nClassic maps on Victoria Island are confirmed.\n"
+             "Not at launch\nOssyria and 3rd job are not initial-launch content.\n")
+    pages = {"guide/maplestory-classic-worlds-release-date": guide,
+             "map/1": "# Henesys\nLocation Victoria Road / Victoria Island\n",
+             "map/2": "# Orbis\nLocation Orbis / Ossyria\n",
+             "npc/1": "# Rina\nLocation\nHenesys\n", "npc/2": "# Lisa\nLocation\nOrbis\n",
+             "quest/1": "# Rina's Errand\n", "quest/2": "# Lisa's Errand\n", **items}
+    entities = [ent("guide/maplestory-classic-worlds-release-date", "Release"), ent("map/1", "Henesys"),
+                ent("map/2", "Orbis"), ent("npc/1", "Rina"), ent("npc/2", "Lisa"),
+                ent("quest/1", "Rina's Errand", NPC="Rina", Area="Victoria Island"),
+                ent("quest/2", "Lisa's Errand", NPC="Lisa", Area="Ossyria")]
+    entities += [ent(k, f"Item {k}") for k in items]
+    return small_kb(tmp_path, entities, {}, pages)
+
+
+def test_an_item_is_in_the_game_when_one_of_its_sources_is(tmp_path):
+    from maplehelper import availability
+    shop = "Where to buy\n{npc} Grocer cheapest\n{place}\n50\nmesos\nCOT2 prices\nDropped By\nCommunity sourced\n"
+    kb = _guide_kb(tmp_path, {
+        "item/1": shop.format(npc="Rina", place="Victoria Road: Henesys Shop · Henesys"),
+        "item/2": shop.format(npc="Lisa", place="Orbis: Orbis Department Store · Orbis"),
+        "item/3": "Quest Reward\nRina's Errand ( 25 %)\nSimilar Scroll items\n",
+        "item/4": "Quest Reward\nLisa's Errand\nSimilar Scroll items\n",
+        "item/5": "Craftable\nArcforge Consumables Produces × 1\nIngredients\n",
+        "item/6": "Cash Shop\n100 NX\nClosed-test price · Available\n",
+        "item/7": "Cash Shop\n100 NX\nClosed-test price · Unavailable\n",
+        "item/8": "Dropped By\nCommunity sourced\nLoading…\nFree Market Prices\n",
+        "item/9": "Needed By\n1 quest\nQuests\nQuest | Lv | Qty\nRina's Errand Rina\n| 17 | 3\n",
+    })
+    a = availability.of(kb)
+    assert {k: a.item_open(k) for k in (f"item/{i}" for i in range(1, 10))} == {
+        "item/1": True, "item/2": False,          # a shop in Henesys / only one in Orbis
+        "item/3": True, "item/4": False,          # a reward of an open / a shut quest
+        "item/5": True,                           # a recipe makes it
+        "item/6": True, "item/7": False,          # the Cash Shop sells it / doesn't
+        "item/8": False,                          # no source the KB confirms
+        "item/9": True,                           # an open quest asks for it
+    }
+
+
+@needs_kb
+def test_items_in_the_game_on_the_real_kb(real):
+    from maplehelper import availability
+    a = availability.of(real)
+    name = {e["name"]: k for k, e in real.entities.items() if e["category"] == "item"}
+    for n in ("Red Potion", "Snail Shell", "Apple", "Gloves Attack Scroll: Lesser", "Elixir", "Green Skullcap"):
+        assert a.item_open(name[n]), n
+    for n in ("Return Scroll to Orbis", "Dark Jr. Yeti Skin", "Firebomb Flame", "Cerebes Tooth"):
+        assert not a.item_open(name[n]), n
+
+
 # ------------------------------------------------------------------ 26: guide captions
 
 def test_figure_captions_keep_their_lines(monkeypatch, tmp_path):
