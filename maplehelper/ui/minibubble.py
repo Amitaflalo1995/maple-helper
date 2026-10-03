@@ -19,6 +19,7 @@ class MiniBubble(QWidget):
 
     def __init__(self):
         super().__init__(None, Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
+        self.setAttribute(Qt.WA_AlwaysShowToolTips)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAttribute(Qt.WA_MacAlwaysShowToolWindow)   # macOS hides tool windows of inactive apps
         self.setFixedSize(SIZE + 2 * MARGIN, SIZE + 2 * MARGIN)

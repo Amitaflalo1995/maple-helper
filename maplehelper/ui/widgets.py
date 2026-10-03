@@ -565,11 +565,14 @@ class EntityCard(Selectable, QFrame):
     # requirement, attack and defense. ("Required Level", "Attack" and "Defense" are no KB keys: 2,147 of 2,726 item
     # cards had no stat line at all, and none showed its level requirement.)
     MONSTER_STATS = ("Level", "HP", "EXP")
-    ITEM_STATS = ("Level Requirement", "Weapon Attack", "Magic Attack", "Weapon Defense", "Magic Defense")
+    ITEM_STATS = ("Level Requirement", "Weapon Attack", "Magic Attack", "Weapon Defense", "Magic Defense",
+                  "Upgrade Slots")
     ITEM_BONUSES = ("STR", "DEX", "INT", "LUK", "HP", "MP", "Accuracy", "Avoidability", "Speed", "Jump")
 
     @staticmethod
-    def _stats(e: dict, t) -> str:
+    def _stats(e: dict, t, limit: int | None = None) -> str:
+        """Every stat the KB gives the item (or the monster's level, HP and EXP): the bonuses are what tells one
+        hood from the next ("Red Thief Hood" HP +15, "Green Thief Hood" DEX +1 and HP +5), so none is cut."""
         props = e.get("props") or {}
         item = e.get("category") == "item"
         keys = (EntityCard.ITEM_STATS + EntityCard.ITEM_BONUSES) if item else EntityCard.MONSTER_STATS
@@ -587,7 +590,7 @@ class EntityCard(Selectable, QFrame):
             # otherwise lands on the wrong side ("233 :HP", seen live)
             # (+ RLM: two English pieces side by side would otherwise merge into one run, in English order)
             bits.append(f"‪{text}‬‏" if label.isascii() else text)
-            if len(bits) >= 3:
+            if limit and len(bits) >= limit:
                 break
         return " · ".join(bits)
 
@@ -907,9 +910,13 @@ class CharacterRow(QFrame):
 class EntityTile(Selectable, QFrame):
     """Compact item tile for lists (drops, rewards): picture + official name. Tap to ask about it."""
 
-    def __init__(self, kb, key: str):
+    def __init__(self, kb, key: str, t=None):
         super().__init__(objectName="Tile")
         e = kb.get(key) or {}
+        if t is None:
+            from ..i18n import I18n
+            from . import terms
+            t = I18n(terms.LANG)          # the chat's language (a tile made without one)
         self._init_selectable(key, e.get("name", key))
         self.url = e.get("url")
         self.setToolTip(e.get("name", key))
@@ -925,17 +932,50 @@ class EntityTile(Selectable, QFrame):
             if not pm.isNull():
                 pic.setPixmap(pm.scaled(32, 32, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         row.addWidget(pic)
+        col = QVBoxLayout()
+        col.setSpacing(1)
         self.name = QLabel(e.get("name", key), objectName="TileName")
         self.name.setWordWrap(True)
         self.name.setMinimumWidth(48)        # a long word ("Intermediate") never holds two tiles wider than the chat
-        row.addWidget(self.name, 1)
+        col.addWidget(self.name)
+        # the item's level requirement and bonuses under its name: tiles of look-alike items (the five Thief Hoods)
+        # differ only there
+        stats = EntityTile.short_stats(e) if e.get("category") == "item" else ""
+        self.stats = QLabel(stats, objectName="TileStats")
+        self.stats.setWordWrap(True)
+        self.stats.setMinimumWidth(48)
+        self.stats.setVisible(bool(stats))
+        col.addWidget(self.stats)
+        row.addLayout(col, 1)
         self._align_name()
+
+    # a tile is half the chat wide: the game's own short stat names ("Lv. 15 · DEF 18 · DEX +1 · HP +5")
+    SHORT = {"Level Requirement": "Lv.", "Weapon Attack": "ATT", "Magic Attack": "M.ATT", "Weapon Defense": "DEF",
+             "Magic Defense": "M.DEF", "Accuracy": "ACC", "Avoidability": "AVOID", "Upgrade Slots": "Slots"}
+
+    @staticmethod
+    def short_stats(e: dict) -> str:
+        props = e.get("props") or {}
+        bits = []
+        for k in EntityCard.ITEM_STATS + EntityCard.ITEM_BONUSES:
+            v = props.get(k)
+            if v in (None, "", 0, "0"):
+                continue
+            if k in EntityCard.ITEM_BONUSES:
+                sign = "" if str(v)[:1] in "+-" else "+"
+                bits.append(f"{EntityTile.SHORT.get(k, k)}\u00a0{sign}{v}")
+            else:
+                bits.append(f"{EntityTile.SHORT.get(k, k)}\u00a0{v}")
+        # one left-to-right run (a Hebrew chat mirrored "+1 DEX"); no-break spaces keep a value with its name
+        return "\u202a" + " · ".join(bits) + "\u202c" if bits else ""
 
     def _align_name(self):
         """The (English) name sits right beside its picture: on the right in a Hebrew chat. Qt resolves "leading"
         by the text's own direction, so an English name went to the far left, away from its picture."""
         rtl = self.layoutDirection() == Qt.RightToLeft
-        self.name.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
+        for lb in (self.name, getattr(self, "stats", None)):
+            if lb is not None:
+                lb.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
 
     def changeEvent(self, e):
         from PySide6.QtCore import QEvent
@@ -974,7 +1014,7 @@ class TileGrid(QFrame):
         grid = QGridLayout()
         grid.setSpacing(6)
         for i, k in enumerate(keys):
-            grid.addWidget(EntityTile(kb, k), i // 2, i % 2)
+            grid.addWidget(EntityTile(kb, k, t), i // 2, i % 2)
         outer.addLayout(grid)
         credit = QLabel("NiaMeowDB (meowdb.com)", objectName="CardCredit")
         outer.addWidget(credit)
@@ -1031,7 +1071,7 @@ class DropGroupCard(QFrame):
         grid.setSpacing(6)
         mixed = len(set(srcs.get(i) for i in items)) > 1
         for i, k in enumerate(items):
-            tile = EntityTile(kb, k)
+            tile = EntityTile(kb, k, t)
             if mixed and t is not None:
                 tile.setToolTip(f"{tile.toolTip()} · {sources.tag(t, srcs.get(k) or sources.MSEA)}")
             grid.addWidget(tile, i // 2, i % 2)

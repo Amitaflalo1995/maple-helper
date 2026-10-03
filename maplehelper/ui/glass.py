@@ -182,6 +182,7 @@ class GlassDialog(QDialog):
                  strength: float = 0.6):
         # on top like the chat and Settings, or a confirmation opened from Settings hides behind it
         super().__init__(None, Qt.FramelessWindowHint | Qt.Dialog | Qt.WindowStaysOnTopHint)
+        self.setAttribute(Qt.WA_AlwaysShowToolTips)      # tooltips while the game is the active window too
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setWindowTitle(title)
         self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)

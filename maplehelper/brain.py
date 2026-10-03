@@ -112,6 +112,7 @@ REPLY_RULES = """<reply_rules>
 - Only what the game scope in your instructions says is in the game: never send the player to a place it says is not
   out, or suggest its monsters, NPCs, quests or a job advancement it says is not out; if asked, say it isn't out yet.
 - At most {length} short lines. No filler, no follow-up offers.
+- Never write knowledge-base keys ("item/294", "monster/5") in the answer text: they go only in the META block.
 - NEVER translate game names: items, monsters, maps, NPCs, skills and quests stay in English exactly as in the data
   ("Blue Snail Shell", not "קונכיית חילזון כחול"), even inside a Hebrew sentence.
 - Locations, drops and stats only from the context or the knowledge base (Grep pages/monster/*.md for "Map Locations" if needed).
@@ -300,10 +301,21 @@ def item_keys_for_question(question: str, kb: KnowledgeBase) -> list[str]:
     return []
 
 
+# a knowledge-base key the AI wrote into its prose ("Subi Throwing Stars (item/294)"): keys are for the META block
+# and the app's cards, a player reads them as noise. Removed with the brackets around it, or alone.
+_KEY_IN_TEXT = re.compile(r"\s*[\(\[]\s*(?:monster|item|map|npc|quest|skill|class|guide|shop|crafting|formula)/[\w\-]+"
+                          r"\s*[\)\]]|\s*(?<![\w/])(?:monster|item|map|npc|quest|skill|class|guide|shop|crafting|formula)/"
+                          r"[\w\-]+(?![\w/])")
+
+
+def drop_keys(text: str) -> str:
+    return _KEY_IN_TEXT.sub("", text)
+
+
 def split_meta(raw: str) -> tuple[str, dict]:
     """Separate the visible answer from the trailing @@META@@ JSON."""
     if META not in raw:
-        return raw.strip(), {}
+        return drop_keys(raw).strip(), {}
     text, _, meta = raw.partition(META)
     m = re.search(r"\{.*\}", meta, re.S)
     try:
@@ -317,7 +329,7 @@ def split_meta(raw: str) -> tuple[str, dict]:
         if key in data and not isinstance(data[key], typ):
             del data[key]
     _numbers(data.get("profile_update"))
-    return text.strip(), data
+    return drop_keys(text).strip(), data
 
 
 def _whole(v) -> int | None:
@@ -361,7 +373,7 @@ def streamed_text(raw: str) -> str:
         if text.endswith(META[:n]):
             text = text[:-n]
             break
-    return text.strip()
+    return drop_keys(text).strip()
 
 
 class Brain:

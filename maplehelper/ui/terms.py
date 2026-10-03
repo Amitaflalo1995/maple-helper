@@ -20,7 +20,7 @@ LANG = "he"          # the UI language; the chat sets it at start
 BADGE_PX = 15
 
 
-def _badge_uri() -> str | None:
+def _badge_uri(color: str | None = None, size_px: int | None = None) -> str | None:
     """Draw the "?" badge once (needs a running Qt app) and hand it to the glossary's links as a data: URI.
 
     Kept in memory, never in a file: a shared temp file was redrawn or deleted by another process (a test
@@ -28,13 +28,13 @@ def _badge_uri() -> str | None:
     if QGuiApplication.instance() is None:
         return None
     scale = 3                                   # drawn large, shown at BADGE_PX: crisp on any screen
-    size = BADGE_PX * scale
+    size = (size_px or BADGE_PX) * scale
     pm = QPixmap(size, size)
     pm.fill(Qt.transparent)
     p = QPainter(pm)
     p.setRenderHint(QPainter.Antialiasing)
     p.setPen(Qt.NoPen)
-    p.setBrush(QColor(theme.ORANGE))
+    p.setBrush(QColor(color or theme.ORANGE))
     p.drawEllipse(0, 0, size, size)
     f = QFont("Arial")
     f.setBold(True)
@@ -48,6 +48,12 @@ def _badge_uri() -> str | None:
     buf.open(QIODevice.WriteOnly)
     pm.save(buf, "PNG")
     return "data:image/png;base64," + bytes(data.toBase64()).decode()
+
+
+def hint_badge_html(px: int = 13) -> str:
+    """A small grey "?" before a line whose tooltip explains it (the scope line under the chat)."""
+    uri = _badge_uri("#9A9AA0", px)
+    return f"<img src='{uri}' width='{px}' height='{px}' style='vertical-align: middle'>&nbsp;" if uri else ""
 
 
 def setup():

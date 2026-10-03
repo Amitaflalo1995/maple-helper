@@ -151,3 +151,12 @@ def test_verified_date_is_the_last_nightly_check(isolated_store, monkeypatch, tm
     assert updater.kb_checked() == "2026-10-03"                 # a quiet night still moves it on
     updater._remember_checked("not a date")
     assert updater.kb_checked() == "2026-10-03"
+
+
+def test_kb_keys_never_reach_the_answer_text():
+    from maplehelper import brain
+    raw = "Subi Throwing Stars (item/294) is a drop of Mano [monster/700004] (MSEA), see item/12.\n@@META@@ {}"
+    text, _ = brain.split_meta(raw)
+    assert text == "Subi Throwing Stars is a drop of Mano (MSEA), see."
+    assert "item/" not in brain.streamed_text("זה drop של Mano (item/294) - מופיע")
+    assert brain.drop_keys("קבצים ב-pages/item") == "קבצים ב-pages/item"      # a path in words isn't a key

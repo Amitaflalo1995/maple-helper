@@ -1,6 +1,7 @@
 """The in-game chat window: a liquid-glass panel over the game, draggable across monitors, F9 only to close."""
 from __future__ import annotations
 
+import html
 import time
 
 from PySide6.QtCore import (QEasingCurve, QObject, QParallelAnimationGroup, QPoint, QPropertyAnimation, QRect, QRectF,
@@ -316,6 +317,9 @@ class Overlay(QWidget):
 
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, brain: Brain):
         super().__init__(None, Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
+        # the game is the active window while the chat floats over it, and Qt shows tooltips only in the active
+        # window: without this, hovering a button explained it only sometimes
+        self.setAttribute(Qt.WA_AlwaysShowToolTips)
         from . import terms
         terms.LANG = settings["language"] or "he"
         terms.setup()
@@ -560,6 +564,7 @@ class Overlay(QWidget):
         lay.addWidget(self.capsule)
         # under the chat: what the answers cover. Only what the KB confirms is in the game, and when it last checked
         self.scope_note = QLabel(objectName="ScopeNote")
+        self.scope_note.setTextFormat(Qt.RichText)
         self.scope_note.setWordWrap(True)
         self.scope_note.setAlignment(Qt.AlignHCenter)
         lay.addWidget(self.scope_note)
@@ -640,9 +645,10 @@ class Overlay(QWidget):
         super().leaveEvent(e)
 
     def _fit_header(self):
-        """Version and saver badge only when the header has room: first the version goes, then the buttons move
-        closer, then the badge shrinks to its leaf (its tooltip still explains it), then BETA becomes "β", and only at the
-        narrowest width with the largest font does it step aside."""
+        """Version and saver badge only when the header has room: first the buttons move closer, then the version
+        goes, then the badge shrinks to its leaf (its tooltip still explains it), then BETA becomes "β", and only at
+        the narrowest width with the largest font does it step aside. (Closer buttons first: with BETA beside the
+        name the version went at the default size.)"""
         tb = self.title_bar.layout()
         room = self.title_bar.width()
         self.saver_badge.setText("🍃 " + self.t("saver_on_badge"))
@@ -651,7 +657,7 @@ class Overlay(QWidget):
         self.beta_badge.setText("BETA")
         self.beta_badge.show()
         tb.setSpacing(8)
-        for step in ("version", "tight", "badge", "beta", "nobeta", "done"):
+        for step in ("tight", "version", "badge", "beta", "nobeta", "done"):
             tb.invalidate()
             if tb.sizeHint().width() <= room or step == "done":
                 return
@@ -683,7 +689,9 @@ class Overlay(QWidget):
         checked = day(updater.kb_checked())     # the last night the KB was checked against NiaMeowDB
         changed = day(availability.of(self.kb).verified)       # when the release guide last changed what's out
         text = self.t("scope_note", date=checked) if checked else self.t("scope_note_nodate")
-        self.scope_note.setText(bidi.plain(text, self.t.rtl))
+        from . import terms
+        # a grey "?" says the line explains itself on hover
+        self.scope_note.setText(terms.hint_badge_html() + html.escape(bidi.plain(text, self.t.rtl)))
         tip = self.t("scope_tip") + ("\n" + self.t("scope_tip_changed", date=changed) if changed else "")
         self.scope_note.setToolTip(tip)
         self.beta_badge.setToolTip(self.t("beta_tip"))

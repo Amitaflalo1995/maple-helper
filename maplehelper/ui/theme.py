@@ -250,6 +250,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #Card[selected="true"], #Tile[selected="true"], #GroupHeader[selected="true"] {{
         border: 2px solid {ORANGE}; background: rgba(255,149,51,0.12); }}
     #TileName {{ font-size: {s - 1}px; font-weight: 500; color: {c['text']}; }}
+    #TileStats {{ font-size: {s - 3}px; color: {c['muted']}; }}
     #CardName {{ font-weight: 600; color: {c['text']}; }}
     #CardSub {{ color: {c['muted']}; font-size: {s - 2}px; }}
     #CardStat {{ color: {c['text']}; font-size: {s - 2}px; }}
