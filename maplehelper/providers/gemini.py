@@ -12,8 +12,10 @@ not Gemini CLI. Each question runs `agy` headless, locked down:
 The screenshot is a file the agent opens with view_file (agy takes only text in a message), the
 question comes on stdin and the answer streams back.
 
-Sign-in: agy prints a Google link; after signing in, the page shows a code the player pastes back
-(it waits 60 seconds). login() starts it hidden and opens the link; submit_login_code() pastes.
+Sign-in: agy prints a Google link and opens it in the browser itself; after signing in, the page shows a
+code the player pastes back (it waits 60 seconds). login() starts it hidden; submit_login_code() types the
+code into its console. Anything else run with -p while signed out would start that same sign-in, so the
+usage read checks first and an answer stops at "Authentication required".
 """
 from __future__ import annotations
 
@@ -51,7 +53,7 @@ TOOLS = ["view_file", "grep_search", "list_dir", "find_by_name"]
 RETRY_NOTE = ("\n\n(Your last attempt stopped at a blocked file. Read only inside the knowledge-base folder "
               "and the screenshot, then answer.)")
 SIGNED_IN_AS = re.compile(r"authenticated successfully as (\S+@\S+)")
-LOGIN_URL = re.compile(r"https://accounts\.google\.com/\S+")
+AUTH_NEEDED = b"Authentication required"     # agy, signed out, about to start a sign-in
 
 
 def home() -> Path:
@@ -388,6 +390,10 @@ class Gemini(Provider):
 
     def read_limits(self, timeout: float = CHECK_TIMEOUT_S) -> dict | None:
         try:
+            # signed out, agy answers /usage by starting a sign-in, and opens Google in the browser by itself
+            # (opening Settings did that): read it only once `agy models` (which never does) says signed in
+            if not read_models():
+                return None
             r = _run(["-p", "/usage", "--output-format", "json"], timeout)
         except CheckFailed:
             return None
@@ -434,16 +440,9 @@ class Gemini(Provider):
             return None
         home().mkdir(parents=True, exist_ok=True)
         sign_in_mode()
-        opened = threading.Event()
-
-        def on_line(text: str):
-            m = LOGIN_URL.search(text)
-            if m and not opened.is_set():
-                opened.set()
-                import webbrowser
-                webbrowser.open(m.group(0))
+        # agy opens the Google page in the browser by itself (a second tab from here was one too many)
         return base.open_login(exe, ["-p", "Reply with just: OK", "--output-format", "json"], env(),
-                               cwd=str(home()), keep_stdin=True, on_line=on_line)
+                               cwd=str(home()), keep_stdin=True)
 
     def submit_login_code(self, code: str) -> bool:
         return base.send_login_input(code.strip() + "\n")
@@ -508,7 +507,19 @@ class GeminiBackend:
             self._proc = p
         self._running.add(p)
         err: list[bytes] = []
-        reader = threading.Thread(target=lambda: err.extend(iter(lambda: p.stderr.read(4096), b"")), daemon=True)
+        signed_out = threading.Event()
+
+        def drain_stderr():
+            for chunk in iter(lambda: p.stderr.read(4096), b""):
+                err.append(chunk)
+                if AUTH_NEEDED in b"".join(err[-2:]):
+                    stop_signed_out()
+        reader = threading.Thread(target=drain_stderr, daemon=True)
+
+        def stop_signed_out():
+            # signed out: agy would open a Google sign-in in the browser and wait a minute for a code
+            signed_out.set()
+            p.kill()
         reader.start()
 
         def feed():
@@ -535,6 +546,9 @@ class GeminiBackend:
         def lines():
             for line in p.stdout:
                 last[0] = time.monotonic()
+                if AUTH_NEEDED in line:
+                    stop_signed_out()
+                    break
                 yield line
         conv = None
         try:
@@ -545,6 +559,9 @@ class GeminiBackend:
         finally:
             self._running.discard(p)
             forget(conv)
+        if signed_out.is_set():
+            log.warning("Gemini is signed out: the question stopped before agy opened a sign-in")
+            return RawResult(error="not_logged_in")
         if stalled.is_set():
             log.warning("Gemini stalled, stopped: %s", stderr[-1000:])
             return RawResult(error="timeout")

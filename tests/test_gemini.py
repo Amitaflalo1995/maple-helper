@@ -162,19 +162,17 @@ class TestAccount:
         monkeypatch.setattr(gemini, "_run", lambda args, timeout=30: None)
         assert providers.get("gemini").account()["status"] == "not_installed"
 
-    def test_sign_in_runs_hidden_opens_the_link_once_and_takes_the_code(self, home, monkeypatch):
+    def test_sign_in_runs_hidden_and_takes_the_code(self, home, monkeypatch):
+        """agy opens the Google page itself: the app opening it too made a second tab."""
         seen, opened = {}, []
         monkeypatch.setattr(gemini, "find_agy", lambda: "agy.exe")
-        monkeypatch.setattr(base, "open_login", lambda exe, args, env, cwd, keep_stdin, on_line: seen.update(
-            exe=exe, args=args, env=env, cwd=cwd, keep=keep_stdin, on_line=on_line) or "proc")
+        monkeypatch.setattr(base, "open_login", lambda exe, args, env, cwd, keep_stdin: seen.update(
+            exe=exe, args=args, env=env, cwd=cwd, keep=keep_stdin) or "proc")
         import webbrowser
         monkeypatch.setattr(webbrowser, "open", opened.append)
         assert providers.get("gemini").login() == "proc"
         assert seen["keep"] and seen["cwd"] == str(home) and seen["env"]["HOME"] == str(home)
-        seen["on_line"]("Authentication required. Please visit the URL to log in:")
-        seen["on_line"]("https://accounts.google.com/o/oauth2/auth?client_id=1&state=2")
-        seen["on_line"]("https://accounts.google.com/o/oauth2/auth?client_id=1&state=2")
-        assert opened == ["https://accounts.google.com/o/oauth2/auth?client_id=1&state=2"]
+        assert opened == []
         typed = []
         monkeypatch.setattr(base, "send_login_input", typed.append)
         providers.get("gemini").submit_login_code("  4/0AXl-code \n")
@@ -390,3 +388,18 @@ def test_a_check_that_hangs_is_not_not_installed(home, monkeypatch):
     monkeypatch.setattr(gemini, "_models_cache", [])
     assert providers.get("gemini").account()["status"] == "logged_out"
     assert providers.get("gemini").models() == [(None, "")] and providers.get("gemini").read_limits() is None
+
+
+def test_signed_out_question_stops_before_agy_opens_a_sign_in(home, monkeypatch, kb_copy):
+    from maplehelper.kb import KnowledgeBase
+    b = TestBackend().make(KnowledgeBase(kb_copy), monkeypatch,
+                           ["Authentication required. Please visit the URL to log in:\n", "  https://accounts...\n"])
+    assert b.ask("hi", None, None, None).error == "not_logged_in"
+
+
+def test_usage_is_read_only_when_signed_in(home, monkeypatch):
+    """Signed out, agy answers /usage by opening a Google sign-in in the browser (it did when Settings opened)."""
+    calls = []
+    monkeypatch.setattr(gemini, "read_models", lambda max_age=10: [])
+    monkeypatch.setattr(gemini, "_run", lambda args, timeout=30: calls.append(args))
+    assert providers.get("gemini").read_limits() is None and calls == []
