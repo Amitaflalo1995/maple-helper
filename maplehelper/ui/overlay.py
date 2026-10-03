@@ -405,7 +405,7 @@ class Overlay(QWidget):
         tb.addWidget(self.saver_badge)
         # the version and the saver badge never hold the window wide: _fit_header hides / shortens them when
         # the header has no room (at 470 px with a large font the chat could not get that narrow)
-        for w in (self.version_label, self.saver_badge):
+        for w in (self.version_label, self.saver_badge, self.beta_badge):
             w.setMinimumWidth(1)
         tb.addStretch(1)
         self.history_btn = self._icon_button(theme.ICON["search"])
@@ -641,14 +641,17 @@ class Overlay(QWidget):
 
     def _fit_header(self):
         """Version and saver badge only when the header has room: first the version goes, then the buttons move
-        closer, then the badge shrinks to its leaf (its tooltip still explains it)."""
+        closer, then the badge shrinks to its leaf (its tooltip still explains it), then BETA becomes "β", and only at the
+        narrowest width with the largest font does it step aside."""
         tb = self.title_bar.layout()
         room = self.title_bar.width()
         self.saver_badge.setText("🍃 " + self.t("saver_on_badge"))
         self.saver_badge.setVisible(self._saver_on)
         self.version_label.show()
+        self.beta_badge.setText("BETA")
+        self.beta_badge.show()
         tb.setSpacing(8)
-        for step in ("version", "tight", "badge", "done"):
+        for step in ("version", "tight", "badge", "beta", "nobeta", "done"):
             tb.invalidate()
             if tb.sizeHint().width() <= room or step == "done":
                 return
@@ -656,8 +659,12 @@ class Overlay(QWidget):
                 self.version_label.hide()
             elif step == "tight":
                 tb.setSpacing(3)          # the header's buttons closer together
-            else:
+            elif step == "badge":
                 self.saver_badge.setText("🍃")
+            elif step == "beta":
+                self.beta_badge.setText("β")
+            else:
+                self.beta_badge.hide()
 
     def resizeEvent(self, e):
         super().resizeEvent(e)
