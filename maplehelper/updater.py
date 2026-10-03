@@ -25,7 +25,7 @@ import urllib.error
 import urllib.request
 import zipfile
 
-from .store import USER_KB, kb_dir
+from .store import DATA_DIR, USER_KB, kb_dir
 
 # Set when the GitHub repository exists (see README, "Publishing").
 GITHUB_REPO = "Maple-Helper/maple-helper"
@@ -95,6 +95,36 @@ def update_kb(before_swap=None) -> bool:
     return fetch_kb(before_swap) == "updated"
 
 
+CHECKED_FILE = DATA_DIR / "kb_checked.txt"
+
+
+def _remember_checked(day) -> None:
+    """The night the KB was last checked against NiaMeowDB (the manifest's "checked", moved on every night even
+    when nothing changed): the chat shows it as "knowledge base verified on"."""
+    if isinstance(day, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", day):
+        try:
+            CHECKED_FILE.write_text(day, encoding="utf-8")
+        except OSError:
+            pass
+
+
+def kb_checked() -> str:
+    """"2026-10-03" when known: the manifest's last check, else the installed KB's own date."""
+    try:
+        day = CHECKED_FILE.read_text(encoding="utf-8").strip()
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", day):
+            return max(day, _kb_date())
+    except OSError:
+        pass
+    return _kb_date()
+
+
+def _kb_date() -> str:
+    """The installed KB's date from its version ("2026.09.30.2111" -> "2026-09-30")."""
+    m = re.match(r"(\d{4})\.(\d{2})\.(\d{2})", local_version())
+    return "-".join(m.groups()) if m else ""
+
+
 def fetch_kb(before_swap=None) -> str:
     """"updated", "uptodate", "postponed" or "failed". before_swap() runs right before the folders are swapped (the app
     stops the AI process working inside the KB there); returning False postpones the update."""
@@ -111,6 +141,7 @@ def fetch_kb(before_swap=None) -> str:
             and _SHA.fullmatch(str(manifest.get("sha256", "")).lower())
             and re.fullmatch(r"\d{4}\.\d{2}\.\d{2}(\.\d{1,6})?", str(manifest.get("version", "")))):
         return "failed"          # only a KB from this repository's releases, with a real checksum and version
+    _remember_checked(manifest.get("checked"))
     if str(manifest.get("version", "")) <= local_version():
         return "uptodate"
     data = _get(manifest["url"], timeout=300)

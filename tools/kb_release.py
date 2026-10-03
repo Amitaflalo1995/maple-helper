@@ -180,7 +180,9 @@ def pack(kb: Path, out: Path, version: str | None = None, previous_kb: Path | No
         for f in sorted(p for p in kb.rglob("*") if p.is_file()):
             z.write(f, f.relative_to(kb).as_posix())
     manifest = {"version": version, "sha256": hashlib.sha256(zpath.read_bytes()).hexdigest(),
-                "url": f"https://github.com/{REPO}/releases/latest/download/kb.zip"}
+                "url": f"https://github.com/{REPO}/releases/latest/download/kb.zip",
+                # when NiaMeowDB was last checked; the nightly run moves it on even when nothing changed
+                "checked": time.strftime("%Y-%m-%d", time.gmtime())}
     (out / "kb-manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
     return manifest
 

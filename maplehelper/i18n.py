@@ -18,6 +18,7 @@ STRINGS = {
     "scope_note_nodate": {"he": "מותאם למה שיש במשחק עכשיו, לפי המאגר", "en": "Matches the game as it is now, per the knowledge base"},
     "scope_tip": {"he": "התשובות והכלים מבוססים רק על מה שהמאגר של NiaMeowDB מאשר שנמצא במשחק. כשתוכן חדש יוצא והמאגר מאשר אותו, הוא מתווסף לבד בעדכון המאגר.",
                   "en": "Answers and tools use only what the NiaMeowDB knowledge base confirms is in the game. When new content comes out and the knowledge base confirms it, it is added by itself with a knowledge base update."},
+    "scope_tip_changed": {"he": "מה שקיים במשחק השתנה לאחרונה במאגר ב-{date}.", "en": "What is in the game last changed in the knowledge base on {date}."},
     "beta_tip": {"he": "גרסת בטא: ייתכנו תקלות. אפשר לדווח בהגדרות ← דיווח על תקלה.",
                  "en": "Beta version: there may be bugs. Report them in Settings → Report a problem."},
     "input_placeholder": {"he": "שאלו אותי משהו… (Enter לשליחה, F10 לדיבור)",

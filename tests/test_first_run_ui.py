@@ -140,3 +140,14 @@ def test_hebrew_search_boxes_start_on_the_right(qapp):
     en = QLineEdit()
     follow_typing(en, False)
     assert en.alignment() & Qt.AlignLeft
+
+
+def test_verified_date_is_the_last_nightly_check(isolated_store, monkeypatch, tmp_path):
+    from maplehelper import updater
+    monkeypatch.setattr(updater, "CHECKED_FILE", tmp_path / "kb_checked.txt")
+    monkeypatch.setattr(updater, "local_version", lambda: "2026.09.30.2111")
+    assert updater.kb_checked() == "2026-09-30"                 # no check yet: the installed KB's own date
+    updater._remember_checked("2026-10-03")
+    assert updater.kb_checked() == "2026-10-03"                 # a quiet night still moves it on
+    updater._remember_checked("not a date")
+    assert updater.kb_checked() == "2026-10-03"

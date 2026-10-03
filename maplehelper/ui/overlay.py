@@ -676,12 +676,16 @@ class Overlay(QWidget):
     def show_scope(self) -> None:
         """The line under the chat: answers follow the game as it is now, as the KB last verified it (a KB update
         brings a new date, and content the KB confirms as released appears without an app update)."""
-        from .. import availability
-        a = availability.of(self.kb)
-        date = ".".join(reversed(a.verified.split("-"))) if a.verified else ""
-        text = self.t("scope_note", date=date) if date else self.t("scope_note_nodate")
+        from .. import availability, updater
+
+        def day(iso: str) -> str:            # "2026-10-03" -> "03.10.2026"
+            return ".".join(reversed(iso.split("-"))) if iso else ""
+        checked = day(updater.kb_checked())     # the last night the KB was checked against NiaMeowDB
+        changed = day(availability.of(self.kb).verified)       # when the release guide last changed what's out
+        text = self.t("scope_note", date=checked) if checked else self.t("scope_note_nodate")
         self.scope_note.setText(bidi.plain(text, self.t.rtl))
-        self.scope_note.setToolTip(self.t("scope_tip"))
+        tip = self.t("scope_tip") + ("\n" + self.t("scope_tip_changed", date=changed) if changed else "")
+        self.scope_note.setToolTip(tip)
         self.beta_badge.setToolTip(self.t("beta_tip"))
 
     def apply_language(self):

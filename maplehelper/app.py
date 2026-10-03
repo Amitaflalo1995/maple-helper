@@ -662,6 +662,7 @@ class MapleHelperApp:
 
     def _kb_update_done(self, status: str, before: str, interactive: bool):
         t = I18n(self.settings["language"])
+        self.overlay.show_scope()           # the check itself moves "verified on" on, even with nothing new
         if status == "updated":
             self.reload_kb()
             self.kb_updated(before, interactive=interactive)
