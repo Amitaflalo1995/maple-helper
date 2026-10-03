@@ -560,6 +560,8 @@ STRINGS = {
     "q_profession": {"he": "דורש {prof} ברמה {n} (בדף היצירה)", "en": "Needs {prof} Lv. {n} (crafting page)"},
     "exp_title": {"he": "כמה EXP מרוויחים?", "en": "How much EXP are you making?"},
     "exp_now": {"he": "עכשיו: Lv. {lv} · EXP {pct}", "en": "Now: Lv. {lv} · EXP {pct}"},
+    "exp_now_unknown": {"he": "עכשיו: Lv. {lv} · אחוז ה-EXP עוד לא נקרא מהמשחק",
+                        "en": "Now: Lv. {lv} · your EXP % hasn't been read from the game yet"},
     "exp_per_hour": {"he": "EXP לשעה", "en": "EXP / hour"},
     "exp_pct_hour": {"he": "מהלבל בשעה", "en": "of the level / hour"},
     "exp_to_level": {"he": "עד הלבל הבא", "en": "to next level"},

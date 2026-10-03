@@ -1388,8 +1388,9 @@ class ToolsDialog(GlassDialog):
         if not c:
             self._set(self.exp_now, t("tool_no_char"))
             return
-        pct = f"{c.exp_pct:.1f}%" if c.exp_pct is not None else "?"
-        self._set(self.exp_now, t("exp_now", lv=c.level, pct=pct))
+        # no reading yet: say so, a lone "?" read like a broken value
+        self._set(self.exp_now, t("exp_now", lv=c.level, pct=f"{c.exp_pct:.1f}%") if c.exp_pct is not None
+                  else t("exp_now_unknown", lv=c.level))
         m = self.meter.get(c.id) or {}
         r = m.get("result")
         for key, cell in self.exp_cells.items():
