@@ -37,7 +37,7 @@ MAX_W = 360          # wide pictures are scaled down to the reader's width
 ICON_MAX = 40        # an image this small inside text is an inline icon
 
 VOID = {"img", "br", "hr", "input", "meta", "link", "source", "wbr", "line", "rect", "path", "circle", "col"}
-BLOCK = {"p", "ul", "ol", "table", "h1", "h2", "h3", "h4", "h5", "div", "section", "article", "figure", "header",
+BLOCK = {"p", "pre", "ul", "ol", "table", "h1", "h2", "h3", "h4", "h5", "div", "section", "article", "figure", "header",
          "details", "summary", "aside", "nav", "blockquote", "li", "dl", "dt", "dd", "figcaption", "main", "footer"}
 SKIP_TAGS = {"script", "style", "svg", "button", "nav", "noscript", "aside", "form", "input", "select", "iframe"}
 SKIP_CLASSES = ("correction-loop", "toc", "button-row")
@@ -102,7 +102,9 @@ def plain(n) -> str:
 def squash(s: str) -> str:
     s = re.sub(r"[ \t\r\f\v ]+", " ", s)
     s = re.sub(r" *\n[\n ]*", "\n", s)
-    s = re.sub(r"\*\*\s*\*\*", "", s)
+    # "**a** **b**" -> "**a b**", but never across a line break: "= **60**\n**Basic attack MAX**" stays two
+    # lines (joined, it read "= **60Basic attack MAX**")
+    s = re.sub(r"\*\*[ \t]*\*\*", "", s)
     s = re.sub(r"\s+([,.;:!?)])", r"\1", s)     # "Razor ." -> "Razor."
     s = re.sub(r"\(\s+", "(", s)
     return s.strip(" \n")
@@ -182,10 +184,19 @@ class Converter:
     def inline(self, n) -> str:
         if isinstance(n, str):
             return re.sub(r"\s+", " ", n)        # line breaks in the HTML source are just spaces
-        if n.tag in SKIP_TAGS or hidden(n):
+        if n.tag in SKIP_TAGS:
             return ""
+        if hidden(n):
+            # a separator hidden from screen readers still parts the words on screen: "<time>October 21,
+            # 2026</time><span aria-hidden> · </span>Starts" was "October 21, 2026Starts"
+            sep = plain(n) if n.attrs.get("aria-hidden") == "true" else ""
+            return sep if sep.strip() and not re.search(r"\w", sep) else (" " if sep else "")
         if n.tag == "br":
             return "\n"
+        if n.tag == "pre":
+            # a formula block: its own line breaks are the formula's lines, and it is a block of its own
+            # ("... x 0.8</pre><pre>MIN = ..." read "x 0.8MIN = ...")
+            return "\n" + "".join(k if isinstance(k, str) else self.inline(k) for k in n.kids) + "\n"
         if n.tag == "img":
             return self.icon(n)
         inner = "".join(self.inline(k) for k in n.kids)

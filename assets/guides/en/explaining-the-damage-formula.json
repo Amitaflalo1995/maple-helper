@@ -20,7 +20,13 @@
    "h3": "Weapon attacks"
   },
   {
-   "p": "K = SkillDamage / 100 m = (MasteryLevel / 10 + 0.1) × 0.8MIN = K × TotalWATK × (0.8 + (P × m × W + Q + 2A) / 100)MAX = K × TotalWATK × (1.0 + (P × W + Q + 2A) / 100)"
+   "p": "K = SkillDamage / 100\nm = (MasteryLevel / 10 + 0.1) × 0.8"
+  },
+  {
+   "p": "MIN = K × TotalWATK ×\n(0.8 + (P × m × W + Q + 2A) / 100)"
+  },
+  {
+   "p": "MAX = K × TotalWATK ×\n(1.0 + (P × W + Q + 2A) / 100)"
   },
   {
    "p": "K"
@@ -74,7 +80,16 @@
    "h3": "Spells"
   },
   {
-   "p": "K = SkillPower / 100 m = (SpellMastery / 10 + 0.1) × 0.8MagicTotal = floor(TotalINT / 2) + EquipmentMATK + ScrollMATK + BuffMATKMIN = K × MagicTotal × (1 + TotalINT × m / 100)MAX = K × MagicTotal × (1 + TotalINT / 100)"
+   "p": "K = SkillPower / 100\nm = (SpellMastery / 10 + 0.1) × 0.8"
+  },
+  {
+   "p": "MagicTotal = floor(TotalINT / 2)\n+ EquipmentMATK + ScrollMATK + BuffMATK"
+  },
+  {
+   "p": "MIN = K × MagicTotal × (1 + TotalINT × m / 100)"
+  },
+  {
+   "p": "MAX = K × MagicTotal × (1 + TotalINT / 100)"
   },
   {
    "p": "K"
@@ -180,7 +195,7 @@
    "p": "**Derived combat stats and damage range are different things.** Derived combat stats include ACC and EVA, plus Magic, WDEF and MDEF. The character stat window's damage range is a separate summary. It predicts the lowest and highest damage from one ordinary basic physical attack. The formula uses your current stats plus Total W.ATK, Attack Power, the weapon multiplier and mastery. This range is calculated before the target's defenses and elements. It also excludes level-difference scaling, critical hits and a skill's damage value. MeowDB mirrors split-action weapons by using the lowest MIN and highest MAX across their possible ordinary actions."
   },
   {
-   "p": "**Mastery at Lv 0** = (0 / 10 + 0.1) × 0.8 = 0.08\n**1H Sword multiplier** = 1.8\n**Basic attack MIN** = trunc(47 × (0.8 + (132 × 0.08 × 1.8 + 30) / 100)) = **60Basic attack MAX** = trunc(47 × (1.0 + (132 × 1.8 + 30) / 100)) = **172Character-window damage range: 60-172**"
+   "p": "**Mastery at Lv 0** = (0 / 10 + 0.1) × 0.8 = 0.08\n**1H Sword multiplier** = 1.8\n**Basic attack MIN** = trunc(47 × (0.8 + (132 × 0.08 × 1.8 + 30) / 100)) = **60**\n**Basic attack MAX** = trunc(47 × (1.0 + (132 × 1.8 + 30) / 100)) = **172**\n**Character-window damage range: 60-172**"
   },
   {
    "p": "A skill applies its own damage value on top. Max-level Power Strike uses `S = 2.60`, so this same clean example becomes **157-449** before target modifiers. This is a skill result, so it sits outside the character-window range. The window also excludes critical rolls and monster-specific modifiers."
@@ -736,7 +751,7 @@
    "p": "Animation timing and one-minute damage This determines how long attacks take and how many complete attacks fit into 60 seconds."
   },
   {
-   "p": "**For ordinary positive-delay actions:timingTier** = clamp(resolvedTier, 0, 10)\n**ScaledFrame** = truncTowardZero(FrameDelay × (10 + timingTier) / 16)\n**nativeMs** = sum(ScaledFrame for every resolved frame)\n**Player-facing Animation Time (best-supported model)** = 30 × ceil(nativeMs / 30)\nWeapon Booster shifts a matching weapon by 2 speed stages. Spell Booster shifts eligible F/P and I/L magic actions by 1 stage at Lv 1-10 and 2 stages at Lv 11-20."
+   "p": "**For ordinary positive-delay actions:**\n**timingTier** = clamp(resolvedTier, 0, 10)\n**ScaledFrame** = truncTowardZero(FrameDelay × (10 + timingTier) / 16)\n**nativeMs** = sum(ScaledFrame for every resolved frame)\n**Player-facing Animation Time (best-supported model)** = 30 × ceil(nativeMs / 30)\nWeapon Booster shifts a matching weapon by 2 speed stages. Spell Booster shifts eligible F/P and I/L magic actions by 1 stage at Lv 1-10 and 2 stages at Lv 11-20."
   },
   {
    "p": "The frame durations and their attack-speed conversion are confirmed for ordinary COT2 characters, including Savage Blow. Explosion includes both its preparation and release. We still round displayed times up to 30 ms steps; that final rounding remains a model."
@@ -798,5 +813,5 @@
   }
  ],
  "source": "https://meowdb.com/msclassic/guides/explaining-the-damage-formula",
- "hash": "9d64ee09175b"
+ "hash": "67ecf4e982b5"
 }

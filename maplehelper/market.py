@@ -23,6 +23,13 @@ class NpcPrices:
     shops: list[tuple[str, str, int]] = field(default_factory=list)   # (NPC, where, price), cheapest first
     unpriced: list[tuple[str, str]] = field(default_factory=list)     # (NPC, where): sells it, no price in the page
     ranks: dict[tuple[str, str], str] = field(default_factory=dict)   # (NPC, where) -> citizen grade its price needs
+    # (NPC, where) whose price the KB labels "COT2 prices": the second closed test's price, not a confirmed launch
+    # price (the release guide: "Do not turn COT2 omissions into launch facts")
+    cot2: set[tuple[str, str]] = field(default_factory=set)
+
+    def test_price(self, shop: tuple) -> bool:
+        """A shop (NPC, where, ...) whose price is one from the COT2 test."""
+        return tuple(shop[:2]) in self.cot2
 
 
 def _int(text: str) -> int | None:
@@ -51,6 +58,8 @@ def npc_prices(kb, key: str) -> NpcPrices:
             elif npc:
                 out.unpriced.append((npc, where))
             nxt = lines[i + 4] if i + 4 < len(lines) else ""
+            if nxt.startswith("COT2 prices"):
+                out.cot2.add((npc, where))
             rank = _RANK.match(nxt)
             if rank:
                 out.ranks[(npc, where)] = rank.group(1)
