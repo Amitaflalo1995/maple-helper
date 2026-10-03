@@ -240,15 +240,54 @@ class ToolsDialog(GlassDialog):
         outer.addLayout(grid)
         self.stack = QStackedWidget()
         outer.addWidget(self.stack, 1)
+        # only the page asked for is built before the window shows; the others follow right after it is up
+        # (all nine at once held the window back for a second or more). A page another one reaches into
+        # before then is built on the spot (__getattr__).
         self.pages = {}
-        for name in PAGES:
-            w = getattr(self, f"_page_{name}")()
-            self.pages[name] = w
-            self.stack.addWidget(w)
-        rtl_buttons(self, rtl)
-        # Enter in a search box runs that tab's search, never "click the first tab" (Where to train)
+        self._pending = list(PAGES)
+        for _ in PAGES:
+            self.stack.addWidget(QWidget())
+        start = PAGES.index(page) if page in PAGES else 0
+        self._build_page(PAGES[start])
         no_default_buttons(self)
-        self.show_page(PAGES.index(page) if page in PAGES else 0)
+        self.show_page(start)
+        QTimer.singleShot(0, self._build_next)
+
+    def _build_page(self, name: str) -> None:
+        if name not in self._pending:
+            return
+        self._pending.remove(name)
+        w = getattr(self, f"_page_{name}")()
+        self.pages[name] = w
+        i = PAGES.index(name)
+        placeholder = self.stack.widget(i)
+        self.stack.insertWidget(i, w)
+        self.stack.removeWidget(placeholder)
+        placeholder.deleteLater()
+        rtl_buttons(w, self.t.rtl)
+        # Enter in a search box runs that tab's search, never "click the first tab" (Where to train)
+        no_default_buttons(w)
+
+    def _build_next(self) -> None:
+        """One more page per turn of the event loop, so the window stays responsive while they are made."""
+        try:
+            if self._pending:
+                self._build_page(self._pending[0])
+                QTimer.singleShot(0, self._build_next)
+        except RuntimeError:      # the window closed meanwhile
+            pass
+
+    def _build_rest(self) -> None:
+        while self._pending:
+            self._build_page(self._pending[0])
+
+    def __getattr__(self, name):
+        # a widget of a page not built yet (a test, a page reaching into another): build them all and look again
+        pending = self.__dict__.get("_pending")
+        if pending and not name.startswith("__"):
+            self._build_rest()
+            return getattr(self, name)
+        raise AttributeError(name)
 
     # common -------------------------------------------------------------
 
@@ -257,6 +296,7 @@ class ToolsDialog(GlassDialog):
         return self.profiles.active
 
     def show_page(self, i: int):
+        self._build_page(PAGES[i])
         self.nav.button(i).setChecked(True)
         self.stack.setCurrentIndex(i)
         self.refresh(PAGES[i])

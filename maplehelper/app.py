@@ -110,7 +110,10 @@ class MapleHelperApp:
         theme.set_mode(self.settings["appearance"])
         self.qapp.setLayoutDirection(Qt.RightToLeft if I18n(self.settings["language"]).rtl else Qt.LeftToRight)
         css = theme.stylesheet(self.font_family, self.settings["font_size"])
-        self.qapp.setStyleSheet(css)
+        # restyling the app re-polishes every open widget (the chat with its answers too): only when it changed,
+        # not each time a window opens, which held "Play tools" back for a second
+        if css != self.qapp.styleSheet():
+            self.qapp.setStyleSheet(css)
         return css
 
     @staticmethod
