@@ -32,6 +32,12 @@ class Quest:
     grade: tuple[str, int] | None = None                # ("Henesys", 9): the citizenship grade it asks
     profession: tuple[str, int] | None = None           # ("Smithing", 5): "Profession Smithing Lv. 5+"
 
+    def matches(self, query: str) -> bool:
+        """The quest search: every word of the query in its name, NPC, area, what it asks or what it gives."""
+        text = " ".join([self.name, self.npc, self.area, *self.needs, *self.rewards,
+                         *(r for rs in self.class_rewards.values() for r in rs)]).lower()
+        return all(w in text for w in query.lower().split())
+
     @property
     def after(self) -> str:
         """The quests to do first, as one line ("A, B")."""

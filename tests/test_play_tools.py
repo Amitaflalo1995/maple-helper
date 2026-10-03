@@ -268,3 +268,47 @@ def test_profession_info_names_teacher_town_and_quests():
     assert i.start_level == 10 and i.master_level == 25
     assert "Perion" in i.station_towns and "El Nath" not in " ".join(i.station_towns)
     assert crafting.info(KB, "leatherworking").start_quest       # no "in Need of an Apprentice": the first one
+
+
+@needs_kb
+def test_quest_search_filters_the_list_for_the_level(tmp_path, monkeypatch):
+    """The quests page had no search: finding a quest meant scrolling. The search keeps to the list shown
+    (the quests for the character's level), by name, NPC, area, what it asks and what it gives."""
+    import sys
+    from PySide6.QtWidgets import QApplication
+    QApplication.instance() or QApplication(sys.argv)
+    from maplehelper import quests, store
+    from maplehelper.kb import KnowledgeBase
+    from maplehelper.ui.tools import ToolsDialog
+    monkeypatch.setattr(store.Profiles, "path", tmp_path / "profiles.json")
+    monkeypatch.setattr(store.Settings, "path", tmp_path / "settings.json")
+    kb = KnowledgeBase(REAL_KB)
+    p = store.Profiles()
+    c = p.add("Kiwi", "Thief", "Assassin", 32)
+    d = ToolsDialog(kb, p, store.Settings(), "en", "", {}, "quests")
+    level_list = quests.for_level(kb, c.level, c.base_class, c.job, c.quests_done)["now"]
+    assert len(level_list) > 1
+
+    def cards():
+        return sum(1 for i in range(d.q_list.count()) if d.q_list.itemAt(i).widget() is not None)
+    d._fill_quests()
+    everything = cards()
+    target = level_list[1]
+    d.q_search.setText(target.name)
+    d._fill_quests()
+    assert 1 <= cards() < everything
+    assert cards() == sum(1 for q in level_list if q.matches(target.name))     # only from the level's list
+    d.q_search.setText("zzzz-no-such-quest")
+    d._fill_quests()
+    assert cards() == 1 and "No quest like that in the list for your level." in d.q_list.itemAt(0).widget().text()
+    d.q_search.clear()
+    d._fill_quests()
+    assert cards() == everything
+
+
+def test_quest_matches_name_npc_and_what_it_asks():
+    from maplehelper.quests import Quest
+    q = Quest(key="quest/1", name="Pio's Collecting Recycled Goods", level=10, npc="Pio", area="Lith Harbor",
+              needs=["Green Mushroom Cap x 20"], rewards=["Red Potion x 20"])
+    assert q.matches("pio") and q.matches("mushroom cap") and q.matches("red potion") and q.matches("LITH")
+    assert not q.matches("mushroom snail")
