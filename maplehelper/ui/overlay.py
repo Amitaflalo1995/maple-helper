@@ -894,21 +894,21 @@ class Overlay(QWidget):
         active = self.profiles.active_id
         # the card already shows the current character: the menu lists only the others to switch to
         others = [c for c in self.profiles.characters if c.id != active]
-        for c in others:
+        for i, c in enumerate(others):
             # a card the size of the one above it, not a small menu line
             choice = CharacterChoice(c, self.profiles.avatar_path(c), self.kb, self.t.rtl)
             choice.setFixedWidth(self.profile_card.width())
             choice.setEnabled(not busy)
-            a = QWidgetAction(menu)
-            a.setDefaultWidget(choice)
             choice.clicked.connect(lambda cid=c.id: (menu.close(), self.switch_character(cid)))
+            # room under each card, more under the last: the cards stand apart from the menu panel below them
+            # (an empty spacer row got no height in a QMenu)
+            holder = QWidget()
+            hl = QVBoxLayout(holder)
+            hl.setContentsMargins(0, 0, 0, 16 if i == len(others) - 1 else 6)
+            hl.addWidget(choice)
+            a = QWidgetAction(menu)
+            a.setDefaultWidget(holder)
             menu.addAction(a)
-        if others:
-            gap = QWidgetAction(menu)          # the cards stand apart from the menu below them
-            spacer = QWidget()
-            spacer.setFixedHeight(8)
-            gap.setDefaultWidget(spacer)
-            menu.addAction(gap)
         if self.profiles.active is not None:
             edit = QAction(theme.glyph_icon("edit"), bidi.plain(self.t("edit_character"), self.t.rtl), menu)
             edit.setEnabled(not busy)
