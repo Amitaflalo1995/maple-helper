@@ -17,29 +17,133 @@
   <a href="https://github.com/Maple-Helper/maple-helper/releases"><img src="https://img.shields.io/github/downloads/Maple-Helper/maple-helper/total" alt="Total downloads"></a>
 </p>
 
+<p align="center">
+  <a href="#about">About</a> ·
+  <a href="#screenshots">Screenshots</a> ·
+  <a href="#download">Download</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#using-the-overlay">Using the overlay</a> ·
+  <a href="#data-and-privacy">Privacy</a> ·
+  <a href="https://maplehelper.app/">Website</a>
+</p>
+
 ## About
 
 Maple Helper is a desktop assistant for Windows and macOS that puts a chat overlay on top of Maple Story Classic World. Press **F9** to open it, then type a question or press **F10** to speak (press again to stop). Answers draw on a screenshot of your game, your character profile, previous conversations, and a local copy of the NiaMeowDB game database.
 
 Use it to look up drops, find quest NPCs, or ask where to train without switching away from the game. The **play tools** window adds calculators and planners that read the same database: where to train, hit and damage, your build, quests for your level, crafting, citizenship and prices.
 
-<p align="center">
-  <img src="https://www.maplehelper.app/assets/shots/en/mano-light.webp" width="260" alt="The chat: what Mano drops, with a monster card and pictures of its drops">
-  <img src="https://www.maplehelper.app/assets/shots/en/guide-light.webp" width="260" alt="The Warrior guide in the app, with class art, pros and cons, and a formula box">
-  <img src="https://www.maplehelper.app/assets/shots/en/wishlist-light.webp" width="260" alt="Items I'm looking for, with the monsters that drop each one">
-</p>
-<p align="center">
-  <img src="https://www.maplehelper.app/assets/shots/en/hp-dark.webp" width="260" alt="Dark mode: an instant answer for Blue Snail's HP">
-  <img src="https://www.maplehelper.app/assets/shots/en/tools-calc-dark.webp" width="260" alt="Play tools, hit & damage: the ACC you need to never miss a monster, dark mode">
-  <img src="https://www.maplehelper.app/assets/shots/en/settings-light.webp" width="260" alt="Settings: appearance, keys, answers, AI account and plan usage">
-</p>
-<p align="center">
-  <img src="https://www.maplehelper.app/assets/shots/en/tools-train-light.webp" width="260" alt="Play tools, where to train: maps for your level with hit chance, hits to kill and EXP">
-  <img src="https://www.maplehelper.app/assets/shots/en/tools-crafting-light.webp" width="260" alt="Play tools, crafting: the profession's teacher, quests and stations, then the best recipes for your level">
-  <img src="https://www.maplehelper.app/assets/shots/en/tools-quests-light.webp" width="260" alt="Play tools, quests: quests for your level with the NPC, what they need and the rewards">
-</p>
-
 Website: **https://maplehelper.app/** (source: [maple-helper-site](https://github.com/Maple-Helper/maple-helper-site))
+
+## Screenshots
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.maplehelper.app/assets/shots/en/mano-dark.webp">
+    <img src="https://www.maplehelper.app/assets/shots/en/mano-light.webp" width="380" alt="Ask about anything in the game">
+  </picture>
+</p>
+<h3 align="center">Ask about anything in the game</h3>
+<p align="center">Press <b>F9</b> in game and ask. Instant answers come straight from the game database, with a card for the monster and pictures of everything it drops.</p>
+
+<br>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.maplehelper.app/assets/shots/en/hp-dark.webp">
+    <img src="https://www.maplehelper.app/assets/shots/en/hp-light.webp" width="380" alt="Quick facts in a second">
+  </picture>
+</p>
+<h3 align="center">Quick facts in a second</h3>
+<p align="center">Simple questions like a monster's HP are answered on the spot, without waiting for the AI.</p>
+
+<br>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.maplehelper.app/assets/shots/en/guide-dark.webp">
+    <img src="https://www.maplehelper.app/assets/shots/en/guide-light.webp" width="380" alt="A full guide for every class">
+  </picture>
+</p>
+<h3 align="center">A full guide for every class</h3>
+<p align="center">32 guides with class art, pros and cons, skill and item icons, tables and formulas, in English and Hebrew. The ones that fit your character come first.</p>
+
+<br>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.maplehelper.app/assets/shots/en/wishlist-dark.webp">
+    <img src="https://www.maplehelper.app/assets/shots/en/wishlist-light.webp" width="380" alt="Items I'm looking for">
+  </picture>
+</p>
+<h3 align="center">Items I'm looking for</h3>
+<p align="center">Star an item to keep a list of what you hunt, with the monsters that drop each one and where to find them.</p>
+
+<br>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.maplehelper.app/assets/shots/en/tools-train-dark.webp">
+    <img src="https://www.maplehelper.app/assets/shots/en/tools-train-light.webp" width="380" alt="Where to train">
+  </picture>
+</p>
+<h3 align="center">Where to train</h3>
+<p align="center">Maps for your level, ranked, with your hit chance, hits to kill, EXP per kill and how many kills to the next level.</p>
+
+<br>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.maplehelper.app/assets/shots/en/tools-calc-dark.webp">
+    <img src="https://www.maplehelper.app/assets/shots/en/tools-calc-light.webp" width="380" alt="Hit & damage">
+  </picture>
+</p>
+<h3 align="center">Hit &amp; damage</h3>
+<p align="center">Pick a monster to see the ACC you need to never miss it, your hit chance and how many hits it takes.</p>
+
+<br>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.maplehelper.app/assets/shots/en/tools-build-dark.webp">
+    <img src="https://www.maplehelper.app/assets/shots/en/tools-build-light.webp" width="380" alt="Build plan">
+  </picture>
+</p>
+<h3 align="center">Build plan</h3>
+<p align="center">Your class guide's AP and SP tables, with the row for your current level highlighted.</p>
+
+<br>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.maplehelper.app/assets/shots/en/tools-quests-dark.webp">
+    <img src="https://www.maplehelper.app/assets/shots/en/tools-quests-light.webp" width="380" alt="Quests for your level">
+  </picture>
+</p>
+<h3 align="center">Quests for your level</h3>
+<p align="center">The quests you can take now and soon, with the NPC, what they need and the rewards, best EXP first.</p>
+
+<br>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.maplehelper.app/assets/shots/en/tools-crafting-dark.webp">
+    <img src="https://www.maplehelper.app/assets/shots/en/tools-crafting-light.webp" width="380" alt="Crafting">
+  </picture>
+</p>
+<h3 align="center">Crafting</h3>
+<p align="center">Every profession explained, from the teacher and the quests to where to craft, then the best recipes for your level.</p>
+
+<br>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://www.maplehelper.app/assets/shots/en/settings-dark.webp">
+    <img src="https://www.maplehelper.app/assets/shots/en/settings-light.webp" width="380" alt="Make it yours">
+  </picture>
+</p>
+<h3 align="center">Make it yours</h3>
+<p align="center">Light or dark appearance, hotkeys, language, font size, answer length, and your AI account with its plan usage.</p>
 
 ## Download
 
