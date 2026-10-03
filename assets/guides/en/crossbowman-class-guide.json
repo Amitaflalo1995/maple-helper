@@ -540,10 +540,6 @@
    "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 mesos · 500 HP 1.43 HP per meso [[img:d19cbf8225851d.png]] **Blue Potion** 220 mesos · 200 MP 0.91 MP per meso"
   },
   {
-   "guide": "best-buy-shop-efficiency",
-   "text": "Compare shop potion efficiency"
-  },
-  {
    "h2": "Common Crossbowman mistakes"
   },
   {
@@ -588,5 +584,5 @@
   }
  ],
  "source": "https://meowdb.com/msclassic/guides/crossbowman-class-guide",
- "hash": "754a6ec8d48f"
+ "hash": "e65cbf11533a"
 }

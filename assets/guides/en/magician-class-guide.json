@@ -504,7 +504,7 @@
    "h3": "Magician AP allocation: levels 10-30"
   },
   {
-   "p": "Raise LUK only for the next wand, then put everything else into INT. In practice, all 5 AP go into LUK at levels 20, 25, and 30, and every other level goes into INT. Equipment LUK can replace base LUK once that gear is already equipped."
+   "p": "Raise LUK only for the next wand, then put everything else into INT. Equipment LUK can replace base LUK once that gear is already equipped."
   },
   {
    "table": [
@@ -569,7 +569,7 @@
     [
      "15",
      "[[img:b8e7401b5626da.png]]Hardwood Wand 34 M.ATK",
-     "[[img:f17cd152cb8c9e.png]]Blue Plain Robe +3 INT, male [[img:3d57a6a58ad57f.png]]Yellow Arianne + [[img:15b990e216a32b.png]]Yellow Arianne Skirt +1 INT each, female",
+     "[[img:f17cd152cb8c9e.png]]Blue Plain Robe +3 INT",
      "Flora the Fairy and Serabi the Fairy in Ellinia"
     ],
     [
@@ -581,13 +581,13 @@
     [
      "25",
      "[[img:ab2b399177dae9.png]]Ice Wand 48 M.ATK",
-     "[[img:cc32edb0e377c6.png]]Blue Doros Robe +5 INT, male [[img:4df809ed803d00.png]]Brown Doroness Robe +5 INT, female",
+     "[[img:cc32edb0e377c6.png]]Blue Doros Robe +5 INT",
      "Flora the Fairy and Serabi the Fairy"
     ],
     [
      "30",
      "[[img:2e8d2c65bd2aec.png]]Mithril Wand 55 M.ATK",
-     "[[img:9bb0c142cdc0c7.png]]Blue Wizard Robe +6 INT, male [[img:14da1a348301c5.png]]Blue Fairy Top + [[img:bfd615e03195ec.png]]Blue Fairy Skirt +3 INT each, female",
+     "[[img:9bb0c142cdc0c7.png]]Blue Wizard Robe +6 INT",
      "Flora the Fairy and Serabi the Fairy"
     ]
    ]
@@ -596,7 +596,7 @@
    "h3": "Mage overalls and scrolling"
   },
   {
-   "p": "Mage overalls are strong early upgrades, but the blue robes are male-only. Blue Plain Robe has +3 INT at level 15, Blue Doros Robe has +5 INT at level 25, and Blue Wizard Robe has +6 INT at level 30. Female Magicians get Brown Doroness Robe with +5 INT at level 25. At levels 15 and 30, their best option is a top and bottom: Yellow Arianne and Yellow Arianne Skirt for +2 INT, then Blue Fairy Top and Blue Fairy Skirt for +6 INT. Serabi the Fairy in Ellinia sells all of them. Each overall has 10 upgrade slots."
+   "p": "Mage overalls are strong early upgrades. Blue Plain Robe has +3 INT at level 15, Blue Doros Robe has +5 INT at level 25, and Blue Wizard Robe has +6 INT at level 30. Each has 10 upgrade slots."
   },
   {
    "note": "**Overall INT scrolls have no equivalent for Mage tops or bottoms.** The Lesser scroll is guaranteed +1 INT. The Intermediate scroll has a 60% success rate and gives +2 INT. Ben in Kerning City Civic Center sells the Lesser scroll for 35,000 mesos at Distinguished Citizen."
@@ -666,7 +666,7 @@
    "h3": "Pan Lid"
   },
   {
-   "p": "Level 10. 44 WDEF and 8.1% Guard. Better physical block chance than Mystic Shield. [[img:b62ded95656118.png]]Green Mushrooms drop it."
+   "p": "Level 10. 44 WDEF and 8.1% Guard. Better physical block chance than Mystic Shield."
   },
   {
    "h3": "Mystic Shield"
@@ -817,5 +817,5 @@
   }
  ],
  "source": "https://meowdb.com/msclassic/guides/magician-class-guide",
- "hash": "dd782bd95e5d"
+ "hash": "09cc237097e6"
 }

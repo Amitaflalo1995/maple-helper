@@ -46,6 +46,22 @@ def test_rejects_missing_pages(kb_copy):
         kb_release.validate(kb_copy)
 
 
+def test_rejects_a_kb_without_the_release_guide(kb_copy):
+    from maplehelper import availability
+    assert kb_release.RELEASE_GUIDE == availability.RELEASE_GUIDE     # the page the app reads the live game from
+    page = kb_copy / "pages" / f"{kb_release.RELEASE_GUIDE}.md"
+    text = page.read_text(encoding="utf-8")
+    page.write_text(text.replace("Not at launch", "Later"), encoding="utf-8")
+    with pytest.raises(kb_release.InvalidKB, match="lost its section"):
+        kb_release.validate(kb_copy)
+    page.unlink()
+    index = json.loads((kb_copy / "index.json").read_text(encoding="utf-8"))
+    (kb_copy / "index.json").write_text(json.dumps([e for e in index if e["key"] != kb_release.RELEASE_GUIDE]),
+                                        encoding="utf-8")
+    with pytest.raises(kb_release.InvalidKB, match="no release guide"):
+        kb_release.validate(kb_copy)
+
+
 def test_pack_writes_zip_and_matching_manifest(kb_copy, tmp_path):
     out = tmp_path / "dist"
     m = kb_release.pack(kb_copy, out, version="2026.10.02.1200")

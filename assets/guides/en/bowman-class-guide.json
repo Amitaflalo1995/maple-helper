@@ -787,10 +787,6 @@
    "p": "[[img:a699b6aea354d7.png]] **White Potion** 500 HP for 350 mesos 0.7 meso per HP [[img:d19cbf8225851d.png]] **Blue Potion** 200 MP for 220 mesos 1.1 mesos per MP"
   },
   {
-   "guide": "best-buy-shop-efficiency",
-   "text": "Compare shop potion efficiency"
-  },
-  {
    "h2": "Common Bowman mistakes"
   },
   {
@@ -841,5 +837,5 @@
   }
  ],
  "source": "https://meowdb.com/msclassic/guides/bowman-class-guide",
- "hash": "3cc0b0b94d52"
+ "hash": "0687f80cf442"
 }

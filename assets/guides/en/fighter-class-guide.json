@@ -1192,10 +1192,6 @@
    "p": "Accuracy potions pay for themselves when they remove misses or unlock a faster map. Test the potion in Training Advisor first. If your hit rate stays at 100% without it, spend the mesos elsewhere."
   },
   {
-   "guide": "best-buy-shop-efficiency",
-   "text": "Compare shop potion efficiency"
-  },
-  {
    "h2": "Common Fighter mistakes"
   },
   {
@@ -1417,5 +1413,5 @@
   }
  ],
  "source": "https://meowdb.com/msclassic/guides/fighter-class-guide",
- "hash": "c4308067f338"
+ "hash": "5e94289ad466"
 }

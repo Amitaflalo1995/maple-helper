@@ -1175,10 +1175,6 @@
    "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 mesos · 500 HP 1.43 HP per meso [[img:d19cbf8225851d.png]] **Blue Potion** 220 mesos · 200 MP 0.91 MP per meso"
   },
   {
-   "guide": "best-buy-shop-efficiency",
-   "text": "Compare shop potion efficiency"
-  },
-  {
    "h2": "Common mistakes"
   },
   {
@@ -1244,5 +1240,5 @@
   }
  ],
  "source": "https://meowdb.com/msclassic/guides/bandit-class-guide",
- "hash": "fdd7376d82d5"
+ "hash": "cc38787f7804"
 }

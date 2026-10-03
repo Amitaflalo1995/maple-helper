@@ -834,10 +834,6 @@
    "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 מסוס · 500 HP 1.43 HP לכל מסו [[img:d19cbf8225851d.png]] **Blue Potion** 220 מסוס · 200 MP 0.91 MP לכל מסו"
   },
   {
-   "guide": "best-buy-shop-efficiency",
-   "text": "השוו את יעילות הפוטים בחנויות"
-  },
-  {
    "h2": "טעויות נפוצות של Cleric"
   },
   {
@@ -881,5 +877,5 @@
    "p": "Robeira מקדמת את ה-Cleric שלכם ל-Priest ב-El Nath. ג'וב שלישי ו-El Nath לא נמצאים בגרסת ההשקה. המדריך הזה עוצר לפני SP של ג'וב שלישי, אז תבדקו את סקילי ה-Priest הנוכחיים לפני שאתם מוציאים את הנקודה של לבל 70."
   }
  ],
- "source_hash": "b1880c915784"
+ "source_hash": "d67dc6964c9f"
 }

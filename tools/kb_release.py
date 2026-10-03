@@ -16,6 +16,7 @@ import argparse
 import csv
 import hashlib
 import json
+import re
 import sys
 import time
 import zipfile
@@ -27,6 +28,10 @@ MIN_KEEP_RATIO = 0.9   # an update may not lose more than 10% of the previous en
 CHANGELOG = "changelog.json"
 CHANGELOG_KEEP = 30    # updates kept, so a player who skipped a few still sees everything they missed
 MAX_LISTED = 300       # per list in one update; the rest is only counted
+# maplehelper/availability.py reads what is in the live game from this guide: without it (or its two sections)
+# the app can't tell released content from unreleased, so a KB lacking it is never published
+RELEASE_GUIDE = "guide/maplestory-classic-worlds-release-date"
+RELEASE_GUIDE_SECTIONS = ("Confirmed content", "Not at launch")
 
 
 class InvalidKB(Exception):
@@ -68,6 +73,15 @@ def validate(kb: Path, previous_index: Path | None = None, min_entities: int = 1
             missing_pages.append(key)
     if missing_pages:
         problems.append(f"{len(missing_pages)} entries without a page, e.g. {', '.join(missing_pages[:5])}")
+
+    guide = kb / "pages" / f"{RELEASE_GUIDE}.md"
+    if RELEASE_GUIDE not in {e.get("key") for e in index if isinstance(e, dict)} or not guide.exists():
+        problems.append(f"no release guide ({RELEASE_GUIDE}): the app can't tell what is in the game without it")
+    else:
+        text = guide.read_text(encoding="utf-8", errors="replace")
+        lost = [h for h in RELEASE_GUIDE_SECTIONS if not re.search(rf"^{re.escape(h)}\s*$", text, re.M)]
+        if lost:
+            problems.append(f"the release guide lost its section(s): {', '.join(lost)}")
 
     if problems:
         raise InvalidKB("; ".join(problems))
