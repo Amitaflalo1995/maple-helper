@@ -447,6 +447,7 @@ class MapleHelperApp:
         self.brain.provider = self.settings["provider"]
         ai = providers.get(self.settings["provider"])
         self.brain.api_key = ai.load_api_key() if self.settings.api_key_mode(ai.name) else None
+        self.brain.ui_lang = self.settings["language"]
         self.apply_saver_mode()
 
     def on_account_changed(self):

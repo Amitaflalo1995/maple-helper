@@ -103,10 +103,22 @@ REPLY_RULES = """<reply_rules>
 LENGTH_LINES = {"short": 6, "detailed": 15}
 
 
+def reply_language(question: str, ui_lang: str = "he") -> str:
+    """The answer's language: the question's (Hebrew letters: Hebrew, Latin ones: English), else the app's.
+    Hebrew in the context (earlier session summaries, profile notes) made an English player's answer Hebrew."""
+    if re.search(r"[֐-׿]", question):
+        return "Hebrew"
+    if re.search(r"[A-Za-z]", _FOCUS_TAG.sub("", question)):
+        return "English"
+    return "Hebrew" if ui_lang == "he" else "English"
+
+
 def build_prompt(question: str, character: Character | None, history: History | None, kb: KnowledgeBase,
                  has_screenshot: bool, length: str = "short", focus=None, extra: str | None = None,
-                 kb_context: bool = True) -> str:
-    """kb_context=False: no knowledge-base pre-fetch (a screenshot read needs only the profile and the picture)."""
+                 kb_context: bool = True, ui_lang: str = "he") -> str:
+    """kb_context=False: no knowledge-base pre-fetch (a screenshot read needs only the profile and the picture).
+    ui_lang: the app's language, for a question with no words to tell by."""
+    language = f"Reply in {reply_language(question, ui_lang)}, whatever language the context above is in."
     parts = []
     if character:
         parts.append(f"<player_profile>\n{character.summary()}\n</player_profile>")
@@ -126,7 +138,8 @@ def build_prompt(question: str, character: Character | None, history: History | 
     ctx = []
     if not kb_context:
         question_parts = [f"<screenshot>{'attached above' if has_screenshot else 'not available'}</screenshot>",
-                          f"<question>\n{question}\n</question>", REPLY_RULES.format(length=LENGTH_LINES["short"])]
+                          f"<question>\n{question}\n</question>", language,
+                          REPLY_RULES.format(length=LENGTH_LINES["short"])]
         return "\n\n".join(parts + question_parts)
     if character:
         digest = kb.level_digest(character.level)
@@ -174,8 +187,9 @@ def build_prompt(question: str, character: Character | None, history: History | 
     if extra:
         parts.append(extra)          # app-made context (inventory read, a picked-up conversation): prompt only
     parts.append(f"<question>\n{question}\n</question>")
-    if re.search(r"[\u0590-\u05FF]", question):
-        parts.append("Reply in Hebrew.")      # it slipped into English once after a screenshot-heavy turn (live)
+    # a Hebrew question slipped into English once after a screenshot-heavy turn (live), and an English one into
+    # Hebrew with Hebrew in the context: the language is said outright, after the question
+    parts.append(language)
     parts.append(REPLY_RULES.format(length=LENGTH_LINES.get(length, 6)))
     return "\n\n".join(parts)
 
@@ -284,6 +298,7 @@ class Brain:
         self.model = model
         self.length = length
         self.api_key = api_key
+        self.ui_lang = "he"            # the app's language (set by the app): for questions with no words to tell by
         self._provider = providers.get(provider)
         self.backend = self._provider.backend(self)
 
@@ -349,7 +364,7 @@ class Brain:
         # True (one screenshot), or the number of detail tiles that follow it (an int, never 1 == True)
         has = (len(shots) - 1 if len(shots) > 1 else True) if shots else False
         prompt = build_prompt(question, character, history, self.kb, has, "short" if light else self.length, focus,
-                              extra, kb_context=not light)
+                              extra, kb_context=not light, ui_lang=self.ui_lang)
         raw_delta = (lambda raw: on_delta(streamed_text(raw))) if on_delta else None
         if model or light:
             result = self.backend.run(prompt, screenshot_jpeg, raw_delta, model=model, tools=not light)

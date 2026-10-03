@@ -476,3 +476,34 @@ def test_claude_never_passes_a_stray_credential(monkeypatch):
 
 def test_an_api_key_without_credit_says_so():
     assert base.classify_error("Your credit balance is too low to access the Anthropic API") == "no_credit"
+
+
+@pytest.mark.parametrize("question,ui,lang", [
+    ("where do I hunt snails?", "he", "English"),        # an English player in a Hebrew app: English
+    ("איפה מוצאים חלזונות?", "en", "Hebrew"),
+    ("[about Mano] 42", "he", "Hebrew"),                 # nothing to tell by: the app's language
+    ("42?", "en", "English"),
+])
+def test_the_answer_language_follows_the_question(question, ui, lang):
+    from maplehelper.brain import reply_language
+    assert reply_language(question, ui) == lang
+
+
+def test_an_english_question_is_answered_in_english_even_with_hebrew_context(kb, tmp_path):
+    """A player wrote in English and got Hebrew: earlier session summaries in Hebrew pulled the answer along."""
+    from maplehelper.brain import build_prompt
+    from maplehelper.store import History
+
+    class Hist(History):
+        def __init__(self):
+            pass
+
+        def summaries(self):
+            return ["השחקן שאל על חלזונות והתאמן ב-Henesys."]
+
+        def recent(self):
+            return [{"role": "user", "text": "מה נשמע"}, {"role": "assistant", "text": "הכל טוב"}]
+    p = build_prompt("where do Red Snails spawn?", None, Hist(), kb, False, ui_lang="he")
+    assert "Reply in English, whatever language the context above is in." in p
+    p = build_prompt("where do Red Snails spawn?", None, Hist(), kb, False, kb_context=False, ui_lang="he")
+    assert "Reply in English" in p
