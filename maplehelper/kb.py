@@ -66,6 +66,7 @@ ALIAS_DROP = {
     "בין", "אלי", "אליי", "מאי", "פי", "סר", "מקס", "אוק", "פיל", "הפיל",
     "נהר", "הנהר", "פסל", "סדן", "צור", "הצור", "השף", "שף", "רוח רפאים", "טוויטר", "טיק טוק", "שוער", "ליצן",
     "תיבת אוצר",
+    "מיין",        # Myen's alias is the verb "to sort" ("למיין את האינבנטורי" made a Myen card, and voice "ל-Myen")
 }
 # alias -> entity key, over aliases.json (keys and names as in the KB's index.json)
 ALIAS_SET = {
@@ -80,8 +81,11 @@ ALIAS_SET = {
 # names no NPC (the AI lists the NPCs it means in its META entities, those still get a card)
 COMMON_WORD_NPCS = {"Max", "River", "Anvil", "Oak", "Jack", "Pan", "Chef", "Statue", "Flint", "Rain", "Exit", "Silver"}
 NO_LOOSE_UNDER = 5    # Hebrew letters an alias needs for its spelling-tolerant form ("פיה" -> "פי" is no name)
+# the part of a name that marks one variant of an entity: "Nella (KPQ 1st Stage)", "Forgotten Hollow Instance 080003500"
+_VARIANT = re.compile(r"\s*\(.*?\)|\s+Instance \d+$")
 PREFIX_FROM = 4        # Hebrew letters a name needs before a glued prefix counts ("לאן" is not ל + "אן")
 _PREFIX = "[בלמהושכ]{1,2}"
+NAMES_TABLE = "names.tsv"     # key, category, name, type: one line per entity, for the AI to grep (see ensure_drop_table)
 
 
 class KnowledgeBase:
@@ -95,13 +99,39 @@ class KnowledgeBase:
         self.aliases: dict[str, str] = {}   # normalized alias -> key
         alias_file = self.root / "aliases.json"
         if alias_file.exists():
+            shared: dict[str, list[str]] = {}
             for key, names in json.loads(alias_file.read_text(encoding="utf-8")).items():
                 for n in names:
-                    if _norm(n) not in ALIAS_DROP:
-                        self.aliases[_norm(n)] = key
+                    if _norm(n) not in ALIAS_DROP and key in self.entities:
+                        shared.setdefault(_norm(n), [])
+                        if key not in shared[_norm(n)]:
+                            shared[_norm(n)].append(key)
+            for alias, keys in shared.items():
+                key = keys[0] if len(keys) == 1 else self._base_entity(keys)
+                if key:
+                    self.aliases[alias] = key
         self.aliases.update({_norm(a): k for a, k in ALIAS_SET.items() if k in self.entities})
         # names with ", " ": " or "[ ]" ("Tree Dungeon, Monkey Forest I") stay one block in a Hebrew answer
         bidi.set_names(e.get("name", "") for e in self.entities.values())
+
+    def _base_entity(self, keys: list[str]) -> str | None:
+        """The one entity an alias several entities share means: the plain one ("Forgotten Hollow", not
+        "Forgotten Hollow Instance 080003500"; "Zelya", not "Zelya (Free Market)"). aliases.json gives some
+        Hebrew names to every variant, and the last one used to win (an empty instance arena, a PQ stage NPC).
+        Variants alone ("VIP Cab (Ellinia)", "VIP Cab (Sleepywood)") mean their plain name's entity when the KB
+        has it; two plain names ("Pason", "Pison") are a real tie: no alias then, rather than a wrong card."""
+        def rank(k: str) -> tuple[bool, int]:
+            name = self.entities[k].get("name", "")
+            return bool(_VARIANT.search(name)), len(name)
+        ranked = sorted(keys, key=rank)
+        if rank(ranked[0]) != rank(ranked[1]):
+            return ranked[0]
+        bases = {_VARIANT.sub("", self.entities[k].get("name", "")).strip() for k in keys}
+        if len(bases) == 1:
+            base, cat = bases.pop(), keys[0].partition("/")[0]
+            return next((k for k, e in self.entities.items()
+                         if e.get("name") == base and k.startswith(cat + "/")), None)
+        return None
 
     # ------------------------------------------------------------ basic access
 
@@ -192,6 +222,9 @@ class KnowledgeBase:
                     loose.setdefault(form, set()).add(k)
         pairs += [(f, next(iter(ks)), True) for f, ks in loose.items()
                   if len(ks) == 1 and exact.get(f, next(iter(ks))) in ks]
+        # a dropped alias names nothing, and neither does a shorter name inside it: key "" takes its words
+        # ("טיק טוק" is TikTok, and its "טיק" answered with Tick's stats)
+        pairs += [(d, "", False) for d in ALIAS_DROP if HEBREW.search(d)]
         return sorted(pairs, key=lambda p: -len(p[0]))
 
     def _occurrence(self, hay: str, name: str, key: str, taken: list[tuple[int, int]]) -> tuple[int, int] | None:
@@ -239,7 +272,7 @@ class KnowledgeBase:
                     span = None       # a question's "max level" is no Max either; "where is Max" is
                 if span:
                     taken.append(span)
-                    if key not in [k for k, _, _ in out]:
+                    if key and key not in [k for k, _, _ in out]:
                         out.append((key, *span))
                     break
             if len(out) >= max_results:
@@ -269,7 +302,8 @@ class KnowledgeBase:
     def _resolve_pattern(self) -> re.Pattern | None:
         """One pattern for every Hebrew alias, longest first (compiling one per alias took ~140 ms a call).
         A glued prefix only before a long alias: "כאן" is not כ + "אן" (Anne), "מפיל" not מ + "פיל"."""
-        heb = sorted((a for a, k in self.aliases.items() if HEBREW.search(a) and self.get(k)), key=len, reverse=True)
+        heb = sorted({a for a, k in self.aliases.items() if HEBREW.search(a) and self.get(k)}
+                     | {d for d in ALIAS_DROP if HEBREW.search(d)}, key=len, reverse=True)
         if not heb:
             return None
         long = [a for a in heb if _heb_letters(a) >= PREFIX_FROM]
@@ -285,6 +319,8 @@ class KnowledgeBase:
             return out
 
         def name(m: re.Match) -> str:
+            if m.group("name") not in self.aliases:
+                return m.group(0)      # a dropped alias (in the pattern so no shorter alias inside it matches)
             # keep a glued Hebrew prefix: "ובלו סנייל" → "ו-Blue Snail"
             en = self.get(self.aliases[m.group("name")])["name"]
             pre = m.groupdict().get("pre")
@@ -314,11 +350,57 @@ class KnowledgeBase:
             if 0 < j < end:
                 end = j
         found = []
-        for line in body[i:end].split("\n"):
-            k = self._item_by_name.get(line.strip().lower())
+        lines = body[i:end].split("\n")
+        for n, line in enumerate(lines):
+            k = self._drop_item(line.strip().lower(), lines[n + 1].strip() if n + 1 < len(lines) else "",
+                                self.get(key)["name"])
             if k and k not in found:
                 found.append(k)
         return found
+
+    @cached_property
+    def _monsters_by_name(self) -> dict[str, list[str]]:
+        out: dict[str, list[str]] = {}
+        for k, e in self.entities.items():
+            if e["category"] == "monster":
+                out.setdefault(e["name"].strip().lower(), []).append(k)
+        return out
+
+    def monster_keys(self, name: str) -> list[str]:
+        """Every monster entry of a name: the KB lists some twice ("Mano" in its map and a map-less copy)."""
+        return self._monsters_by_name.get((name or "").strip().lower(), [])
+
+    @cached_property
+    def _items_by_name(self) -> dict[str, list[str]]:
+        out: dict[str, list[str]] = {}
+        for k, e in self.entities.items():
+            if e["category"] == "item":
+                out.setdefault(e["name"].strip().lower(), []).append(k)
+        return out
+
+    def _drop_item(self, name: str, hint: str, monster: str) -> str | None:
+        """The item a drop line names. Some items share a name (the Lv 40 earring "Blue Moon" and the Lv 50 Thief
+        top "Blue Moon"): the line under the name tells them apart ("Lv 50 · Thief" for equipment, the type
+        word, "Potion" or "Monster Drop", otherwise), and when it can't (two "Dark Shadow" tops, Lv 40 · Thief),
+        the item page whose own "Dropped By" list names this monster. Still a tie: the first one, as before."""
+        keys = self._items_by_name.get(name)
+        if not keys or len(keys) == 1:
+            return keys[0] if keys else None
+        lv = re.match(r"Lv (\d+)\b", hint)
+        if lv:
+            fit = [k for k in keys if str(self.get(k).get("type") or "").startswith("Equip")
+                   and str((self.get(k).get("props") or {}).get("Level Requirement", "")) == lv.group(1)]
+        else:
+            fit = [k for k in keys if hint and hint.lower() in str(self.get(k).get("type") or "").lower()]
+        fit = fit or keys
+        if len(fit) > 1:
+            fit = [k for k in fit if self._dropped_by(k, monster)] or fit
+        return fit[0]
+
+    def _dropped_by(self, item: str, monster: str) -> bool:
+        page = self.page(item)
+        i = page.find("Dropped By")
+        return i >= 0 and re.search(rf"^{re.escape(monster)}$", page[i:], re.M) is not None
 
     @cached_property
     def droppers(self) -> dict[str, list[str]]:
@@ -348,16 +430,23 @@ class KnowledgeBase:
 
     def ensure_drop_table(self) -> None:
         """Write drops.tsv next to index.json so Claude can grep 'which monsters drop X' in one step: only monsters
-        the KB confirms are in the game. A table from before that rule (no drops.ingame mark beside it) is redone."""
+        the KB confirms are in the game. A table from before that rule (no drops.ingame mark beside it) is redone.
+        names.tsv beside it is the index's names and keys, one entity per line."""
         path = self.root / "drops.tsv"
         mark = self.root / "drops.ingame"
+        names = self.root / NAMES_TABLE
         idx = self.root / "index.json"
         try:
-            if (path.exists() and mark.exists() and idx.exists()
+            if (path.exists() and mark.exists() and names.exists() and idx.exists()
                     and path.stat().st_mtime >= idx.stat().st_mtime):
                 return
             mark.write_text("drops.tsv lists only monsters the KB confirms are in the game (availability.py)\n",
                             encoding="utf-8")
+            # index.json is one 1.3 MB line: Gemini's grep can't read a line that long ("bufio.Scanner: token too
+            # long", answers took 30-140 s) and any other grep hit returns all of it. One entity per line instead.
+            rows = ["key\tcategory\tname\ttype"]
+            rows += [f"{k}\t{e.get('category', '')}\t{e.get('name', '')}\t{e.get('type') or ''}" for k, e in self.entities.items()]
+            names.write_text("\n".join(rows), encoding="utf-8")
             lines = ["monster\tmonster_level\tmonster_key\titem\titem_type\titem_key"]
             for ikey, monsters in self.droppers.items():
                 it = self.get(ikey)
@@ -381,20 +470,30 @@ class KnowledgeBase:
 
     @cached_property
     def _monsters(self) -> list[dict]:
-        """The monsters the KB confirms are in the game, with their confirmed maps (the AI's level digest)."""
-        from . import availability
+        """The monsters the KB confirms are in the game, with the maps a player can go to (the AI's level digest).
+        No tutorial/job-test/PQ copies ("Fairy 2", "Tutorial Jr. Sentinel", the Tools' training spots skip them
+        too), and a boss the KB also lists as a map-less copy (King Slime, Mushmom's 800xxx entries) only once:
+        those rows took the place of monsters a player can train on under the 40-row cap."""
+        from . import availability, combat
         open_ = availability.of(self)
         rows = []
         for key, e in self.entities.items():
-            if e["category"] != "monster" or not open_.monster_key_open(key):
+            if e["category"] != "monster" or combat.special_monster(e["name"]) or not open_.monster_key_open(key):
                 continue
             p = e.get("props", {})
             lvl = p.get("Level")
             if not isinstance(lvl, (int, float)):
                 continue
             rows.append({"key": key, "name": e["name"], "level": int(lvl), "hp": p.get("HP"),
-                         "exp": p.get("EXP"), "maps": [m for m in self.all_maps(key) if open_.map_open(m)][:3]})
-        return sorted(rows, key=lambda r: r["level"])
+                         "exp": p.get("EXP"), "maps": [m for m in self.all_maps(key) if combat.reachable_map(self, m)][:3]})
+        mapped = {r["name"] for r in rows if r["maps"]}
+        seen: set[str] = set()
+        out = []
+        for r in sorted(rows, key=lambda r: (r["level"], not r["maps"])):
+            if r["maps"] or (r["name"] not in mapped and r["name"] not in seen):
+                out.append(r)
+                seen.add(r["name"])
+        return out
 
     def _top_maps(self, key: str, n: int = 3) -> list[str]:
         body = self.page(key)

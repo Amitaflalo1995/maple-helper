@@ -51,14 +51,18 @@ def main(categories: list[str]):
     index = json.loads((KB / "index.json").read_text(encoding="utf-8"))
     aliases = json.loads(OUT.read_text(encoding="utf-8")) if OUT.exists() else {}
     exe = claude_exe()
-    seen_names = set()
+    from maplehelper.kb import _VARIANT
+    # one entry per base name, the plain entity first: "Zelya (Free Market)" and "Forgotten Hollow Instance 080003500"
+    # got the same Hebrew alias as "Zelya" and "Forgotten Hollow", and the app opened the variant
+    seen_names = {_VARIANT.sub("", e["name"]).strip().lower() for e in index if e["key"] in aliases}
     rows = []
-    for e in index:
+    for e in sorted(index, key=lambda e: bool(_VARIANT.search(e["name"]))):
         if e["category"] in categories and e["key"] not in aliases:
             name = e["name"]
-            if name.lower() in seen_names or re.search(r"\(alt\)|\bPQ\b|\(KPQ\)", name):
-                continue  # one entry per display name; skip party-quest variants
-            seen_names.add(name.lower())
+            base = _VARIANT.sub("", name).strip().lower()
+            if base in seen_names or re.search(r"\(alt\)|\bPQ\b|\(KPQ\)", name):
+                continue  # one entry per base name; skip party-quest variants
+            seen_names.add(base)
             rows.append((e["key"], name))
     print(f"{len(rows)} names to alias")
     for i in range(0, len(rows), BATCH):
@@ -74,6 +78,13 @@ def main(categories: list[str]):
         OUT.write_text(json.dumps(aliases, ensure_ascii=False, indent=0), encoding="utf-8")
         print(f"  {min(i + BATCH, len(rows))}/{len(rows)}")
     print(f"aliases.json: {len(aliases)} entries")
+    shared: dict[str, set[str]] = {}
+    for key, names in aliases.items():
+        for n in names:
+            shared.setdefault(n, set()).add(key)
+    for n, keys in sorted(shared.items()):
+        if len(keys) > 1:      # the app keeps the plain entity or drops the alias (KnowledgeBase._base_entity)
+            print(f"  shared alias {n}: {', '.join(sorted(keys))}")
 
 
 if __name__ == "__main__":

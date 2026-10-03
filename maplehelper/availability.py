@@ -161,6 +161,24 @@ class Availability:
         where = self.npc_continent(npc) if npc else None
         return where in self.confirmed if where else True
 
+    def entity_open(self, key: str) -> bool:
+        """Any KB entry the AI may be handed: a monster, map, NPC or quest the KB doesn't confirm is not in the
+        game; items, skills, guides and the rest are not tied to a place."""
+        cat = key.partition("/")[0]
+        if not self.known or cat not in ("monster", "map", "npc", "quest"):
+            return True
+        if cat == "monster":
+            return self.monster_key_open(key)
+        if cat == "npc":
+            return self.npc_open(key)
+        if cat == "quest":
+            return self.quest_open(key)
+        return self._once("map", key, lambda: self._map_key_open(key))
+
+    def _map_key_open(self, key: str) -> bool:
+        m = _MAP_LOCATION.search(self.kb.page(key))
+        return bool(m) and m.group(2).strip() in self.confirmed
+
     # ------------------------------------------------------------ jobs
 
     def job_tier_open(self, tier: int) -> bool:

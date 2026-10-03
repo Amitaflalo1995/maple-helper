@@ -232,6 +232,12 @@ def scrape_one(category: str, slug: str, url: str, refresh: bool) -> dict | None
             "lastmod": LASTMOD.get(url, ""), "hash": hashlib.sha1(md.encode("utf-8")).hexdigest()[:16]}
 
 
+def write_index(path: Path, entries: list[dict]) -> None:
+    """index.json with one entity per line: the AI greps the KB folder, and on one 1.3 MB line Gemini's grep failed
+    every time ("bufio.Scanner: token too long") while any other grep hit returned the whole index."""
+    path.write_text("[\n" + ",\n".join(json.dumps(e, ensure_ascii=False) for e in entries) + "\n]\n", encoding="utf-8")
+
+
 def scrape(limit: int | None, refresh: bool, changed_only: bool = False) -> None:
     urls = entity_urls()
     index_path = KB / "index.json"
@@ -274,12 +280,12 @@ def scrape(limit: int | None, refresh: bool, changed_only: bool = False) -> None
             else:
                 print(f"[{counter[0]}/{total}] skip (not found) {url}", flush=True)
             if counter[0] % 25 == 0:
-                index_path.write_text(json.dumps(list(index.values()), ensure_ascii=False), encoding="utf-8")
+                write_index(index_path, list(index.values()))
 
     with ThreadPoolExecutor(max_workers=WORKERS) as pool:
         list(pool.map(work, jobs))
 
-    index_path.write_text(json.dumps(list(index.values()), ensure_ascii=False), encoding="utf-8")
+    write_index(index_path, list(index.values()))
     meta_path = KB / "meta.json"
     meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
     meta.update({"source": "NiaMeowDB (meowdb.com)", "fetched_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -312,11 +318,11 @@ def fill_images() -> None:
             done[0] += 1
             if done[0] % 50 == 0:
                 print(f"[{done[0]}/{len(todo)}]", flush=True)
-                index_path.write_text(json.dumps(index, ensure_ascii=False), encoding="utf-8")
+                write_index(index_path, index)
 
     with ThreadPoolExecutor(max_workers=WORKERS) as pool:
         list(pool.map(work, todo))
-    index_path.write_text(json.dumps(index, ensure_ascii=False), encoding="utf-8")
+    write_index(index_path, index)
     got = sum(1 for e in todo if e.get("image"))
     print(f"pictures added: {got}/{len(todo)}")
 
@@ -332,7 +338,7 @@ def stamp() -> None:
         e["lastmod"] = LASTMOD.get(e["url"], "")
         if md.exists():
             e["hash"] = hashlib.sha1(md.read_text(encoding="utf-8").encode("utf-8")).hexdigest()[:16]
-    index_path.write_text(json.dumps(index, ensure_ascii=False), encoding="utf-8")
+    write_index(index_path, index)
     print(f"stamped {len(index)} entities")
 
 

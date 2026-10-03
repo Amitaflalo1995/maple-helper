@@ -409,8 +409,8 @@ STRINGS = {
     "quick_who_drops": {"he": "מפלצות שמפילות את {name}:", "en": "Monsters that drop {name}:"},
     "quick_where": {"he": "{name} נמצא בעיקר במפות:", "en": "{name} is found mostly in:"},
     # the KB's drop lists are NiaMeowDB's MSEA reference list plus what players confirmed for Classic
-    "quick_drops_note": {"he": "רשימת הדרופים היא רשימת ייחוס, עוד לא אושרה כולה ל-Classic.",
-                         "en": "Drop lists are reference data, not all confirmed for Classic yet."},
+    "quick_drops_note": {"he": "רשימת הדרופים היא רשימת הייחוס של MSEA (MapleSEA הישן), עוד לא אושרה ל-Classic.",
+                         "en": "Drop lists are MSEA reference data (old MapleSEA), not confirmed for Classic yet."},
     "quick_sells": {"he": "איפה קונים {name}:", "en": "Where to buy {name}:"},
     "quick_acc": {"he": "כדי לא לפספס אף פעם את {name} ב-Lv. {lv} צריך **{n} ACC** (90% פגיעות: {n90}).",
                   "en": "To never miss {name} at Lv. {lv} you need **{n} ACC** (90% hits: {n90})."},
