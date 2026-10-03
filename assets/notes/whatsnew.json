@@ -1,5 +1,24 @@
 [
  {
+  "version": "0.8.1",
+  "he": [
+   "סיור היכרות קצר בפעם הראשונה: כל כפתור בחלון והסבר עליו. אפשר להפעיל אותו שוב מההגדרות.",
+   "הסשן הקודם מסודר לפי דמות, עם השאלות של כל אחת, וכפתור \"להמשיך את השיחה\" שמחזיר את השיחה לצ'אט.",
+   "תפריט הדמויות: כל דמות נוספת מוצגת ככרטיס מלא עם \"בחירת דמות\", והצ'אט מאחור מטושטש.",
+   "כלי משחק נפתח מהר יותר. ב\"איפה לאמן\" וב\"פגיעה ונזק\" הסטטים למעלה, יש תמונה למפלצת ו\"לשאול בצ'אט\" על מפלצות, מפות, מקצועות ומתכונים.",
+   "בילד: התוצאה באמצע הטבלה, אייקון לכל סקיל, והגדלה נכונה בריחוף. קווסטים: הלבל שמוצג הוא הלבל שבו אפשר לסיים.",
+   "שמות הג'ובים בעברית ביצירת דמות, סימן ה-? תמיד מוצג נכון, ותיקונים קטנים רבים."
+  ],
+  "en": [
+   "A short first-run tour of every button in the window. Replay it any time from Settings.",
+   "The last-session card is grouped by character, with each one's questions and a \"Continue the chat\" button that brings the conversation back.",
+   "Character menu: other characters show as full cards with \"Choose\", over a blurred chat.",
+   "Play tools opens faster. Where to train and Hit & damage show your stats first, a monster picture, and \"Ask in chat\" on monsters, maps, professions and recipes.",
+   "Build: the result column in the middle, an icon for every skill, and the right picture on hover. Quests show the level you can finish them at.",
+   "Job names in Hebrew when creating a character, the ? badge always shows properly, and many small fixes."
+  ]
+ },
+ {
   "version": "0.8.0",
   "he": [
    "אפשר לבחור עכשיו גם Gemini (עם חשבון Google) וגם Grok (עם חשבון Grok, גם חינמי), לצד Claude ו-ChatGPT. מחליפים בכל רגע בהגדרות ← חשבון AI.",

@@ -131,6 +131,8 @@ class Tour(QWidget):
     def finish(self):
         self.overlay.removeEventFilter(self)
         self.hide()
+        # back to the question box: else focus lands on the first header button (search) and it stays lit
+        self.overlay.input.setFocus()
         self.finished.emit()
         self.deleteLater()
 
