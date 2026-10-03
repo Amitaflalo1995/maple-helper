@@ -1,7 +1,7 @@
 """iOS-style controls: switch, segmented control, grouped section rows."""
 from __future__ import annotations
 
-from PySide6.QtCore import Property, QEasingCurve, QPropertyAnimation, QRectF, QSize, Qt, Signal
+from PySide6.QtCore import Property, QEasingCurve, QEvent, QObject, QPropertyAnimation, QRectF, QSize, Qt, Signal
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtWidgets import (QAbstractButton, QButtonGroup, QFrame, QHBoxLayout, QLabel, QPushButton,
                                QSizePolicy, QVBoxLayout, QWidget)
@@ -101,6 +101,13 @@ class Segmented(QFrame):
         b = self.group.checkedButton()
         return b.property("value") if b else None
 
+    def set_label(self, label: str) -> None:
+        """What a screen reader says for it: the row's label for the control, and as context on each segment
+        (alone, "Dark" or "A" says nothing about what it sets)."""
+        self.setAccessibleName(label)
+        for b in self.group.buttons():
+            b.setAccessibleDescription(label)
+
 
 class Section(QFrame):
     """A grouped card of rows (iOS Settings): label on the leading side, control on the trailing side."""
@@ -121,7 +128,7 @@ class Section(QFrame):
         self.rows.setContentsMargins(14, 4, 14, 4)
         self.rows.setSpacing(0)
         outer.addWidget(self.card)
-        self._count = 0
+        self._items: list[tuple[QFrame | None, QWidget]] = []    # each row, and the separator above it
 
     def set_header(self, header: str) -> None:
         if self.header is not None:
@@ -129,10 +136,6 @@ class Section(QFrame):
 
     def add_row(self, label: str, control: QWidget | None = None, hint: str = "", hint_below: bool = False) -> QWidget:
         """hint_below: the hint goes under the whole row (label and control), not squeezed beside the control."""
-        if self._count:
-            sep = QFrame(objectName="Separator")
-            sep.setFixedHeight(1)
-            self.rows.addWidget(sep)
         row = QWidget()
         if hint_below:
             whole = QVBoxLayout(row)
@@ -156,17 +159,52 @@ class Section(QFrame):
         if control is not None:
             control.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
             lay.addWidget(control, 0, Qt.AlignVCenter)
-        self.rows.addWidget(row)
-        self._count += 1
+            # the label is a separate QLabel beside it: without this a screen reader said only "check box"
+            # or "button F9", never what the switch or the pick is for
+            if hasattr(control, "set_label"):
+                control.set_label(label)
+            else:
+                control.setAccessibleName(label)
+            if hint:
+                control.setAccessibleDescription(hint)
+        self.add_widget(row)
         return row
 
     def add_widget(self, w: QWidget):
-        if self._count:
+        sep = None
+        if self._items:
             sep = QFrame(objectName="Separator")
             sep.setFixedHeight(1)
             self.rows.addWidget(sep)
         self.rows.addWidget(w)
-        self._count += 1
+        self._items.append((sep, w))
+        # a row that is hidden for now (a sign-in hint, the installer's progress) left its divider behind, an
+        # empty line at the bottom of the card: each divider shows only when its row and one above it do
+        w.installEventFilter(self)
+        self._sync_separators()
+
+    @staticmethod
+    def _shown(w: QWidget) -> bool:
+        """Shown in the card (or will be once the window opens): only an explicit hide() counts."""
+        return not (w.isHidden() and w.testAttribute(Qt.WA_WState_ExplicitShowHide))
+
+    def _sync_separators(self) -> None:
+        above = False
+        for sep, w in self._items:
+            shown = self._shown(w)
+            if sep is not None:
+                sep.setVisible(shown and above)
+            above = above or shown
+
+    def eventFilter(self, obj: QObject, e: QEvent) -> bool:
+        if e.type() in (QEvent.Show, QEvent.Hide):
+            self._sync_separators()
+        return False
+
+    def showEvent(self, e):
+        # rows hidden or shown before the window opened sent no Show/Hide event to the filter
+        self._sync_separators()
+        super().showEvent(e)
 
 
 def track_slider(slider, rtl: bool) -> None:
@@ -200,6 +238,7 @@ class Select(QPushButton):
         self.setCursor(Qt.PointingHandCursor)
         self._items: list[str] = []
         self._index = -1
+        self._label = ""
         self.clicked.connect(self._open)
         if items:
             self.addItems(items)
@@ -214,11 +253,22 @@ class Select(QPushButton):
     def clear(self):
         self._items, self._index = [], -1
         self.setText("")
+        self._name()
 
     def show_none(self, prompt: str):
         """No item chosen yet: show a prompt ("Pick a job") until the player picks one."""
         self._index = -1
         self.setText(prompt)
+        self._name()
+
+    def set_label(self, label: str) -> None:
+        """What the pick is for ("Open/close key"): a screen reader heard only the value ("F9")."""
+        self._label = label
+        self._name()
+
+    def _name(self) -> None:
+        if self._label:
+            self.setAccessibleName(f"{self._label}: {self.text()}" if self.text() else self._label)
 
     def count(self):
         return len(self._items)
@@ -233,6 +283,7 @@ class Select(QPushButton):
         if 0 <= i < len(self._items) and i != self._index:
             self._index = i
             self.setText(self._items[i])
+            self._name()
             self.currentIndexChanged.emit(i)
 
     def setCurrentText(self, text: str):
@@ -309,6 +360,8 @@ class Stepper(QFrame):
         self.edit.setFixedWidth(46)
         self.edit.textEdited.connect(self._typed)
         self.edit.editingFinished.connect(lambda: self.edit.setText(str(self._v)))
+        # Up/Down in the field step like the buttons (the buttons are a mouse target; typing is the keyboard way)
+        self.edit.installEventFilter(self)
         # minus sits on the leading side, plus on the trailing side (mirrors in RTL)
         lay.addWidget(self.minus)
         lay.addWidget(self.edit)
@@ -317,6 +370,22 @@ class Stepper(QFrame):
 
     def value(self) -> int:
         return self._v
+
+    def set_label(self, label: str, less: str = "", more: str = "") -> None:
+        """Screen-reader names: the field is the value of `label`; the - and + buttons say what they do
+        (alone they were read as "minus" and "plus" with nothing to tie them to the field)."""
+        self.setAccessibleName(label)
+        self.edit.setAccessibleName(label)
+        self.minus.setAccessibleName(less or self.minus.text())
+        self.plus.setAccessibleName(more or self.plus.text())
+        for b in (self.minus, self.plus):
+            b.setAccessibleDescription(label)
+
+    def eventFilter(self, obj, e) -> bool:
+        if obj is self.edit and e.type() == QEvent.KeyPress and e.key() in (Qt.Key_Up, Qt.Key_Down):
+            self.setValue(self._v + (1 if e.key() == Qt.Key_Up else -1))
+            return True
+        return super().eventFilter(obj, e)
 
     def setMinimum(self, lo: int):
         """Raise/lower the floor; a value below it moves up to it (and emits)."""
@@ -491,11 +560,15 @@ class WrapLink(QLabel):
         self.setWordWrap(True)
         self.setTextFormat(Qt.RichText)
         self.setCursor(Qt.PointingHandCursor)
+        # reachable with Tab and run with Enter or Space, like the buttons around it (a QLabel takes no focus:
+        # "Read my stats from the screen" was mouse-only)
+        self.setFocusPolicy(Qt.StrongFocus)
         self._rtl = rtl
         self.set_text(text)
 
     def set_text(self, text: str) -> None:
         import html
+        self.setAccessibleName(text)        # the plain words, not the rich-text markup around them
         d, side = ("rtl", "right") if self._rtl else ("ltr", "left")
         self.setText(f"<div dir='{d}' align='{side}'><span style='color:{theme.accent_text()}; font-weight:500;'>"
                      f"{html.escape(bidi.plain(text, self._rtl))}</span></div>")
@@ -505,6 +578,12 @@ class WrapLink(QLabel):
             self.clicked.emit()
             return
         super().mouseReleaseEvent(e)
+
+    def keyPressEvent(self, e):
+        if e.key() in (Qt.Key_Return, Qt.Key_Enter, Qt.Key_Space) and not e.isAutoRepeat():
+            self.clicked.emit()
+            return
+        super().keyPressEvent(e)
 
 
 def follow_typing(edit, rtl: bool) -> None:

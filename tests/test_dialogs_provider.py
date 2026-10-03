@@ -282,7 +282,7 @@ def test_settings_esc_keeps_unsaved_changes_and_keys_must_differ(env):
     assert not dlg.save_btn.isEnabled() and not dlg.keys_error.isHidden()
     dlg._save()
     assert s["hotkey_voice"] != s["hotkey_toggle"]           # not saved like that
-    dlg.hk_voice.setCurrentText("F12")
+    dlg.hk_voice.setCurrentText("F11")            # (F12 is not offered on Windows: it never registers)
     assert dlg.save_btn.isEnabled() and dlg.keys_error.isHidden()
     dlg.close()
 
