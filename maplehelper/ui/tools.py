@@ -9,7 +9,7 @@ import re
 import time
 
 from PySide6.QtCore import QEvent, QPoint, QSize, Qt, QTimer, QUrl, Signal
-from PySide6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
+from PySide6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel, QTextOption
 from PySide6.QtWidgets import (QButtonGroup, QCompleter, QFrame, QGraphicsOpacityEffect, QGridLayout, QHBoxLayout,
                                QLabel, QLineEdit, QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
 
@@ -287,9 +287,12 @@ class ToolsDialog(GlassDialog):
             self._build_page(self._pending[0])
 
     def __getattr__(self, name):
-        # a widget of a page not built yet (a test, a page reaching into another): build them all and look again
+        # a widget of a page not built yet (a test, a page reaching into another): build them all and look again.
+        # Only public names: the widgets are public, while a private name is the window's own state, probed with
+        # hasattr() before it is first set (_skill_icons' "_skills"). Building every page for that held the window
+        # back ~0.2 s whenever it opened on the Build page, the lazy build undone.
         pending = self.__dict__.get("_pending")
-        if pending and not name.startswith("__"):
+        if pending and not name.startswith("_"):
             self._build_rest()
             return getattr(self, name)
         raise AttributeError(name)
@@ -304,12 +307,30 @@ class ToolsDialog(GlassDialog):
         self._build_page(PAGES[i])
         self.nav.button(i).setChecked(True)
         self.stack.setCurrentIndex(i)
+        # the quest pages rebuild up to 40 cards (~0.3 s): a tab switch back to one that would show the same thing
+        # keeps it as it is. Every other redraw (a quest marked done, a new reading, the search) still fills.
+        state = self._page_state(PAGES[i])
+        if state is not None and state == self.__dict__.get("_filled", {}).get(PAGES[i]):
+            return
         self.refresh(PAGES[i])
+
+    def _page_state(self, name: str):
+        """Everything a quest page's cards are made from, or None for a page that always redraws."""
+        c = self.c
+        if name not in ("quests", "town") or c is None:
+            return None
+        common = (c.id, c.level, c.base_class, c.job, tuple(c.quests_done), theme.MODE)
+        if name == "quests":
+            return common + (tuple(sorted((c.crafts or {}).items())), self.q_mode.value(),
+                             self.q_search.text().strip(), self._q_limit, self.q_done_toggle.isChecked())
+        return common + (c.town, self._town_limit, self.town_done_toggle.isChecked())
 
     def refresh(self, name: str | None = None):
         """Redraw a page (or the current one) from the character and the KB."""
         name = name or PAGES[self.stack.currentIndex()]
         getattr(self, f"_fill_{name}", lambda: None)()
+        if name in ("quests", "town"):
+            self.__dict__.setdefault("_filled", {})[name] = self._page_state(name)
 
     def profile_changed(self):
         """The chat read the profile again (level, EXP, stats): follow it."""
@@ -580,7 +601,10 @@ class ToolsDialog(GlassDialog):
         if not q:
             spots = combat.spots(self.kb, self.c.level, n=1) if self.c else []
             return spots[0].monster if spots else None
-        ms = combat.monsters(self.kb)
+        # only monsters the KB confirms are in the game, like the list: a typed "Star Pixie" (Orbis) or "Ratz" (no
+        # map at all) got a full hits-to-kill card as if it could be met
+        open_ = availability.of(self.kb)
+        ms = [m for m in combat.monsters(self.kb) if open_.monster_key_open(m.key)]
         exact = [m for m in ms if m.name.lower() == q]
         if exact:
             return min(exact, key=lambda m: -sum(n for _, n in m.maps))
@@ -683,6 +707,8 @@ class ToolsDialog(GlassDialog):
         self.build_view = QTextBrowser(objectName="GuideText")
         self.build_view.setOpenLinks(False)
         self.build_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # breaks between words only, a wide table in a smaller font, as in the guides reader ("crafti" / "ng 1")
+        self.build_view.setWordWrapMode(QTextOption.WordWrap)
         from .guides import ImageZoom
         self.build_zoom = ImageZoom(self.build_view)
         lay.addWidget(self.build_view, 1)
@@ -741,10 +767,12 @@ class ToolsDialog(GlassDialog):
         opt.setTextDirection(Qt.RightToLeft if he else Qt.LeftToRight)
         self.build_view.document().setDefaultTextOption(opt)
         self.build_view.setHtml("\n".join(out))
+        from .guides import fit_tables
+        fit_tables(self.build_view)
 
     def _skill_icons(self) -> list[tuple[str, str]]:
         """(skill name, picture file URI), longest names first so "Power Strike" wins over "Power"."""
-        if not hasattr(self, "_skills"):
+        if "_skills" not in self.__dict__:
             out = []
             for k, e in self.kb.entities.items():
                 if e.get("category") == "skill":
@@ -785,14 +813,14 @@ class ToolsDialog(GlassDialog):
         t = self.t
         sc, lay = scroll_page()
         self.q_mode = Segmented([(t("q_now"), "now"), (t("q_soon"), "soon")], "now", t.rtl)
-        self.q_mode.changed.connect(lambda *_: self._fill_quests())
+        self.q_mode.changed.connect(lambda *_: self._fill_quests(new_list=True))
         lay.addWidget(self.q_mode, 0, Qt.AlignHCenter)
         # search within the list shown (the quests that fit the character's level), not all quests
         self.q_search = QLineEdit()
         self.q_search.setPlaceholderText(t("q_search"))
         self.q_search.setClearButtonEnabled(True)
         self._q_search_timer = QTimer(self, singleShot=True, interval=200)     # rebuild once typing pauses
-        self._q_search_timer.timeout.connect(self._fill_quests)
+        self._q_search_timer.timeout.connect(lambda: self._fill_quests(new_list=True))
         self.q_search.textChanged.connect(lambda *_: self._q_search_timer.start())
         follow_typing(self.q_search, t.rtl)
         lay.addWidget(self.q_search)
@@ -808,10 +836,13 @@ class ToolsDialog(GlassDialog):
         self.q_list.setSpacing(8)
         lay.addLayout(self.q_list)
         lay.addStretch(1)
+        self._q_limit = MAX_QUESTS
         return sc
 
-    def _fill_quests(self):
+    def _fill_quests(self, new_list: bool = False):
         t, c = self.t, self.c
+        if new_list:                    # another list (Available / Coming up, a new search): its first cards again
+            self._q_limit = MAX_QUESTS
         clear(self.q_list)
         clear(self.q_done)
         if not c:
@@ -834,9 +865,28 @@ class ToolsDialog(GlassDialog):
                 self.q_list.addWidget(self._label(t("q_no_match"), "RowHint"))
         elif not rows:
             self.q_list.addWidget(self._label(t("q_none"), "RowHint"))
-        for q in rows[:MAX_QUESTS]:
+        for q in rows[:self._q_limit]:
             self.q_list.addWidget(self._quest_card(q))
+        self._more_quests(self.q_list, len(rows), self._q_limit, "_q_limit")
         self._add_done(self.q_done_toggle, self.q_done, list(c.quests_done))
+
+    def _more_quests(self, layout: QVBoxLayout, total: int, shown: int, limit: str):
+        """Under a list cut at `shown` cards: "Showing 40 of 56 quests" and "Show more quests". The header counts
+        every quest and the cut ones are the lowest-EXP ones, so without this they were out of reach (only a search
+        found them). The numbers are in the line, not on the button: a button lays a Hebrew label with a number in
+        it out of order."""
+        if total <= shown:
+            return
+        layout.addWidget(self._label(self.t("q_shown", n=shown, total=total), "RowHint"))
+        more = QPushButton(self._p(self.t("q_more")), objectName="Secondary")
+        more.setCursor(Qt.PointingHandCursor)
+        more.setAutoDefault(False)
+
+        def show_more():
+            setattr(self, limit, shown + MAX_QUESTS)
+            self._refresh_in_place()
+        more.clicked.connect(lambda *_: show_more())
+        layout.addWidget(more, 0, Qt.AlignHCenter)
 
     def _picture_uri(self, kind: str, name: str) -> str | None:
         """The KB picture of a monster / item / NPC by its name, as a file URI."""
@@ -990,6 +1040,12 @@ class ToolsDialog(GlassDialog):
         under the toggle: a small header, then muted cards, each with a way back to the list."""
         t = self.t
         toggle.setVisible(bool(keys))
+        if not keys and toggle.isChecked():
+            # nothing left to show: closed again, or the next quest marked done would open the list on its own.
+            # Quietly: its toggled signal redraws the page, and this is already inside a redraw
+            toggle.blockSignals(True)
+            toggle.setChecked(False)
+            toggle.blockSignals(False)
         toggle.setText(self._p(t("q_hide_done" if toggle.isChecked() else "q_show_done", n=len(keys))))
         if not (keys and toggle.isChecked()):
             return
@@ -1169,6 +1225,7 @@ class ToolsDialog(GlassDialog):
         self.town_done.setSpacing(8)
         lay.addLayout(self.town_done)
         lay.addStretch(1)
+        self._town_limit = MAX_QUESTS
         return sc
 
     def _set_town(self, *_):
@@ -1176,7 +1233,8 @@ class ToolsDialog(GlassDialog):
         if c:
             c.town = self.town_pick.value()
             self.profiles.save()
-        self._fill_town()
+        self._town_limit = MAX_QUESTS         # another town's list: its first cards
+        self.refresh("town")
 
     def _fill_town(self):
         t, c = self.t, self.c
@@ -1206,8 +1264,9 @@ class ToolsDialog(GlassDialog):
             return
         if not rows:
             self.town_list.addWidget(self._label(t("q_none"), "RowHint"))
-        for q in rows[:MAX_QUESTS]:
+        for q in rows[:self._town_limit]:
             self.town_list.addWidget(self._quest_card(q))
+        self._more_quests(self.town_list, len(rows), self._town_limit, "_town_limit")
         mine = [k for k in c.quests_done
                 if (q := quests.quest(self.kb, k)) and q.area == "Citizenship" and quests.town_of(self.kb, q) == town]
         self._add_done(self.town_done_toggle, self.town_done, mine)
@@ -1293,7 +1352,16 @@ class ToolsDialog(GlassDialog):
         self.price_box.addWidget(card)
         self._price_for = name
         import threading
-        threading.Thread(target=lambda n=name: self.market_ready.emit((n, market.free_market(n))), daemon=True).start()
+
+        def lookup(n=name):
+            found = market.free_market(n)          # up to 10 s on a slow connection
+            try:
+                self.market_ready.emit((n, found))
+            except RuntimeError:
+                # the window was closed (and deleted) meanwhile: nothing to show it in. Uncaught, this logged a
+                # CRITICAL "uncaught exception in thread" into the log that goes with problem reports
+                pass
+        threading.Thread(target=lookup, daemon=True).start()
 
     def _on_market(self, result):
         t = self.t

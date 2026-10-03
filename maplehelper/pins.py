@@ -49,7 +49,10 @@ def conversations(records: list[dict]) -> list[dict]:
 
 
 def search(pairs: list[dict], query: str) -> list[dict]:
-    """Newest first; every word of the query must appear in the question or the answer."""
+    """Newest first; every word of the query must appear in the question or the answer, as the player sees them:
+    not the stored "[about Mano]" tag (an "about" search matched every question asked from a card) nor the
+    answer's "**" bold marks."""
     words = [w for w in query.lower().split() if w]
-    hits = [p for p in pairs if all(w in (p["q"] + " " + p["a"]).lower() for w in words)]
+    hits = [p for p in pairs
+            if all(w in (shown_question(p["q"]) + " " + p["a"].replace("**", "")).lower() for w in words)]
     return list(reversed(hits))
