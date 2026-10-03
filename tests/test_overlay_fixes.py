@@ -6,6 +6,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 import pytest  # noqa: E402
 from PySide6.QtCore import QRect  # noqa: E402
+from PySide6.QtGui import QTextDocumentFragment  # noqa: E402
 
 from maplehelper.brain import META, streamed_text  # noqa: E402
 from maplehelper.i18n import STRINGS, I18n  # noqa: E402
@@ -134,7 +135,9 @@ def test_screenshot_hint_names_the_players_hotkey(overlay):
     overlay.settings["hotkey_toggle"] = "F8"
     overlay.game_hwnd, overlay.shot = None, None
     overlay._update_shot_hint()
-    assert "F8" in overlay.shot_hint.text() and "F9" not in overlay.shot_hint.text()
+    # the words the player reads: the label's HTML also carries the badge PNG as base64, which can spell "F9"
+    shown = QTextDocumentFragment.fromHtml(overlay.shot_hint.text()).toPlainText()
+    assert "F8" in shown and "F9" not in shown
 
 
 def test_language_switch_updates_tooltips_and_term_language(overlay):

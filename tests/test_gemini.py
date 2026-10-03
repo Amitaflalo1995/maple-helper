@@ -20,6 +20,13 @@ def step(**kw):
 OK = {"event": "result", "result": {"conversation_id": "abc-123", "status": "SUCCESS", "response": "x"}}
 
 
+@pytest.fixture(autouse=True)
+def no_model_list(monkeypatch):
+    """The `agy models` list is a module-level cache: every test starts without one, whatever ran before."""
+    monkeypatch.setattr(gemini, "_models_cache", [])
+    monkeypatch.setattr(gemini, "_models_at", 0.0)
+
+
 @pytest.fixture
 def home(tmp_path, monkeypatch):
     h = tmp_path / "agy-home"
@@ -318,6 +325,8 @@ class TestBackend:
         assert "--model" not in FakePopen.calls[1].cmd
 
     def test_summary_has_no_tools(self, kb, home, monkeypatch):
+        # summaries ask for the saver alias: with the list already read it resolves without running `agy models`
+        monkeypatch.setattr(gemini, "_models_cache", [("gemini-3.8-flash-low", "Gemini 3.8 Flash (Low)")])
         b = self.make(kb, monkeypatch, events(step(step_type="agent_response", state="DONE", text_delta="• Hunt"), OK))
         assert b.backend.summarize("Summarize.", "long text") == "• Hunt"
         p = FakePopen.calls[0]
