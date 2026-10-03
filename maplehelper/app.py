@@ -902,6 +902,7 @@ class MapleHelperApp:
         threading.Thread(target=inventory.warm, args=(self.kb,), daemon=True).start()   # the new KB's icons
         self.brain.kb = self.kb
         self.overlay.kb = self.kb
+        self.overlay.show_scope()           # the new KB's "verified on" date
 
     def shutdown(self):
         telemetry.flush()

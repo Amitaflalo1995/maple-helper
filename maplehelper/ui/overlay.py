@@ -390,6 +390,12 @@ class Overlay(QWidget):
         tb.addWidget(logo)
         self.title = QLabel("Maple Helper", objectName="Title")
         tb.addWidget(self.title)
+        # the app is still in beta: always shown beside the name, never hidden for room like the version
+        self.beta_badge = QLabel("BETA", objectName="BetaBadge")
+        self.beta_badge.setLayoutDirection(Qt.LeftToRight)
+        self.beta_badge.setAlignment(Qt.AlignCenter)
+        self.beta_badge.setFixedHeight(17)
+        tb.addWidget(self.beta_badge, 0, Qt.AlignVCenter)
         self.version_label = QLabel(f"v{__version__}", objectName="Version")
         self.version_label.setLayoutDirection(Qt.LeftToRight)
         tb.addWidget(self.version_label)
@@ -552,6 +558,11 @@ class Overlay(QWidget):
         self.shot_hint.hide()
         lay.addWidget(self.shot_hint)
         lay.addWidget(self.capsule)
+        # under the chat: what the answers cover. Only what the KB confirms is in the game, and when it last checked
+        self.scope_note = QLabel(objectName="ScopeNote")
+        self.scope_note.setWordWrap(True)
+        self.scope_note.setAlignment(Qt.AlignHCenter)
+        lay.addWidget(self.scope_note)
 
         # every edge and corner resizes (a single grip in one bottom corner was the only way before)
         self.setMouseTracking(True)
@@ -655,6 +666,17 @@ class Overlay(QWidget):
         if self.isVisible():
             QTimer.singleShot(300, self.save_geometry)
 
+    def show_scope(self) -> None:
+        """The line under the chat: answers follow the game as it is now, as the KB last verified it (a KB update
+        brings a new date, and content the KB confirms as released appears without an app update)."""
+        from .. import availability
+        a = availability.of(self.kb)
+        date = ".".join(reversed(a.verified.split("-"))) if a.verified else ""
+        text = self.t("scope_note", date=date) if date else self.t("scope_note_nodate")
+        self.scope_note.setText(bidi.plain(text, self.t.rtl))
+        self.scope_note.setToolTip(self.t("scope_tip"))
+        self.beta_badge.setToolTip(self.t("beta_tip"))
+
     def apply_language(self):
         from . import terms
         self.t = I18n(self.settings["language"] or "he")
@@ -674,6 +696,7 @@ class Overlay(QWidget):
         set_tip(self.settings_btn, self.t("settings"))
         self.saver_badge.setToolTip(self.t.p("saver_hint", self.settings["provider"]))
         self._fit_header()
+        self.show_scope()
         set_tip(self.wish_btn, self.t("wishlist"))
         set_tip(self.guides_btn, self.t("guides"))
         set_tip(self.history_btn, self.t("history"))

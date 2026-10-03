@@ -61,6 +61,8 @@ class Availability:
         # a KB with no release guide at all says nothing about what's out (a test's tiny KB): nothing is
         # filtered then. The real KB always has it (tools/kb_release.py refuses to publish one without it).
         self.known = bool(guide)
+        # when the KB last checked what is out: the release guide's own date ("2026-09-29T00:00:00.000Z")
+        self.verified = str((kb.get(RELEASE_GUIDE) or {}).get("lastmod") or "")[:10]
         self._memo: dict[tuple[str, str], object] = {}       # (what, key) -> answer: pages are read once
         # the guide's own body, not its FAQ/table of contents at the top (which repeats the headings)
         body = guide[guide.rfind("Confirmed content"):] if "Confirmed content" in guide else guide
