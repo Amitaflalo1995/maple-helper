@@ -5,7 +5,7 @@ from __future__ import annotations
 import webbrowser
 
 from PySide6.QtCore import QEvent, QObject, QPoint, QPointF, Qt, QTimer, QUrl, Signal
-from PySide6.QtGui import QCursor, QGuiApplication, QPixmap
+from PySide6.QtGui import QCursor, QFontInfo, QGuiApplication, QPixmap, QTextCharFormat, QTextCursor, QTextFormat, QTextOption, QTextTable
 from PySide6.QtWidgets import (QApplication, QButtonGroup, QFrame, QHBoxLayout, QLabel, QLineEdit, QPushButton, QScrollArea,
                                QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
 
@@ -17,6 +17,50 @@ from .glass import GlassDialog
 
 ZOOM = 3            # pictures are pixel art: a whole-number zoom keeps them sharp
 ZOOM_MAX_W = 720
+TABLE_MIN_PX = 10   # a wide table's text gets this small at the least before it scrolls sideways
+
+
+def fit_tables(browser: QTextBrowser, wait: bool = True) -> None:
+    """Tables wider than the view get a smaller font, a pixel at a time, until they fit (down to TABLE_MIN_PX).
+    Lines break between words only (WordWrap), so a 10-column table no longer splits "341,782" into "341,7" /
+    "82"; what is still too wide after this scrolls sideways."""
+    if not browser.isVisible():
+        # filled before its window is on screen (a window opened on this page): the view has no width yet, and
+        # every table would come out at the smallest size. Measured once the window is up instead.
+        if wait:
+            def later():
+                try:
+                    fit_tables(browser, wait=False)
+                except RuntimeError:          # closed meanwhile
+                    pass
+            QTimer.singleShot(0, later)
+        return
+    doc = browser.document()
+    room = browser.viewport().width() - 2 * doc.documentMargin()
+    base = QFontInfo(browser.font()).pixelSize()        # a font set in points has no pixelSize() of its own
+    if room <= 0 or base <= TABLE_MIN_PX:
+        return
+    lay = doc.documentLayout()
+    for frame in doc.rootFrame().childFrames():
+        if not isinstance(frame, QTextTable):
+            continue
+        px = base
+        while lay.frameBoundingRect(frame).width() > room + 1 and px > TABLE_MIN_PX:
+            px -= 1
+            cur = QTextCursor(doc)
+            cur.setPosition(frame.firstPosition())
+            cur.setPosition(frame.lastPosition(), QTextCursor.KeepAnchor)
+            fmt = QTextCharFormat()
+            fmt.setProperty(QTextFormat.FontPixelSize, px)
+            cur.mergeCharFormat(fmt)
+    # the sideways bar only for a table still too wide: the page itself measures a pixel over the view (rounding),
+    # which put a bar under every guide
+    over = doc.size().width() - browser.viewport().width()
+    browser.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded if over > 2 else Qt.ScrollBarAlwaysOff)
+    if over > 2 and browser.layoutDirection() == Qt.RightToLeft:
+        # a right-to-left page that scrolls sideways starts at its right edge, where its lines begin
+        bar = browser.horizontalScrollBar()
+        bar.setValue(bar.maximum())
 
 
 def zoomed(pix: QPixmap) -> QPixmap:
@@ -36,6 +80,10 @@ class ImageZoom(QObject):
         self.pop = QLabel(None, Qt.ToolTip | Qt.FramelessWindowHint)
         self.pop.setAttribute(Qt.WA_TransparentForMouseEvents)
         self.pop.setStyleSheet("background: rgba(28,28,30,0.92); border-radius: 12px; padding: 8px;")
+        # the popup is a window of its own (no parent, so it can stand beside the dialog): it goes with the view.
+        # The dialogs delete themselves on close, before the poll below could hide it, so it stayed on screen
+        # over the game until the app quit, and each Play tools / Guides window left one more behind
+        self.destroyed.connect(self.pop.deleteLater)
         self._shown = None
         browser.viewport().setMouseTracking(True)
         browser.viewport().installEventFilter(self)
@@ -80,6 +128,10 @@ class ImageZoom(QObject):
             else:
                 self.hide()
         elif e.type() in (QEvent.Leave, QEvent.Wheel, QEvent.MouseButtonPress):
+            self.hide()
+        elif e.type() == QEvent.Hide and self._shown:
+            # the window closed (or another page took its place) with a picture zoomed: Qt sends no Leave to a
+            # window that is closing
             self.hide()
         return False
 
@@ -148,6 +200,9 @@ class GuideRow(QFrame):
         super().__init__(objectName="Card")
         self.key = g["key"]
         self.setCursor(Qt.PointingHandCursor)
+        # a row opens from the keyboard too (Tab to it, Enter or Space): with the mouse only, no guide could be
+        # opened without one. Its title is what a screen reader says.
+        self.setFocusPolicy(Qt.TabFocus)          # a click opens it without leaving a focus ring behind
         row = QHBoxLayout(self)
         row.setContentsMargins(10, 8, 10, 8)
         row.setSpacing(10)
@@ -162,7 +217,9 @@ class GuideRow(QFrame):
         col = QVBoxLayout()
         col.setSpacing(2)
         align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute
-        title = QLabel(bidi.plain(guides.title(g["key"], g["title"], t.lang), rtl), objectName="CardName")
+        shown_title = guides.title(g["key"], g["title"], t.lang)
+        self.setAccessibleName(shown_title)
+        title = QLabel(bidi.plain(shown_title, rtl), objectName="CardName")
         title.setWordWrap(True)
         title.setAlignment(align)
         col.addWidget(title)
@@ -175,6 +232,19 @@ class GuideRow(QFrame):
     def mouseReleaseEvent(self, e):
         if e.button() == Qt.LeftButton:
             self.clicked.emit(self.key)
+
+    def paintEvent(self, e):
+        super().paintEvent(e)
+        if self.hasFocus():
+            from .pinsview import draw_focus
+            draw_focus(self)
+
+    def keyPressEvent(self, e):
+        if e.key() in (Qt.Key_Return, Qt.Key_Enter, Qt.Key_Space):
+            self.clicked.emit(self.key)
+            e.accept()
+            return
+        super().keyPressEvent(e)
 
 
 class GuidesDialog(GlassDialog):
@@ -189,6 +259,9 @@ class GuidesDialog(GlassDialog):
         self.all = guides.all_guides(kb)
         self.picks = guides.for_you(kb, character)
         self._reading: str | None = None
+        # the guides left through a link inside a guide, with where each was scrolled to: Back / Esc return there,
+        # not to the list (which lost the place in the first guide)
+        self._trail: list[tuple[str, int]] = []
 
         outer = QVBoxLayout(self.content)
         outer.setContentsMargins(0, 0, 0, 0)
@@ -202,12 +275,23 @@ class GuidesDialog(GlassDialog):
             self.open_guide(open_key)
 
     def keyPressEvent(self, e):
-        # Esc in an open guide goes back to the list (like "Back"); in the list it closes the window
+        # Esc in an open guide goes back (like "Back": to the guide a link came from, else the list); in the list
+        # it closes the window
         if e.key() == Qt.Key_Escape and self.stack.currentIndex() == 1:
-            self.stack.setCurrentIndex(0)
+            self._back()
             e.accept()
             return
         super().keyPressEvent(e)
+
+    def _back(self):
+        if self._trail:
+            key, at = self._trail.pop()
+            self._show(key)
+            bar = self.browser.verticalScrollBar()
+            bar.setValue(at)
+            QTimer.singleShot(0, lambda: bar.setValue(at))      # again once the document has its full height
+            return
+        self.stack.setCurrentIndex(0)
 
     # library ----------------------------------------------------------------
 
@@ -221,6 +305,7 @@ class GuidesDialog(GlassDialog):
         self.search.setPlaceholderText(bidi.plain(t("g_search"), rtl))
         self.search.setClearButtonEnabled(True)
         self.search.textChanged.connect(lambda *_: self._fill())
+        self.search.returnPressed.connect(self._open_first)          # Enter opens the top result
         follow_typing(self.search, rtl)
         lay.addWidget(self.search)
         chips = FlowLayout(spacing=6)        # wraps onto a second row: one row of five was 521 px wide
@@ -263,7 +348,8 @@ class GuidesDialog(GlassDialog):
                     texts[g["key"]] = (guides.book_text(b) if b else
                                        guides.search_text(g["key"], self.kb.page(g["key"])) + " "
                                        + guides.text_of(g["key"], self.t.lang)).lower()
-            shown = [g for g in self.all if q in g["title"].lower() or q in texts[g["key"]]]
+            wants = self._queries(q)
+            shown = [g for g in self.all if any(w in g["title"].lower() or w in texts[g["key"]] for w in wants)]
         elif cat == "for_you":
             by_key = {g["key"]: g for g in self.all}
             shown = [by_key[k] for k in self.picks if k in by_key]
@@ -277,6 +363,24 @@ class GuidesDialog(GlassDialog):
             self.rows.addWidget(QLabel(bidi.plain(self.t("g_none"), self.t.rtl), objectName="RowHint"))
         self.rows.addStretch(1)
 
+    def _queries(self, q: str) -> list[str]:
+        """The search as typed, and in Hebrew also with the KB's Hebrew names turned into the English ones the
+        guides use ("קרנינג" -> "kerning city"): even the Hebrew guides keep game names in English, so a Hebrew
+        name found nothing."""
+        wants = [q]
+        resolve = getattr(self.kb, "resolve_names", None)
+        if resolve and bidi._RTL.search(q):
+            en = resolve(q).lower().strip()
+            if en and en != q:
+                wants.append(en)
+        return wants
+
+    def _open_first(self):
+        row = next((self.rows.itemAt(i).widget() for i in range(self.rows.count())
+                    if isinstance(self.rows.itemAt(i).widget(), GuideRow)), None)
+        if row is not None:
+            self.open_guide(row.key)
+
     # reader -----------------------------------------------------------------
 
     def _reader(self) -> QWidget:
@@ -285,9 +389,9 @@ class GuidesDialog(GlassDialog):
         lay = QVBoxLayout(w)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.setSpacing(8)
-        back = QPushButton(bidi.plain(t("g_back"), rtl), objectName="Link")
+        self.back = back = QPushButton(bidi.plain(t("g_back"), rtl), objectName="Link")
         back.setCursor(Qt.PointingHandCursor)
-        back.clicked.connect(lambda: self.stack.setCurrentIndex(0))
+        back.clicked.connect(self._back)
         lay.addWidget(back, 0, (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute)   # the reading start
         self.r_title = QLabel(objectName="PageTitle")
         self.r_title.setWordWrap(True)
@@ -315,7 +419,18 @@ class GuidesDialog(GlassDialog):
         self.browser.anchorClicked.connect(self._on_link)
         from . import terms
         self.browser.highlighted.connect(lambda url: terms._hovered(url.toString(), self.t.lang))   # hover shows it too
-        self.browser.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)   # wide tables wrap their cells instead
+        # lines break between words only: Qt's default also breaks inside a word when a table cell is narrow, so
+        # a 10-column table read "341,7" / "82" for one DPM value and "Savag" / "e Blow". A wide table gets a
+        # smaller font instead, and one still too wide scrolls sideways (fit_tables; the text around it still
+        # wraps at the window's width)
+        self.browser.setWordWrapMode(QTextOption.WordWrap)
+        from . import theme
+        # the app's style draws only the vertical bar: the sideways one in the same thin look
+        self.browser.horizontalScrollBar().setStyleSheet(
+            f"QScrollBar:horizontal {{ background: transparent; height: 6px; margin: 1px 4px; }}"
+            f"QScrollBar::handle:horizontal {{ background: {theme.P()['scroll']}; border-radius: 3px; min-width: 28px; }}"
+            "QScrollBar::add-line, QScrollBar::sub-line, QScrollBar::add-page, QScrollBar::sub-page"
+            " { width: 0; background: none; }")
         self.zoom = ImageZoom(self.browser)
         self.browser.setLayoutDirection(Qt.LeftToRight)      # the guides are written in English
         lay.addWidget(self.browser, 1)
@@ -329,13 +444,23 @@ class GuidesDialog(GlassDialog):
         if link.startswith("guide:"):
             key = "guide/" + link[6:]
             if self.kb.get(key) or guides.book(key, "en"):
-                self.open_guide(key)
+                if self._reading and self._reading != key:
+                    self._trail.append((self._reading, self.browser.verticalScrollBar().value()))
+                self._show(key)
         elif link.startswith("http"):
             webbrowser.open(link)
 
     def open_guide(self, key: str):
+        """A guide opened from the list (or by the app): Back from it goes to the list."""
+        self._trail.clear()
+        self._show(key)
+
+    def _show(self, key: str):
         t = self.t
         self._reading = key
+        # Back says where it goes: the guide a link came from, else the list (not the guide's name: the titles are
+        # long, "MapleStory Classic Thief Build and Leveling Guide: Lv 1-30" ran out of the window)
+        self.back.setText(bidi.plain(t("g_back_prev") if self._trail else t("g_back"), t.rtl))
         b = guides.book(key, t.lang)
         if b:
             self._open_book(key, b)
@@ -357,6 +482,7 @@ class GuidesDialog(GlassDialog):
         self.browser.document().setDefaultTextOption(opt)
         self.browser.setHtml(guides.to_html(g, labels, rtl))
         self.stack.setCurrentIndex(1)
+        fit_tables(self.browser)
 
     def _open_book(self, key: str, b: dict):
         """A full guide (pictures, tables, notes) from assets/guides."""
@@ -377,3 +503,4 @@ class GuidesDialog(GlassDialog):
         self.browser.setHtml(glossary.annotate(guides.book_html(b, theme.MODE, t.rtl), t.lang, limit=30))
         self.browser.verticalScrollBar().setValue(0)
         self.stack.setCurrentIndex(1)
+        fit_tables(self.browser)

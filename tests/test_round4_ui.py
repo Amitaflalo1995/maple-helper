@@ -147,8 +147,10 @@ def test_history_shows_a_page_with_a_count_and_more(kb):
 def test_history_preview_keeps_an_english_ellipsis_at_its_end(kb):
     from maplehelper.ui.pinsview import HistoryDialog
     d = HistoryDialog([{"q": "where?", "a": "word " * 60, "t": time.time()}], "Elipaz", "he", "")
-    previews = [lb.text() for lb in d.findChildren(type(d.count)) if lb.text().endswith("…" + bidi.PDI + bidi.RLM)]
-    assert previews                   # one left-to-right block: its "…" stays after the English text
+    # laid out left to right as itself (not an isolate inside a right-to-left paragraph, which clipped the first
+    # letter, see test_tools_windows): its "…" stays after the English text
+    previews = [lb for lb in d.findChildren(type(d.count)) if lb.text().endswith("word…")]
+    assert previews and all(lb.layoutDirection() == Qt.LeftToRight for lb in previews)
     d.close()
 
 

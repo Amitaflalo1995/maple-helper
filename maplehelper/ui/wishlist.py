@@ -5,7 +5,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 
-from .. import bidi
+from .. import availability, bidi
 from ..i18n import I18n
 from ..kb import KnowledgeBase
 from .controls import rtl_buttons
@@ -52,6 +52,14 @@ class WishlistDialog(GlassDialog):
             head.setAlignment(self._align)
             head.setContentsMargins(4, 4, 4, 0)
             lay.addWidget(head)
+            if droppers:
+                # the drop lists include the MSEA reference drops, not all confirmed for Classic: said here as the
+                # instant answers say it under the same data
+                note = QLabel(bidi.plain(t("quick_drops_note"), rtl), objectName="RowHint")
+                note.setWordWrap(True)
+                note.setAlignment(self._align)
+                note.setContentsMargins(4, 0, 4, 0)
+                lay.addWidget(note)
             item = (kb.get(k) or {}).get("name", k)
             # each dropper as a row with its picture, level, map and a way to ask the chat about it (live feedback:
             # a small text list was hard to read and led nowhere)
@@ -81,7 +89,10 @@ class WishlistDialog(GlassDialog):
         e = kb.get(m) or {}
         name = e.get("name", m)
         lvl = (e.get("props") or {}).get("Level")
-        maps = kb._top_maps(m, n=1)
+        # where it lives: its busiest map the KB confirms is in the game (kb.droppers already keeps only monsters
+        # that are in the game, but one that lives in both regions listed its Orbis map first)
+        open_ = availability.of(kb)
+        maps = [mp for mp in kb.all_maps(m) if open_.map_open(mp)][:1]
         card = QFrame(objectName="Card")
         row = QHBoxLayout(card)
         row.setContentsMargins(12, 8, 12, 8)
