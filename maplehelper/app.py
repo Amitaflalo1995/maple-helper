@@ -554,7 +554,9 @@ class MapleHelperApp:
 
     def apply_autostart(self):
         # the setting means "start at login" on macOS (named before macOS support)
-        osapi.set_autostart(self.settings["start_with_windows"], [BACKGROUND_ARG])
+        if osapi.set_autostart(self.settings["start_with_windows"], [BACKGROUND_ARG]) is False:
+            t = I18n(self.settings["language"])     # macOS, run from the disk image: the login item would break
+            self.toast(t("start_at_login"), t("start_at_login_move"), timeout_ms=15000)
 
     # ------------------------------------------------------------------ knowledge base updates
 

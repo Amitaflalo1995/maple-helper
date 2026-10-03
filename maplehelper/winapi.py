@@ -9,12 +9,14 @@ from __future__ import annotations
 
 import ctypes
 import ctypes.wintypes as wt
+import os
+import re
 import sys
 
 from PySide6.QtCore import QAbstractNativeEventFilter, QObject, Signal
 from PySide6.QtWidgets import QApplication, QWidget
 
-from . import APP_NAME
+from . import APP_NAME, capture
 from .capture import grab_image, grab_jpeg
 
 user32 = ctypes.windll.user32
@@ -44,18 +46,49 @@ def _title(hwnd) -> str:
     return buf.value
 
 
+def _class_name(hwnd) -> str:
+    buf = ctypes.create_unicode_buffer(256)
+    user32.GetClassNameW(hwnd, buf, 256)
+    return buf.value
+
+
+def _pid(hwnd) -> int:
+    pid = wt.DWORD()
+    user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+    return pid.value
+
+
+# windows that only mention the game: a browser tab, Discord, a folder, a text file ("MapleStory guide - YouTube -
+# Google Chrome"). Never "the game": its screenshot went to the AI when the game was closed or minimized
+NOT_GAME_CLASSES = {"Chrome_WidgetWin_0", "Chrome_WidgetWin_1", "MozillaWindowClass", "MozillaDialogClass",
+                    "CabinetWClass", "ExploreWClass", "ApplicationFrameWindow", "Windows.UI.Core.CoreWindow",
+                    "IEFrame", "OperaWindowClass", "Notepad", "Notepad++", "OpusApp", "XLMAIN", "PPTFrameClass"}
+NOT_GAME_APPS = re.compile(r"\b(chrome|edge|firefox|opera|brave|vivaldi|discord|youtube|explorer|notepad|telegram|"
+                           r"whatsapp|twitch|reddit|obs)\b", re.IGNORECASE)
+_BIDI_MARKS = re.compile("[\u200e\u200f\u202a-\u202e\u2066-\u2069]")    # Chrome wraps titles in them
+
+
+def is_game_window(title: str, class_name: str) -> bool:
+    """A window of the game itself, by its title and window class (no process access)."""
+    t = _BIDI_MARKS.sub("", title).strip()
+    if not any(g.lower() in t.lower() for g in GAME_TITLES) or "maple helper" in t.lower():
+        return False
+    return class_name not in NOT_GAME_CLASSES and not NOT_GAME_APPS.search(t)
+
+
 def find_game_window() -> int | None:
+    capture.LAST_PROBLEM = None
     found: list[int] = []
+    own = os.getpid()
 
     def cb(hwnd, _):
         if user32.IsWindowVisible(hwnd) and not user32.IsIconic(hwnd):
-            t = _title(hwnd)
-            if any(g.lower() in t.lower() for g in GAME_TITLES) and "maple helper" not in t.lower():
+            if is_game_window(_title(hwnd), _class_name(hwnd)) and _pid(hwnd) != own:
                 found.append(hwnd)
         return True
 
     user32.EnumWindows(EnumWindowsProc(cb), 0)
-    # the game itself before a browser tab / Discord / folder that merely mentions it ("MapleStory - Google Chrome")
+    # the game's own title first; a title with a separator last (a window of some other app that slipped through)
     found.sort(key=lambda h: (_title(h) not in GAME_TITLES, any(s in _title(h) for s in (" - ", " | ", " — "))))
     return found[0] if found else None
 
@@ -71,13 +104,66 @@ def window_rect(hwnd) -> tuple[int, int, int, int] | None:
     return (r.left, r.top, w, h) if w > 50 and h > 50 else None
 
 
+GA_ROOT = 2
+WS_EX_LAYERED = 0x00080000
+GWL_EXSTYLE = -20
+LWA_ALPHA = 0x2
+# the taskbar may overlap a windowed game's edge: never private, never mistaken for the game
+SHELL_CLASSES = {"Shell_TrayWnd", "Shell_SecondaryTrayWnd"}
+
+
+def _window_from_point(x: int, y: int) -> int:
+    return user32.WindowFromPoint(wt.POINT(x, y)) or 0
+
+
+def _invisible(hwnd) -> bool:
+    """A layered window drawn fully transparent (alpha 0): it covers nothing the player sees."""
+    if not user32.GetWindowLongW(hwnd, GWL_EXSTYLE) & WS_EX_LAYERED:
+        return False
+    alpha, flags = ctypes.c_ubyte(), wt.DWORD()
+    if not user32.GetLayeredWindowAttributes(hwnd, None, ctypes.byref(alpha), ctypes.byref(flags)):
+        return False
+    return bool(flags.value & LWA_ALPHA) and alpha.value == 0
+
+
+def covered(hwnd: int, rect: tuple[int, int, int, int]) -> bool:
+    """Another app's window is over the game (a browser or Discord in front, the game on another desktop).
+
+    The capture is a screen grab: it takes whatever is drawn on top, so a covered game must not be captured at all
+    (the covering window's pixels went to the AI as "the game"). Checked like a mouse click would be (WindowFromPoint)
+    at a few points across the window; our own windows (the chat steps aside, transparent) and the game's own
+    popups don't count, nor do click-through overlays, which WindowFromPoint passes by."""
+    x, y, w, h = rect
+    game_pid, own = _pid(hwnd), os.getpid()
+    for fy in (0.15, 0.5, 0.85):
+        for fx in (0.15, 0.5, 0.85):
+            hit = _window_from_point(int(x + w * fx), int(y + h * fy))
+            if not hit:
+                continue           # off every monitor: nothing there to leak
+            root = user32.GetAncestor(hit, GA_ROOT) or hit
+            if root == hwnd or _pid(root) in (game_pid, own):
+                continue
+            if _class_name(root) in SHELL_CLASSES or _invisible(root):
+                continue
+            return True
+    return False
+
+
 def capture_game(hwnd: int | None = None) -> bytes | None:
-    """JPEG of the game window (longest side capture.MAX_SIDE), or None if the game isn't found."""
+    """JPEG of the game window (longest side capture.MAX_SIDE), or None if the game isn't found or another window
+    covers it (then capture.LAST_PROBLEM says so, and the chat asks to bring the game to the front)."""
     hwnd = hwnd or find_game_window()
     if not hwnd:
         return None
     rect = window_rect(hwnd)
-    return grab_jpeg(rect) if rect else None
+    if not rect:
+        return None
+    try:
+        hidden = covered(hwnd, rect)
+    except (OSError, AttributeError, ValueError):
+        hidden = True        # can't tell what is on top: never risk sending another window
+    capture.LAST_PROBLEM = "covered" if hidden else None
+    return None if hidden else grab_jpeg(rect)
 
 
 def is_exclusive_fullscreen(hwnd: int | None) -> bool:

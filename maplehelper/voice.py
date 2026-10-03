@@ -6,6 +6,7 @@ GPU (CUDA) when available, otherwise CPU int8 (always on macOS).
 """
 from __future__ import annotations
 
+import sys
 import threading
 
 import numpy as np
@@ -93,6 +94,11 @@ class VoiceController(QObject):
             self._start()
 
     def _start(self):
+        if sys.platform == "darwin":
+            from . import macapi
+            if macapi.microphone_denied():      # macOS would record silence: "I didn't hear anything"
+                self.failed.emit("mic: denied in macOS Privacy & Security")
+                return
         try:
             import sounddevice as sd
             self._chunks = []
@@ -119,6 +125,12 @@ class VoiceController(QObject):
             return
         audio = np.concatenate(self._chunks)[:, 0] if self._chunks else np.zeros(0, dtype=np.float32)
         if len(audio) < SAMPLE_RATE * MIN_SECONDS:
+            self.state.emit("idle")
+            return
+        if sys.platform == "darwin" and not np.any(audio):
+            # pure digital silence (a real mic always hears some noise): macOS gives that while the microphone
+            # is not allowed (or its prompt is still open), with no error
+            self.failed.emit("mic: only silence, probably no microphone permission")
             self.state.emit("idle")
             return
         self.state.emit("transcribing" if self.transcriber.loaded() else
