@@ -85,6 +85,44 @@ STARTUP_TEXT = {
 }
 
 
+RELEASES_URL = "https://github.com/Maple-Helper/maple-helper/releases/latest"
+MAC_TEXT = {
+    "startup": {"he": STARTUP_TEXT["he"].replace("המחשב", "ה-Mac"), "en": STARTUP_TEXT["en"].replace("the PC", "the Mac")},
+    "broken": {"he": BROKEN_TEXT["he"].replace("להתקין מחדש?", "להוריד מחדש? (גררו את האפליקציה שוב לתיקיית Applications.)"),
+               "en": BROKEN_TEXT["en"].replace("Reinstall now?", "Download it again? (Drag the app into Applications again.)")},
+    "download": {"he": "להורדה", "en": "Download"},
+    "close": {"he": "סגירה", "en": "Close"},
+}
+
+
+def _mac_alert(message: str, buttons: list[str]) -> str:
+    """A system alert on macOS without Qt (osascript): the bundle is a menu-bar app with no Dock icon, so a failed
+    start showed nothing at all. Returns the button clicked ("" if the alert couldn't be shown)."""
+    import subprocess
+    script = ["on run argv",
+              "set btns to items 2 thru -1 of argv",
+              "display alert \"Maple Helper\" message (item 1 of argv) as critical buttons btns "
+              "default button (count of btns)",
+              "return button returned of result",
+              "end run"]
+    cmd = ["osascript"] + [a for line in script for a in ("-e", line)] + [message, *buttons]
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True, timeout=600).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        return ""
+
+
+def _report_on_mac(exc: BaseException, where: str) -> None:
+    lang = _language()
+    pick = lambda key: MAC_TEXT[key].get(lang, MAC_TEXT[key]["en"])   # noqa: E731
+    if not _damaged(exc):
+        _mac_alert(pick("startup") % where, [pick("close")])
+        return
+    if _mac_alert(pick("broken"), [pick("close"), pick("download")]) == pick("download"):
+        import webbrowser
+        webbrowser.open(RELEASES_URL)
+
+
 def _damaged(exc: BaseException) -> bool:
     """A file of the install is missing or broken (reinstalling helps), not some other startup error."""
     import zlib
@@ -102,6 +140,14 @@ def report_broken_install(exc: BaseException) -> None:
         (logs / "startup-error.log").write_text("".join(traceback.format_exception(exc)), encoding="utf-8")
     except Exception:
         pass
+    if sys.platform == "darwin":
+        try:
+            from .store import DATA_DIR
+            where = str(DATA_DIR / "logs" / "startup-error.log")
+        except Exception:
+            where = "startup-error.log"
+        _report_on_mac(exc, where)
+        return
     if sys.platform != "win32":
         return
     import ctypes

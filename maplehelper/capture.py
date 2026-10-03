@@ -14,6 +14,16 @@ LAST_FULL: Image.Image | None = None
 # where the mouse was in that grab (image pixels): the game draws its own hand cursor, and over an inventory
 # slot it looked like an item (live test)
 LAST_CURSOR: tuple[int, int] | None = None
+# why the latest look for the game gave no screenshot although the game may be open: "covered" (another window is
+# over it: its pixels are never sent as the game), "screen_permission" (macOS Screen Recording is off: the grab would
+# be the wallpaper), None otherwise. Reset by every find_game_window; the chat says it instead of "no game".
+LAST_PROBLEM: str | None = None
+PROBLEM_TEXT = {"covered": "shot_game_covered", "screen_permission": "perm_screen_body"}
+
+
+def problem_key() -> str | None:
+    """The i18n key explaining the latest capture that gave nothing, or None (then: the game isn't open)."""
+    return PROBLEM_TEXT.get(LAST_PROBLEM or "")
 
 
 def _cursor_in(x: int, y: int, w: int, h: int) -> tuple[int, int] | None:
@@ -53,15 +63,41 @@ def detail_tiles(img: Image.Image | None, width: int = 1200) -> list[bytes]:
     return tiles
 
 
+BLACK = 12          # a pillarbox bar is pure black; JPEG-free screen pixels, so a little noise at most
+
+
+def content_box(img: Image.Image) -> tuple[int, int, int, int] | None:
+    """The picture without the black bars a game draws to keep its aspect ratio (a 16:9 game on a 3440 px
+    ultrawide: a quarter of the width was black, and the game got that much less of the AI's resolution).
+    Only bars: the same width on both sides (or above and below), with most of the picture left. None: no bars."""
+    box = img.convert("L").point(lambda v: 255 if v > BLACK else 0).getbbox()
+    if not box:
+        return None             # all black (a loading screen): nothing to trim
+    w, h = img.size
+    left, top, right, bottom = box
+    if not (left >= w * 0.02 and abs(left - (w - right)) <= max(4, w * 0.01) and right - left >= w * 0.5):
+        left, right = 0, w
+    if not (top >= h * 0.02 and abs(top - (h - bottom)) <= max(4, h * 0.01) and bottom - top >= h * 0.5):
+        top, bottom = 0, h
+    return None if (left, top, right, bottom) == (0, 0, w, h) else (left, top, right, bottom)
+
+
 def grab_jpeg(rect: tuple[int, int, int, int]) -> bytes:
-    """JPEG of a screen rectangle (x, y, w, h), longest side MAX_SIDE."""
+    """JPEG of a screen rectangle (x, y, w, h), longest side MAX_SIDE, without pillarbox / letterbox bars."""
     global LAST_FULL, LAST_CURSOR
     img = grab_image(*rect)
-    LAST_FULL = img.copy()
     try:
-        LAST_CURSOR = _cursor_in(*rect)
+        cursor = _cursor_in(*rect)
     except Exception:      # noqa: BLE001
-        LAST_CURSOR = None
+        cursor = None
+    box = content_box(img)
+    if box:
+        img = img.crop(box)     # the screenshot, LAST_FULL and the cursor all in the same (trimmed) coordinates
+        if cursor:
+            cx, cy = cursor[0] - box[0], cursor[1] - box[1]
+            cursor = (cx, cy) if 0 <= cx < img.width and 0 <= cy < img.height else None
+    LAST_FULL = img.copy()
+    LAST_CURSOR = cursor
     img.thumbnail((MAX_SIDE, MAX_SIDE))
     buf = io.BytesIO()
     img.save(buf, "JPEG", quality=82)

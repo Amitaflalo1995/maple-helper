@@ -19,8 +19,12 @@ from .store import DATA_DIR
 
 LOG_DIR = DATA_DIR / "logs"
 LOG_FILE = LOG_DIR / "maplehelper.log"
-PRIVATE_SETTINGS = ("window", "bubble_pos", "pins", "last_session", "wishlist", "microphone",
-                    "tips_dismissed", "usage_warned")
+# the settings a report carries, by name: a new setting stays out until it is added here (a deny-list let the stats'
+# install_id in, which tied the anonymous usage stats to the player who sent the report)
+REPORT_SETTINGS = ("language", "hotkey_toggle", "hotkey_voice", "appearance", "font_size", "answer_length",
+                   "start_with_windows", "voice_send_immediately", "provider", "model", "codex_model", "grok_model",
+                   "gemini_model", "last_model", "api_key_fallback", "onboarding_done", "tour_done", "usage",
+                   "saver_mode", "seen_version", "instant_answers", "telemetry")
 log = logging.getLogger("maplehelper")
 
 
@@ -53,7 +57,7 @@ def build_report(out_dir: Path, info: dict, settings: dict) -> Path:
     """Zip the logs + info + settings (minus private bits) into out_dir; returns the zip path."""
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"MapleHelper-report-{time.strftime('%Y%m%d-%H%M%S')}.zip"
-    clean = {k: v for k, v in settings.items() if k not in PRIVATE_SETTINGS}
+    clean = {k: settings[k] for k in REPORT_SETTINGS if k in settings}
     with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as z:
         z.writestr("info.json", json.dumps(info, ensure_ascii=False, indent=1))
         z.writestr("settings.json", json.dumps(clean, ensure_ascii=False, indent=1))
@@ -61,3 +65,17 @@ def build_report(out_dir: Path, info: dict, settings: dict) -> Path:
                 sorted(LOG_DIR.glob("startup-error.log")):
             z.write(f, f"logs/{f.name}")
     return path
+
+
+def save_report(desktop: Path, info: dict, settings: dict) -> tuple[Path, str]:
+    """The report on the desktop, or in the app's data folder when the desktop can't take it (Controlled Folder
+    Access, an offline OneDrive folder). Returns the zip and the i18n key naming where it went.
+
+    macOS goes straight to the data folder: Desktop (and Downloads) are privacy-protected there, so a write asks
+    for access with a system prompt that blocks the chat, and "Don't Allow" left it in the data folder anyway."""
+    if sys.platform != "darwin":
+        try:
+            return build_report(desktop, info, settings), "report_saved"
+        except OSError:
+            pass
+    return build_report(DATA_DIR, info, settings), "report_saved_data"

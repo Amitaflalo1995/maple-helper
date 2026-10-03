@@ -1200,7 +1200,11 @@ class Overlay(QWidget):
         """Fresh screenshot: it goes with the next question. Used: say so, with a one-click retake.
         No game open: explain how screenshots work, so the player knows before it matters."""
         hk = self.settings["hotkey_toggle"]
-        if not self.game_hwnd and not self.shot:
+        from ..capture import problem_key
+        problem = None if self.shot else problem_key()     # the game covered, or no Screen Recording grant
+        if problem:
+            text = self.t(problem).replace("F9", hk)
+        elif not self.game_hwnd and not self.shot:
             text = self.t("shot_hint_no_game").replace("F9", hk)
         elif self.shot and not self.shot_used:
             text = self.t("shot_hint_ready").replace("F9", hk)
@@ -1231,7 +1235,9 @@ class Overlay(QWidget):
         finally:
             self.setWindowOpacity(1.0)
         self.shot_used = False
-        self.add_system((lambda t: "✓ " + t("recaptured")) if self.shot else (lambda t: t("sync_no_game")))
+        from ..capture import problem_key
+        missing = problem_key() or "sync_no_game"
+        self.add_system((lambda t: "✓ " + t("recaptured")) if self.shot else (lambda t: t(missing)))
         self._update_shot_hint()
 
     # ------------------------------------------------------------------ feed
@@ -1457,6 +1463,11 @@ class Overlay(QWidget):
         self._question_shot = shot
         if shot is None and not self.shot_used and not self.game_hwnd:
             self.add_system(lambda t: t("no_game"))
+        elif shot is None and not self.shot_used:
+            from ..capture import problem_key
+            problem = problem_key()      # the game covered (never its cover sent) or no Screen Recording grant
+            if problem:
+                self.add_system(lambda t: t(problem))
         self.shot_used = True
         self._update_shot_hint()
         telemetry.track("question_asked", answered_by=self.settings["provider"], tagged=bool(focus),
@@ -1643,7 +1654,9 @@ class Overlay(QWidget):
         self.setWindowOpacity(1.0)
         if not shot:
             self._sync_ended()
-            self.add_system(lambda t: t("sync_no_game"))
+            from ..capture import problem_key
+            missing = problem_key() or "sync_no_game"
+            self.add_system(lambda t: t(missing))
             self.sync_finished.emit(False)
             return
         try:
