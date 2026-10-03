@@ -286,6 +286,11 @@ def _rich(text: str, rtl: bool, icon_px: int = 22) -> str:
     return out
 
 
+def has_book(slug: str) -> bool:
+    """A guide the reader can open: its English book is shipped."""
+    return (TRANSLATIONS / "en" / f"{slug}.json").is_file()
+
+
 def book_html(b: dict, mode: str = "light", rtl_ui: bool = False) -> str:
     """The reader's HTML (QTextBrowser): headings, paragraphs, notes, lists, tables, pictures,
     links to other guides (href="guide:<slug>")."""
@@ -342,6 +347,8 @@ def book_html(b: dict, mode: str = "light", rtl_ui: bool = False) -> str:
             out.append(f"<p align='center' style='margin: 6px 0 10px 0;'><img src='{(IMAGES / blk['img']).as_uri()}'"
                        f" width='{blk.get('w', 0)}' height='{blk.get('h', 0)}'>{cap}</p>")
         elif "guide" in blk:
+            if not has_book(blk["guide"]):
+                continue        # a card for a guide that wasn't built (the site's own pages): a link to nowhere
             r = rtl_of(blk["text"])
             arrow = "←" if he else "→"
             out.append(f"<p {'dir=rtl align=right' if r else ''} style='margin: 4px 0;'>"
@@ -381,7 +388,9 @@ def for_you(kb, c) -> list[str]:
         if c.level < 15:
             picks.append("guide/beginners-guide-first-steps-in-maple-world")
         picks.append("guide/best-grind-maps-every-level")
-        if 21 <= c.level <= 30:
+        # KPQ opens at Lv. 21 with no level cap in Classic (kerning-city-party-quest-kpq-guide: "You unlock KPQ at
+        # level 21. There doesn't appear to be any level cap"; the old game's cap of 30 is gone)
+        if c.level >= 21:
             picks.append("guide/kerning-city-party-quest-kpq-guide")
         picks.append("guide/exp-table-level-1-to-100")
         if c.level >= 39:                  # the Hollow opens at Lv. 39 (its guide), not 60
