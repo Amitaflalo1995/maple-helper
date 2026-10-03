@@ -929,28 +929,38 @@ class Overlay(QWidget):
         self._menu_closed_at = time.monotonic()
 
     def _blur_cover(self) -> QLabel:
-        """A blurred, dimmed picture of the chat laid over it, under the character card."""
-        from PySide6.QtGui import QColor, QPainter
-        from PySide6.QtWidgets import QGraphicsBlurEffect, QGraphicsPixmapItem, QGraphicsScene
-        shot = self.grab()
-        scene = QGraphicsScene()
-        item = QGraphicsPixmapItem(shot)
-        blur = QGraphicsBlurEffect()
-        blur.setBlurRadius(14)
-        item.setGraphicsEffect(blur)
-        scene.addItem(item)
-        soft = QPixmap(shot.size())
-        soft.setDevicePixelRatio(shot.devicePixelRatio())
-        soft.fill(Qt.transparent)
-        p = QPainter(soft)
-        scene.render(p, QRectF(0, 0, shot.width() / shot.devicePixelRatio(), shot.height() / shot.devicePixelRatio()),
-                     QRectF(shot.rect()))
-        p.setCompositionMode(QPainter.CompositionMode_SourceAtop)      # dim only where the chat is, not the shadow
-        p.fillRect(soft.rect(), QColor(0, 0, 0, 60))
+        """A softly blurred picture of the chat laid over its panel, under the character card.
+
+        Done in the screen's real pixels (a scaled screen drew the blur shifted and shrunk), only inside the
+        rounded panel, and tinted with the panel's own color rather than darkened (gray looked dirty)."""
+        from PySide6.QtGui import QColor, QImage, QPainter
+        m = self.SHADOW
+        panel = self.rect().adjusted(m, m, -m, -m)
+        img = self.grab(panel).toImage()
+        dpr = img.devicePixelRatio()
+        w, h = img.width(), img.height()
+        soft = img
+        for k in (10, 6):           # down then up, twice: a smooth blur without a graphics scene
+            soft = soft.scaled(max(1, w // k), max(1, h // k), Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
+            soft = soft.scaled(w, h, Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
+        out = QImage(w, h, QImage.Format_ARGB32_Premultiplied)
+        out.fill(Qt.transparent)
+        p = QPainter(out)
+        p.setRenderHint(QPainter.Antialiasing)
+        clip = QPainterPath()
+        clip.addRoundedRect(QRectF(0, 0, w, h), theme.RADIUS * dpr, theme.RADIUS * dpr)
+        p.setClipPath(clip)
+        soft.setDevicePixelRatio(1)       # drawn pixel for pixel: its own ratio would shrink it a second time
+        p.drawImage(0, 0, soft)
+        r, g, b = theme.P()["glass"]
+        p.fillRect(0, 0, w, h, QColor(r, g, b, 110))
         p.end()
+        pm = QPixmap.fromImage(out)
+        pm.setDevicePixelRatio(dpr)
         cover = QLabel(self)
-        cover.setPixmap(soft)
-        cover.setGeometry(self.rect())
+        cover.setAttribute(Qt.WA_TransparentForMouseEvents)
+        cover.setPixmap(pm)
+        cover.setGeometry(panel)
         cover.show()
         self.profile_card.raise_()
         return cover
