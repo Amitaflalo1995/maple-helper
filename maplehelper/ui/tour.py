@@ -197,6 +197,17 @@ class Tour(QWidget):
         else:
             super().keyPressEvent(e)
 
+    def focusNextPrevChild(self, nxt: bool) -> bool:
+        """Tab stays on the card's buttons. Passed up to the chat, it went to the search button under the dim
+        layer, where Enter and Esc no longer reached the tour."""
+        order = [b for b in (self.skip_btn, self.back_btn, self.next_btn) if b.isVisible()]
+        if not order:
+            return True
+        cur = self.focusWidget()
+        i = order.index(cur) if cur in order else (-1 if nxt else 0)
+        order[(i + (1 if nxt else -1)) % len(order)].setFocus(Qt.TabFocusReason if nxt else Qt.BacktabFocusReason)
+        return True
+
     def eventFilter(self, obj, ev):
         if obj is self.overlay and ev.type() in (QEvent.Resize, QEvent.LayoutRequest):
             self.setGeometry(self.overlay.rect())

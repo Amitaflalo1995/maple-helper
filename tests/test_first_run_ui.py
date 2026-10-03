@@ -62,15 +62,23 @@ def test_buttons_get_the_hand_cursor(qapp):
     from PySide6.QtCore import Qt
     from PySide6.QtWidgets import QPushButton
 
-    from maplehelper.app import _HandCursor
-    hand = _HandCursor(qapp)
-    qapp.installEventFilter(hand)
+    from maplehelper.ui import theme
+    old = qapp.style().name()
+    qapp.setStyle(theme.AppStyle("Fusion"))         # as main() does: no app-wide event filter
     try:
         b = QPushButton("x")
         b.ensurePolished()
         assert b.cursor().shape() == Qt.PointingHandCursor
+        own = QPushButton("y")
+        own.setCursor(Qt.IBeamCursor)                 # a cursor the widget set itself stays
+        own.ensurePolished()
+        assert own.cursor().shape() == Qt.IBeamCursor
+        styled = QPushButton("z")                     # a widget with its own stylesheet still goes through it
+        styled.setStyleSheet("QPushButton { color: red; }")
+        styled.ensurePolished()
+        assert styled.cursor().shape() == Qt.PointingHandCursor
     finally:
-        qapp.removeEventFilter(hand)
+        qapp.setStyle(old)
 
 
 def test_tour_walks_every_visible_button_and_marks_itself_done(qapp, isolated_store, kb, monkeypatch):

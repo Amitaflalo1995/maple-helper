@@ -1,7 +1,7 @@
 """Branded notifications (instead of the Windows toast, which shows the host process name)."""
 from __future__ import annotations
 
-from PySide6.QtCore import QEasingCurve, QPropertyAnimation, QPoint, Qt, QTimer
+from PySide6.QtCore import QEasingCurve, QPoint, QPropertyAnimation, QRect, Qt, QTimer
 from PySide6.QtGui import QGuiApplication, QPixmap
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QToolButton, QVBoxLayout, QWidget
 
@@ -19,7 +19,7 @@ class Toast(QWidget):
 
     _live: list["Toast"] = []
 
-    def __init__(self, title: str, message: str, rtl: bool, font_family: str, timeout_ms: int = 5000):
+    def __init__(self, title: str, message: str, rtl: bool, font_family: str, timeout_ms: int = 5000, screen=None):
         super().__init__(None, Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool | Qt.WindowDoesNotAcceptFocus)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAttribute(Qt.WA_ShowWithoutActivating)
@@ -27,17 +27,9 @@ class Toast(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose)
         self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
         self.setFixedWidth(WIDTH + 2 * SHADOW)
-        c = theme.P()
-        self.setStyleSheet(f"""
-            * {{ font-family: "{font_family}"; color: {c['text']}; }}
-            #Card {{ background: transparent; border: none; }}
-            #Accent {{ background: {theme.ORANGE}; border-radius: 2px; }}
-            #Title {{ font-size: 14px; font-weight: 600; color: {c['text']}; }}
-            #Body {{ font-size: 13px; color: {c['text']}; }}
-            #Brand {{ font-size: 11px; color: {c['muted']}; }}
-            QToolButton {{ background: transparent; border: none; color: {c['muted']}; font-size: 14px; }}
-            QToolButton:hover {{ color: {c['text']}; }}
-        """)
+        self._font_family, self._screen = font_family, screen
+        self._slot: QRect | None = None          # where it sits once it has slid in
+        self.restyle()
         outer = QVBoxLayout(self)
         outer.setContentsMargins(SHADOW, SHADOW, SHADOW, SHADOW)
         card = QFrame(objectName="Card")
@@ -84,21 +76,53 @@ class Toast(QWidget):
 
         self._timer = QTimer(self, singleShot=True, interval=timeout_ms, timeout=self.dismiss)
 
+    def restyle(self) -> None:
+        """The text colors of the current theme (the glass itself is painted from it each time): a toast up during
+        a theme switch kept white text on the new light glass."""
+        c = theme.P()
+        self.setStyleSheet(f"""
+            * {{ font-family: "{self._font_family}"; color: {c['text']}; }}
+            #Card {{ background: transparent; border: none; }}
+            #Accent {{ background: {theme.ORANGE}; border-radius: 2px; }}
+            #Title {{ font-size: 14px; font-weight: 600; color: {c['text']}; }}
+            #Body {{ font-size: 13px; color: {c['text']}; }}
+            #Brand {{ font-size: 11px; color: {c['muted']}; }}
+            QToolButton {{ background: transparent; border: none; color: {c['muted']}; font-size: 14px; }}
+            QToolButton:hover {{ color: {c['text']}; }}
+        """)
+        self.update()
+
     def show_toast(self):
         self.adjustSize()
-        screen = QGuiApplication.primaryScreen().availableGeometry()
-        x = screen.right() - self.width() - MARGIN + SHADOW
-        y = screen.bottom() - self.height() - MARGIN + SHADOW
-        # stack above toasts that are still visible
-        for other in Toast._live:
-            if other.isVisible():
-                y = min(y, other.y() - self.height() - 8)
+        # the monitor the player is looking at (App.toast picks it), else the primary one
+        area = (self._screen or QGuiApplication.primaryScreen()).availableGeometry()
+        Toast._live = [o for o in Toast._live if o.isVisible() and o._slot is not None]
+        while True:
+            y = self._free_y(area)
+            if y is not None or not Toast._live:
+                break
+            Toast._live[0].dismiss()           # no room left on the screen: the oldest toast makes way
+        x = area.right() - self.width() - MARGIN + SHADOW
+        y = y if y is not None else area.bottom() - self.height() - MARGIN + SHADOW
+        self._slot = QRect(x, y, self.width(), self.height())
         Toast._live.append(self)
         self.setWindowOpacity(0.0)
         self.move(QPoint(x, y + 12))
         self.show()
         self._anim(1.0, QPoint(x, y))
         self._timer.start()
+
+    def _free_y(self, area: QRect) -> int | None:
+        """The lowest free slot in the corner: up past the toasts it would overlap only, so a gap left by a toast
+        that went away is used again (a new toast always went above the highest one, and on past the top of the
+        screen). None when there's no room left on the screen."""
+        h = self.height()
+        y = area.bottom() - h - MARGIN + SHADOW
+        for other in sorted(Toast._live, key=lambda o: -o._slot.y()):       # bottom first
+            r = other._slot
+            if y < r.y() + r.height() + 8 and y + h + 8 > r.y():
+                y = r.y() - h - 8
+        return y if y >= area.top() + MARGIN - SHADOW else None
 
     def _anim(self, opacity: float, pos: QPoint, on_done=None):
         self._fade = QPropertyAnimation(self, b"windowOpacity", self)
@@ -123,11 +147,18 @@ class Toast(QWidget):
     def mouseReleaseEvent(self, e):
         self.dismiss()
 
+    def closeEvent(self, e):
+        # closed any other way than dismiss() (it deletes itself on close): out of the stack too
+        if self in Toast._live:
+            Toast._live.remove(self)
+        super().closeEvent(e)
+
     def paintEvent(self, e):
         paint_glass(self, None, radius=18)
 
 
-def notify(title: str, message: str = "", rtl: bool = True, font_family: str | None = None, timeout_ms: int = 5000):
-    t = Toast(title, message, rtl, font_family or theme.FONT_FAMILY, timeout_ms)
+def notify(title: str, message: str = "", rtl: bool = True, font_family: str | None = None, timeout_ms: int = 5000,
+           screen=None):
+    t = Toast(title, message, rtl, font_family or theme.FONT_FAMILY, timeout_ms, screen)
     t.show_toast()
     return t

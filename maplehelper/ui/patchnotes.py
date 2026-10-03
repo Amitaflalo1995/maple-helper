@@ -15,13 +15,41 @@ from .widgets import EntityCard, Selectable
 SHOWN = 80   # rows per list; the rest is counted
 
 
+KINDS = ("added", "changed", "updated", "removed")
+
+
 def summary(t: I18n, entries: list[dict]) -> str:
     """'3 new, 12 changed' over one or more updates."""
-    total = {"added": 0, "changed": 0, "updated": 0, "removed": 0}
-    for e in entries:
-        for k in total:
-            total[k] += (e.get("counts") or {}).get(k, 0)
-    return ", ".join(t(f"pn_n_{k}", n=n) for k, n in total.items() if n)
+    total = totals(entries)
+    return ", ".join(t(f"pn_n_{k}", n=total[k]) for k in KINDS if total[k])
+
+
+def totals(entries: list[dict]) -> dict[str, int]:
+    """How many pages each kind of change touched over these updates, each page once: a page updated in two of
+    them is one updated page ("12 pages updated" for 9 pages), one added and then updated is a new page, and
+    one added and then removed is nothing. Rows a long update didn't list are counted as it counted them."""
+    if len(entries) == 1:
+        counts = entries[0].get("counts") or {}
+        return {k: counts.get(k, len(entries[0].get(k) or [])) for k in KINDS}
+    seen: dict[str, list[str]] = {}            # key -> its kinds, oldest update first
+    unlisted = dict.fromkeys(KINDS, 0)
+    for e in sorted(entries, key=lambda e: str(e.get("version", ""))):
+        counts = e.get("counts") or {}
+        for kind in KINDS:
+            rows = e.get(kind) or []
+            unlisted[kind] += max(0, counts.get(kind, len(rows)) - len(rows))
+            for r in rows:
+                seen.setdefault(r.get("key") or r.get("name") or id(r), []).append(kind)
+    total = dict(unlisted)
+    for kinds in seen.values():
+        if kinds[0] == "added":
+            if kinds[-1] != "removed":
+                total["added"] += 1
+        elif kinds[-1] == "removed":
+            total["removed"] += 1
+        else:
+            total["changed" if "changed" in kinds else "updated"] += 1
+    return total
 
 
 def _category(t: I18n, cat: str) -> str:
@@ -75,10 +103,17 @@ class ChangeCard(Selectable, QFrame):
             super().mouseReleaseEvent(ev)
 
 
+def gutter(rtl: bool) -> tuple[int, int, int, int]:
+    """A feed's margins: the room before the scrollbar is on the scrollbar's side, the left in Hebrew (margins
+    don't mirror, so the Hebrew cards touched the bar while the gap sat on the empty right side)."""
+    return (6, 0, 0, 0) if rtl else (0, 0, 6, 0)
+
+
 class WhatsNewDialog(GlassDialog):
     """What changed in the app itself, version by version."""
 
     def __init__(self, notes: list[dict], lang: str, stylesheet: str):
+        self.notes = notes            # (opened again as it is after a language or theme switch)
         self.t = t = I18n(lang or "he")
         super().__init__(t("whats_new"), t.rtl)
         self.setStyleSheet(stylesheet)
@@ -90,7 +125,7 @@ class WhatsNewDialog(GlassDialog):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         body = QWidget(objectName="Feed")
         lay = QVBoxLayout(body)
-        lay.setContentsMargins(0, 0, 6, 0)
+        lay.setContentsMargins(*gutter(t.rtl))
         lay.setSpacing(18)
         scroll.setWidget(body)
         outer.addWidget(scroll, 1)
@@ -115,6 +150,7 @@ class WhatsNewDialog(GlassDialog):
 
 class PatchNotesDialog(GlassDialog):
     def __init__(self, entries: list[dict], lang: str, stylesheet: str, kb: KnowledgeBase):
+        self.entries = entries        # (opened again as it is after a language or theme switch)
         self.t = t = I18n(lang or "he")
         super().__init__(t("patch_notes"), t.rtl)
         self.kb = kb
@@ -127,7 +163,7 @@ class PatchNotesDialog(GlassDialog):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         body = QWidget(objectName="Feed")
         lay = QVBoxLayout(body)
-        lay.setContentsMargins(0, 0, 6, 0)
+        lay.setContentsMargins(*gutter(t.rtl))
         lay.setSpacing(18)
         scroll.setWidget(body)
         outer.addWidget(scroll, 1)

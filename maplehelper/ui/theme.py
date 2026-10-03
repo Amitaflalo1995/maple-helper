@@ -9,7 +9,7 @@ import sys
 
 from PySide6.QtCore import QEvent, QObject, QRectF, Qt
 from PySide6.QtGui import QColor, QFont, QFontDatabase, QPainter, QPen
-from PySide6.QtWidgets import QAbstractButton, QApplication, QSlider, QWidget
+from PySide6.QtWidgets import QAbstractButton, QApplication, QComboBox, QProxyStyle, QSlider, QWidget
 
 from ..store import ASSETS
 
@@ -213,7 +213,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #InfoText {{ color: {c['text']}; font-size: {s - 1}px; }}
     #JobHint {{ color: {c['muted']}; font-size: {s - 3}px; }}
     #ProfileCard {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 16px; }}
-    #ProfileCard:hover {{ border: 1px solid rgba(255,149,51,0.7); }}
+    #ProfileCard:hover, #ProfileCard[active="true"] {{ border: 1px solid rgba(255,149,51,0.7); }}
     QToolButton#Refresh {{ font-family: "{ICON_FONT}"; font-size: 15px; color: {c['muted']}; background: transparent;
                            border: none; border-radius: 15px; min-width: 30px; max-width: 30px; min-height: 30px;
                            max-height: 30px; }}
@@ -382,10 +382,11 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #MenuRow:disabled {{ background: transparent; }}
     /* Qt ignores a pseudo-state on an ancestor ("#MenuRow:hover #MenuRowText" matched every row, and the
        ":disabled" one painted every label grey), so the label is styled by its own state: a child of a disabled
-       row is disabled itself, and the hover comes as a property set by MenuRowHover */
+       row is disabled itself, and the hover comes as a property set by MenuRowHover (installed per row) */
     #MenuRowText {{ color: {c['text']}; }}
     #MenuRowText:disabled {{ color: {c['faint']}; }}
-    #MenuRowText[hover="true"] {{ color: {ON_ORANGE}; }}
+    #MenuRow[active="true"] {{ background: {ORANGE}; }}
+    #MenuRowText[hover="true"], #MenuRow[active="true"] #MenuRowText {{ color: {ON_ORANGE}; }}
     QMenu#SplitMenu::separator {{ margin: 4px 13px; }}
     QToolTip {{ background: {"#2C2C2E" if MODE == "dark" else "#FFFFFF"}; color: {c['text']};
                 border: 1px solid {c['stroke']}; border-radius: 6px; padding: 4px 8px; }}
@@ -395,17 +396,59 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
 _FOCUS_RING = None
 
 
+def wants_focus_ring(w) -> bool:
+    """Buttons, sliders, and the custom widgets that take keyboard focus (cards, the character card) and asked
+    for the ring with the "focus_ring" property."""
+    return isinstance(w, (QAbstractButton, QSlider)) or bool(w.property("focus_ring"))
+
+
+class AppStyle(QProxyStyle):
+    """The app's style (Fusion underneath). Its polish(), which Qt runs once for every widget it styles (a
+    stylesheet's own style passes it on), gives buttons and drop-downs the pointing hand and hooks the focus
+    ring to the widgets that can show one.
+
+    Both used to be event filters on the whole application: every event of every object went through Python
+    twice, and a widget-heavy window (the history's "Show more", the play tools) took about twice as long."""
+
+    def polish(self, arg):
+        if isinstance(arg, QWidget):
+            super().polish(arg)
+            if isinstance(arg, (QAbstractButton, QComboBox)) and not arg.testAttribute(Qt.WA_SetCursor):
+                arg.setCursor(Qt.PointingHandCursor)      # like a link, unless the widget set its own cursor
+            if _FOCUS_RING is not None and wants_focus_ring(arg):
+                arg.removeEventFilter(_FOCUS_RING)         # polished again (a restyle): still one filter
+                arg.installEventFilter(_FOCUS_RING)
+            return None
+        return super().polish(arg)
+
+
 def install_focus_ring() -> None:
     """A subtle orange ring on the button that has keyboard focus (Tab / Shift+Tab), like the web's
     :focus-visible: a click gives no ring. Drawn by a see-through child over the button's own edge, so no
-    layout moves and no tight parent clips it (a QFocusFrame outside the button was cut off in a chat row)."""
+    layout moves and no tight parent clips it (a QFocusFrame outside the button was cut off in a chat row).
+    The app's style (AppStyle) hooks it to each button as Qt styles it: only their events reach Python."""
     global _FOCUS_RING
     app = QApplication.instance()
     if app is None or _FOCUS_RING is not None:
         return
     _FOCUS_RING = FocusRing(app)
-    app.installEventFilter(_FOCUS_RING)
-    app.installEventFilter(MenuRowHover(app))
+    if not isinstance(app.style(), AppStyle):
+        app.setStyle(AppStyle(app.style().name()))      # re-polishes the widgets that exist already
+    else:
+        for w in app.allWidgets():                      # made before the ring existed
+            if wants_focus_ring(w):
+                w.installEventFilter(_FOCUS_RING)
+
+
+def menu_row_hover() -> "MenuRowHover":
+    """The one hover watcher menu rows install on themselves (an app-wide filter slowed every screen)."""
+    global _MENU_ROW_HOVER
+    if _MENU_ROW_HOVER is None:
+        _MENU_ROW_HOVER = MenuRowHover()
+    return _MENU_ROW_HOVER
+
+
+_MENU_ROW_HOVER = None
 
 
 class MenuRowHover(QObject):
@@ -465,7 +508,7 @@ class FocusRing(QObject):
 
     def eventFilter(self, obj, e):
         t = e.type()
-        if t in (QEvent.FocusIn, QEvent.FocusOut) and isinstance(obj, (QAbstractButton, QSlider)):
+        if t in (QEvent.FocusIn, QEvent.FocusOut) and wants_focus_ring(obj):
             self._hide()
             if t == QEvent.FocusIn and e.reason() in self.KEYBOARD:
                 self.ring, self.target = _Ring(obj), obj
