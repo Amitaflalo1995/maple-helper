@@ -97,6 +97,10 @@ if (-not $iscc) {
 if (-not $iscc) { throw "Inno Setup not found. Install it (choco install innosetup) or pass -SkipInstaller." }
 $isccArgs = @("/Q", "/DAppVersion=$Version")
 if ($FastInstaller) { $isccArgs += "/DCompression=lzma2/fast" }
+# lets an update skip the KB's ~8,000 files when the PC already has this KB (KbNeedsInstall in installer.iss)
+$KbMeta = Join-Path $AppDir "_internal/data/kb/meta.json"
+$KbVersion = if (Test-Path $KbMeta) { (Get-Content $KbMeta -Raw | ConvertFrom-Json).version } else { "" }
+if ($KbVersion) { $isccArgs += "/DKbVersion=$KbVersion" }
 & $iscc @isccArgs packaging/installer.iss
 if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed" }
 # keep the unversioned name: the in-app updater downloads exactly "MapleHelper-Setup.exe"
@@ -108,16 +112,30 @@ Invoke-Sign $setup
 if ($TestInstaller) {
     $target = Join-Path ([IO.Path]::GetTempPath()) "MapleHelper-install-test"
     Remove-Item -Recurse -Force $target -ErrorAction SilentlyContinue
+    function Install-Silently {
+        # not -Wait: in PowerShell 7 it also waits for child processes, and setup relaunches the app, so it never returns
+        $p = Start-Process $setup -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/DIR=`"$target`"" -PassThru
+        $null = $p.Handle   # keep the handle, or ExitCode reads empty after the exit
+        if (-not $p.WaitForExit(300000)) { throw "Installer did not finish within 5 minutes" }
+        if ($p.ExitCode -ne 0) { throw "Installer exited with $($p.ExitCode)" }
+        # a silent install relaunches the app (that is how self-updates restart it); stop it for the test
+        Start-Sleep -Seconds 5
+        Stop-InstalledApp $target
+    }
     Write-Host "== Installing silently into $target"
-    # not -Wait: in PowerShell 7 it also waits for child processes, and setup relaunches the app, so it never returns
-    $p = Start-Process $setup -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/DIR=`"$target`"" -PassThru
-    $null = $p.Handle   # keep the handle, or ExitCode reads empty after the exit
-    if (-not $p.WaitForExit(300000)) { throw "Installer did not finish within 5 minutes" }
-    if ($p.ExitCode -ne 0) { throw "Installer exited with $($p.ExitCode)" }
-    # a silent install relaunches the app (that is how self-updates restart it); stop it for the test
-    Start-Sleep -Seconds 5
-    Stop-InstalledApp $target
+    Install-Silently
     Invoke-SelfTest (Join-Path $target $AppExe)
+
+    if ($KbVersion) {
+        # an update carrying the KB that is already installed must leave the KB's files alone
+        Write-Host "== Updating over it (same KB $KbVersion)"
+        $sentinel = Join-Path $target "_internal/data/kb/untouched-by-update"
+        Set-Content $sentinel "x"
+        Install-Silently
+        if (-not (Test-Path $sentinel)) { throw "The update reinstalled a KB that was already installed" }
+        Remove-Item $sentinel
+        Invoke-SelfTest (Join-Path $target $AppExe)
+    }
     $programs = [Environment]::GetFolderPath("Programs")
     $shortcut = Get-ChildItem $programs -Recurse -Filter "Maple Helper.lnk" -ErrorAction SilentlyContinue | Select-Object -First 1
     if (-not $shortcut) { throw "Start Menu shortcut missing under $programs" }

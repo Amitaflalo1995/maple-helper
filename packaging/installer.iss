@@ -9,6 +9,10 @@
 #ifndef Compression
   #define Compression "lzma2/ultra"
 #endif
+; the bundled knowledge base's version (its meta.json), passed by build.ps1; empty = always install it
+#ifndef KbVersion
+  #define KbVersion ""
+#endif
 
 [Setup]
 AppId={{4B526220-22E4-45D2-88B7-C62A0B7385E4}
@@ -67,12 +71,18 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
 
 [InstallDelete]
-; the previous version's bundled KB goes first (dropped pages, an old drops.tsv). Only the KB: removing all of
-; _internal would leave nothing that can even start if a silent update stopped halfway
-Type: filesandordirs; Name: "{app}\_internal\data\kb"
+; a bundled KB that is replaced goes first (dropped pages, an old drops.tsv); one that is kept stays (see
+; KbNeedsInstall). Only the KB: removing all of _internal would leave nothing that can even start if a silent
+; update stopped halfway
+Type: filesandordirs; Name: "{app}\_internal\data\kb"; Check: KbNeedsInstall
 
 [Files]
-Source: "..\dist\Maple Helper\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\dist\Maple Helper\*"; Excludes: "\_internal\data\kb"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; the KB is ~8,000 small files, most of an update's time; app releases usually carry the KB already installed
+Source: "..\dist\Maple Helper\_internal\data\kb\*"; Excludes: "\meta.json"; DestDir: "{app}\_internal\data\kb"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist; Check: KbNeedsInstall
+; meta.json (the version KbNeedsInstall reads) goes in last: a KB cut short, by a crash or a killed setup, has none,
+; so the next update installs it again instead of skipping a KB with missing pages
+Source: "..\dist\Maple Helper\_internal\data\kb\meta.json"; DestDir: "{app}\_internal\data\kb"; Flags: ignoreversion skipifsourcedoesntexist; Check: KbNeedsInstall
 
 [Registry]
 ; "Start with Windows" (written by the app): removed on uninstall, never created here
@@ -133,6 +143,51 @@ hebrew.LaunchProgram=לפתוח את %1 עכשיו
 english.LaunchProgram=Open %1 now
 
 [Code]
+var
+  KbDecided, KbInstall: Boolean;
+
+// "2026.10.02.0638" from <Dir>\meta.json, or '' when Dir holds no usable KB (same test as store.kb_dir)
+function KbVersionIn(Dir: String): String;
+var
+  S: AnsiString;
+  P: Integer;
+begin
+  Result := '';
+  if not FileExists(Dir + '\index.json') or not LoadStringFromFile(Dir + '\meta.json', S) then
+    Exit;
+  P := Pos('"version"', S);
+  if P = 0 then
+    Exit;
+  S := Copy(S, P + Length('"version"'), Length(S));
+  P := Pos('"', S);
+  if P = 0 then
+    Exit;
+  S := Copy(S, P + 1, Length(S));
+  P := Pos('"', S);
+  if P > 0 then
+    Result := Copy(S, 1, P - 1);
+end;
+
+// Skip the KB when this one is already installed, or when the app's downloaded KB (which wins over
+// the bundled one) is as new. Decided once: the answer must not change while the KB's files go in.
+// Versions are zero-padded UTC timestamps, so a plain string comparison orders them.
+function KbNeedsInstall(): Boolean;
+var
+  Installed, Downloaded: String;
+begin
+  if not KbDecided then
+  begin
+    KbDecided := True;
+    Installed := KbVersionIn(ExpandConstant('{app}\_internal\data\kb'));
+    Downloaded := KbVersionIn(ExpandConstant('{userappdata}\MapleHelper\kb'));
+    KbInstall := ('{#KbVersion}' = '') or (Installed = '') or
+                 ((Installed <> '{#KbVersion}') and (CompareStr(Downloaded, '{#KbVersion}') < 0));
+    Log(Format('KB: bundled %s, installed %s, downloaded %s -> install: %d', ['{#KbVersion}',
+               Installed, Downloaded, Ord(KbInstall)]));
+  end;
+  Result := KbInstall;
+end;
+
 // An update runs right after the app quits: wait (up to 30 s) until it has really exited,
 // so no file is still in use while it is replaced (a half-updated install otherwise).
 function InitializeSetup(): Boolean;
