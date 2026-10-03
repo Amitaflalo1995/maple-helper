@@ -173,12 +173,14 @@ def _write(path: Path, text: str, encoding: str = "utf-8") -> None:
             pass
 
 
-def grok_command(exe: str, prompt_file, instructions: str, model: str | None = None, tools: bool = True,
-                 platform: str = sys.platform) -> list[str]:
+def grok_command(exe: str, prompt_file, instructions: str, model: str | None = None,
+                 tools: bool | list[str] = True, platform: str = sys.platform) -> list[str]:
+    """tools: True all three, False none (a summary), or the ones this call keeps (["read_file"]: the screenshot)."""
+    keep = TOOLS if tools is True else (tools or [])
     cmd = [exe, "--prompt-file", str(prompt_file), "--system-prompt-override", instructions,
            "--tools", ",".join(TOOLS),
-           # MCP meta-tools always; with no knowledge-base reading (a summary) the three tools too
-           "--disallowed-tools", ",".join(["search_tool", "use_tool"] + ([] if tools else TOOLS)),
+           # MCP meta-tools always, and the read tools this call doesn't keep
+           "--disallowed-tools", ",".join(["search_tool", "use_tool"] + [t for t in TOOLS if t not in keep]),
            "--disable-web-search", "--no-subagents", "--no-plan", "--permission-mode", "dontAsk",
            "--output-format", "streaming-messages-json", "--include-partial-messages"]
     if platform == "darwin":
@@ -196,6 +198,13 @@ def tools_note(kb_root, shots: list[Path]) -> str:
         note += ("\nThe player's game screenshot is " + ", ".join(str(s) for s in shots) +
                  ": open it with read_file first, before answering.")
     return note
+
+
+def shot_note(shots: list[Path]) -> str:
+    """A quick screenshot read: the knowledge base isn't open, so the model doesn't go looking for it."""
+    return ("\n\nThis is a quick screenshot read. The knowledge base is not open to you this time: do not search, "
+            "list or open any folder. Your only tool is read_file, for the player's game screenshot: "
+            + ", ".join(str(s) for s in shots) + ". Open it first, then answer from it and the player's profile.")
 
 
 def classify(text: str) -> str | None:
@@ -422,8 +431,8 @@ class GrokBackend:
         if self._proc and self._proc.poll() is None:
             self._proc.kill()
 
-    def _exec(self, instructions: str, prompt: str, model: str | None, tools: bool = True, on_delta=None,
-              answer: bool = True, timeout: float | None = None) -> RawResult:
+    def _exec(self, instructions: str, prompt: str, model: str | None, tools: bool | list[str] = True,
+              on_delta=None, answer: bool = True, timeout: float | None = None) -> RawResult:
         b = self.brain
         write_guard(b.kb.root)
         fd, prompt_file = tempfile.mkstemp(prefix="maplehelper-grok-", suffix=".txt")
@@ -496,9 +505,15 @@ class GrokBackend:
                 if jpeg:
                     shots.append(folder / f"screenshot-{i}.jpg")
                     shots[-1].write_bytes(jpeg)
-            reads = tools or bool(shots)              # the screenshot is opened with read_file
-            return self._exec(b.system_prompt() + tools_note(b.kb.root, shots), prompt,
-                              resolve_model(model or b.model), reads, on_raw_delta)
+            if tools:
+                reads, note = True, tools_note(b.kb.root, shots)
+            elif shots:
+                # the ⟳ sync: the screenshot only (opened with read_file). With grep and list_dir too, a model goes
+                # digging in the knowledge base and the sync gives up at 60 s (seen with Gemini: over two minutes)
+                reads, note = ["read_file"], shot_note(shots)
+            else:
+                reads, note = False, ""
+            return self._exec(b.system_prompt() + note, prompt, resolve_model(model or b.model), reads, on_raw_delta)
         finally:
             shutil.rmtree(folder, ignore_errors=True)
 

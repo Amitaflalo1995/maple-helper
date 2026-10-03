@@ -54,6 +54,8 @@ def test_command_is_locked_down():
     assert grok.grok_command("grok", "q", "x", platform="darwin")[-2:] == ["--sandbox", "strict"]
     no_tools = grok.grok_command("grok", "q", "x", tools=False, platform="win32")
     assert no_tools[no_tools.index("--disallowed-tools") + 1] == "search_tool,use_tool,read_file,grep,list_dir"
+    shot_only = grok.grok_command("grok", "q", "x", tools=["read_file"], platform="win32")
+    assert shot_only[shot_only.index("--disallowed-tools") + 1] == "search_tool,use_tool,grep,list_dir"
 
 
 def test_env_keeps_the_players_setup_and_other_tools_out(home, monkeypatch):
@@ -265,6 +267,16 @@ class TestBackend:
         assert "screenshot-0.jpg" in instructions and "read_file" in instructions
         assert p.kw["cwd"] == str(kb.root) and p.kw["env"]["GROK_HOME"] == str(home / ".grok")
         assert not list(grok.shots_dir().rglob("*.jpg"))                     # gone after
+
+    def test_the_sync_screenshot_read_opens_only_the_screenshot(self, kb, home, monkeypatch):
+        """light (the ⟳ sync, 60 s): read_file for the screenshot, no grep or list_dir in the knowledge base."""
+        b = self.make(kb, monkeypatch, stream(START, delta("Lv 13\n@@META@@\n{}"), OK))
+        assert b.ask("sync", None, None, b"JPEGDATA", light=True).error is None
+        p = FakePopen.calls[0]
+        assert p.cmd[p.cmd.index("--disallowed-tools") + 1] == "search_tool,use_tool,grep,list_dir"
+        instructions = p.cmd[p.cmd.index("--system-prompt-override") + 1]
+        assert "quick screenshot read" in instructions and "screenshot-0.jpg" in instructions
+        assert "read it with read_file, grep and list_dir" not in instructions
 
     def test_api_key_and_summary(self, kb, home, monkeypatch):
         b = self.make(kb, monkeypatch, stream(START, delta("• Hunt"), OK), api_key="xai-1")

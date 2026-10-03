@@ -49,7 +49,9 @@ CREDENTIAL = ("gemini", "antigravity")
 AGENT = "maplehelper"
 SUMMARY_AGENT = "maplehelper-summary"     # each kind of call has its own agent file: they can run together
 QUICK_AGENT = "maplehelper-quick"
+SHOT_AGENT = "maplehelper-shot"          # a quick screenshot read (the ⟳ sync): view_file only
 TOOLS = ["view_file", "grep_search", "list_dir", "find_by_name"]
+SHOT_TOOLS = ["view_file"]
 RETRY_NOTE = ("\n\n(Your last attempt stopped at a blocked file. Read only inside the knowledge-base folder "
               "and the screenshot, then answer.)")
 SIGNED_IN_AS = re.compile(r"authenticated successfully as (\S+@\S+)")
@@ -161,6 +163,13 @@ def tools_note(kb_root, shots: list[Path]) -> str:
         note += ("\nThe player's game screenshot is attached as " + ", ".join(str(s) for s in shots) +
                  ": open it with view_file first, before answering.")
     return note
+
+
+def shot_note(shots: list[Path]) -> str:
+    """A quick screenshot read: the knowledge base isn't open, so the agent doesn't go looking for it."""
+    return ("\n\nThis is a quick screenshot read. The knowledge base is not open to you this time: do not search, "
+            "list or open any folder. Your only tool is view_file, for the player's game screenshot: "
+            + ", ".join(str(s) for s in shots) + ". Open it first, then answer from it and the player's profile.")
 
 
 def agy_command(exe: str, agent: str, model: str | None = None) -> list[str]:
@@ -581,10 +590,16 @@ class GeminiBackend:
                 if jpeg:
                     shots.append(folder / f"screenshot-{i}.jpg")
                     shots[-1].write_bytes(jpeg)
-            instructions = b.system_prompt() + tools_note(b.kb.root, shots)
-            reads = tools or bool(shots)          # the screenshot is opened with view_file
-            return self._exec(AGENT if reads else QUICK_AGENT, instructions, TOOLS if reads else [],
-                              prompt, resolve_model(model or b.model), on_raw_delta)
+            if tools:
+                agent, allowed, note = AGENT, TOOLS, tools_note(b.kb.root, shots)
+            elif shots:
+                # the ⟳ sync: the screenshot only (opened with view_file). With the knowledge-base tools too, the
+                # agent grepped the knowledge base for over two minutes and the sync gave up at 60 s
+                agent, allowed, note = SHOT_AGENT, SHOT_TOOLS, shot_note(shots)
+            else:
+                agent, allowed, note = QUICK_AGENT, [], ""
+            return self._exec(agent, b.system_prompt() + note, allowed, prompt, resolve_model(model or b.model),
+                              on_raw_delta)
         finally:
             shutil.rmtree(folder, ignore_errors=True)
 

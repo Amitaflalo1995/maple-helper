@@ -299,6 +299,19 @@ class TestBackend:
         assert str(kb.root.resolve()) in p.agent and "screenshot-0.jpg" in p.agent and "  - view_file" in p.agent
         assert not list(gemini.shots_dir().rglob("*.jpg"))                    # and gone after
 
+    def test_the_sync_screenshot_read_opens_only_the_screenshot(self, kb, home, monkeypatch):
+        """light (the ⟳ sync, 60 s): with the knowledge-base tools too the agent grepped for over two minutes."""
+        b = self.make(kb, monkeypatch, ANSWER)
+        assert b.ask("sync", None, None, b"JPEGDATA", light=True).error is None
+        p = FakePopen.calls[0]
+        assert p.cmd[p.cmd.index("--agent") + 1] == gemini.SHOT_AGENT
+        assert "tools:\n  - view_file\nexcludeDefaultComponents" in p.agent
+        assert "quick screenshot read" in p.agent and "screenshot-0.jpg" in p.agent and "grep_search," not in p.agent
+        b = self.make(kb, monkeypatch, ANSWER)                       # no screenshot: no tools at all
+        b.ask("hi", None, None, None, light=True)
+        assert FakePopen.calls[0].cmd[FakePopen.calls[0].cmd.index("--agent") + 1] == gemini.QUICK_AGENT
+        assert "tools: []" in FakePopen.calls[0].agent
+
     def test_api_key(self, kb, home, monkeypatch):
         b = self.make(kb, monkeypatch, ANSWER, api_key="AIzaKEY")
         b.ask("hi", None, None, None)
