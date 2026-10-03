@@ -2,6 +2,7 @@
 (no real CLI calls)."""
 import io
 import json
+from pathlib import Path
 
 import pytest
 
@@ -69,6 +70,16 @@ def test_env_gives_the_cli_its_own_home(home, monkeypatch):
     if gemini.sys.platform == "win32":
         assert e["USERPROFILE"] == str(home)
     assert gemini.env("AIzaKEY")["GEMINI_API_KEY"] == "AIzaKEY"
+
+
+def test_env_gives_the_cli_a_temp_folder_of_its_own(home, tmp_path, monkeypatch):
+    """agy's tools read the process's temp folder whatever the allow list says: never the player's %TEMP%."""
+    monkeypatch.setenv("TEMP", str(tmp_path / "players-temp"))
+    monkeypatch.setenv("TMP", str(tmp_path / "players-temp"))
+    e = gemini.env()
+    assert e["TEMP"] == e["TMP"] == e["TMPDIR"] == str(gemini.tmp_dir()) and gemini.tmp_dir().is_dir()
+    assert gemini.tmp_dir().is_relative_to(home)
+    assert gemini.env(tmp=home / "tmp" / "run-1")["TEMP"] == str(home / "tmp" / "run-1")
 
 
 class TestEvents:
@@ -298,6 +309,8 @@ class TestBackend:
         assert "<question>" in p.stdin.getvalue().decode()
         assert str(kb.root.resolve()) in p.agent and "screenshot-0.jpg" in p.agent and "  - view_file" in p.agent
         assert not list(gemini.shots_dir().rglob("*.jpg"))                    # and gone after
+        run_tmp = Path(p.kw["env"]["TEMP"])                                   # a temp folder of the run's own
+        assert run_tmp.parent == gemini.tmp_dir() and p.kw["env"]["TMP"] == str(run_tmp) and not run_tmp.exists()
 
     def test_the_sync_screenshot_read_opens_only_the_screenshot(self, kb, home, monkeypatch):
         """light (the ⟳ sync, 60 s): with the knowledge-base tools too the agent grepped for over two minutes."""

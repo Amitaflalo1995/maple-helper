@@ -5,7 +5,8 @@ not Gemini CLI. Each question runs `agy` headless, locked down:
   * a custom agent of ours (excludeDefaultComponents) holds our instructions and only four read
     tools (view_file, grep_search, list_dir, find_by_name): no shell, writing, web or browser;
   * file reads are allowed only in the knowledge base and the screenshot folder (permissions.allow);
-    headless runs auto-deny anything that would need approval;
+    headless runs auto-deny anything that would need approval. agy also reads its own temp folder
+    freely, so that is a private one in its home, not the player's %TEMP%;
   * the CLI gets a home of its own in Maple Helper's data folder (HOME/USERPROFILE), so the player's
     own Antigravity setup (rules, skills, plugins, MCP servers) never reaches the answers. The Google
     sign-in itself lives in the system's credential store, shared with the player's own Antigravity.
@@ -68,6 +69,10 @@ def shots_dir() -> Path:
     return home() / "shots"
 
 
+def tmp_dir() -> Path:
+    return home() / "tmp"
+
+
 def find_windows() -> str | None:
     p = shutil.which("agy")
     if p and p.lower().endswith(".exe"):
@@ -81,12 +86,19 @@ def find_agy() -> str | None:
     return find_windows() if sys.platform == "win32" else find_posix("agy", POSIX_DIRS)
 
 
-def env(api_key: str | None = None) -> dict:
+def env(api_key: str | None = None, tmp: Path | None = None) -> dict:
+    """tmp: this run's own temp folder (default: the shared one in our home)."""
     e = child_env(POSIX_DIRS)
     h = str(home())
     e["HOME"] = h
     if sys.platform == "win32":
         e["USERPROFILE"] = h
+    # agy's tools may always read the process's temp folder (a scratch area), whatever permissions.allow says:
+    # with the player's own %TEMP% that opened other apps' files and Codex's screenshots to view_file, list_dir
+    # and grep_search. Pointed at a folder of ours, the allow list holds.
+    t = tmp or tmp_dir()
+    t.mkdir(parents=True, exist_ok=True)
+    e["TEMP"] = e["TMP"] = e["TMPDIR"] = str(t)
     e.pop("GEMINI_API_KEY", None)
     if api_key:
         e["GEMINI_API_KEY"] = api_key
@@ -506,10 +518,19 @@ class GeminiBackend:
         return RawResult(error="api_error") if r.error == "bad_model" else r
 
     def _once(self, agent, stdin_text, model, on_delta, answer, timeout) -> RawResult:
+        tmp_dir().mkdir(parents=True, exist_ok=True)
+        # a temp folder per run, gone with it: an answer and a summary can run together
+        tmp = Path(tempfile.mkdtemp(prefix="run-", dir=tmp_dir()))
+        try:
+            return self._run_in(agent, stdin_text, model, on_delta, answer, timeout, tmp)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def _run_in(self, agent, stdin_text, model, on_delta, answer, timeout, tmp: Path) -> RawResult:
         try:
             p = subprocess.Popen(agy_command(self.exe, agent, model), cwd=str(self.brain.kb.root),
                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                 env=env(self.brain.api_key), creationflags=CREATE_NO_WINDOW)
+                                 env=env(self.brain.api_key, tmp), creationflags=CREATE_NO_WINDOW)
         except OSError as e:
             return RawResult(error=f"launch_failed: {e}")
         if answer:
