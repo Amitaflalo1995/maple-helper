@@ -13,13 +13,14 @@ from .. import __version__, bidi, osapi, quick, telemetry
 from ..brain import Answer, Brain
 from ..i18n import STRINGS, I18n
 from ..kb import KnowledgeBase
-from ..session import SessionStats, lines as session_lines, questions as session_questions
+from ..session import SessionStats, blocks as session_blocks, records as session_records
 from ..store import ASSETS, History, Profiles, Settings
 from . import theme
 from .glass import paint_glass
 from .minibubble import MiniBubble
 from .widgets import (SELECTION, WISHLIST, Bubble, BubbleRow, DropGroupCard, EntityCard, NoticeCard, ProfileCard,
-                      CharacterChoice, SessionCard, SplitMenu, SystemLine, TileGrid)
+                      CharacterChoice, SessionCard, SplitMenu, SystemLine, TileGrid,
+                      character_image)
 
 
 
@@ -896,7 +897,7 @@ class Overlay(QWidget):
         others = [c for c in self.profiles.characters if c.id != active]
         for i, c in enumerate(others):
             # a card the size of the one above it, not a small menu line
-            choice = CharacterChoice(c, self.profiles.avatar_path(c), self.kb, self.t.rtl)
+            choice = CharacterChoice(c, self.profiles.avatar_path(c), self.kb, self.t.rtl, self.t("choose_character"))
             choice.setFixedWidth(self.profile_card.width())
             choice.setEnabled(not busy)
             choice.clicked.connect(lambda cid=c.id: (menu.close(), self.switch_character(cid)))
@@ -918,9 +919,41 @@ class Overlay(QWidget):
         menu.add_row("copy", self.t("share_character"), self.copy_character_card, self.profiles.active is not None)
         card = self.profile_card
         menu.setMinimumWidth(card.width() + 10)
-        # the menu's 5 px padding sits outside the card's edges, so its cards line up with this one
-        menu.exec(card.mapToGlobal(QPoint(-5, card.height() + 1)))
+        # the chat behind the open menu goes soft (blurred and dimmed), the character card stays sharp
+        cover = self._blur_cover()
+        try:
+            # the menu's 5 px padding sits outside the card's edges, so its cards line up with this one
+            menu.exec(card.mapToGlobal(QPoint(-5, card.height() + 1)))
+        finally:
+            cover.deleteLater()
         self._menu_closed_at = time.monotonic()
+
+    def _blur_cover(self) -> QLabel:
+        """A blurred, dimmed picture of the chat laid over it, under the character card."""
+        from PySide6.QtGui import QColor, QPainter
+        from PySide6.QtWidgets import QGraphicsBlurEffect, QGraphicsPixmapItem, QGraphicsScene
+        shot = self.grab()
+        scene = QGraphicsScene()
+        item = QGraphicsPixmapItem(shot)
+        blur = QGraphicsBlurEffect()
+        blur.setBlurRadius(14)
+        item.setGraphicsEffect(blur)
+        scene.addItem(item)
+        soft = QPixmap(shot.size())
+        soft.setDevicePixelRatio(shot.devicePixelRatio())
+        soft.fill(Qt.transparent)
+        p = QPainter(soft)
+        scene.render(p, QRectF(0, 0, shot.width() / shot.devicePixelRatio(), shot.height() / shot.devicePixelRatio()),
+                     QRectF(shot.rect()))
+        p.setCompositionMode(QPainter.CompositionMode_SourceAtop)      # dim only where the chat is, not the shadow
+        p.fillRect(soft.rect(), QColor(0, 0, 0, 60))
+        p.end()
+        cover = QLabel(self)
+        cover.setPixmap(soft)
+        cover.setGeometry(self.rect())
+        cover.show()
+        self.profile_card.raise_()
+        return cover
 
     def switch_character(self, cid: str):
         if cid == self.profiles.active_id:
@@ -1023,24 +1056,46 @@ class Overlay(QWidget):
         self._materialize(True)
 
     def _show_last_session(self):
-        """A new session starts: first, what happened in the previous one."""
+        """A new session starts: first, what happened in the previous one, one block per character."""
         from .. import pins
         last = self.settings["last_session"]
         if not last:
             return
         self.settings["last_session"] = None
+        blocks = []
+        for b in session_blocks(last, self.t):
+            c = next((c for c in self.profiles.characters if c.id == b["id"]), None)
+            b["avatar"] = character_image(c, self.profiles.avatar_path(c), self.kb) if c else None
+            asked = [pins.shown_question(m["text"]) for m in session_records(last, b["id"], History)
+                     if m["role"] == "user"]
+            # the latest three, an English question one block ("Where is Pio?" showed as "?Where is Pio")
+            b["questions"] = [bidi.name_block(q, self.t.rtl) for q in asked[-3:]]
+            if len(asked) > 3:
+                b["questions"].insert(0, self.t("sess_more_q", n=len(asked) - 3))
+            blocks.append(b)
+        self._add_widget(SessionCard(self.t("sess_title", minutes=last["minutes"]), blocks, self.t.rtl,
+                                     self.t("sess_continue"), lambda cid: self.continue_session(last, cid)))
 
-        def details():
-            rows, rtl = [], self.t.rtl
-            for name, asked in session_questions(last, History).items():
-                if rows:
-                    rows.append(("", ""))             # apart from the previous character's questions
-                rows.append((self.t("sess_asked", name=bidi.name_block(name, rtl)), "CardName"))
-                # an English question is one block ("Where is Pio?" showed as "?Where is Pio")
-                rows += [("• " + bidi.name_block(pins.shown_question(q), rtl), "CardStat") for q in asked]
-            return rows or [(self.t("sess_no_details"), "CardStat")]
-        self._add_widget(SessionCard(self.t("sess_title", minutes=last["minutes"]), session_lines(last, self.t),
-                                     self.t.rtl, details, self.t("sess_more"), self.t("sess_less")))
+    def continue_session(self, last: dict, cid: str) -> None:
+        """"Continue the chat" on the last-session card: that character's conversation back in the feed (switching
+        to them first), and the next question asked as its follow-up."""
+        from .. import pins
+        if self._is_busy():
+            self._say_busy()
+            return
+        if cid != self.profiles.active_id:
+            self.switch_character(cid)
+        recs = session_records(last, cid, History)
+        for m in recs:
+            text = pins.shown_question(m["text"]) if m["role"] == "user" else m["text"]
+            self.add_bubble(text, m["role"])
+        c = self.profiles.active
+        self.add_system(lambda t, name=(c.name if c else ""): t("sess_continued", name=name))
+        convo = "\n".join(f"{'Player' if m['role'] == 'user' else 'Helper'}: {m['text'][:600]}" for m in recs[-8:])
+        if convo:
+            self._hidden_context = ("<continuing>\nThe player picked their last session's chat up again; the "
+                                    f"question follows on from it.\n{convo}\n</continuing>")
+        self.input.setFocus()
 
     def close_overlay(self):
         self.bubble.hide()

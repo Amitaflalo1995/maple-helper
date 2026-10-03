@@ -228,55 +228,54 @@ class NoticeCard(QFrame):
 
 
 class SessionCard(QFrame):
-    """'Last session': levels gained, quests done, questions asked, per character. Tap to see the questions."""
+    """'Last session', one block per character: portrait and name, what changed, the questions asked, and
+    "Continue the chat" back into that character's conversation. (One list of lines read as if one
+    character's questions belonged to the other.)"""
 
-    def __init__(self, title: str, lines: list[str], rtl: bool, details=None, more: str = "", less: str = ""):
+    def __init__(self, title: str, blocks: list[dict], rtl: bool, continue_text: str = "", on_continue=None):
         super().__init__(objectName="Card")
         self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
-        self._rtl, self._details, self._more, self._less = rtl, details, more, less
+        self._rtl = rtl
+        self._align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute
         col = QVBoxLayout(self)
         col.setContentsMargins(14, 10, 14, 10)
-        col.setSpacing(3)
-        self._align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute
+        col.setSpacing(6)
         head = QLabel(bidi.plain(title, rtl), objectName="CardName")
         head.setAlignment(self._align)
         col.addWidget(head)
-        for ln in lines:
-            if ln:
-                col.addWidget(self._line(ln))
-            else:
-                col.addSpacing(6)             # one character's lines apart from the next one's
-        self._extra = QWidget()
-        self._extra_lay = QVBoxLayout(self._extra)
-        self._extra_lay.setContentsMargins(0, 6, 0, 0)
-        self._extra_lay.setSpacing(3)
-        self._extra.hide()
-        col.addWidget(self._extra)
-        self._toggle = None
-        if details:
-            self.setCursor(Qt.PointingHandCursor)
-            self._toggle = QLabel(bidi.plain(more, rtl), objectName="CardSub")
-            self._toggle.setAlignment(self._align)
-            col.addWidget(self._toggle)
+        for i, b in enumerate(blocks):
+            if i:
+                sep = QFrame(objectName="Separator")
+                sep.setFixedHeight(1)
+                col.addWidget(sep)
+            row = QHBoxLayout()
+            row.setSpacing(10)
+            pic = Avatar(36)
+            pic.set_image(b.get("avatar"))
+            row.addWidget(pic, 0, Qt.AlignTop)
+            body = QVBoxLayout()
+            body.setSpacing(2)
+            name = QLabel(bidi.plain(b["name"], rtl), objectName="ProfileName")
+            name.setAlignment(self._align)
+            body.addWidget(name)
+            for ln in b["lines"]:
+                body.addWidget(self._line(ln, "CardStat"))
+            for q in b.get("questions", []):
+                body.addWidget(self._line("• " + q, "CardSub"))
+            if b.get("questions") and on_continue and b.get("id"):
+                go = QPushButton(bidi.plain(continue_text, rtl), objectName="Link")
+                go.setCursor(Qt.PointingHandCursor)
+                go.setAutoDefault(False)
+                go.clicked.connect(lambda _=False, cid=b["id"]: on_continue(cid))
+                body.addWidget(go, 0, Qt.AlignLeft)        # the leading edge (mirrored in Hebrew)
+            row.addLayout(body, 1)
+            col.addLayout(row)
 
-    def _line(self, text: str, name: str = "CardStat") -> QLabel:
+    def _line(self, text: str, name: str) -> QLabel:
         lb = QLabel(bidi.plain(text, self._rtl), objectName=name)
         lb.setWordWrap(True)
         lb.setAlignment(self._align)
         return lb
-
-    def mouseReleaseEvent(self, e):
-        if not self._details or e.button() != Qt.LeftButton:
-            return
-        if self._extra.isHidden() and not self._extra_lay.count():
-            for text, name in self._details():
-                if text:
-                    self._extra_lay.addWidget(self._line(text, name))
-                else:
-                    self._extra_lay.addSpacing(6)
-        opening = self._extra.isHidden()
-        self._extra.setVisible(opening)
-        self._toggle.setText(bidi.plain(self._less if opening else self._more, self._rtl))
 
 
 # ------------------------------------------------------------------ entity cards
@@ -659,7 +658,7 @@ class CharacterChoice(QFrame):
 
     clicked = Signal()
 
-    def __init__(self, c, avatar_path, kb, rtl: bool):
+    def __init__(self, c, avatar_path, kb, rtl: bool, choose_text: str = ""):
         super().__init__(objectName="ProfileCard")
         self.setCursor(Qt.PointingHandCursor)
         row = QHBoxLayout(self)
@@ -677,6 +676,13 @@ class CharacterChoice(QFrame):
             lb.setAlignment(align)
             col.addWidget(lb)
         row.addLayout(col, 1)
+        if choose_text:
+            # "Choose character" where the card above has "What now?": says what a click on this card does
+            choose = QPushButton(bidi.plain(choose_text, rtl), objectName="NowChip")
+            choose.setCursor(Qt.PointingHandCursor)
+            choose.setAutoDefault(False)
+            choose.clicked.connect(self.clicked.emit)
+            row.addWidget(choose, 0, Qt.AlignVCenter)
 
     def mouseReleaseEvent(self, e):
         if e.button() == Qt.LeftButton and self.isEnabled() and self.rect().contains(e.position().toPoint()):

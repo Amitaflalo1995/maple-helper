@@ -51,22 +51,6 @@ class SessionStats:
                 "from": self.started, "to": self.last_active}
 
 
-def questions(summary: dict, history_for, limit: int = 30) -> dict[str, list[str]]:
-    """The player's own questions in that session, per character name (history_for(id) -> History)."""
-    lo, hi = summary.get("from"), summary.get("to")
-    out: dict[str, list[str]] = {}
-    if lo is None or hi is None:
-        return out
-    for r in summary["chars"]:
-        if not r.get("id"):
-            continue
-        asked = [m["text"] for m in history_for(r["id"]).recent(400)
-                 if m.get("role") == "user" and lo - 1 <= m.get("t", 0) <= hi + 1]
-        if asked:
-            out[r["name"]] = asked[-limit:]
-    return out
-
-
 def lines(summary: dict, t) -> list[str]:
     """Readable lines for one summary (t = I18n). An empty line separates one character from the next; in Hebrew
     every English name (a character, a quest) is one left-to-right block, or its brackets and order broke."""
@@ -91,3 +75,37 @@ def lines(summary: dict, t) -> list[str]:
         if r["questions"]:
             out.append(t("sess_questions", n=r["questions"]))
     return out
+
+
+def blocks(summary: dict, t) -> list[dict]:
+    """The summary per character, for the card: [{id, name, lines}], the name kept apart (it heads its block)
+    so one character's level, quests and questions never read as the next one's."""
+    from . import bidi
+    rtl = getattr(t, "rtl", False)
+    out = []
+    for r in summary["chars"]:
+        rows = []
+        if r["end_level"] != r["start_level"]:
+            rows.append(t("sess_level_change", a=r["start_level"], b=r["end_level"]))
+        else:
+            rows.append(t("sess_level_now", level=r["end_level"]))
+        if r["end_job"] != r["start_job"]:
+            rows.append(t("sess_job", job=r["end_job"]))
+        if r["quests_done"]:
+            names = (bidi.RLM + ", ").join(bidi.ltr_block(q, rtl) for q in r["quests_done"][:4])
+            rows.append(t("sess_quests_done", n=len(r["quests_done"]), names=names))
+        if r["quests_started"]:
+            rows.append(t("sess_quests_started", n=len(r["quests_started"])))
+        if r["questions"]:
+            rows.append(t("sess_questions", n=r["questions"]))
+        out.append({"id": r.get("id"), "name": r["name"], "lines": rows})
+    return out
+
+
+def records(summary: dict, cid: str, history_for, limit: int = 400) -> list[dict]:
+    """One character's chat (questions and answers) in that session, oldest first."""
+    lo, hi = summary.get("from"), summary.get("to")
+    if lo is None or hi is None or not cid:
+        return []
+    return [m for m in history_for(cid).recent(limit)
+            if m.get("role") in ("user", "assistant") and lo - 1 <= m.get("t", 0) <= hi + 120]

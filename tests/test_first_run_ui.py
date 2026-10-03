@@ -91,3 +91,27 @@ def test_tour_walks_every_visible_button_and_marks_itself_done(qapp, isolated_st
     assert seen[-1] == "tour_done" and "tour_tools" in seen
     assert s["tour_done"] is True and ov._tour is None
     assert set(k for _, k in tour_mod.STEPS) >= set(seen)
+
+
+def test_last_session_card_continues_that_characters_chat(qapp, isolated_store, kb):
+    from PySide6.QtWidgets import QPushButton
+
+    from maplehelper.ui.overlay import Overlay
+    from maplehelper.ui.widgets import SessionCard
+    s, p = isolated_store.Settings(), isolated_store.Profiles()
+    a = p.add("Main", "Thief", "Assassin", 31)
+    b = p.add("Alt", "Beginner", "Beginner", 1)
+    p.set_active(a.id)
+    h = isolated_store.History(b.id)
+    h.append("user", "where is Mano?")
+    h.append("assistant", "In the Henesys hunting ground.")
+    t = max(m["t"] for m in h.recent())
+    s["last_session"] = {"minutes": 5, "from": t - 60, "to": t, "chars": [
+        {"id": b.id, "name": "Alt", "start_level": 1, "end_level": 1, "start_job": "Beginner", "end_job": "Beginner",
+         "questions": 1, "quests_done": [], "quests_started": []}]}
+    ov = Overlay(s, p, kb, None)
+    ov._show_last_session()
+    card = ov.findChildren(SessionCard)[-1]
+    go = next(x for x in card.findChildren(QPushButton) if x.objectName() == "Link")
+    go.click()
+    assert p.active_id == b.id and "where is Mano?" in ov._hidden_context
