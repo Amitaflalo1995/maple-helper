@@ -10,7 +10,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from maplehelper import sources, guides, market, quests
+from maplehelper import guides, market, quests, sources
 from maplehelper.i18n import I18n
 from maplehelper.kb import KnowledgeBase
 

@@ -104,7 +104,7 @@ def history(text: str) -> Stamp | None:
             before, label = tm.group("old").strip(), tm.group("new").strip() or label
             for row in lines[i + 1:]:
                 cols = [c.strip() for c in row.split(" | ")]
-                if len(cols) != 4:
+                if len(cols) != 4 or _HISTORY.match(row):       # (the next build's header splits in four too)
                     break
                 rows.append(Change(*cols))
         blocks.append((label, before, rows))
@@ -260,6 +260,9 @@ def markers(kb, key: str) -> list[Marker]:
                     out.append(Marker("shop_list", build, ln))
                 if re.search(r"community|tester|Discord|Reported", who, re.I):
                     out.append(Marker("shop_list", COMMUNITY, ln))
+                if not out or out[-1].line != ln:
+                    # anything else names MeowDB's own tools ("builds from the meowdb.com Character Builder")
+                    out.append(Marker("source", MEOWDB, ln))
         elif (m := _PARTY_EXP.match(ln)):
             out.append(Marker("party_exp", m.group("label"), ln))
         elif "from closed-beta play" in ln:
@@ -356,6 +359,10 @@ def page_note(kb, key: str) -> str:
                 "official": "official (Nexon)",
                 "guide_data": f"numbers are {m.source} data",
                 "cash_price": f"Cash Shop price from the {m.source} test",
+                "cash_shop": f"Cash Shop listing: {m.source} only",
+                "source": "numbers from MeowDB's own tools",
+                "party_exp": f"party EXP bonus from {m.source}",
+                "mob_rate": "mob rate is MeowDB's reading of the closed tests",
                 "exp_table": "levels 50+ are a historical reference table"}.get(m.kind)
         if what and what not in seen:
             seen.add(what)

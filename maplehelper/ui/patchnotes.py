@@ -6,7 +6,7 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 
 from .. import bidi, recent
-from ..i18n import STRINGS, I18n
+from ..i18n import NBSP, STRINGS, I18n
 from ..kb import KnowledgeBase
 from .controls import Section, rtl_buttons
 from .glass import GlassDialog
@@ -30,12 +30,13 @@ def update_notice(t: I18n, entries: list[dict], kb, char=None, wished=()) -> str
     mine, rest = recent.split(entries, kb, char, wished)
     if not mine:
         return t("patch_notes_summary", summary=summary(t, entries))
-    names = [bidi.ltr_block(r.get("name") or r.get("key", ""), t.rtl) for _, _, r in mine[:3]]
+    # each name one unbreakable block: "Fire Boar" wrapped as "Fire" / "Boar" at the end of a Hebrew line
+    names = [bidi.ltr_block((r.get("name") or r.get("key", "")).replace(" ", NBSP), t.rtl) for _, _, r in mine[:3]]
     if len(mine) > 3:
         names.append(t("pn_more", n=len(mine) - 3))
     text = t("patch_notes_affects", n=len(mine), names=", ".join(names))
     more = summary(t, rest)
-    return text + ("\n" + t("pn_more_changes") + ": " + more if more else "")
+    return text + ("\n" + t("pn_and_more", summary=more) if more else "")
 
 
 def totals(entries: list[dict]) -> dict[str, int]:

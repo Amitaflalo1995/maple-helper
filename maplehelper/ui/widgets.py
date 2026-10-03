@@ -301,7 +301,7 @@ def source_tag(t, source: str, stamp=None) -> QLabel:
     from .. import sources
     lb = QLabel(bidi.plain(sources.tag(t, source), t.rtl), objectName="SourceTag")
     lb.setAlignment(Qt.AlignCenter)
-    lb.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    lb.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
     text = sources.stamp_tip(t, source, stamp)
     lb.setToolTip(tip_html(text, t.rtl))
     lb.setAccessibleName(f"{sources.tag(t, source)}: {text}")
@@ -321,7 +321,7 @@ def updated_tag(t, kb, key: str) -> QLabel | None:
         return None
     lb = QLabel(bidi.plain(t("updated_tag"), t.rtl), objectName="UpdatedTag")
     lb.setAlignment(Qt.AlignCenter)
-    lb.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+    lb.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
     text = recent.tip(t, kb, r)
     lb.setToolTip(tip_html(text, t.rtl))
     lb.setAccessibleName(text)
@@ -482,20 +482,27 @@ class EntityCard(Selectable, QFrame):
         col.addWidget(sub_label)
 
         stats = self._stats(e, t)
-        # the stat line says where its numbers come from (the page's build, "COT2", else MeowDB's own), and an
-        # entity a KB update changed this week says so: on the stat line, else under the subtitle
-        from .. import sources
-        updated = updated_tag(t, kb, key)
         if stats:
             stat_label = _label(bidi.plain(stats, he), "CardStat")
             stat_label.setAlignment(side)
+            col.addWidget(stat_label)
+        # the credit line is the card's source line: where the stat line's numbers come from (the page's build,
+        # "COT2", else MeowDB's own) and, for an entity a KB update changed this week, "Updated", at its start
+        from .. import sources
+        chips = []
+        if stats:
             stamp = sources.stat_source(kb, key)
             self.source_chip = source_tag(t, stamp.source if stamp else sources.MEOWDB, stamp)
-            col.addLayout(chip_row([self.source_chip] + ([updated] if updated else []), stat_label))
-        elif updated:
-            col.addLayout(chip_row([updated]))
-        credit = _label("NiaMeowDB (meowdb.com)", "CardCredit")
-        col.addWidget(credit)
+            chips.append(self.source_chip)
+        updated = updated_tag(t, kb, key)
+        if updated:
+            chips.append(updated)
+        credit = _label("NiaMeowDB (meowdb.com)", "CardCredit", wrap=False)
+        line = QWidget()
+        credit_row = chip_row(chips)
+        line.setLayout(credit_row)
+        credit_row.addWidget(credit, 0, Qt.AlignVCenter)
+        col.addWidget(line)
         row.addLayout(col, 1)
         from PySide6.QtWidgets import QToolButton
         from . import theme

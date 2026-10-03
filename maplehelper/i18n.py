@@ -911,6 +911,7 @@ STRINGS = {
     "updated_tip_head": {"he": "עודכן במאגר ב-{date}:", "en": "Updated in the knowledge base on {date}:"},
     "pn_affects": {"he": "{n} שינויים שנוגעים בכם", "en": "{n} changes that affect you"},
     "pn_more_changes": {"he": "עוד שינויים", "en": "More changes"},
+    "pn_and_more": {"he": "ועוד: {summary}", "en": "Also: {summary}"},
     "pn_why_gear": {"he": "ציוד שמתאים לכם", "en": "Gear for you"},
     "pn_why_train": {"he": "בטווח האימון שלכם", "en": "In your training range"},
     "pn_why_wish": {"he": "ברשימת המעקב", "en": "On your wishlist"},
