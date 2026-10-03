@@ -217,6 +217,21 @@ def test_installer_relaunch_honours_the_launch_args():
     assert 'Parameters: "{param:LAUNCHARGS|--background}"' in iss
 
 
+def test_installer_skips_a_kb_that_is_already_installed():
+    # ~8,000 small files: an update rewriting an unchanged KB is most of its time
+    from pathlib import Path
+    iss = (Path(__file__).resolve().parent.parent / "packaging" / "installer.iss").read_text(encoding="utf-8")
+    assert 'Excludes: "\\_internal\\data\\kb"' in iss
+    assert iss.count("Check: KbNeedsInstall") == 3      # the wipe of the previous KB, its files, then meta.json
+    # meta.json marks a complete KB, so it is installed after every other KB file
+    files = iss[iss.index("[Files]"):iss.index("[Icons]")]
+    assert 'Excludes: "\\meta.json"' in files
+    assert files.index("data\\kb\\meta.json") > files.index("data\\kb\\*")
+    # the installer reads the same places and version format as the app
+    assert "{userappdata}\\MapleHelper\\kb" in iss and "\\_internal\\data\\kb" in iss
+    assert str(updater.USER_KB).endswith(str(Path("MapleHelper") / "kb"))
+
+
 def test_kb_in_use_is_kept_whole_and_retried_later(env, monkeypatch):
     # Windows refuses to rename a folder another process works in (the AI runs inside the KB)
     user_kb, _, publish = env
