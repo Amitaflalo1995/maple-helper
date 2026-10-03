@@ -32,7 +32,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 OUT = ROOT / "assets" / "guides"
 SITE = "https://meowdb.com"
-UA = "Mozilla/5.0 (Maple Helper guide builder; https://github.com/Amitaflalo1995/maple-helper)"
+UA = "Mozilla/5.0 (Maple Helper guide builder; https://github.com/Maple-Helper/maple-helper)"
 MAX_W = 360          # wide pictures are scaled down to the reader's width
 ICON_MAX = 40        # an image this small inside text is an inline icon
 

@@ -26,7 +26,7 @@ DIST = ROOT / "dist"
 KB = ROOT / "data" / "kb"
 ISCC = Path.home() / "AppData" / "Local" / "Programs" / "Inno Setup 6" / "ISCC.exe"
 PY = ROOT / ".venv" / "Scripts" / "python.exe"
-REPO = "Amitaflalo1995/maple-helper"
+REPO = "Maple-Helper/maple-helper"
 
 
 def run(cmd, **kw):

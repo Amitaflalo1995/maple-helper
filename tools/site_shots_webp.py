@@ -1,7 +1,7 @@
 """Site screenshots, step 2: raw PNGs from tools/site_shots.py -> <site repo>/assets/shots/[en/]<name>-<mode>.webp.
 
 Run: python tools/site_shots_webp.py <raw_dir> <maple-helper-site checkout>/assets/shots     (needs Pillow)
-The website lives in its own repository: https://github.com/Amitaflalo1995/maple-helper-site
+The website lives in its own repository: https://github.com/Maple-Helper/maple-helper-site
 """
 import os
 import sys

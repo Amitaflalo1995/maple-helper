@@ -50,7 +50,7 @@ def test_pack_writes_zip_and_matching_manifest(kb_copy, tmp_path):
     out = tmp_path / "dist"
     m = kb_release.pack(kb_copy, out, version="2026.10.02.1200")
     assert m["version"] == "2026.10.02.1200"
-    assert m["url"] == "https://github.com/Amitaflalo1995/maple-helper/releases/latest/download/kb.zip"
+    assert m["url"] == "https://github.com/Maple-Helper/maple-helper/releases/latest/download/kb.zip"
     assert hashlib.sha256((out / "kb.zip").read_bytes()).hexdigest() == m["sha256"]
     assert json.loads((out / "kb-manifest.json").read_text(encoding="utf-8")) == m
     with zipfile.ZipFile(out / "kb.zip") as z:
