@@ -52,6 +52,24 @@ def test_onboarding_relabels_the_connect_page_for_gemini(env, monkeypatch):
     assert "the AI you chose (now Google's Gemini)" in dlg.privacy_label.text()
 
 
+def test_offline_says_so_and_offers_no_sign_in(env, monkeypatch):
+    """Gemini can't tell offline whether it's signed in: "no connection", never "sign in" (that fails too)."""
+    from maplehelper import providers
+    from maplehelper.ui.dialogs import Onboarding, SettingsDialog
+    monkeypatch.setattr(type(providers.get("gemini")), "account", lambda self: {"status": "offline", "email": None})
+    s, profiles, kb = env
+    dlg = Onboarding(s, profiles, kb, lambda *_: "")
+    dlg._on_provider("gemini")
+    dlg._on_status("gemini", "offline")
+    assert "Couldn't reach Gemini" in dlg.status_label.text() and dlg.login_btn.isHidden()
+    assert dlg.install_btn.isHidden() and not dlg._ai_ok
+    s["provider"] = "gemini"
+    dlg = SettingsDialog(s, profiles, kb, lambda *_: "")
+    dlg._on_account({"status": "offline", "email": None, "provider": "gemini"})
+    assert "Couldn't reach Gemini" in dlg.account_label.text()
+    assert dlg.switch_btn.isHidden() and dlg.install_btn.isHidden() and dlg.logout_btn.isHidden()
+
+
 def test_onboarding_ignores_a_late_status_for_the_other_provider(env):
     from maplehelper.ui.dialogs import Onboarding
     s, profiles, kb = env

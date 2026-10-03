@@ -104,36 +104,48 @@ def env(api_key: str | None = None) -> dict:
 
 
 GUARD_PS1 = r"""# Maple Helper: Grok may read only the knowledge base and the screenshot (a PreToolUse hook).
-# Any other path, or anything unexpected, is denied: a hook that fails would let the read through.
+# Grok lets a read through unless the hook prints a deny, so anything unexpected (a request it can't read, a missing
+# or broken roots file, any error at all) ends in the deny at the bottom. This file is plain ASCII and never changes:
+# the folders it allows come from maplehelper-guard-roots.json beside it, so no path (a Hebrew user name) ever
+# becomes part of the script's source.
+$ErrorActionPreference = 'Stop'
 $deny = '{"decision":"block","reason":"Only the knowledge base and the screenshot can be read.","hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Only the knowledge base and the screenshot can be read."}}'
 try {
-  $in = [Console]::In.ReadToEnd() | ConvertFrom-Json
+  # Grok sends UTF-8: read the bytes, not the console's code page (862/1255 garbled a Hebrew path)
+  $buf = New-Object IO.MemoryStream
+  [Console]::OpenStandardInput().CopyTo($buf)
+  $in = [Text.Encoding]::UTF8.GetString($buf.ToArray()).TrimStart([char]0xFEFF) | ConvertFrom-Json
+  $cfg = [IO.File]::ReadAllText((Join-Path $PSScriptRoot 'maplehelper-guard-roots.json'), [Text.Encoding]::UTF8) | ConvertFrom-Json
   $ti = $in.tool_input
-  $p = $null
+  if (-not $ti) { throw 'no tool call' }
+  $p = '.'                                     # no path (a grep with none): the folder it runs in
   foreach ($k in 'target_file', 'target_directory', 'path') { if ($ti.$k) { $p = [string]$ti.$k; break } }
-  if (-not $p) { exit 0 }
   $base = if ($in.cwd) { [string]$in.cwd } else { (Get-Location).Path }
   $full = [IO.Path]::GetFullPath([IO.Path]::Combine($base, $p))
-  foreach ($root in @(ROOTS)) {
+  foreach ($root in $cfg.roots) {
+    $root = [string]$root
+    if (-not $root) { continue }
     if ($full -ieq $root -or $full.StartsWith($root + '\', [StringComparison]::OrdinalIgnoreCase)) { exit 0 }
   }
 } catch { }
 [Console]::Out.Write($deny)
 exit 2
 """
-
-
-def _ps_quote(s: str) -> str:
-    return "'" + s.replace("'", "''") + "'"
+GUARD_ROOTS = "maplehelper-guard-roots.json"
 
 
 def write_guard(kb_root) -> None:
-    """Windows: the read guard (a hook in our Grok home). Written when the knowledge base path changes."""
+    """Windows: the read guard (a hook in our Grok home). Written when the knowledge base path changes.
+    The folders go in a JSON file of their own, not into the script: Windows PowerShell 5.1 read the script in the
+    ANSI code page, a Hebrew user name in a pasted path turned into stray quote marks (ב/ג: a parse error, so the
+    hook failed and Grok read anything; other letters: garbled folders, so it read nothing)."""
     if sys.platform != "win32":
         return
-    roots = ", ".join(_ps_quote(str(Path(p).resolve())) for p in (kb_root, shots_dir()))
+    roots = [str(Path(p).resolve()) for p in (kb_root, shots_dir())]
+    # ASCII JSON (\u escapes) read as UTF-8: the same text whatever the PC's code pages
+    _write(grok_home() / GUARD_ROOTS, json.dumps({"roots": roots}, indent=1))
     script = grok_home() / "maplehelper-guard.ps1"
-    _write(script, GUARD_PS1.replace("ROOTS", roots))
+    _write(script, GUARD_PS1, encoding="utf-8-sig")       # the BOM: PowerShell 5.1 reads it as UTF-8 regardless
     cmd = f'powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "{script}"'
     # no matcher: it runs for each of the three tools (a tool-name matcher didn't match them)
     _write(grok_home() / "hooks" / "maplehelper.json",
@@ -141,16 +153,16 @@ def write_guard(kb_root) -> None:
                       indent=1))
 
 
-def _write(path: Path, text: str) -> None:
+def _write(path: Path, text: str, encoding: str = "utf-8") -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     try:
-        if path.read_text(encoding="utf-8") == text:
+        if path.read_text(encoding=encoding) == text:
             return
     except OSError:
         pass
     fd, tmp = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=path.parent)
     try:
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
+        with os.fdopen(fd, "w", encoding=encoding) as f:
             f.write(text)
         os.replace(tmp, path)
     except OSError:
@@ -161,12 +173,14 @@ def _write(path: Path, text: str) -> None:
             pass
 
 
-def grok_command(exe: str, prompt_file, instructions: str, model: str | None = None, tools: bool = True,
-                 platform: str = sys.platform) -> list[str]:
+def grok_command(exe: str, prompt_file, instructions: str, model: str | None = None,
+                 tools: bool | list[str] = True, platform: str = sys.platform) -> list[str]:
+    """tools: True all three, False none (a summary), or the ones this call keeps (["read_file"]: the screenshot)."""
+    keep = TOOLS if tools is True else (tools or [])
     cmd = [exe, "--prompt-file", str(prompt_file), "--system-prompt-override", instructions,
            "--tools", ",".join(TOOLS),
-           # MCP meta-tools always; with no knowledge-base reading (a summary) the three tools too
-           "--disallowed-tools", ",".join(["search_tool", "use_tool"] + ([] if tools else TOOLS)),
+           # MCP meta-tools always, and the read tools this call doesn't keep
+           "--disallowed-tools", ",".join(["search_tool", "use_tool"] + [t for t in TOOLS if t not in keep]),
            "--disable-web-search", "--no-subagents", "--no-plan", "--permission-mode", "dontAsk",
            "--output-format", "streaming-messages-json", "--include-partial-messages"]
     if platform == "darwin":
@@ -184,6 +198,13 @@ def tools_note(kb_root, shots: list[Path]) -> str:
         note += ("\nThe player's game screenshot is " + ", ".join(str(s) for s in shots) +
                  ": open it with read_file first, before answering.")
     return note
+
+
+def shot_note(shots: list[Path]) -> str:
+    """A quick screenshot read: the knowledge base isn't open, so the model doesn't go looking for it."""
+    return ("\n\nThis is a quick screenshot read. The knowledge base is not open to you this time: do not search, "
+            "list or open any folder. Your only tool is read_file, for the player's game screenshot: "
+            + ", ".join(str(s) for s in shots) + ". Open it first, then answer from it and the player's profile.")
 
 
 def classify(text: str) -> str | None:
@@ -410,8 +431,8 @@ class GrokBackend:
         if self._proc and self._proc.poll() is None:
             self._proc.kill()
 
-    def _exec(self, instructions: str, prompt: str, model: str | None, tools: bool = True, on_delta=None,
-              answer: bool = True, timeout: float | None = None) -> RawResult:
+    def _exec(self, instructions: str, prompt: str, model: str | None, tools: bool | list[str] = True,
+              on_delta=None, answer: bool = True, timeout: float | None = None) -> RawResult:
         b = self.brain
         write_guard(b.kb.root)
         fd, prompt_file = tempfile.mkstemp(prefix="maplehelper-grok-", suffix=".txt")
@@ -484,9 +505,15 @@ class GrokBackend:
                 if jpeg:
                     shots.append(folder / f"screenshot-{i}.jpg")
                     shots[-1].write_bytes(jpeg)
-            reads = tools or bool(shots)              # the screenshot is opened with read_file
-            return self._exec(b.system_prompt() + tools_note(b.kb.root, shots), prompt,
-                              resolve_model(model or b.model), reads, on_raw_delta)
+            if tools:
+                reads, note = True, tools_note(b.kb.root, shots)
+            elif shots:
+                # the ⟳ sync: the screenshot only (opened with read_file). With grep and list_dir too, a model goes
+                # digging in the knowledge base and the sync gives up at 60 s (seen with Gemini: over two minutes)
+                reads, note = ["read_file"], shot_note(shots)
+            else:
+                reads, note = False, ""
+            return self._exec(b.system_prompt() + note, prompt, resolve_model(model or b.model), reads, on_raw_delta)
         finally:
             shutil.rmtree(folder, ignore_errors=True)
 

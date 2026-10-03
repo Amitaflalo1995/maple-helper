@@ -680,6 +680,8 @@ STRINGS = {
                              "en": "Gemini is installed but not signed in"},
     "ob_not_logged_grok": {"he": "Grok מותקן, אבל צריך להתחבר",
                            "en": "Grok is installed but not signed in"},
+    "ob_offline": {"he": "אין חיבור ל-{name}. בדקו את החיבור לאינטרנט.",
+                   "en": "Couldn't reach {name}. Check your internet connection."},
     "ob_need_plan": {"he": "נדרש מנוי Claude Pro או Max.", "en": "A Claude Pro or Max plan is required."},
     "ob_need_plan_codex": {"he": "נדרש מנוי ChatGPT בתשלום (Plus, Pro, Business ועוד).",
                            "en": "A paid ChatGPT plan is required (Plus, Pro, Business…)."},

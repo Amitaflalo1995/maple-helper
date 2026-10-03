@@ -5,7 +5,8 @@ not Gemini CLI. Each question runs `agy` headless, locked down:
   * a custom agent of ours (excludeDefaultComponents) holds our instructions and only four read
     tools (view_file, grep_search, list_dir, find_by_name): no shell, writing, web or browser;
   * file reads are allowed only in the knowledge base and the screenshot folder (permissions.allow);
-    headless runs auto-deny anything that would need approval;
+    headless runs auto-deny anything that would need approval. agy also reads its own temp folder
+    freely, so that is a private one in its home, not the player's %TEMP%;
   * the CLI gets a home of its own in Maple Helper's data folder (HOME/USERPROFILE), so the player's
     own Antigravity setup (rules, skills, plugins, MCP servers) never reaches the answers. The Google
     sign-in itself lives in the system's credential store, shared with the player's own Antigravity.
@@ -49,7 +50,9 @@ CREDENTIAL = ("gemini", "antigravity")
 AGENT = "maplehelper"
 SUMMARY_AGENT = "maplehelper-summary"     # each kind of call has its own agent file: they can run together
 QUICK_AGENT = "maplehelper-quick"
+SHOT_AGENT = "maplehelper-shot"          # a quick screenshot read (the ⟳ sync): view_file only
 TOOLS = ["view_file", "grep_search", "list_dir", "find_by_name"]
+SHOT_TOOLS = ["view_file"]
 RETRY_NOTE = ("\n\n(Your last attempt stopped at a blocked file. Read only inside the knowledge-base folder "
               "and the screenshot, then answer.)")
 SIGNED_IN_AS = re.compile(r"authenticated successfully as (\S+@\S+)")
@@ -66,6 +69,10 @@ def shots_dir() -> Path:
     return home() / "shots"
 
 
+def tmp_dir() -> Path:
+    return home() / "tmp"
+
+
 def find_windows() -> str | None:
     p = shutil.which("agy")
     if p and p.lower().endswith(".exe"):
@@ -79,12 +86,19 @@ def find_agy() -> str | None:
     return find_windows() if sys.platform == "win32" else find_posix("agy", POSIX_DIRS)
 
 
-def env(api_key: str | None = None) -> dict:
+def env(api_key: str | None = None, tmp: Path | None = None) -> dict:
+    """tmp: this run's own temp folder (default: the shared one in our home)."""
     e = child_env(POSIX_DIRS)
     h = str(home())
     e["HOME"] = h
     if sys.platform == "win32":
         e["USERPROFILE"] = h
+    # agy's tools may always read the process's temp folder (a scratch area), whatever permissions.allow says:
+    # with the player's own %TEMP% that opened other apps' files and Codex's screenshots to view_file, list_dir
+    # and grep_search. Pointed at a folder of ours, the allow list holds.
+    t = tmp or tmp_dir()
+    t.mkdir(parents=True, exist_ok=True)
+    e["TEMP"] = e["TMP"] = e["TMPDIR"] = str(t)
     e.pop("GEMINI_API_KEY", None)
     if api_key:
         e["GEMINI_API_KEY"] = api_key
@@ -161,6 +175,13 @@ def tools_note(kb_root, shots: list[Path]) -> str:
         note += ("\nThe player's game screenshot is attached as " + ", ".join(str(s) for s in shots) +
                  ": open it with view_file first, before answering.")
     return note
+
+
+def shot_note(shots: list[Path]) -> str:
+    """A quick screenshot read: the knowledge base isn't open, so the agent doesn't go looking for it."""
+    return ("\n\nThis is a quick screenshot read. The knowledge base is not open to you this time: do not search, "
+            "list or open any folder. Your only tool is view_file, for the player's game screenshot: "
+            + ", ".join(str(s) for s in shots) + ". Open it first, then answer from it and the player's profile.")
 
 
 def agy_command(exe: str, agent: str, model: str | None = None) -> list[str]:
@@ -317,6 +338,11 @@ class CheckFailed(Exception):
     """agy was found but didn't answer (timed out): neither "not installed" nor "signed out"."""
 
 
+class Offline(CheckFailed):
+    """agy couldn't reach Google ("Eligibility check failed: ... dial tcp ... no such host"): the sign-in may be
+    fine, so not "signed out"."""
+
+
 def _run(args: list[str], timeout: float = CHECK_TIMEOUT_S) -> subprocess.CompletedProcess | None:
     """A quick agy command on the sign-in. One at a time: each start rewrites cli.log, which names the account.
     None when agy is missing or won't start; CheckFailed when it hangs."""
@@ -348,6 +374,13 @@ def read_models(max_age: float = 10.0) -> list[tuple[str, str]] | None:
     r = _run(["models"])
     if r is None:
         return None
+    if r.returncode != 0:
+        # offline, agy ends 1 with only the network error on stderr and no list: that is no sign of being signed
+        # out (it said "not signed in" to a signed-in player)
+        detail = (r.stdout + r.stderr).decode("utf-8", errors="replace")
+        if classify(detail) == "offline":
+            log.warning("agy models: no connection: %s", detail.strip()[-300:])
+            raise Offline()
     found = parse_models(r.stdout.decode("utf-8", errors="replace"))
     if found:
         _models_cache, _models_at = found, time.monotonic()
@@ -410,6 +443,8 @@ class Gemini(Provider):
             return {"status": "not_installed", "email": None}
         try:
             found = read_models(max_age=0)
+        except Offline:
+            return {"status": "offline", "email": None}         # say so, and no sign-in to offer: it would fail too
         except CheckFailed:
             # it hangs (offline, a stuck update): not "not installed" (a reinstall won't help); a sign-in might
             return {"status": "logged_out", "email": None}
@@ -497,10 +532,19 @@ class GeminiBackend:
         return RawResult(error="api_error") if r.error == "bad_model" else r
 
     def _once(self, agent, stdin_text, model, on_delta, answer, timeout) -> RawResult:
+        tmp_dir().mkdir(parents=True, exist_ok=True)
+        # a temp folder per run, gone with it: an answer and a summary can run together
+        tmp = Path(tempfile.mkdtemp(prefix="run-", dir=tmp_dir()))
+        try:
+            return self._run_in(agent, stdin_text, model, on_delta, answer, timeout, tmp)
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def _run_in(self, agent, stdin_text, model, on_delta, answer, timeout, tmp: Path) -> RawResult:
         try:
             p = subprocess.Popen(agy_command(self.exe, agent, model), cwd=str(self.brain.kb.root),
                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                 env=env(self.brain.api_key), creationflags=CREATE_NO_WINDOW)
+                                 env=env(self.brain.api_key, tmp), creationflags=CREATE_NO_WINDOW)
         except OSError as e:
             return RawResult(error=f"launch_failed: {e}")
         if answer:
@@ -581,10 +625,16 @@ class GeminiBackend:
                 if jpeg:
                     shots.append(folder / f"screenshot-{i}.jpg")
                     shots[-1].write_bytes(jpeg)
-            instructions = b.system_prompt() + tools_note(b.kb.root, shots)
-            reads = tools or bool(shots)          # the screenshot is opened with view_file
-            return self._exec(AGENT if reads else QUICK_AGENT, instructions, TOOLS if reads else [],
-                              prompt, resolve_model(model or b.model), on_raw_delta)
+            if tools:
+                agent, allowed, note = AGENT, TOOLS, tools_note(b.kb.root, shots)
+            elif shots:
+                # the ⟳ sync: the screenshot only (opened with view_file). With the knowledge-base tools too, the
+                # agent grepped the knowledge base for over two minutes and the sync gave up at 60 s
+                agent, allowed, note = SHOT_AGENT, SHOT_TOOLS, shot_note(shots)
+            else:
+                agent, allowed, note = QUICK_AGENT, [], ""
+            return self._exec(agent, b.system_prompt() + note, allowed, prompt, resolve_model(model or b.model),
+                              on_raw_delta)
         finally:
             shutil.rmtree(folder, ignore_errors=True)
 

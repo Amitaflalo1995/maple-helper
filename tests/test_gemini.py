@@ -2,6 +2,7 @@
 (no real CLI calls)."""
 import io
 import json
+from pathlib import Path
 
 import pytest
 
@@ -69,6 +70,16 @@ def test_env_gives_the_cli_its_own_home(home, monkeypatch):
     if gemini.sys.platform == "win32":
         assert e["USERPROFILE"] == str(home)
     assert gemini.env("AIzaKEY")["GEMINI_API_KEY"] == "AIzaKEY"
+
+
+def test_env_gives_the_cli_a_temp_folder_of_its_own(home, tmp_path, monkeypatch):
+    """agy's tools read the process's temp folder whatever the allow list says: never the player's %TEMP%."""
+    monkeypatch.setenv("TEMP", str(tmp_path / "players-temp"))
+    monkeypatch.setenv("TMP", str(tmp_path / "players-temp"))
+    e = gemini.env()
+    assert e["TEMP"] == e["TMP"] == e["TMPDIR"] == str(gemini.tmp_dir()) and gemini.tmp_dir().is_dir()
+    assert gemini.tmp_dir().is_relative_to(home)
+    assert gemini.env(tmp=home / "tmp" / "run-1")["TEMP"] == str(home / "tmp" / "run-1")
 
 
 class TestEvents:
@@ -139,8 +150,13 @@ def test_forget_removes_the_run_and_keeps_only_the_last_logs(home):
 
 
 class Done:
-    def __init__(self, out: str, code: int = 0):
-        self.stdout, self.returncode = out.encode(), code
+    def __init__(self, out: str, code: int = 0, err: str = ""):
+        self.stdout, self.returncode, self.stderr = out.encode(), code, err.encode()
+
+
+OFFLINE = ('Error: Eligibility check failed: Post "https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist": '
+           "proxyconnect tcp: dial tcp 127.0.0.1:9: connectex: No connection could be made because the target machine "
+           "actively refused it.")
 
 
 class TestAccount:
@@ -156,6 +172,19 @@ class TestAccount:
         monkeypatch.setattr(gemini, "_run", lambda args, timeout=30: Done("gemini-3.8-flash-low\tGemini 3.8 Flash (Low)\n"))
         assert providers.get("gemini").account() == {"status": "ok", "email": None}
         assert providers.get("gemini").saver_model == "gemini-3.8-flash-low"
+
+    def test_offline_is_not_signed_out(self, home, monkeypatch):
+        """Offline, agy ends 1 with only a network error: the player was told to sign in (which fails too)."""
+        monkeypatch.setattr(gemini, "find_agy", lambda: "agy.exe")
+        monkeypatch.setattr(gemini, "_models_cache", [])
+        monkeypatch.setattr(gemini, "_run", lambda args, timeout=30: Done("", 1, OFFLINE))
+        g = providers.get("gemini")
+        assert g.account() == {"status": "offline", "email": None}
+        assert g.models() == [(None, "")] and g.read_limits() is None and gemini.resolve_model(gemini.SAVER_ALIAS) is None
+        # signed out says so even with a failing exit code
+        monkeypatch.setattr(gemini, "_run", lambda args, timeout=30: Done("", 1, "Error: Please sign in to view "
+                                                                                 "available models."))
+        assert g.account() == {"status": "logged_out", "email": None}
 
     def test_cli_that_will_not_start_counts_as_not_installed(self, home, monkeypatch):
         monkeypatch.setattr(gemini, "find_agy", lambda: "agy.exe")
@@ -298,6 +327,21 @@ class TestBackend:
         assert "<question>" in p.stdin.getvalue().decode()
         assert str(kb.root.resolve()) in p.agent and "screenshot-0.jpg" in p.agent and "  - view_file" in p.agent
         assert not list(gemini.shots_dir().rglob("*.jpg"))                    # and gone after
+        run_tmp = Path(p.kw["env"]["TEMP"])                                   # a temp folder of the run's own
+        assert run_tmp.parent == gemini.tmp_dir() and p.kw["env"]["TMP"] == str(run_tmp) and not run_tmp.exists()
+
+    def test_the_sync_screenshot_read_opens_only_the_screenshot(self, kb, home, monkeypatch):
+        """light (the ⟳ sync, 60 s): with the knowledge-base tools too the agent grepped for over two minutes."""
+        b = self.make(kb, monkeypatch, ANSWER)
+        assert b.ask("sync", None, None, b"JPEGDATA", light=True).error is None
+        p = FakePopen.calls[0]
+        assert p.cmd[p.cmd.index("--agent") + 1] == gemini.SHOT_AGENT
+        assert "tools:\n  - view_file\nexcludeDefaultComponents" in p.agent
+        assert "quick screenshot read" in p.agent and "screenshot-0.jpg" in p.agent and "grep_search," not in p.agent
+        b = self.make(kb, monkeypatch, ANSWER)                       # no screenshot: no tools at all
+        b.ask("hi", None, None, None, light=True)
+        assert FakePopen.calls[0].cmd[FakePopen.calls[0].cmd.index("--agent") + 1] == gemini.QUICK_AGENT
+        assert "tools: []" in FakePopen.calls[0].agent
 
     def test_api_key(self, kb, home, monkeypatch):
         b = self.make(kb, monkeypatch, ANSWER, api_key="AIzaKEY")
