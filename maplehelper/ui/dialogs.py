@@ -870,6 +870,7 @@ class SettingsDialog(GlassDialog):
     account_changed = Signal()
     patch_notes_requested = Signal()
     whats_new_requested = Signal()
+    tour_requested = Signal()
 
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, stylesheet_fn):
         self.t = t = I18n(settings["language"] or "he")
@@ -1031,6 +1032,9 @@ class SettingsDialog(GlassDialog):
         news.setCursor(Qt.PointingHandCursor)
         news.clicked.connect(self.whats_new_requested.emit)
         sec.add_widget(news)
+        tour = QPushButton(t("tour_replay"), objectName="Link")
+        tour.clicked.connect(self.tour_requested.emit)
+        sec.add_widget(tour)
         report_btn = QPushButton(t("report_problem"), objectName="Link")
         report_btn.setCursor(Qt.PointingHandCursor)
         report_btn.clicked.connect(self.report_requested.emit)

@@ -373,6 +373,18 @@ class ToolsDialog(GlassDialog):
             terms.watch(lb, self.t.lang)
         return row
 
+    def _ask_link(self, on_click) -> QWidget:
+        """"Ask in chat" at the reading start, under what it asks about."""
+        ask = QPushButton(self._p(self.t("ask_short")), objectName="Link")
+        ask.setAutoDefault(False)
+        ask.clicked.connect(lambda *_: on_click())
+        box = QWidget()
+        bl = QHBoxLayout(box)
+        bl.setContentsMargins(0, 0, 0, 4)
+        bl.addWidget(ask, 0, Qt.AlignLeft)        # AlignLeft is the leading edge (mirrored in Hebrew)
+        bl.addStretch(1)
+        return box
+
     def _big(self, value: str, label: str, explain: bool = True) -> QVBoxLayout:
         """A big number with its (explained) name under it."""
         box = QVBoxLayout()
@@ -442,10 +454,11 @@ class ToolsDialog(GlassDialog):
         sc, lay = scroll_page()
         self.train_head = self._label("", "ToolHeader")
         lay.addWidget(self.train_head)
+        # the stats first: the spots below are ranked by them, and at the end of a long list nobody found them
+        lay.addWidget(self._stats_section())
         self.train_list = QVBoxLayout()
         self.train_list.setSpacing(8)
         lay.addLayout(self.train_list)
-        lay.addWidget(self._stats_section())
         lay.addStretch(1)
         self._load_stats()
         return sc
@@ -548,10 +561,11 @@ class ToolsDialog(GlassDialog):
         self.calc_input = EntityPicker(rows, self._p(t("calc_placeholder", n=len(rows))))
         self.calc_input.picked.connect(self._fill_calc)
         lay.addWidget(self.calc_input)
+        # the stats first, as on "Where to train": every number below comes from them
+        lay.addWidget(self._stats_section())
         self.calc_box = QVBoxLayout()
         self.calc_box.setSpacing(12)
         lay.addLayout(self.calc_box)
-        lay.addWidget(self._stats_section())
         lay.addStretch(1)
         self._load_stats()
         return sc
@@ -584,6 +598,15 @@ class ToolsDialog(GlassDialog):
         magic = c.base_class == combat.MAGE
         sec = Section(bidi.ltr_block(f"{m.name} · Lv. {m.level}", t.rtl), t.rtl)
         nums = QHBoxLayout()
+        # the monster's picture leads the row (the start side), as on the training-spot cards
+        path = self.kb.picture(m.key)
+        pm = QPixmap(str(path)) if path else QPixmap()
+        if not pm.isNull():
+            pic = QLabel()
+            pic.setFixedSize(56, 56)
+            pic.setAlignment(Qt.AlignCenter)
+            pic.setPixmap(pm.scaled(56, 56, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            nums.addWidget(pic, 0, Qt.AlignVCenter)
         # P.DEF for every class: the hits below are the stat window's basic attack, a Magician's staff swing too
         for value, label in ((f"{m.hp:,}", "HP"), (f"{m.exp:,}", "EXP"), (str(m.avoid), "Avoid"), (str(m.pdef), "P.DEF")):
             nums.addLayout(self._big(value, label))
@@ -609,10 +632,15 @@ class ToolsDialog(GlassDialog):
         if dmg:
             # the stat window's range is a basic attack: for a Magician the staff swing, a physical hit (P.DEF)
             hits, avg = combat.hits_to_kill(dmg[0], dmg[1], m, c.level)
-            hint = t("calc_hits_avg", n=f"{avg:.1f}") + "\n" + t("calc_hits_mage" if magic else "calc_hits_basic")
-            self._row(sec, t("calc_hits"), tag(str(hits), "Tag"), hint=hint)
+            # the number inside the sentence ("3 basic hits always kill it"): a lone "1" at the far edge read as
+            # unrelated, and "1.0 on average" said nothing when it's always one hit
+            hint = t("calc_hits_mage" if magic else "calc_hits_basic")
+            if avg < hits - 0.05:
+                hint = t("calc_hits_avg", n=f"{avg:.1f}") + "\n" + hint
+            self._row(sec, t("calc_hits", n=hits), hint=hint)
         if not (acc and dmg):
             sec.add_widget(self._label(t("calc_need_stats"), "RowHint"))
+        sec.add_widget(self._ask_link(lambda: self.tag_requested.emit(m.key)))
         self.calc_box.addWidget(sec)
         if m.avoid > 0:
             # ACC to never miss as your level changes: three big numbers, not a list
@@ -630,7 +658,12 @@ class ToolsDialog(GlassDialog):
             maps_sec = Section(t("calc_maps_head_plain"), t.rtl)
             for mp, n in m.maps[:3]:
                 # one English block: "Tree Dungeon, Forest Up North IV" kept its comma in place
-                self._row(maps_sec, bidi.ltr_name(self.kb.map_label(mp), t.rtl), tag(self._p(t("spot_crowd", n=n)), "Tag"))
+                label = self.kb.map_label(mp)
+                row = self._row(maps_sec, bidi.ltr_name(label, t.rtl), tag(self._p(t("spot_crowd", n=n)), "Tag"))
+                ask = QPushButton(self._p(t("ask_short")), objectName="Link")
+                ask.setAutoDefault(False)
+                ask.clicked.connect(lambda _=False, q=t("calc_ask_map", map=label): self.ask_requested.emit(q, False))
+                row.layout().insertWidget(1, ask, 0, Qt.AlignVCenter)      # between the map's name and its count
             self.calc_box.addWidget(maps_sec)
 
     # build ---------------------------------------------------------------

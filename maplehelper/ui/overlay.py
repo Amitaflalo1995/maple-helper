@@ -547,6 +547,22 @@ class Overlay(QWidget):
         # every edge and corner resizes (a single grip in one bottom corner was the only way before)
         self.setMouseTracking(True)
 
+    # ------------------------------------------------------------------ first-run tour
+
+    def start_tour(self) -> None:
+        """The tour of every button in this window (ui/tour.py); marks itself seen when skipped or done."""
+        from .tour import Tour
+        if getattr(self, "_tour", None) is not None or not self.isVisible():
+            return
+        keys = {"toggle": self.settings["hotkey_toggle"], "voice": self.settings["hotkey_voice"]}
+        self._tour = Tour(self, self.t, keys)
+
+        def done():
+            self._tour = None
+            self.settings["tour_done"] = True
+        self._tour.finished.connect(done)
+        self._tour.start()
+
     # ------------------------------------------------------------------ resizing from any edge
     # The window is frameless: its shadow margin and the panel's own margin (no controls there) are the edges.
     # Pressing there hands the drag to the system (startSystemResize), like a normal window's border.

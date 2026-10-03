@@ -6,6 +6,7 @@ window, which stay on top of the game."""
 from __future__ import annotations
 
 import html
+import os
 import tempfile
 from pathlib import Path
 
@@ -24,7 +25,15 @@ def _badge_file() -> str | None:
     """Draw the "?" badge once (needs a running Qt app) and hand its file to the glossary's links."""
     if QGuiApplication.instance() is None:
         return None
-    path = Path(tempfile.gettempdir()) / "maplehelper-term-badge.png"
+    # one file per running app: a shared name was redrawn by another process (a test run, with no fonts)
+    # and every "?" in the open app turned into an empty orange dot
+    tmp = Path(tempfile.gettempdir())
+    for old in tmp.glob("maplehelper-term-badge*.png"):
+        try:
+            old.unlink()
+        except OSError:       # still shown by another running copy
+            pass
+    path = tmp / f"maplehelper-term-badge-{os.getpid()}.png"
     scale = 3                                   # drawn large, shown at BADGE_PX: crisp on any screen
     size = BADGE_PX * scale
     pm = QPixmap(size, size)

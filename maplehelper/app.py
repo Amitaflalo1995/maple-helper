@@ -206,11 +206,21 @@ class MapleHelperApp:
             self.toast(t("app_tagline"), t("ob_done_hint").replace("F9", self.settings["hotkey_toggle"]))
         else:
             QTimer.singleShot(0, lambda: self.overlay.toggle(self.capture))
+            if not self.settings["tour_done"]:
+                # once the chat is up and laid out: the first look at it walks through every button
+                QTimer.singleShot(700, self.overlay.start_tour)
         QTimer.singleShot(1500, self.check_permissions)
         self.announce_whats_new(fresh_install)
         self.qapp.aboutToQuit.connect(self.shutdown)
         self._listen_for_second_launch()
         return True
+
+    def replay_tour(self, settings_dialog) -> None:
+        """Settings → "Take the app tour": the settings window steps away and the chat shows the tour."""
+        settings_dialog.close()
+        if not self.overlay.isVisible():
+            self.overlay.toggle(self.capture)
+        QTimer.singleShot(300, self.overlay.start_tour)
 
     def _listen_for_second_launch(self):
         """The app runs in the tray (autostart): opening it again from the desktop or Start menu shows the chat."""
@@ -396,6 +406,7 @@ class MapleHelperApp:
             dlg.account_changed.connect(self.on_account_changed)
             dlg.patch_notes_requested.connect(lambda: self.show_patch_notes())
             dlg.whats_new_requested.connect(lambda: self.show_whats_new())
+            dlg.tour_requested.connect(lambda: self.replay_tour(dlg))
             return dlg
         self.open_window("settings", make, on_close=self.overlay.refresh_profile_chip)
 

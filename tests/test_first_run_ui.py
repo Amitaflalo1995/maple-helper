@@ -1,4 +1,4 @@
-"""The character form shows job names in the player's language and keeps the English one (offscreen Qt)."""
+"""First-run UI: job names in the player's language (English kept), the hand cursor, the chat tour (offscreen Qt)."""
 import os
 
 import pytest
@@ -71,3 +71,23 @@ def test_buttons_get_the_hand_cursor(qapp):
         assert b.cursor().shape() == Qt.PointingHandCursor
     finally:
         qapp.removeEventFilter(hand)
+
+
+def test_tour_walks_every_visible_button_and_marks_itself_done(qapp, isolated_store, kb, monkeypatch):
+    from maplehelper.ui import tour as tour_mod
+    from maplehelper.ui.overlay import Overlay
+    s = isolated_store.Settings()
+    ov = Overlay(s, isolated_store.Profiles(), kb, None)
+    ov.resize(520, 760)
+    ov.show()
+    ov.start_tour()
+    tr = ov._tour
+    assert tr is not None and tr.steps[0][1] == "tour_welcome"
+    seen = []
+    for _ in range(len(tr.steps)):
+        assert tr.title.text() and tr.body.text() and "{" not in tr.body.text()
+        seen.append(tr.steps[tr.i][1])
+        tr.next_btn.click()
+    assert seen[-1] == "tour_done" and "tour_tools" in seen
+    assert s["tour_done"] is True and ov._tour is None
+    assert set(k for _, k in tour_mod.STEPS) >= set(seen)
