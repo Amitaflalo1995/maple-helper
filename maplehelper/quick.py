@@ -37,6 +37,8 @@ SELLS = re.compile(r"\b(sells?|sold|buy|price|cost)\b|" + _he("מוכר|מוכר
 ACC_NEEDED = re.compile(r"\b(acc|accuracy)\b.*\b(need|needed|required|to hit)\b|\b(need|needed|required)\b.*\b(acc|accuracy)\b|"
                         r"(צריך|צריכים|נדרש|דרוש|כדי לפגוע|כדי להכות).*(דיוק|acc|אקיורסי)|"
                         r"(דיוק|acc|אקיורסי).*(צריך|צריכים|נדרש|דרוש|לפגוע|להכות)", re.I)
+# a level the question names ("acc needed for lupin at level 25", "כמה דיוק צריך ללופין בלבל 25"): the ACC is for it
+ASKED_LEVEL = re.compile(r"\b(?:level|lvl|lv)\.?\s*(\d{1,3})\b|" + rf"(?<![{HE}])[בל]?(?:לבל|רמה)\s*-?\s*(\d{{1,3}})(?!\d)", re.I)
 STATS = [  # (pattern, props key, label); Hebrew as whole words: "לבלו סנייל" (Blue Snail) is not "לבל"
     (re.compile(r"\bhp\b|" + _he("חיים|אייץ' פי", the=True), re.I), "HP", "HP"),
     (re.compile(r"\bmp\b|" + _he("מאנה|מנה", the=True), re.I), "MP", "MP"),
@@ -94,10 +96,14 @@ def answer(question: str, kb: KnowledgeBase, t, char=None) -> Answer | None:
     cat, name = e.get("category"), e.get("name", key)
 
     if cat == "item" and SELLS.search(q) and not DROPS.search(q):
-        shops = [s for s in market.npc_prices(kb, key).shops if combat.released(kb, s[1])]
+        prices = market.npc_prices(kb, key)
+        shops = [s for s in prices.shops if combat.released(kb, s[1])]
         if not shops:
             return None
-        lines = [f"• {npc} · {where} · {price:,} mesos" for npc, where, price in shops[:3]]
+        # a Town Hall shop's price is for a citizen grade and up: said, or a player without it is told to buy there
+        lines = [f"• {npc} · {where} · {price:,} mesos"
+                 + (" " + t("price_rank", rank=prices.ranks[(npc, where)]) if (npc, where) in prices.ranks else "")
+                 for npc, where, price in shops[:3]]
         return Answer(text=t("quick_sells", name=name) + "\n" + "\n".join(lines), entities=[key])
     if cat == "item" and (WHO.search(q) or DROPS.search(q)):
         groups = kb.drop_groups([key], limit=6)
@@ -130,7 +136,11 @@ def answer(question: str, kb: KnowledgeBase, t, char=None) -> Answer | None:
         m = combat.monster(kb, key)
         if not m:
             return None
-        lv = int(getattr(char, "level", 0) or 0) or m.level      # no character: at the monster's own level
+        asked = ASKED_LEVEL.search(q)
+        # the level the question names, else the character's, else (no character) the monster's own
+        lv = int(next(g for g in asked.groups() if g)) if asked else int(getattr(char, "level", 0) or 0) or m.level
+        if not 1 <= lv <= 250:
+            return None
         if m.avoid <= 0:
             return Answer(text=t("quick_acc_none", name=name), entities=[key])
         return Answer(text=t("quick_acc", name=name, lv=lv, n=combat.acc_needed(lv, m.level, m.avoid),

@@ -314,6 +314,11 @@ class Provider:
         """The models a player can pick: [(value for the CLI, name to show)]; None = the CLI's default."""
         return []
 
+    def default_model(self) -> str | None:
+        """The name of the model the CLI uses when the player picked none, where the CLI says (it may run a CLI:
+        call it off the UI thread). None: unknown until an answer reports its model."""
+        return None
+
     def read_limits(self) -> dict | None:
         """The plan usage read on demand (usage.parse shape); None when the CLI only reports it with answers."""
         return None

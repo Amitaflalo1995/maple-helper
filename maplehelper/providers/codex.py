@@ -236,6 +236,10 @@ class Codex(Provider):
         out += [(m["id"], m.get("displayName") or m["id"]) for m in data if m.get("id") and not m.get("hidden")]
         return out
 
+    def default_model(self) -> str | None:
+        # codex exec never names the model it ran: the default is model/list's isDefault entry
+        return self.models()[0][1] or None
+
     def read_limits(self, timeout: float = 20) -> dict | None:
         """The ChatGPT plan usage (5-hour and weekly windows), from `codex app-server`'s
         account/rateLimits/read. None when not installed, signed out, on an API key, or on any error."""

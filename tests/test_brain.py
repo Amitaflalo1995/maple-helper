@@ -118,3 +118,80 @@ def test_app_context_never_drives_the_heuristics():
 @pytest.mark.parametrize("text", ["what should I do once I'm level 30?", "when im level 70 which job", "כשאני אגיע ללבל 30 מה לעשות?"])
 def test_plans_are_no_stated_level(text):
     assert brain.stated_level(text) is None
+
+
+# ------------------------------------------------------------------ audit: drops, scope, HUD, model name
+
+class _Backend:
+    exe = "fake"
+
+    def __init__(self, text):
+        self.text = text
+
+    def run(self, *_a, **_k):
+        from maplehelper.providers.base import RawResult
+        return RawResult(text=self.text)
+
+    def prewarm(self):
+        pass
+
+
+def _brain(kb_copy, text):
+    from maplehelper.kb import KnowledgeBase
+    b = brain.Brain(KnowledgeBase(kb_copy))
+    b.backend = _Backend(text)
+    return b
+
+
+def test_a_drop_group_of_the_wrong_shape_keeps_the_answer(kb_copy):
+    b = _brain(kb_copy, 'Red Snail drops it.\n@@META@@\n{"drop_groups": [{"monster": "monster/130101", "items": 5}]}')
+    ans = b.ask("who drops Red Potion?", None, None, None)
+    assert ans.error is None and ans.text == "Red Snail drops it."
+
+
+@pytest.mark.parametrize("q,drops", [
+    ("למה אני נופל מהחבל ליד Mano", False),
+    ("מה נופל מ-Mano?", True),
+    ("מה בדרך כלל נופל מ-Mano?", True),
+    ("מה שנופל מ-Mano", True),
+    ("what does Mano drop", True),
+])
+def test_falling_is_no_drops_question(q, drops):
+    assert bool(brain.DROP_WORDS.search(q)) is drops
+
+
+def test_which_monsters_to_grind_is_no_hat_drops_question(kb):
+    q = "I'm level 58 now. What are the best quests for me to do for EXP, and which monsters should I grind?"
+    assert brain.item_keys_for_question(q, kb) == [] and not brain.is_reverse(q, kb)
+    assert brain.is_reverse("which monsters drop potions?", kb)
+    assert brain.is_reverse("which monsters give Red Potion?", kb)
+
+
+def test_drops_are_presented_as_msea_reference():
+    s = brain.SYSTEM_PROMPT.format(length="")
+    assert "MSEA reference" in s and "not confirmed for Classic" in s
+    assert "grepping names.tsv" in s and "grepping index.json" not in s
+
+
+def test_reply_rules_allow_questions_about_the_helper_and_follow_the_scope():
+    assert "Maple Helper itself" in brain.REPLY_RULES and "game scope" in brain.REPLY_RULES
+
+
+@pytest.mark.parametrize("light", [False, True])
+def test_the_hud_outranks_the_profile_with_a_screenshot(kb, light):
+    char = Character(id="c1", name="Kalimero", base_class="Thief", job="Assassin", level=31)
+    shot = brain.build_prompt("what's my level?", char, None, kb, has_screenshot=True, kb_context=not light)
+    assert brain.HUD_RULE in shot and shot.index(brain.HUD_RULE) > shot.index("<player_profile>")
+    assert brain.HUD_RULE not in brain.build_prompt("what's my level?", char, None, kb, has_screenshot=False,
+                                                    kb_context=not light)
+
+
+def test_the_cli_default_model_is_named(kb_copy, monkeypatch):
+    """Codex never reports its model: "You run on ChatGPT." left the AI saying its model is unknown."""
+    b = _brain(kb_copy, "")
+    monkeypatch.setattr(b._provider, "default_model", lambda: "GPT-6.1-Sol")
+    assert b._running_on().endswith("on Claude.")
+    b.prewarm()
+    assert b._running_on() == "\nYou run on Claude, model GPT-6.1-Sol."
+    b.last_model = "claude-sonnet-5"
+    assert b._running_on() == "\nYou run on Claude, model Sonnet 5."
