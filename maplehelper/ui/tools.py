@@ -1112,6 +1112,8 @@ class ToolsDialog(GlassDialog):
         if i.station_towns:
             col.addWidget(self._label(t("craft_station", station=i.station, towns=" · ".join(i.station_towns)),
                                       "RowLabel"))
+        name = crafting.NAMES[prof]
+        col.addWidget(self._ask_link(lambda: self.ask_requested.emit(t("craft_ask", prof=name), False)))
         return card
 
     def _recipe_card(self, r: crafting.Recipe, best: bool) -> QFrame:

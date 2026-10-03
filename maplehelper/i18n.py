@@ -523,6 +523,8 @@ STRINGS = {
     "calc_hits": {"he": "{n} מכות רגילות הורגות אותה תמיד", "en": "{n} basic hits always kill it"},
     "calc_hits_one": {"he": "מכה רגילה אחת הורגת אותה תמיד", "en": "One basic hit always kills it"},
     "calc_hits_avg": {"he": "עם קצת מזל פחות: בממוצע {n} מכות.", "en": "With some luck fewer: {n} on average."},
+    "craft_ask": {"he": "ספר לי על מקצוע ה-{prof}: איך מתחילים, איך מעלים רמה הכי מהר, ומה הכי משתלם לייצר בשבילי.",
+                  "en": "Tell me about {prof}: how to start, the fastest way to level it, and what's most worth making for me."},
     "calc_ask_map": {"he": "ספר לי על המפה {map}: איך מגיעים אליה, אילו מפלצות יש בה, והאם היא טובה לאימון בשבילי.",
                      "en": "Tell me about the map {map}: how to get there, which monsters live there, and whether it's a good place for me to train."},
     "calc_hits_basic": {"he": "לפי מכה רגילה מחלון ה-Stat, בלי סקילים. עם סקילים הורגים מהר יותר.", "en": "For a basic attack from the Stat window, without skills. Skills kill faster."},
