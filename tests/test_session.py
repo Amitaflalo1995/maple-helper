@@ -40,12 +40,24 @@ def test_deleted_character_is_left_out():
     assert s.summary(SimpleNamespace(characters=[])) is None
 
 
-def test_the_summary_opens_to_the_questions_of_that_session():
+def test_the_summary_brings_back_that_sessions_chat_per_character():
     kiwi = char()
     s = session.SessionStats(now=100)
     s.question(kiwi, now=200)
     summary = s.summary(SimpleNamespace(characters=[kiwi]))
     log = [{"role": "user", "text": "before", "t": 50}, {"role": "user", "text": "where is Mano?", "t": 150},
            {"role": "assistant", "text": "In ...", "t": 160}, {"role": "user", "text": "after", "t": 999}]
-    got = session.questions(summary, lambda cid: SimpleNamespace(recent=lambda n: log))
-    assert got == {"Kiwi": ["where is Mano?"]}
+    got = session.records(summary, kiwi.id, lambda cid: SimpleNamespace(recent=lambda n: log))
+    assert [m["text"] for m in got] == ["where is Mano?", "In ..."]
+
+
+def test_blocks_keep_each_character_apart():
+    from maplehelper.i18n import I18n
+    summary = {"chars": [
+        {"id": "a", "name": "Kalimero", "start_level": 30, "end_level": 31, "start_job": "Assassin",
+         "end_job": "Assassin", "questions": 0, "quests_done": [], "quests_started": []},
+        {"id": "b", "name": "Kalimeroz", "start_level": 1, "end_level": 1, "start_job": "Beginner",
+         "end_job": "Beginner", "questions": 2, "quests_done": [], "quests_started": []}]}
+    b = session.blocks(summary, I18n("en"))
+    assert [x["name"] for x in b] == ["Kalimero", "Kalimeroz"]
+    assert b[0]["lines"] == ["Level 30 → 31"] and b[1]["lines"] == ["Level 1", "2 questions"]

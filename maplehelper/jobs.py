@@ -16,6 +16,23 @@ JOBS = {
     "Bowman": [("Beginner", 1), ("Bowman", 10), ("Hunter", 30), ("Crossbowman", 30), ("Ranger", 70), ("Sniper", 70)],
     "Thief": [("Beginner", 1), ("Thief", 10), ("Assassin", 30), ("Bandit", 30), ("Hermit", 70), ("Chief Bandit", 70)],
 }
+# Hebrew names, as Israeli players say them (the 1st jobs as the class cards translate them, the rest spelled
+# out: "פייטר", "קלריק"). Shown beside the English name the game uses; the profile always keeps the English one.
+JOB_HE = {"Beginner": "ביגינר", "Warrior": "לוחם", "Magician": "קוסם", "Bowman": "קשת", "Thief": "גנב",
+          "Fighter": "פייטר", "Page": "פייג'", "Spearman": "ספירמן", "Crusader": "קרוסיידר",
+          "White Knight": "וייט נייט", "Dragon Knight": "דרגון נייט", "F/P Wizard": "ויזארד אש ורעל",
+          "I/L Wizard": "ויזארד קרח וברק", "Cleric": "קלריק", "F/P Mage": "מייג' אש ורעל",
+          "I/L Mage": "מייג' קרח וברק", "Priest": "פריסט", "Hunter": "האנטר", "Crossbowman": "קרוסבואומן",
+          "Ranger": "ריינג'ר", "Sniper": "סנייפר", "Assassin": "אסאסין", "Bandit": "בנדיט", "Hermit": "הרמיט",
+          "Chief Bandit": "צ'יף בנדיט"}
+
+
+def job_label(job: str, lang: str) -> str:
+    """How a job is shown: in Hebrew, its Hebrew name with the game's English one ("פייטר · Fighter")."""
+    he = JOB_HE.get(job) if lang == "he" else None
+    return f"{he} · {job}" if he else job
+
+
 # 3rd job isn't in the launch build (pages/guide/attacks-you-can-use-mid-jump.md: "Third job isn't available at
 # launch"; pages/guide/assassin-class-guide.md: "Third job and El Nath are not in the launch build"): the plan's
 # "next job" stops at the 2nd. Set to 3 once it opens.

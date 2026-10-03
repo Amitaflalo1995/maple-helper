@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import webbrowser
 
-from PySide6.QtCore import QEvent, QObject, QPoint, Qt, QTimer, QUrl, Signal
-from PySide6.QtGui import QCursor, QGuiApplication, QPixmap, QTextCursor
+from PySide6.QtCore import QEvent, QObject, QPoint, QPointF, Qt, QTimer, QUrl, Signal
+from PySide6.QtGui import QCursor, QGuiApplication, QPixmap
 from PySide6.QtWidgets import (QApplication, QButtonGroup, QFrame, QHBoxLayout, QLabel, QLineEdit, QPushButton, QScrollArea,
                                QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
 
@@ -60,27 +60,17 @@ class ImageZoom(QObject):
             self.hide()
 
     def image_at(self, pos: QPoint) -> str | None:
-        """The file of the picture under this viewport point, if any."""
+        """The file of the picture under this viewport point, if any.
+
+        Asked of the document's own layout (imageAt), which knows each picture's box: working it out from text
+        cursors went wrong in Hebrew table cells, where two icons side by side zoomed the wrong one or none."""
         b = self.browser
-        c = b.cursorForPosition(pos)
-        for back in (0, 1):                 # the picture is the character just before or after the cursor
-            at = QTextCursor(c)
-            if back:
-                at.movePosition(QTextCursor.Left)
-            nxt = QTextCursor(at)
-            nxt.movePosition(QTextCursor.Right, QTextCursor.KeepAnchor)
-            fmt = nxt.charFormat()
-            if not fmt.isImageFormat():
-                continue
-            img = fmt.toImageFormat()
-            left = b.cursorRect(at)
-            right = b.cursorRect(nxt)
-            x0, x1 = sorted((left.x(), right.x()))
-            h = img.height() or left.height()
-            if x0 - 2 <= pos.x() <= max(x1, x0 + img.width()) + 2 and right.bottom() - h - 4 <= pos.y() <= right.bottom() + 4:
-                url = QUrl(img.name())
-                return url.toLocalFile() if url.isLocalFile() else img.name()
-        return None
+        at = QPointF(pos.x() + b.horizontalScrollBar().value(), pos.y() + b.verticalScrollBar().value())
+        name = b.document().documentLayout().imageAt(at)
+        if not name:
+            return None
+        url = QUrl(name)
+        return url.toLocalFile() if url.isLocalFile() else name
 
     def eventFilter(self, obj, e):
         if e.type() == QEvent.MouseMove:

@@ -226,6 +226,9 @@ class Select(QPushButton):
     def currentText(self):
         return self._items[self._index] if 0 <= self._index < len(self._items) else ""
 
+    def currentIndex(self) -> int:
+        return self._index
+
     def setCurrentIndex(self, i: int):
         if 0 <= i < len(self._items) and i != self._index:
             self._index = i

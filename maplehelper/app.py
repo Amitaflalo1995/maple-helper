@@ -6,10 +6,10 @@ import sys
 import threading
 import webbrowser
 
-from PySide6.QtCore import QLockFile, QObject, Qt, QTimer, Signal
+from PySide6.QtCore import QEvent, QLockFile, QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QAction, QIcon
 from PySide6.QtNetwork import QLocalServer, QLocalSocket
-from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
+from PySide6.QtWidgets import QAbstractButton, QApplication, QComboBox, QMenu, QSystemTrayIcon
 
 from . import APP_NAME, __version__, osapi, providers, report, telemetry, updater, whatsnew, wishlist
 from .brain import Brain
@@ -66,6 +66,19 @@ def load_kb() -> KnowledgeBase:
         return KnowledgeBase(BUNDLED_KB)
 
 
+class _HandCursor(QObject):
+    """Every button (and drop-down) shows the pointing hand, like a link, unless it set its own cursor.
+
+    Set once for the whole app, when Qt first styles each widget, so a new button can't miss it.
+    """
+
+    def eventFilter(self, obj, event):
+        if (event.type() == QEvent.Polish and isinstance(obj, (QAbstractButton, QComboBox))
+                and not obj.testAttribute(Qt.WA_SetCursor)):
+            obj.setCursor(Qt.PointingHandCursor)
+        return False
+
+
 class _MainThread(QObject):
     """Background checks emit here; Qt delivers the call on the GUI thread (queued connection).
 
@@ -97,7 +110,10 @@ class MapleHelperApp:
         theme.set_mode(self.settings["appearance"])
         self.qapp.setLayoutDirection(Qt.RightToLeft if I18n(self.settings["language"]).rtl else Qt.LeftToRight)
         css = theme.stylesheet(self.font_family, self.settings["font_size"])
-        self.qapp.setStyleSheet(css)
+        # restyling the app re-polishes every open widget (the chat with its answers too): only when it changed,
+        # not each time a window opens, which held "Play tools" back for a second
+        if css != self.qapp.styleSheet():
+            self.qapp.setStyleSheet(css)
         return css
 
     @staticmethod
@@ -190,11 +206,21 @@ class MapleHelperApp:
             self.toast(t("app_tagline"), t("ob_done_hint").replace("F9", self.settings["hotkey_toggle"]))
         else:
             QTimer.singleShot(0, lambda: self.overlay.toggle(self.capture))
+            if not self.settings["tour_done"]:
+                # once the chat is up and laid out: the first look at it walks through every button
+                QTimer.singleShot(700, self.overlay.start_tour)
         QTimer.singleShot(1500, self.check_permissions)
         self.announce_whats_new(fresh_install)
         self.qapp.aboutToQuit.connect(self.shutdown)
         self._listen_for_second_launch()
         return True
+
+    def replay_tour(self, settings_dialog) -> None:
+        """Settings → "Take the app tour": the settings window steps away and the chat shows the tour."""
+        settings_dialog.close()
+        if not self.overlay.isVisible():
+            self.overlay.toggle(self.capture)
+        QTimer.singleShot(300, self.overlay.start_tour)
 
     def _listen_for_second_launch(self):
         """The app runs in the tray (autostart): opening it again from the desktop or Start menu shows the chat."""
@@ -380,6 +406,7 @@ class MapleHelperApp:
             dlg.account_changed.connect(self.on_account_changed)
             dlg.patch_notes_requested.connect(lambda: self.show_patch_notes())
             dlg.whats_new_requested.connect(lambda: self.show_whats_new())
+            dlg.tour_requested.connect(lambda: self.replay_tour(dlg))
             return dlg
         self.open_window("settings", make, on_close=self.overlay.refresh_profile_chip)
 
@@ -871,6 +898,8 @@ def main():
     report.log.info("Maple Helper %s starting on %s (%s)", __version__, sys.platform, " ".join(sys.argv[1:]) or "no args")
     qapp = QApplication(sys.argv)
     qapp.setStyle("Fusion")   # the native Windows 11 style ignores rounded corners on buttons
+    hand = _HandCursor(qapp)
+    qapp.installEventFilter(hand)
     qapp.setApplicationName(APP_NAME)
     qapp.setApplicationDisplayName(APP_NAME)
     lock = QLockFile(str(DATA_DIR / "app.lock"))

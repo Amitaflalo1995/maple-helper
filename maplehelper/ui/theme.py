@@ -331,6 +331,13 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QMenu::item:disabled {{ color: {c['muted']}; font-weight: 600; font-size: {s - 2}px; }}
     QMenu::indicator {{ width: 14px; height: 14px; left: 8px; }}
     QMenu::separator {{ height: 1px; background: {c['hair']}; margin: 4px 8px; }}
+    QMenu#SplitMenu {{ background: transparent; border: none; }}
+    QMenu#SplitMenu::item {{ margin: 0 5px; }}
+    #MenuRow {{ border-radius: 7px; background: transparent; }}
+    #MenuRow:hover {{ background: {ORANGE}; }}
+    #MenuRow:hover #MenuRowText {{ color: #FFFFFF; }}
+    #MenuRow:disabled #MenuRowText {{ color: {c['muted']}; }}
+    QMenu#SplitMenu::separator {{ margin: 4px 13px; }}
     QToolTip {{ background: {"#2C2C2E" if MODE == "dark" else "#FFFFFF"}; color: {c['text']};
                 border: 1px solid {c['stroke']}; border-radius: 6px; padding: 4px 8px; }}
     """

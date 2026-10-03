@@ -15,7 +15,7 @@ from ..providers.base import login_failed, login_waiting, stop_login
 from .controls import AdaptiveRow, FlowLayout, Section, Segmented, Select, Stepper, Switch, rtl_buttons
 from .glass import GlassDialog, no_default_buttons
 from ..i18n import I18n
-from ..jobs import JOBS        # the job tree: base class -> [(job, min level)], checked against the KB
+from ..jobs import JOBS, job_label        # the job tree: base class -> [(job, min level)], checked against the KB
 from ..kb import KnowledgeBase
 from ..store import ASSETS, History, Profiles, Settings
 from . import theme
@@ -257,7 +257,7 @@ class CharacterForm(QWidget):
 
     def _refresh_jobs(self):
         cls = self.base_class()
-        previous = self.job.currentText()
+        previous = self.current_job()
         hint = ""
         jobs = ["Beginner"] if cls == "Beginner" else []
         if cls and cls != "Beginner":
@@ -268,7 +268,7 @@ class CharacterForm(QWidget):
             upcoming = [(j, lv) for j, lv in JOBS[cls] if lv > self.level.value()]
             if upcoming:
                 lv = upcoming[0][1]
-                names = [job for job, need in upcoming if need == lv]
+                names = [job_label(job, self.t.lang) for job, need in upcoming if need == lv]
                 hint = (self.t("job_hint_next", job=names[0], level=lv) if len(names) == 1 else
                         self.t("job_hint_next_many", jobs=", ".join(names), level=lv))
         else:
@@ -277,10 +277,13 @@ class CharacterForm(QWidget):
         single = len(jobs) <= 1
         self.job.setVisible(bool(cls) and not single)
         self.job_fixed.setVisible(bool(cls) and single)
-        self.job_fixed.setText(jobs[0] if jobs else "")
+        # shown in the player's language (Hebrew beside the game's English name); the values stay English
+        self._fixed_job = jobs[0] if jobs else ""
+        self.job_fixed.setText(job_label(self._fixed_job, self.t.lang) if self._fixed_job else "")
+        self._job_values = [] if single else jobs
         self.job.clear()
         if not single:
-            self.job.addItems(jobs)
+            self.job.addItems([job_label(j, self.t.lang) for j in jobs])
             if self._job_picked and previous in jobs:
                 self.job.setCurrentIndex(jobs.index(previous))
             else:
@@ -298,11 +301,17 @@ class CharacterForm(QWidget):
                 b.setChecked(True)
         self.level.setValue(c.level)
         self._refresh_jobs()
-        self.job.setCurrentText(c.job)
+        if c.job in self._job_values:
+            self.job.setCurrentIndex(self._job_values.index(c.job))
         self._job_picked = True        # the saved job is the player's choice
 
     def current_job(self) -> str:
-        return self.job_fixed.text() if self.job_fixed.isVisibleTo(self) else self.job.currentText()
+        """The job's English name (what the profile keeps), whatever language the list shows."""
+        if self.job_fixed.isVisibleTo(self):
+            return getattr(self, "_fixed_job", "")
+        i = self.job.currentIndex()
+        values = getattr(self, "_job_values", [])
+        return values[i] if 0 <= i < len(values) else ""
 
     def valid(self) -> bool:
         return bool(self.name.text().strip()) and bool(self.base_class()) and bool(self.current_job())
@@ -861,6 +870,7 @@ class SettingsDialog(GlassDialog):
     account_changed = Signal()
     patch_notes_requested = Signal()
     whats_new_requested = Signal()
+    tour_requested = Signal()
 
     def __init__(self, settings: Settings, profiles: Profiles, kb: KnowledgeBase, stylesheet_fn):
         self.t = t = I18n(settings["language"] or "he")
@@ -1022,6 +1032,9 @@ class SettingsDialog(GlassDialog):
         news.setCursor(Qt.PointingHandCursor)
         news.clicked.connect(self.whats_new_requested.emit)
         sec.add_widget(news)
+        tour = QPushButton(t("tour_replay"), objectName="Link")
+        tour.clicked.connect(self.tour_requested.emit)
+        sec.add_widget(tour)
         report_btn = QPushButton(t("report_problem"), objectName="Link")
         report_btn.setCursor(Qt.PointingHandCursor)
         report_btn.clicked.connect(self.report_requested.emit)

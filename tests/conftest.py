@@ -11,6 +11,8 @@ import tempfile
 from pathlib import Path
 
 os.environ["APPDATA"] = tempfile.mkdtemp(prefix="maplehelper-tests-")
+# every window a test makes stays off the screen (one test file without this flashed a real Settings window)
+os.environ["QT_QPA_PLATFORM"] = "offscreen"
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tools"))
