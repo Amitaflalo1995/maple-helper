@@ -37,3 +37,46 @@ def test_logging_writes_to_the_log_file(tmp_path, monkeypatch):
             if h not in before:
                 root.removeHandler(h)
                 h.close()
+
+
+def test_report_leaves_out_the_stats_id_and_every_unlisted_setting(tmp_path, monkeypatch):
+    from maplehelper.store import DEFAULT_SETTINGS
+    monkeypatch.setattr(report, "LOG_DIR", tmp_path / "logs")
+    settings = {**DEFAULT_SETTINGS, "install_id": "26583820c5e5", "language": "en", "some_new_secret": "x"}
+    path = report.build_report(tmp_path / "out", {}, settings)
+    with zipfile.ZipFile(path) as z:
+        saved = json.loads(z.read("settings.json"))
+    assert "install_id" not in saved and "some_new_secret" not in saved and saved["language"] == "en"
+    # every setting is either reported or private on purpose: a new one makes this test ask which
+    private = {"window", "bubble_pos", "pins", "last_session", "wishlist", "microphone", "tips_dismissed",
+               "usage_warned", "install_id"}
+    assert set(DEFAULT_SETTINGS) - set(report.REPORT_SETTINGS) == private
+
+
+def test_report_names_the_folder_it_really_went_to(tmp_path, monkeypatch):
+    import sys
+    monkeypatch.setattr(report, "LOG_DIR", tmp_path / "logs")
+    monkeypatch.setattr(report, "DATA_DIR", tmp_path / "data")
+    desktop = tmp_path / "desk"
+    monkeypatch.setattr(sys, "platform", "win32")
+    path, key = report.save_report(desktop, {}, {})
+    assert path.parent == desktop and key == "report_saved"
+
+    real = report.build_report
+
+    def blocked(out_dir, info, settings):
+        if out_dir == desktop:
+            raise PermissionError("Controlled Folder Access")
+        return real(out_dir, info, settings)
+    monkeypatch.setattr(report, "build_report", blocked)
+    path, key = report.save_report(desktop, {}, {})
+    assert path.parent == tmp_path / "data" and key == "report_saved_data"
+
+
+def test_mac_report_never_touches_the_protected_desktop(tmp_path, monkeypatch):
+    import sys
+    monkeypatch.setattr(report, "LOG_DIR", tmp_path / "logs")
+    monkeypatch.setattr(report, "DATA_DIR", tmp_path / "data")
+    monkeypatch.setattr(sys, "platform", "darwin")
+    path, key = report.save_report(tmp_path / "desk", {}, {})
+    assert path.parent == tmp_path / "data" and key == "report_saved_data" and not (tmp_path / "desk").exists()

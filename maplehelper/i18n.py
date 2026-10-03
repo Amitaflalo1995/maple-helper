@@ -293,6 +293,8 @@ STRINGS = {
     "report_problem": {"he": "דיווח על תקלה", "en": "Report a problem"},
     "report_saved": {"he": "דוח התקלה נשמר בשולחן העבודה",
                      "en": "The problem report was saved to your desktop"},
+    "report_saved_data": {"he": "דוח התקלה נשמר בתיקיית הנתונים של האפליקציה (היא נפתחת עכשיו)",
+                          "en": "The problem report was saved in the app's data folder (it's opening now)"},
     "report_saved_body": {"he": "שלחו את הקובץ {name} למי שעוזר לכם עם האפליקציה. אין בו שיחות, צילומי מסך או פרטים אישיים.",
                           "en": "Send {name} to whoever helps you with the app. It has no chats, screenshots or personal details."},
     "update_kb": {"he": "עדכון המאגר", "en": "Update database"},

@@ -505,14 +505,11 @@ class MapleHelperApp:
         import subprocess
         t = I18n(self.settings["language"])
         info = report.system_info(__version__, updater.local_version(), ai_status)
-        try:
-            path = report.build_report(desktop, info, dict(self.settings.data))
-        except OSError:      # Desktop blocked (Controlled Folder Access) or a OneDrive folder offline
-            path = report.build_report(DATA_DIR, info, dict(self.settings.data))
+        path, saved = report.save_report(desktop, info, dict(self.settings.data))
         report.log.info("problem report written: %s", path.name)
         # show the file, selected, in Explorer / Finder
         subprocess.Popen(["explorer", "/select,", str(path)] if sys.platform == "win32" else ["open", "-R", str(path)])
-        self.toast(t("report_saved"), t("report_saved_body", name=path.name), timeout_ms=12000)
+        self.toast(t(saved), t("report_saved_body", name=path.name), timeout_ms=12000)
 
     def on_history_cleared(self):
         self.overlay.clear_feed()
