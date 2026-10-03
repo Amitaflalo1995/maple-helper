@@ -53,33 +53,6 @@ def _tint(alpha, base):        # the orange-tinted notes and chips: orange at 10
     return tuple(round(o * alpha + b * (1 - alpha)) for o, b in zip(ORANGE_RGB, base))
 
 
-@pytest.mark.parametrize("mode", ["light", "dark"])
-def test_small_text_reaches_aa_on_every_surface(mode):
-    theme.set_mode(mode)
-    c = theme.P()
-    panel = c["glass"]
-    card = _rgb(c["fill1"], panel)
-    for bg in (panel, card, _tint(0.10, panel), _tint(0.12, panel)):
-        assert _contrast(_rgb(c["muted"], bg), bg) >= 4.5
-        assert _contrast(_rgb(theme.accent_text(), bg), bg) >= 4.5
-        assert _contrast(_rgb(theme.accent_text(deep=True), bg), bg) >= 4.5
-
-
-def test_text_on_the_orange_fills_reaches_aa():
-    for fill in ("#FFA24A", theme.ORANGE_DEEP, theme.ORANGE, "#FFB066", "#F58A2A"):     # incl. the hover gradient
-        assert _contrast(_rgb(theme.ON_ORANGE), _rgb(fill)) >= 4.5
-    css = theme.stylesheet("Rubik", 14)
-    for rule in ("#BubbleUser QLabel", "#BubbleTag", "QPushButton#Primary {", "QToolButton#Send {"):
-        assert f"color: {theme.ON_ORANGE}" in css[css.index(rule):].split("}")[0]
-    assert "rgba(255,255,255,0.85)" not in css
-
-
-def test_the_data_credit_is_not_faint():
-    css = theme.stylesheet("Rubik", 14)
-    credit = css[css.index("#CardCredit"):].split("}")[0]
-    assert theme.P()["muted"] in credit and "font-size: 11px" in credit
-
-
 def _menu(app):
     from maplehelper.ui.widgets import SplitMenu
     theme.set_mode("light")

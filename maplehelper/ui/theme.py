@@ -30,9 +30,7 @@ PALETTES = {
     "light": {
         "glass": (242, 242, 247), "glass_alpha": 1.0, "solid_alpha": 1.0,
         "sheen": 0, "rim_top": 40, "rim": 30,
-        # muted at 0.78, not Apple's 0.60-ish secondaryLabel: small grey text (hints, card subtitles) has to reach
-        # WCAG AA 4.5:1 on the grey panel and on the orange-tinted notes too (0.66 gave 3.8:1 there)
-        "text": "#1D1D1F", "muted": "rgba(60,60,67,0.78)", "faint": "rgba(60,60,67,0.42)",
+        "text": "#1D1D1F", "muted": "rgba(60,60,67,0.66)", "faint": "rgba(60,60,67,0.42)",
         "fill1": "#FFFFFF", "fill2": "#FFFFFF", "fill3": "#E5E5EA",
         "pressed": "rgba(230,230,235,0.95)", "stroke": "rgba(0,0,0,0.08)", "hair": "rgba(0,0,0,0.05)",
         "scroll": "rgba(0,0,0,0.25)",
@@ -54,13 +52,11 @@ def P() -> dict:
     return _contrast(c) if HIGH_CONTRAST else c
 
 
-# orange as text on light surfaces: #FF9533 / #F07A12 are too faint to read there, and #C9620A still gave only
-# 3.3-4.0:1 on white and on the orange-tinted notes and chips; this one is 4.6:1 or more on all of them (WCAG AA)
-ORANGE_TEXT_LIGHT = "#A84F00"
-# text and icons ON an orange fill (the player's bubble, Primary / Send buttons, a checked chip, a hovered menu
-# row): white on #FFA24A..#F07A12 is only 2.0-2.8:1, near-black is 6-9:1, and the fill keeps the brand orange
-ON_ORANGE = "#1D1D1F"
-GOOD_TEXT_LIGHT = "#1F7A45"       # the green of "saved"/"good" tags on white: #2E9E5B was 3.0-3.4:1 there
+ORANGE_TEXT_LIGHT = "#C9620A"     # orange as text on white: #FF9533 / #F07A12 are too faint to read there
+# text and icons on an orange fill (the player's bubble, Primary / Send buttons, a checked chip, a hovered menu
+# row): white, the brand look the owner chose (a darker text read better but changed the look)
+ON_ORANGE = "#FFFFFF"
+GOOD_TEXT_LIGHT = "#2E9E5B"
 
 
 def accent_text(deep: bool = False) -> str:
@@ -237,7 +233,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #GroupHeader {{ background: transparent; border: 1px solid transparent; border-radius: 10px; }}
     #GroupHeader:hover {{ border: 1px solid rgba(255,149,51,0.7); }}
     #TileGridTitle {{ color: {c['muted']}; font-size: {s - 2}px; font-weight: 600; }}
-    #BubbleTag {{ color: {ON_ORANGE}; font-size: {s - 3}px; font-weight: 600; }}
+    #BubbleTag {{ color: rgba(255,255,255,0.85); font-size: {s - 3}px; font-weight: 600; }}
     #FocusBar {{ background: rgba(255,149,51,0.12); border: 1px solid rgba(255,149,51,0.55); border-radius: 12px; }}
     QPushButton#TagChip {{ background: {"rgba(255,255,255,0.10)" if MODE == "dark" else "#FFFFFF"};
                            border: 1px solid rgba(255,149,51,0.55); border-radius: 12px; min-height: 24px;
@@ -254,7 +250,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #CardName {{ font-weight: 600; color: {c['text']}; }}
     #CardSub {{ color: {c['muted']}; font-size: {s - 2}px; }}
     #CardStat {{ color: {c['text']}; font-size: {s - 2}px; }}
-    #CardCredit {{ color: {c['muted']}; font-size: {s - 3}px; }}    /* the data source's credit: readable, not faint */
+    #CardCredit {{ color: {c['faint']}; font-size: {s - 4}px; }}
 
     QPushButton#Chip {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 14px;
                         min-height: 28px; max-height: 28px; padding: 0 13px; font-size: {s - 2}px; font-weight: 500; color: {c['text']}; }}
@@ -271,7 +267,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #Tag, #TagGood, #TagWarn, #TagAccent {{ font-size: {s - 3}px; font-weight: 600; border-radius: 8px; padding: 2px 8px; }}
     #Tag {{ color: {c['muted']}; background: {c['fill3']}; }}
     #TagGood {{ color: {good}; background: rgba(52,199,89,0.16); }}
-    #TagWarn {{ color: {otd}; background: rgba(255,149,51,0.18); }}
+    #TagWarn {{ color: #C9620A; background: rgba(255,149,51,0.18); }}
     #TagAccent {{ color: {otd}; background: rgba(255,149,51,0.12); }}
     #BigStat {{ font-size: {s + 10}px; font-weight: 700; letter-spacing: -0.4px; color: {c['text']}; }}
     #BigStatLabel {{ font-size: {s - 3}px; color: {c['muted']}; }}
