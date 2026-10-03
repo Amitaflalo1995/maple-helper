@@ -7,7 +7,7 @@ from PySide6.QtCore import (QEasingCurve, QObject, QParallelAnimationGroup, QPoi
                             Qt, QThread, QTimer, Signal)
 from PySide6.QtGui import QAction, QGuiApplication, QIcon, QPainterPath, QPixmap
 from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QMenu, QPushButton,
-                               QScrollArea, QSizePolicy, QToolButton, QVBoxLayout, QWidget)
+                               QScrollArea, QSizePolicy, QToolButton, QVBoxLayout, QWidget, QWidgetAction)
 
 from .. import __version__, bidi, osapi, quick, telemetry
 from ..brain import Answer, Brain
@@ -19,7 +19,7 @@ from . import theme
 from .glass import paint_glass
 from .minibubble import MiniBubble
 from .widgets import (SELECTION, WISHLIST, Bubble, BubbleRow, DropGroupCard, EntityCard, NoticeCard, ProfileCard,
-                      SessionCard, SystemLine, TileGrid, character_image)
+                      CharacterChoice, SessionCard, SystemLine, TileGrid)
 
 
 
@@ -895,11 +895,13 @@ class Overlay(QWidget):
         # the card already shows the current character: the menu lists only the others to switch to
         others = [c for c in self.profiles.characters if c.id != active]
         for c in others:
-            img = character_image(c, self.profiles.avatar_path(c), self.kb)
-            a = QAction(QIcon(str(img)) if img else QIcon(), bidi.plain(f"{c.name}  ·  Lv. {c.level} {c.job_label}",
-                                                                           self.t.rtl), menu)
-            a.setEnabled(not busy)
-            a.triggered.connect(lambda _=False, cid=c.id: self.switch_character(cid))
+            # a card the size of the one above it, not a small menu line
+            choice = CharacterChoice(c, self.profiles.avatar_path(c), self.kb, self.t.rtl)
+            choice.setFixedWidth(self.profile_card.width())
+            choice.setEnabled(not busy)
+            a = QWidgetAction(menu)
+            a.setDefaultWidget(choice)
+            choice.clicked.connect(lambda cid=c.id: (menu.close(), self.switch_character(cid)))
             menu.addAction(a)
         if others:
             menu.addSeparator()

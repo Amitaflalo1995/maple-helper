@@ -589,6 +589,36 @@ class ProfileCard(QFrame):
             self.clicked.emit()
 
 
+class CharacterChoice(QFrame):
+    """Another character in the switch menu, as big as the character card above it (a small menu line with a
+    tiny icon looked like a different, lesser thing)."""
+
+    clicked = Signal()
+
+    def __init__(self, c, avatar_path, kb, rtl: bool):
+        super().__init__(objectName="ProfileCard")
+        self.setCursor(Qt.PointingHandCursor)
+        row = QHBoxLayout(self)
+        row.setContentsMargins(10, 8, 12, 8)     # the card's own margins and portrait size
+        row.setSpacing(10)
+        self.avatar = Avatar(46)
+        self.avatar.set_image(character_image(c, avatar_path, kb))
+        row.addWidget(self.avatar)
+        col = QVBoxLayout()
+        col.setSpacing(1)
+        align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter
+        name = QLabel(bidi.plain(c.name, rtl), objectName="ProfileName")
+        meta = QLabel(f"Lv. {c.level} · {c.job_label}", objectName="ProfileMeta")
+        for lb in (name, meta):
+            lb.setAlignment(align)
+            col.addWidget(lb)
+        row.addLayout(col, 1)
+
+    def mouseReleaseEvent(self, e):
+        if e.button() == Qt.LeftButton and self.isEnabled() and self.rect().contains(e.position().toPoint()):
+            self.clicked.emit()
+
+
 def character_image(c, avatar_path, kb):
     """The character's own portrait, else the picture of its job (or class)."""
     if avatar_path:
