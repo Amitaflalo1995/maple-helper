@@ -482,10 +482,18 @@ class EntityCard(Selectable, QFrame):
         col.addWidget(sub_label)
 
         stats = self._stats(e, t)
-        if stats:
-            stat_label = _label(bidi.plain(stats, he), "CardStat")
-            stat_label.setAlignment(side)
-            col.addWidget(stat_label)
+        main, bonuses = stat_parts(e)
+        if main or bonuses:
+            # one small pill per stat ("Lv. 30", "DEF 75", "STR DEX INT LUK +1"): a single long line mixed Hebrew
+            # labels with English stats and wrapped into a scrambled order in a Hebrew chat
+            from .controls import FlowLayout
+            pills = QWidget()
+            flow = FlowLayout(pills, spacing=4)
+            for text in main + bonuses:
+                pill = QLabel(text, objectName="StatPill")
+                pill.setLayoutDirection(Qt.LeftToRight)
+                flow.addWidget(pill)
+            col.addWidget(pills)
         # the credit line is the card's source line: where the stat line's numbers come from (the page's build,
         # "COT2", else MeowDB's own) and, for an entity a KB update changed this week, "Updated", at its start
         from .. import sources
@@ -907,6 +915,35 @@ class CharacterRow(QFrame):
         self.chosen.emit(self.cid)
 
 
+# the game's own short stat names, for pills and tiles
+_SHORT = {"Level": "Lv.", "Level Requirement": "Lv.", "Weapon Attack": "ATT", "Magic Attack": "M.ATT",
+          "Weapon Defense": "DEF", "Magic Defense": "M.DEF", "Accuracy": "ACC", "Avoidability": "AVOID",
+          "Upgrade Slots": "Slots"}
+
+
+def stat_parts(e: dict, tile: bool = False) -> tuple[list[str], list[str]]:
+    """(main stats, bonuses) as short pieces: ["Lv. 30", "DEF 75", "Slots 10"], ["STR DEX INT LUK +1", "HP MP +10"].
+    Bonuses of the same value are one piece (the Sauna Robe's four +1s), so a card or a half-width tile stays short.
+    A tile leaves out the upgrade slots (the card has them). A monster: level, HP, EXP."""
+    props = e.get("props") or {}
+    if e.get("category") != "item":
+        main = [f"{_SHORT.get(k, k)}\u00a0{props[k]:,}" if isinstance(props.get(k), int) else f"{_SHORT.get(k, k)}\u00a0{props[k]}"
+                for k in EntityCard.MONSTER_STATS if props.get(k) not in (None, "", 0, "0")]
+        return main, []
+    main = [f"{_SHORT.get(k, k)}\u00a0{props[k]}" for k in EntityCard.ITEM_STATS
+            if props.get(k) not in (None, "", 0, "0") and not (tile and k == "Upgrade Slots")]
+    groups: dict[str, list[str]] = {}
+    for k in EntityCard.ITEM_BONUSES:
+        v = props.get(k)
+        if v in (None, "", 0, "0"):
+            continue
+        value = str(v) if str(v)[:1] in "+-" else f"+{v}"
+        groups.setdefault(value, []).append(_SHORT.get(k, k))
+    # no-break spaces inside a group: it wraps as a whole ("HP MP +10" never splits after "HP")
+    bonuses = ["\u00a0".join(names) + f"\u00a0{value}" for value, names in groups.items()]
+    return main, bonuses
+
+
 class EntityTile(Selectable, QFrame):
     """Compact item tile for lists (drops, rewards): picture + official name. Tap to ask about it."""
 
@@ -940,7 +977,9 @@ class EntityTile(Selectable, QFrame):
         col.addWidget(self.name)
         # the item's level requirement and bonuses under its name: tiles of look-alike items (the five Thief Hoods)
         # differ only there
-        stats = EntityTile.short_stats(e) if e.get("category") == "item" else ""
+        main, bonuses = stat_parts(e, tile=True) if e.get("category") == "item" else ([], [])
+        # one left-to-right run per line (a Hebrew chat mirrored "+1 DEX"): the main stats, then the bonuses
+        stats = "\n".join("\u202a" + " · ".join(part) + "\u202c" for part in (main, bonuses) if part)
         self.stats = QLabel(stats, objectName="TileStats")
         self.stats.setWordWrap(True)
         self.stats.setMinimumWidth(48)
@@ -948,26 +987,6 @@ class EntityTile(Selectable, QFrame):
         col.addWidget(self.stats)
         row.addLayout(col, 1)
         self._align_name()
-
-    # a tile is half the chat wide: the game's own short stat names ("Lv. 15 · DEF 18 · DEX +1 · HP +5")
-    SHORT = {"Level Requirement": "Lv.", "Weapon Attack": "ATT", "Magic Attack": "M.ATT", "Weapon Defense": "DEF",
-             "Magic Defense": "M.DEF", "Accuracy": "ACC", "Avoidability": "AVOID", "Upgrade Slots": "Slots"}
-
-    @staticmethod
-    def short_stats(e: dict) -> str:
-        props = e.get("props") or {}
-        bits = []
-        for k in EntityCard.ITEM_STATS + EntityCard.ITEM_BONUSES:
-            v = props.get(k)
-            if v in (None, "", 0, "0"):
-                continue
-            if k in EntityCard.ITEM_BONUSES:
-                sign = "" if str(v)[:1] in "+-" else "+"
-                bits.append(f"{EntityTile.SHORT.get(k, k)}\u00a0{sign}{v}")
-            else:
-                bits.append(f"{EntityTile.SHORT.get(k, k)}\u00a0{v}")
-        # one left-to-right run (a Hebrew chat mirrored "+1 DEX"); no-break spaces keep a value with its name
-        return "\u202a" + " · ".join(bits) + "\u202c" if bits else ""
 
     def _align_name(self):
         """The (English) name sits right beside its picture: on the right in a Hebrew chat. Qt resolves "leading"
