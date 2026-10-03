@@ -1,5 +1,14 @@
 [
  {
+  "version": "0.8.2",
+  "he": [
+   "\"שליחת נתוני שימוש אנונימיים\" בהגדרות (פרטיות ומערכת) עובד עכשיו. הוא כבוי כברירת מחדל, ואם מפעילים אותו נשלח רק באילו אפשרויות משתמשים. אף פעם לא שאלות, תשובות, צילומי מסך או הקלטות."
+  ],
+  "en": [
+   "\"Share anonymous usage stats\" in Settings (Privacy & system) now works. It's off unless you turn it on, and it only sends which features get used. Never your questions, answers, screenshots or voice."
+  ]
+ },
+ {
   "version": "0.8.1",
   "he": [
    "סיור היכרות קצר בפעם הראשונה: כל כפתור בחלון והסבר עליו. אפשר להפעיל אותו שוב מההגדרות.",
