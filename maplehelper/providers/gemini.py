@@ -37,7 +37,8 @@ log = logging.getLogger(__name__)
 STALL_TIMEOUT_S = 150    # no output for this long = stuck (tool steps and streaming print all along)
 CHECK_TIMEOUT_S = 30
 
-INSTALL_CMD = "irm https://antigravity.google/cli/install.ps1 | iex"
+# the window closes by itself when it worked; a failure (the script throws) leaves it open with the reason
+INSTALL_CMD = "try { irm https://antigravity.google/cli/install.ps1 | iex; exit } catch { Write-Host $_ }"
 INSTALL_CMD_MAC = "curl -fsSL https://antigravity.google/cli/install.sh | bash"
 POSIX_DIRS = ["~/.local/bin", "/opt/homebrew/bin", "/usr/local/bin"]
 
@@ -50,6 +51,7 @@ QUICK_AGENT = "maplehelper-quick"
 TOOLS = ["view_file", "grep_search", "list_dir", "find_by_name"]
 RETRY_NOTE = ("\n\n(Your last attempt stopped at a blocked file. Read only inside the knowledge-base folder "
               "and the screenshot, then answer.)")
+SIGNED_IN_AS = re.compile(r"authenticated successfully as (\S+@\S+)")
 LOGIN_URL = re.compile(r"https://accounts\.google\.com/\S+")
 
 
@@ -254,6 +256,20 @@ def parse_usage(data) -> dict | None:
     return out or None
 
 
+def signed_in_email() -> str | None:
+    """agy has no command that names the account, but its log says "authenticated successfully as <email>"
+    each time it starts signed in (the log is in Maple Helper's own Antigravity home)."""
+    try:
+        with open(home() / ".gemini" / "antigravity-cli" / "cli.log", "rb") as f:
+            f.seek(0, 2)
+            f.seek(max(0, f.tell() - 200_000))
+            text = f.read().decode("utf-8", errors="replace")
+    except OSError:
+        return None
+    found = SIGNED_IN_AS.findall(text)
+    return found[-1].rstrip(".,;") if found else None
+
+
 _models_cache: list[tuple[str, str]] = []
 
 
@@ -320,7 +336,7 @@ class Gemini(Provider):
         found = parse_models(r.stdout.decode("utf-8", errors="replace"))
         if found:
             _models_cache = found
-            return {"status": "ok", "email": None}
+            return {"status": "ok", "email": signed_in_email()}
         return {"status": "logged_out", "email": None}
 
     def logout(self) -> bool:

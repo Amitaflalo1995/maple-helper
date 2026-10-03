@@ -331,3 +331,17 @@ def test_model_names():
 def test_install_uses_googles_official_script():
     assert "antigravity.google/cli/install.ps1" in gemini.INSTALL_CMD
     assert "antigravity.google/cli/install.sh" in gemini.INSTALL_CMD_MAC
+
+
+def test_the_account_email_comes_from_agys_log(home):
+    assert gemini.signed_in_email() is None
+    log = home / ".gemini" / "antigravity-cli" / "cli.log"
+    log.parent.mkdir(parents=True)
+    log.write_text("I1003 server_oauth.go:203] OAuth: authenticated successfully as old@gmail.com\n"
+                   "I1003 other line\n"
+                   "I1003 server_oauth.go:203] OAuth: authenticated successfully as player@gmail.com\n")
+    assert gemini.signed_in_email() == "player@gmail.com"
+
+
+def test_install_window_closes_by_itself_only_when_it_worked():
+    assert gemini.INSTALL_CMD.startswith("try {") and "; exit }" in gemini.INSTALL_CMD

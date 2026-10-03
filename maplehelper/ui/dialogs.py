@@ -43,6 +43,21 @@ def _field(text: str) -> QLabel:
     return QLabel(text, objectName="FieldLabel")
 
 
+def _while_open(slot):
+    """A slot fed from a background check: the answer can arrive after the dialog closed and Qt deleted its
+    widgets ("Internal C++ object already deleted"), which then crashed the app. Too late is simply dropped."""
+    import functools
+
+    @functools.wraps(slot)
+    def run(self, *args):
+        try:
+            return slot(self, *args)
+        except RuntimeError as e:
+            if "already deleted" not in str(e):
+                raise
+    return run
+
+
 def _code_row(t: I18n, on_send) -> tuple[QWidget, QLineEdit]:
     """Gemini's sign-in ends with a code the browser shows: a field to paste it, shown while that sign-in waits."""
     edit = QLineEdit()
@@ -934,6 +949,7 @@ class SettingsDialog(GlassDialog):
         from .. import usage
         self.usage_meter.setText(bidi.plain("\n".join(usage.lines(self.settings, self.t, provider=provider)), self.t.rtl))
 
+    @_while_open
     def _on_limits(self, r: dict):
         """Fresh usage read in the background (ChatGPT); ignored if the player switched AI meanwhile."""
         from .. import usage
@@ -954,6 +970,7 @@ class SettingsDialog(GlassDialog):
         else:
             self._show_models(ai.name, ai.models())
 
+    @_while_open
     def _show_models(self, name: str, models: list):
         from ..providers.base import model_name
         ai = self._ai()
@@ -1022,6 +1039,7 @@ class SettingsDialog(GlassDialog):
     def _set_account_text(self, text: str):
         self.account_label.setText(bidi.plain(text, self.t.rtl))
 
+    @_while_open
     def _on_account(self, acc: dict):
         t, p = self.t, acc.get("provider")
         if p != self._ai().name:
@@ -1053,6 +1071,10 @@ class SettingsDialog(GlassDialog):
         if self._login_timer.isActive() and st == "ok":
             self._login_timer.stop()
             self._set_on_top(True)
+        if st == "ok" and was not in (None, "ok"):
+            # just installed or signed in: the model list and plan usage read before that came back empty
+            self._fill_models()
+            self._label_usage()
         if was is not None and was != st and not api_key:
             self.account_changed.emit()
 
