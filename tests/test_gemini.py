@@ -164,6 +164,8 @@ class TestDiscovery:
         script.write_text("")
         monkeypatch.setenv("APPDATA", str(tmp_path))
         monkeypatch.setattr(gemini.shutil, "which", lambda _n: None)
+        assert gemini.find_windows() is None              # still unpacking: npm writes the shim last
+        (tmp_path / "npm" / "gemini.cmd").write_text("")
         assert gemini.find_windows() == str(script)
         monkeypatch.setattr(gemini, "find_node", lambda: "C:/nodejs/node.exe")
         assert gemini.command(str(script), platform="win32") == ["C:/nodejs/node.exe", str(script)]
@@ -175,6 +177,7 @@ class TestDiscovery:
         script = tmp_path / "custom" / gemini.PACKAGE
         script.parent.mkdir(parents=True)
         script.write_text("")
+        (tmp_path / "custom" / "gemini.cmd").write_text("")
         monkeypatch.setenv("APPDATA", str(tmp_path / "nothing"))
         monkeypatch.setattr(gemini.shutil, "which", lambda _n: str(tmp_path / "custom" / "gemini.cmd"))
         assert gemini.find_windows() == str(script)
@@ -280,3 +283,7 @@ class TestBackend:
 def test_model_names():
     assert base.model_name("gemini-3.8-flash") == "Gemini 3.8 Flash"
     assert base.model_name("gemini-3-pro-preview") == "Gemini 3 Pro Preview"
+
+
+def test_install_window_closes_by_itself_only_when_it_worked():
+    assert gemini.INSTALL_CMD.endswith("if ($LASTEXITCODE -eq 0) { exit }")

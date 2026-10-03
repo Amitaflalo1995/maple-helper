@@ -32,7 +32,9 @@ INSTALL_CMD = (
     "if ($v -lt 20) { winget install -e --id OpenJS.NodeJS.LTS --accept-source-agreements "
     "--accept-package-agreements; $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + "
     "[Environment]::GetEnvironmentVariable('Path', 'User') }; "
-    "npm.cmd install -g @google/gemini-cli")
+    "npm.cmd install -g @google/gemini-cli; "
+    # done: the window closes by itself (it stays open, with npm's error, only when the install failed)
+    "if ($LASTEXITCODE -eq 0) { exit }")
 INSTALL_CMD_MAC = ("if command -v brew >/dev/null 2>&1; then brew install gemini-cli; "
                    "else npm install -g @google/gemini-cli; fi")
 POSIX_DIRS = ["~/.local/bin", "/opt/homebrew/bin", "/usr/local/bin", "~/.npm-global/bin"]
@@ -104,14 +106,15 @@ def find_node() -> str | None:
 
 def find_windows() -> str | None:
     """gemini.js of an npm install. Never the gemini.cmd shim: stopping an answer would only stop cmd.exe,
-    and the node.exe under it would go on."""
+    and the node.exe under it would go on. The shim still has to be there: npm writes it last, so an
+    install that's still unpacking doesn't count as installed yet."""
     dirs = [Path(os.environ.get("APPDATA", "")) / "npm"]
     shim = shutil.which("gemini")
     if shim:
         dirs.insert(0, Path(shim).parent)      # an npm install with its own prefix
     for d in dirs:
         script = d / PACKAGE
-        if script.exists():
+        if script.exists() and (d / "gemini.cmd").exists():
             return str(script)
     return None
 
