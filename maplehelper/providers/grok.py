@@ -246,6 +246,19 @@ def parse_models(output: str) -> list[tuple[str, str]]:
     return out
 
 
+def signed_in_email() -> str | None:
+    """The account's email from the sign-in grok saved in our home (auth.json: one entry per account, each
+    with "email"); `grok models` only says "You are logged in with grok.com"."""
+    try:
+        data = json.loads((grok_home() / "auth.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    for entry in (data.values() if isinstance(data, dict) else []):
+        if isinstance(entry, dict) and isinstance(entry.get("email"), str) and "@" in entry["email"]:
+            return entry["email"]
+    return None
+
+
 def lightest(models: list[tuple[str, str]]) -> str | None:
     return next((m for m, _ in models if "fast" in m or "mini" in m), None)
 
@@ -337,7 +350,9 @@ class Grok(Provider):
         if got is None:
             return {"status": "not_installed", "email": None}
         found, email = got
-        return {"status": "ok", "email": email} if found else {"status": "logged_out", "email": None}
+        if not found:
+            return {"status": "logged_out", "email": None}
+        return {"status": "ok", "email": email or signed_in_email()}
 
     def logout(self) -> bool:
         r = _run(["logout"])

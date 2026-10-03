@@ -230,3 +230,17 @@ class TestBackend:
 def test_install_uses_xais_official_script():
     assert grok.INSTALL_CMD == "irm https://x.ai/cli/install.ps1 | iex"
     assert grok.INSTALL_CMD_MAC == "curl -fsSL https://x.ai/cli/install.sh | bash"
+
+
+def test_the_account_email_comes_from_grok_s_sign_in_file(home, monkeypatch):
+    """`grok models` only says "You are logged in with grok.com": the email is in auth.json."""
+    assert grok.signed_in_email() is None
+    (home / ".grok").mkdir(parents=True)
+    (home / ".grok" / "auth.json").write_text(json.dumps({"https://auth.x.ai::abc": {
+        "key": "secret", "auth_mode": "oauth", "email": "player@x.com", "refresh_token": "r"}}), encoding="utf-8")
+    assert grok.signed_in_email() == "player@x.com"
+    monkeypatch.setattr(grok, "_models_cache", [])
+    monkeypatch.setattr(grok, "find_grok", lambda: "grok.exe")
+    monkeypatch.setattr(grok, "_run", lambda args, timeout=30: Done(
+        "You are logged in with grok.com.\n\nAvailable models:\n  * grok-4.7 (default)\n"))
+    assert providers.get("grok").account() == {"status": "ok", "email": "player@x.com"}
