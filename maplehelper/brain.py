@@ -11,7 +11,8 @@ import logging
 import re
 from dataclasses import dataclass, field
 
-from . import providers
+from . import availability, providers, sources
+from . import recent as kb_changes      # ("recent" is the conversation in build_prompt)
 from .kb import KnowledgeBase
 from .store import Character, History
 
@@ -20,7 +21,8 @@ log = logging.getLogger(__name__)
 META = "@@META@@"
 _FOCUS_TAG = re.compile(r"^\s*\[about [^\]]*\]\s*")      # "[about Mano] " the chat puts before a tagged question
 REVERSE_WORDS = re.compile(r"(מאיז[הו]|מאילו|איזה|אילו)\s+מפלצ|מי\s+מפיל|which\s+monsters?|who\s+drops|what\s+drops", re.I)
-DROP_WORDS = re.compile(r"דרופ|מפיל|נופל|שנופל|drops?\b|loot", re.I)
+# "נופל" alone is also falling ("למה אני נופל מהחבל ליד Mano" showed Mano's whole drop list): only as "what drops"
+DROP_WORDS = re.compile(r"דרופ|מפיל|(?<![א-ת])(?:מה|איזה|אילו)\s+(?:\S+\s+){0,2}נופל|שנופל|drops?\b|loot", re.I)
 SUMMARY_PROMPT = ("Summarize this MapleStory Classic helper conversation in 2-3 sentences for future context: "
                   "what the player worked on, decisions, open goals. Same language as the conversation.")
 
@@ -30,17 +32,30 @@ What you receive with each question:
 - A screenshot of the game window, taken the moment the player opened the chat (when available).
 - The player's character profile, recent conversation, and knowledge-base context the app pre-fetched.
 
-Knowledge base: the current directory is the full NiaMeowDB (meowdb.com) database for MapleStory Classic: index.json (every entity: key, name, category, props) and pages/<category>/<id>.md (full details: stats, drops, maps, quests). Categories: monster, item, map, quest, npc, skill, class, guide, shop, crafting, formula.
+Knowledge base: the current directory is the full NiaMeowDB (meowdb.com) database for MapleStory Classic: index.json (every entity: key, name, category, props), names.tsv (key, category, name, type: one entity per line, the file to grep for a name or a key) and pages/<category>/<id>.md (full details: stats, drops, maps, quests). Categories: monster, item, map, quest, npc, skill, class, guide, shop, crafting, formula.
 - Use the pre-fetched context first. Use Grep/Glob/Read only for what is missing. Never write text before a tool call.
 - Never invent facts, numbers, drops or locations. If the data does not say, say so briefly.
 
-Which monsters drop something: drops.tsv (monster, level, key, item, item type, item key) lists every monster→item
-drop. Grep it for the item name or the item type (e.g. "Throwing Star", "Scroll", "Potion"). Answer grouped per monster
-(monster → the items it drops), lowest level first, and return the grouping as META "drop_groups".
+Which monsters drop something: drops.tsv (monster, level, key, item, item type, item key, source) lists the monster→item
+drops of the monsters in the game; source is the list the drop is on ("MSEA" or "community", see Drops below). Grep it for the item name or the item type (e.g. "Throwing Star", "Scroll", "Potion"). Answer
+grouped per monster (monster → the items it drops), lowest level first, and return the grouping as META "drop_groups".
+An item page's "Dropped By" list names every monster that ever dropped it: one drops.tsv doesn't list for that item is
+not in the game, so never name it as a source.
 
-Drops: a monster page lists its drops ("Drops (MS Classic)" confirmed by players, and "MSEA reference drops").
-When asked what a monster drops, list the drops by name (grouped: Etc / Use / Equipment is fine), say which list they
-come from, and return every dropped item's key in entities.
+Drops: a monster page lists its drops in two lists under "Drops (MS Classic)": "Community sourced" (drops players
+saw in Classic themselves: community) and "MSEA reference drops" (what the monster dropped in old MapleSEA, which the KB
+calls historical reference, not confirmed for Classic). drops.tsv's source column and the pre-fetched drop lists say
+which list each drop is on. When asked what a monster drops, list the drops by name (grouped: Etc / Use / Equipment is
+fine), say which list they come from, and return every dropped item's key in entities.
+
+Sources: the app tags every number it shows with where it comes from, and so do you. A pre-fetched page starts with a
+"[sources: ...]" line: stats and NPC shop prices carry the build the KB labels them with ("COT2" = the second closed
+test, not confirmed for launch; a later KB may say "Launch"), drops their list, Free Market prices are community
+reports, the game's scope is official (Nexon), and anything unlabeled is MeowDB's own. Whenever you state drops,
+prices or stats, name their source in a word or two right after them: "(MSEA)", "(community)", "(COT2)", "(official)",
+"(MeowDB)" in English; in a Hebrew answer "(MSEA)", "(קהילה)", "(COT2)", "(רשמי)", "(MeowDB)". When players reported
+nothing, say so in the answer's language: "אין נתונים מהקהילה" / "no community data". "Recent KB change" lines are things a knowledge-base update changed this week: when they bear on the answer,
+point the change out briefly (old → new).
 
 Advice must fit the player's level and job. If the profile lacks level or job, ask for it before recommending.
 
@@ -60,7 +75,7 @@ After the answer, output a line containing only @@META@@ followed by one JSON ob
 {{"entities": ["monster/5", ...], "profile_update": {{}}, "avatar_box": [0.42, 0.55, 0.05, 0.1]}}
 - entities: knowledge-base keys (category/id from index.json) of what you mention, most relevant first, max 12.
   When the answer is a LIST of items (drops, quest rewards, shop stock, what to buy/equip), include EVERY item's key
-  so the app can show each one with its picture. Find keys by grepping index.json for the item names.
+  so the app can show each one with its picture. Find keys by grepping names.tsv for the item names.
 - avatar_box (only with a screenshot, only if clearly visible): [x, y, w, h] as fractions (0-1) of the screenshot, a snug box
   around the PLAYER'S OWN character sprite, head to feet, excluding the name tag. Find it by its name tag: the same name
   as the HUD's character name (bottom left, next to the level). NPCs stand around too: their name tags are on a yellow
@@ -83,6 +98,9 @@ class Answer:
     profile_update: dict = field(default_factory=dict)
     avatar_box: list | None = None
     drop_groups: list = field(default_factory=list)
+    # where an instant answer's data comes from (sources.py: "COT2", "MSEA", "community", "MeowDB", ...): chips
+    # beside its badge
+    sources: list = field(default_factory=list)
     error: str | None = None
     cost_usd: float | None = None
     limits: dict | None = None          # Claude plan usage (usage.parse of Claude Code's rate_limit_event)
@@ -90,17 +108,63 @@ class Answer:
 
 
 REPLY_RULES = """<reply_rules>
-- Only MapleStory Classic: a question about anything else gets one short line saying you only help with the game.
+- Only MapleStory Classic and Maple Helper itself (its features, settings, which AI and model answers): anything else
+  gets one short line saying you only help with the game.
+- Only what the game scope in your instructions says is in the game: never send the player to a place it says is not
+  out, or suggest its monsters, NPCs, quests or a job advancement it says is not out; if asked, say it isn't out yet.
 - At most {length} short lines. No filler, no follow-up offers.
+- Never write knowledge-base keys ("item/294", "monster/5") in the answer text: they go only in the META block.
+- In a Hebrew answer only game names and stat names stay in English; every other word is Hebrew ("קווסט", not
+  "quest"; "קהילה", not "community"; never "This", "drop" or "and" in a Hebrew sentence). Write stat bonuses one
+  per item ("STR +1, DEX +1"), never slashed together ("STR/DEX +1").
 - NEVER translate game names: items, monsters, maps, NPCs, skills and quests stay in English exactly as in the data
   ("Blue Snail Shell", not "קונכיית חילזון כחול"), even inside a Hebrew sentence.
 - Locations, drops and stats only from the context or the knowledge base (Grep pages/monster/*.md for "Map Locations" if needed).
+- Name the source of every drop list, price and stat you state, briefly: "(MSEA)", "(COT2)", "(MeowDB)", and in the
+  answer's language "(community)" / "(קהילה)", "(official)" / "(רשמי)"; none reported: "אין נתונים מהקהילה".
 - Then the line @@META@@ and the JSON object. Always include it, even when empty. If the player states a new level/job, put it in profile_update.
 - profile_update describes ONLY the character in <player_profile>. If the player says they are on another character,
   or the screenshot's HUD shows another name, put that character's facts in profile_update WITH its "name" (the app
   offers to add it or switch to it), and never word it as a change of the profile's character.
 </reply_rules>"""
 LENGTH_LINES = {"short": 6, "detailed": 15}
+# the HUD is what the player is now: Claude answered "Lv. 31" from the saved profile with "LV. 13 ... KalimeroZ" on
+# screen (and saved the map to the profile's character), while Codex and Gemini read the HUD
+HUD_RULE = ("The screenshot's HUD (bottom left: level, job, character name) is the truth for this moment: read it before "
+            "<player_profile>. When its name (even one letter apart), level or job differs from the profile, answer from "
+            "the HUD and put the HUD's facts, with its exact \"name\", in profile_update.")
+NOT_OUT = "NOT in the game: the knowledge base doesn't confirm it is out. Never recommend it; if asked, say it isn't out yet."
+
+
+def _page(kb: KnowledgeBase, key: str, limit: int) -> str:
+    """A pre-fetched page, marked when the KB says it isn't in the game: the pages of Orbis, El Nath and the rest
+    read like any town's ("El Nath is a town in El Nath, Ossyria"), and the AI sent players there."""
+    body = kb.page_body(key, limit=limit)
+    if body and key.startswith("item/"):
+        body = _mark_droppers(kb, body)
+    if body:
+        # what each kind of data on the page is (its build, drop list, ...), so the answer can name it
+        note = sources.page_note(kb, key)
+        body = f"{note}\n{body}" if note else body
+    if body and not availability.of(kb).entity_open(key):
+        return f"[{key}] ({NOT_OUT})\n{body}"
+    return f"[{key}]\n{body}" if body else ""
+
+
+def _mark_droppers(kb: KnowledgeBase, body: str) -> str:
+    """An item page's "Dropped By" list ("Mano / Lv 20 / Trixter / Lv 25 / Jr. Sentinel / Lv 26") with the
+    monsters the KB doesn't confirm in the game marked: the AI named Jr. Sentinel (Orbis) as a source, live."""
+    i = body.find("Dropped By")
+    if i < 0:
+        return body
+    open_ = availability.of(kb)
+    lines = body[i:].split("\n")
+    for n in range(len(lines) - 1):
+        if re.fullmatch(r"Lv \d+", lines[n + 1].strip()):
+            keys = kb.monster_keys(lines[n].strip())
+            if keys and not any(open_.monster_key_open(k) for k in keys):
+                lines[n] += " (not in the game)"
+    return body[:i] + "\n".join(lines)
 
 
 def reply_language(question: str, ui_lang: str = "he") -> str:
@@ -138,6 +202,7 @@ def build_prompt(question: str, character: Character | None, history: History | 
     ctx = []
     if not kb_context:
         question_parts = [f"<screenshot>{'attached above' if has_screenshot else 'not available'}</screenshot>",
+                          *([HUD_RULE] if has_screenshot else []),
                           f"<question>\n{question}\n</question>", language,
                           REPLY_RULES.format(length=LENGTH_LINES["short"])]
         return "\n\n".join(parts + question_parts)
@@ -151,7 +216,7 @@ def build_prompt(question: str, character: Character | None, history: History | 
         sel = [f"The player tagged these cards; the question is about them unless they say otherwise: {names}"]
         per = 4000 if len(tagged) == 1 else 2000
         for k in tagged:
-            sel.append(f"[{k}]\n{kb.page_body(k, limit=per)}")
+            sel.append(_page(kb, k, per))
             if k.startswith("monster/"):
                 sel.append(kb.drops_digest(k))
         ctx.append("<selected>\n" + "\n".join(x for x in sel if x) + "\n</selected>")
@@ -159,21 +224,29 @@ def build_prompt(question: str, character: Character | None, history: History | 
         items = item_keys_for_question(question, kb)
         groups = kb.drop_groups(items, limit=10)
         if groups:
-            lines = ["Which monsters drop it (from drops.tsv; lowest level first; names and keys as in game):"]
+            lines = ["Which monsters drop it (from drops.tsv; each drop with its list: MSEA = the reference list, not "
+                     "confirmed for Classic, community = players saw it in Classic; lowest level first; names and keys "
+                     "as in game):"]
             for g in groups:
                 m = kb.get(g["monster"])
                 lv = (m.get("props") or {}).get("Level", "?")
                 lines.append(f"- {m['name']} (Lv {lv}) [{g['monster']}]: "
-                             + ", ".join(f"{kb.get(i)['name']} [{i}]" for i in g["items"]))
+                             + ", ".join(f"{kb.get(i)['name']} [{i}] ({g['sources'].get(i, sources.MSEA)})"
+                                         for i in g["items"]))
             ctx.append("\n".join(lines))
     for key in kb.find_mentions(question, max_results=4):
-        body = kb.page_body(key, limit=2500)
+        body = _page(kb, key, 2500)
         if body:
-            ctx.append(f"[{key}]\n{body}")
+            ctx.append(body)
         if key.startswith("monster/"):
             drops = kb.drops_digest(key)
             if drops:
                 ctx.append(drops)
+    # what a KB update changed this week in the entities above (and the level digest's monsters)
+    shown = re.findall(r"\[((?:monster|item|npc|map|quest|skill)/[^\]\s]+)\]", "\n".join(ctx))
+    changes = kb_changes.ai_lines(kb, shown)
+    if changes:
+        ctx.append("\n".join(changes))
     if ctx:
         parts.append("<kb_context>\n" + "\n\n".join(ctx) + "\n</kb_context>")
     if has_screenshot is True:
@@ -184,6 +257,8 @@ def build_prompt(question: str, character: Character | None, history: History | 
         shot = (f"attached above, followed by {has_screenshot} full-resolution parts of the same screenshot "
                 "(left to right) for reading small icons and text")
     parts.append(f"<screenshot>{shot}</screenshot>")
+    if has_screenshot:
+        parts.append(HUD_RULE)
     if extra:
         parts.append(extra)          # app-made context (inventory read, a picked-up conversation): prompt only
     parts.append(f"<question>\n{question}\n</question>")
@@ -195,24 +270,28 @@ def build_prompt(question: str, character: Character | None, history: History | 
 
 
 # Hebrew (and English) words for item families → the item "type" text in the database
+# (English as whole words: "hats?" matched the end of "What", "that" and "chat", and every "which monsters should I
+# grind?" got 369 hats as its drop context and its card panel)
 ITEM_FAMILIES = [
-    (r"כוכב|שוריקן|throwing\s*star|stars?\b", "Throwing Star"),
-    (r"חיצ(ים|י)|arrows?\b", "Arrow"),
-    (r"שיקוי|שיקויים|פוטיון|potions?\b", "Potion"),
-    (r"מגיל(ה|ות)|סקרול|scrolls?\b", "Scroll"),
-    (r"כפפ(ה|ות)|gloves?\b", "Glove"),
-    (r"נעל(יים)?|boots?|shoes?\b", "Shoes"),
-    (r"כוב(ע|עים)|hats?\b|helm", "Hat"),
-    (r"מגן|shields?\b", "Shield"),
-    (r"עגיל|earrings?\b", "Earring"),
-    (r"גלימ(ה|ות)|capes?\b", "Cape"),
+    (r"כוכב|שוריקן|\bthrowing\s*stars?\b|\bstars?\b", "Throwing Star"),
+    (r"חיצ(ים|י)|\barrows?\b", "Arrow"),
+    (r"שיקוי|שיקויים|פוטיון|\bpotions?\b", "Potion"),
+    (r"מגיל(ה|ות)|סקרול|\bscrolls?\b", "Scroll"),
+    (r"כפפ(ה|ות)|\bgloves?\b", "Glove"),
+    (r"נעל(יים)?|\bboots?\b|\bshoes?\b", "Shoes"),
+    (r"כוב(ע|עים)|\bhats?\b|\bhelm", "Hat"),
+    (r"מגן|\bshields?\b", "Shield"),
+    (r"עגיל|\bearrings?\b", "Earring"),
+    (r"גלימ(ה|ות)|\bcapes?\b", "Cape"),
 ]
 
 
 def is_reverse(question: str, kb: KnowledgeBase) -> bool:
-    """A "which monsters drop X" question. "what drops does Mano have?" names a monster: it asks Mano's drops."""
+    """A "which monsters drop X" question. "what drops does Mano have?" names a monster: it asks Mano's drops.
+    "Which monsters" alone is no drops question ("which monsters should I grind?"): it needs a drop word or an item."""
     return bool(REVERSE_WORDS.search(question)) and \
-        not any(k.startswith("monster/") for k in kb.find_mentions(question, max_results=4))
+        not any(k.startswith("monster/") for k in kb.find_mentions(question, max_results=4)) and \
+        (bool(DROP_WORDS.search(question)) or bool(item_keys_for_question(question, kb)))
 
 
 def item_keys_for_question(question: str, kb: KnowledgeBase) -> list[str]:
@@ -227,10 +306,21 @@ def item_keys_for_question(question: str, kb: KnowledgeBase) -> list[str]:
     return []
 
 
+# a knowledge-base key the AI wrote into its prose ("Subi Throwing Stars (item/294)"): keys are for the META block
+# and the app's cards, a player reads them as noise. Removed with the brackets around it, or alone.
+_KEY_IN_TEXT = re.compile(r"\s*[\(\[]\s*(?:monster|item|map|npc|quest|skill|class|guide|shop|crafting|formula)/[\w\-]+"
+                          r"\s*[\)\]]|\s*(?<![\w/])(?:monster|item|map|npc|quest|skill|class|guide|shop|crafting|formula)/"
+                          r"[\w\-]+(?![\w/])")
+
+
+def drop_keys(text: str) -> str:
+    return _KEY_IN_TEXT.sub("", text)
+
+
 def split_meta(raw: str) -> tuple[str, dict]:
     """Separate the visible answer from the trailing @@META@@ JSON."""
     if META not in raw:
-        return raw.strip(), {}
+        return drop_keys(raw).strip(), {}
     text, _, meta = raw.partition(META)
     m = re.search(r"\{.*\}", meta, re.S)
     try:
@@ -244,7 +334,7 @@ def split_meta(raw: str) -> tuple[str, dict]:
         if key in data and not isinstance(data[key], typ):
             del data[key]
     _numbers(data.get("profile_update"))
-    return text.strip(), data
+    return drop_keys(text).strip(), data
 
 
 def _whole(v) -> int | None:
@@ -288,7 +378,7 @@ def streamed_text(raw: str) -> str:
         if text.endswith(META[:n]):
             text = text[:-n]
             break
-    return text.strip()
+    return drop_keys(text).strip()
 
 
 class Brain:
@@ -299,6 +389,7 @@ class Brain:
         self.length = length
         self.api_key = api_key
         self.last_model = None         # the model that answered last (the CLI's default has no name until then)
+        self._defaults: dict[str, str | None] = {}     # provider -> its CLI's default model name, read once
         self.ui_lang = "he"            # the app's language (set by the app): for questions with no words to tell by
         self._provider = providers.get(provider)
         self.backend = self._provider.backend(self)
@@ -317,20 +408,39 @@ class Brain:
             self.last_model = None          # the other AI's model
 
     def system_prompt(self) -> str:
-        return SYSTEM_PROMPT.format(length=LENGTH.get(self.length, LENGTH["short"])) + self._running_on()
+        return (SYSTEM_PROMPT.format(length=LENGTH.get(self.length, LENGTH["short"])) + self._scope()
+                + self._running_on())
+
+    def _scope(self) -> str:
+        """What is in the game, as the KB states it (availability.py): the AI never sends a player to Orbis or
+        El Nath, or offers a 3rd job, while the KB says they aren't out."""
+        from . import availability
+        try:
+            return ("\n\nGame scope (from the knowledge base, the only source of truth; its release guide is built "
+                    "from Nexon's official statements, so this is official): "
+                    + availability.of(self.kb).scope_note())
+        except Exception:      # noqa: BLE001 - a KB without the release guide: no scope line rather than no answer
+            return ""
 
     def _running_on(self) -> str:
         """Which AI answers: our instructions replace each CLI's own, and Grok then didn't know its model
         ("which model am I talking to?" got "not shown in this session")."""
         from .providers.base import model_name
         model = self.last_model or self.model
-        name = model_name(model) if model else ""
+        # Codex never reports the model it ran: with no model picked, its CLI's default (read by prewarm), so
+        # "which model are you?" isn't "ChatGPT, the exact model isn't exposed to me"
+        name = model_name(model) if model else (self._defaults.get(self._provider.name) or "")
         return f"\nYou run on {self._provider.label}" + (f", model {name}" if name else "") + "."
 
     def prewarm(self) -> None:
         """Get the next question's process ready now, where the provider supports it."""
         self._find_cli()
         self.backend.prewarm()
+        if not self.model and self._provider.name not in self._defaults:
+            try:
+                self._defaults[self._provider.name] = self._provider.default_model()
+            except Exception:      # noqa: BLE001 - only the model's name in the prompt depends on it
+                log.warning("default model of %s not read", self._provider.name, exc_info=True)
 
     def shutdown(self) -> None:
         self.backend.shutdown()
@@ -396,10 +506,11 @@ class Brain:
         entities = [k for k in entities if str((self.kb.get(k) or {}).get("name", "")).lower() in low]
         groups = []
         for g in meta.get("drop_groups") or []:
-            if isinstance(g, dict) and kb_has(self.kb, str(g.get("monster", ""))):
-                items = [i for i in g.get("items") or [] if isinstance(i, str) and kb_has(self.kb, i)]
+            # a group of the wrong shape ("items": 5) is skipped: it must never turn a good answer into an error
+            if isinstance(g, dict) and kb_has(self.kb, str(g.get("monster", ""))) and isinstance(g.get("items"), list):
+                items = [i for i in g["items"] if isinstance(i, str) and kb_has(self.kb, i)]
                 if items:
-                    groups.append({"monster": g["monster"], "items": items[:10]})
+                    groups.append(self.kb.drop_group(g["monster"], items[:10]))
         if not groups and is_reverse(question, self.kb):
             # the app builds the grouping itself: the question's items, else the items the answer names
             items = item_keys_for_question(question, self.kb) or \
@@ -422,6 +533,10 @@ class Brain:
             named = [k for k in self.kb.find_mentions(text, max_results=12, answer=True)
                      if k.split("/")[0] in ("monster", "item", "npc", "map", "quest")]
             entities = entities + [k for k in named if k not in entities]
+        # no card for what the KB says isn't in the game: "El Nath isn't out yet" came with an El Nath map card
+        # (a 3rd-job answer with Tylus' and Chief's Residence's), shown like any place the player can go
+        open_ = availability.of(self.kb)
+        entities = [k for k in entities if open_.entity_open(k)]
         box = meta.get("avatar_box")
         if not (isinstance(box, list) and len(box) == 4 and all(isinstance(v, (int, float)) for v in box)):
             box = None

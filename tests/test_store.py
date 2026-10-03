@@ -251,8 +251,137 @@ def test_history_skips_lines_of_the_wrong_shape(isolated_store):
 def test_history_file_is_trimmed(isolated_store, monkeypatch):
     h = isolated_store.History("x")
     monkeypatch.setattr(isolated_store.History, "MAX_BYTES", 2000)
-    monkeypatch.setattr(isolated_store.History, "KEEP_LINES", 10)
+    monkeypatch.setattr(isolated_store.History, "KEEP_BYTES", 1500)
     for i in range(100):
         h.append("user", f"question {i}")
     recs = h.recent(1000)
     assert len(recs) <= 30 and recs[-1]["text"] == "question 99"
+
+
+def test_finished_quests_match_loosely_and_the_list_is_capped(isolated_store):
+    p = isolated_store.Profiles()
+    p.add("Ayash", "Thief", "Bandit", 30)
+    p.apply_update({"quests_started": ["Maya's Medicine"]})
+    assert p.apply_update({"quests_started": ["maya's  medicine"]}) == []          # the same quest again
+    assert p.apply_update({"quests_completed": ["Mayas medicine"]}) == [("quest-", "Maya's Medicine")]
+    for i in range(40):
+        p.apply_update({"quests_started": [f"Quest {i}"]})
+    c = isolated_store.Profiles().active
+    assert len(c.active_quests) == isolated_store.MAX_ACTIVE_QUESTS and c.active_quests[-1] == "Quest 39"
+    shown = c.summary().split("Active quests: ")[1].split("\n")[0].split(", ")
+    assert len(shown) == isolated_store.QUESTS_IN_PROMPT and shown[-1] == "Quest 39"
+
+
+def test_old_piles_of_quests_and_notes_are_capped_on_load(isolated_store):
+    isolated_store.Profiles.path.write_text(json.dumps({"active": "a", "characters": [
+        {"id": "a", "name": "Kiwi", "base_class": "Thief", "job": "Assassin", "level": 34,
+         "active_quests": [f"q{i}" for i in range(200)], "notes": [f"n{i}" for i in range(100)]}]}), encoding="utf-8")
+    c = isolated_store.Profiles().active
+    assert c.active_quests[-1] == "q199" and len(c.active_quests) == isolated_store.MAX_ACTIVE_QUESTS
+    assert c.notes[-1] == "n99" and len(c.notes) == isolated_store.MAX_NOTES
+
+
+def test_nan_and_infinity_in_profiles_never_block_the_start(isolated_store):
+    raw = ('{"active": "a", "characters": ['
+           '{"id": "a", "name": "A", "base_class": "Thief", "job": "Hermit", "level": Infinity,'
+           ' "stats": {"acc": NaN, "hp": Infinity, "mp": 1e400, "dmg_min": 50}},'
+           '{"id": "b", "name": "B", "base_class": "Thief", "job": "Hermit", "level": 1e400},'
+           '{"id": "c", "name": "C", "base_class": "Thief", "job": "Hermit", "level": NaN}]}')
+    isolated_store.Profiles.path.write_text(raw, encoding="utf-8")
+    p = isolated_store.Profiles()
+    assert [c.level for c in p.characters] == [1, 1, 1]
+    assert p.active.stats == {"dmg_min": 50}
+
+
+def test_unknown_fields_survive_a_save(isolated_store):
+    """After a downgrade the fields of the newer version are kept on disk, not deleted by the first save."""
+    isolated_store.Profiles.path.write_text(json.dumps({"active": "a", "future_top": [1], "characters": [
+        {"id": "a", "name": "Kiwi", "base_class": "Thief", "job": "Assassin", "level": 34,
+         "future_field": "keep me"}]}), encoding="utf-8")
+    p = isolated_store.Profiles()
+    p.set_active("a")
+    p.apply_update({"level": 35})
+    saved = json.loads(isolated_store.Profiles.path.read_text(encoding="utf-8"))
+    assert saved["future_top"] == [1]
+    assert saved["characters"][0]["future_field"] == "keep me" and saved["characters"][0]["level"] == 35
+
+
+def test_history_trim_gets_well_under_the_cap_with_long_answers(isolated_store, monkeypatch):
+    monkeypatch.setattr(isolated_store.History, "MAX_BYTES", 40_000)
+    monkeypatch.setattr(isolated_store.History, "KEEP_BYTES", 30_000)
+    h = isolated_store.History("long")
+    for i in range(60):
+        h.append("user", f"q{i}")
+        h.append("assistant", "שלום " * 300)          # ~3 KB a line in UTF-8
+    size = h.log.stat().st_size
+    assert size <= 40_000
+    before = h.log.read_bytes()
+    h.append("user", "one more")                      # under the cap: appended, not rewritten
+    assert h.log.read_bytes().startswith(before)
+    recs = h.recent(5)
+    assert len(recs) == 5 and recs[-1]["text"] == "one more"
+    assert all(json.loads(line) for line in h.log.read_text(encoding="utf-8").splitlines())
+
+
+def test_recent_reads_the_tail_of_a_big_log(isolated_store):
+    h = isolated_store.History("tail")
+    with h.log.open("w", encoding="utf-8") as f:
+        for i in range(5000):
+            f.write(json.dumps({"t": i, "role": "user", "text": f"q{i} " + "x" * 50}) + "\n")
+    assert [r["text"].split()[0] for r in h.recent(3)] == ["q4997", "q4998", "q4999"]
+    assert len(h.recent(2000)) == 2000
+
+
+def _mac_startup_failure(tmp_path, monkeypatch, exc, answer):
+    import subprocess
+    import sys
+    import webbrowser
+
+    from maplehelper import setupwait, store
+    monkeypatch.setattr(store, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(sys, "platform", "darwin")
+    monkeypatch.setattr(setupwait, "_language", lambda: "en")
+    calls, opened = [], []
+
+    def run(cmd, **kw):
+        calls.append(cmd)
+        return subprocess.CompletedProcess(cmd, 0, stdout=answer + "\n", stderr="")
+    monkeypatch.setattr(subprocess, "run", run)
+    monkeypatch.setattr(webbrowser, "open", opened.append)
+    setupwait.report_broken_install(exc)
+    return calls, opened
+
+
+def test_mac_startup_failure_is_shown_not_silent(tmp_path, monkeypatch):
+    """The macOS bundle has no Dock icon: a failed start showed nothing at all. Now a system alert says so."""
+    calls, opened = _mac_startup_failure(tmp_path, monkeypatch, PermissionError("read-only data folder"), "Close")
+    assert len(calls) == 1 and calls[0][0] == "osascript" and not opened
+    message = calls[0][calls[0].index("end run") + 1]
+    assert "couldn't start" in message and "startup-error.log" in message and "the Mac" in message
+
+
+def test_mac_damaged_install_offers_the_download_page(tmp_path, monkeypatch):
+    from maplehelper import setupwait
+    calls, opened = _mac_startup_failure(tmp_path, monkeypatch, ModuleNotFoundError("No module named 'x'"), "Download")
+    assert calls[0][-2:] == ["Close", "Download"] and "Applications" in calls[0][-3]
+    assert opened == [setupwait.RELEASES_URL]
+    assert setupwait.MAC_TEXT["broken"]["he"] != setupwait.BROKEN_TEXT["he"]
+    assert setupwait.MAC_TEXT["startup"]["he"] != setupwait.STARTUP_TEXT["he"]
+
+
+def test_f12_hotkey_loads_as_the_default_on_windows(isolated_store, monkeypatch):
+    # Windows never lets a program register F12: a saved F12 is the default key there, and stays F12 on macOS
+    import json
+    isolated_store.Settings.path.write_text(json.dumps({"hotkey_toggle": "F12", "hotkey_voice": "F7"}), "utf-8")
+    monkeypatch.setattr(isolated_store.sys, "platform", "win32")
+    s = isolated_store.Settings()
+    assert (s["hotkey_toggle"], s["hotkey_voice"]) == ("F9", "F7")
+    # the default is the other hotkey's: the next default, never two hotkeys on one key
+    isolated_store.Settings.path.write_text(json.dumps({"hotkey_toggle": "F12", "hotkey_voice": "F9"}), "utf-8")
+    s = isolated_store.Settings()
+    assert (s["hotkey_toggle"], s["hotkey_voice"]) == ("F10", "F9")
+    isolated_store.Settings.path.write_text(json.dumps({"hotkey_toggle": "F12", "hotkey_voice": "F12"}), "utf-8")
+    s = isolated_store.Settings()
+    assert (s["hotkey_toggle"], s["hotkey_voice"]) == ("F9", "F10")
+    monkeypatch.setattr(isolated_store.sys, "platform", "darwin")
+    assert isolated_store.Settings()["hotkey_toggle"] == "F12"

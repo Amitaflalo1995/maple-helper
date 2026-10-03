@@ -9,7 +9,7 @@ import pytest
 from maplehelper import updater
 
 MANIFEST = "https://example.test/kb-manifest.json"
-ZIP_URL = "https://example.test/kb.zip"
+ZIP_URL = "https://github.com/Maple-Helper/maple-helper/releases/download/kb-2026.02.01/kb.zip"
 
 
 def make_zip(files: dict[str, str]) -> bytes:
@@ -108,6 +108,10 @@ API = "https://api.github.com/repos/Maple-Helper/maple-helper/releases/latest"
 SETUP = b"MZ fake installer bytes"
 
 
+def dl(tag: str, name: str) -> str:
+    return f"https://github.com/Maple-Helper/maple-helper/releases/download/{tag}/{name}"
+
+
 @pytest.fixture
 def app_env(tmp_path, monkeypatch):
     """A fake GitHub API + release assets; downloads land under tmp_path."""
@@ -115,14 +119,16 @@ def app_env(tmp_path, monkeypatch):
     net: dict[str, bytes | None] = {}
     monkeypatch.setattr(updater, "_get", lambda url, timeout=30: net.get(url))
 
-    def publish(tag="v0.2.0", setup=SETUP, sums=None, include_sums=True, **extra):
+    def publish(tag="v0.2.0", setup=SETUP, sums=None, include_sums=True, setup_url=None, size=None, **extra):
         sums = sums if sums is not None else f"{hashlib.sha256(setup).hexdigest()}  MapleHelper-Setup.exe\n"
-        assets = [{"name": "MapleHelper-Setup.exe", "browser_download_url": "https://dl/setup", "size": len(setup)}]
+        setup_url = setup_url or dl(tag, "MapleHelper-Setup.exe")
+        assets = [{"name": "MapleHelper-Setup.exe", "browser_download_url": setup_url,
+                   "size": len(setup) if size is None else size}]
         if include_sums:
-            assets.append({"name": "SHA256SUMS.txt", "browser_download_url": "https://dl/sums"})
+            assets.append({"name": "SHA256SUMS.txt", "browser_download_url": dl(tag, "SHA256SUMS.txt")})
         net[API] = json.dumps({"tag_name": tag, "assets": assets, **extra}).encode()
-        net["https://dl/setup"] = setup
-        net["https://dl/sums"] = sums.encode()
+        net[setup_url] = setup
+        net[dl(tag, "SHA256SUMS.txt")] = sums.encode()
     return tmp_path, net, publish
 
 
@@ -145,7 +151,7 @@ def test_same_size_corruption_is_caught(app_env):
     # the old size-only check accepted this: same length, different bytes
     tmp, net, publish = app_env
     publish()
-    net["https://dl/setup"] = bytes(len(SETUP))
+    net[dl("v0.2.0", "MapleHelper-Setup.exe")] = bytes(len(SETUP))
     assert updater.download_app_update("0.1.0") is None
 
 
@@ -295,3 +301,62 @@ def test_only_an_installed_copy_self_updates(tmp_path, monkeypatch):
     assert not updater.installed_copy()               # portable zip: no uninstaller beside it
     (tmp_path / "unins000.exe").write_bytes(b"")
     assert updater.installed_copy()
+
+
+@pytest.mark.parametrize("kwargs", [
+    {"setup_url": "https://evil.example/MapleHelper-Setup.exe"},                    # not this repository
+    {"setup_url": "http://github.com/Maple-Helper/maple-helper/releases/download/v0.2.0/MapleHelper-Setup.exe"},
+    {"setup_url": "https://github.com/someone/fork/releases/download/v0.2.0/MapleHelper-Setup.exe"},
+    {"setup_url": dl("v0.1.5", "MapleHelper-Setup.exe")},                          # another release's file
+    {"size": len(SETUP) + 1},                                                     # GitHub lists another size
+    {"size": None, "tag": "v0.2.0", "state": "x"},
+    {"tag": "v0.2.0/../../x"},                                                    # the tag names the file
+])
+def test_installer_must_come_from_this_release(app_env, kwargs):
+    tmp, net, publish = app_env
+    if kwargs.get("size") is None:
+        kwargs.pop("size", None)
+    if kwargs.pop("state", None):
+        publish(**kwargs)
+        rel = json.loads(net[API])
+        rel["assets"][0]["state"] = "starter"
+        net[API] = json.dumps(rel).encode()
+    else:
+        publish(**kwargs)
+    assert updater.download_app_update("0.1.0") is None
+    assert not (tmp / "kb" / "updates").exists() or not any((tmp / "kb" / "updates").iterdir())
+
+
+def test_never_a_downgrade_even_from_a_cached_installer(app_env):
+    tmp, _, publish = app_env
+    publish(tag="v0.1.0")
+    cached = tmp / "updates" / "MapleHelper-Setup-v0.1.0.exe"
+    cached.parent.mkdir(parents=True)
+    cached.write_bytes(SETUP)
+    assert updater.download_app_update("0.2.0") is None
+
+
+@pytest.mark.parametrize("change", [
+    {"url": "https://evil.example/kb.zip"},
+    {"url": "http://github.com/Maple-Helper/maple-helper/releases/download/kb-2026.02.01/kb.zip"},
+    {"sha": "not-a-hash"},
+    {"version": "2099.01.01/../x"},
+])
+def test_kb_only_from_this_repository_with_a_real_checksum(env, change):
+    user_kb, net, publish = env
+    url = change.pop("url", None)
+    publish(**change)
+    if url:
+        m = json.loads(net[MANIFEST])
+        m["url"] = url
+        net[MANIFEST] = json.dumps(m).encode()
+        net[url] = GOOD_ZIP
+    assert updater.fetch_kb() == "failed" and still_old(user_kb)
+
+
+def test_release_url_check():
+    ok = "https://github.com/Maple-Helper/maple-helper/releases/download/v1.2.3/MapleHelper-Setup.exe"
+    assert updater.release_url_ok(ok, "v1.2.3", "MapleHelper-Setup.exe")
+    assert not updater.release_url_ok(ok, "v1.2.4", "MapleHelper-Setup.exe")
+    assert not updater.release_url_ok(ok + "?x=1")
+    assert not updater.release_url_ok(None)

@@ -502,7 +502,7 @@
    "h3": "חלוקת AP ל-Magician: לבל 10-30"
   },
   {
-   "p": "תעלה LUK רק בשביל ה-Wand הבא, וכל השאר ל-INT. בפועל, כל 5 ה-AP הולכים ל-LUK בלבלים 20, 25 ו-30, וכל שאר הלבלים הולכים ל-INT. LUK מציוד יכול להחליף LUK בסיס ברגע שהציוד הזה כבר מצויד."
+   "p": "תעלה LUK רק בשביל ה-Wand הבא, וכל השאר ל-INT. LUK מציוד יכול להחליף LUK בסיס ברגע שהציוד הזה כבר מצויד."
   },
   {
    "table": [
@@ -567,7 +567,7 @@
     [
      "15",
      "[[img:b8e7401b5626da.png]]Hardwood Wand 34 M.ATK",
-     "[[img:f17cd152cb8c9e.png]]Blue Plain Robe +3 INT, זכר [[img:3d57a6a58ad57f.png]]Yellow Arianne + [[img:15b990e216a32b.png]]Yellow Arianne Skirt +1 INT כל אחד, נקבה",
+     "[[img:f17cd152cb8c9e.png]]Blue Plain Robe +3 INT",
      "Flora the Fairy ו-Serabi the Fairy ב-Ellinia"
     ],
     [
@@ -579,13 +579,13 @@
     [
      "25",
      "[[img:ab2b399177dae9.png]]Ice Wand 48 M.ATK",
-     "[[img:cc32edb0e377c6.png]]Blue Doros Robe +5 INT, זכר [[img:4df809ed803d00.png]]Brown Doroness Robe +5 INT, נקבה",
+     "[[img:cc32edb0e377c6.png]]Blue Doros Robe +5 INT",
      "Flora the Fairy ו-Serabi the Fairy"
     ],
     [
      "30",
      "[[img:2e8d2c65bd2aec.png]]Mithril Wand 55 M.ATK",
-     "[[img:9bb0c142cdc0c7.png]]Blue Wizard Robe +6 INT, זכר [[img:14da1a348301c5.png]]Blue Fairy Top + [[img:bfd615e03195ec.png]]Blue Fairy Skirt +3 INT כל אחד, נקבה",
+     "[[img:9bb0c142cdc0c7.png]]Blue Wizard Robe +6 INT",
      "Flora the Fairy ו-Serabi the Fairy"
     ]
    ]
@@ -594,7 +594,7 @@
    "h3": "אוברולים של מג'ים וסקרולים"
   },
   {
-   "p": "אוברולים של מג'ים הם שדרוגים חזקים בהתחלה, אבל הגלימות הכחולות רק לזכרים. ל-Blue Plain Robe יש +3 INT בלבל 15, ל-Blue Doros Robe יש +5 INT בלבל 25, ול-Blue Wizard Robe יש +6 INT בלבל 30. Magician נקבה מקבלת Brown Doroness Robe עם +5 INT בלבל 25. בלבלים 15 ו-30, האפשרות הכי טובה שלה היא חולצה ומכנסיים: Yellow Arianne ו-Yellow Arianne Skirt בשביל +2 INT, ואז Blue Fairy Top ו-Blue Fairy Skirt בשביל +6 INT. Serabi the Fairy ב-Ellinia מוכרת את כולם. לכל אוברול יש 10 סלוטי שדרוג."
+   "p": "אוברולים של מג'ים הם שדרוגים חזקים בהתחלה. ל-Blue Plain Robe יש +3 INT בלבל 15, ל-Blue Doros Robe יש +5 INT בלבל 25, ול-Blue Wizard Robe יש +6 INT בלבל 30. לכל אחד מהם יש 10 סלוטי שדרוג."
   },
   {
    "note": "**לסקרולי Overall INT אין מקבילה לחולצות או מכנסיים של מג'ים.** סקרול ה-Lesser נותן +1 INT בוודאות. סקרול ה-Intermediate הוא 60% הצלחה ונותן +2 INT. Ben ב-Kerning City Civic Center מוכר את סקרול ה-Lesser ב-35,000 מסוס בדרגת Distinguished Citizen."
@@ -664,7 +664,7 @@
    "h3": "Pan Lid"
   },
   {
-   "p": "לבל 10. 44 WDEF ו-8.1% Guard. סיכוי חסימה פיזית טוב יותר מ-Mystic Shield. [[img:b62ded95656118.png]]Green Mushroom מפילים אותו."
+   "p": "לבל 10. 44 WDEF ו-8.1% Guard. סיכוי חסימה פיזית טוב יותר מ-Mystic Shield."
   },
   {
    "h3": "Mystic Shield"
@@ -814,5 +814,5 @@
    "text": "מדריך Cleric ללבל 30-70"
   }
  ],
- "source_hash": "dd782bd95e5d"
+ "source_hash": "09cc237097e6"
 }

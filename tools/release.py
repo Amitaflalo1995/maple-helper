@@ -92,6 +92,11 @@ def main():
     ap.add_argument("--notes", default="")
     args = ap.parse_args()
 
+    # the same gate as CI (release.yml, kb-update.yml): never ship or bundle a broken or partial KB
+    try:
+        print("KB valid:", kb_release.validate(KB, min_entities=500))
+    except kb_release.InvalidKB as e:
+        sys.exit(f"knowledge base at {KB} is not fit to ship: {e}")
     kb_zip, manifest = build_kb(patch_notes=args.kb_only)
     if args.kb_only:
         tag = subprocess.run(["gh", "release", "view", "--repo", REPO, "--json", "tagName", "-q", ".tagName"],

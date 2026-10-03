@@ -9,7 +9,7 @@ import sys
 
 from PySide6.QtCore import QEvent, QObject, QRectF, Qt
 from PySide6.QtGui import QColor, QFont, QFontDatabase, QPainter, QPen
-from PySide6.QtWidgets import QAbstractButton, QApplication, QSlider, QWidget
+from PySide6.QtWidgets import QAbstractButton, QApplication, QComboBox, QProxyStyle, QSlider, QWidget
 
 from ..store import ASSETS
 
@@ -37,13 +37,26 @@ PALETTES = {
     },
 }
 MODE = "dark"
+HIGH_CONTRAST = False      # Windows high contrast is on (set_mode): no see-through grey text, firmer borders
+
+
+def _contrast(c: dict) -> dict:
+    """A palette for high contrast: secondary text in the full text color, the faint (disabled) grey as the
+    normal muted one, and borders a reader can see."""
+    rgb = "235,235,245" if c is PALETTES["dark"] else "0,0,0"
+    return {**c, "muted": c["text"], "faint": c["muted"], "stroke": f"rgba({rgb},0.60)", "hair": f"rgba({rgb},0.35)"}
 
 
 def P() -> dict:
-    return PALETTES.get(MODE, PALETTES["dark"])
+    c = PALETTES.get(MODE, PALETTES["dark"])
+    return _contrast(c) if HIGH_CONTRAST else c
 
 
 ORANGE_TEXT_LIGHT = "#C9620A"     # orange as text on white: #FF9533 / #F07A12 are too faint to read there
+# text and icons on an orange fill (the player's bubble, Primary / Send buttons, a checked chip, a hovered menu
+# row): white, the brand look the owner chose (a darker text read better but changed the look)
+ON_ORANGE = "#FFFFFF"
+GOOD_TEXT_LIGHT = "#2E9E5B"
 
 
 def accent_text(deep: bool = False) -> str:
@@ -69,9 +82,37 @@ SYMBOL_ICONS = {"open": "\u2197", "refresh": "\u21bb", "info": "\u24d8", "edit":
                 "tools": "\u2692\ufe0e", "timer": "\u23f1\ufe0e", "play": "\u25b6\ufe0e", "check": "\u2713"}
 
 
+def high_contrast() -> str | None:
+    """'dark' or 'light' when Windows high contrast (a Contrast theme) is on, by the system's window background;
+    None when it's off or unknown. The app draws its own colors, so without this a contrast theme changed
+    nothing (and the see-through grey text stayed)."""
+    if sys.platform != "win32":
+        return None
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        class HIGHCONTRASTW(ctypes.Structure):
+            _fields_ = [("cbSize", wintypes.UINT), ("dwFlags", wintypes.DWORD), ("lpszDefaultScheme", wintypes.LPWSTR)]
+        hc = HIGHCONTRASTW()
+        hc.cbSize = ctypes.sizeof(hc)
+        user32 = ctypes.windll.user32
+        if not user32.SystemParametersInfoW(0x0042, hc.cbSize, ctypes.byref(hc), 0) or not hc.dwFlags & 0x1:
+            return None                                       # SPI_GETHIGHCONTRAST, HCF_HIGHCONTRASTON
+        bg = user32.GetSysColor(5)                            # COLOR_WINDOW, 0x00BBGGRR
+        r, g, b = bg & 0xFF, (bg >> 8) & 0xFF, (bg >> 16) & 0xFF
+        return "light" if 0.299 * r + 0.587 * g + 0.114 * b > 128 else "dark"
+    except Exception:
+        return None
+
+
 def set_mode(mode: str) -> None:
-    global MODE, TEXT, MUTED
-    MODE = mode if mode in PALETTES else "dark"
+    """The appearance from Settings, unless Windows high contrast is on: then the matching light or dark look in
+    its high-contrast palette (checked on every restyle, so turning it on applies when a window next opens)."""
+    global MODE, TEXT, MUTED, HIGH_CONTRAST
+    hc = high_contrast()
+    HIGH_CONTRAST = hc is not None
+    MODE = hc or (mode if mode in PALETTES else "dark")
     TEXT, MUTED = P()["text"], P()["muted"]
 
 
@@ -102,13 +143,14 @@ def app_font(size: int = 14) -> QFont:
 def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     s, c = size, P()
     ot, otd = accent_text(), accent_text(deep=True)      # orange text: darker on white for contrast
+    good = "#2E9E5B" if MODE == "dark" else GOOD_TEXT_LIGHT
     install_focus_ring()
     return f"""
     QPushButton, QToolButton {{ outline: none; }}
     * {{ font-family: "{font_family}"; font-size: {s}px; color: {c['text']}; }}
     QWidget#Overlay, QWidget#Feed {{ background: transparent; }}
     #Title {{ font-size: {s + 1}px; font-weight: 600; letter-spacing: -0.2px; color: {c['text']}; }}
-    #SaverBadge {{ font-size: {s - 4}px; font-weight: 600; color: #2E9E5B; background: rgba(52,199,89,0.14);
+    #SaverBadge {{ font-size: {s - 4}px; font-weight: 600; color: {good}; background: rgba(52,199,89,0.14);
                    border-radius: 8px; padding: 1px 7px; }}
     QProgressBar#ExpBar {{ background: {c['fill3']}; border: none; border-radius: 3px; }}
     QProgressBar#ExpBar::chunk {{ background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #FFA24A, stop:1 {ORANGE_DEEP});
@@ -118,12 +160,16 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QPushButton#PlanLink {{ background: transparent; border: none; padding: 2px 0; text-align: left; color: {c['text']}; }}
     QPushButton#PlanLink:hover {{ color: {ot}; }}
     QTextBrowser#GuideText {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 14px;
-                               padding: 10px 12px; color: {c['text']}; selection-background-color: {ORANGE}; }}
+                               padding: 10px 12px; color: {c['text']}; selection-background-color: {ORANGE};
+                               selection-color: {ON_ORANGE}; }}
     #PinAnswer {{ color: {c['text']}; font-size: {s - 1}px; }}
     QFrame#ShareCard {{ background: {c['fill1']}; border: 1px solid {c['stroke']}; border-radius: 18px; }}
     #ShareName {{ font-size: {s + 8}px; font-weight: 700; color: {c['text']}; }}
     #ShareMeta {{ font-size: {s + 1}px; font-weight: 500; color: {c['muted']}; }}
     #ShareBrand {{ font-size: {s - 3}px; font-weight: 600; color: {ot}; }}
+    #BetaBadge {{ font-size: {s - 5}px; font-weight: 700; color: {accent_text()}; background: transparent;
+                  border: 1px solid rgba(255,149,51,0.6); border-radius: 5px; padding: 0 4px; min-height: 0; }}
+    #ScopeNote {{ color: {c['faint']}; font-size: {s - 4}px; }}
     #Version {{ font-size: {s - 3}px; font-weight: 300; color: {c['muted']}; background: transparent; }}
     #ProfilePill {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 12px;
                     min-height: 24px; max-height: 24px; padding: 0 11px; font-size: {s - 2}px; font-weight: 500; color: {c['text']}; }}
@@ -170,7 +216,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #InfoText {{ color: {c['text']}; font-size: {s - 1}px; }}
     #JobHint {{ color: {c['muted']}; font-size: {s - 3}px; }}
     #ProfileCard {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 16px; }}
-    #ProfileCard:hover {{ border: 1px solid rgba(255,149,51,0.7); }}
+    #ProfileCard:hover, #ProfileCard[active="true"] {{ border: 1px solid rgba(255,149,51,0.7); }}
     QToolButton#Refresh {{ font-family: "{ICON_FONT}"; font-size: 15px; color: {c['muted']}; background: transparent;
                            border: none; border-radius: 15px; min-width: 30px; max-width: 30px; min-height: 30px;
                            max-height: 30px; }}
@@ -181,7 +227,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #ProfileMeta {{ font-size: {s - 1}px; font-weight: 500; color: {c['muted']}; }}
     #BubbleUser {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFA24A, stop:1 {ORANGE_DEEP});
                    border-radius: 15px; min-height: 32px; }}
-    #BubbleUser QLabel {{ color: #FFFFFF; }}
+    #BubbleUser QLabel {{ color: {ON_ORANGE}; }}
     #BubbleBot {{ background: {c['fill1']}; border: 1px solid {c['hair']}; border-radius: 15px; min-height: 32px; }}
     #SystemLine {{ color: {c['muted']}; font-size: {s - 2}px; }}
 
@@ -204,6 +250,9 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #Card[selected="true"], #Tile[selected="true"], #GroupHeader[selected="true"] {{
         border: 2px solid {ORANGE}; background: rgba(255,149,51,0.12); }}
     #TileName {{ font-size: {s - 1}px; font-weight: 500; color: {c['text']}; }}
+    #StatPill {{ font-size: {s - 2}px; font-weight: 500; color: {c['text']}; background: {c['fill3']};
+                 border-radius: 7px; padding: 1px 7px; }}
+    #TileStats {{ font-size: {s - 3}px; color: {c['muted']}; }}
     #CardName {{ font-weight: 600; color: {c['text']}; }}
     #CardSub {{ color: {c['muted']}; font-size: {s - 2}px; }}
     #CardStat {{ color: {c['text']}; font-size: {s - 2}px; }}
@@ -214,7 +263,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QPushButton#Chip:hover {{ background: {c['fill3']}; }}
     QPushButton#Chip:pressed {{ background: {c['pressed']}; }}
     QPushButton#Chip:checked {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFA24A, stop:1 {ORANGE_DEEP});
-                                border: 1px solid {ORANGE_DEEP}; color: white; font-weight: 700; }}
+                                border: 1px solid {ORANGE_DEEP}; color: {ON_ORANGE}; font-weight: 700; }}
     QPushButton#SubChip {{ background: transparent; border: 1px solid {c['stroke']}; border-radius: 10px;
                            min-height: 26px; max-height: 26px; padding: 0 10px; font-size: {s - 3}px; font-weight: 500;
                            color: {c['muted']}; }}
@@ -223,9 +272,14 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
                                    font-weight: 700; }}
     #Tag, #TagGood, #TagWarn, #TagAccent {{ font-size: {s - 3}px; font-weight: 600; border-radius: 8px; padding: 2px 8px; }}
     #Tag {{ color: {c['muted']}; background: {c['fill3']}; }}
-    #TagGood {{ color: #2E9E5B; background: rgba(52,199,89,0.16); }}
+    #TagGood {{ color: {good}; background: rgba(52,199,89,0.16); }}
     #TagWarn {{ color: #C9620A; background: rgba(255,149,51,0.18); }}
     #TagAccent {{ color: {otd}; background: rgba(255,149,51,0.12); }}
+    /* where a datum comes from (sources.py): quieter than the tags above, an outline beside the data */
+    #SourceTag {{ font-size: {s - 4}px; font-weight: 600; color: {c['muted']}; background: transparent;
+                  border: 1px solid {c['stroke']}; border-radius: 7px; padding: 1px 5px; }}
+    #UpdatedTag {{ font-size: {s - 4}px; font-weight: 700; color: {otd}; background: rgba(255,149,51,0.14);
+                   border: 1px solid rgba(255,149,51,0.45); border-radius: 7px; padding: 1px 5px; }}
     #BigStat {{ font-size: {s + 10}px; font-weight: 700; letter-spacing: -0.4px; color: {c['text']}; }}
     #BigStatLabel {{ font-size: {s - 3}px; color: {c['muted']}; }}
     QPushButton#NowChip {{ background: rgba(255,149,51,0.12); border: 1px solid rgba(255,149,51,0.55); border-radius: 12px;
@@ -239,8 +293,9 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #Capsule {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 21px; }}
     #Capsule[focus="true"] {{ border: 1px solid rgba(255,149,51,0.85); }}
     QLineEdit#Input {{ background: transparent; border: none; padding: 0 4px; selection-background-color: {ORANGE};
+                       selection-color: {ON_ORANGE};
                        color: {c['text']}; }}
-    QToolButton#Send {{ font-family: "{ICON_FONT}"; font-size: 13px; color: #FFFFFF; border: none; border-radius: 15px;
+    QToolButton#Send {{ font-family: "{ICON_FONT}"; font-size: 13px; color: {ON_ORANGE}; border: none; border-radius: 15px;
                         min-width: 30px; max-width: 30px; min-height: 30px; max-height: 30px;
                         background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFA24A, stop:1 {ORANGE_DEEP}); }}
     QToolButton#Send:hover {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFB066, stop:1 #F58A2A); }}
@@ -248,7 +303,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QToolButton#Send:disabled {{ background: {c['fill2']}; color: {c['faint']}; }}
 
     QPushButton#Primary {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFA24A, stop:1 {ORANGE_DEEP});
-                           color: #FFFFFF; border: none; border-radius: 12px; min-height: 26px; padding: 4px 18px; font-weight: 600; }}
+                           color: {ON_ORANGE}; border: none; border-radius: 12px; min-height: 26px; padding: 4px 18px; font-weight: 600; }}
     QPushButton#Primary:hover {{ background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFB066, stop:1 #F58A2A); }}
     QPushButton#Primary:pressed {{ background: {ORANGE_DEEP}; }}
     QPushButton#Primary:disabled {{ background: {c['fill2']}; color: {c['faint']}; }}
@@ -273,7 +328,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     #RowLabel {{ color: {c['text']}; }}
     #DialogBody {{ font-size: {s + 1}px; color: {c['text']}; line-height: 140%; }}
     #RowHint {{ color: {c['muted']}; font-size: {s - 3}px; }}
-    #WarnHint {{ color: {ORANGE if MODE == "dark" else "#C9620A"}; font-size: {s - 3}px; font-weight: 500; }}
+    #WarnHint {{ color: {ORANGE if MODE == "dark" else ORANGE_TEXT_LIGHT}; font-size: {s - 3}px; font-weight: 500; }}
     #PageTitle {{ font-size: {s + 8}px; font-weight: 700; letter-spacing: -0.3px; color: {c['text']}; }}
     #PageBody {{ color: {c['muted']}; }}
     #FieldLabel {{ color: {c['muted']}; font-size: {s - 2}px; font-weight: 500; }}
@@ -306,7 +361,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QComboBox::down-arrow {{ image: none; width: 0; height: 0; }}
     QComboBox QAbstractItemView {{ background: {"#2C2C2E" if MODE == "dark" else "#FFFFFF"}; color: {c['text']};
                                    border: 1px solid {c['stroke']}; border-radius: 10px; padding: 4px; outline: none;
-                                   selection-background-color: {ORANGE}; selection-color: #FFFFFF; }}
+                                   selection-background-color: {ORANGE}; selection-color: {ON_ORANGE}; }}
     QSpinBox {{ background: {c['fill2']}; border: 1px solid {c['stroke']}; border-radius: 10px; min-height: 26px;
                 padding: 0 8px; color: {c['text']}; }}
     QSpinBox::up-button, QSpinBox::down-button {{ width: 16px; border: none; background: transparent; }}
@@ -327,7 +382,7 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QMenu {{ background: {"rgba(44,44,46,0.98)" if MODE == "dark" else "rgba(255,255,255,0.98)"};
              border: 1px solid {c['stroke']}; border-radius: 12px; padding: 5px; }}
     QMenu::item {{ padding: 6px 16px 6px 28px; border-radius: 7px; color: {c['text']}; min-width: 64px; }}
-    QMenu::item:selected {{ background: {ORANGE}; color: #FFFFFF; }}
+    QMenu::item:selected {{ background: {ORANGE}; color: {ON_ORANGE}; }}
     QMenu::item:disabled {{ color: {c['muted']}; font-weight: 600; font-size: {s - 2}px; }}
     QMenu::indicator {{ width: 14px; height: 14px; left: 8px; }}
     QMenu::separator {{ height: 1px; background: {c['hair']}; margin: 4px 8px; }}
@@ -335,8 +390,14 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
     QMenu#SplitMenu::item {{ margin: 0 5px; }}
     #MenuRow {{ border-radius: 7px; background: transparent; }}
     #MenuRow:hover {{ background: {ORANGE}; }}
-    #MenuRow:hover #MenuRowText {{ color: #FFFFFF; }}
-    #MenuRow:disabled #MenuRowText {{ color: {c['muted']}; }}
+    #MenuRow:disabled {{ background: transparent; }}
+    /* Qt ignores a pseudo-state on an ancestor ("#MenuRow:hover #MenuRowText" matched every row, and the
+       ":disabled" one painted every label grey), so the label is styled by its own state: a child of a disabled
+       row is disabled itself, and the hover comes as a property set by MenuRowHover (installed per row) */
+    #MenuRowText {{ color: {c['text']}; }}
+    #MenuRowText:disabled {{ color: {c['faint']}; }}
+    #MenuRow[active="true"] {{ background: {ORANGE}; }}
+    #MenuRowText[hover="true"], #MenuRow[active="true"] #MenuRowText {{ color: {ON_ORANGE}; }}
     QMenu#SplitMenu::separator {{ margin: 4px 13px; }}
     QToolTip {{ background: {"#2C2C2E" if MODE == "dark" else "#FFFFFF"}; color: {c['text']};
                 border: 1px solid {c['stroke']}; border-radius: 6px; padding: 4px 8px; }}
@@ -346,16 +407,76 @@ def stylesheet(font_family: str, size: int, opacity: float = 1.0) -> str:
 _FOCUS_RING = None
 
 
+def wants_focus_ring(w) -> bool:
+    """Buttons, sliders, and the custom widgets that take keyboard focus (cards, the character card) and asked
+    for the ring with the "focus_ring" property."""
+    return isinstance(w, (QAbstractButton, QSlider)) or bool(w.property("focus_ring"))
+
+
+class AppStyle(QProxyStyle):
+    """The app's style (Fusion underneath). Its polish(), which Qt runs once for every widget it styles (a
+    stylesheet's own style passes it on), gives buttons and drop-downs the pointing hand and hooks the focus
+    ring to the widgets that can show one.
+
+    Both used to be event filters on the whole application: every event of every object went through Python
+    twice, and a widget-heavy window (the history's "Show more", the play tools) took about twice as long."""
+
+    def polish(self, arg):
+        if isinstance(arg, QWidget):
+            super().polish(arg)
+            if isinstance(arg, (QAbstractButton, QComboBox)) and not arg.testAttribute(Qt.WA_SetCursor):
+                arg.setCursor(Qt.PointingHandCursor)      # like a link, unless the widget set its own cursor
+            if _FOCUS_RING is not None and wants_focus_ring(arg):
+                arg.removeEventFilter(_FOCUS_RING)         # polished again (a restyle): still one filter
+                arg.installEventFilter(_FOCUS_RING)
+            return None
+        return super().polish(arg)
+
+
 def install_focus_ring() -> None:
     """A subtle orange ring on the button that has keyboard focus (Tab / Shift+Tab), like the web's
     :focus-visible: a click gives no ring. Drawn by a see-through child over the button's own edge, so no
-    layout moves and no tight parent clips it (a QFocusFrame outside the button was cut off in a chat row)."""
+    layout moves and no tight parent clips it (a QFocusFrame outside the button was cut off in a chat row).
+    The app's style (AppStyle) hooks it to each button as Qt styles it: only their events reach Python."""
     global _FOCUS_RING
     app = QApplication.instance()
     if app is None or _FOCUS_RING is not None:
         return
     _FOCUS_RING = FocusRing(app)
-    app.installEventFilter(_FOCUS_RING)
+    if not isinstance(app.style(), AppStyle):
+        app.setStyle(AppStyle(app.style().name()))      # re-polishes the widgets that exist already
+    else:
+        for w in app.allWidgets():                      # made before the ring existed
+            if wants_focus_ring(w):
+                w.installEventFilter(_FOCUS_RING)
+
+
+def menu_row_hover() -> "MenuRowHover":
+    """The one hover watcher menu rows install on themselves (an app-wide filter slowed every screen)."""
+    global _MENU_ROW_HOVER
+    if _MENU_ROW_HOVER is None:
+        _MENU_ROW_HOVER = MenuRowHover()
+    return _MENU_ROW_HOVER
+
+
+_MENU_ROW_HOVER = None
+
+
+class MenuRowHover(QObject):
+    """A menu row's label turns dark on the row's orange hover. The stylesheet can't say it ("#MenuRow:hover
+    #MenuRowText" is matched by every row: Qt ignores an ancestor's pseudo-state), so the label gets a hover
+    property here and is re-polished."""
+
+    def eventFilter(self, obj, e):
+        t = e.type()
+        if t in (QEvent.Enter, QEvent.Leave) and isinstance(obj, QWidget) and obj.objectName() == "MenuRow":
+            label = obj.findChild(QWidget, "MenuRowText")
+            hover = t == QEvent.Enter and obj.isEnabled()
+            if label is not None and bool(label.property("hover")) != hover:
+                label.setProperty("hover", hover)
+                label.style().unpolish(label)
+                label.style().polish(label)
+        return False
 
 
 class _Ring(QWidget):
@@ -398,7 +519,7 @@ class FocusRing(QObject):
 
     def eventFilter(self, obj, e):
         t = e.type()
-        if t in (QEvent.FocusIn, QEvent.FocusOut) and isinstance(obj, (QAbstractButton, QSlider)):
+        if t in (QEvent.FocusIn, QEvent.FocusOut) and wants_focus_ring(obj):
             self._hide()
             if t == QEvent.FocusIn and e.reason() in self.KEYBOARD:
                 self.ring, self.target = _Ring(obj), obj

@@ -53,7 +53,7 @@ def test_next_job_stops_at_the_second_job_while_third_job_is_closed(monkeypatch)
     assert plan.next_job("Thief", "Thief", 29) == (["Assassin", "Bandit"], 30)
     assert plan.next_job("Thief", "Assassin", 34) is None
     assert plan.next_job("Magician", "Cleric", 69) is None
-    monkeypatch.setattr(jobs, "MAX_JOB_TIER", 3)       # the day 3rd job opens: one constant
+    monkeypatch.setattr(jobs, "open_tier", lambda kb=None: 3)     # the day the KB confirms 3rd job
     assert plan.next_job("Thief", "Assassin", 34) == (["Hermit", "Chief Bandit"], 70)
 
 
@@ -77,9 +77,10 @@ def test_job_tree_matches_the_knowledge_base(real):
         assert "at level 30" in real.page(f"class/{cls}")
     assert "advance again at level 70" in real.page("class/bowman")
     assert {lv for js in jobs.JOBS.values() for _, lv in js} == {1, 10, 30, 70}
-    # MAX_JOB_TIER = 2 because of this line
-    assert "Third job isn't available at launch" in real.page("guide/attacks-you-can-use-mid-jump")
-    assert jobs.MAX_JOB_TIER == 2
+    # 3rd job stays shut because the KB's release guide says so (availability.py reads it from there)
+    from maplehelper import availability
+    assert "3rd job are not initial-launch content" in real.page("guide/maplestory-classic-worlds-release-date")
+    assert jobs.open_tier(real) == 2 and availability.of(real).job_tier == 2
 
 
 # ------------------------------------------------------------------ 2, 3, 10, 11, 23: quests
@@ -150,7 +151,8 @@ def test_a_quest_finished_at_a_higher_level_waits_for_it():
     assert [q.key for q in quests.for_level(kb, 50)["soon"]] == ["quest/1"]
     assert [q.key for q in quests.for_level(kb, 52)["now"]] == ["quest/1"]
     kb = quest_kb()
-    assert quests.citizenship(kb, "", 30) == [] and quests.citizenship(kb, "", 52)
+    # the quest asks Henesys citizenship grade 9: a Henesys quest, whatever its NPC page says
+    assert quests.citizenship(kb, "Henesys", 30) == [] and quests.citizenship(kb, "Henesys", 52)
     quests._quest.cache_clear()
 
 
@@ -306,9 +308,10 @@ def test_an_unknown_word_before_the_name_is_no_sure_answer(kb):
 
 
 def test_drop_answers_carry_the_caveat_and_say_1_item(kb, monkeypatch):
-    monkeypatch.setattr(kb, "monster_drops", lambda key: ["item/2000000"])
+    monkeypatch.setattr(kb, "drop_lists", lambda key: {"community": [], "MSEA": ["item/2000000"]})
     a = quick.answer("Red Snail drops", kb, t)
     assert a and a.text.startswith("Red Snail drops 1 item:") and t("quick_drops_note") in a.text
+    assert a.sources == ["MSEA"]
     assert I18n("he")("quick_drops", name="X", n=1) == "X מפיל פריט אחד:"
 
 
@@ -323,12 +326,12 @@ def test_instant_answers_on_the_real_kb(real):
     assert "M.DEF" in quick.answer("Lupin magic defense", real, t).text
     sells = quick.answer("who sells red potion", real, t)
     assert sells and sells.text.startswith("Where to buy Red Potion:") and "50 mesos" in sells.text
-    assert not any(r in sells.text for r in combat.NOT_YET)
+    assert "El Nath" not in sells.text and "Orbis" not in sells.text
     where = quick.answer("where is Red Snail", real, t)
     assert where and " · " in where.text.split("\n")[1]                  # "map · region" (kb.map_label)
-    assert quick.answer("where is Leatty", real, t) is None              # only El Nath / Orbis maps
+    assert "isn't in the game" in quick.answer("where is Leatty", real, t).text   # Ossyria only: not out
     assert quick.answer("where is King Slime", real, t) is None          # only its party quest stage
-    assert quick.answer("כמה חיים לג׳וניור סנטינל", real, t).text == "Jr. Sentinel · HP: 531"
+    assert "עוד לא נמצא במשחק" in quick.answer("כמה חיים לג׳וניור סנטינל", real, I18n("he")).text   # Orbis only
     assert quick.answer("Jr Boogie hp", real, t).text.startswith("Jr. Boogie 1 · HP:")
     assert quick.answer("Ghost Stump level", real, t) is None
     assert quick.answer("איפה יש תמנונים", real, t).entities == [
@@ -425,9 +428,64 @@ def test_recipe_counts_match_the_pages(real):
 def test_released_filters_unreleased_shops(real):
     from maplehelper import market
     red_cross = market.npc_prices(real, real._item_by_name["red cross shield"])
-    open_shops = [s for s in red_cross.shops if combat.released(s[1])]
+    open_shops = [s for s in red_cross.shops if combat.released(real, s[1])]
     assert open_shops and all("Orbis" not in s[1] for s in open_shops)
-    assert not combat.released("El Nath: El Nath Weapon Store · El Nath")
+    assert not combat.released(real, "El Nath")
+
+
+# ------------------------------------------------------------------ items in the game (availability.item_open)
+
+def _guide_kb(tmp_path, items: dict[str, str]) -> KnowledgeBase:
+    """A KB with a release guide (Victoria Island in, Ossyria out), two towns, a quest at each, and these item pages."""
+    guide = ("Confirmed content\nClassic maps on Victoria Island are confirmed.\n"
+             "Not at launch\nOssyria and 3rd job are not initial-launch content.\n")
+    pages = {"guide/maplestory-classic-worlds-release-date": guide,
+             "map/1": "# Henesys\nLocation Victoria Road / Victoria Island\n",
+             "map/2": "# Orbis\nLocation Orbis / Ossyria\n",
+             "npc/1": "# Rina\nLocation\nHenesys\n", "npc/2": "# Lisa\nLocation\nOrbis\n",
+             "quest/1": "# Rina's Errand\n", "quest/2": "# Lisa's Errand\n", **items}
+    entities = [ent("guide/maplestory-classic-worlds-release-date", "Release"), ent("map/1", "Henesys"),
+                ent("map/2", "Orbis"), ent("npc/1", "Rina"), ent("npc/2", "Lisa"),
+                ent("quest/1", "Rina's Errand", NPC="Rina", Area="Victoria Island"),
+                ent("quest/2", "Lisa's Errand", NPC="Lisa", Area="Ossyria")]
+    entities += [ent(k, f"Item {k}") for k in items]
+    return small_kb(tmp_path, entities, {}, pages)
+
+
+def test_an_item_is_in_the_game_when_one_of_its_sources_is(tmp_path):
+    from maplehelper import availability
+    shop = "Where to buy\n{npc} Grocer cheapest\n{place}\n50\nmesos\nCOT2 prices\nDropped By\nCommunity sourced\n"
+    kb = _guide_kb(tmp_path, {
+        "item/1": shop.format(npc="Rina", place="Victoria Road: Henesys Shop · Henesys"),
+        "item/2": shop.format(npc="Lisa", place="Orbis: Orbis Department Store · Orbis"),
+        "item/3": "Quest Reward\nRina's Errand ( 25 %)\nSimilar Scroll items\n",
+        "item/4": "Quest Reward\nLisa's Errand\nSimilar Scroll items\n",
+        "item/5": "Craftable\nArcforge Consumables Produces × 1\nIngredients\n",
+        "item/6": "Cash Shop\n100 NX\nClosed-test price · Available\n",
+        "item/7": "Cash Shop\n100 NX\nClosed-test price · Unavailable\n",
+        "item/8": "Dropped By\nCommunity sourced\nLoading…\nFree Market Prices\n",
+        "item/9": "Needed By\n1 quest\nQuests\nQuest | Lv | Qty\nRina's Errand Rina\n| 17 | 3\n",
+    })
+    a = availability.of(kb)
+    assert {k: a.item_open(k) for k in (f"item/{i}" for i in range(1, 10))} == {
+        "item/1": True, "item/2": False,          # a shop in Henesys / only one in Orbis
+        "item/3": True, "item/4": False,          # a reward of an open / a shut quest
+        "item/5": True,                           # a recipe makes it
+        "item/6": True, "item/7": False,          # the Cash Shop sells it / doesn't
+        "item/8": False,                          # no source the KB confirms
+        "item/9": True,                           # an open quest asks for it
+    }
+
+
+@needs_kb
+def test_items_in_the_game_on_the_real_kb(real):
+    from maplehelper import availability
+    a = availability.of(real)
+    name = {e["name"]: k for k, e in real.entities.items() if e["category"] == "item"}
+    for n in ("Red Potion", "Snail Shell", "Apple", "Gloves Attack Scroll: Lesser", "Elixir", "Green Skullcap"):
+        assert a.item_open(name[n]), n
+    for n in ("Return Scroll to Orbis", "Dark Jr. Yeti Skin", "Firebomb Flame", "Cerebes Tooth"):
+        assert not a.item_open(name[n]), n
 
 
 # ------------------------------------------------------------------ 26: guide captions
@@ -453,3 +511,144 @@ def test_haste_captions_are_whole_in_both_languages():
             caps = [b["cap"] for b in g["blocks"] if b.get("img") == "8ea44ba66a1c56.png"]
             assert len(caps) == 2 and all("\n" in c and "px" in c.split("\n")[-1] for c in caps), (slug, lang)
             assert not any(re.search(r"Lv\d+\d{3} x", c) for c in caps)
+
+
+# ------------------------------------------------------------------ 27: names, drops and the level digest (audit)
+
+RELEASE = ("---\n{}\n---\n\n# Release\n\nConfirmed content\nClassic maps on Victoria Island.\n"
+           "Not at launch\nOssyria and 3rd job are not initial-launch content.\n")
+
+
+def test_a_shared_alias_means_the_plain_entity(tmp_path):
+    """aliases.json gives some Hebrew names to every variant of a town or NPC: the last one won (an instance arena,
+    a PQ stage NPC). The plain one wins now, variants alone mean their plain name's entity, and a real tie is no alias."""
+    kb = small_kb(tmp_path, [
+        ent("map/1", "Forgotten Hollow"), ent("map/2", "Forgotten Hollow Instance 2"), ent("map/3", "Forgotten Hollow Instance 3"),
+        ent("npc/1", "Zelya"), ent("npc/2", "Zelya (Free Market)"), ent("npc/3", "Pason"), ent("npc/4", "Pison"),
+    ], {"map/1": ["פורגוטן הולו"], "map/2": ["פורגוטן הולו", "החלל הנשכח"], "map/3": ["פורגוטן הולו", "החלל הנשכח"],
+        "npc/2": ["זליה"], "npc/1": ["זליה"], "npc/3": ["פייסון"], "npc/4": ["פייסון"]})
+    assert kb.find_mentions("איך מגיעים לפורגוטן הולו?") == ["map/1"]
+    assert kb.find_mentions("איפה החלל הנשכח") == ["map/1"]
+    assert kb.find_mentions("איפה זליה") == ["npc/1"]
+    assert kb.find_mentions("איפה פייסון") == []
+
+
+def test_a_dropped_alias_hides_the_shorter_alias_inside_it(tmp_path):
+    """"טיק טוק" is dropped (TikTok): its "טיק" answered with Tick's stats. "למיין" (to sort) is no Myen."""
+    kb = small_kb(tmp_path, [ent("monster/1", "Tick", Level=34), ent("npc/1", "Myen")],
+                  {"monster/1": ["טיק"], "npc/1": ["מיין"]})
+    assert kb.find_mentions("מה הלבל של טיק-טוק") == [] and kb.find_mentions("מה הלבל של טיק") == ["monster/1"]
+    assert quick.answer("מה הלבל של טיק-טוק", kb, t) is None
+    assert kb.find_mentions("איך למיין את האינבנטורי?") == []
+    assert kb.resolve_names("כדאי למיין את הפריטים") == "כדאי למיין את הפריטים"
+    assert kb.resolve_names("ראיתי טיק טוק") == "ראיתי טיק טוק" and kb.resolve_names("ראיתי טיק") == "ראיתי Tick"
+
+
+def test_a_drop_line_picks_the_item_its_level_and_page_name(tmp_path):
+    """Two items share a name: the "Lv N" line under the drop picks the equipment, and the item page's own
+    "Dropped By" list breaks a tie the line can't."""
+    drops = "Drops (MS Classic)\nEquipment\nBlue Moon\nLv 50 · Thief\nDark Shadow\nLv 40 · Thief\nMap Locations\n"
+    kb = small_kb(tmp_path, [
+        {**ent("item/1", "Blue Moon", **{"Level Requirement": 40}), "type": "Equip / Earrings"},
+        {**ent("item/2", "Blue Moon", **{"Level Requirement": 50}), "type": "Equip / Top"},
+        {**ent("item/3", "Dark Shadow", **{"Level Requirement": 40}), "type": "Equip / Top"},
+        {**ent("item/4", "Dark Shadow", **{"Level Requirement": 40}), "type": "Equip / Top"},
+        ent("monster/1", "Iron Hog", Level=28),
+    ], {}, {"monster/1": drops, "item/3": "Dropped By\nYeti\n", "item/4": "Dropped By\nIron Hog\nLv 28\n"})
+    assert kb.monster_drops("monster/1") == ["item/2", "item/4"]
+
+
+@needs_kb
+def test_instant_acc_answer_uses_the_level_the_question_names(real):
+    """"acc needed for lupin at level 25" answered for the character's level 50 (86 ACC, far too low)."""
+    m = combat.monster(real, "monster/35")
+    a = quick.answer("acc needed for lupin at level 25", real, t, SimpleNamespace(level=50))
+    assert a and "Lv. 25" in a.text and f"**{combat.acc_needed(25, m.level, m.avoid)} ACC**" in a.text
+    he = quick.answer("כמה דיוק צריך ללופין בלבל 25", real, t, SimpleNamespace(level=50))
+    assert he and "Lv. 25" in he.text
+    assert "Lv. 50" in quick.answer("acc needed for lupin", real, t, SimpleNamespace(level=50)).text
+
+
+def test_unreleased_pages_are_marked_in_the_ai_context(tmp_path):
+    """A question naming El Nath pre-fetched its page, which reads like any town's: the AI sent players there."""
+    from maplehelper import brain
+    kb = small_kb(tmp_path, [ent("guide/maplestory-classic-worlds-release-date", "Release"),
+                             ent("map/1", "El Nath"), ent("map/2", "Henesys")], {},
+                  {"guide/maplestory-classic-worlds-release-date": RELEASE,
+                   "map/1": "El Nath\nLocation El Nath / Ossyria\n", "map/2": "Henesys\nLocation Victoria Road / Victoria Island\n"})
+    p = brain.build_prompt("how do I get to El Nath from Henesys?", None, None, kb, has_screenshot=False)
+    assert f"[map/1] ({brain.NOT_OUT})" in p and "[map/2]\n" in p
+
+
+def test_drop_table_comes_with_a_names_table(kb_copy):
+    """index.json is one 1.3 MB line Gemini's grep can't read: names.tsv has one entity per line."""
+    kb = KnowledgeBase(kb_copy)
+    kb.ensure_drop_table()
+    rows = (kb_copy / "names.tsv").read_text(encoding="utf-8").split("\n")
+    assert rows[0] == "key\tcategory\tname\ttype" and "monster/130101\tmonster\tRed Snail\t" in rows
+    assert len(rows) == len(kb.entities) + 1
+
+
+def test_scraper_writes_one_entity_per_line(tmp_path):
+    import scrape_meowdb
+    entries = [{"key": "monster/1", "name": "Snail"}, {"key": "item/1", "name": "Snail Shell"}]
+    scrape_meowdb.write_index(tmp_path / "index.json", entries)
+    text = (tmp_path / "index.json").read_text(encoding="utf-8")
+    assert json.loads(text) == entries and len(text.splitlines()) == 4
+
+
+@needs_kb
+def test_real_level_digest_lists_only_monsters_a_player_can_train_on(real):
+    for lv in range(1, 71):
+        rows = [r.split(" | ") for r in real.level_digest(lv).split("\n")[1:]]
+        names = [r[0] for r in rows]
+        assert not any(combat.special_monster(n) for n in names), lv
+        assert len(names) == len(set(names)) or all(r[4] for r in rows if names.count(r[0]) > 1), lv
+        assert not any(w in r[4] for r in rows for w in ("Orbis", "El Nath", "Ludibrium")), lv
+
+
+@needs_kb
+def test_real_shared_and_dropped_aliases(real):
+    assert real.find_mentions("איך מגיעים לפורגוטן הולו?") == ["map/010006000"]
+    assert real.find_mentions("איפה זליה") == ["npc/701"] and real.find_mentions("איפה נלה") == ["npc/406"]
+    assert real.find_mentions("איך למיין את האינבנטורי?") == []
+    assert quick.answer("מה הלבל של טיק-טוק", real, t) is None
+
+
+@needs_kb
+def test_real_drops_of_duplicate_named_items(real):
+    assert "item/1088" in real.monster_drops("monster/24") and "item/911" not in real.monster_drops("monster/24")
+
+
+@needs_kb
+def test_real_instant_shop_answer_names_the_citizen_grade(real):
+    a = quick.answer("who sells Gloves Attack Scroll: Lesser", real, t)
+    assert a and "Guardian of the Village" in a.text
+
+
+def test_item_page_droppers_not_in_the_game_are_marked(tmp_path):
+    """The item page's MSEA "Dropped By" list named Jr. Sentinel (Orbis), and the AI gave it as a source."""
+    from maplehelper import brain
+    kb = small_kb(tmp_path, [ent("guide/maplestory-classic-worlds-release-date", "Release"),
+                             ent("item/1", "Subi Throwing Stars"), ent("monster/1", "Mano", Level=20),
+                             ent("monster/2", "Jr. Sentinel", Level=26), ent("map/1", "Thicket"), ent("map/2", "Tower")], {},
+                  {"guide/maplestory-classic-worlds-release-date": RELEASE,
+                   "item/1": "Dropped By\nMSEA Reference Drops\nMano\nLv 20\nJr. Sentinel\nLv 26\nFree Market Prices\n",
+                   "monster/1": "Map Locations\nMap | Count\n--- | ---\nThicket Victoria Road | 1 | x\n",
+                   "monster/2": "Map Locations\nMap | Count\n--- | ---\nTower Orbis | 1 | x\n",
+                   "map/1": "Location Victoria Road / Victoria Island\n", "map/2": "Location Orbis / Ossyria\n"})
+    p = brain.build_prompt("which monsters drop Subi Throwing Stars?", None, None, kb, has_screenshot=False)
+    assert "\nMano\nLv 20\nJr. Sentinel (not in the game)\nLv 26" in p
+
+
+def test_no_card_for_what_is_not_in_the_game(tmp_path):
+    from maplehelper import brain
+    from maplehelper.providers.base import RawResult
+    kb = small_kb(tmp_path, [ent("guide/maplestory-classic-worlds-release-date", "Release"),
+                             ent("map/1", "El Nath"), ent("map/2", "Henesys")], {},
+                  {"guide/maplestory-classic-worlds-release-date": RELEASE,
+                   "map/1": "Location El Nath / Ossyria\n", "map/2": "Location Victoria Road / Victoria Island\n"})
+    b = brain.Brain(kb)
+    b.backend = SimpleNamespace(exe="fake", run=lambda *a, **k: RawResult(
+        text='El Nath isn\'t out yet; stay around Henesys.\n@@META@@\n{"entities": ["map/1", "map/2"]}'))
+    assert b.ask("how do I get to El Nath?", None, None, None).entities == ["map/2"]

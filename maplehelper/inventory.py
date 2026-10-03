@@ -4,6 +4,14 @@ knowledge base's item pictures.
 The AI couldn't name the items from a screenshot (on a wide screen an icon is a few dozen pixels in a big picture,
 seen live). Matching pixels against the database's own icons is exact where the AI guessed: the game draws the
 same pictures, only scaled.
+
+Both sides go through one rule: a KB picture is first drawn on the slot's beige, then the icon is every pixel clearly
+off that beige, without the drop shadow below it, cropped to those pixels and compared at SIZE x SIZE. The slot's
+speckle stays under that line, so an in-game icon is cropped as tightly as the KB's.
+
+Some pictures are shared: every scroll of a tier, the NPC letters, the Black Sacks. The game draws them alike, so
+no picture can tell them apart. Such a slot is "ambiguous": the player is asked to point the mouse at it so the
+game's tooltip shows its name in the next screenshot, where the AI reads it.
 """
 from __future__ import annotations
 
@@ -16,10 +24,21 @@ from PIL import Image
 
 SLOT_BG = np.array([224, 222, 212], np.int16)      # the beige of an inventory slot
 SIZE = 24                                            # icons are compared at this size
+ICON_DIFF = 40         # a pixel this far off the beige is the icon's (the slot's speckle stays within ~35)
+TWIN = 3.0             # KB pictures this close to each other are one picture (every scroll of a tier)
+MARGIN = 2.0           # the best match must beat every other picture by this much to name the item
+UNKNOWN = 40.0         # a best match this far off is no item the KB has (or one it doesn't confirm is in the game)
+UNKNOWN_ALIKE = 45.0   # the same for a picture several items share (a scroll's is distinctive, its count covers it)
 
 
 def _slot_mask(rgb: np.ndarray) -> np.ndarray:
     return (np.abs(rgb.astype(np.int16) - SLOT_BG) <= 14).all(axis=2)
+
+
+def _slot_like(rgb: np.ndarray) -> np.ndarray:
+    """The slot's own pixels: its beige, the speckle on it and its darker frame, not the white lines around it."""
+    a = rgb.astype(np.int16)
+    return (np.abs(a - SLOT_BG).max(axis=2) <= 30) & ~(a >= 230).all(axis=2)
 
 
 def _runs(row: np.ndarray, lo: int, hi: int) -> list[tuple[int, int]]:
@@ -30,88 +49,189 @@ def _runs(row: np.ndarray, lo: int, hi: int) -> list[tuple[int, int]]:
     return [(int(a), int(b - a)) for a, b in zip(s, e) if lo <= b - a <= hi]
 
 
-def find_slots(rgb: np.ndarray) -> list[tuple[int, int, int]]:
-    """Inventory slots as (x, y, size): rows where three or more equally long, equally spaced beige runs start
-    (the top of a row of slots, above the icons), stacked at the same pitch."""
-    mask = _slot_mask(rgb)
-    best: dict[tuple, list[int]] = {}
+def _columns(mask: np.ndarray, candidates: int = 8) -> list[tuple[list[int], int]]:
+    """Possible slot columns (their left x) and slot width, likeliest first: image rows where three or more equally
+    long, equally spaced slot runs start (a row of slots, above or beside the icons)."""
+    best: dict[tuple, list[list[tuple[int, int]]]] = {}      # grid -> per image row, its runs on that grid
     for y in range(mask.shape[0]):
         runs = _runs(mask[y], 24, 200)
-        for i in range(len(runs) - 2):
+        i = 0
+        while i < len(runs) - 2:          # every grid along the row (the game's scenery can look like one too)
             (x0, n0), (x1, n1), (x2, n2) = runs[i:i + 3]
             pitch = x1 - x0
             if abs(n1 - n0) <= 3 and abs(n2 - n0) <= 3 and abs((x2 - x1) - pitch) <= 3 and pitch - n0 <= n0 // 3:
-                # every run of the row on that grid
-                xs = [x for x, n in runs if abs(n - n0) <= 3 and (x - x0) % pitch in (0, 1, 2, pitch - 1, pitch - 2)]
-                best.setdefault((min(xs) // 4, n0 // 4, pitch // 4), []).append(y)
-                break
-    if not best:
-        return []
-    (gx, gn, gp), ys = max(best.items(), key=lambda kv: len(kv[1]))
-    n, pitch = gn * 4, gp * 4
-    # recover exact numbers from one matching row
-    y0 = ys[0]
-    runs = [r for r in _runs(mask[y0], 24, 200) if abs(r[1] - n) <= 6]
-    if len(runs) < 3:
-        return []
-    size = int(np.median([r[1] for r in runs]))
-    pitch = int(np.median(np.diff([r[0] for r in runs])))
-    xs = [r[0] for r in runs]
-    # slot tops: the first row of each run of consecutive matching rows
-    tops = [y for i, y in enumerate(ys) if i == 0 or y - ys[i - 1] > 2]
-    rows = sorted({min(tops) + k * pitch for k in range(round((max(tops) - min(tops)) / pitch) + 1)})
-    return [(x, y, size) for y in rows for x in xs if y + size <= rgb.shape[0]]
+                on = [j for j, (x, n) in enumerate(runs) if j >= i and abs(n - n0) <= 3
+                      and (x - x0) % pitch in (0, 1, 2, pitch - 1, pitch - 2)]
+                best.setdefault((x0 // 4, n0 // 4, pitch // 4), []).append([runs[j] for j in on])
+                i = on[-1] + 1
+            else:
+                i += 1
+    out = []
+    for rows in sorted(best.values(), key=len, reverse=True)[:candidates]:
+        found = max(rows, key=len)        # the row where most slots show their full width
+        size = int(np.median([n for _, n in found]))
+        pitch = int(np.median(np.diff([x for x, _ in found])))
+        x0 = found[0][0]
+        out.append((sorted({x0 + round((x - x0) / pitch) * pitch for x, _ in found}), size))
+    return out
 
 
-def _normalise(img: Image.Image, mask: np.ndarray) -> np.ndarray | None:
-    """The masked icon cropped to its pixels, on the slot colour, SIZE x SIZE."""
+def _lines(band: np.ndarray) -> np.ndarray:
+    """Per line of a band of slots (lines along axis 0): a line between slots, or the grid's frame. The game draws
+    them white; another plain colour that isn't the slot's beige counts too. Icons never fill every slot of the
+    band with one colour."""
+    a = band.astype(np.int16)
+    light = (a >= 230).all(axis=2).mean(axis=1) >= 0.8
+    med = np.median(a, axis=1).astype(np.int16)
+    same = (np.abs(a - med[:, None, :]) <= 12).all(axis=2).mean(axis=1) >= 0.85
+    beige = (np.abs(med - SLOT_BG) <= 30).all(axis=1)
+    return light | (same & ~beige)
+
+
+def _between(lines: np.ndarray, size: int) -> list[tuple[int, int]]:
+    """(start, length) of the gaps between lines as long as a slot (±1/8), each with a line on both sides (a slot
+    the screen's edge cuts has none past it); the longest run of them at one steady pitch."""
+    d = np.diff(np.concatenate(([1], lines.astype(np.int8), [1])))
+    starts, ends = np.flatnonzero(d == -1), np.flatnonzero(d == 1)
+    tol = max(3, size // 8)
+    cells = [(int(s), int(e - s)) for s, e in zip(starts, ends)
+             if 0 < s and e < len(lines) and abs((e - s) - size) <= tol]
+    if not cells:
+        return []
+    chains: list[list[tuple[int, int]]] = [[cells[0]]]
+    for c in cells[1:]:
+        last = chains[-1]
+        gap = c[0] - last[-1][0]
+        if gap <= size * 1.5 and (len(last) < 2 or abs(gap - (last[1][0] - last[0][0])) <= 3):
+            last.append(c)
+        else:
+            chains.append([c])
+    return max(chains, key=len)
+
+
+def _grid(rgb: np.ndarray, xs: list[int], size: int) -> list[tuple[int, int, int]]:
+    xs = [x for x in xs if x + size <= rgb.shape[1]]
+    if len(xs) < 3:
+        return []
+    rows = _between(_lines(np.concatenate([rgb[:, x:x + size] for x in xs], axis=1)), size)
+    if not rows:
+        return []
+    # the columns between their own lines, along the rows found
+    across = np.concatenate([rgb[y:y + n] for y, n in rows], axis=0).transpose(1, 0, 2)
+    exact = _between(_lines(across), size)
+    if len(exact) >= 3 and len(exact) >= len(xs) - 1:
+        xs = [x for x, _ in exact]
+        size = int(np.median([n for _, n in exact]))
+    return [(x, y, size) for y, _ in rows for x in xs if y + size <= rgb.shape[0]]
+
+
+def find_slots(rgb: np.ndarray) -> list[tuple[int, int, int]]:
+    """Inventory slots as (x, y, size). The slot runs across a row of slots give the columns roughly; the rows are
+    then measured on their own, between the lines that separate them (their pitch differs from the columns'),
+    and the columns again between theirs. A slot the window's edge cuts has no line past it and isn't one. Of the
+    candidate grids, the one with the most slots."""
+    grids = [_grid(rgb, xs, size) for xs, size in _columns(_slot_like(rgb))]
+    return max(grids, key=len, default=[])
+
+
+def _icon_mask(rgb: np.ndarray, hidden: np.ndarray | None = None, shadow: bool = False) -> np.ndarray:
+    """The icon's pixels on a slot: clearly off the beige (the speckle isn't), without the drop shadow under it.
+    The game draws that shadow on its own (not always where the KB picture has it), so neither side keeps it,
+    unless shadow: then it anchors an icon whose bottom a stack count covers."""
+    a = rgb.astype(np.float32)
+    mask = np.abs(a - SLOT_BG).max(axis=2) > ICON_DIFF
+    if hidden is not None:
+        mask &= ~hidden              # covered by something else (a stack count)
+    if shadow:
+        return mask
+    # the shadow darkens the beige: a pixel that is the beige times t (an icon's black outline is darker still)
+    t = a.mean(axis=2) / float(SLOT_BG.mean())
+    shade = mask & (t >= 0.3) & (np.abs(a - t[..., None] * SLOT_BG).max(axis=2) <= 14)
+    body = mask & ~shade
+    # ...below every other pixel of the icon in its column
+    rows = np.arange(a.shape[0])[:, None]
+    lowest = np.where(body, rows, -1).max(axis=0)
+    return mask & ~(shade & (rows > lowest[None, :]))
+
+
+def _normalise(rgb: np.ndarray, mask: np.ndarray, hidden: np.ndarray | None = None):
+    """The masked icon cropped to its pixels, on the slot colour, SIZE x SIZE. With hidden (the pixels something
+    covers, like a stack count): also the weight of each compared pixel, 0 where it was covered."""
     ys, xs = np.nonzero(mask)
-    if len(xs) < 20:
-        return None
-    box = (int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1)
-    a = np.asarray(img.convert("RGB")).astype(np.float32)
+    if len(xs) < 12:
+        return (None, None) if hidden is not None else None
+    a = rgb.astype(np.uint8).copy()
     a[~mask] = SLOT_BG
-    crop = Image.fromarray(a.astype(np.uint8)).crop(box)
+    box = (slice(ys.min(), ys.max() + 1), slice(xs.min(), xs.max() + 1))
+    crop = Image.fromarray(a[box])
     side = max(crop.size)
+    at = ((side - crop.width) // 2, (side - crop.height) // 2)
     square = Image.new("RGB", (side, side), tuple(int(v) for v in SLOT_BG))
-    square.paste(crop, ((side - crop.width) // 2, (side - crop.height) // 2))
-    return np.asarray(square.resize((SIZE, SIZE), Image.BILINEAR)).astype(np.float32)
+    square.paste(crop, at)
+    vec = np.asarray(square.resize((SIZE, SIZE), Image.BOX)).astype(np.float32)
+    if hidden is None:
+        return vec
+    cover = Image.new("F", (side, side), 0.0)
+    cover.paste(Image.fromarray(hidden[box].astype(np.float32), "F"), at)
+    weight = 1.0 - np.asarray(cover.resize((SIZE, SIZE), Image.BOX))
+    return vec, np.where(weight >= 0.5, weight, 0.0).astype(np.float32)
 
 
-def _icon_vector(path) -> np.ndarray | None:
+def _on_slot(path) -> np.ndarray | None:
+    """A KB picture drawn on a slot, as the game draws it (its soft shadow blends into the beige)."""
     try:
         im = Image.open(path).convert("RGBA")
     except OSError:
         return None
-    a = np.asarray(im)
-    shadow = (a[..., :3].max(axis=2) < 90) & (a[..., 3] < 200)    # the soft drop shadow under some icons
-    return _normalise(im, (a[..., 3] > 60) & ~shadow)
+    slot = Image.new("RGBA", im.size, tuple(int(v) for v in SLOT_BG) + (255,))
+    return np.asarray(Image.alpha_composite(slot, im).convert("RGB"))
 
 
-_INDEX: dict[str, tuple[list[str], np.ndarray]] = {}
+def _icon_vectors(path) -> tuple[np.ndarray, np.ndarray] | None:
+    """A KB picture as compared: without its shadow, and with it."""
+    rgb = _on_slot(path)
+    if rgb is None:
+        return None
+    plain, shaded = _normalise(rgb, _icon_mask(rgb)), _normalise(rgb, _icon_mask(rgb, shadow=True))
+    return None if plain is None or shaded is None else (plain, shaded)
+
+
+@dataclass
+class Index:
+    keys: list[str]
+    vecs: np.ndarray                 # N x SIZE x SIZE x 3, the pictures without their shadow
+    shaded: np.ndarray               # the same with it
+
+
+_INDEX: dict[str, Index] = {}
 _INDEX_LOCK = threading.Lock()     # the background warm-up and a read must not both build it
 
 
-def _index(kb) -> tuple[list[str], np.ndarray]:
+def _index(kb) -> Index:
     # by folder and size: a KB update keeps the folder but changes its items (a stale key broke describe())
     root = f"{getattr(kb, 'root', '')}|{len(kb.entities)}|{id(kb)}"
     with _INDEX_LOCK:
         return _INDEX.get(root) or _build_index(kb, root)
 
 
-def _build_index(kb, root: str) -> tuple[list[str], np.ndarray]:
-    """Every item picture as a comparable vector (called under _INDEX_LOCK)."""
+def _build_index(kb, root: str) -> Index:
+    """Every picture of an item the KB confirms is in the game, as a comparable vector (called under _INDEX_LOCK).
+    An item whose only sources are unreleased (Return Scroll to Orbis) can't be in a bag: it is no candidate."""
+    from . import availability
+    open_ = availability.of(kb)
     _INDEX.clear()
-    keys, vecs = [], []
+    keys, vecs, shaded = [], [], []
     for k, e in kb.entities.items():
-        if e.get("category") != "item":
+        if e.get("category") != "item" or not open_.item_open(k):
             continue
         path = kb.image_path(k)
-        v = _icon_vector(path) if path else None
+        v = _icon_vectors(path) if path else None
         if v is not None:
             keys.append(k)
-            vecs.append(v)
-    _INDEX[root] = (keys, np.stack(vecs) if vecs else np.zeros((0, SIZE, SIZE, 3), np.float32))
+            vecs.append(v[0])
+            shaded.append(v[1])
+    empty = np.zeros((0, SIZE, SIZE, 3), np.float32)
+    _INDEX[root] = Index(keys, np.stack(vecs) if vecs else empty, np.stack(shaded) if shaded else empty)
     return _INDEX[root]
 
 
@@ -119,54 +239,171 @@ def _build_index(kb, root: str) -> tuple[list[str], np.ndarray]:
 class Slot:
     index: int                      # 1-based, left to right, top to bottom
     picture: bytes                  # the icon as the game shows it (PNG)
-    matches: list[tuple[str, float]] = field(default_factory=list)   # (item key, distance), best first
+    # (item key, distance), best first. certain: the first is the item; ambiguous: every item drawn with this
+    # very picture (any of them); unknown: the nearest pictures, none close enough to name the item
+    matches: list[tuple[str, float]] = field(default_factory=list)
+    status: str = "certain"         # "certain" | "ambiguous" | "unknown" | "hovered"
 
 
 def warm(kb) -> None:
-    """Build the icon index ahead of time (2,700 pictures, ~1 s): the first inventory check doesn't wait."""
+    """Build the icon index ahead of time (1,400 pictures, ~1 s): the first inventory check doesn't wait."""
     _index(kb)
 
 
+def _whole(c: np.ndarray) -> bool:
+    """The slot is drawn whole: at least two of its corners show the slot's beige (an icon may reach one or two
+    corners; a window, a tooltip or the screen's edge over the slot covers more)."""
+    k = max(2, c.shape[0] // 16)
+    corners = (c[:k, :k], c[:k, -k:], c[-k:, :k], c[-k:, -k:])
+    return sum((~_icon_mask(q)).mean() >= 0.6 for q in corners) >= 2
+
+
+def _count_box(c: np.ndarray) -> tuple[int, int] | None:
+    """(top, right) of the stack count the game prints at a slot's bottom left ("92": light digits outlined in
+    black), or None. Only its black outline is off the beige enough to look like the icon's."""
+    size = c.shape[0]
+    top = int(size * 0.6)
+    band = c[top:, : int(size * 0.75)].astype(np.int16)
+    black = band.max(axis=2) <= 60
+    light = band.min(axis=2) >= 170
+    texty = (black.sum(axis=0) >= 2) & (light.sum(axis=0) >= 2)
+    start = int(np.argmax(texty)) if texty.any() else -1
+    if start < 0 or start > size * 0.12:
+        return None
+    end = start
+    while end < len(texty) and (texty[end] or (end + 1 < len(texty) and texty[end + 1])):
+        end += 1
+    if end - start < size * 0.08:
+        return None
+    rows = np.flatnonzero(black[:, start:end].any(axis=1))
+    return top + int(rows[0]), end
+
+
+def _vectors(c: np.ndarray) -> list[tuple[np.ndarray, np.ndarray | None, bool]]:
+    """The slot's icon as comparable readings (vector, weight of each pixel or None for all, with the shadow): as
+    it is, and without a stack count when it seems to have one. Under a count the icon isn't compared, and its
+    shadow, still in view to the right, keeps the crop where the KB picture's is."""
+    mask = _icon_mask(c)
+    v = _normalise(c, mask)
+    out = [(v, None, False)] if v is not None else []
+    box = _count_box(c)
+    if box:
+        hidden = np.zeros(mask.shape, bool)
+        hidden[box[0]:, :box[1] + 1] = True
+        v, w = _normalise(c, _icon_mask(c, hidden, shadow=True), hidden)
+        if v is not None and w.sum() > SIZE * SIZE / 3:
+            out.append((v, w, True))
+    return out
+
+
+def _distances(vecs: list[tuple[np.ndarray, np.ndarray | None, bool]], index: Index) -> np.ndarray:
+    """Per KB picture, its distance to the slot's icon (the closest of the slot's readings)."""
+    out = []
+    for v, w, shaded in vecs:
+        diff = np.abs((index.shaded if shaded else index.vecs) - v).mean(axis=3)
+        out.append(diff.mean(axis=(1, 2)) if w is None else (diff * w).sum(axis=(1, 2)) / w.sum())
+    return np.min(out, axis=0)
+
+
+def _match(vecs: list, index: Index, kb, top: int) -> tuple[str, list[tuple[str, float]]]:
+    """(status, matches) for a slot: see Slot."""
+    d = _distances(vecs, index)
+    order = np.argsort(d, kind="stable")
+    b = order[0]
+    nearest = [(index.keys[j], float(d[j])) for j in order[:top]]
+    # the KB pictures that are the best one's twins: the game draws them alike
+    twin = np.abs(index.vecs - index.vecs[b]).mean(axis=(1, 2, 3)) <= TWIN
+    twins = [j for j in order if twin[j]]
+    alike = len({(kb.get(index.keys[j]) or {}).get("name") for j in twins}) > 1
+    if d[b] > (UNKNOWN_ALIKE if alike else UNKNOWN):
+        return "unknown", nearest
+    rival = next((j for j in order if not twin[j]), None)
+    if rival is not None and d[rival] - d[b] < MARGIN:
+        return "unknown", nearest          # another picture fits as well: no telling which
+    if alike:
+        return "ambiguous", [(index.keys[j], float(d[j])) for j in twins]
+    return "certain", nearest
+
+
 def read(img: Image.Image, kb, top: int = 3, cursor: tuple[int, int] | None = None) -> list[Slot]:
-    """Every filled slot of the inventory in a full-resolution screenshot, with its best database matches.
-    cursor: the mouse position in the image; the game's hand cursor over a slot is no item."""
+    """Every filled slot of the inventory in a full-resolution screenshot, with its database matches.
+    cursor: the mouse position in the image. The game's hand cursor over a slot is no item: that slot comes back
+    as "hovered" (its name is in the game's tooltip in the same screenshot)."""
     rgb = np.asarray(img.convert("RGB"))
-    keys, vecs = _index(kb)
+    index = _index(kb)
     out = []
     for i, (x, y, size) in enumerate(find_slots(rgb), 1):
         # the hand sprite hangs below and right of the mouse point (~0.6 slot): any slot it touches
         if cursor and x - size * 0.6 <= cursor[0] < x + size and y - size * 0.7 <= cursor[1] < y + size:
+            if x <= cursor[0] < x + size and y <= cursor[1] < y + size:
+                out.append(Slot(i, b"", status="hovered"))      # the one the mouse points at
             continue
-        cell = img.crop((x, y, x + size, y + size))
-        c = np.asarray(cell.convert("RGB")).astype(np.int16)
-        edge = max(3, size // 12)
-        if _slot_mask(c[:edge]).mean() < 0.6 or min(_slot_mask(c[:, :edge]).mean(), _slot_mask(c[:, -edge:]).mean()) < 0.8:
-            continue                 # not a whole slot (the last row is cut by the window's edge)
-        if c.reshape(-1, 3).std(axis=0).max() < 20:
+        c = rgb[y:y + size, x:x + size]
+        if not _whole(c):
+            continue                 # covered (a window, a tooltip) or cut by the screen's edge
+        if _icon_mask(c).mean() < 0.02:
             continue                 # an empty slot: just the speckled beige
-        dark_shadow = (np.abs(c - c.mean(axis=2, keepdims=True)) < 10).all(axis=2) & (c.max(axis=2) < 200) & \
-            (c.max(axis=2) > 60)
-        mask = ~_slot_mask(c) & ~dark_shadow & ~((c >= 232).all(axis=2))
-        if mask.mean() < 0.04:
-            continue                 # an empty slot
-        v = _normalise(cell, mask)
-        if v is None:
+        vecs = _vectors(c)
+        if not vecs:
             continue
         buf = io.BytesIO()
-        cell.save(buf, "PNG")
+        Image.fromarray(c).save(buf, "PNG")
         slot = Slot(i, buf.getvalue())
-        if len(keys):
-            d = np.abs(vecs - v).mean(axis=(1, 2, 3))
-            order = np.argsort(d)[:top]
-            slot.matches = [(keys[j], float(d[j])) for j in order]
+        if len(index.keys):
+            slot.status, slot.matches = _match(vecs, index, kb, top)
+        else:
+            slot.status = "unknown"
         out.append(slot)
     return out
 
 
+def ambiguous_example(slot: Slot, kb) -> str:
+    """A name that stands for an ambiguous slot's look-alikes ("Gloves Attack Scroll: Lesser")."""
+    for k, _ in slot.matches:
+        e = kb.get(k)
+        if e:
+            return e["name"]
+    return ""
+
+
 def describe(slots: list[Slot], kb) -> str:
-    """The reading for the AI: per slot, the likely items (closest first)."""
+    """The reading for the AI: per slot, what the app knows about it."""
     lines = []
     for s in slots:
-        names = ", ".join(f"{kb.get(k)['name']} [{k}]" for k, _ in s.matches if kb.get(k))
-        lines.append(f"Slot {s.index}: {names or 'unknown'}")
+        names = [f"{kb.get(k)['name']} [{k}]" for k, _ in s.matches if kb.get(k)]
+        if s.status == "hovered":
+            lines.append(f"Slot {s.index}: under the mouse pointer. If the screenshot shows the game's item tooltip "
+                         "(the box with an item name next to the pointer), that is this slot's item: read its name "
+                         "there.")
+        elif s.status == "ambiguous":
+            shown = ", ".join(names[:8]) + (f", … ({len(names) - 8} more)" if len(names) > 8 else "")
+            lines.append(f"Slot {s.index}: AMBIGUOUS, one of {len(names)} items drawn with the very same picture "
+                         f"({shown}). The picture can't tell them apart: don't guess which one.")
+        elif s.status == "unknown":
+            lines.append(f"Slot {s.index}: not recognised (no single KB picture matches it; nearest: "
+                         f"{', '.join(names) or 'none'}). Don't name it from these.")
+        else:
+            alt = f" (other close pictures: {', '.join(names[1:])})" if len(names) > 1 else ""
+            lines.append(f"Slot {s.index}: {names[0] if names else 'unknown'}{alt}")
     return "\n".join(lines)
+
+
+def for_ai(slots: list[Slot], kb) -> str:
+    """The hidden context the AI gets with an inventory check: the reading, and how to treat each kind of slot."""
+    described = describe(slots, kb)
+    if not described:
+        return ""
+    return ("<inventory_read>\nThe app matched each filled inventory slot's icon to the database pictures "
+            "(slots count left to right, top to bottom):\n" + described + "\n\n"
+            "How to use it:\n"
+            "- A slot with a name was recognised from its picture: that is the item.\n"
+            "- An AMBIGUOUS slot holds one of several items drawn with the very same picture (every scroll of a tier "
+            "looks alike, so do the NPC letters). Never pick one of them yourself. If the screenshot shows the "
+            "game's item tooltip for that slot (the box with the item's name next to the mouse pointer), use the "
+            "name written there. Otherwise tell the player it is one of those look-alike items, and that to know "
+            "which, they hover the mouse over it in the game (without clicking) until its name shows, then press "
+            "F5 in the chat to check again.\n"
+            "- A slot that is not recognised: say you couldn't tell what it is (same hover-and-F5 tip); never name "
+            "it from the nearest pictures.\n"
+            "- The slot under the mouse pointer: read its name from the tooltip in the screenshot.\n"
+            "</inventory_read>")

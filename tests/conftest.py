@@ -11,8 +11,19 @@ import tempfile
 from pathlib import Path
 
 os.environ["APPDATA"] = tempfile.mkdtemp(prefix="maplehelper-tests-")
+# the other per-user folders too: the AI CLIs are looked up there (%LOCALAPPDATA%\Programs, ~/.local/bin, ~/.grok)
+_HOME = tempfile.mkdtemp(prefix="maplehelper-tests-home-")
+for _var in ("LOCALAPPDATA", "USERPROFILE", "HOME"):
+    os.environ[_var] = _HOME
+os.environ.pop("GROK_BIN_DIR", None)
 # every window a test makes stays off the screen (one test file without this flashed a real Settings window)
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
+# offscreen Qt has no fonts unless pointed at them: text would be laid out in a fake fixed-width font, and
+# results would change once a test registers real fonts. Every test measures the fonts players have
+_FONTS = {"win32": r"C:\Windows\Fonts", "darwin": "/System/Library/Fonts"}.get(sys.platform, "")
+if _FONTS and os.path.isdir(_FONTS):
+    os.environ.setdefault("QT_QPA_FONTDIR", _FONTS)
+
 # telemetry.py ships a real PostHog key: no test may send real usage stats
 # (test_telemetry.py lifts this for itself and mocks the network instead)
 os.environ["MAPLEHELPER_NO_TELEMETRY"] = "1"
@@ -23,6 +34,57 @@ sys.path.insert(0, str(ROOT / "tools"))
 import pytest  # noqa: E402
 
 FIXTURE_KB = Path(__file__).parent / "fixtures" / "kb"
+
+# CI sets this after unpacking a real kb.zip into data/kb: the game-value tests skip without it locally,
+# but there a missing KB must fail the run, not leave it green with those tests silently skipped
+REQUIRE_REAL_KB = bool(os.environ.get("MAPLEHELPER_REQUIRE_REAL_KB"))
+
+
+@pytest.hookimpl(wrapper=True)
+def pytest_runtest_makereport(item, call):
+    rep = yield
+    if REQUIRE_REAL_KB and rep.skipped and "knowledge base" in str(rep.longrepr):
+        rep.outcome = "failed"
+        rep.longrepr = f"MAPLEHELPER_REQUIRE_REAL_KB is set, but this test was skipped: {rep.longrepr}"
+    return rep
+
+
+AI_CLIS = {"codex", "claude", "agy", "grok"}
+LOOPBACK = ("127.", "::1", "localhost")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def no_real_world():
+    """Tests never start the AI CLIs installed on this machine or reach the internet.
+
+    Windows and dialogs read the account, models and plan usage on background threads, and the prices page
+    asks the free market site; on a developer's PC that ran the real Codex app-server and reached meowdb.com.
+    Session-wide, so a thread that outlives its test is still covered. A test that needs a CLI or a reply
+    patches it itself (FakePopen, find_exe, urlopen) on top of this."""
+    import shutil
+    import socket
+
+    from maplehelper import market
+    from maplehelper.providers import codex
+
+    mp = pytest.MonkeyPatch()
+    which = shutil.which
+    mp.setattr(shutil, "which", lambda name, *a, **k: None if Path(str(name)).stem.lower() in AI_CLIS
+               else which(name, *a, **k))
+    mp.setattr(codex, "store_apps", lambda: [])           # the Microsoft Store copy, found through the registry
+    mp.setattr(market, "free_market", lambda name, timeout=10: None)
+
+    connect = socket.socket.connect
+
+    def local_only(sock, address):
+        host = str(address[0]) if isinstance(address, tuple) else str(address)
+        if sock.family in (socket.AF_INET, socket.AF_INET6) and not host.startswith(LOOPBACK):
+            raise OSError(f"tests must not reach the network ({host})")
+        return connect(sock, address)
+
+    mp.setattr(socket.socket, "connect", local_only)
+    yield
+    mp.undo()
 
 
 @pytest.fixture

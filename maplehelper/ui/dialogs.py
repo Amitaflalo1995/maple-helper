@@ -14,18 +14,24 @@ from .. import bidi, providers
 from ..providers.base import login_failed, login_waiting, stop_login
 from .controls import AdaptiveRow, FlowLayout, Section, Segmented, Select, Stepper, Switch, rtl_buttons
 from .glass import GlassDialog, no_default_buttons
+from .patchnotes import gutter
 from ..i18n import I18n
-from ..jobs import JOBS, job_label        # the job tree: base class -> [(job, min level)], checked against the KB
+from ..jobs import JOBS, job_label, open_jobs        # the job tree: base class -> [(job, min level)], checked against the KB
 from ..kb import KnowledgeBase
 from ..store import ASSETS, History, Profiles, Settings
 from . import theme
 
 CLASS_HE = {"Beginner": "ביגינר", "Warrior": "לוחם", "Magician": "קוסם", "Bowman": "קשת", "Thief": "גנב"}
-MAX_LEVEL = 200
+# Only the level field's bound, not the game's level cap: the KB says no launch cap is published (testers reached
+# at least 100). It matches the bound the saved profile keeps (store._repair), so nothing typed here is
+# changed on the next load.
+LEVEL_FIELD_MAX = 250
 
 
-def jobs_for(base_class: str, level: int) -> list[str]:
-    return [j for j, lv in JOBS.get(base_class, []) if lv <= level]
+def jobs_for(base_class: str, level: int, kb=None) -> list[str]:
+    """The jobs a character of this class can have at this level, only those in the game (no 3rd job until
+    the KB confirms it)."""
+    return [j for j, lv in open_jobs(base_class, kb) if lv <= level]
 
 
 def _title(text: str) -> QLabel:
@@ -42,6 +48,13 @@ def _body(text: str) -> QLabel:
 
 def _field(text: str) -> QLabel:
     return QLabel(text, objectName="FieldLabel")
+
+
+def hotkey_choices() -> list[str]:
+    """The F-keys a hotkey can be. Windows keeps F12 for the debugger and never lets a program register it
+    (RegisterHotKey fails, and the app then said "F12 is taken by another program" on every start); macOS has it."""
+    last = 11 if sys.platform == "win32" else 12
+    return [f"F{i}" for i in range(1, last + 1)]
 
 
 def _while_open(slot):
@@ -153,6 +166,7 @@ def _code_row(t: I18n, on_send) -> tuple[QWidget, QLineEdit]:
     """Gemini's sign-in ends with a code the browser shows: a field to paste it, shown while that sign-in waits."""
     edit = QLineEdit()
     edit.setPlaceholderText(t("ob_code_hint"))
+    edit.setAccessibleName(t("ob_code_hint"))          # a placeholder isn't read as the field's name
     edit.setLayoutDirection(Qt.LeftToRight)                       # the code itself is Latin
     edit.returnPressed.connect(on_send)
     btn = QPushButton(t("ob_code_send"), objectName="Secondary")
@@ -178,11 +192,12 @@ class CharacterForm(QWidget):
 
     def __init__(self, t: I18n, kb: KnowledgeBase):
         super().__init__()
-        self.t = t
+        self.t, self.kb = t, kb
         lay = QVBoxLayout(self)
         lay.setSpacing(10)
         lay.addWidget(_field(t("ob_char_name")))
         self.name = QLineEdit()
+        self.name.setAccessibleName(t("ob_char_name"))     # its label above is a separate QLabel
         self.name.setMaxLength(24)
         self.name.textChanged.connect(lambda *_: self.changed.emit())
         lay.addWidget(self.name)
@@ -215,18 +230,21 @@ class CharacterForm(QWidget):
         row = QHBoxLayout()
         col1 = QVBoxLayout()
         col1.addWidget(_field(t("ob_level")))
-        self.level = Stepper(1, MAX_LEVEL, 1)
+        self.level = Stepper(1, LEVEL_FIELD_MAX, 1)
+        self.level.set_label(t("ob_level"), t("step_less"), t("step_more"))
         self.level.valueChanged.connect(lambda *_: self._refresh_jobs())
         col1.addWidget(self.level)
         row.addLayout(col1)
         col2 = QVBoxLayout()
         col2.addWidget(_field(t("ob_job")))
         self.job = Select()
+        self.job.set_label(t("ob_job"))
         self.job.currentIndexChanged.connect(lambda *_: self.changed.emit())
         self._job_picked = False       # the user chose a job by hand: keep it while it stays available
         self.job.picked.connect(lambda *_: setattr(self, "_job_picked", True))
         col2.addWidget(self.job)
         self.job_fixed = QLabel("Beginner", objectName="JobFixed")
+        self.job_fixed.setAccessibleDescription(t("ob_job"))
         # an English word in a Hebrew form still starts on the right, like the other fields
         self.job_fixed.setAlignment((Qt.AlignRight if t.rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
         self.job_fixed.hide()
@@ -264,8 +282,8 @@ class CharacterForm(QWidget):
             # a class is chosen at its 1st job, so its level starts there (Warrior 10, Magician 8…)
             first_level = next(lv for j, lv in JOBS[cls] if j != "Beginner")
             self.level.setMinimum(first_level)
-            jobs = [j for j in jobs_for(cls, self.level.value()) if j != "Beginner"]
-            upcoming = [(j, lv) for j, lv in JOBS[cls] if lv > self.level.value()]
+            jobs = [j for j in jobs_for(cls, self.level.value(), self.kb) if j != "Beginner"]
+            upcoming = [(j, lv) for j, lv in open_jobs(cls, self.kb) if lv > self.level.value()]
             if upcoming:
                 lv = upcoming[0][1]
                 names = [job_label(job, self.t.lang) for job, need in upcoming if need == lv]
@@ -330,7 +348,9 @@ class Onboarding(GlassDialog):
         self.t = I18n(settings["language"] or "he")
         self.edit_id = edit_id
         only_character = only_character or edit_id is not None
-        title = self.t("add_character") if only_character else "Maple Helper"
+        # the window title is what the taskbar, Alt+Tab and screen readers show
+        title = (self.t("edit_character") if edit_id else
+                 self.t("add_character") if only_character else "Maple Helper")
         super().__init__(title, self.t.rtl)
         self.settings, self.profiles, self.kb = settings, profiles, kb
         self.stylesheet_fn = stylesheet_fn
@@ -427,6 +447,7 @@ class Onboarding(GlassDialog):
         lay.addWidget(_title(self.t("ob_connect")))
         rtl = self.t.rtl
         self.provider_pick = Segmented([(p.label, p.name) for p in providers.PROVIDERS.values()], self.provider, rtl)
+        self.provider_pick.set_label(self.t("ai_provider"))
         self.provider_pick.changed.connect(self._on_provider)
         prow = QHBoxLayout()
         prow.addWidget(self.provider_pick)
@@ -473,6 +494,7 @@ class Onboarding(GlassDialog):
         lay.addSpacing(8)
         sec = Section(self.t("ob_use_api_key"), rtl)
         self.key_edit = QLineEdit()
+        self.key_edit.setAccessibleName(self.t("ob_use_api_key"))     # the section header names it on screen
         self.key_edit.setEchoMode(QLineEdit.Password)
         self.key_edit.setLayoutDirection(Qt.LeftToRight)
         self.key_edit.returnPressed.connect(self._check_key)      # Enter checks the pasted key
@@ -589,11 +611,17 @@ class Onboarding(GlassDialog):
     # logic ---------------------------------------------------------------
 
     RESTART = 2
+    _carried: dict | None = None     # what the player typed, kept across a language restart (restart_on_language)
 
     def _on_language(self, btn):
         lang = btn.property("lang")
         if lang != self.t.lang:
-            # reopen in the chosen language (the app loops on RESTART)
+            # reopen in the chosen language (the app loops on RESTART). The new dialog is built from scratch:
+            # carry over what was typed, or a character filled in before going back here was lost
+            f = self.form
+            Onboarding._carried = {"name": f.name.text(), "base_class": f.base_class(), "level": f.level.value(),
+                                   "job": f.current_job() if f._job_picked else "", "provider": self.provider,
+                                   "key": self.key_edit.text()}
             self.settings["language"] = lang
             self.done(self.RESTART)
             return
@@ -695,7 +723,10 @@ class Onboarding(GlassDialog):
             self._signing_in = False
             return
         if self._poll_left <= 0:
-            # gave up waiting: back on top, and no more "this updates by itself" for a check that stopped
+            # gave up waiting: back on top, and no more "this updates by itself" for a check that stopped. The
+            # sign-in still waiting ends too, or the "click the sign-in button again" this says did nothing
+            stop_login()
+            self._login_proc = None
             self._end_sign_in()
             self.login_hint.setText(bidi.plain(self.t("sign_in_timeout"), self.t.rtl))
             self.login_hint.show()
@@ -714,12 +745,14 @@ class Onboarding(GlassDialog):
         if provider != self.provider:
             return            # a check that started before the player switched provider
         t = self.t
+        signed_in = st == "ok"
         # a key that checked out counts as connected, whatever the account check says (it reads the sign-in)
-        self._ai_ok = st == "ok" or self.settings.api_key_mode(provider)
+        self._ai_ok = signed_in or self.settings.api_key_mode(provider)
         if self._ai_ok:
             st = "ok"
         text = {"ok": t("ob_connected"), "logged_out": t.p("ob_not_logged", provider),
-                "not_installed": t.p("ob_not_installed", provider)}[st]
+                "not_installed": t.p("ob_not_installed", provider),
+                "offline": t("ob_offline", name=providers.get(provider).label)}[st]
         self.status_label.setText(bidi.plain(text, t.rtl))
         self.login_btn.setVisible(st == "logged_out")
         if self._install_check:
@@ -734,7 +767,10 @@ class Onboarding(GlassDialog):
                 self._end_sign_in()      # back on top, showing "Connected"
             self.login_hint.hide()
             self.install_btn.hide()
-            self.settings.set_api_key_mode(provider, False)
+            if signed_in:
+                # the account itself works: answers go through it, not the key. Only then: a stored key is what
+                # made a signed-out check "connected", and dropping its mode here left the player with no AI
+                self.settings.set_api_key_mode(provider, False)
         elif not self._signing_in:
             self.install_btn.setVisible(st == "not_installed")
         self._update_nav()
@@ -827,10 +863,23 @@ class Onboarding(GlassDialog):
         self._update_nav()
 
     def restart_on_language(self):
-        """After a language restart, open straight on the AI step."""
-        if not self.only_character and self.stack.count() > 1:
+        """After a language restart, open straight on the AI step, with what was typed before it."""
+        carried, Onboarding._carried = Onboarding._carried, None
+        if self.only_character:
+            return
+        if carried:
+            self._restore(carried)
+        if self.stack.count() > 1:
             self.stack.setCurrentIndex(1)
             self._update_nav()
+
+    def _restore(self, c: dict):
+        from types import SimpleNamespace
+        if c.get("base_class") or c.get("name"):
+            self.form.load(SimpleNamespace(name=c["name"], base_class=c["base_class"], level=c["level"], job=c["job"]))
+            self.form._job_picked = bool(c["job"])     # a job the player hadn't picked yet stays unpicked
+        if c.get("key") and c.get("provider") == self.provider:
+            self.key_edit.setText(c["key"])
 
 
 class ConfirmDialog(GlassDialog):
@@ -890,7 +939,7 @@ class SettingsDialog(GlassDialog):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         body = QWidget(objectName="Feed")
         lay = QVBoxLayout(body)
-        lay.setContentsMargins(0, 0, 6, 0)
+        lay.setContentsMargins(*gutter(rtl))          # the room before the scrollbar, on its side (left in Hebrew)
         lay.setSpacing(18)
         scroll.setWidget(body)
         outer.addWidget(scroll, 1)
@@ -904,6 +953,7 @@ class SettingsDialog(GlassDialog):
         # small / medium / large "A" (the stylesheet wins over setFont, so size it there)
         for i, b in enumerate(self.font.group.buttons()):
             b.setStyleSheet(f"font-size: {11 + i * 4}px; font-weight: 600;")
+            b.setAccessibleName(t(("font_small", "font_medium", "font_large")[i]))   # three "A"s, read aloud
         sec.add_row(t("font_size"), self.font)
         self.lang = Segmented([("עברית", "he"), ("English", "en")], settings["language"] or "he", rtl)
         sec.add_row(t("language"), self.lang)
@@ -911,15 +961,21 @@ class SettingsDialog(GlassDialog):
 
         # keys
         sec = Section(t("sec_keys"), rtl)
-        fkeys = [f"F{i}" for i in range(1, 13)]
+        fkeys = hotkey_choices()
+        from ..store import DEFAULT_SETTINGS
         self.hk_toggle = Select()
         self.hk_toggle.addItems(fkeys)
-        self.hk_toggle.setCurrentText(settings["hotkey_toggle"])
-        sec.add_row(t("hotkey_toggle"), self.hk_toggle)
         self.hk_voice = Select()
         self.hk_voice.addItems(fkeys)
-        self.hk_voice.setCurrentText(settings["hotkey_voice"])
-        sec.add_row(t("hotkey_voice"), self.hk_voice)
+        for pick, key in ((self.hk_toggle, "hotkey_toggle"), (self.hk_voice, "hotkey_voice")):
+            # a key that can't be offered here (F12 saved on Windows, where it never worked): the default instead,
+            # not whichever key happened to be first in the list
+            pick.setCurrentText(settings[key] if settings[key] in fkeys else DEFAULT_SETTINGS[key])
+        sec.add_row(t("hotkey_toggle"), self.hk_toggle)
+        # a Mac's F-keys are media keys unless fn is held (the texts teach "fn+F9"), and F11 shows the desktop:
+        # said once under the two keys, not on every choice
+        sec.add_row(t("hotkey_voice"), self.hk_voice, hint=t("hotkey_fn_mac") if t.mac else "",
+                    hint_below=t.mac)
         self.keys_error = QLabel(bidi.plain(t("hotkey_same"), rtl), objectName="WarnHint")   # a warning, not a hint
         self.keys_error.setWordWrap(True)
         self.keys_error.setContentsMargins(0, 4, 0, 4)
@@ -951,7 +1007,9 @@ class SettingsDialog(GlassDialog):
         self.model_pick.picked.connect(self._on_model)
         self._model_values: list = []
         self._models_bridge = _Bridge()
-        self._models_bridge.account.connect(lambda r: self._show_models(r["provider"], r["models"]))
+        # a bound method, not a lambda: the lambda held the dialog from inside the bridge's C++ connection, where
+        # Python's collector can't see it, so every Settings window opened stayed in memory with its bridges
+        self._models_bridge.account.connect(self._on_models)
         self._fill_models()
         self.account_label = QLabel(bidi.plain(t("ob_checking"), rtl), objectName="RowLabel")
         self.account_label.setWordWrap(True)
@@ -1123,6 +1181,9 @@ class SettingsDialog(GlassDialog):
         else:
             self._show_models(ai.name, ai.models())
 
+    def _on_models(self, r: dict):
+        self._show_models(r["provider"], r["models"])
+
     @_while_open
     def _show_models(self, name: str, models: list):
         from ..providers.base import model_name
@@ -1216,11 +1277,13 @@ class SettingsDialog(GlassDialog):
         elif st == "ok":
             self._set_account_text(t("account_signed_in", email=acc["email"]) if acc.get("email")
                                    else t("account_signed_in_no_email", name=self._ai().label))
+        elif st == "offline":     # the sign-in may be fine: no "Sign in" (it would fail offline too)
+            self._set_account_text(t("ob_offline", name=self._ai().label))
         elif not self._login_timer.isActive():
             self._set_account_text(t.p("ob_not_logged", p) if st == "logged_out" else t.p("ob_not_installed", p))
         connected = api_key or st == "ok"
         self.switch_btn.setText(t("account_switch") if connected else t.p("ob_login", p))
-        self.switch_btn.setVisible(st != "not_installed")
+        self.switch_btn.setVisible(st not in ("not_installed", "offline"))
         self.logout_btn.setVisible(connected)
         # not installed, or a sign-in that broke ("reinstalling should fix this"): offer the installer
         self.install_btn.setVisible(not connected and (st == "not_installed" or self._login_broken))
@@ -1358,8 +1421,12 @@ class SettingsDialog(GlassDialog):
             self._login_failed()
             return
         if self._login_left <= 0:
-            # gave up waiting: say so (the text said "finish signing in…" forever) and show the real status
+            # gave up waiting: say so (the text said "finish signing in…" forever) and show the real status.
+            # The sign-in still waiting for the browser ends too: the hint says to click the button again, and
+            # that click did nothing while the old one lived (login_waiting)
             self._login_timer.stop()
+            stop_login()
+            self._login_proc = None
             self._set_on_top(True)
             self.account_hint.setText(bidi.plain(self.t("sign_in_timeout"), self.t.rtl))
             self.account_hint.show()

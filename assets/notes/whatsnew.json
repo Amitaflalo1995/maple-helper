@@ -1,5 +1,24 @@
 [
  {
+  "version": "0.8.3",
+  "he": [
+   "רק מה שקיים במשחק: האפליקציה וה-AI מציגים רק תוכן שהמאגר מאשר שנמצא במשחק עכשיו (בלי Orbis, El Nath וג'וב שלישי). כשתוכן חדש ייצא והמאגר יאשר אותו, הוא יתווסף לבד.",
+   "תג מקור ליד כל נתון: MSEA, COT2, קהילה, רשמי או MeowDB, עם הסבר בריחוף. ה-AI מציין גם הוא מאיפה כל נתון.",
+   "תג \"עודכן\" על מה שהשתנה במאגר בשבוע האחרון, והודעת עדכון שמראה קודם את השינויים שנוגעים לדמות שלך.",
+   "כרטיסי פריטים מציגים לבל נדרש, הגנה ובונוסים (STR DEX INT LUK +1), גם ברשימות.",
+   "זיהוי התיק הרבה יותר מדויק, ופריטים שנראים אותו דבר (כמו סקרולים) כבר לא מנוחשים: מעבירים עליהם את העכבר ולוחצים F5.",
+   "לא מצלמים חלון אחר כשהמשחק מכוסה, תג BETA, שורת \"המאגר אומת\" מתחת לצ'אט, נגישות מקלדת וקורא מסך, ומאות תיקונים מבדיקה מקיפה."
+  ],
+  "en": [
+   "Only what's in the game: the app and the AI show only content the knowledge base confirms is in the game now (no Orbis, El Nath or 3rd job). When new content comes out and the knowledge base confirms it, it's added by itself.",
+   "A source tag beside every number: MSEA, COT2, community, official or MeowDB, with an explanation on hover. The AI names its sources too.",
+   "An \"Updated\" tag on what changed in the knowledge base this week, and update notes that list the changes that affect your character first.",
+   "Item cards show the level requirement, defense and bonuses (STR DEX INT LUK +1), in lists too.",
+   "Much more accurate inventory reading; look-alike items (like scrolls) are no longer guessed: hover the mouse over them and press F5.",
+   "No screenshot of another window when the game is covered, a BETA badge, a \"knowledge base verified\" line under the chat, keyboard and screen-reader access, and hundreds of fixes from a full audit."
+  ]
+ },
+ {
   "version": "0.8.2",
   "he": [
    "\"שליחת נתוני שימוש אנונימיים\" בהגדרות (פרטיות ומערכת) עובד עכשיו. הוא כבוי כברירת מחדל, ואם מפעילים אותו נשלח רק באילו אפשרויות משתמשים. אף פעם לא שאלות, תשובות, צילומי מסך או הקלטות."

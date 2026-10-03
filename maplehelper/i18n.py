@@ -1,6 +1,9 @@
 """UI strings in Hebrew and English."""
 from __future__ import annotations
 
+import re
+import sys
+
 STRINGS = {
     "app_tagline": {"he": "העוזר האישי שלכם ב-MapleStory Classic", "en": "Your personal MapleStory Classic assistant"},
     "disclaimer": {"he": "Maple Helper רק רואה את המסך, כמו צילום מסך. הוא לא נוגע בקבצים או בזיכרון של המשחק, "
@@ -10,14 +13,25 @@ STRINGS = {
                          "use it at your own risk."},
     "unofficial": {"he": "עוזר לא רשמי ל-MapleStory Classic · אין קשר ל-Nexon",
                    "en": "Unofficial companion for MapleStory Classic · Not affiliated with Nexon"},
+    "scope_note": {"he": "מותאם למה שיש במשחק עכשיו · המאגר אומת ב-{date}",
+                   "en": "Matches the game as it is now · knowledge base verified {date}"},
+    "scope_note_nodate": {"he": "מותאם למה שיש במשחק עכשיו, לפי המאגר", "en": "Matches the game as it is now, per the knowledge base"},
+    "scope_tip": {"he": "התשובות והכלים מבוססים רק על מה שהמאגר של NiaMeowDB מאשר שנמצא במשחק. כשתוכן חדש יוצא והמאגר מאשר אותו, הוא מתווסף לבד בעדכון המאגר.",
+                  "en": "Answers and tools use only what the NiaMeowDB knowledge base confirms is in the game. When new content comes out and the knowledge base confirms it, it is added by itself with a knowledge base update."},
+    "scope_tip_changed": {"he": "מה שקיים במשחק השתנה לאחרונה במאגר ב-{date}.", "en": "What is in the game last changed in the knowledge base on {date}."},
+    "beta_tip": {"he": "גרסת בטא: ייתכנו תקלות. אפשר לדווח בהגדרות ← דיווח על תקלה.",
+                 "en": "Beta version: there may be bugs. Report them in Settings → Report a problem."},
     "input_placeholder": {"he": "שאלו אותי משהו… (Enter לשליחה, F10 לדיבור)",
                           "en": "Ask me anything… (Enter to send, F10 to talk)"},
     "thinking": {"he": "חושב…", "en": "Thinking…"},
     "cancel": {"he": "ביטול", "en": "Cancel"},
     "recaptured": {"he": "צילום מסך חדש נשמר ויישלח עם השאלה הבאה", "en": "New screenshot saved; it goes with your next question"},
     "recapture": {"he": "צילום מחדש של מסך המשחק", "en": "Retake the game screenshot"},
+    "send_question": {"he": "שליחת השאלה", "en": "Send the question"},
     "voice_mic_failed": {"he": "לא הצלחתי להפעיל את המיקרופון. בדקו שהוא מחובר ושיש ל-Maple Helper הרשאה אליו (הגדרות Windows > פרטיות > מיקרופון).",
                          "en": "I couldn't start the microphone. Check that it's connected and that Maple Helper may use it (Windows Settings > Privacy > Microphone)."},
+    "voice_mic_failed_mac": {"he": "לא הצלחתי להפעיל את המיקרופון. בדקו שהוא מחובר ושיש ל-Maple Helper הרשאה אליו (הגדרות המערכת > פרטיות ואבטחה > מיקרופון).",
+                             "en": "I couldn't start the microphone. Check that it's connected and that Maple Helper may use it (System Settings > Privacy & Security > Microphone)."},
     "other_char_new": {"he": "במשחק מופיעה דמות אחרת, {name}, ולא {current}. את {current} לא שיניתי.",
                        "en": "The game shows another character, {name}, not {current}. I left {current} as it is."},
     "other_char_add": {"he": "הוספת {name} כדמות חדשה", "en": "Add {name} as a new character"},
@@ -29,6 +43,8 @@ STRINGS = {
                       "en": "I didn't hear anything. Press the mic (or F10), speak, then press it again when done."},
     "voice_failed": {"he": "זיהוי הדיבור נכשל (ייתכן שהורדת מודל הדיבור לא הושלמה). נסו שוב בעוד רגע.",
                      "en": "Speech recognition failed (the speech model may not have finished downloading). Try again in a moment."},
+    "voice_download_failed": {"he": "כדי להוריד את מודל הדיבור (פעם אחת, כ-1.6GB) צריך חיבור לאינטרנט. התחברו ונסו שוב.",
+                              "en": "The speech model (one time, about 1.6GB) needs an internet connection to download. Connect and try again."},
     "report_preparing": {"he": "מכינים את הדוח…", "en": "Preparing the report…"},
     "mic_tip": {"he": "לחצו (או {key}) כדי להתחיל להקליט, ושוב כשסיימתם לדבר כדי לשלוח",
                 "en": "Click (or {key}) to start recording, and again when you're done to send"},
@@ -56,6 +72,8 @@ STRINGS = {
     "sync_reading": {"he": "קורא את המסך…", "en": "Reading the screen…"},
     "sync_timeout": {"he": "הקריאה לקחה יותר מדי זמן. נסו שוב.", "en": "Reading the screen took too long. Try again."},
     "sync_no_game": {"he": "חלון המשחק לא נמצא. פתחו את המשחק ונסו שוב.", "en": "Game window not found. Open the game and try again."},
+    "shot_game_covered": {"he": "חלון אחר מסתיר את המשחק, אז לא צילמתי אותו. העבירו את המשחק לקדמת המסך ונסו שוב (F9 או המצלמה).",
+                          "en": "Another window is covering the game, so I didn't take a screenshot. Bring the game to the front and try again (F9 or the camera)."},
     "refresh_tip": {"he": "עדכון הלבל, הג'וב והתמונה מהמשחק", "en": "Update level, job and portrait from the game"},
     "profile_updated": {"he": "✓ עודכן · {label}: {value}", "en": "✓ Updated · {label}: {value}"},
     "confirm_other_char": {"he": "נראה שזו דמות אחרת: {desc}. לעדכן את {name}?",
@@ -87,6 +105,8 @@ STRINGS = {
     "tip_map": {"he": "המפלצות כאן חלשות בשבילכם. {map} ({mob}) משתלמת הרבה יותר. לחצו לפרטים",
                 "en": "The monsters here are too weak for you. {map} ({mob}) pays much better. Click for details"},
     "tip_map_q": {"he": "איך מגיעים ל-{map} מכאן?", "en": "How do I get to {map} from here?"},
+    "tip_ask_a11y": {"he": "Enter או רווח שואלים על הטיפ בצ'אט", "en": "Enter or Space asks about this tip in the chat"},
+    "input_a11y": {"he": "השאלה שלכם", "en": "Your question"},
     "tip_hide": {"he": "הסתרה עד הלבל הבא", "en": "Hide until the next level"},
     "exp": {"he": "EXP", "en": "EXP"},
     "guides": {"he": "מדריכים", "en": "Guides"},
@@ -103,6 +123,7 @@ STRINGS = {
     "g_pros": {"he": "יתרונות", "en": "Pros"},
     "g_cons": {"he": "חסרונות", "en": "Cons"},
     "g_back": {"he": "→ כל המדריכים", "en": "← All guides"},
+    "g_back_prev": {"he": "→ חזרה למדריך הקודם", "en": "← Back to the previous guide"},
     "g_ask": {"he": "לשאול על המדריך", "en": "Ask about this guide"},
     "g_web": {"he": "פתיחה באתר", "en": "Open on the web"},
     "pin": {"he": "נעיצת התשובה", "en": "Pin this answer"},
@@ -119,7 +140,7 @@ STRINGS = {
     "history_search": {"he": "מה מחפשים? למשל Mano או שם של קווסט", "en": "What are you looking for? e.g. Mano or a quest name"},
     "history_count": {"he": "{n} תוצאות", "en": "{n} results"},
     "history_count_of": {"he": "{n} מתוך {total} תוצאות", "en": "{n} of {total} results"},
-    "history_more": {"he": "להציג עוד {n}", "en": "Show {n} more"},
+    "history_more": {"he": "להציג עוד שיחות", "en": "Show more"},
     "history_continue": {"he": "להמשיך את השיחה בצ'אט", "en": "Continue in chat"},
     "history_continued": {"he": "ממשיכים מהשיחה הזו. מה עוד תרצו לדעת?", "en": "Picking up this conversation. What else would you like to know?"},
     "day_today": {"he": "היום", "en": "Today"},
@@ -214,8 +235,6 @@ STRINGS = {
     "hotkey_toggle": {"he": "מקש פתיחה/סגירה", "en": "Open/close key"},
     "hotkey_voice": {"he": "מקש דיבור (לחיצה להתחלה ולסיום)", "en": "Talk key (press to start and stop)"},
     "appearance": {"he": "מראה", "en": "Appearance"},
-    "appearance_dark": {"he": "כהה (זכוכית שחורה)", "en": "Dark (black glass)"},
-    "appearance_light": {"he": "בהיר (זכוכית לבנה)", "en": "Light (white glass)"},
     "minimize": {"he": "מזעור", "en": "Minimize"},
     "close_chat": {"he": "סגירה (F9 פותח שוב)", "en": "Close (F9 opens it again)"},
     "sec_appearance": {"he": "תצוגה", "en": "Display"},
@@ -286,6 +305,10 @@ STRINGS = {
     "voice_send": {"he": "שליחה מיידית אחרי דיבור", "en": "Send right after speaking"},
     "opacity": {"he": "שקיפות", "en": "Opacity"},
     "font_size": {"he": "גודל גופן", "en": "Font size"},
+    # screen readers: the three "A" buttons of the font size say which size they are
+    "font_small": {"he": "גופן קטן", "en": "Small text"},
+    "font_medium": {"he": "גופן בינוני", "en": "Medium text"},
+    "font_large": {"he": "גופן גדול", "en": "Large text"},
     "answer_length": {"he": "אורך תשובות", "en": "Answer length"},
     "short": {"he": "קצר", "en": "Short"},
     "detailed": {"he": "מפורט", "en": "Detailed"},
@@ -293,6 +316,8 @@ STRINGS = {
     "report_problem": {"he": "דיווח על תקלה", "en": "Report a problem"},
     "report_saved": {"he": "דוח התקלה נשמר בשולחן העבודה",
                      "en": "The problem report was saved to your desktop"},
+    "report_saved_data": {"he": "דוח התקלה נשמר בתיקיית הנתונים של האפליקציה (היא נפתחת עכשיו)",
+                          "en": "The problem report was saved in the app's data folder (it's opening now)"},
     "report_saved_body": {"he": "שלחו את הקובץ {name} למי שעוזר לכם עם האפליקציה. אין בו שיחות, צילומי מסך או פרטים אישיים.",
                           "en": "Send {name} to whoever helps you with the app. It has no chats, screenshots or personal details."},
     "update_kb": {"he": "עדכון המאגר", "en": "Update database"},
@@ -352,6 +377,8 @@ STRINGS = {
     "update_available_mac": {"he": "הורידו אותה מתפריט Maple Helper בשורת התפריטים.",
                              "en": "Download it from the Maple Helper menu in the menu bar."},
     "start_at_login": {"he": "הפעלה בכניסה למחשב", "en": "Start at login"},
+    "start_at_login_move": {"he": "כדי שהאפליקציה תיפתח בכניסה למחשב, גררו את Maple Helper לתיקיית Applications ופתחו אותה משם.",
+                            "en": "To start at login, drag Maple Helper into the Applications folder and open it from there."},
     "perm_title": {"he": "צריך הרשאה של macOS", "en": "macOS permission needed"},
     "perm_screen_body": {"he": "כדי לראות את המשחק, אפשרו את Maple Helper תחת הגדרות המערכת ← פרטיות ואבטחה ← הקלטת מסך, ואז הפעילו את האפליקציה מחדש.",
                          "en": "To see the game, allow Maple Helper in System Settings → Privacy & Security → Screen Recording, then restart the app."},
@@ -391,8 +418,20 @@ STRINGS = {
                              "and get a note when a database update changes it."},
     "inv_found": {"he": "זיהיתי {n} פריטים בתיק:", "en": "I recognized {n} items in the inventory:"},
     "inv_found_one": {"he": "זיהיתי פריט אחד בתיק:", "en": "I recognized 1 item in the inventory:"},
-    "inv_not_found": {"he": "לא מצאתי את חלון האינבנטורי בצילום. פתחו אותו במשחק (מקש I) ונסו שוב.",
-                      "en": "I couldn't find the inventory window in the screenshot. Open it in game (I key) and try again."},
+    "inv_not_found": {"he": "לא מצאתי את חלון האינבנטורי בצילום. פתחו אותו במשחק ונסו שוב.",
+                      "en": "I couldn't find the inventory window in the screenshot. Open it in game and try again."},
+    "inv_alike": {"he": "במשבצת {slots} יש אחד מתוך {n} פריטים שנראים בדיוק אותו דבר (למשל {example}).",
+                  "en": "Slot {slots} holds one of {n} items that look exactly the same (for example {example})."},
+    "inv_alike_slots": {"he": "במשבצות {slots} יש בכל אחת אחד מתוך {n} פריטים שנראים בדיוק אותו דבר (למשל {example}).",
+                        "en": "Slots {slots} each hold one of {n} items that look exactly the same (for example {example})."},
+    "inv_unknown": {"he": "לא הצלחתי לזהות {n} פריטים (משבצות {slots}).",
+                    "en": "I couldn't recognize {n} items (slots {slots})."},
+    "inv_unknown_one": {"he": "לא הצלחתי לזהות את הפריט במשבצת {slots}.",
+                        "en": "I couldn't recognize the item in slot {slots}."},
+    "inv_hover": {"he": "כדי שאדע בדיוק מה זה: במשחק, העבירו את העכבר מעל הפריט (בלי ללחוץ) עד שהשם שלו מופיע, "
+                        "ואז לחצו F5 כדי לבדוק שוב. אקרא את השם מהצילום.",
+                  "en": "So I know exactly which it is: in the game, hover the mouse over the item (don't click) until "
+                        "its name shows, then press F5 to check again. I'll read the name from the screenshot."},
     "wish_ask": {"he": "איפה הכי כדאי לי לצוד {monster} כדי להשיג {item}? כמה בערך צריך להרוג?",
                  "en": "Where's the best place for me to hunt {monster} to get {item}? About how many kills does it take?"},
     "wish_dropped_by": {"he": "מפילים:", "en": "Dropped by:"},
@@ -403,12 +442,16 @@ STRINGS = {
     "copy_card": {"he": "העתקה כתמונה, לשיתוף עם חברים", "en": "Copy as a picture to share"},
     "copied": {"he": "✓ הועתק. אפשר להדביק בדיסקורד או בוואטסאפ (Ctrl+V)",
                "en": "✓ Copied. Paste it in Discord or WhatsApp (Ctrl+V)"},
+    "copied_mac": {"he": "✓ הועתק. אפשר להדביק בדיסקורד או בוואטסאפ (⌘V)",
+                   "en": "✓ Copied. Paste it in Discord or WhatsApp (⌘V)"},
     "quick_drops": {"he": "{name} מפיל {n} פריטים:", "en": "{name} drops {n} items:"},
+    "quick_not_in_game": {"he": "לפי המאגר, {name} עוד לא נמצא במשחק (לא מאושר במפה שזמינה כרגע).",
+                          "en": "According to the knowledge base, {name} isn't in the game yet (not on any map that is out now)."},
     "quick_who_drops": {"he": "מפלצות שמפילות את {name}:", "en": "Monsters that drop {name}:"},
     "quick_where": {"he": "{name} נמצא בעיקר במפות:", "en": "{name} is found mostly in:"},
     # the KB's drop lists are NiaMeowDB's MSEA reference list plus what players confirmed for Classic
-    "quick_drops_note": {"he": "רשימת הדרופים היא רשימת ייחוס, עוד לא אושרה כולה ל-Classic.",
-                         "en": "Drop lists are reference data, not all confirmed for Classic yet."},
+    "quick_drops_note": {"he": "רשימת הדרופים היא רשימת הייחוס של MSEA (MapleSEA הישן), עוד לא אושרה ל-Classic.",
+                         "en": "Drop lists are MSEA reference data (old MapleSEA), not confirmed for Classic yet."},
     "quick_sells": {"he": "איפה קונים {name}:", "en": "Where to buy {name}:"},
     "quick_acc": {"he": "כדי לא לפספס אף פעם את {name} ב-Lv. {lv} צריך **{n} ACC** (90% פגיעות: {n90}).",
                   "en": "To never miss {name} at Lv. {lv} you need **{n} ACC** (90% hits: {n90})."},
@@ -442,7 +485,7 @@ STRINGS = {
     "stat_acc": {"he": "Accuracy (ACC)", "en": "Accuracy (ACC)"},
     "stat_dmg_min": {"he": "נזק מינימלי", "en": "Min damage"},
     "stat_dmg_max": {"he": "נזק מקסימלי", "en": "Max damage"},
-    "my_stats_hint": {"he": "את שלושת המספרים רואים בחלון ה-**Stat** במשחק (מקש **S**).\nהנזק שם הוא של **מכה רגילה**, בלי סקילים, אז גם מספרי המכות כאן הם למכות רגילות.", "en": "Find these three numbers in the game's **Stat** window (**S** key).\nThe damage there is one **basic attack**, without skills, so the hit counts here are for basic attacks too."},
+    "my_stats_hint": {"he": "את שלושת המספרים רואים בחלון ה-**Stat** במשחק.\nהנזק שם הוא של **מכה רגילה**, בלי סקילים, אז גם מספרי המכות כאן הם למכות רגילות.", "en": "Find these three numbers in the game's **Stat** window.\nThe damage there is one **basic attack**, without skills, so the hit counts here are for basic attacks too."},
     "my_stats_read": {"he": "לקרוא מצילום מסך (פתחו קודם את חלון ה-Stat)", "en": "Read from a screenshot (open the Stat window first)"},
     "train_need_stats": {"he": "**רוצים חישוב מדויק?** מלאו למטה ACC ונזק,\nותראו כמה פעמים תפגעו ובכמה מכות תהרגו.", "en": "**Want exact numbers?** Add your ACC and damage below\nto see your hit chance and hits per kill."},
     "train_none": {"he": "אין עדיין במאגר מפלצות קרובות ללבל שלכם.", "en": "The database has no monsters near your level yet."},
@@ -490,6 +533,8 @@ STRINGS = {
     "price_npc_buys": {"he": "**NPC קונה מכם:** {n} mesos", "en": "**An NPC pays you:** {n} mesos"},
     "price_shop": {"he": "**בחנות:** {n} mesos (הכי זול אצל {npc} ב-{where})", "en": "**In a shop:** {n} mesos (cheapest at {npc}, {where})"},
     "price_no_npc": {"he": "אין לפריט מחיר NPC במאגר.", "en": "No NPC price for this item in the database."},
+    "term_links_a11y": {"he": "הסבר למונחים: {terms}. Tab עובר בין סימני ה-?, ו-Enter או רווח פותחים הסבר.",
+                        "en": "Explained terms: {terms}. Tab moves between the ? marks; Enter or Space opens one."},
     "price_rank": {"he": "(לאזרחים בדרגת {rank} ומעלה)", "en": "(for citizens of grade {rank} and up)"},
     "price_sold_by": {"he": "**נמכר אצל:** {npcs} (בלי מחיר במאגר)", "en": "**Sold by:** {npcs} (no price in the database)"},
     "price_sold_by_also": {"he": "**נמכר גם אצל:** {npcs} (בלי מחיר במאגר)", "en": "**Also sold by:** {npcs} (no price in the database)"},
@@ -498,7 +543,8 @@ STRINGS = {
     "price_fm_empty": {"he": "**Free Market:** עדיין אין דיווחים של שחקנים על הפריט הזה ב-14 הימים האחרונים.", "en": "**Free Market:** no player reports for this item in the last 14 days yet."},
     "price_fm_offline": {"he": "**Free Market:** לא הצלחתי להגיע ל-MeowDB כרגע. נסו שוב מאוחר יותר.", "en": "**Free Market:** couldn't reach MeowDB right now. Try again later."},
     "price_open_site": {"he": "כל הדיווחים ב-MeowDB", "en": "All reports on MeowDB"},
-    "price_hint": {"he": "מחירי ה-NPC מגיעים מהמאגר. מחירי ה-Free Market הם **דיווחים של שחקנים ב-MeowDB** מ-14 הימים האחרונים, כך שהם מתעדכנים כל הזמן.", "en": "NPC prices come from the database. Free Market prices are **player reports on MeowDB** from the last 14 days, so they keep moving."},
+    # (the chip beside each price names its source: a build label read from the KB, so this stays true after launch)
+    "price_hint": {"he": "התגית ליד כל מחיר אומרת מאיפה הוא: מחירי ה-NPC מסומנים לפי המאגר (למשל **COT2**, מהטסט הסגור השני, כך שבמשחק עצמו הם עשויים להשתנות), ומחירי ה-Free Market הם **דיווחים של שחקנים ב-MeowDB** מ-14 הימים האחרונים, כך שהם מתעדכנים כל הזמן.", "en": "The tag beside each price says where it comes from: NPC prices carry the database's label (e.g. **COT2**, from the second closed test, so the live game may differ), and Free Market prices are **player reports on MeowDB** from the last 14 days, so they keep moving."},
     "prices_intro": {"he": "**כמה שווה פריט?** בוחרים פריט אחד ורואים מיד כמה NPC משלם עליו, כמה הוא עולה בחנות, ומה המחיר בין שחקנים ב-Free Market.\nבלי AI ובלי צילום מסך.", "en": "**What's an item worth?** Pick one item and see at once what an NPC pays, what a shop charges, and the player price on the Free Market.\nNo AI, no screenshot."},
     "more_intro": {"he": "**עזרה מה-AI לפני ואחרי גרינד.** הוא מסתכל על **התיק שלכם** ואומר מה למכור ומה לשמור, או מכין **רשימת קניות** לפי המפה שבחרתם.\nהתשובה מגיעה בצ'אט. לבדיקת מחיר של פריט אחד יש את הטאב **מחיר פריט**.", "en": "**AI help before and after grinding.** It looks at **your bag** and says what to sell and keep, or makes a **shopping list** for the map you pick.\nThe answer comes in the chat. To check one item's price, use the **Item price** tab."},
     "calc_never_dodges": {"he": "**המפלצת לא מתחמקת** (Avoid 0): פוגעים בה תמיד, בכל ACC.", "en": "**This monster never dodges** (Avoid 0): you always hit, at any ACC."},
@@ -545,10 +591,10 @@ STRINGS = {
     "q_done_head": {"he": "סומנו כגמורים", "en": "Marked done"},
     "q_search": {"he": "חיפוש קווסט: שם, NPC, מפלצת או פריט", "en": "Search quests: name, NPC, monster or item"},
     "q_found": {"he": "**{n} מתוך {total} קווסטים** ב-Lv. {lv} מתאימים לחיפוש", "en": "**{n} of {total} quests** at Lv. {lv} match"},
-    "q_no_match": {"he": "אין קווסט כזה ברשימה שמתאימה לרמה שלך.", "en": "No quest like that in the list for your level."},
+    "q_no_match": {"he": "אין קווסט כזה ברשימה שמתאימה לרמה שלכם.", "en": "No quest like that in the list for your level."},
     "q_none": {"he": "אין כאן קווסטים כרגע.", "en": "No quests here right now."},
-    "q_needs": {"he": "צריך: {what}", "en": "Needs: {what}"},
-    "q_gets": {"he": "מקבלים: {what}", "en": "Rewards: {what}"},
+    "q_shown": {"he": "מוצגים {n} מתוך {total} הקווסטים", "en": "Showing {n} of {total} quests"},
+    "q_more": {"he": "להציג עוד קווסטים", "en": "Show more quests"},
     "q_after": {"he": "אחרי הקווסט {name}", "en": "After {name}"},
     "q_needs_head": {"he": "צריך:", "en": "Needs:"},
     "q_gets_head": {"he": "מקבלים:", "en": "Rewards:"},
@@ -558,9 +604,14 @@ STRINGS = {
     "q_hide_done": {"he": "הסתרת הקווסטים שסומנו כגמורים", "en": "Hide quests marked done"},
     "q_pick_head": {"he": "בוחרים אחד (לקלאס שלכם):", "en": "Pick one (for your class):"},
     "q_random_head": {"he": "מקבלים אחד מאלה, באקראי:", "en": "You get one of these, at random:"},
+    "q_gender_head": {"he": "מקבלים לפי המין של הדמות:", "en": "Depends on your character's gender:"},
+    "q_gender_Male": {"he": "{item} (לדמות זכר)", "en": "{item} (male character)"},
+    "q_gender_Female": {"he": "{item} (לדמות נקבה)", "en": "{item} (female character)"},
     "q_complete_lv": {"he": "אפשר לקבל כבר מ-Lv. {take}, אבל לסיים רק מ-Lv. {n}", "en": "Can be taken from Lv. {take}, but completed from Lv. {n} only"},
     "q_grade": {"he": "דורש אזרחות {town} בדרגה {n}", "en": "Needs {town} citizenship grade {n}"},
     "q_profession": {"he": "דורש {prof} ברמה {n} (בדף היצירה)", "en": "Needs {prof} Lv. {n} (crafting page)"},
+    "q_min_fame": {"he": "דורש לפחות {n} Fame", "en": "Needs at least {n} Fame"},
+    "q_accept_cost": {"he": "עולה {n} mesos לקבל את הקווסט", "en": "Costs {n} mesos to accept"},
     "exp_title": {"he": "כמה EXP מרוויחים?", "en": "How much EXP are you making?"},
     "exp_now": {"he": "עכשיו: Lv. {lv} · EXP {pct}", "en": "Now: Lv. {lv} · EXP {pct}"},
     "exp_now_unknown": {"he": "עכשיו: Lv. {lv} · אחוז ה-EXP עוד לא נקרא מהמשחק",
@@ -579,7 +630,7 @@ STRINGS = {
     "exp_idle": {"he": "1. לוחצים **התחלת מדידה**\n2. משחקים כמה דקות\n3. לוחצים **לבדוק עכשיו**", "en": "1. Click **Start measuring**\n2. Play for a few minutes\n3. Click **Check now**"},
     "exp_hint": {"he": "המדידה קוראת את פס ה-EXP **מצילום מסך**, אז כדאי למדוד **לפחות 10 דקות**.\nכך יודעים אם מפה באמת משתלמת.", "en": "It reads the EXP bar **from a screenshot**, so measure for **at least 10 minutes**.\nThat's how you know if a map really pays."},
     "sell_title": {"he": "מה כדאי למכור?", "en": "What should I sell?"},
-    "sell_body": {"he": "פתחו את **האינבנטורי** במשחק (מקש **I**) ולחצו על הכפתור.\nהאפליקציה תצלם ותגיד לכל פריט:\n• **למכור ל-NPC**\n• **לשמור לקווסט**\n• **לשמור לקראפטינג**, למשל ל-Smithing או ל-Tailoring\n• **לשמור לציוד** שאפשר ללבוש\n• **למכור ב-Free Market**", "en": "Open your **inventory** in the game (**I** key) and click the button.\nThe app takes a screenshot and tells you, for each item:\n• **Sell to an NPC**\n• **Keep for a quest**\n• **Keep for crafting** (Smithing, Tailoring and more)\n• **Keep as gear** you can wear\n• **Sell on the Free Market**"},
+    "sell_body": {"he": "פתחו את **האינבנטורי** במשחק ולחצו על הכפתור.\nהאפליקציה תצלם ותגיד לכל פריט:\n• **למכור ל-NPC**\n• **לשמור לקווסט**\n• **לשמור לקראפטינג**, למשל ל-Smithing או ל-Tailoring\n• **לשמור לציוד** שאפשר ללבוש\n• **למכור ב-Free Market**", "en": "Open your **inventory** in the game and click the button.\nThe app takes a screenshot and tells you, for each item:\n• **Sell to an NPC**\n• **Keep for a quest**\n• **Keep for crafting** (Smithing, Tailoring and more)\n• **Keep as gear** you can wear\n• **Sell on the Free Market**"},
     "sell_go": {"he": "לבדוק את האינבנטורי", "en": "Check my inventory"},
     "sell_q": {"he": "תסתכל על האינבנטורי בצילום המסך ותמיין כל פריט שמופיע לאחת הקבוצות, עם כותרת לכל קבוצה:\n1. למכור ל-NPC (עם מחיר המכירה ל-NPC מהמאגר)\n2. לשמור לקווסט (איזה קווסט צריך אותו)\n3. לשמור לקראפטינג: חומרים שמשמשים במתכון של Smithing, Weaponcrafting, Tailoring, Woodcrafting, Leatherworking או Arcforge (תבדוק בדפי crafting במאגר, ותגיד לאיזה מתכון)\n4. לשמור לציוד שהדמות שלי יכולה ללבוש עכשיו או בקרוב\n5. למכור ב-Free Market (פריטים ששווים יותר משחקנים)\nתתחיל ממה שהכי כדאי למכור, וקצר.", "en": "Look at the inventory in the screenshot and sort every item shown into one group, with a heading per group:\n1. Sell to an NPC (with the NPC sell-back price from the knowledge base)\n2. Keep for a quest (which quest needs it)\n3. Keep for crafting: materials used in a Smithing, Weaponcrafting, Tailoring, Woodcrafting, Leatherworking or Arcforge recipe (check the crafting pages in the knowledge base, and say which recipe)\n4. Keep as gear my character can wear now or soon\n5. Sell on the Free Market (worth more to players)\nMost worth selling first, and short."},
     "shop_title": {"he": "רשימת קניות לפני גרינד", "en": "Shopping list before grinding"},
@@ -672,6 +723,8 @@ STRINGS = {
                              "en": "Gemini is installed but not signed in"},
     "ob_not_logged_grok": {"he": "Grok מותקן, אבל צריך להתחבר",
                            "en": "Grok is installed but not signed in"},
+    "ob_offline": {"he": "אין חיבור ל-{name}. בדקו את החיבור לאינטרנט.",
+                   "en": "Couldn't reach {name}. Check your internet connection."},
     "ob_need_plan": {"he": "נדרש מנוי Claude Pro או Max.", "en": "A Claude Pro or Max plan is required."},
     "ob_need_plan_codex": {"he": "נדרש מנוי ChatGPT בתשלום (Plus, Pro, Business ועוד).",
                            "en": "A paid ChatGPT plan is required (Plus, Pro, Business…)."},
@@ -690,6 +743,9 @@ STRINGS = {
     "ob_class": {"he": "קלאס", "en": "Class"},
     "ob_job": {"he": "ג'וב נוכחי", "en": "Current job"},
     "ob_level": {"he": "לבל נוכחי", "en": "Current level"},
+    # screen readers: the stepper's − and + buttons
+    "step_less": {"he": "הורדה באחד", "en": "Decrease by one"},
+    "step_more": {"he": "העלאה באחד", "en": "Increase by one"},
     "ob_next": {"he": "הבא", "en": "Next"},
     "ob_back": {"he": "חזרה", "en": "Back"},
     "ob_finish": {"he": "סיום, בואו נשחק!", "en": "Done, let's play!"},
@@ -773,6 +829,10 @@ STRINGS = {
                       "en": "Tip: run the game in Borderless / Windowed Fullscreen so the chat can appear on top."},
     "ob_done_hint": {"he": "לחצו F9 בתוך המשחק כדי לפתוח ולסגור את הצ'אט.",
                      "en": "Press F9 in game to open and close the chat."},
+    "ob_done_hint_mac": {"he": "לחצו F9 בתוך המשחק כדי לפתוח ולסגור את הצ'אט (בלי fn אם הפעלתם מקשי F רגילים בהגדרות המערכת > מקלדת).",
+                         "en": "Press F9 in game to open and close the chat (without fn if you turned on standard function keys in System Settings > Keyboard)."},
+    "hotkey_fn_mac": {"he": "ב-Mac לוחצים עם fn (למשל fn+F9), אלא אם הפעלתם מקשי F רגילים בהגדרות המערכת > מקלדת. F11 מציג את שולחן העבודה של macOS.",
+                      "en": "On a Mac, hold fn with the key (fn+F9, say) unless you turned on standard function keys in System Settings > Keyboard. F11 shows the macOS desktop."},
     "hotkey_same": {"he": "אותו מקש לא יכול גם לפתוח את הצ'אט וגם להתחיל דיבור. בחרו מקש אחר לאחד מהם.",
                     "en": "One key can't both open the chat and start talking. Pick a different key for one of them."},
     "hotkey_taken": {"he": "המקש {key} תפוס על ידי תוכנה אחרת. בחרו מקש אחר בהגדרות.",
@@ -810,6 +870,53 @@ STRINGS = {
     "exp_line_kills_one": {"he": "{pct}% · נשארו {left} EXP ללבל הבא · הריגה אחת של {mob}",
                            "en": "{pct}% · {left} EXP to the next level (1 {mob} kill)"},
     "calc_more_acc_one": {"he": "חסר ACC אחד, בערך {pts} {stat}", "en": "1 ACC short, about {pts} {stat}"},
+    "pn_affects_one": {"he": "שינוי אחד שנוגע בכם", "en": "1 change that affects you"},
+    "patch_notes_affects_one": {"he": "שינוי אחד במאגר נוגע בכם: {names}", "en": "1 database change affects you: {names}"},
+
+    # where each datum comes from (sources.py): the chip's short label and its tooltip
+    "src_msea": {"he": "MSEA", "en": "MSEA"},
+    "src_community": {"he": "קהילה", "en": "Community"},
+    "src_official": {"he": "רשמי · Nexon", "en": "Official · Nexon"},
+    "src_meowdb": {"he": "MeowDB", "en": "MeowDB"},
+    "src_reference": {"he": "ייחוס היסטורי", "en": "Historical ref."},
+    "src_msea_tip": {"he": "רשימת ייחוס היסטורית מ-MapleSEA הישן (לפני Big Bang). המאגר מציג אותה לעיון בלבד: היא עוד לא אושרה ל-Classic.",
+                     "en": "A historical reference list from old MapleSEA (before Big Bang). The knowledge base shows it for reference only: not confirmed for Classic yet."},
+    "src_community_tip": {"he": "דיווחים של שחקנים ב-MeowDB: מה ששחקנים ראו בעצמם במשחק. לא נתון רשמי.",
+                          "en": "Player reports on MeowDB: what players saw in the game themselves. Not official data."},
+    "src_official_tip": {"he": "הצהרה רשמית של Nexon, מתוך מדריך ההשקה שבמאגר.",
+                         "en": "An official Nexon statement, from the knowledge base's release guide."},
+    "src_meowdb_tip": {"he": "נתון מהמאגר של NiaMeowDB (meowdb.com). המאגר לא מסמן מאיזו גרסה של המשחק הוא.",
+                       "en": "From the NiaMeowDB knowledge base (meowdb.com). The knowledge base doesn't say which build of the game it is from."},
+    "src_reference_tip": {"he": "טבלת ייחוס היסטורית: הערכה בלבד, עד שיאומת במשחק עצמו.",
+                          "en": "A historical reference table: an estimate until it is verified in the game itself."},
+    "src_cot_tip": {"he": "נתוני גרסת הניסיון {nth} ({label}), לא מאושר להשקה.",
+                    "en": "Data from the {nth} closed test ({label}), not confirmed for launch."},
+    "src_nth_1": {"he": "הראשונה", "en": "first"},
+    "src_nth_2": {"he": "השנייה", "en": "second"},
+    "src_nth_3": {"he": "השלישית", "en": "third"},
+    "src_nth": {"he": "הסגורה", "en": "latest"},
+    "src_launch_tip": {"he": "ערכים מהמשחק עצמו ({label}), כפי שהמאגר מסמן אותם.",
+                       "en": "Values from the game itself ({label}), as the knowledge base labels them."},
+    "src_build_tip": {"he": "ערכים שהמאגר מסמן כ-{label}.", "en": "Values the knowledge base labels {label}."},
+    "src_changed_head": {"he": "מה השתנה מאז {before}:", "en": "Changed since {before}:"},
+    "src_data": {"he": "מקור הנתונים:", "en": "Data source:"},
+    "price_test": {"he": "(מחיר מהטסט הסגור {label})", "en": "({label} test price)"},
+    "price_build": {"he": "(מחיר {label})", "en": "({label} price)"},
+    "quick_drops_note_community": {"he": "את הדרופים האלה שחקנים ראו בעצמם ב-Classic (דיווחי קהילה ב-MeowDB).",
+                                   "en": "Players saw these drops in Classic themselves (community reports on MeowDB)."},
+    "quick_drops_note_both": {"he": "חלק מהדרופים דווחו על ידי שחקנים ב-Classic, והשאר מרשימת הייחוס של MSEA (עוד לא אושרה ל-Classic).",
+                              "en": "Some drops were reported by players in Classic; the rest are MSEA reference data, not confirmed for Classic yet."},
+
+    # a page that changed in a recent knowledge-base update (recent.py)
+    "updated_tag": {"he": "עודכן", "en": "Updated"},
+    "updated_tip_head": {"he": "עודכן במאגר ב-{date}:", "en": "Updated in the knowledge base on {date}:"},
+    "pn_affects": {"he": "{n} שינויים שנוגעים בכם", "en": "{n} changes that affect you"},
+    "pn_more_changes": {"he": "עוד שינויים", "en": "More changes"},
+    "pn_and_more": {"he": "ועוד: {summary}", "en": "Also: {summary}"},
+    "pn_why_gear": {"he": "ציוד שמתאים לכם", "en": "Gear for you"},
+    "pn_why_train": {"he": "בטווח האימון שלכם", "en": "In your training range"},
+    "pn_why_wish": {"he": "ברשימת המעקב", "en": "On your wishlist"},
+    "patch_notes_affects": {"he": "{n} שינויים במאגר נוגעים בכם: {names}", "en": "{n} database changes affect you: {names}"},
 }
 
 
@@ -817,15 +924,33 @@ NBSP = " "
 # two-word English names: in a wrapped Hebrew line "Claude" at a line's end and "Code" at the next one's start
 # read as two things (and in RTL the halves swap sides), so their space is a no-break space
 WHOLE_NAMES = ("Maple Helper", "Claude Code")
+# and any short English run in a Hebrew line, not just the listed names: "Claude Pro", "Google AI Pro",
+# "Free Market", "Copy to Clipboard" split the same way, and so did names that come in through a placeholder.
+# Up to three words (a longer English run may wrap; one unbreakable block would overflow a narrow label); a
+# run may follow a Hebrew prefix hyphen ("ב-Free Market").
+_LATIN_WORD = r"[A-Za-z0-9][A-Za-z0-9.'’&+\-]*"
+_SHORT_RUN = re.compile(rf"(?<![A-Za-z0-9.'’&+])(?<![A-Za-z0-9]-)(?<![A-Za-z0-9.'’&+\-] ){_LATIN_WORD}(?: {_LATIN_WORD}){{1,2}}(?![A-Za-z0-9.'’&+\-]| [A-Za-z0-9])")
 
 
 def keep_names_whole(s: str) -> str:
     for name in WHOLE_NAMES:
         s = s.replace(name, name.replace(" ", NBSP))
-    return s
+    return _SHORT_RUN.sub(lambda m: m.group(0).replace(" ", NBSP) if re.search("[A-Za-z]", m.group(0)) else m.group(0), s)
+
+
+# macOS versions of a string ("<key>_mac"), picked by I18n: Mac paths and shortcuts (System Settings, ⌘V).
+# A listed set, not every "_mac" key: update_available_mac is a separate line next to update_available.
+MAC_VARIANTS = {"voice_mic_failed", "copied", "ob_done_hint"}
+# strings that teach a hotkey: on a Mac keyboard F9/F10 are media keys unless fn is held, so a Mac shows
+# "fn+F9" (the callers' .replace("F9", the chosen key) keeps the "fn+")
+FN_KEY_HINTS = {"input_placeholder", "voice_nothing", "mic_tip", "listening", "close_chat", "shot_hint_no_game",
+                "shot_hint_ready", "ob_done_hint"}
+_FKEY = re.compile(r"(?<![\w+])F(?:1[0-2]|[1-9])\b")
 
 
 class I18n:
+    mac = sys.platform == "darwin"
+
     def __init__(self, lang: str = "he"):
         self.lang = lang if lang in ("he", "en") else "he"
 
@@ -836,10 +961,21 @@ class I18n:
     def __call__(self, _key: str, **kw) -> str:
         if str(kw.get("n", "")) == "1" and f"{_key}_one" in STRINGS:
             _key = f"{_key}_one"         # "תוצאה אחת" / "1 result", not "1 תוצאות" / "1 results"
+        base = _key
+        if self.mac and _key in MAC_VARIANTS:
+            _key = f"{_key}_mac"
         s = STRINGS.get(_key, {}).get(self.lang) or STRINGS.get(_key, {}).get("en") or _key
         if self.lang == "he":
             s = keep_names_whole(s)
-        return s.format(**kw) if kw else s
+            # a short name that comes in through a placeholder ("Red Snail") is kept whole too; only a value that
+            # is nothing but that name: a longer one ("Tree Dungeon, Monkey Forest I") is a KB name bidi keeps
+            # whole by its exact spelling, and one with markup or an isolate is laid out already
+            kw = {k: v.replace(" ", NBSP) if isinstance(v, str) and _SHORT_RUN.fullmatch(v) and re.search("[A-Za-z]", v)
+                  else v for k, v in kw.items()}
+        s = s.format(**kw) if kw else s
+        if self.mac and base in FN_KEY_HINTS:
+            s = _FKEY.sub(lambda m: "fn+" + m.group(0), s)
+        return s
 
     def p(self, _key: str, provider: str | None, **kw) -> str:
         """The string for one AI provider: '<key>_<provider>' when it exists, else the shared '<key>'."""

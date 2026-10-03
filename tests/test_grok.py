@@ -54,6 +54,8 @@ def test_command_is_locked_down():
     assert grok.grok_command("grok", "q", "x", platform="darwin")[-2:] == ["--sandbox", "strict"]
     no_tools = grok.grok_command("grok", "q", "x", tools=False, platform="win32")
     assert no_tools[no_tools.index("--disallowed-tools") + 1] == "search_tool,use_tool,read_file,grep,list_dir"
+    shot_only = grok.grok_command("grok", "q", "x", tools=["read_file"], platform="win32")
+    assert shot_only[shot_only.index("--disallowed-tools") + 1] == "search_tool,use_tool,grep,list_dir"
 
 
 def test_env_keeps_the_players_setup_and_other_tools_out(home, monkeypatch):
@@ -68,26 +70,81 @@ def test_env_keeps_the_players_setup_and_other_tools_out(home, monkeypatch):
     assert grok.env("xai-KEY")["XAI_API_KEY"] == "xai-KEY"
 
 
+def guard_decides(home, cwd, path, tool="read_file", key="target_file", raw=None):
+    """What the real hook (Windows PowerShell 5.1, as Grok runs it) answers for one read: allow / deny / fail."""
+    hook = json.loads((home / ".grok" / "hooks" / "maplehelper.json").read_text(encoding="utf-8"))
+    cmd = hook["hooks"]["PreToolUse"][0]["hooks"][0]["command"]
+    script = str(home / ".grok" / "maplehelper-guard.ps1")
+    assert script in cmd and "matcher" not in hook["hooks"]["PreToolUse"][0]
+    data = raw if raw is not None else json.dumps({"cwd": str(cwd), "tool_name": tool, "tool_input": {key: path}},
+                                                  ensure_ascii=False).encode("utf-8")     # Grok sends raw UTF-8
+    r = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File",
+                        script], input=data, capture_output=True)
+    if r.returncode == 2 and b'"permissionDecision":"deny"' in r.stdout:
+        return "deny"
+    # Grok lets anything but an explicit deny through: a hook that errors (exit 1, no JSON) is an open door
+    return "allow" if r.returncode == 0 else f"fail {r.returncode}: {r.stderr[-300:]!r}"
+
+
 @pytest.mark.skipif(sys.platform != "win32", reason="the read guard is a PowerShell hook")
 def test_read_guard_allows_only_the_knowledge_base_and_the_screenshot(home, tmp_path):
     kb = tmp_path / "kb"
     kb.mkdir()
     grok.write_guard(kb)
-    hook = json.loads((home / ".grok" / "hooks" / "maplehelper.json").read_text(encoding="utf-8"))
-    cmd = hook["hooks"]["PreToolUse"][0]["hooks"][0]["command"]
-    script = str(home / ".grok" / "maplehelper-guard.ps1")
-    assert script in cmd and "matcher" not in hook["hooks"]["PreToolUse"][0]
 
     def decide(path, tool="read_file", key="target_file"):
-        data = json.dumps({"cwd": str(kb), "tool_name": tool, "tool_input": {key: path}})
-        r = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File",
-                            script], input=data.encode(), capture_output=True)
-        return "deny" if b'"permissionDecision":"deny"' in r.stdout else "allow"
+        return guard_decides(home, kb, path, tool, key)
     assert decide("henesys.md") == "allow" and decide(str(kb / "pages" / "a.md")) == "allow"
     assert decide(str(grok.shots_dir() / "run-1" / "screenshot-0.jpg")) == "allow"
     assert decide(r"C:\Users\Someone\secret.txt") == "deny" and decide(r"..\settings.json") == "deny"
     assert decide(str(kb) + r"\..\x.txt") == "deny" and decide(r"C:\Windows", "list_dir", "target_directory") == "deny"
     assert decide(r"C:\x", "grep", "path") == "deny"
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="the read guard is a PowerShell hook")
+@pytest.mark.parametrize("user", ["גבי", "עמית", "O’Neil‘s ‚x‛"])
+def test_read_guard_holds_under_a_hebrew_or_quoted_user_folder(tmp_path, monkeypatch, user):
+    """The data folder sits under the Windows user name. ב and ג are the bytes D7 91 / D7 92, which PowerShell 5.1
+    read as ‘ ’ (quote marks) in a script without a BOM: the hook broke and Grok could read the whole disk. Other
+    Hebrew letters garbled the folders, and Grok couldn't read the knowledge base at all. Curly quotes in a name are
+    PowerShell quote marks too."""
+    root = tmp_path / user / "AppData" / "Roaming" / "MapleHelper"
+    home = root / "grok"
+    monkeypatch.setattr(grok, "home", lambda: home)
+    kb = root / "kb"
+    (kb / "pages").mkdir(parents=True)
+    grok.write_guard(kb)
+    source = (home / ".grok" / "maplehelper-guard.ps1").read_bytes()
+    assert source.startswith(b"\xef\xbb\xbf") and source[3:].isascii()       # a BOM, and no path in the source
+
+    def decide(path, tool="read_file", key="target_file"):
+        return guard_decides(home, kb, path, tool, key)
+    assert decide("henesys.md") == "allow" and decide(str(kb / "pages" / "בדיקה.md")) == "allow"
+    assert decide(str(grok.shots_dir() / "run-1" / "screenshot-0.jpg")) == "allow"
+    assert decide(r"C:\Windows\win.ini") == "deny" and decide(str(root / "history.json")) == "deny"
+    assert decide(str(tmp_path / user / ".ssh"), "list_dir", "target_directory") == "deny"
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="the read guard is a PowerShell hook")
+def test_read_guard_fails_closed(home, tmp_path):
+    """Anything the hook can't make sense of is a deny, never an error (which Grok would let through)."""
+    kb = tmp_path / "kb"
+    kb.mkdir()
+    grok.write_guard(kb)
+    assert guard_decides(home, kb, None, raw=b"not json {") == "deny"
+    assert guard_decides(home, kb, None, raw=b"") == "deny"
+    # no path at all: the folder it runs in decides (the knowledge base, where Grok runs)
+    assert guard_decides(home, kb, None, raw=json.dumps({"cwd": str(kb), "tool_input": {"pattern": "x"}}).encode()) \
+        == "allow"
+    assert guard_decides(home, kb, None, raw=json.dumps({"cwd": "C:\\", "tool_input": {"pattern": "x"}}).encode()) \
+        == "deny"
+    roots = home / ".grok" / grok.GUARD_ROOTS
+    roots.write_text("{broken", encoding="utf-8")
+    assert guard_decides(home, kb, "henesys.md") == "deny"
+    roots.unlink()
+    assert guard_decides(home, kb, "henesys.md") == "deny"
+    grok.write_guard(kb)                                     # written again when the next question starts
+    assert guard_decides(home, kb, "henesys.md") == "allow"
 
 
 class TestStream:
@@ -210,6 +267,16 @@ class TestBackend:
         assert "screenshot-0.jpg" in instructions and "read_file" in instructions
         assert p.kw["cwd"] == str(kb.root) and p.kw["env"]["GROK_HOME"] == str(home / ".grok")
         assert not list(grok.shots_dir().rglob("*.jpg"))                     # gone after
+
+    def test_the_sync_screenshot_read_opens_only_the_screenshot(self, kb, home, monkeypatch):
+        """light (the ⟳ sync, 60 s): read_file for the screenshot, no grep or list_dir in the knowledge base."""
+        b = self.make(kb, monkeypatch, stream(START, delta("Lv 13\n@@META@@\n{}"), OK))
+        assert b.ask("sync", None, None, b"JPEGDATA", light=True).error is None
+        p = FakePopen.calls[0]
+        assert p.cmd[p.cmd.index("--disallowed-tools") + 1] == "search_tool,use_tool,grep,list_dir"
+        instructions = p.cmd[p.cmd.index("--system-prompt-override") + 1]
+        assert "quick screenshot read" in instructions and "screenshot-0.jpg" in instructions
+        assert "read it with read_file, grep and list_dir" not in instructions
 
     def test_api_key_and_summary(self, kb, home, monkeypatch):
         b = self.make(kb, monkeypatch, stream(START, delta("• Hunt"), OK), api_key="xai-1")

@@ -33,10 +33,6 @@ def job_label(job: str, lang: str) -> str:
     return f"{he} · {job}" if he else job
 
 
-# 3rd job isn't in the launch build (pages/guide/attacks-you-can-use-mid-jump.md: "Third job isn't available at
-# launch"; pages/guide/assassin-class-guide.md: "Third job and El Nath are not in the launch build"): the plan's
-# "next job" stops at the 2nd. Set to 3 once it opens.
-MAX_JOB_TIER = 2
 # other names for the same job: older clients and servers print these on the HUD (an Old School HUD says "Archer"),
 # and players type them ("FP Wizard", "Bowmen"); keys are compared lowercase without punctuation (_key)
 ALIASES = {"archer": "Bowman", "bowmen": "Bowman", "swordman": "Warrior", "swordsman": "Warrior", "rogue": "Thief",
@@ -84,7 +80,22 @@ def first_job(base_class: str, level: int) -> str:
     return jobs[1][0] if len(jobs) > 1 and level >= jobs[1][1] else "Beginner"
 
 
-def tier_levels(base_class: str) -> list[int]:
+def open_tier(kb=None) -> int:
+    """How far the job tree is open in the game: up to the 2nd job until the KB confirms 3rd job
+    (availability.py reads it from the release guide). With no KB at hand, only what is always there."""
+    if kb is None:
+        return 2
+    from . import availability
+    return availability.of(kb).job_tier
+
+
+def tier_levels(base_class: str, kb=None) -> list[int]:
     """The levels of the class's advancements, open ones only: [1, 10, 30] while 3rd job isn't out."""
     levels = sorted({lv for _, lv in JOBS.get(base_class, [])})
-    return levels[:MAX_JOB_TIER + 1]
+    return levels[:open_tier(kb) + 1]
+
+
+def open_jobs(base_class: str, kb=None) -> list[tuple[str, int]]:
+    """The class's jobs that are in the game, with their levels (no 3rd job until the KB confirms it)."""
+    levels = set(tier_levels(base_class, kb))
+    return [(j, lv) for j, lv in JOBS.get(base_class, []) if lv in levels]

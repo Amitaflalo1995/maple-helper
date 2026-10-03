@@ -161,7 +161,7 @@ def info(kb, profession: str) -> Info:
                 ln = lines[i]
                 if ln and ln != "Find path here":
                     town = ln.replace(" Victoria Road", "").replace(" Dungeon", "").replace(" Shallow Passage", "").strip()
-                    if combat.grind_map(town) and town not in out.station_towns:
+                    if combat.released(kb, town) and town not in out.station_towns:
                         out.station_towns.append(town)
                 i += 1
     return out

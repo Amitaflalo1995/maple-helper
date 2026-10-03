@@ -28,7 +28,8 @@ def test_first_question_says_loading_not_downloading_when_on_disk(on_disk, state
         def stop(self): pass
         def close(self): pass
     vc._stream = Stream()
-    vc._chunks = [np.zeros((voice.SAMPLE_RATE, 1), dtype=np.float32)]
+    # a little noise, as any real mic gives: pure digital silence is macOS's "no microphone permission"
+    vc._chunks = [np.full((voice.SAMPLE_RATE, 1), 0.01, dtype=np.float32)]
     states = []
     vc.state.connect(states.append)
     vc._stop()
@@ -45,3 +46,34 @@ def test_preload_only_when_the_model_is_on_disk(monkeypatch):
     monkeypatch.setattr(voice.Transcriber, "downloaded", staticmethod(lambda: True))
     vc.preload()
     assert len(started) == 1
+
+
+class _Stream:
+    def stop(self): pass
+    def close(self): pass
+
+
+def test_mac_silence_is_a_microphone_permission_hint(monkeypatch):
+    """macOS records pure zeros while the microphone isn't allowed: say so, not "I didn't hear anything"."""
+    import numpy as np
+    vc = voice.VoiceController()
+    monkeypatch.setattr(voice.sys, "platform", "darwin")
+    monkeypatch.setattr(vc, "_run", lambda audio: pytest.fail("silence must not be transcribed"))
+    failed, states = [], []
+    vc.failed.connect(failed.append)
+    vc.state.connect(states.append)
+    vc._stream = _Stream()
+    vc._chunks = [np.zeros((voice.SAMPLE_RATE, 1), dtype=np.float32)]
+    vc._stop()
+    assert failed and failed[0].startswith("mic:") and states == ["idle"]
+
+
+def test_mac_denied_microphone_is_reported_before_recording(monkeypatch):
+    from maplehelper import macapi
+    vc = voice.VoiceController()
+    monkeypatch.setattr(voice.sys, "platform", "darwin")
+    monkeypatch.setattr(macapi, "microphone_denied", lambda: True)
+    failed = []
+    vc.failed.connect(failed.append)
+    vc._start()
+    assert failed and failed[0].startswith("mic:") and vc._stream is None

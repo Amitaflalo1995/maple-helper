@@ -15,6 +15,8 @@ import re
 from dataclasses import dataclass, field
 from functools import lru_cache
 
+from . import availability
+
 # base accuracy per class: Common = 1.2 x DEX + 2 x Level + 0.6 x LUK
 ACC_DIVISOR = {"Beginner": (2.5, 5), "Warrior": (2.5, 10), "Bowman": (4.8, 20), "Thief": (4.0, 15)}
 MAGE = "Magician"
@@ -60,12 +62,12 @@ _NOT_GRIND = re.compile(_CLOSED_MAP.pattern + r"|Hidden Street$", re.I)
 _NOT_GRIND_MOB = re.compile(r"\(|\bFairy \d|Dummy", re.I)
 
 
-# Ossyria (Orbis, El Nath and beyond) is not initial-launch content (Nexon's August 2026 report, see the
-# release-date guide): the KB lists its maps from the test, but nobody can reach them yet
-NOT_YET = ("Orbis", "El Nath", "Ludibrium", "Aquarium", "Aqua Road", "Leafre", "Mu Lung", "Omega Sector")
 # a spawn this slow is a boss (the KB monster pages' "Respawn" column: Mano "1h-1h 30m", Jr. Balrog "3h",
 # Zombie Mushmom "1h-1h 30m"; field monsters come back in seconds, the slowest ones in 5-10m)
 BOSS_RESPAWN = 30 * 60
+# the training range: monsters this many levels below / above the player are training spots (spots(), and a KB
+# update's monster changes that matter to the player, recent.py)
+SPOT_BELOW, SPOT_ABOVE = 8, 6
 
 
 def special_monster(name: str) -> bool:
@@ -73,18 +75,21 @@ def special_monster(name: str) -> bool:
     return bool(_NOT_GRIND_MOB.search(name)) or name.startswith("Tutorial")
 
 
-def released(place: str) -> bool:
-    """Not in a region that isn't out yet ("El Nath: El Nath Weapon Store · El Nath" is not)."""
-    return not any(r in place for r in NOT_YET)
+# What is in the game comes from the KB alone (availability.py): a map counts only when the KB confirms its
+# continent is out, so Ossyria (Orbis, El Nath) and anything the KB doesn't confirm stay out of every list.
+
+def released(kb, place: str) -> bool:
+    """A town or street the KB confirms is in the game ("El Nath" is not while Ossyria isn't out)."""
+    return availability.of(kb).place_open(place)
 
 
-def reachable_map(name: str) -> bool:
-    """A map a player can go to now: not a test/PQ/event room, not in a region that isn't out yet."""
-    return not _CLOSED_MAP.search(name) and not any(r in name for r in NOT_YET)
+def reachable_map(kb, name: str) -> bool:
+    """A map a player can go to now: not a test/PQ/event room, and confirmed in the game by the KB."""
+    return not _CLOSED_MAP.search(name) and availability.of(kb).map_open(name)
 
 
-def grind_map(name: str) -> bool:
-    return not _NOT_GRIND.search(name) and not any(r in name for r in NOT_YET)
+def grind_map(kb, name: str) -> bool:
+    return not _NOT_GRIND.search(name) and availability.of(kb).map_open(name)
 
 
 def respawn_seconds(text: str) -> float | None:
@@ -111,8 +116,8 @@ def _map_rows(page: str) -> list[list[str]]:
     return rows
 
 
-def _maps(page: str, n: int = 4) -> list[tuple[str, int]]:
-    return [(c[0], int(c[1])) for c in _map_rows(page) if grind_map(c[0])][:n]
+def _maps(kb, page: str, n: int = 4) -> list[tuple[str, int]]:
+    return [(c[0], int(c[1])) for c in _map_rows(page) if grind_map(kb, c[0])][:n]
 
 
 def _respawn(page: str) -> float:
@@ -136,7 +141,7 @@ def _monster(kb, key: str) -> Monster | None:
     if not all(isinstance(v, (int, float)) for v in (level, hp, exp)) or hp <= 0:
         return None
     return Monster(key, e["name"], int(level), int(hp), int(exp), _after(lines, "AVOID") or 0,
-                   _after(lines, "P.DEF") or 0, _after(lines, "M.DEF") or 0, _maps(page), _respawn(page))
+                   _after(lines, "P.DEF") or 0, _after(lines, "M.DEF") or 0, _maps(kb, page), _respawn(page))
 
 
 def monsters(kb) -> list[Monster]:
@@ -241,7 +246,7 @@ class Spot:
 
 
 def spots(kb, level: int, acc: int | None = None, dmg: tuple[int, int] | None = None, magic: bool = False,
-          below: int = 8, above: int = 6, n: int = 8) -> list[Spot]:
+          below: int = SPOT_BELOW, above: int = SPOT_ABOVE, n: int = 8) -> list[Spot]:
     """The best monsters to train on, best first: EXP per swing with your accuracy and damage.
 
     Without stats, monsters are ranked by EXP per HP near the player's level. The stat window's damage is a

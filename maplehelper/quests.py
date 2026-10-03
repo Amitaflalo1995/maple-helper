@@ -6,6 +6,8 @@ import re
 from dataclasses import dataclass, field
 from functools import lru_cache
 
+from . import availability
+
 WINDOW_BELOW = 12     # quests this many levels under you still show (cheap EXP you may have skipped)
 WINDOW_ABOVE = 4      # and these coming soon
 
@@ -31,11 +33,19 @@ class Quest:
     complete_level: int = 0             # "Level 52+ to complete": taken earlier, finished only from this level
     grade: tuple[str, int] | None = None                # ("Henesys", 9): the citizenship grade it asks
     profession: tuple[str, int] | None = None           # ("Smithing", 5): "Profession Smithing Lv. 5+"
+    # a reward that depends on the character's gender, written on the flat Rewards line with the gender before it
+    # (pages/quest/10508.md "Male Blue Sauna Robe x 1 Female Red Sauna Robe x 1"): "Male" -> ["Blue Sauna Robe x 1"]
+    gender_rewards: dict[str, list[str]] = field(default_factory=dict)
+    min_fame: int = 0                   # "Fame 10 +" (pages/quest/10401.md): the Fame it takes to accept
+    accept_cost: int = 0                # "Pay 1,000 mesos to accept." (pages/quest/10303.md)
+    # any other pre-requisite line, kept word for word so it is never lost ("Must not already have: ...")
+    notes: list[str] = field(default_factory=list)
 
     def matches(self, query: str) -> bool:
         """The quest search: every word of the query in its name, NPC, area, what it asks or what it gives."""
         text = " ".join([self.name, self.npc, self.area, *self.needs, *self.rewards,
-                         *(r for rs in self.class_rewards.values() for r in rs)]).lower()
+                         *(r for rs in self.class_rewards.values() for r in rs),
+                         *(r for rs in self.gender_rewards.values() for r in rs)]).lower()
         return all(w in text for w in query.lower().split())
 
     @property
@@ -54,6 +64,20 @@ class Quest:
     def rewards_random(self, base_class: str) -> list[str]:
         """The random reward set for this class, and the one for any class (you get one of them)."""
         return self._for_class(self.random_rewards, base_class)
+
+    def rewards_gender(self, t) -> list[str]:
+        """The gender-dependent rewards, each marked with the gender that gets it (the profile has no gender)."""
+        return [t(f"q_gender_{g}", item=item) for g, items in self.gender_rewards.items() for item in items]
+
+    def prereq_hints(self, t) -> list[str]:
+        """The pre-requisites the card lists beside grade and profession: Fame, a fee to accept, and any line
+        the parser has no field for (kept as the KB writes it)."""
+        out = []
+        if self.min_fame:
+            out.append(t("q_min_fame", n=self.min_fame))
+        if self.accept_cost:
+            out.append(t("q_accept_cost", n=f"{self.accept_cost:,}"))
+        return out + self.notes
 
     def opens_at(self) -> int:
         """The level it can be done at: to take it, and to complete it."""
@@ -83,6 +107,24 @@ CLASSES = ("Warrior", "Magician", "Bowman", "Thief", "Pirate", "Beginner", "Any 
 _GRADE = re.compile(r"^(.+?): Citizenship grade (\d+)\s*")
 _COMPLETE_LV = re.compile(r"Level (\d+)\+ to complete")
 _PROFESSION = re.compile(r"^Profession (\w+) Lv\. (\d+)\+")
+_FAME = re.compile(r"^Fame ([\d,]+) ?\+$")                       # "Fame 10 +"
+_ACCEPT_COST = re.compile(r"^Pay ([\d,]+) mesos to accept\.?$")    # "Pay 1,000 mesos to accept."
+_MIN_LEVEL = re.compile(r"^Level Lv\. \d+\+$")                   # the level line (props "Minimum Level" has it)
+GENDERS = ("Male", "Female")
+
+
+def _split_owner(kb, item: str) -> tuple[str, str] | None:
+    """A flat Rewards item that names its class or gender first ("Warrior Dark Knuckle x 1", "Male Blue Sauna
+    Robe x 1", pages/quest/10007.md and 10508.md): (owner, "Dark Knuckle x 1"), when the rest is a KB item and the
+    whole name is not one ("Warrior Potion" is an item of its own)."""
+    owner, _, rest = item.partition(" ")
+    if owner not in GENDERS and (owner not in CLASSES or owner == "Any Class"):
+        return None
+    name = rest.rsplit(" x ", 1)[0].strip().lower()
+    items = getattr(kb, "_item_by_name", {})
+    if name in items and item.rsplit(" x ", 1)[0].strip().lower() not in items:
+        return owner, rest
+    return None
 
 
 def _rewards_by_class(lines: list[str], head: str, parse) -> dict[str, list[str]]:
@@ -125,12 +167,19 @@ def _quest(kb, key: str) -> Quest | None:
             q.complete_level = int(c.group(1))
             ln = ln[c.end():].strip()
         pr = _PROFESSION.match(ln)
+        fame, cost = _FAME.match(ln), _ACCEPT_COST.match(ln)
         if ln.startswith("Job "):
             q.job = ln[4:].strip()
         elif ln.startswith("Quest Complete "):
             q.afters.append(ln[len("Quest Complete "):].strip())
         elif pr:
             q.profession = (pr.group(1), int(pr.group(2)))
+        elif fame:
+            q.min_fame = int(fame.group(1).replace(",", ""))
+        elif cost:
+            q.accept_cost = int(cost.group(1).replace(",", ""))
+        elif ln and not _MIN_LEVEL.match(ln):
+            q.notes.append(ln)
     for ln in _section(lines, "Requirements"):
         q.needs += [f"{name.strip()} x {n}" for name, n in _ITEM.findall(ln)] or [ln]
     pick = False                     # inside "Pick one (class-specific):"
@@ -143,11 +192,20 @@ def _quest(kb, key: str) -> Quest | None:
         if ln.startswith("Pick one (class-specific)"):
             pick = True
             break
-        q.rewards += [f"{name.strip()} x {n}" for name, n in _ITEM.findall(ln)]
+        for item in (f"{name.strip()} x {n}" for name, n in _ITEM.findall(ln)):
+            owned = _split_owner(kb, item)
+            if not owned:
+                q.rewards.append(item)
+            elif owned[0] in GENDERS:
+                q.gender_rewards.setdefault(owned[0], []).append(owned[1])
+            else:                    # the class's own item: shown only to that class, under "pick one"
+                q.class_rewards.setdefault(owned[0], []).append(owned[1])
     if pick:
-        q.class_rewards = _rewards_by_class(
+        picked = _rewards_by_class(
             lines, next(ln for ln in lines if ln.startswith("Pick one (class-specific)")),
             lambda ln: [f"{name.strip()} x {n}" for name, n in _ITEM.findall(ln)])
+        for cls, items in picked.items():
+            q.class_rewards.setdefault(cls, []).extend(items)
     q.random_rewards = _rewards_by_class(
         lines, "Random reward - one of:",
         lambda ln: [f"{name.strip()} x {n} ({pct}%)" for name, n, pct in _ODDS_ITEM.findall(ln)])
@@ -185,8 +243,10 @@ def for_level(kb, level: int, base_class: str = "", job: str = "", done: list[st
     profession level the character doesn't have (crafts given) is left out."""
     done_set = set(done or [])
     now, soon, town = [], [], []
+    open_ = availability.of(kb)
     for k, e in kb.entities.items():
-        if e.get("category") != "quest":
+        # only quests the KB confirms are in the game: none in Ossyria, no event the KB marks "Ended"
+        if e.get("category") != "quest" or not open_.quest_open(k):
             continue
         q = quest(kb, k)
         if not q or (base_class and not job_fits(q, base_class, job)) or not craft_fits(q, crafts):
@@ -210,10 +270,18 @@ TOWNS = ("Henesys", "Kerning City")          # the towns with citizenship (their
 
 
 def town_of(kb, q: Quest) -> str:
-    """The citizenship town a quest belongs to: its board's town, else where its NPC stands."""
+    """The citizenship town a quest belongs to: the town whose citizenship grade it requires, its board's town,
+    the town its name invites you to (the openers, "To Henesys, the Prairie Town" pages/quest/506000.md, and
+    "To the Gray City, Kerning City" 506100.md, handed out by Henesys' Arthur), else where its NPC stands
+    (Jake and Mr. Goldstein's pages name no town, their quests ask Kerning's grade)."""
+    if q.grade and q.grade[0] in TOWNS:
+        return q.grade[0]
     m = re.search(r"\((.+)\)", q.npc or "")
     if m and m.group(1) in TOWNS:
         return m.group(1)
+    named = [t for t in TOWNS if re.search(rf"\b{re.escape(t)}\b", q.name)]
+    if len(named) == 1:
+        return named[0]
     key = kb._npc_by_name.get((q.npc or "").lower())
     page = kb.page(key) if key else ""
     hits = [(page.find(t), t) for t in TOWNS if t in page]
@@ -225,8 +293,9 @@ def citizenship(kb, town: str, level: int, done: list[str] | None = None) -> lis
     (one you can take but only complete at a higher level, "Level 52+ to complete", waits for that level)."""
     done_set = set(done or [])
     out = []
+    open_ = availability.of(kb)
     for k, e in kb.entities.items():
-        if e.get("category") != "quest" or k in done_set:
+        if e.get("category") != "quest" or k in done_set or not open_.quest_open(k):
             continue
         q = quest(kb, k)
         if q and q.area == "Citizenship" and q.opens_at() <= level and town_of(kb, q) == town:

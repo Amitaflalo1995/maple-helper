@@ -71,9 +71,9 @@ def test_orange_text_is_darker_on_light_glass():
     try:
         theme.set_mode("light")
         css = theme.stylesheet("Rubik", 13)
-        assert theme.accent_text() == "#C9620A"
+        assert theme.accent_text() == theme.ORANGE_TEXT_LIGHT
         link = css[css.index("QPushButton#Link, QPushButton#LinkDanger"):]
-        assert "color: #C9620A" in link.split("}")[0]
+        assert f"color: {theme.ORANGE_TEXT_LIGHT}" in link.split("}")[0]
         assert "stop:1 #F07A12" in css           # the orange fills stay the brand orange
         theme.set_mode("dark")
         assert theme.accent_text() == theme.ORANGE and theme.accent_text(deep=True) == theme.ORANGE_DEEP
@@ -82,8 +82,8 @@ def test_orange_text_is_darker_on_light_glass():
 
 
 def test_a_trailing_plus_stays_with_its_number():
-    assert f"{bidi.LRE}ACC 40+{bidi.PDF}" in bidi.isolate_ltr_runs("כדאי לבוא עם ACC 40+.")
-    assert f"{bidi.LRE}Lv. 30+{bidi.PDF}" in bidi.isolate_ltr_runs("מ-Lv. 30+ אפשר")
+    assert f"{bidi.LRE}ACC\u00a040+{bidi.PDF}" in bidi.isolate_ltr_runs("כדאי לבוא עם ACC 40+.")
+    assert f"{bidi.LRE}Lv.\u00a030+{bidi.PDF}" in bidi.isolate_ltr_runs("מ-Lv. 30+ אפשר")
     assert f"{bidi.LRE}Kerning{bidi.PDF}" in bidi.isolate_ltr_runs("Kerning +שלום")    # not a number's plus
 
 

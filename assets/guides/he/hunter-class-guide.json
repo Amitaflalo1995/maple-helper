@@ -613,10 +613,6 @@
    "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 mesos · 500 HP 1.43 HP לכל meso [[img:d19cbf8225851d.png]] **Blue Potion** 220 mesos · 200 MP 0.91 MP לכל meso"
   },
   {
-   "guide": "best-buy-shop-efficiency",
-   "text": "השוו יעילות של פוטים מהחנות"
-  },
-  {
    "h2": "טעויות נפוצות של Hunter"
   },
   {
@@ -659,5 +655,5 @@
    "p": "Rene מקדם Hunter ל-Ranger ב-El Nath. הג'וב השלישי ו-El Nath לא נמצאים בגרסת ההשקה. טבלת ה-SP למעלה מוציאה רק נקודות של הג'וב השני. תבדקו את ספר ה-Ranger של COT2 לפני שאתם בוחרים את הסקיל הראשון של הג'וב השלישי."
   }
  ],
- "source_hash": "8f5e43a66cd5"
+ "source_hash": "2b2636ffbf2d"
 }

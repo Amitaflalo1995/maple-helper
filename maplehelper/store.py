@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import sys
@@ -134,6 +135,21 @@ class Settings:
 
     def __init__(self):
         self.data = {**DEFAULT_SETTINGS, **_read_json(self.path, {})}
+        self._windows_keys()
+
+    def _windows_keys(self) -> None:
+        """Windows keeps F12 for the debugger and never lets a program register it: a hotkey saved as F12 (older
+        versions offered it) never worked there, so it loads as the default key, or the other default when that
+        one is the other hotkey's, never two hotkeys on one key."""
+        if sys.platform != "win32":
+            return
+        keys = ("hotkey_toggle", "hotkey_voice")
+        for key in keys:
+            if self.data.get(key) != "F12":
+                continue
+            other = self.data.get(next(k for k in keys if k != key))
+            self.data[key] = next(k for k in (DEFAULT_SETTINGS[key], *(DEFAULT_SETTINGS[k] for k in keys),
+                                              *(f"F{i}" for i in range(1, 12))) if k != other)
 
     def __getitem__(self, key):
         return self.data.get(key, DEFAULT_SETTINGS.get(key))
@@ -186,12 +202,20 @@ class Character:
         """The job as the player sees it in game (the app works with the MapleStory Classic name inside)."""
         return self.job_shown or self.job
 
+    def finish_quest(self, name: str) -> list[str]:
+        """The started quests this name finishes, removed from active_quests and returned: compared by
+        quest_key, so a quest marked done in Play tools by its KB name leaves the one the AI started under it."""
+        gone = [a for a in self.active_quests if quest_key(a) and quest_key(a) == quest_key(name)]
+        for a in gone:
+            self.active_quests.remove(a)
+        return gone
+
     def summary(self) -> str:
         parts = [f"Name: {self.name}", f"Class: {self.base_class}", f"Job: {self.job}", f"Level: {self.level}"]
         if self.map:
             parts.append(f"Last known map: {self.map}")
         if self.active_quests:
-            parts.append("Active quests: " + ", ".join(self.active_quests))
+            parts.append("Active quests: " + ", ".join(self.active_quests[-QUESTS_IN_PROMPT:]))
         st = self.stats or {}
         if st:
             bits = [f"ACC {st['acc']}" if st.get("acc") else "",
@@ -204,6 +228,17 @@ class Character:
 
 
 STAT_KEYS = ("acc", "dmg_min", "dmg_max", "hp", "mp")
+# active quests only ever come from what the player mentions, and a finished one is only removed when they say so:
+# the list is capped (newest kept) and only the newest few go into every prompt (it reached 200 in testing)
+MAX_ACTIVE_QUESTS = 15
+QUESTS_IN_PROMPT = 8
+MAX_NOTES = 30          # summary() uses the last 10
+
+
+def quest_key(name: str) -> str:
+    """A quest name compared without letter case, spacing or punctuation: "Maya's medicine" finishes the started
+    "Maya's Medicine"."""
+    return re.sub(r"[\W_]+", "", name.casefold())
 
 
 def _consistent_job(update: dict, c: "Character") -> dict:
@@ -287,7 +322,7 @@ def _repair(c: dict) -> dict | None:
     c = dict(c)
     try:
         c["level"] = max(1, min(250, int(float(c.get("level")))))
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):     # NaN, Infinity and 1e400 parse as valid JSON
         c["level"] = 1
     if not isinstance(c.get("base_class"), str) or not canonical_class(c["base_class"]):
         c["base_class"] = "Beginner"
@@ -295,7 +330,10 @@ def _repair(c: dict) -> dict | None:
         c["job"] = first_job(c["base_class"], c["level"])
     if isinstance(c.get("stats"), dict):      # numbers only: a string here broke the play tools
         c["stats"] = {k: int(v) for k, v in c["stats"].items()
-                      if isinstance(v, (int, float)) and not isinstance(v, bool)}
+                      if isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)}
+    for key, cap in (("active_quests", MAX_ACTIVE_QUESTS), ("notes", MAX_NOTES)):
+        if isinstance(c.get(key), list):
+            c[key] = c[key][-cap:]
     return c
 
 
@@ -306,16 +344,21 @@ class Profiles:
         raw = _read_json(self.path, {"active": None, "characters": []})
         known = {f.name for f in fields(Character)}
         # a newer version may have saved fields this one doesn't know (after a downgrade, or a preview build):
-        # skip them instead of failing to start
+        # this one doesn't use them, but keeps them as they are and writes them back, so the newer version finds them
+        self._extra = {k: v for k, v in raw.items() if k not in ("active", "characters")}
+        self._char_extra: dict[str, dict] = {}
         self.characters = []
         for c in raw.get("characters", []) if isinstance(raw.get("characters"), list) else []:
-            c = _repair(c)
-            if c is None:
-                continue
             try:
+                c = _repair(c)
+                if c is None:
+                    continue
                 self.characters.append(Character(**{k: v for k, v in c.items() if k in known and _sane(k, v)}))
-            except (TypeError, AttributeError):    # still unusable
+            except (TypeError, AttributeError, ValueError, OverflowError):    # still unusable: the others still load
                 continue
+            extra = {k: v for k, v in c.items() if k not in known}
+            if extra:
+                self._char_extra[c["id"]] = extra
         self.active_id = raw.get("active")
 
     @property
@@ -411,13 +454,12 @@ class Profiles:
                 setattr(c, key, val)
                 changed.append((key, val))
         for q in _str_list(update.get("quests_started")):
-            if q not in c.active_quests:
+            if quest_key(q) and all(quest_key(a) != quest_key(q) for a in c.active_quests):
                 c.active_quests.append(q)
                 changed.append(("quest+", q))
+        del c.active_quests[:-MAX_ACTIVE_QUESTS]
         for q in _str_list(update.get("quests_completed")):
-            if q in c.active_quests:
-                c.active_quests.remove(q)
-                changed.append(("quest-", q))
+            changed += [("quest-", a) for a in c.finish_quest(q)]
         stats = update.get("stats")
         if isinstance(stats, dict):
             clean = {k: int(v) for k, v in stats.items()
@@ -435,6 +477,7 @@ class Profiles:
         note = update.get("note")
         if isinstance(note, str) and note.strip() and note not in c.notes:
             c.notes.append(note)
+            del c.notes[:-MAX_NOTES]
             changed.append(("note", note))
         if changed or relabelled:
             c.updated_at = time.time()
@@ -459,7 +502,8 @@ class Profiles:
         return None
 
     def save(self):
-        _write_json(self.path, {"active": self.active_id, "characters": [asdict(c) for c in self.characters]})
+        chars = [{**self._char_extra.get(c.id, {}), **asdict(c)} for c in self.characters]
+        _write_json(self.path, {**self._extra, "active": self.active_id, "characters": chars})
 
 
 # ---------------------------------------------------------------- history
@@ -480,24 +524,39 @@ class History:
         self._trim()
 
     MAX_BYTES = 4_000_000       # ~8,000 questions: every question reads the file, it mustn't grow forever
-    KEEP_LINES = 6000
+    # a trim cuts well under the cap, by size: a fixed line count left long Hebrew answers over it, and then every
+    # question rewrote the whole 8 MB file twice
+    KEEP_BYTES = 3_000_000
 
     def _trim(self) -> None:
         try:
             if self.log.stat().st_size <= self.MAX_BYTES:
                 return
-            lines = self.log.read_text(encoding="utf-8", errors="replace").splitlines()[-self.KEEP_LINES:]
+            data = self.log.read_bytes()
+            cut = data.find(b"\n", len(data) - self.KEEP_BYTES)      # the tail, from the start of a line
             tmp = self.log.with_suffix(".tmp")
-            tmp.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            tmp.write_bytes(data[cut + 1:] if cut >= 0 else b"")
             tmp.replace(self.log)
         except OSError:
             pass
 
+    def _tail(self, n: int) -> list[str]:
+        """The last n lines, read back from the end of the file (not the whole log on every question)."""
+        with self.log.open("rb") as f:
+            pos = f.seek(0, os.SEEK_END)
+            chunk = b""
+            while pos > 0 and chunk.count(b"\n") <= n:
+                step = min(65536, pos)
+                pos -= step
+                f.seek(pos)
+                chunk = f.read(step) + chunk
+        # errors="replace": a line cut off mid-character by a crash must not break every question
+        return chunk.decode("utf-8", errors="replace").splitlines()[-n:]
+
     def recent(self, n: int = RECENT) -> list[dict]:
         if not self.log.exists():
             return []
-        # errors="replace": a line cut off mid-character by a crash must not break every question
-        lines = self.log.read_text(encoding="utf-8", errors="replace").splitlines()[-n:]
+        lines = self._tail(n)
         out = []
         for ln in lines:
             try:

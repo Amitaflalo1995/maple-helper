@@ -18,7 +18,13 @@
    "h3": "התקפות נשק"
   },
   {
-   "p": "K = SkillDamage / 100 m = (MasteryLevel / 10 + 0.1) × 0.8MIN = K × TotalWATK × (0.8 + (P × m × W + Q + 2A) / 100)MAX = K × TotalWATK × (1.0 + (P × W + Q + 2A) / 100)"
+   "p": "K = SkillDamage / 100\nm = (MasteryLevel / 10 + 0.1) × 0.8"
+  },
+  {
+   "p": "MIN = K × TotalWATK ×\n(0.8 + (P × m × W + Q + 2A) / 100)"
+  },
+  {
+   "p": "MAX = K × TotalWATK ×\n(1.0 + (P × W + Q + 2A) / 100)"
   },
   {
    "p": "K"
@@ -72,7 +78,16 @@
    "h3": "ספלים"
   },
   {
-   "p": "K = SkillPower / 100 m = (SpellMastery / 10 + 0.1) × 0.8MagicTotal = floor(TotalINT / 2) + EquipmentMATK + ScrollMATK + BuffMATKMIN = K × MagicTotal × (1 + TotalINT × m / 100)MAX = K × MagicTotal × (1 + TotalINT / 100)"
+   "p": "K = SkillPower / 100\nm = (SpellMastery / 10 + 0.1) × 0.8"
+  },
+  {
+   "p": "MagicTotal = floor(TotalINT / 2)\n+ EquipmentMATK + ScrollMATK + BuffMATK"
+  },
+  {
+   "p": "MIN = K × MagicTotal × (1 + TotalINT × m / 100)"
+  },
+  {
+   "p": "MAX = K × MagicTotal × (1 + TotalINT / 100)"
   },
   {
    "p": "K"
@@ -178,7 +193,7 @@
    "p": "**סטטי קרב נגזרים וטווח נזק הם דברים שונים.** סטטי קרב נגזרים כוללים ACC ו-EVA, ועוד Magic, WDEF ו-MDEF. טווח הנזק בחלון הסטטים של הדמות הוא סיכום נפרד. הוא חוזה את הנזק הנמוך והגבוה ביותר מהתקפה פיזית בסיסית רגילה אחת. הנוסחה משתמשת בסטטים הנוכחיים שלכם ועוד Total W.ATK, Attack Power, מכפיל הנשק והמאסטרי. הטווח הזה מחושב לפני ההגנות והאלמנטים של המטרה. הוא גם לא כולל סקיילינג לפי פער לבלים, קריטים וערך הנזק של סקיל. MeowDB משקף נשקים עם פעולות מפוצלות על ידי שימוש ב-MIN הנמוך ביותר וב-MAX הגבוה ביותר מכל הפעולות הרגילות האפשריות שלהם."
   },
   {
-   "p": "**Mastery בלבל 0** = (0 / 10 + 0.1) × 0.8 = 0.08\n**1H Sword multiplier** = 1.8\n**Basic attack MIN** = trunc(47 × (0.8 + (132 × 0.08 × 1.8 + 30) / 100)) = **60Basic attack MAX** = trunc(47 × (1.0 + (132 × 1.8 + 30) / 100)) = **172טווח נזק בחלון הדמות: 60-172**"
+   "p": "**Mastery בלבל 0** = (0 / 10 + 0.1) × 0.8 = 0.08\n**1H Sword multiplier** = 1.8\n**Basic attack MIN** = trunc(47 × (0.8 + (132 × 0.08 × 1.8 + 30) / 100)) = **60**\n**Basic attack MAX** = trunc(47 × (1.0 + (132 × 1.8 + 30) / 100)) = **172**\n**טווח נזק בחלון הדמות: 60-172**"
   },
   {
    "p": "סקיל מוסיף מעל זה את ערך הנזק שלו. Power Strike במקסימום משתמש ב-`S = 2.60`, אז אותה דוגמה נקייה הופכת ל-**157-449** לפני משני המטרה. זו תוצאה של סקיל, אז היא מחוץ לטווח של חלון הדמות. החלון גם לא כולל גלגולי קריט ומשנים ספציפיים למפלצת."
@@ -734,7 +749,7 @@
    "p": "תזמון אנימציה ונזק לדקה זה קובע כמה זמן לוקחות התקפות וכמה התקפות שלמות נכנסות ב-60 שניות."
   },
   {
-   "p": "**לפעולות רגילות עם דיליי חיובי:timingTier** = clamp(resolvedTier, 0, 10)\n**ScaledFrame** = truncTowardZero(FrameDelay × (10 + timingTier) / 16)\n**nativeMs** = sum(ScaledFrame for every resolved frame)\n**Animation Time שמוצג לשחקן (המודל הנתמך ביותר)** = 30 × ceil(nativeMs / 30)\nWeapon Booster מזיז נשק מתאים ב-2 דרגות מהירות. Spell Booster מזיז פעולות מאגיה מתאימות של F/P ו-I/L בדרגה אחת בלבל 1-10 ובשתי דרגות בלבל 11-20."
+   "p": "**לפעולות רגילות עם דיליי חיובי:**\n**timingTier** = clamp(resolvedTier, 0, 10)\n**ScaledFrame** = truncTowardZero(FrameDelay × (10 + timingTier) / 16)\n**nativeMs** = sum(ScaledFrame for every resolved frame)\n**Animation Time שמוצג לשחקן (המודל הנתמך ביותר)** = 30 × ceil(nativeMs / 30)\nWeapon Booster מזיז נשק מתאים ב-2 דרגות מהירות. Spell Booster מזיז פעולות מאגיה מתאימות של F/P ו-I/L בדרגה אחת בלבל 1-10 ובשתי דרגות בלבל 11-20."
   },
   {
    "p": "משכי הפריימים וההמרה שלהם למהירות התקפה מאומתים לדמויות COT2 רגילות, כולל Savage Blow. Explosion כולל גם את ההכנה וגם את השחרור. אנחנו עדיין מעגלים זמנים מוצגים כלפי מעלה לצעדים של 30 ms; העיגול הסופי הזה נשאר מודל."
@@ -795,5 +810,5 @@
    "text": "הסבר על תוספת HP/MP ב-MapleStory Classic World"
   }
  ],
- "source_hash": "9d64ee09175b"
+ "source_hash": "67ecf4e982b5"
 }

@@ -656,10 +656,6 @@
    "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 mesos · 500 HP 1.43 HP לכל meso [[img:d19cbf8225851d.png]] **Blue Potion** 220 mesos · 200 MP 0.91 MP לכל meso"
   },
   {
-   "guide": "best-buy-shop-efficiency",
-   "text": "השוו יעילות של פוטים מהחנות"
-  },
-  {
    "h2": "טעויות נפוצות של F/P Wizard"
   },
   {
@@ -702,5 +698,5 @@
    "p": "F/P Wizard הופך ל-F/P Mage דרך Robeira ב-El Nath. ג'וב שלישי ו-El Nath לא בגרסת ההשקה."
   }
  ],
- "source_hash": "e385bc5ad1e9"
+ "source_hash": "ae30d44a02ee"
 }

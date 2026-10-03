@@ -62,15 +62,23 @@ def test_buttons_get_the_hand_cursor(qapp):
     from PySide6.QtCore import Qt
     from PySide6.QtWidgets import QPushButton
 
-    from maplehelper.app import _HandCursor
-    hand = _HandCursor(qapp)
-    qapp.installEventFilter(hand)
+    from maplehelper.ui import theme
+    old = qapp.style().name()
+    qapp.setStyle(theme.AppStyle("Fusion"))         # as main() does: no app-wide event filter
     try:
         b = QPushButton("x")
         b.ensurePolished()
         assert b.cursor().shape() == Qt.PointingHandCursor
+        own = QPushButton("y")
+        own.setCursor(Qt.IBeamCursor)                 # a cursor the widget set itself stays
+        own.ensurePolished()
+        assert own.cursor().shape() == Qt.IBeamCursor
+        styled = QPushButton("z")                     # a widget with its own stylesheet still goes through it
+        styled.setStyleSheet("QPushButton { color: red; }")
+        styled.ensurePolished()
+        assert styled.cursor().shape() == Qt.PointingHandCursor
     finally:
-        qapp.removeEventFilter(hand)
+        qapp.setStyle(old)
 
 
 def test_tour_walks_every_visible_button_and_marks_itself_done(qapp, isolated_store, kb, monkeypatch):
@@ -115,3 +123,40 @@ def test_last_session_card_continues_that_characters_chat(qapp, isolated_store, 
     go = next(x for x in card.findChildren(QPushButton) if x.objectName() == "Link")
     go.click()
     assert p.active_id == b.id and "where is Mano?" in ov._hidden_context
+
+
+def test_hebrew_search_boxes_start_on_the_right(qapp):
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QLineEdit
+
+    from maplehelper.ui.controls import follow_typing
+    e = QLineEdit()
+    follow_typing(e, True)
+    assert e.alignment() & Qt.AlignRight                     # empty: by the Hebrew hint
+    e.setText("Red Snail")
+    assert e.alignment() & Qt.AlignLeft                      # an English name runs from the left
+    e.setText("חילזון")
+    assert e.alignment() & Qt.AlignRight
+    en = QLineEdit()
+    follow_typing(en, False)
+    assert en.alignment() & Qt.AlignLeft
+
+
+def test_verified_date_is_the_last_nightly_check(isolated_store, monkeypatch, tmp_path):
+    from maplehelper import updater
+    monkeypatch.setattr(updater, "CHECKED_FILE", tmp_path / "kb_checked.txt")
+    monkeypatch.setattr(updater, "local_version", lambda: "2026.09.30.2111")
+    assert updater.kb_checked() == "2026-09-30"                 # no check yet: the installed KB's own date
+    updater._remember_checked("2026-10-03")
+    assert updater.kb_checked() == "2026-10-03"                 # a quiet night still moves it on
+    updater._remember_checked("not a date")
+    assert updater.kb_checked() == "2026-10-03"
+
+
+def test_kb_keys_never_reach_the_answer_text():
+    from maplehelper import brain
+    raw = "Subi Throwing Stars (item/294) is a drop of Mano [monster/700004] (MSEA), see item/12.\n@@META@@ {}"
+    text, _ = brain.split_meta(raw)
+    assert text == "Subi Throwing Stars is a drop of Mano (MSEA), see."
+    assert "item/" not in brain.streamed_text("זה drop של Mano (item/294) - מופיע")
+    assert brain.drop_keys("קבצים ב-pages/item") == "קבצים ב-pages/item"      # a path in words isn't a key

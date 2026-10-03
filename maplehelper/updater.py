@@ -2,6 +2,14 @@
 
 A release carries kb-manifest.json: {"version": "2026.10.02", "url": ".../kb.zip", "sha256": "..."}.
 The zip is unpacked into %APPDATA%/MapleHelper/kb, which then wins over the bundled copy.
+
+What is trusted, and its limit: every file must come over HTTPS from this repository's own release downloads,
+for the release's own tag, with the size GitHub lists and the SHA-256 the release publishes (SHA256SUMS.txt /
+kb-manifest.json), and never be an older version. That catches corruption, a truncated download and a file from
+anywhere else, but the checksum comes from the same release as the file: whoever can publish a release can
+publish both. The real fix is a signature from outside the release: Authenticode-sign the installer (and check it
+here with WinVerifyTrust and the expected signer before running it), or sign SHA256SUMS.txt / kb-manifest.json with
+a key whose public half ships inside the app. Updates are unsigned for now (owner's decision).
 """
 from __future__ import annotations
 
@@ -17,11 +25,26 @@ import urllib.error
 import urllib.request
 import zipfile
 
-from .store import USER_KB, kb_dir
+from .store import DATA_DIR, USER_KB, kb_dir
 
 # Set when the GitHub repository exists (see README, "Publishing").
 GITHUB_REPO = "Maple-Helper/maple-helper"
 MANIFEST_URL = f"https://github.com/{GITHUB_REPO}/releases/latest/download/kb-manifest.json" if GITHUB_REPO else ""
+
+
+_TAG = re.compile(r"v?\d{1,4}(\.\d{1,4}){1,2}")        # "v0.9.2": also safe in a file name
+_SHA = re.compile(r"[0-9a-f]{64}")
+
+
+def release_url_ok(url, tag: str | None = None, name: str | None = None) -> bool:
+    """A download from this repository's releases over HTTPS (for that tag and file name, when given)."""
+    if not isinstance(url, str) or not GITHUB_REPO:
+        return False
+    m = re.fullmatch(rf"https://github\.com/{re.escape(GITHUB_REPO)}/releases/(?:download/([^/]+)|latest/download)/([^/?#]+)",
+                     url)
+    if not m:
+        return False
+    return (tag is None or m.group(1) == tag) and (name is None or m.group(2) == name)
 
 
 def local_version() -> str:
@@ -72,6 +95,36 @@ def update_kb(before_swap=None) -> bool:
     return fetch_kb(before_swap) == "updated"
 
 
+CHECKED_FILE = DATA_DIR / "kb_checked.txt"
+
+
+def _remember_checked(day) -> None:
+    """The night the KB was last checked against NiaMeowDB (the manifest's "checked", moved on every night even
+    when nothing changed): the chat shows it as "knowledge base verified on"."""
+    if isinstance(day, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", day):
+        try:
+            CHECKED_FILE.write_text(day, encoding="utf-8")
+        except OSError:
+            pass
+
+
+def kb_checked() -> str:
+    """"2026-10-03" when known: the manifest's last check, else the installed KB's own date."""
+    try:
+        day = CHECKED_FILE.read_text(encoding="utf-8").strip()
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", day):
+            return max(day, _kb_date())
+    except OSError:
+        pass
+    return _kb_date()
+
+
+def _kb_date() -> str:
+    """The installed KB's date from its version ("2026.09.30.2111" -> "2026-09-30")."""
+    m = re.match(r"(\d{4})\.(\d{2})\.(\d{2})", local_version())
+    return "-".join(m.groups()) if m else ""
+
+
 def fetch_kb(before_swap=None) -> str:
     """"updated", "uptodate", "postponed" or "failed". before_swap() runs right before the folders are swapped (the app
     stops the AI process working inside the KB there); returning False postpones the update."""
@@ -84,12 +137,15 @@ def fetch_kb(before_swap=None) -> str:
         manifest = json.loads(raw)
     except json.JSONDecodeError:
         return "failed"
-    if not isinstance(manifest, dict) or not manifest.get("url"):
-        return "failed"
+    if not (isinstance(manifest, dict) and release_url_ok(manifest.get("url"))
+            and _SHA.fullmatch(str(manifest.get("sha256", "")).lower())
+            and re.fullmatch(r"\d{4}\.\d{2}\.\d{2}(\.\d{1,6})?", str(manifest.get("version", "")))):
+        return "failed"          # only a KB from this repository's releases, with a real checksum and version
+    _remember_checked(manifest.get("checked"))
     if str(manifest.get("version", "")) <= local_version():
         return "uptodate"
     data = _get(manifest["url"], timeout=300)
-    if not data or hashlib.sha256(data).hexdigest() != manifest.get("sha256"):
+    if not data or hashlib.sha256(data).hexdigest() != manifest["sha256"].lower():
         return "failed"
     tmp = USER_KB.with_name("kb.new")
     shutil.rmtree(tmp, ignore_errors=True)
@@ -163,7 +219,9 @@ def _asset(rel: dict, name: str) -> dict | None:
 def _published_sha256(rel: dict, name: str) -> str | None:
     """The release's own checksum for `name`, from its SHA256SUMS.txt."""
     sums = _asset(rel, SUMS_ASSET)
-    raw = _get(sums["browser_download_url"], timeout=30) if sums else None
+    if not sums or not release_url_ok(sums.get("browser_download_url"), rel.get("tag_name"), SUMS_ASSET):
+        return None
+    raw = _get(sums["browser_download_url"], timeout=30)
     if not raw:
         return None
     for line in raw.decode("utf-8", errors="replace").splitlines():
@@ -181,6 +239,8 @@ def _latest_release() -> dict | None:
         return None
     if not isinstance(rel, dict) or rel.get("draft") or rel.get("prerelease"):
         return None
+    if not isinstance(rel.get("tag_name"), str) or not _TAG.fullmatch(rel["tag_name"]):
+        return None           # the tag names the downloaded file: nothing but a plain version
     return rel
 
 
@@ -216,25 +276,31 @@ def download_app_update(current: str, progress=None) -> str | None:
     """If GitHub has a newer release, download its installer. Returns the installer path.
     progress(done_bytes, total_bytes) is called while it downloads.
 
-    The installer is only kept when its SHA-256 matches the release's SHA256SUMS.txt:
-    it is executed on the player's PC, so a truncated or corrupted download must never run.
+    The installer is only kept when it comes from this repository's release of that tag over HTTPS, has the size
+    GitHub lists and the SHA-256 of the release's SHA256SUMS.txt, and is newer than this version (never a
+    downgrade): it is executed on the player's PC, so a truncated, corrupted or foreign file must never run.
+    It is not signed yet (see the module docstring: Authenticode + WinVerifyTrust is the real fix).
     """
     rel = _latest_release()
-    if not rel or _version_tuple(rel.get("tag_name", "")) <= _version_tuple(current):
+    if not rel or _version_tuple(rel["tag_name"]) <= _version_tuple(current):
         return None
     asset = _asset(rel, SETUP_ASSET)
-    want = _published_sha256(rel, SETUP_ASSET) if asset else None
-    if not want:
+    if not (asset and release_url_ok(asset.get("browser_download_url"), rel["tag_name"], SETUP_ASSET)
+            and asset.get("state", "uploaded") == "uploaded"):
+        return None
+    size = asset.get("size")
+    want = _published_sha256(rel, SETUP_ASSET)
+    if not want or not isinstance(size, int) or size <= 0:
         return None
     path = USER_KB.parent / "updates" / f"MapleHelper-Setup-{rel['tag_name']}.exe"
     try:
-        if path.exists() and hashlib.sha256(path.read_bytes()).hexdigest() == want:
+        if path.exists() and path.stat().st_size == size and hashlib.sha256(path.read_bytes()).hexdigest() == want:
             return str(path)       # downloaded before (an update skipped at shutdown): no second download
     except OSError:
         pass
     url = asset["browser_download_url"]
     data = _download(url, progress) if progress else _get(url, timeout=600)
-    if not data or hashlib.sha256(data).hexdigest() != want:
+    if not data or len(data) != size or hashlib.sha256(data).hexdigest() != want:
         return None
     path.parent.mkdir(parents=True, exist_ok=True)
     part = path.with_suffix(".part")

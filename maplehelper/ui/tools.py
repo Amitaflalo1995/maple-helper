@@ -9,15 +9,17 @@ import re
 import time
 
 from PySide6.QtCore import QEvent, QPoint, QSize, Qt, QTimer, QUrl, Signal
-from PySide6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
+from PySide6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel, QTextOption
 from PySide6.QtWidgets import (QButtonGroup, QCompleter, QFrame, QGraphicsOpacityEffect, QGridLayout, QHBoxLayout,
                                QLabel, QLineEdit, QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
 
-from .. import bidi, buildplan, combat, crafting, glossary, guides, market, plan, quests
+from .. import availability, bidi, buildplan, combat, crafting, glossary, guides, market, plan, quests, sources
 from ..i18n import I18n
 from . import terms, theme
-from .controls import FlowLayout, Section, Segmented, Stepper, WrapLink, rtl_buttons
+from .controls import FlowLayout, Section, Segmented, Stepper, WrapLink, follow_typing, rtl_buttons
 from .glass import GlassDialog, no_default_buttons
+from .widgets import chip_row, source_tag, source_tags, updated_tag
+from .patchnotes import gutter
 
 PAGES = ("train", "calc", "build", "quests", "crafting", "town", "prices", "exp", "more")
 MAX_QUESTS = 40
@@ -35,19 +37,27 @@ def clear(layout):
             clear(item.layout())
 
 
+def _alone(w: QWidget) -> QHBoxLayout:
+    """One widget as a layout (beside chip_row's rows)."""
+    box = QHBoxLayout()
+    box.setContentsMargins(0, 0, 0, 0)
+    box.addWidget(w, 1)
+    return box
+
+
 def tag(text: str, kind: str = "Tag") -> QLabel:
     lb = QLabel(text, objectName=kind)
     lb.setAlignment(Qt.AlignCenter)
     return lb
 
 
-def scroll_page() -> tuple[QScrollArea, QVBoxLayout]:
+def scroll_page(rtl: bool) -> tuple[QScrollArea, QVBoxLayout]:
     sc = QScrollArea()
     sc.setWidgetResizable(True)
     sc.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
     body = QWidget(objectName="Feed")
     lay = QVBoxLayout(body)
-    lay.setContentsMargins(0, 0, 6, 0)
+    lay.setContentsMargins(*gutter(rtl))      # the room before the scrollbar, on its side (left in Hebrew)
     lay.setSpacing(14)
     sc.setWidget(body)
     return sc, lay
@@ -83,9 +93,10 @@ class EntityPicker(QLineEdit):
     rows: (shown text, name to put in the box, picture path or None)."""
     picked = Signal()
 
-    def __init__(self, rows: list[tuple[str, str, object]], placeholder: str, icon: int = 36):
+    def __init__(self, rows: list[tuple[str, str, object]], placeholder: str, icon: int = 36, rtl: bool = False):
         super().__init__()
         self.setPlaceholderText(placeholder)
+        self.setAccessibleName(placeholder)         # a placeholder isn't read as the field's name
         self.setClearButtonEnabled(True)
         model = _LazyIcons(self, icon)
         for shown, name, path in rows:
@@ -121,6 +132,7 @@ class EntityPicker(QLineEdit):
         arrow = self.addAction(self._chevron(), QLineEdit.TrailingPosition)
         arrow.triggered.connect(self.open_list)
         self.setMinimumHeight(34)
+        follow_typing(self, rtl)
 
     @staticmethod
     def _chevron() -> QIcon:
@@ -168,8 +180,10 @@ def _bold_names(text: str) -> str:
 def monster_rows(kb) -> list[tuple[str, str, object]]:
     """Every monster once (the version that spawns on the most maps), lowest level first."""
     best: dict[str, combat.Monster] = {}
+    open_ = availability.of(kb)
     for m in combat.monsters(kb):
-        if combat.special_monster(m.name):
+        # only monsters the KB confirms are in the game: none from Ossyria, none with no map at all
+        if combat.special_monster(m.name) or not open_.monster_key_open(m.key):
             continue
         if m.name not in best or sum(n for _, n in m.maps) > sum(n for _, n in best[m.name].maps):
             best[m.name] = m
@@ -194,8 +208,10 @@ def map_rows(kb) -> list[tuple[str, str, object]]:
             continue
         page = kb.page(k)
         where = re.search(r"\nLocation (.+)", page)
-        place = where.group(1).split(" / ")[-1].strip() if where else ""
-        if not combat.grind_map(f"{e['name']} {place}"):
+        street, _, place = where.group(1).partition(" / ") if where else ("", "", "")
+        place = place.strip()
+        # confirmed in the game by the KB (its continent is out), and a map people hunt on
+        if not combat.grind_map(kb, f"{e['name']} {street.strip()}"):
             continue
         lv = re.search(r"\nMonster levels Lv (\d+)\s*[-–]\s*(\d+)", page)
         lo = int(lv.group(1)) if lv else 999
@@ -282,9 +298,12 @@ class ToolsDialog(GlassDialog):
             self._build_page(self._pending[0])
 
     def __getattr__(self, name):
-        # a widget of a page not built yet (a test, a page reaching into another): build them all and look again
+        # a widget of a page not built yet (a test, a page reaching into another): build them all and look again.
+        # Only public names: the widgets are public, while a private name is the window's own state, probed with
+        # hasattr() before it is first set (_skill_icons' "_skills"). Building every page for that held the window
+        # back ~0.2 s whenever it opened on the Build page, the lazy build undone.
         pending = self.__dict__.get("_pending")
-        if pending and not name.startswith("__"):
+        if pending and not name.startswith("_"):
             self._build_rest()
             return getattr(self, name)
         raise AttributeError(name)
@@ -299,12 +318,30 @@ class ToolsDialog(GlassDialog):
         self._build_page(PAGES[i])
         self.nav.button(i).setChecked(True)
         self.stack.setCurrentIndex(i)
+        # the quest pages rebuild up to 40 cards (~0.3 s): a tab switch back to one that would show the same thing
+        # keeps it as it is. Every other redraw (a quest marked done, a new reading, the search) still fills.
+        state = self._page_state(PAGES[i])
+        if state is not None and state == self.__dict__.get("_filled", {}).get(PAGES[i]):
+            return
         self.refresh(PAGES[i])
+
+    def _page_state(self, name: str):
+        """Everything a quest page's cards are made from, or None for a page that always redraws."""
+        c = self.c
+        if name not in ("quests", "town") or c is None:
+            return None
+        common = (c.id, c.level, c.base_class, c.job, tuple(c.quests_done), theme.MODE)
+        if name == "quests":
+            return common + (tuple(sorted((c.crafts or {}).items())), self.q_mode.value(),
+                             self.q_search.text().strip(), self._q_limit, self.q_done_toggle.isChecked())
+        return common + (c.town, self._town_limit, self.town_done_toggle.isChecked())
 
     def refresh(self, name: str | None = None):
         """Redraw a page (or the current one) from the character and the KB."""
         name = name or PAGES[self.stack.currentIndex()]
         getattr(self, f"_fill_{name}", lambda: None)()
+        if name in ("quests", "town"):
+            self.__dict__.setdefault("_filled", {})[name] = self._page_state(name)
 
     def profile_changed(self):
         """The chat read the profile again (level, EXP, stats): follow it."""
@@ -363,6 +400,16 @@ class ToolsDialog(GlassDialog):
         lb.setWordWrap(wrap)
         self._set(lb, text, seen)
         return terms.watch(lb, self.t.lang)
+
+    def _source_line(self, box: QHBoxLayout, source: str | None) -> None:
+        """ "Data source: [MeowDB]" under a page's header, for a page whose whole list has one source (None: empty)."""
+        clear(box)
+        if not source:
+            return
+        box.setSpacing(6)
+        box.addWidget(self._label(self.t("src_data"), "RowHint", wrap=False), 0, Qt.AlignVCenter)
+        box.addWidget(source_tag(self.t, source), 0, Qt.AlignVCenter)
+        box.addStretch(1)
 
     def _row(self, sec: Section, label: str, control: QWidget | None = None, hint: str = "") -> QWidget:
         """A settings-style row whose label explains its game terms ("?")."""
@@ -451,7 +498,7 @@ class ToolsDialog(GlassDialog):
     # where to train --------------------------------------------------------
 
     def _page_train(self):
-        sc, lay = scroll_page()
+        sc, lay = scroll_page(self.t.rtl)
         self.train_head = self._label("", "ToolHeader")
         lay.addWidget(self.train_head)
         # the stats first: the spots below are ranked by them, and at the end of a long list nobody found them
@@ -532,6 +579,13 @@ class ToolsDialog(GlassDialog):
             nums.addWidget(tag(self._p(t("spot_hits", n=s.hits)), "Tag"))
         nums.addWidget(tag(self._p(t("spot_exp", n=m.exp)), "Tag"))
         nums.addWidget(tag(self._p(t("spot_crowd", n=m.maps[0][1])), "Tag"))
+        # the monster's numbers come from its page: its build ("COT2") or MeowDB's own; a KB update this week
+        # that changed it says so
+        stamp = sources.stat_source(self.kb, m.key)
+        nums.addWidget(source_tag(t, stamp.source if stamp else sources.MEOWDB, stamp))
+        updated = updated_tag(t, self.kb, m.key)
+        if updated:
+            why.addWidget(updated)
         for line in (why, nums):
             if line.count():
                 col.addLayout(line)
@@ -542,7 +596,10 @@ class ToolsDialog(GlassDialog):
         if kills:
             info.append(t("spot_kills", n=f"{kills:,}"))
         if info:
-            col.addWidget(self._label("\n".join(info), "CardSub"))
+            label = self._label("\n".join(info), "CardSub")
+            # the kills come from the EXP table: past its confirmed levels it is a historical reference
+            ref = kills and sources.exp_source(self.kb, c.level) == sources.REFERENCE
+            col.addLayout(chip_row([source_tag(t, sources.REFERENCE)], label, lead=True) if ref else _alone(label))
         row.addLayout(col, 1)
         # its own row under the tags, at the reading start: beside them it took the room the tags needed
         ask = QPushButton(self._p(t("ask_short")), objectName="Link")
@@ -556,9 +613,9 @@ class ToolsDialog(GlassDialog):
 
     def _page_calc(self):
         t = self.t
-        sc, lay = scroll_page()
+        sc, lay = scroll_page(self.t.rtl)
         rows = monster_rows(self.kb)
-        self.calc_input = EntityPicker(rows, self._p(t("calc_placeholder", n=len(rows))))
+        self.calc_input = EntityPicker(rows, self._p(t("calc_placeholder", n=len(rows))), rtl=t.rtl)
         self.calc_input.picked.connect(self._fill_calc)
         lay.addWidget(self.calc_input)
         # the stats first, as on "Where to train": every number below comes from them
@@ -575,7 +632,10 @@ class ToolsDialog(GlassDialog):
         if not q:
             spots = combat.spots(self.kb, self.c.level, n=1) if self.c else []
             return spots[0].monster if spots else None
-        ms = combat.monsters(self.kb)
+        # only monsters the KB confirms are in the game, like the list: a typed "Star Pixie" (Orbis) or "Ratz" (no
+        # map at all) got a full hits-to-kill card as if it could be met
+        open_ = availability.of(self.kb)
+        ms = [m for m in combat.monsters(self.kb) if open_.monster_key_open(m.key)]
         exact = [m for m in ms if m.name.lower() == q]
         if exact:
             return min(exact, key=lambda m: -sum(n for _, n in m.maps))
@@ -611,7 +671,16 @@ class ToolsDialog(GlassDialog):
         for value, label in ((f"{m.hp:,}", "HP"), (f"{m.exp:,}", "EXP"), (str(m.avoid), "Avoid"), (str(m.pdef), "P.DEF")):
             nums.addLayout(self._big(value, label))
         holder = QWidget()
-        holder.setLayout(nums)
+        both = QVBoxLayout(holder)
+        both.setContentsMargins(0, 0, 0, 0)
+        both.addLayout(nums)
+        # where these numbers (and every result below, worked out from them) come from
+        stamp = sources.stat_source(self.kb, m.key)
+        self.calc_chips = [source_tag(t, stamp.source if stamp else sources.MEOWDB, stamp)]
+        updated = updated_tag(t, self.kb, m.key)
+        if updated:
+            self.calc_chips.append(updated)
+        both.addLayout(chip_row(self.calc_chips))
         sec.add_widget(holder)
         if m.avoid <= 0:
             # nothing to compute: say it plainly instead of a column of zeros
@@ -675,9 +744,13 @@ class ToolsDialog(GlassDialog):
         lay.setSpacing(8)
         self.build_head = self._label("", "ToolHeader")
         lay.addWidget(self.build_head)
+        self.build_src = QHBoxLayout()
+        lay.addLayout(self.build_src)
         self.build_view = QTextBrowser(objectName="GuideText")
         self.build_view.setOpenLinks(False)
         self.build_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        # breaks between words only, a wide table in a smaller font, as in the guides reader ("crafti" / "ng 1")
+        self.build_view.setWordWrapMode(QTextOption.WordWrap)
         from .guides import ImageZoom
         self.build_zoom = ImageZoom(self.build_view)
         lay.addWidget(self.build_view, 1)
@@ -692,6 +765,7 @@ class ToolsDialog(GlassDialog):
         t, c = self.t, self.c
         if not c:
             self._set(self.build_head, t("tool_no_char"))
+            self._source_line(self.build_src, None)
             self.build_view.setHtml("")
             self._build_key = None
             self.build_guide_btn.hide()          # no character, no guide to open
@@ -700,6 +774,8 @@ class ToolsDialog(GlassDialog):
         self._build_key = key
         self.build_guide_btn.setVisible(bool(key))
         self._set(self.build_head, t("build_head", job=c.job_label or c.base_class, n=c.level))
+        # the class guide's numbers: "use current COT2 data" on its page, else MeowDB's own
+        self._source_line(self.build_src, (sources.guide_source(self.kb, key) or sources.MEOWDB) if tables else None)
         if not tables:
             self.build_view.setHtml(f"<p>{t('build_none')}</p>")
             return
@@ -736,10 +812,12 @@ class ToolsDialog(GlassDialog):
         opt.setTextDirection(Qt.RightToLeft if he else Qt.LeftToRight)
         self.build_view.document().setDefaultTextOption(opt)
         self.build_view.setHtml("\n".join(out))
+        from .guides import fit_tables
+        fit_tables(self.build_view)
 
     def _skill_icons(self) -> list[tuple[str, str]]:
         """(skill name, picture file URI), longest names first so "Power Strike" wins over "Power"."""
-        if not hasattr(self, "_skills"):
+        if "_skills" not in self.__dict__:
             out = []
             for k, e in self.kb.entities.items():
                 if e.get("category") == "skill":
@@ -748,14 +826,6 @@ class ToolsDialog(GlassDialog):
                         out.append((e["name"], path.as_uri()))
             self._skills = sorted(out, key=lambda x: -len(x[0]))
         return self._skills
-
-    def _q_search_direction(self, *_):
-        """In Hebrew the cursor and the hint start on the right; an English name typed in (most quests) runs
-        left to right like the game writes it."""
-        text = self.q_search.text()
-        rtl = self.t.rtl and (not text or bool(bidi._RTL.search(text)))
-        self.q_search.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
-        self.q_search.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
 
     @staticmethod
     def _short_skill_icons(rows: list[list[str]], icons: list[tuple[str, str]]) -> list[tuple[str, str]]:
@@ -786,22 +856,25 @@ class ToolsDialog(GlassDialog):
 
     def _page_quests(self):
         t = self.t
-        sc, lay = scroll_page()
+        sc, lay = scroll_page(self.t.rtl)
         self.q_mode = Segmented([(t("q_now"), "now"), (t("q_soon"), "soon")], "now", t.rtl)
-        self.q_mode.changed.connect(lambda *_: self._fill_quests())
+        self.q_mode.changed.connect(lambda *_: self._fill_quests(new_list=True))
         lay.addWidget(self.q_mode, 0, Qt.AlignHCenter)
         # search within the list shown (the quests that fit the character's level), not all quests
         self.q_search = QLineEdit()
         self.q_search.setPlaceholderText(t("q_search"))
+        self.q_search.setAccessibleName(t("q_search"))        # a placeholder isn't read as the field's name
         self.q_search.setClearButtonEnabled(True)
         self._q_search_timer = QTimer(self, singleShot=True, interval=200)     # rebuild once typing pauses
-        self._q_search_timer.timeout.connect(self._fill_quests)
+        self._q_search_timer.timeout.connect(lambda: self._fill_quests(new_list=True))
         self.q_search.textChanged.connect(lambda *_: self._q_search_timer.start())
-        self.q_search.textChanged.connect(self._q_search_direction)
-        self._q_search_direction()
+        follow_typing(self.q_search, t.rtl)
         lay.addWidget(self.q_search)
         self.q_head = self._label("", "ToolHeader")
         lay.addWidget(self.q_head)
+        self.q_src = QHBoxLayout()
+        lay.addLayout(self.q_src)
+        self._source_line(self.q_src, sources.MEOWDB)
         # "show done quests" right under the header: under a list of 50 it was out of reach
         self.q_done_toggle = self._done_toggle()
         lay.addWidget(self.q_done_toggle, 0, Qt.AlignHCenter)
@@ -812,10 +885,13 @@ class ToolsDialog(GlassDialog):
         self.q_list.setSpacing(8)
         lay.addLayout(self.q_list)
         lay.addStretch(1)
+        self._q_limit = MAX_QUESTS
         return sc
 
-    def _fill_quests(self):
+    def _fill_quests(self, new_list: bool = False):
         t, c = self.t, self.c
+        if new_list:                    # another list (Available / Coming up, a new search): its first cards again
+            self._q_limit = MAX_QUESTS
         clear(self.q_list)
         clear(self.q_done)
         if not c:
@@ -838,9 +914,28 @@ class ToolsDialog(GlassDialog):
                 self.q_list.addWidget(self._label(t("q_no_match"), "RowHint"))
         elif not rows:
             self.q_list.addWidget(self._label(t("q_none"), "RowHint"))
-        for q in rows[:MAX_QUESTS]:
+        for q in rows[:self._q_limit]:
             self.q_list.addWidget(self._quest_card(q))
+        self._more_quests(self.q_list, len(rows), self._q_limit, "_q_limit")
         self._add_done(self.q_done_toggle, self.q_done, list(c.quests_done))
+
+    def _more_quests(self, layout: QVBoxLayout, total: int, shown: int, limit: str):
+        """Under a list cut at `shown` cards: "Showing 40 of 56 quests" and "Show more quests". The header counts
+        every quest and the cut ones are the lowest-EXP ones, so without this they were out of reach (only a search
+        found them). The numbers are in the line, not on the button: a button lays a Hebrew label with a number in
+        it out of order."""
+        if total <= shown:
+            return
+        layout.addWidget(self._label(self.t("q_shown", n=shown, total=total), "RowHint"))
+        more = QPushButton(self._p(self.t("q_more")), objectName="Secondary")
+        more.setCursor(Qt.PointingHandCursor)
+        more.setAutoDefault(False)
+
+        def show_more():
+            setattr(self, limit, shown + MAX_QUESTS)
+            self._refresh_in_place()
+        more.clicked.connect(lambda *_: show_more())
+        layout.addWidget(more, 0, Qt.AlignHCenter)
 
     def _picture_uri(self, kind: str, name: str) -> str | None:
         """The KB picture of a monster / item / NPC by its name, as a file URI."""
@@ -858,16 +953,18 @@ class ToolsDialog(GlassDialog):
 
     def _thing_html(self, text: str) -> str:
         """ "Defeat Blue Snail x 10" / "Red Potion x 20" -> its picture, then the name (kept as one English block)."""
-        m = re.fullmatch(r"(Defeat |Collect )?(.+?) x ([\d,]+)( \([\d.]+%\))?", text.strip())
+        m = re.fullmatch(r"(Defeat |Collect )?(.+?) x ([\d,]+)( \([\d.]+%\))?( \(.+\))?", text.strip())
         if not m:
             return html.escape(text)
-        verb, name, n, odds = m.groups()
+        verb, name, n, odds, note = m.groups()
         n += odds or ""                 # a random reward keeps its odds: "Bronze Ore x7 (16.7%)"
         uri = self._picture_uri("monster" if verb == "Defeat " else "item", name) or \
             self._picture_uri("item" if verb == "Defeat " else "monster", name)
         img = f"<img src='{uri}' height='24' style='vertical-align: middle'>&nbsp;" if uri else ""
         # picture and name in one left-to-right unit, so in Hebrew the picture stays beside its own name
-        return f"<span style='white-space: nowrap'>{bidi.LRE}{img}{html.escape(name)} x{n}{bidi.PDF}{bidi.RLM}</span>"
+        # a note in the player's language after it ("(male character)", Quest.rewards_gender), outside the block
+        return (f"<span style='white-space: nowrap'>{bidi.LRE}{img}{html.escape(name)} x{n}{bidi.PDF}{bidi.RLM}</span>"
+                + html.escape(note or ""))
 
     def _things_label(self, head: str, things: list[str], extra: str = "") -> QLabel:
         """A heading, then one thing per line: its picture beside its own name, never split by a wrap."""
@@ -924,6 +1021,10 @@ class ToolsDialog(GlassDialog):
             if things:
                 shown = things[:4] + ([t("pn_more", n=len(things) - 4)] if len(things) > 4 else [])
                 col.addWidget(self._things_label(t(head), shown))
+        # a reward that depends on the character's gender: both listed, each marked (the profile has no gender)
+        by_gender = q.rewards_gender(t)
+        if by_gender:
+            col.addWidget(self._things_label(t("q_gender_head"), by_gender))
         hints = []
         if q.after:
             hints.append(t("q_after", name=bidi.ltr_block(q.after, t.rtl)))
@@ -933,6 +1034,7 @@ class ToolsDialog(GlassDialog):
             hints.append(t("q_grade", town=q.grade[0], n=q.grade[1]))
         if q.profession:
             hints.append(t("q_profession", prof=q.profession[0], n=q.profession[1]))
+        hints += q.prereq_hints(t)          # Fame, a fee to accept, any other pre-requisite line of the page
         if hints:
             col.addWidget(self._label("\n".join(hints), "RowHint"))
         acts = QHBoxLayout()
@@ -959,6 +1061,10 @@ class ToolsDialog(GlassDialog):
         c = self.c
         if c and key not in c.quests_done:
             c.quests_done.append(key)
+            # done here is done for the chat too: the started quest leaves "Active quests" in the AI's prompt
+            q = quests.quest(self.kb, key)
+            if q:
+                c.finish_quest(q.name)
             self.profiles.save()
         self._refresh_in_place()
 
@@ -994,6 +1100,12 @@ class ToolsDialog(GlassDialog):
         under the toggle: a small header, then muted cards, each with a way back to the list."""
         t = self.t
         toggle.setVisible(bool(keys))
+        if not keys and toggle.isChecked():
+            # nothing left to show: closed again, or the next quest marked done would open the list on its own.
+            # Quietly: its toggled signal redraws the page, and this is already inside a redraw
+            toggle.blockSignals(True)
+            toggle.setChecked(False)
+            toggle.blockSignals(False)
         toggle.setText(self._p(t("q_hide_done" if toggle.isChecked() else "q_show_done", n=len(keys))))
         if not (keys and toggle.isChecked()):
             return
@@ -1012,7 +1124,7 @@ class ToolsDialog(GlassDialog):
 
     def _page_crafting(self):
         t = self.t
-        sc, lay = scroll_page()
+        sc, lay = scroll_page(self.t.rtl)
         # the professions live inside this tab's own card, in a lighter style than the main tabs
         sec = Section(t("craft_profession"), t.rtl)
         grid = FlowLayout(spacing=6)            # wraps: three long names on one row were wider than the window
@@ -1037,6 +1149,9 @@ class ToolsDialog(GlassDialog):
         lay.addLayout(self.craft_info)
         self.craft_head = self._label("", "ToolHeader")
         lay.addWidget(self.craft_head)
+        self.craft_src = QHBoxLayout()
+        lay.addLayout(self.craft_src)
+        self._source_line(self.craft_src, sources.MEOWDB)
         self.craft_list = QVBoxLayout()
         self.craft_list.setSpacing(8)
         lay.addLayout(self.craft_list)
@@ -1152,7 +1267,7 @@ class ToolsDialog(GlassDialog):
 
     def _page_town(self):
         t = self.t
-        sc, lay = scroll_page()
+        sc, lay = scroll_page(self.t.rtl)
         sec = Section(t("town_title"), t.rtl)
         self.town_pick = Segmented([(name, name) for name in quests.TOWNS], quests.TOWNS[0], t.rtl)
         self.town_pick.changed.connect(self._set_town)
@@ -1164,6 +1279,9 @@ class ToolsDialog(GlassDialog):
         lay.addWidget(sec)
         self.town_head = self._label("", "ToolHeader")
         lay.addWidget(self.town_head)
+        self.town_src = QHBoxLayout()
+        lay.addLayout(self.town_src)
+        self._source_line(self.town_src, sources.MEOWDB)
         self.town_list = QVBoxLayout()
         self.town_list.setSpacing(8)
         lay.addLayout(self.town_list)
@@ -1173,6 +1291,7 @@ class ToolsDialog(GlassDialog):
         self.town_done.setSpacing(8)
         lay.addLayout(self.town_done)
         lay.addStretch(1)
+        self._town_limit = MAX_QUESTS
         return sc
 
     def _set_town(self, *_):
@@ -1180,7 +1299,8 @@ class ToolsDialog(GlassDialog):
         if c:
             c.town = self.town_pick.value()
             self.profiles.save()
-        self._fill_town()
+        self._town_limit = MAX_QUESTS         # another town's list: its first cards
+        self.refresh("town")
 
     def _fill_town(self):
         t, c = self.t, self.c
@@ -1210,8 +1330,9 @@ class ToolsDialog(GlassDialog):
             return
         if not rows:
             self.town_list.addWidget(self._label(t("q_none"), "RowHint"))
-        for q in rows[:MAX_QUESTS]:
+        for q in rows[:self._town_limit]:
             self.town_list.addWidget(self._quest_card(q))
+        self._more_quests(self.town_list, len(rows), self._town_limit, "_town_limit")
         mine = [k for k in c.quests_done
                 if (q := quests.quest(self.kb, k)) and q.area == "Citizenship" and quests.town_of(self.kb, q) == town]
         self._add_done(self.town_done_toggle, self.town_done, mine)
@@ -1220,12 +1341,12 @@ class ToolsDialog(GlassDialog):
 
     def _page_prices(self):
         t = self.t
-        sc, lay = scroll_page()
+        sc, lay = scroll_page(self.t.rtl)
         # a term gets its "?" once on this page: in the intro, not again in the card, the market line and the hint
         self._price_seen: set = set()
         lay.addWidget(self._label(t("prices_intro"), "ToolHeader", seen=self._price_seen))
         rows = item_rows(self.kb)
-        self.price_input = EntityPicker(rows, self._p(t("price_placeholder", n=f"{len(rows):,}")), icon=32)
+        self.price_input = EntityPicker(rows, self._p(t("price_placeholder", n=f"{len(rows):,}")), icon=32, rtl=t.rtl)
         self.price_input.picked.connect(self._fill_prices)
         lay.addWidget(self.price_input)
         self.price_box = QVBoxLayout()
@@ -1270,26 +1391,42 @@ class ToolsDialog(GlassDialog):
         col.setSpacing(6)
         outer.addLayout(col, 1)
         seen = self._card_seen = set(self._price_seen)
-        col.addWidget(self._label(f"**{name}**", "CardName", seen=seen))
-        lines = []
+        updated = updated_tag(t, self.kb, key)
+        title = self._label(f"**{name}**", "CardName", seen=seen)
+        if updated:
+            col.addLayout(chip_row([updated], title))
+        else:
+            col.addWidget(title)
+        # each price with where it comes from: the item page's values (its build, e.g. "COT2"), a shop price's
+        # own label ("COT2 prices"), the Free Market's player reports (community)
+        stamp = sources.stat_source(self.kb, key)
+        lines: list[tuple[str, list[str]]] = []
         if npc.sell_back is not None:
-            lines.append(t("price_npc_buys", n=f"{npc.sell_back:,}"))
-        shops = [s for s in npc.shops if combat.released(s[1])]      # no El Nath / Orbis shop before they open
+            lines.append((t("price_npc_buys", n=f"{npc.sell_back:,}"), [sources.source_of(self.kb, key)]))
+        shops = [s for s in npc.shops if combat.released(self.kb, s[1])]      # no El Nath / Orbis shop before they open
         if shops:
             cheapest = shops[0]
             line = t("price_shop", n=f"{cheapest[2]:,}", npc=cheapest[0], where=cheapest[1].split(" · ")[-1])
             rank = npc.ranks.get(cheapest[:2])        # a town shop's item for a citizen grade and up
-            lines.append(line + (" " + t("price_rank", rank=rank) if rank else ""))
+            if rank:
+                line += " " + t("price_rank", rank=rank)
+            # the KB labels these prices with a build (the COT2 test's, not confirmed for launch): its chip says so
+            lines.append((line, [npc.source(cheapest)]))
         # NPCs the page lists without a price still sell it: name them
-        unpriced = [s for s in npc.unpriced if combat.released(s[1])][:3]
+        unpriced = [s for s in npc.unpriced if combat.released(self.kb, s[1])][:3]
         if unpriced:
             who = ", ".join(f"{n} ({w.split(' · ')[-1]})" for n, w in unpriced)
-            lines.append(t("price_sold_by_also" if shops else "price_sold_by", npcs=who))
+            lines.append((t("price_sold_by_also" if shops else "price_sold_by", npcs=who), []))
         if not lines:
-            lines.append(t("price_no_npc"))
-        col.addWidget(self._label("\n".join(lines), "RowLabel", seen=seen))
+            lines.append((t("price_no_npc"), []))
+        self.price_chips = []
+        for text, srcs in lines:
+            chips = source_tags(t, srcs, stamp)
+            self.price_chips += chips
+            col.addLayout(chip_row(chips, self._label(text, "RowLabel", seen=seen), lead=True))
         self.fm_label = self._label(t("price_fm_loading"), "RowLabel", seen=set(seen))
-        col.addWidget(self.fm_label)
+        self.fm_chip = source_tag(t, sources.COMMUNITY)
+        col.addLayout(chip_row([self.fm_chip], self.fm_label, lead=True))
         web = QPushButton(self._p(t("price_open_site")), objectName="Link")
         web.setCursor(Qt.PointingHandCursor)
         web.clicked.connect(lambda _=False, n=name: __import__("webbrowser").open(market.page_url(n)))
@@ -1297,7 +1434,16 @@ class ToolsDialog(GlassDialog):
         self.price_box.addWidget(card)
         self._price_for = name
         import threading
-        threading.Thread(target=lambda n=name: self.market_ready.emit((n, market.free_market(n))), daemon=True).start()
+
+        def lookup(n=name):
+            found = market.free_market(n)          # up to 10 s on a slow connection
+            try:
+                self.market_ready.emit((n, found))
+            except RuntimeError:
+                # the window was closed (and deleted) meanwhile: nothing to show it in. Uncaught, this logged a
+                # CRITICAL "uncaught exception in thread" into the log that goes with problem reports
+                pass
+        threading.Thread(target=lookup, daemon=True).start()
 
     def _on_market(self, result):
         t = self.t
@@ -1319,7 +1465,7 @@ class ToolsDialog(GlassDialog):
 
     def _page_exp(self):
         t = self.t
-        sc, lay = scroll_page()
+        sc, lay = scroll_page(self.t.rtl)
         sec = Section(t("exp_title"), t.rtl)
         self.exp_now = self._label("", "RowLabel")
         sec.add_widget(self.exp_now)
@@ -1334,6 +1480,10 @@ class ToolsDialog(GlassDialog):
         sec.add_widget(holder)
         self.exp_status = self._label("", "RowHint")
         sec.add_widget(self.exp_status)
+        src = QWidget()
+        self.exp_src = QHBoxLayout(src)
+        self.exp_src.setContentsMargins(0, 0, 0, 0)
+        sec.add_widget(src)
         btns = QHBoxLayout()
         self.exp_start = QPushButton(self._p(t("exp_start")), objectName="Primary")
         self.exp_start.setCursor(Qt.PointingHandCursor)
@@ -1405,6 +1555,8 @@ class ToolsDialog(GlassDialog):
                 h, rest = divmod(int(v), 3600)
                 cell.setText(f"{h}:{rest // 60:02d}")
         self.exp_measure.setEnabled(bool(m.get("start")))
+        # the % and the time to level come from the EXP table: MeowDB's confirmed levels, then a historical reference
+        self._source_line(self.exp_src, sources.exp_source(self.kb, c.level))
         if self.meter.get("pending"):
             return
         if r:
@@ -1423,7 +1575,7 @@ class ToolsDialog(GlassDialog):
 
     def _page_more(self):
         t = self.t
-        sc, lay = scroll_page()
+        sc, lay = scroll_page(self.t.rtl)
         lay.addWidget(self._label(t("more_intro"), "ToolHeader"))
         sell = Section(t("sell_title"), t.rtl)
         sell.add_widget(self._label(t("sell_body"), "RowLabel"))
@@ -1435,7 +1587,7 @@ class ToolsDialog(GlassDialog):
         shop = Section(t("shop_title"), t.rtl)
         shop.add_widget(self._label(t("shop_body"), "RowLabel"))
         maps = map_rows(self.kb)
-        self.shop_map = EntityPicker(maps, self._p(t("shop_map_ph", n=len(maps))), icon=40)
+        self.shop_map = EntityPicker(maps, self._p(t("shop_map_ph", n=len(maps))), icon=40, rtl=t.rtl)
         self.shop_map.setMinimumWidth(280)
         shop.add_row(t("shop_where"), self.shop_map)
         self.shop_len = Segmented([("30", 30), ("60", 60), ("120", 120)], 60, t.rtl)

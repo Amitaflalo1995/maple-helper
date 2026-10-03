@@ -1,8 +1,15 @@
-# Lint + the full test suite. Reused by CI, Release and KB refresh, so no pipeline can skip it.
+# Lint + the full test suite against a real knowledge base. Reused by CI, Release and the nightly KB refresh,
+# so nothing reaches players untested: CI and pull requests check the KB players have now (the latest
+# release's kb.zip), Release and KB refresh pass the exact KB they are about to publish.
 name: Test
 
 on:
   workflow_call:
+    inputs:
+      kb-artifact:
+        description: "Artifact holding the kb.zip to test (empty: the latest release's kb.zip)"
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -36,7 +43,27 @@ jobs:
       - name: Lint
         run: python -m ruff check . --output-format=github
 
+      # data/kb is not in git: without it every game-value test (drops, EXP, quests, guides) would be skipped
+      - name: Get the knowledge base to test (artifact)
+        if: inputs.kb-artifact != ''
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ inputs.kb-artifact }}
+          path: kb-in
+
+      - name: Get the knowledge base to test (latest release)
+        if: inputs.kb-artifact == ''
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download --repo "$GITHUB_REPOSITORY" --pattern kb.zip --dir kb-in
+
+      - name: Unpack the knowledge base
+        run: python -m zipfile -e kb-in/kb.zip data/kb
+
       - name: Test
+        env:
+          MAPLEHELPER_REQUIRE_REAL_KB: "1"    # a test that needs data/kb fails instead of skipping
         run: python -m pytest --junitxml=test-results.xml -o junit_family=xunit2
 
       - name: Upload test results

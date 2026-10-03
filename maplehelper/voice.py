@@ -6,6 +6,7 @@ GPU (CUDA) when available, otherwise CPU int8 (always on macOS).
 """
 from __future__ import annotations
 
+import sys
 import threading
 
 import numpy as np
@@ -93,6 +94,11 @@ class VoiceController(QObject):
             self._start()
 
     def _start(self):
+        if sys.platform == "darwin":
+            from . import macapi
+            if macapi.microphone_denied():      # macOS would record silence: "I didn't hear anything"
+                self.failed.emit("mic: denied in macOS Privacy & Security")
+                return
         try:
             import sounddevice as sd
             self._chunks = []
@@ -121,6 +127,12 @@ class VoiceController(QObject):
         if len(audio) < SAMPLE_RATE * MIN_SECONDS:
             self.state.emit("idle")
             return
+        if sys.platform == "darwin" and not np.any(audio):
+            # pure digital silence (a real mic always hears some noise): macOS gives that while the microphone
+            # is not allowed (or its prompt is still open), with no error
+            self.failed.emit("mic: only silence, probably no microphone permission")
+            self.state.emit("idle")
+            return
         self.state.emit("transcribing" if self.transcriber.loaded() else
                         "loading" if self.transcriber.downloaded() else "downloading")
         threading.Thread(target=self._run, args=(audio,), daemon=True).start()
@@ -130,6 +142,11 @@ class VoiceController(QObject):
             out = self.transcriber.transcribe(audio)
             self.text.emit(out)
         except Exception as e:
-            self.failed.emit(str(e))
+            # the model isn't on disk after the attempt: its one-time download failed (offline, most often), and
+            # "try again in a moment" would only fail again
+            self.failed.emit(("download: " if not self.transcriber.downloaded() else "") + str(e))
         finally:
-            self.state.emit("idle")
+            # a new recording may have started while this clip was transcribed: the mic is live, and "idle" turned
+            # its light and the "listening" hint off while it kept recording
+            if self._stream is None:
+                self.state.emit("idle")

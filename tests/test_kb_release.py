@@ -10,7 +10,7 @@ import kb_release
 
 def test_fixture_kb_is_valid(kb_copy):
     summary = kb_release.validate(kb_copy)
-    assert summary["count"] == 15 and set(summary["categories"]) == set(kb_release.CATEGORIES)
+    assert summary["count"] == 19 and set(summary["categories"]) == set(kb_release.CATEGORIES)
 
 
 def test_rejects_unreadable_index(kb_copy):
@@ -37,12 +37,28 @@ def test_rejects_big_drop_from_previous(kb_copy, tmp_path):
 def test_small_drop_is_fine(kb_copy, tmp_path):
     prev = tmp_path / "prev-index.json"
     prev.write_text(json.dumps([{"key": f"x/{i}"} for i in range(16)]), encoding="utf-8")
-    assert kb_release.validate(kb_copy, previous_index=prev)["count"] == 15
+    assert kb_release.validate(kb_copy, previous_index=prev)["count"] == 19
 
 
 def test_rejects_missing_pages(kb_copy):
     (kb_copy / "pages" / "monster" / "130101.md").unlink()
     with pytest.raises(kb_release.InvalidKB, match="1 entries without a page"):
+        kb_release.validate(kb_copy)
+
+
+def test_rejects_a_kb_without_the_release_guide(kb_copy):
+    from maplehelper import availability
+    assert kb_release.RELEASE_GUIDE == availability.RELEASE_GUIDE     # the page the app reads the live game from
+    page = kb_copy / "pages" / f"{kb_release.RELEASE_GUIDE}.md"
+    text = page.read_text(encoding="utf-8")
+    page.write_text(text.replace("Not at launch", "Later"), encoding="utf-8")
+    with pytest.raises(kb_release.InvalidKB, match="lost its section"):
+        kb_release.validate(kb_copy)
+    page.unlink()
+    index = json.loads((kb_copy / "index.json").read_text(encoding="utf-8"))
+    (kb_copy / "index.json").write_text(json.dumps([e for e in index if e["key"] != kb_release.RELEASE_GUIDE]),
+                                        encoding="utf-8")
+    with pytest.raises(kb_release.InvalidKB, match="no release guide"):
         kb_release.validate(kb_copy)
 
 
@@ -71,7 +87,7 @@ def test_packed_kb_installs_through_the_real_updater(kb_copy, tmp_path, monkeypa
     monkeypatch.setattr(updater, "kb_dir", lambda: user_kb)
     assert updater.update_kb() is True
     assert updater.local_version() == m["version"]
-    assert len(json.loads((user_kb / "index.json").read_text(encoding="utf-8"))) == 15
+    assert len(json.loads((user_kb / "index.json").read_text(encoding="utf-8"))) == 19
 
 
 def test_default_version_sorts_as_string(kb_copy, tmp_path):

@@ -37,7 +37,7 @@ MAX_W = 360          # wide pictures are scaled down to the reader's width
 ICON_MAX = 40        # an image this small inside text is an inline icon
 
 VOID = {"img", "br", "hr", "input", "meta", "link", "source", "wbr", "line", "rect", "path", "circle", "col"}
-BLOCK = {"p", "ul", "ol", "table", "h1", "h2", "h3", "h4", "h5", "div", "section", "article", "figure", "header",
+BLOCK = {"p", "pre", "ul", "ol", "table", "h1", "h2", "h3", "h4", "h5", "div", "section", "article", "figure", "header",
          "details", "summary", "aside", "nav", "blockquote", "li", "dl", "dt", "dd", "figcaption", "main", "footer"}
 SKIP_TAGS = {"script", "style", "svg", "button", "nav", "noscript", "aside", "form", "input", "select", "iframe"}
 SKIP_CLASSES = ("correction-loop", "toc", "button-row")
@@ -102,7 +102,9 @@ def plain(n) -> str:
 def squash(s: str) -> str:
     s = re.sub(r"[ \t\r\f\v ]+", " ", s)
     s = re.sub(r" *\n[\n ]*", "\n", s)
-    s = re.sub(r"\*\*\s*\*\*", "", s)
+    # "**a** **b**" -> "**a b**", but never across a line break: "= **60**\n**Basic attack MAX**" stays two
+    # lines (joined, it read "= **60Basic attack MAX**")
+    s = re.sub(r"\*\*[ \t]*\*\*", "", s)
     s = re.sub(r"\s+([,.;:!?)])", r"\1", s)     # "Razor ." -> "Razor."
     s = re.sub(r"\(\s+", "(", s)
     return s.strip(" \n")
@@ -172,8 +174,9 @@ def fetch(url: str, binary: bool = False):
 
 
 class Converter:
-    def __init__(self, images: Images):
+    def __init__(self, images: Images, known: set[str] | None = None):
         self.images = images
+        self.known = known         # the guides that exist (KB guide slugs); None = keep every link
         self.blocks: list[dict] = []
         self.started = False       # content starts after the <h1>
         self.stopped = False       # ...and ends at "More guides"
@@ -182,10 +185,19 @@ class Converter:
     def inline(self, n) -> str:
         if isinstance(n, str):
             return re.sub(r"\s+", " ", n)        # line breaks in the HTML source are just spaces
-        if n.tag in SKIP_TAGS or hidden(n):
+        if n.tag in SKIP_TAGS:
             return ""
+        if hidden(n):
+            # a separator hidden from screen readers still parts the words on screen: "<time>October 21,
+            # 2026</time><span aria-hidden> · </span>Starts" was "October 21, 2026Starts"
+            sep = plain(n) if n.attrs.get("aria-hidden") == "true" else ""
+            return sep if sep.strip() and not re.search(r"\w", sep) else (" " if sep else "")
         if n.tag == "br":
             return "\n"
+        if n.tag == "pre":
+            # a formula block: its own line breaks are the formula's lines, and it is a block of its own
+            # ("... x 0.8</pre><pre>MIN = ..." read "x 0.8MIN = ...")
+            return "\n" + "".join(k if isinstance(k, str) else self.inline(k) for k in n.kids) + "\n"
         if n.tag == "img":
             return self.icon(n)
         inner = "".join(self.inline(k) for k in n.kids)
@@ -219,6 +231,13 @@ class Converter:
         if self.started and not self.stopped:
             self.blocks.append({kind: value})
 
+    def link(self, href: str, title: str):
+        """A link to another guide, kept only when that guide exists: the reader can't open any other
+        ("best-buy-shop-efficiency" is a site tool, not a guide, and the link did nothing)."""
+        slug = href.rstrip("/").split("/")[-1].split("#")[0]
+        if self.started and not self.stopped and title and (self.known is None or slug in self.known):
+            self.blocks.append({"guide": slug, "text": title})
+
     def walk(self, n: Node):
         for k in n.kids:
             if self.stopped:
@@ -248,15 +267,12 @@ class Converter:
             return
         if t == "a" and (h := find(n, lambda k: k.tag in ("h3", "h4", "p"))) is not None \
                 and "/guides/" in (n.attrs.get("href") or ""):
-            slug = n.attrs["href"].rstrip("/").split("/")[-1].split("#")[0]
-            title = squash(plain(find(n, lambda k: k.tag in ("h3", "h4")) or h))
-            if self.started and not self.stopped and title:
-                self.blocks.append({"guide": slug, "text": title})
+            self.link(n.attrs["href"], squash(plain(find(n, lambda k: k.tag in ("h3", "h4")) or h)))
             return
         if t == "a" and "button-link" in n.classes:
             href = n.attrs.get("href") or ""
-            if "/guides/" in href and self.started and not self.stopped:
-                self.blocks.append({"guide": href.rstrip("/").split("/")[-1].split("#")[0], "text": squash(plain(n))})
+            if "/guides/" in href:
+                self.link(href, squash(plain(n)))
             return
         if t in ("ul", "ol"):
             items = [squash(self.inline(li)) for li in n.kids if isinstance(li, Node) and li.tag == "li"
@@ -290,8 +306,8 @@ class Converter:
             # buttons to the site's tools ("Open Accuracy Simulator") go; links to other guides stay
             for a in iter_tag(n, "a"):
                 href = a.attrs.get("href") or ""
-                if "/guides/" in href and self.started and not self.stopped:
-                    self.blocks.append({"guide": href.rstrip("/").split("/")[-1].split("#")[0], "text": squash(plain(a))})
+                if "/guides/" in href:
+                    self.link(href, squash(plain(a)))
             return
         if t in BLOCK and text == "" and (img := find(n, lambda k: k.tag == "img")) is not None \
                 and not find(n, lambda k: k.tag == "img" and k is not img):
@@ -355,13 +371,13 @@ def iter_tag(n: Node, tag: str):
                 yield from iter_tag(k, tag)
 
 
-def convert(page_html: str, images: Images) -> dict:
+def convert(page_html: str, images: Images, known: set[str] | None = None) -> dict:
     tree = Tree()
     tree.feed(page_html)
     main = find(tree.root, lambda k: k.tag == "main") or tree.root
     h1 = find(main, lambda k: k.tag == "h1")
     title = squash(plain(h1)) if h1 is not None else ""
-    c = Converter(images)
+    c = Converter(images, known)
     c.walk(main)
     blocks = merge(c.blocks)
     hero = None
@@ -383,6 +399,11 @@ def convert(page_html: str, images: Images) -> dict:
             "blocks": blocks}
 
 
+# the labels of the site's live widgets (a countdown, the DPS charts' "Target matchup" switch): the reader
+# doesn't carry the widgets, so their labels alone would tell players to tap bars that aren't there
+CHART_LABELS = {"Days", "Hours", "Minutes", "Seconds", "Target matchup"}
+
+
 def merge(blocks: list[dict]) -> list[dict]:
     """Icon-only paragraphs join the next paragraph ("[[img:x]] Power Strike"); repeats are dropped,
     and so is the "See also" list of site pages at the end."""
@@ -397,9 +418,8 @@ def merge(blocks: list[dict]) -> list[dict]:
             continue
         skip_list = False
         p = b.get("p", "")
-        if p in ("Days", "Hours", "Minutes", "Seconds") or re.fullmatch(r"(-- \w+ ?)+", p) \
-                or p.startswith("Tap a milestone"):
-            continue                  # a live countdown / interactive widget, meaningless as text
+        if p in CHART_LABELS or re.fullmatch(r"(-- \w+ ?)+", p) or p.startswith(("Tap a milestone", "Tap a bar")):
+            continue                  # a live countdown / interactive chart's controls, meaningless without it
         if out and re.fullmatch(r"[\d.,]+( ?(px|%))?", p) and "p" in out[-1] and len(out[-1]["p"]) < 60:
             out[-1] = {"p": f"{out[-1]['p']}: **{p}**"}     # a bar chart's label and value
             continue
@@ -417,6 +437,37 @@ def content_hash(guide: dict) -> str:
     return hashlib.sha1(body.encode("utf-8")).hexdigest()[:12]
 
 
+def _bare(text: str) -> str:
+    """Text reduced to its letters and digits: markup, icons, punctuation and spacing differ between the
+    reader's blocks and the KB's flat copy of the same page."""
+    text = re.sub(r"\[\[img:[^\]]*\]\]", "", text)
+    return re.sub(r"[\W_]+", "", text).lower()
+
+
+def guide_texts(guide: dict):
+    yield guide.get("title") or ""
+    yield guide.get("intro") or ""
+    for b in guide.get("blocks", []):
+        if "guide" in b:
+            continue             # a link: its title is the other guide's
+        for kind, v in b.items():
+            if kind in ("img", "w", "h"):
+                continue
+            if isinstance(v, str):
+                yield v
+            elif kind == "table":
+                yield from (cell for row in v for cell in row)
+            else:
+                yield from v
+
+
+def kb_gaps(guide: dict, kb_page: str) -> list[str]:
+    """The guide's texts that its KB page doesn't have. The KB is the app's only source of game facts and the
+    live page can be newer than the KB snapshot: such text waits for a KB update instead of shipping."""
+    page = _bare(kb_page)
+    return [t for t in guide_texts(guide) if _bare(t) and _bare(t) not in page]
+
+
 def guide_slugs() -> list[str]:
     from maplehelper.kb import KnowledgeBase
     kb = KnowledgeBase()
@@ -424,17 +475,30 @@ def guide_slugs() -> list[str]:
 
 
 def main(argv: list[str]) -> None:
-    slugs = argv or guide_slugs()
+    from maplehelper.kb import KnowledgeBase
+    kb = KnowledgeBase()
+    known = set(guide_slugs())
+    slugs = argv or sorted(known)
     images = Images(OUT / "img")
     (OUT / "en").mkdir(parents=True, exist_ok=True)
+    held = []
     for slug in slugs:
         page = fetch(f"{SITE}/msclassic/guides/{slug}")
-        g = convert(page, images)
+        g = convert(page, images, known)
+        gaps = kb_gaps(g, kb.page(f"guide/{slug}"))
+        if gaps:          # the shipped file stays as it is
+            held.append(slug)
+            print(f"{slug}: NOT written, {len(gaps)} text(s) its KB page doesn't have (update data/kb first):")
+            for t in gaps[:5]:
+                print("   ", t[:120])
+            continue
         g["source"] = f"{SITE}/msclassic/guides/{slug}"
         g["hash"] = content_hash(g)
         (OUT / "en" / f"{slug}.json").write_text(json.dumps(g, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         print(f"{slug}: {len(g['blocks'])} blocks")
-    if not argv:     # a full build: drop pictures no guide uses any more
+    if held:
+        print(f"{len(held)} guide(s) kept as they were: {', '.join(held)}")
+    elif not argv:   # a full build: drop pictures no guide uses any more
         for f in (OUT / "img").glob("*.png"):
             if f.name not in images.used:
                 f.unlink()

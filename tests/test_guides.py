@@ -121,6 +121,43 @@ def test_build_keeps_the_article_with_its_structure(monkeypatch, tmp_path):
     ]
 
 
+def test_build_drops_links_to_pages_that_are_not_guides_and_chart_controls(monkeypatch, tmp_path):
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
+    import build_guides as bg
+    images = bg.Images(tmp_path)
+    monkeypatch.setattr(images, "get", lambda src, max_w=360: (Path(src).stem + ".png", 32, 32))
+    page = ARTICLE.replace('<div class="sm:hidden">',
+                           '<p>Target matchup</p><p>Tap a bar for build details. Warrior Bowman</p>'
+                           '<a class="button-link" href="/msclassic/guides/best-buy-shop-efficiency">Compare</a>'
+                           '<div class="sm:hidden">')
+    g = bg.convert(page, images, known={"fighter-class-guide"})
+    assert [b for b in g["blocks"] if "guide" in b] == [{"guide": "fighter-class-guide", "text": "Continue with Fighter"}]
+    assert not [b for b in g["blocks"] if b.get("p", "").startswith(("Target matchup", "Tap a bar"))]
+
+
+def test_build_holds_back_text_the_kb_page_does_not_have():
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
+    import build_guides as bg
+    page = "# Warrior Guide\nWarriors hit hard.\nSkill Max\nPower Strike 20\nYour hit rate depends on level."
+    g = {"title": "Warrior Guide", "intro": "Warriors hit hard.",
+         "blocks": [{"table": [["Skill", "Max"], ["[[img:1.png]]Power Strike", "20"]]},
+                    {"p": "Your hit rate depends on **level**."}, {"guide": "fighter-class-guide", "text": "Fighter"}]}
+    assert bg.kb_gaps(g, page) == []
+    g["blocks"].append({"ul": ["Taxis are 90% off for Beginners."]})      # newer on the site than in the KB
+    assert bg.kb_gaps(g, page) == ["Taxis are 90% off for Beginners."]
+
+
+def test_every_guide_link_opens_a_guide():
+    """A {"guide": slug} block is drawn as a link: it must lead to a guide the reader has."""
+    import json
+    books = {f.stem for f in (guides.TRANSLATIONS / "en").glob("*.json")}
+    dead = {(f.parent.name, f.stem, b["guide"]) for f in guides.TRANSLATIONS.glob("*/*.json")
+            for b in json.loads(f.read_text(encoding="utf-8")).get("blocks", []) if "guide" in b and b["guide"] not in books}
+    assert not dead
+
+
 def test_translation_round_trip_keeps_blocks():
     import sys
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
@@ -131,6 +168,31 @@ def test_translation_round_trip_keeps_blocks():
     he = tg.translate(en, {"Skills": "סקילים", "Hit **hard**.": "להכות **חזק**."})
     assert he["blocks"][0] == {"h2": "סקילים"} and he["blocks"][1]["table"][1] == ["Power Strike", "20"]
     assert he["blocks"][2] == {"ul": ["להכות **חזק**."]}
+
+
+def test_translation_import_follows_the_english_text_not_positions(monkeypatch, tmp_path):
+    """The English guide is rebuilt between export and import: no translation lands on another sentence,
+    and the result is marked outdated."""
+    import json
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
+    import translate_guides as tg
+    monkeypatch.setattr(tg, "GUIDES", tmp_path / "guides")
+    (tmp_path / "guides" / "en").mkdir(parents=True)
+    en_file = tmp_path / "guides" / "en" / "g.json"
+
+    def write_en(blocks, h):
+        en_file.write_text(json.dumps({"title": "T", "intro": "Intro text", "hash": h, "blocks": blocks}), encoding="utf-8")
+    write_en([{"p": "Level 10 drops 30 mesos"}, {"p": "Level 20 drops 50 mesos"}], "h1")
+    tg.export("he", tmp_path / "out")
+    ids = json.loads((tmp_path / "out" / "g.json").read_text(encoding="utf-8"))["strings"]
+    (tmp_path / "out" / "g.json").write_text(json.dumps({i: f"HE[{s}]" for i, s in ids.items()}), encoding="utf-8")
+    write_en([{"p": "New tip: buy potions"}, {"p": "Level 10 drops 30 mesos"}, {"p": "Level 20 drops 50 mesos"}], "h2")
+    tg.import_("he", tmp_path / "out")
+    he = json.loads((tmp_path / "guides" / "he" / "g.json").read_text(encoding="utf-8"))
+    assert [b["p"] for b in he["blocks"]] == ["New tip: buy potions", "HE[Level 10 drops 30 mesos]",
+                                             "HE[Level 20 drops 50 mesos]"]
+    assert he["source_hash"] == "h1"                  # != the English "h2": the reader shows it as outdated
 
 
 def test_reader_html_for_a_hebrew_guide():

@@ -11,7 +11,7 @@ import re
 from functools import cached_property
 from pathlib import Path
 
-from . import bidi
+from . import bidi, sources
 from .store import ASSETS, kb_dir
 
 FALLBACK_DIR = ASSETS / "fallback"
@@ -66,6 +66,7 @@ ALIAS_DROP = {
     "בין", "אלי", "אליי", "מאי", "פי", "סר", "מקס", "אוק", "פיל", "הפיל",
     "נהר", "הנהר", "פסל", "סדן", "צור", "הצור", "השף", "שף", "רוח רפאים", "טוויטר", "טיק טוק", "שוער", "ליצן",
     "תיבת אוצר",
+    "מיין",        # Myen's alias is the verb "to sort" ("למיין את האינבנטורי" made a Myen card, and voice "ל-Myen")
 }
 # alias -> entity key, over aliases.json (keys and names as in the KB's index.json)
 ALIAS_SET = {
@@ -80,8 +81,12 @@ ALIAS_SET = {
 # names no NPC (the AI lists the NPCs it means in its META entities, those still get a card)
 COMMON_WORD_NPCS = {"Max", "River", "Anvil", "Oak", "Jack", "Pan", "Chef", "Statue", "Flint", "Rain", "Exit", "Silver"}
 NO_LOOSE_UNDER = 5    # Hebrew letters an alias needs for its spelling-tolerant form ("פיה" -> "פי" is no name)
+# the part of a name that marks one variant of an entity: "Nella (KPQ 1st Stage)", "Forgotten Hollow Instance 080003500"
+_VARIANT = re.compile(r"\s*\(.*?\)|\s+Instance \d+$")
 PREFIX_FROM = 4        # Hebrew letters a name needs before a glued prefix counts ("לאן" is not ל + "אן")
 _PREFIX = "[בלמהושכ]{1,2}"
+DROPS_MARK = "drops.tsv lists only monsters the KB confirms are in the game (availability.py), with a source column\n"
+NAMES_TABLE = "names.tsv"     # key, category, name, type: one line per entity, for the AI to grep (see ensure_drop_table)
 
 
 class KnowledgeBase:
@@ -95,13 +100,39 @@ class KnowledgeBase:
         self.aliases: dict[str, str] = {}   # normalized alias -> key
         alias_file = self.root / "aliases.json"
         if alias_file.exists():
+            shared: dict[str, list[str]] = {}
             for key, names in json.loads(alias_file.read_text(encoding="utf-8")).items():
                 for n in names:
-                    if _norm(n) not in ALIAS_DROP:
-                        self.aliases[_norm(n)] = key
+                    if _norm(n) not in ALIAS_DROP and key in self.entities:
+                        shared.setdefault(_norm(n), [])
+                        if key not in shared[_norm(n)]:
+                            shared[_norm(n)].append(key)
+            for alias, keys in shared.items():
+                key = keys[0] if len(keys) == 1 else self._base_entity(keys)
+                if key:
+                    self.aliases[alias] = key
         self.aliases.update({_norm(a): k for a, k in ALIAS_SET.items() if k in self.entities})
         # names with ", " ": " or "[ ]" ("Tree Dungeon, Monkey Forest I") stay one block in a Hebrew answer
         bidi.set_names(e.get("name", "") for e in self.entities.values())
+
+    def _base_entity(self, keys: list[str]) -> str | None:
+        """The one entity an alias several entities share means: the plain one ("Forgotten Hollow", not
+        "Forgotten Hollow Instance 080003500"; "Zelya", not "Zelya (Free Market)"). aliases.json gives some
+        Hebrew names to every variant, and the last one used to win (an empty instance arena, a PQ stage NPC).
+        Variants alone ("VIP Cab (Ellinia)", "VIP Cab (Sleepywood)") mean their plain name's entity when the KB
+        has it; two plain names ("Pason", "Pison") are a real tie: no alias then, rather than a wrong card."""
+        def rank(k: str) -> tuple[bool, int]:
+            name = self.entities[k].get("name", "")
+            return bool(_VARIANT.search(name)), len(name)
+        ranked = sorted(keys, key=rank)
+        if rank(ranked[0]) != rank(ranked[1]):
+            return ranked[0]
+        bases = {_VARIANT.sub("", self.entities[k].get("name", "")).strip() for k in keys}
+        if len(bases) == 1:
+            base, cat = bases.pop(), keys[0].partition("/")[0]
+            return next((k for k, e in self.entities.items()
+                         if e.get("name") == base and k.startswith(cat + "/")), None)
+        return None
 
     # ------------------------------------------------------------ basic access
 
@@ -145,6 +176,15 @@ class KnowledgeBase:
                 out.setdefault(re.sub(r"\s*\(.*?\)", "", n), k)
         return out
 
+    def npc_key(self, name: str) -> str | None:
+        """The NPC page for a name as quests write it ("Arwen the Fairy", "Jake (Subway)")."""
+        n = (name or "").strip().lower()
+        return self._npc_by_name.get(n) or self._npc_by_name.get(re.sub(r"\s*\(.*?\)", "", n)) if n else None
+
+    def all_maps(self, key: str) -> list[str]:
+        """Every map cell of a monster page's "Map Locations" table ("Snail Hunting Ground I Maple Road")."""
+        return self._top_maps(key, 999)
+
     def page(self, key: str) -> str:
         e = self.get(key)
         if not e:
@@ -183,6 +223,9 @@ class KnowledgeBase:
                     loose.setdefault(form, set()).add(k)
         pairs += [(f, next(iter(ks)), True) for f, ks in loose.items()
                   if len(ks) == 1 and exact.get(f, next(iter(ks))) in ks]
+        # a dropped alias names nothing, and neither does a shorter name inside it: key "" takes its words
+        # ("טיק טוק" is TikTok, and its "טיק" answered with Tick's stats)
+        pairs += [(d, "", False) for d in ALIAS_DROP if HEBREW.search(d)]
         return sorted(pairs, key=lambda p: -len(p[0]))
 
     def _occurrence(self, hay: str, name: str, key: str, taken: list[tuple[int, int]]) -> tuple[int, int] | None:
@@ -230,7 +273,7 @@ class KnowledgeBase:
                     span = None       # a question's "max level" is no Max either; "where is Max" is
                 if span:
                     taken.append(span)
-                    if key not in [k for k, _, _ in out]:
+                    if key and key not in [k for k, _, _ in out]:
                         out.append((key, *span))
                     break
             if len(out) >= max_results:
@@ -260,7 +303,8 @@ class KnowledgeBase:
     def _resolve_pattern(self) -> re.Pattern | None:
         """One pattern for every Hebrew alias, longest first (compiling one per alias took ~140 ms a call).
         A glued prefix only before a long alias: "כאן" is not כ + "אן" (Anne), "מפיל" not מ + "פיל"."""
-        heb = sorted((a for a, k in self.aliases.items() if HEBREW.search(a) and self.get(k)), key=len, reverse=True)
+        heb = sorted({a for a, k in self.aliases.items() if HEBREW.search(a) and self.get(k)}
+                     | {d for d in ALIAS_DROP if HEBREW.search(d)}, key=len, reverse=True)
         if not heb:
             return None
         long = [a for a in heb if _heb_letters(a) >= PREFIX_FROM]
@@ -276,6 +320,8 @@ class KnowledgeBase:
             return out
 
         def name(m: re.Match) -> str:
+            if m.group("name") not in self.aliases:
+                return m.group(0)      # a dropped alias (in the pattern so no shorter alias inside it matches)
             # keep a glued Hebrew prefix: "ובלו סנייל" → "ו-Blue Snail"
             en = self.get(self.aliases[m.group("name")])["name"]
             pre = m.groupdict().get("pre")
@@ -293,30 +339,103 @@ class KnowledgeBase:
                 out.setdefault(e["name"].strip().lower(), k)
         return out
 
-    def monster_drops(self, key: str) -> list[str]:
-        """Item keys a monster drops, read from its page (confirmed Classic drops + MSEA reference list)."""
+    def drop_lists(self, key: str) -> dict[str, list[str]]:
+        """A monster's drops by the list its page puts them in: {sources.COMMUNITY: [...], sources.MSEA: [...]}.
+
+        The page's "Drops (MS Classic)" block holds two lists: "Community sourced", the drops players have seen
+        in Classic themselves, then "MSEA reference drops", old MapleSEA's table that the KB calls historical
+        reference. Read as one list, an MSEA drop was shown as if confirmed for Classic (and the other way)."""
+        memo = self.__dict__.setdefault("_drop_lists", {})
+        if key in memo:
+            return memo[key]
         body = self.page(key)
+        out: dict[str, list[str]] = {sources.COMMUNITY: [], sources.MSEA: []}
         i = body.find("Drops (MS Classic)")
-        if i < 0:
-            return []
-        end = len(body)
-        for marker in ("Associated Quests", "Map Locations"):
-            j = body.find(marker, i)
-            if 0 < j < end:
-                end = j
-        found = []
-        for line in body[i:end].split("\n"):
-            k = self._item_by_name.get(line.strip().lower())
-            if k and k not in found:
-                found.append(k)
-        return found
+        if i >= 0:
+            end = len(body)
+            for marker in ("Associated Quests", "Map Locations", "Respawn Timer", "Change history"):
+                j = body.find(marker, i)
+                if 0 < j < end:
+                    end = j
+            block = body[i:end]
+            m = re.search(r"^MSEA reference drops\s*$", block, re.M | re.I)
+            parts = {sources.COMMUNITY: block[:m.start()] if m else block, sources.MSEA: block[m.end():] if m else ""}
+            name = self.get(key)["name"]
+            for src, text in parts.items():
+                lines = text.split("\n")
+                for n, line in enumerate(lines):
+                    k = self._drop_item(line.strip().lower(), lines[n + 1].strip() if n + 1 < len(lines) else "", name)
+                    if k and k not in out[src] and not (src == sources.MSEA and k in out[sources.COMMUNITY]):
+                        out[src].append(k)
+        memo[key] = out
+        return out
+
+    def monster_drops(self, key: str) -> list[str]:
+        """Item keys a monster drops, both lists: the community's Classic drops first, then the MSEA reference
+        list (drop_lists / drop_source say which list each comes from)."""
+        lists = self.drop_lists(key)
+        return lists[sources.COMMUNITY] + lists[sources.MSEA]
+
+    def drop_source(self, monster: str, item: str) -> str | None:
+        """The list a monster's drop is on (sources.COMMUNITY or sources.MSEA), or None when it isn't."""
+        for src, keys in self.drop_lists(monster).items():
+            if item in keys:
+                return src
+        return None
+
+    @cached_property
+    def _monsters_by_name(self) -> dict[str, list[str]]:
+        out: dict[str, list[str]] = {}
+        for k, e in self.entities.items():
+            if e["category"] == "monster":
+                out.setdefault(e["name"].strip().lower(), []).append(k)
+        return out
+
+    def monster_keys(self, name: str) -> list[str]:
+        """Every monster entry of a name: the KB lists some twice ("Mano" in its map and a map-less copy)."""
+        return self._monsters_by_name.get((name or "").strip().lower(), [])
+
+    @cached_property
+    def _items_by_name(self) -> dict[str, list[str]]:
+        out: dict[str, list[str]] = {}
+        for k, e in self.entities.items():
+            if e["category"] == "item":
+                out.setdefault(e["name"].strip().lower(), []).append(k)
+        return out
+
+    def _drop_item(self, name: str, hint: str, monster: str) -> str | None:
+        """The item a drop line names. Some items share a name (the Lv 40 earring "Blue Moon" and the Lv 50 Thief
+        top "Blue Moon"): the line under the name tells them apart ("Lv 50 · Thief" for equipment, the type
+        word, "Potion" or "Monster Drop", otherwise), and when it can't (two "Dark Shadow" tops, Lv 40 · Thief),
+        the item page whose own "Dropped By" list names this monster. Still a tie: the first one, as before."""
+        keys = self._items_by_name.get(name)
+        if not keys or len(keys) == 1:
+            return keys[0] if keys else None
+        lv = re.match(r"Lv (\d+)\b", hint)
+        if lv:
+            fit = [k for k in keys if str(self.get(k).get("type") or "").startswith("Equip")
+                   and str((self.get(k).get("props") or {}).get("Level Requirement", "")) == lv.group(1)]
+        else:
+            fit = [k for k in keys if hint and hint.lower() in str(self.get(k).get("type") or "").lower()]
+        fit = fit or keys
+        if len(fit) > 1:
+            fit = [k for k in fit if self._dropped_by(k, monster)] or fit
+        return fit[0]
+
+    def _dropped_by(self, item: str, monster: str) -> bool:
+        page = self.page(item)
+        i = page.find("Dropped By")
+        return i >= 0 and re.search(rf"^{re.escape(monster)}$", page[i:], re.M) is not None
 
     @cached_property
     def droppers(self) -> dict[str, list[str]]:
-        """item key → monster keys that drop it (lowest level first)."""
+        """item key → monster keys that drop it (lowest level first): only monsters the KB confirms are in the
+        game (availability.py), so no Orbis/El Nath or map-less monster is ever named as a source."""
+        from . import availability
+        open_ = availability.of(self)
         out: dict[str, list[str]] = {}
         for mkey, e in self.entities.items():
-            if e["category"] == "monster":
+            if e["category"] == "monster" and open_.monster_key_open(mkey):
                 for ikey in self.monster_drops(mkey):
                     out.setdefault(ikey, []).append(mkey)
         lvl = lambda k: (self.get(k).get("props") or {}).get("Level") or 999  # noqa: E731
@@ -332,49 +451,86 @@ class KnowledgeBase:
                     groups[m].append(i)
         lvl = lambda k: (self.get(k).get("props") or {}).get("Level") or 999  # noqa: E731
         ordered = sorted(groups, key=lvl)[:limit]
-        return [{"monster": m, "items": groups[m]} for m in ordered]
+        return [self.drop_group(m, groups[m]) for m in ordered]
+
+    def drop_group(self, monster: str, items: list[str]) -> dict:
+        """{"monster", "items", "sources": {item: its list}}: every drop shown says which list it comes from."""
+        return {"monster": monster, "items": items,
+                "sources": {i: self.drop_source(monster, i) or sources.MSEA for i in items}}
 
     def ensure_drop_table(self) -> None:
-        """Write drops.tsv next to index.json so Claude can grep 'which monsters drop X' in one step."""
+        """Write drops.tsv next to index.json so Claude can grep 'which monsters drop X' in one step: only monsters
+        the KB confirms are in the game, each drop with the list it is on. A table from before those rules (no
+        drops.ingame mark beside it, or an older mark) is redone.
+        names.tsv beside it is the index's names and keys, one entity per line."""
         path = self.root / "drops.tsv"
+        mark = self.root / "drops.ingame"
+        names = self.root / NAMES_TABLE
         idx = self.root / "index.json"
         try:
-            if path.exists() and idx.exists() and path.stat().st_mtime >= idx.stat().st_mtime:
+            if (path.exists() and mark.exists() and names.exists() and idx.exists()
+                    and path.stat().st_mtime >= idx.stat().st_mtime
+                    and mark.read_text(encoding="utf-8") == DROPS_MARK):
                 return
-            lines = ["monster\tmonster_level\tmonster_key\titem\titem_type\titem_key"]
+            mark.write_text(DROPS_MARK, encoding="utf-8")
+            # index.json is one 1.3 MB line: Gemini's grep can't read a line that long ("bufio.Scanner: token too
+            # long", answers took 30-140 s) and any other grep hit returns all of it. One entity per line instead.
+            rows = ["key\tcategory\tname\ttype"]
+            rows += [f"{k}\t{e.get('category', '')}\t{e.get('name', '')}\t{e.get('type') or ''}" for k, e in self.entities.items()]
+            names.write_text("\n".join(rows), encoding="utf-8")
+            # source: the list the drop is on, "MSEA" (reference) or "community" (players saw it in Classic)
+            lines = ["monster\tmonster_level\tmonster_key\titem\titem_type\titem_key\tsource"]
             for ikey, monsters in self.droppers.items():
                 it = self.get(ikey)
                 for m in monsters:
                     me = self.get(m)
                     lv = (me.get("props") or {}).get("Level", "")
-                    lines.append(f"{me['name']}\t{lv}\t{m}\t{it['name']}\t{it.get('type') or ''}\t{ikey}")
+                    lines.append(f"{me['name']}\t{lv}\t{m}\t{it['name']}\t{it.get('type') or ''}\t{ikey}\t"
+                                 f"{self.drop_source(m, ikey) or sources.MSEA}")
             path.write_text("\n".join(lines), encoding="utf-8")
         except OSError:
             pass
 
     def drops_digest(self, key: str) -> str:
-        drops = self.monster_drops(key)
-        if not drops:
-            return ""
+        """A monster's drops for the AI, list by list, each said for what it is."""
+        lists = self.drop_lists(key)
         e = self.get(key)
-        names = ", ".join(f"{self.get(k)['name']} [{k}]" for k in drops)
-        return f"Drops of {e['name']} (MSEA reference list; names and keys exactly as in the game): {names}"
+        out = []
+        for src, head in ((sources.COMMUNITY, "community-confirmed in Classic (players saw them drop)"),
+                          (sources.MSEA, "MSEA reference list: old MapleSEA, not confirmed for Classic")):
+            if lists[src]:
+                names = ", ".join(f"{self.get(k)['name']} [{k}]" for k in lists[src])
+                out.append(f"Drops of {e['name']}, {head}; names and keys exactly as in the game: {names}")
+        return "\n".join(out)
 
     # ------------------------------------------------------------ level digest
 
     @cached_property
     def _monsters(self) -> list[dict]:
+        """The monsters the KB confirms are in the game, with the maps a player can go to (the AI's level digest).
+        No tutorial/job-test/PQ copies ("Fairy 2", "Tutorial Jr. Sentinel", the Tools' training spots skip them
+        too), and a boss the KB also lists as a map-less copy (King Slime, Mushmom's 800xxx entries) only once:
+        those rows took the place of monsters a player can train on under the 40-row cap."""
+        from . import availability, combat
+        open_ = availability.of(self)
         rows = []
         for key, e in self.entities.items():
-            if e["category"] != "monster":
+            if e["category"] != "monster" or combat.special_monster(e["name"]) or not open_.monster_key_open(key):
                 continue
             p = e.get("props", {})
             lvl = p.get("Level")
             if not isinstance(lvl, (int, float)):
                 continue
             rows.append({"key": key, "name": e["name"], "level": int(lvl), "hp": p.get("HP"),
-                         "exp": p.get("EXP"), "maps": self._top_maps(key)})
-        return sorted(rows, key=lambda r: r["level"])
+                         "exp": p.get("EXP"), "maps": [m for m in self.all_maps(key) if combat.reachable_map(self, m)][:3]})
+        mapped = {r["name"] for r in rows if r["maps"]}
+        seen: set[str] = set()
+        out = []
+        for r in sorted(rows, key=lambda r: (r["level"], not r["maps"])):
+            if r["maps"] or (r["name"] not in mapped and r["name"] not in seen):
+                out.append(r)
+                seen.add(r["name"])
+        return out
 
     def _top_maps(self, key: str, n: int = 3) -> list[str]:
         body = self.page(key)

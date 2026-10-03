@@ -19,7 +19,7 @@ def test_only_the_first_appearance_is_marked():
 def test_marks_go_after_an_english_block_in_hebrew():
     line = bidi.isolate_ltr_runs("יש לה Avoid 14 בלבד")
     out = glossary.annotate(line, "he")
-    run = f"{bidi.LRE}Avoid 14{bidi.PDF}"
+    run = f"{bidi.LRE}Avoid\u00a014{bidi.PDF}"        # kept on one line (no-break space)
     assert run in out and out.index("g:Avoid") > out.index(run)
 
 
