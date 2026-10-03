@@ -551,7 +551,7 @@ STRINGS = {
     "q_hide_done": {"he": "הסתרת הקווסטים שסומנו כגמורים", "en": "Hide quests marked done"},
     "q_pick_head": {"he": "בוחרים אחד (לקלאס שלכם):", "en": "Pick one (for your class):"},
     "q_random_head": {"he": "מקבלים אחד מאלה, באקראי:", "en": "You get one of these, at random:"},
-    "q_complete_lv": {"he": "אפשר לסיים רק מ-Lv. {n}", "en": "Can be completed from Lv. {n} only"},
+    "q_complete_lv": {"he": "אפשר לקבל כבר מ-Lv. {take}, אבל לסיים רק מ-Lv. {n}", "en": "Can be taken from Lv. {take}, but completed from Lv. {n} only"},
     "q_grade": {"he": "דורש אזרחות {town} בדרגה {n}", "en": "Needs {town} citizenship grade {n}"},
     "q_profession": {"he": "דורש {prof} ברמה {n} (בדף היצירה)", "en": "Needs {prof} Lv. {n} (crafting page)"},
     "exp_title": {"he": "כמה EXP מרוויחים?", "en": "How much EXP are you making?"},
