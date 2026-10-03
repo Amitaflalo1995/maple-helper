@@ -338,6 +338,11 @@ class CheckFailed(Exception):
     """agy was found but didn't answer (timed out): neither "not installed" nor "signed out"."""
 
 
+class Offline(CheckFailed):
+    """agy couldn't reach Google ("Eligibility check failed: ... dial tcp ... no such host"): the sign-in may be
+    fine, so not "signed out"."""
+
+
 def _run(args: list[str], timeout: float = CHECK_TIMEOUT_S) -> subprocess.CompletedProcess | None:
     """A quick agy command on the sign-in. One at a time: each start rewrites cli.log, which names the account.
     None when agy is missing or won't start; CheckFailed when it hangs."""
@@ -369,6 +374,13 @@ def read_models(max_age: float = 10.0) -> list[tuple[str, str]] | None:
     r = _run(["models"])
     if r is None:
         return None
+    if r.returncode != 0:
+        # offline, agy ends 1 with only the network error on stderr and no list: that is no sign of being signed
+        # out (it said "not signed in" to a signed-in player)
+        detail = (r.stdout + r.stderr).decode("utf-8", errors="replace")
+        if classify(detail) == "offline":
+            log.warning("agy models: no connection: %s", detail.strip()[-300:])
+            raise Offline()
     found = parse_models(r.stdout.decode("utf-8", errors="replace"))
     if found:
         _models_cache, _models_at = found, time.monotonic()
@@ -431,6 +443,8 @@ class Gemini(Provider):
             return {"status": "not_installed", "email": None}
         try:
             found = read_models(max_age=0)
+        except Offline:
+            return {"status": "offline", "email": None}         # say so, and no sign-in to offer: it would fail too
         except CheckFailed:
             # it hangs (offline, a stuck update): not "not installed" (a reinstall won't help); a sign-in might
             return {"status": "logged_out", "email": None}

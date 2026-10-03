@@ -332,7 +332,8 @@ class Provider:
         return None
 
     def account(self) -> dict:
-        """{'status': 'not_installed' | 'logged_out' | 'ok', 'email': str | None, ...}"""
+        """{'status': 'not_installed' | 'logged_out' | 'offline' | 'ok', 'email': str | None, ...}
+        offline: the CLI couldn't reach its service, so whether it is signed in is unknown (Gemini)."""
         raise NotImplementedError
 
     def status(self) -> str:

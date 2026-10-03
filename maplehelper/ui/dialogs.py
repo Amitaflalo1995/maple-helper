@@ -721,7 +721,8 @@ class Onboarding(GlassDialog):
         if self._ai_ok:
             st = "ok"
         text = {"ok": t("ob_connected"), "logged_out": t.p("ob_not_logged", provider),
-                "not_installed": t.p("ob_not_installed", provider)}[st]
+                "not_installed": t.p("ob_not_installed", provider),
+                "offline": t("ob_offline", name=providers.get(provider).label)}[st]
         self.status_label.setText(bidi.plain(text, t.rtl))
         self.login_btn.setVisible(st == "logged_out")
         if self._install_check:
@@ -1218,11 +1219,13 @@ class SettingsDialog(GlassDialog):
         elif st == "ok":
             self._set_account_text(t("account_signed_in", email=acc["email"]) if acc.get("email")
                                    else t("account_signed_in_no_email", name=self._ai().label))
+        elif st == "offline":     # the sign-in may be fine: no "Sign in" (it would fail offline too)
+            self._set_account_text(t("ob_offline", name=self._ai().label))
         elif not self._login_timer.isActive():
             self._set_account_text(t.p("ob_not_logged", p) if st == "logged_out" else t.p("ob_not_installed", p))
         connected = api_key or st == "ok"
         self.switch_btn.setText(t("account_switch") if connected else t.p("ob_login", p))
-        self.switch_btn.setVisible(st != "not_installed")
+        self.switch_btn.setVisible(st not in ("not_installed", "offline"))
         self.logout_btn.setVisible(connected)
         # not installed, or a sign-in that broke ("reinstalling should fix this"): offer the installer
         self.install_btn.setVisible(not connected and (st == "not_installed" or self._login_broken))

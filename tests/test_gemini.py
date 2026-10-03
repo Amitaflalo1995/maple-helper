@@ -150,8 +150,13 @@ def test_forget_removes_the_run_and_keeps_only_the_last_logs(home):
 
 
 class Done:
-    def __init__(self, out: str, code: int = 0):
-        self.stdout, self.returncode = out.encode(), code
+    def __init__(self, out: str, code: int = 0, err: str = ""):
+        self.stdout, self.returncode, self.stderr = out.encode(), code, err.encode()
+
+
+OFFLINE = ('Error: Eligibility check failed: Post "https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist": '
+           "proxyconnect tcp: dial tcp 127.0.0.1:9: connectex: No connection could be made because the target machine "
+           "actively refused it.")
 
 
 class TestAccount:
@@ -167,6 +172,19 @@ class TestAccount:
         monkeypatch.setattr(gemini, "_run", lambda args, timeout=30: Done("gemini-3.8-flash-low\tGemini 3.8 Flash (Low)\n"))
         assert providers.get("gemini").account() == {"status": "ok", "email": None}
         assert providers.get("gemini").saver_model == "gemini-3.8-flash-low"
+
+    def test_offline_is_not_signed_out(self, home, monkeypatch):
+        """Offline, agy ends 1 with only a network error: the player was told to sign in (which fails too)."""
+        monkeypatch.setattr(gemini, "find_agy", lambda: "agy.exe")
+        monkeypatch.setattr(gemini, "_models_cache", [])
+        monkeypatch.setattr(gemini, "_run", lambda args, timeout=30: Done("", 1, OFFLINE))
+        g = providers.get("gemini")
+        assert g.account() == {"status": "offline", "email": None}
+        assert g.models() == [(None, "")] and g.read_limits() is None and gemini.resolve_model(gemini.SAVER_ALIAS) is None
+        # signed out says so even with a failing exit code
+        monkeypatch.setattr(gemini, "_run", lambda args, timeout=30: Done("", 1, "Error: Please sign in to view "
+                                                                                 "available models."))
+        assert g.account() == {"status": "logged_out", "email": None}
 
     def test_cli_that_will_not_start_counts_as_not_installed(self, home, monkeypatch):
         monkeypatch.setattr(gemini, "find_agy", lambda: "agy.exe")
