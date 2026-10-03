@@ -6,10 +6,10 @@ import sys
 import threading
 import webbrowser
 
-from PySide6.QtCore import QLockFile, QObject, Qt, QTimer, Signal
+from PySide6.QtCore import QEvent, QLockFile, QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QAction, QIcon
 from PySide6.QtNetwork import QLocalServer, QLocalSocket
-from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
+from PySide6.QtWidgets import QAbstractButton, QApplication, QComboBox, QMenu, QSystemTrayIcon
 
 from . import APP_NAME, __version__, osapi, providers, report, telemetry, updater, whatsnew, wishlist
 from .brain import Brain
@@ -64,6 +64,19 @@ def load_kb() -> KnowledgeBase:
     except Exception:      # noqa: BLE001
         report.log.exception("knowledge base unreadable, using the bundled one")
         return KnowledgeBase(BUNDLED_KB)
+
+
+class _HandCursor(QObject):
+    """Every button (and drop-down) shows the pointing hand, like a link, unless it set its own cursor.
+
+    Set once for the whole app, when Qt first styles each widget, so a new button can't miss it.
+    """
+
+    def eventFilter(self, obj, event):
+        if (event.type() == QEvent.Polish and isinstance(obj, (QAbstractButton, QComboBox))
+                and not obj.testAttribute(Qt.WA_SetCursor)):
+            obj.setCursor(Qt.PointingHandCursor)
+        return False
 
 
 class _MainThread(QObject):
@@ -871,6 +884,8 @@ def main():
     report.log.info("Maple Helper %s starting on %s (%s)", __version__, sys.platform, " ".join(sys.argv[1:]) or "no args")
     qapp = QApplication(sys.argv)
     qapp.setStyle("Fusion")   # the native Windows 11 style ignores rounded corners on buttons
+    hand = _HandCursor(qapp)
+    qapp.installEventFilter(hand)
     qapp.setApplicationName(APP_NAME)
     qapp.setApplicationDisplayName(APP_NAME)
     lock = QLockFile(str(DATA_DIR / "app.lock"))

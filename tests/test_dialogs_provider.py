@@ -49,7 +49,7 @@ def test_onboarding_relabels_the_connect_page_for_gemini(env, monkeypatch):
     assert dlg.install_btn.text() == "Install Gemini"
     assert dlg.login_btn.text() == "Sign in with Google"
     assert "AIza" in dlg.key_edit.placeholderText()
-    assert "Google (Gemini)" in dlg.privacy_label.text()
+    assert "the AI you chose (now Google's Gemini)" in dlg.privacy_label.text()
 
 
 def test_onboarding_ignores_a_late_status_for_the_other_provider(env):
