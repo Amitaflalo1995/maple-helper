@@ -191,6 +191,8 @@ STRINGS = {
                                 "en": "ChatGPT isn't installed on this PC. Open settings to install it."},
     "err_not_installed_gemini": {"he": "Gemini לא מותקן במחשב. פתחו את ההגדרות כדי להתקין.",
                                  "en": "Gemini isn't installed on this PC. Open settings to install it."},
+    "err_no_credit": {"he": "למפתח ה-API אין יתרה. הוסיפו קרדיט בחשבון של המפתח, או התחברו עם החשבון במקום.",
+                      "en": "Your API key has no credit left. Add credit to the key's account, or sign in with your account instead."},
     "err_generic": {"he": "משהו השתבש. נסו שוב.", "en": "Something went wrong. Try again."},
     # tray / settings
     "tray_open": {"he": "פתיחת הצ'אט", "en": "Open chat"},

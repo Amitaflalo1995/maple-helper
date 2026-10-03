@@ -1616,7 +1616,7 @@ class Overlay(QWidget):
             import logging
             logging.getLogger(__name__).warning("answer failed: %s", ans.error)
             key = f"err_{ans.error}" if ans.error in ("offline", "not_logged_in", "usage_limit",
-                                                      "not_installed") else "err_generic"
+                                                      "not_installed", "no_credit") else "err_generic"
             self._pending_bubble.set_text(self.t.p(key, self.settings["provider"]))
             return
         self._pending_bubble.set_text(ans.text)

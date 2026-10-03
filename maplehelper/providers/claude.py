@@ -52,8 +52,20 @@ def find_claude() -> str | None:
     return None
 
 
-def env() -> dict:
-    return child_env(POSIX_DIRS)
+# credentials in the player's environment that would override the account (or the stored key) Maple Helper
+# chose: Claude Code takes them over the sign-in
+FOREIGN_AUTH = ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "CLAUDE_CODE_USE_BEDROCK", "CLAUDE_CODE_USE_VERTEX",
+                "CLAUDE_CODE_OAUTH_TOKEN")
+
+
+def env(api_key: str | None = None) -> dict:
+    """The CLI's environment: the player's account sign-in, or the stored API key, never a stray credential."""
+    e = child_env(POSIX_DIRS)
+    for k in FOREIGN_AUTH:
+        e.pop(k, None)
+    if api_key:
+        e["ANTHROPIC_API_KEY"] = api_key
+    return e
 
 
 class Claude(Provider):
@@ -125,6 +137,7 @@ class ClaudeBackend:
         self._warm: subprocess.Popen | None = None
         self._warm_config: tuple | None = None
         self._warm_lock = threading.Lock()
+        self._cancels = 0
 
     # ------------------------------------------------------------ warm process
     # Claude Code needs ~3s to start. A process started ahead of time sits waiting for its first
@@ -143,13 +156,8 @@ class ClaudeBackend:
                "--include-partial-messages", "--restricted", "--strict-mcp-config",
                "--tools", "Read,Grep,Glob" if tools else "",
                "--model", model or b.model or "sonnet", "--no-session-persistence", "--system-prompt", b.system_prompt()]
-        e = env()
-        if b.api_key:
-            e["ANTHROPIC_API_KEY"] = b.api_key
-        else:
-            e.pop("ANTHROPIC_API_KEY", None)  # use the player's Claude account login
         return subprocess.Popen(cmd, cwd=str(b.kb.root), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE, env=e, creationflags=CREATE_NO_WINDOW)
+                                stderr=subprocess.PIPE, env=env(b.api_key), creationflags=CREATE_NO_WINDOW)
 
     def prewarm(self) -> None:
         """Start the next question's process now (no-op if one is ready)."""
@@ -159,8 +167,9 @@ class ClaudeBackend:
             if self._warm and self._warm.poll() is None and self._warm_config == self._config():
                 return
             self._discard_warm()
+            cfg = self._config()          # before spawning: settings can change while it starts
             try:
-                self._warm, self._warm_config = self._spawn(), self._config()
+                self._warm, self._warm_config = self._spawn(), cfg
             except OSError:
                 self._warm = None
 
@@ -190,8 +199,29 @@ class ClaudeBackend:
         self.cancel()
 
     def cancel(self) -> None:
+        self._cancels += 1            # a question being written when this lands is not sent again
         if self._proc and self._proc.poll() is None:
             self._proc.kill()
+
+    @staticmethod
+    def _send(proc: subprocess.Popen, data: bytes) -> bool:
+        """Write the question (a screenshot makes it far bigger than the pipe). A fresh process reads it only
+        once it has started: a CLI stuck before that is stopped after STALL_TIMEOUT_S, and the write fails."""
+        def stall():
+            if proc.poll() is None:
+                log.warning("Claude Code didn't take the question for %ss, stopped", STALL_TIMEOUT_S)
+                proc.kill()
+        timer = threading.Timer(STALL_TIMEOUT_S, stall)
+        timer.daemon = True
+        timer.start()
+        try:
+            proc.stdin.write(data)
+            proc.stdin.close()
+            return True
+        except OSError:
+            return False
+        finally:
+            timer.cancel()
 
     def run(self, prompt: str, screenshot_jpeg: bytes | None, on_raw_delta=None, model: str | None = None,
             tools: bool = True) -> RawResult:
@@ -206,19 +236,23 @@ class ClaudeBackend:
         msg = {"type": "user", "message": {"role": "user", "content": content}}
 
         own = (model in (None, self.brain.model)) and tools        # the player's setup: the warm process fits
+        cancels = self._cancels
+        data = (json.dumps(msg) + "\n").encode("utf-8")
         try:
             self._proc = (self._take_warm() if own else None) or self._spawn(model, tools)
         except OSError as e:
             log.error("could not start Claude Code: %s", e)
             return RawResult(error=f"launch_failed: {e}")
-        try:
-            self._proc.stdin.write((json.dumps(msg) + "\n").encode("utf-8"))
-            self._proc.stdin.close()
-        except OSError:
-            # the warm process died meanwhile: start fresh once
-            self._proc = self._spawn(model, tools)
-            self._proc.stdin.write((json.dumps(msg) + "\n").encode("utf-8"))
-            self._proc.stdin.close()
+        if not self._send(self._proc, data):
+            if self._cancels != cancels:
+                return RawResult(error="no_result")      # stopped (sync timeout, quit): not sent again
+            # the warm process had died meanwhile: start fresh once
+            try:
+                self._proc = self._spawn(model, tools)
+            except OSError as e:
+                return RawResult(error=f"launch_failed: {e}")
+            if not self._send(self._proc, data):
+                return RawResult(error="no_result")
         # get the next one ready while the player reads this answer
         if own:
             threading.Thread(target=self.prewarm, daemon=True).start()
@@ -275,11 +309,13 @@ class ClaudeBackend:
             return RawResult(error="timeout", limits=limits)
         if not result:
             if not limits:
-                log.warning("no result from Claude Code (exit %s): %s", self._proc.returncode, stderr[-1500:])
+                log.warning("no result from Claude Code (exit %s): %s", proc.returncode, stderr[-1500:])
             return RawResult(error=classify_error(stderr) or "no_result", limits=limits)
         if result.get("is_error"):
             log.warning("Claude Code error: %s | %s", str(result.get("result", ""))[:500], stderr[-1000:])
-            return RawResult(error=classify_error(str(result.get("result", "")) + stderr) or "api_error")
+            # with the plan usage: hitting the limit is exactly when the meter and its warning matter
+            return RawResult(error=classify_error(str(result.get("result", "")) + stderr) or "api_error",
+                             limits=limits)
         return RawResult(text=result.get("result") or current, cost_usd=result.get("total_cost_usd"), limits=limits,
                          model=model)
 
@@ -289,11 +325,7 @@ class ClaudeBackend:
             return None
         cmd = [self.exe, "-p", "--restricted", "--strict-mcp-config", "--tools", "", "--model", "haiku",
                "--no-session-persistence", "--system-prompt", instructions]
-        e = env()
-        if self.brain.api_key:                 # the same account choice as the answers (see _spawn)
-            e["ANTHROPIC_API_KEY"] = self.brain.api_key
-        else:
-            e.pop("ANTHROPIC_API_KEY", None)
+        e = env(self.brain.api_key)            # the same account choice as the answers (see _spawn)
         try:
             r = subprocess.run(cmd, input=text.encode("utf-8"), capture_output=True, timeout=timeout,
                                env=e, creationflags=CREATE_NO_WINDOW)

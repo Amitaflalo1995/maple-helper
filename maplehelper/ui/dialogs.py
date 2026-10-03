@@ -698,6 +698,7 @@ class Onboarding(GlassDialog):
             return
         self._check_status()
 
+    @_while_open
     def _on_status(self, provider: str, st: str):
         if provider != self.provider:
             return            # a check that started before the player switched provider
@@ -748,6 +749,7 @@ class Onboarding(GlassDialog):
         # the check can take up to 15 seconds: off the GUI thread, so the window doesn't freeze
         threading.Thread(target=work, daemon=True).start()
 
+    @_while_open
     def _on_key_checked(self, provider: str, key: str, ok: bool):
         self.key_btn.setEnabled(True)
         if provider != self.provider:

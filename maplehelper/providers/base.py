@@ -277,6 +277,8 @@ def http_ok(url: str, headers: dict) -> bool:
 
 def classify_error(text: str) -> str | None:
     t = text.lower()
+    if "credit balance" in t or "insufficient_quota" in t or "billing" in t:
+        return "no_credit"          # an API key with no money on it (its check passed: the key itself is valid)
     if ("not logged in" in t or "please run /login" in t or "invalid api key" in t or "invalid_api_key" in t
             or "401 unauthorized" in t or "authentication" in t):
         return "not_logged_in"

@@ -222,6 +222,7 @@ class TestCodexBackend:
             {"type": "item.completed", "item": {"type": "agent_message", "text": "Looking…"}},
             {"type": "item.completed", "item": {"type": "agent_message",
                                                 "text": 'Hunt **Red Snail**.\n@@META@@\n{"entities": ["monster/130101"]}'}},
+            {"type": "turn.completed"},
         )
         monkeypatch.setattr(codex.subprocess, "Popen", FakePopen)
         from maplehelper.brain import Brain
@@ -448,3 +449,30 @@ def test_every_provider_is_told_to_stay_on_the_game():
     assert "Scope: you help only with MapleStory Classic" in SYSTEM_PROMPT
     assert "which AI and model answers" in SYSTEM_PROMPT           # questions about the app itself are fine
     assert "Only MapleStory Classic" in REPLY_RULES
+
+
+def test_codex_lead_in_from_a_stopped_run_is_no_answer():
+    """Without turn.completed (timeout, cancel, quit) the last message is a lead-in, not the answer."""
+    r = codex.parse_events(events({"type": "item.completed", "item": {"type": "agent_message",
+                                                                      "text": "I'll grep drops.tsv."}}))
+    assert r.error == "no_result"
+
+
+def test_codex_runs_with_its_extras_switched_off():
+    c = codex.codex_command("codex", "C:/kb", "x", platform="linux")
+    assert 'web_search="disabled"' in c
+    for f in ("apps", "browser_use", "computer_use", "image_generation", "multi_agent", "plugins", "hooks"):
+        assert c[c.index(f) - 1] == "--disable"
+    assert c[-1] == "-"
+
+
+def test_claude_never_passes_a_stray_credential(monkeypatch):
+    for k in claude.FOREIGN_AUTH:
+        monkeypatch.setenv(k, "leftover")
+    e = claude.env()
+    assert not any(k in e for k in claude.FOREIGN_AUTH)
+    assert claude.env("sk-ant-1")["ANTHROPIC_API_KEY"] == "sk-ant-1"
+
+
+def test_an_api_key_without_credit_says_so():
+    assert base.classify_error("Your credit balance is too low to access the Anthropic API") == "no_credit"
