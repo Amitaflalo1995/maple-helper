@@ -7,14 +7,14 @@
 <p align="center"><sub>Unofficial companion for Maple Story Classic World · Not affiliated with Nexon</sub></p>
 
 <p align="center">
-  <a href="https://github.com/Amitaflalo1995/maple-helper/releases/latest"><img src="https://img.shields.io/badge/Download-Windows%20installer-2ea44f?style=for-the-badge&logo=windows&logoColor=white" alt="Download the Windows installer"></a>
-  <a href="https://github.com/Amitaflalo1995/maple-helper/releases/latest"><img src="https://img.shields.io/badge/Download-macOS%20(Apple%20Silicon)-2ea44f?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS (Apple Silicon)"></a>
-  <a href="https://github.com/Amitaflalo1995/maple-helper/releases"><img src="https://img.shields.io/badge/All-releases-555?style=for-the-badge&logo=github&logoColor=white" alt="All releases"></a>
+  <a href="https://github.com/Maple-Helper/maple-helper/releases/latest"><img src="https://img.shields.io/badge/Download-Windows%20installer-2ea44f?style=for-the-badge&logo=windows&logoColor=white" alt="Download the Windows installer"></a>
+  <a href="https://github.com/Maple-Helper/maple-helper/releases/latest"><img src="https://img.shields.io/badge/Download-macOS%20(Apple%20Silicon)-2ea44f?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS (Apple Silicon)"></a>
+  <a href="https://github.com/Maple-Helper/maple-helper/releases"><img src="https://img.shields.io/badge/All-releases-555?style=for-the-badge&logo=github&logoColor=white" alt="All releases"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/Amitaflalo1995/maple-helper/releases/latest"><img src="https://img.shields.io/github/v/release/Amitaflalo1995/maple-helper?label=latest&sort=semver" alt="Latest release"></a>
-  <a href="https://github.com/Amitaflalo1995/maple-helper/releases"><img src="https://img.shields.io/github/downloads/Amitaflalo1995/maple-helper/total" alt="Total downloads"></a>
+  <a href="https://github.com/Maple-Helper/maple-helper/releases/latest"><img src="https://img.shields.io/github/v/release/Maple-Helper/maple-helper?label=latest&sort=semver" alt="Latest release"></a>
+  <a href="https://github.com/Maple-Helper/maple-helper/releases"><img src="https://img.shields.io/github/downloads/Maple-Helper/maple-helper/total" alt="Total downloads"></a>
 </p>
 
 ## About
@@ -39,13 +39,13 @@ Use it to look up drops, find quest NPCs, or ask where to train without switchin
   <img src="https://www.maplehelper.app/assets/shots/en/tools-quests-light.webp" width="260" alt="Play tools, quests: quests for your level with the NPC, what they need and the rewards">
 </p>
 
-Website: **https://maplehelper.app/** (source: [maple-helper-site](https://github.com/Amitaflalo1995/maple-helper-site))
+Website: **https://maplehelper.app/** (source: [maple-helper-site](https://github.com/Maple-Helper/maple-helper-site))
 
 ## Download
 
-**[Download Maple Helper for Windows](https://github.com/Amitaflalo1995/maple-helper/releases/latest/download/MapleHelper-Setup.exe)**, run the installer, and follow the setup screens. The app updates itself and its game database in the background. A portable zip is on the [Releases page](https://github.com/Amitaflalo1995/maple-helper/releases/latest).
+**[Download Maple Helper for Windows](https://github.com/Maple-Helper/maple-helper/releases/latest/download/MapleHelper-Setup.exe)**, run the installer, and follow the setup screens. The app updates itself and its game database in the background. A portable zip is on the [Releases page](https://github.com/Maple-Helper/maple-helper/releases/latest).
 
-**[Download Maple Helper for macOS](https://github.com/Amitaflalo1995/maple-helper/releases/latest/download/MapleHelper-macOS.dmg)** (Apple Silicon), open it, and drag **Maple Helper** into Applications. See [First launch on macOS](#first-launch-on-macos). The game database updates itself; for a new app version, the app shows a notice and a download link in its menu bar menu.
+**[Download Maple Helper for macOS](https://github.com/Maple-Helper/maple-helper/releases/latest/download/MapleHelper-macOS.dmg)** (Apple Silicon), open it, and drag **Maple Helper** into Applications. See [First launch on macOS](#first-launch-on-macos). The game database updates itself; for a new app version, the app shows a notice and a download link in its menu bar menu.
 
 ## Features
 
@@ -87,7 +87,7 @@ The app uses screen capture and its own overlay window. It does not read game me
 
 ## Install
 
-Download the latest release from the [Releases page](https://github.com/Amitaflalo1995/maple-helper/releases/latest):
+Download the latest release from the [Releases page](https://github.com/Maple-Helper/maple-helper/releases/latest):
 
 - **`MapleHelper-Setup.exe`**: the installer. This is the recommended option and doesn't need admin rights.
 - **`MapleHelper-<version>-portable.zip`**: unzip it anywhere and run `Maple Helper.exe`.

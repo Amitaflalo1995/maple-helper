@@ -20,7 +20,7 @@ import zipfile
 from .store import USER_KB, kb_dir
 
 # Set when the GitHub repository exists (see README, "Publishing").
-GITHUB_REPO = "Amitaflalo1995/maple-helper"
+GITHUB_REPO = "Maple-Helper/maple-helper"
 MANIFEST_URL = f"https://github.com/{GITHUB_REPO}/releases/latest/download/kb-manifest.json" if GITHUB_REPO else ""
 
 
