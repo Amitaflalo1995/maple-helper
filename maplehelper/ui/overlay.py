@@ -6,7 +6,7 @@ import time
 from PySide6.QtCore import (QEasingCurve, QObject, QParallelAnimationGroup, QPoint, QPropertyAnimation, QRect, QRectF,
                             Qt, QThread, QTimer, Signal)
 from PySide6.QtGui import QAction, QGuiApplication, QIcon, QPainterPath, QPixmap
-from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QMenu, QPushButton,
+from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QPushButton,
                                QScrollArea, QSizePolicy, QToolButton, QVBoxLayout, QWidget, QWidgetAction)
 
 from .. import __version__, bidi, osapi, quick, telemetry
@@ -19,7 +19,7 @@ from . import theme
 from .glass import paint_glass
 from .minibubble import MiniBubble
 from .widgets import (SELECTION, WISHLIST, Bubble, BubbleRow, DropGroupCard, EntityCard, NoticeCard, ProfileCard,
-                      CharacterChoice, SessionCard, SystemLine, TileGrid)
+                      CharacterChoice, SessionCard, SplitMenu, SystemLine, TileGrid)
 
 
 
@@ -885,7 +885,7 @@ class Overlay(QWidget):
         # the click that closes the open menu lands on the card too: don't reopen it
         if time.monotonic() - getattr(self, "_menu_closed_at", 0) < 0.3:
             return
-        menu = QMenu(self)
+        menu = SplitMenu(self)
         menu.setWindowFlags(menu.windowFlags() | Qt.FramelessWindowHint | Qt.NoDropShadowWindowHint)
         menu.setAttribute(Qt.WA_TranslucentBackground)
         menu.setLayoutDirection(Qt.RightToLeft if self.t.rtl else Qt.LeftToRight)
@@ -904,7 +904,11 @@ class Overlay(QWidget):
             choice.clicked.connect(lambda cid=c.id: (menu.close(), self.switch_character(cid)))
             menu.addAction(a)
         if others:
-            menu.addSeparator()
+            gap = QWidgetAction(menu)          # the cards stand apart from the menu below them
+            spacer = QWidget()
+            spacer.setFixedHeight(8)
+            gap.setDefaultWidget(spacer)
+            menu.addAction(gap)
         if self.profiles.active is not None:
             edit = QAction(theme.glyph_icon("edit"), bidi.plain(self.t("edit_character"), self.t.rtl), menu)
             edit.setEnabled(not busy)
@@ -924,8 +928,9 @@ class Overlay(QWidget):
         share.setEnabled(self.profiles.active is not None)
         menu.addAction(share)
         card = self.profile_card
-        menu.setMinimumWidth(card.width())
-        menu.exec(card.mapToGlobal(QPoint(0, card.height() + 4)))
+        menu.setMinimumWidth(card.width() + 10)
+        # the menu's 5 px padding sits outside the card's edges, so its cards line up with this one
+        menu.exec(card.mapToGlobal(QPoint(-5, card.height() + 1)))
         self._menu_closed_at = time.monotonic()
 
     def switch_character(self, cid: str):

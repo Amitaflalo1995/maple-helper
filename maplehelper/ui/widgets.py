@@ -5,7 +5,8 @@ import webbrowser
 
 from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QSizePolicy, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QMenu, QPushButton, QSizePolicy, QVBoxLayout, QWidget,
+                               QWidgetAction)
 
 from .. import bidi
 from ..kb import KnowledgeBase
@@ -587,6 +588,33 @@ class ProfileCard(QFrame):
     def mouseReleaseEvent(self, e):
         if e.button() == Qt.LeftButton and self.rect().contains(e.position().toPoint()):
             self.clicked.emit()
+
+
+class SplitMenu(QMenu):
+    """A menu whose card rows (QWidgetAction) stand on their own above it: the panel is drawn only behind the
+    plain actions, so the other characters' cards read as cards, not as part of the list."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName("SplitMenu")
+
+    def paintEvent(self, e):
+        from . import theme
+        plain = [self.actionGeometry(a) for a in self.actions()
+                 if not (isinstance(a, QWidgetAction) and a.defaultWidget() is not None) and a.isVisible()]
+        if plain:
+            top = min(r.top() for r in plain) - 5
+            # the menu's 5 px padding is outside the panel: it lines up with the cards (and the card above)
+            rect = QRectF(5.5, top + 0.5, self.width() - 11, self.height() - top - 1)
+            p = QPainter(self)
+            p.setRenderHint(QPainter.Antialiasing)
+            path = QPainterPath()
+            path.addRoundedRect(rect, 12, 12)
+            p.fillPath(path, QColor(44, 44, 46, 250) if theme.MODE == "dark" else QColor(255, 255, 255, 250))
+            p.setPen(QColor(255, 255, 255, 36) if theme.MODE == "dark" else QColor(0, 0, 0, 20))
+            p.drawPath(path)
+            p.end()
+        super().paintEvent(e)
 
 
 class CharacterChoice(QFrame):
