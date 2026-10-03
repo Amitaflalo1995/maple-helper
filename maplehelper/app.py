@@ -6,10 +6,10 @@ import sys
 import threading
 import webbrowser
 
-from PySide6.QtCore import QEvent, QLockFile, QObject, Qt, QTimer, Signal
+from PySide6.QtCore import QLockFile, QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QAction, QIcon
 from PySide6.QtNetwork import QLocalServer, QLocalSocket
-from PySide6.QtWidgets import QAbstractButton, QApplication, QComboBox, QMenu, QSystemTrayIcon
+from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 from . import APP_NAME, __version__, osapi, providers, report, telemetry, updater, whatsnew, wishlist
 from .brain import Brain
@@ -64,19 +64,6 @@ def load_kb() -> KnowledgeBase:
     except Exception:      # noqa: BLE001
         report.log.exception("knowledge base unreadable, using the bundled one")
         return KnowledgeBase(BUNDLED_KB)
-
-
-class _HandCursor(QObject):
-    """Every button (and drop-down) shows the pointing hand, like a link, unless it set its own cursor.
-
-    Set once for the whole app, when Qt first styles each widget, so a new button can't miss it.
-    """
-
-    def eventFilter(self, obj, event):
-        if (event.type() == QEvent.Polish and isinstance(obj, (QAbstractButton, QComboBox))
-                and not obj.testAttribute(Qt.WA_SetCursor)):
-            obj.setCursor(Qt.PointingHandCursor)
-        return False
 
 
 class _MainThread(QObject):
@@ -137,6 +124,9 @@ class MapleHelperApp:
             return bool(r)
 
     def start(self) -> bool:
+        # listening from the start: a second launch while onboarding (or the character setup) is still open
+        # brings that window forward instead of timing out against a server that wasn't up yet
+        self._listen_for_second_launch()
         fresh_install = not self.settings["onboarding_done"]
         if not self.settings["onboarding_done"]:
             if not self.run_onboarding():
@@ -205,14 +195,11 @@ class MapleHelperApp:
             t = I18n(self.settings["language"])
             self.toast(t("app_tagline"), t("ob_done_hint").replace("F9", self.settings["hotkey_toggle"]))
         else:
+            # the first-run tour starts with the chat itself (Overlay.open_overlay), whenever it first opens
             QTimer.singleShot(0, lambda: self.overlay.toggle(self.capture))
-            if not self.settings["tour_done"]:
-                # once the chat is up and laid out: the first look at it walks through every button
-                QTimer.singleShot(700, self.overlay.start_tour)
         QTimer.singleShot(1500, self.check_permissions)
         self.announce_whats_new(fresh_install)
         self.qapp.aboutToQuit.connect(self.shutdown)
-        self._listen_for_second_launch()
         return True
 
     def replay_tour(self, settings_dialog) -> None:
@@ -232,7 +219,20 @@ class MapleHelperApp:
     def _on_second_launch(self):
         while self._instance_server.hasPendingConnections():
             self._instance_server.nextPendingConnection().deleteLater()
-        if not self.overlay.isVisible():
+        if getattr(self, "overlay", None) is None:
+            # still in onboarding or the character setup: no chat yet, bring that window forward
+            win = QApplication.activeModalWidget()
+            if win is not None:
+                self.bring_dialogs_forward()
+                win.raise_()
+                win.activateWindow()
+            return
+        self.show_chat()
+
+    def show_chat(self):
+        """Open the chat, or bring it forward when it is open already (never closes it: the tray's "Open chat"
+        closed an open chat, a toggle under an "open" label)."""
+        if not self.overlay.isVisible() or self.overlay.windowOpacity() <= 0.5:
             self.overlay.toggle(self.capture)
         else:
             self.overlay.raise_()
@@ -251,8 +251,12 @@ class MapleHelperApp:
             self.overlay.add_notice(lambda t: t("whats_new_notice", version=__version__), lambda t: t("whats_new_show"),
                                     lambda: self.show_whats_new(notes))
             if UPDATED_ARG in sys.argv:
-                # back from "Update now": the chat is open, show what changed right away
-                QTimer.singleShot(900, lambda: self.show_whats_new(notes))
+                # back from "Update now": the chat is open, show what changed right away; after the first-run tour
+                # when that runs too (both at once: the changelog took the focus and the tour's keys went dead)
+                if self.settings["tour_done"]:
+                    QTimer.singleShot(900, lambda: self.show_whats_new(notes))
+                else:
+                    self.overlay.tour_ended.connect(lambda: self.show_whats_new(notes), Qt.SingleShotConnection)
 
     def open_window(self, kind: str, make, on_close=None):
         """Settings, guides, history…: a window NEXT TO the chat, which stays usable (not modal).
@@ -302,7 +306,24 @@ class MapleHelperApp:
 
     def toast(self, title: str, message: str = "", timeout_ms: int = 5000):
         notify(title, message, rtl=I18n(self.settings["language"]).rtl, font_family=self.font_family,
-               timeout_ms=timeout_ms)
+               timeout_ms=timeout_ms, screen=self._toast_screen())
+
+    def _toast_screen(self):
+        """Where the player is looking: the chat's monitor when it is open, else the game's (a toast on the
+        primary monitor was missed with the game on the other one), else the primary one (None)."""
+        from PySide6.QtCore import QPoint
+        from PySide6.QtGui import QGuiApplication
+        overlay = getattr(self, "overlay", None)
+        if overlay is not None and overlay.isVisible():
+            return overlay.screen()
+        try:
+            hwnd = osapi.find_game_window()
+            rect = osapi.window_rect(hwnd) if hwnd else None
+        except Exception:      # noqa: BLE001 - a toast never fails over where to go
+            rect = None
+        if rect:
+            return QGuiApplication.screenAt(QPoint(rect[0] + rect[2] // 2, rect[1] + rect[3] // 2))
+        return None
 
     # ------------------------------------------------------------------ events
 
@@ -329,7 +350,9 @@ class MapleHelperApp:
         t = I18n(self.settings["language"])
         if not self.overlay.isVisible():
             self.overlay.toggle(self.capture)
-        self.overlay.add_system(t("voice_mic_failed") if error.startswith("mic:") else t("voice_failed"))
+        key = ("voice_mic_failed" if error.startswith("mic:") else
+               "voice_download_failed" if error.startswith("download:") else "voice_failed")
+        self.overlay.add_system(t(key))
 
     def on_voice_text(self, text: str):
         if not text.strip():          # silence (or only noise): say so, instead of nothing happening
@@ -348,15 +371,16 @@ class MapleHelperApp:
     def summarize_session(self):
         if self.overlay.isVisible():
             return
-        transcript = self.overlay.end_session()
-        c = self.profiles.active
-        if not transcript or not c:
+        # one summary per character the player talked as (switching mid-session left the others unsummarized)
+        transcripts = self.overlay.end_session()
+        if not transcripts:
             return
 
         def work():
-            s = self.brain.summarize(transcript)
-            if s:
-                History(c.id).add_summary(s)
+            for cid, transcript in transcripts.items():
+                s = self.brain.summarize(transcript)
+                if s:
+                    History(cid).add_summary(s)
         threading.Thread(target=work, daemon=True).start()
 
     # ------------------------------------------------------------------ tray & settings
@@ -377,8 +401,7 @@ class MapleHelperApp:
         key = self.settings["hotkey_toggle"]
         # the key in the label itself: the menu's shortcut column glued it to the text in Hebrew ("הצ'אטF9", seen live)
         from . import bidi
-        a_show = QAction(bidi.plain(f"{t('tray_open')}  ·  {key}", t.rtl), menu,
-                         triggered=lambda: self.overlay.toggle(self.capture))
+        a_show = QAction(bidi.plain(f"{t('tray_open')}  ·  {key}", t.rtl), menu, triggered=self.show_chat)
         a_set = QAction(t("tray_settings"), menu, triggered=self.open_settings)
         a_quit = QAction(t("tray_quit"), menu, triggered=self.qapp.quit)
         menu.addAction(a_show)
@@ -418,16 +441,41 @@ class MapleHelperApp:
             self._look = look
             return
         self._look = look
-        reopen = {"tools": self.show_tools, "guides": self.show_guides, "patch_notes": self.show_patch_notes,
-                  "whats_new": self.show_whats_new}
         for kind, dlg in list(self.__dict__.get("_windows", {}).items()):
             if kind == "settings" or dlg is None:
                 continue
+            again = self._reopen_call(kind, dlg)        # read before close: where the player was in it
             dlg.close()
-            again = reopen.get(kind) or (self.show_history if kind.startswith("history:") else
-                                         self.show_wishlist if kind.startswith("wishlist:") else None)
             if again:
-                QTimer.singleShot(0, lambda f=again: f())
+                QTimer.singleShot(0, again)
+
+    def _reopen_call(self, kind: str, dlg):
+        """How to open `dlg` again as it is now: the same page, guide, notes and character (reopened with no
+        arguments, Tools came back on its first page, an open guide on the list, a KB update's patch notes as
+        the generic changelog, and another character's History as the active one's)."""
+        if kind == "tools":
+            from .ui.tools import PAGES
+            stack = getattr(dlg, "stack", None)
+            i = stack.currentIndex() if stack is not None else 0
+            page = PAGES[i] if 0 <= i < len(PAGES) else "train"
+            return lambda: self.show_tools(page)
+        if kind == "guides":
+            key = getattr(dlg, "_reading", None)
+            return lambda: self.show_guides(key)
+        if kind == "patch_notes":
+            entries = getattr(dlg, "entries", None)
+            return lambda: self.show_patch_notes(entries)
+        if kind == "whats_new":
+            notes = getattr(dlg, "notes", None)
+            return lambda: self.show_whats_new(notes)
+        cid = kind.split(":", 1)[1] if ":" in kind else None
+        if self._character(cid) is None:
+            return None                       # that character is gone
+        if kind.startswith("history:"):
+            return lambda: self.show_history(cid)
+        if kind.startswith("wishlist:"):
+            return lambda: self.show_wishlist(cid)
+        return None
 
     def add_character(self):
         before = self.profiles.active_id
@@ -539,9 +587,16 @@ class MapleHelperApp:
 
     def on_settings_changed(self):
         telemetry.set_enabled(self.settings["telemetry"])
+        # the new theme first: apply_language rebuilds text with the theme's colors written in (the retake link
+        # kept the dark theme's faint orange on white)
+        self.overlay.setStyleSheet(self.style())
         self.overlay.apply_language()
         self._reopen_windows_in_new_look()
-        self.overlay.setStyleSheet(self.style())
+        from .ui import terms
+        from .ui.toast import Toast
+        for toast in list(Toast._live):
+            toast.restyle()              # a toast up during the switch: old text colors on the new glass
+        terms.hide()
         self.overlay.apply_capture_mode()
         self.apply_saver_mode()
         self.overlay.show_saver_badge(self.settings["saver_mode"])
@@ -781,37 +836,54 @@ class MapleHelperApp:
         self.overlay.set_tags([key])
         self.overlay.input.setFocus()
 
-    def show_history(self):
+    def _character(self, cid: str | None):
+        """That character (the active one when cid is None), or None."""
+        if cid is None:
+            return self.profiles.active
+        return next((c for c in self.profiles.characters if c.id == cid), None)
+
+    def show_history(self, cid: str | None = None):
         from . import pins
         from .ui.pinsview import HistoryDialog
-        c = self.profiles.active
+        c = self._character(cid)
         if not c:
             return
         pairs = pins.conversations(History(c.id).recent(100000))
         def make():
             dlg = HistoryDialog(pairs, c.name, self.settings["language"], self.style(), self.kb)
             dlg.pin_requested.connect(lambda q, a, cid=c.id: self.overlay.pin_answer(q, a, cid))
-            dlg.continue_requested.connect(self.continue_conversation)
+            # the window stays open across a character switch: its exchange belongs to its own character
+            dlg.continue_requested.connect(lambda q, a, k, cid=c.id: self.continue_conversation(q, a, k, cid))
             return dlg
         self.open_window(f"history:{c.id}", make)
 
-    def continue_conversation(self, question: str, answer: str, keys: list):
-        """From the history: the exchange back in the chat, and the next question follows on from it."""
+    def continue_conversation(self, question: str, answer: str, keys: list, cid: str | None = None):
+        """From the history: the exchange back in the chat, and the next question follows on from it. cid: whose
+        history it came from; the chat switches to that character first (A's exchange went into B's chat)."""
         if not self.overlay.isVisible():
             self.overlay.toggle(self.capture)
         c = self.profiles.active
+        if cid is not None and (c is None or c.id != cid):
+            if self.overlay._is_busy():        # mid-answer the reply still belongs to the current character
+                self.overlay._say_busy()
+                return
+            self.overlay.switch_character(cid)
+            c = self.profiles.active
+            if c is None or c.id != cid:
+                return                         # that character is gone
         history = self.__dict__.get("_windows", {}).get(f"history:{c.id}") if c else None
         if history is not None:
             history.close()           # the conversation goes on in the chat, not behind the history window
         self.overlay.continue_from(question, answer, keys)
 
-    def show_wishlist(self):
-        keys = wishlist.items(self.settings, self.profiles.active_id)
-        old = self.__dict__.get("_windows", {}).get(f"wishlist:{self.profiles.active_id}")
+    def show_wishlist(self, cid: str | None = None):
+        c = self._character(cid)
+        cid = c.id if c else self.profiles.active_id
+        keys = wishlist.items(self.settings, cid)
+        old = self.__dict__.get("_windows", {}).get(f"wishlist:{cid}")
         if old is not None:
             old.close()             # a star added meanwhile: show the list as it is now, not the open copy
-        self.open_window(f"wishlist:{self.profiles.active_id}",
-                         lambda: self._wishlist_dialog(keys))
+        self.open_window(f"wishlist:{cid}", lambda: self._wishlist_dialog(keys))
 
     def _wishlist_dialog(self, keys):
         from .ui.wishlist import WishlistDialog
@@ -897,9 +969,9 @@ def main():
     report.setup_logging()
     report.log.info("Maple Helper %s starting on %s (%s)", __version__, sys.platform, " ".join(sys.argv[1:]) or "no args")
     qapp = QApplication(sys.argv)
-    qapp.setStyle("Fusion")   # the native Windows 11 style ignores rounded corners on buttons
-    hand = _HandCursor(qapp)
-    qapp.installEventFilter(hand)
+    # Fusion: the native Windows 11 style ignores rounded corners on buttons. AppStyle adds the hand cursor and
+    # the focus ring as Qt styles each widget (no app-wide event filter)
+    qapp.setStyle(theme.AppStyle("Fusion"))
     qapp.setApplicationName(APP_NAME)
     qapp.setApplicationDisplayName(APP_NAME)
     lock = QLockFile(str(DATA_DIR / "app.lock"))

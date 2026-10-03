@@ -261,7 +261,7 @@ class SessionCard(QFrame):
             for ln in b["lines"]:
                 body.addWidget(self._line(ln, "CardStat"))
             for q in b.get("questions", []):
-                body.addWidget(self._line("• " + q, "CardSub"))
+                body.addWidget(self._bullet(q))
             if b.get("questions") and on_continue and b.get("id"):
                 go = QPushButton(bidi.plain(continue_text, rtl), objectName="Link")
                 go.setCursor(Qt.PointingHandCursor)
@@ -273,6 +273,16 @@ class SessionCard(QFrame):
 
     def _line(self, text: str, name: str) -> QLabel:
         lb = QLabel(bidi.plain(text, self._rtl), objectName=name)
+        lb.setWordWrap(True)
+        lb.setAlignment(self._align)
+        return lb
+
+    def _bullet(self, question: str) -> QLabel:
+        """'• question' in the card's own direction, the bullet at its leading edge. The question is already one
+        isolated block (name_block); left to plain(), the bullet alone has no direction, so a Hebrew question
+        in the English card made the whole line right-to-left and put the bullet after it."""
+        mark = bidi.RLM if self._rtl else "\u200e"      # (a left-to-right mark)
+        lb = QLabel(f"{mark}• {question}{mark}", objectName="CardSub")
         lb.setWordWrap(True)
         lb.setAlignment(self._align)
         return lb
@@ -337,9 +347,14 @@ WISHLIST = _Wishlist()
 class Selectable:
     """Mixin: a tap selects this entity (orange border); every selectable follows the shared selection."""
 
-    def _init_selectable(self, key: str):
+    def _init_selectable(self, key: str, name: str = ""):
         self.key = key
         self.setCursor(Qt.PointingHandCursor)
+        # Tab reaches it and Enter / Space tags it, as a click does (only a click could); a click doesn't
+        # focus it, so the focus ring shows only for the keyboard
+        self.setFocusPolicy(Qt.TabFocus)
+        self.setProperty("focus_ring", True)
+        self.setAccessibleName(name or key)
         SELECTION.changed.connect(self._on_selection)
 
     def _on_selection(self, keys: list):
@@ -351,6 +366,12 @@ class Selectable:
         if ev.button() == Qt.LeftButton:
             SELECTION.picked.emit(self.key)
 
+    def keyPressEvent(self, ev):
+        if ev.key() in (Qt.Key_Return, Qt.Key_Enter, Qt.Key_Space) and getattr(self, "key", None):
+            SELECTION.picked.emit(self.key)
+            return
+        super().keyPressEvent(ev)
+
 
 class EntityCard(Selectable, QFrame):
     """Image + official English name + key stats + credit; tap to ask about it, ↗ opens its NiaMeowDB page."""
@@ -359,12 +380,15 @@ class EntityCard(Selectable, QFrame):
         super().__init__()
         from ..i18n import I18n
         self.setObjectName("Card")
-        self._init_selectable(key)
+        e = kb.get(key) or {}
+        self._init_selectable(key, e.get("name", key))
         self._t = t = I18n(lang)
         self.setToolTip(t("card_ask_tip"))
-        e = kb.get(key) or {}
         self.url = e.get("url")
         he = lang == "he"
+        # its own direction, from its own language: after a live switch an older card kept its Hebrew texts on the
+        # right while the chat's new direction moved its picture to the left
+        self.setLayoutDirection(Qt.RightToLeft if he else Qt.LeftToRight)
 
         row = QHBoxLayout(self)
         row.setContentsMargins(10, 8, 10, 8)
@@ -412,6 +436,7 @@ class EntityCard(Selectable, QFrame):
             link = QToolButton(objectName="Icon", text=theme.ICON["open"])
             link.setCursor(Qt.PointingHandCursor)
             link.setToolTip("NiaMeowDB")
+            link.setAccessibleName("NiaMeowDB")
             link.clicked.connect(lambda: webbrowser.open(self.url))
             bl.addWidget(link)
         if key.startswith("item/"):
@@ -424,6 +449,7 @@ class EntityCard(Selectable, QFrame):
         copy = QToolButton(objectName="Icon", text=theme.ICON["copy"])
         copy.setCursor(Qt.PointingHandCursor)
         copy.setToolTip(self._t("copy_card"))
+        copy.setAccessibleName(self._t("copy_card"))
         copy.clicked.connect(self.copy_image)
         bl.addWidget(copy)
         bl.addStretch(1)
@@ -437,31 +463,52 @@ class EntityCard(Selectable, QFrame):
         self._star.style().unpolish(self._star)
         self._star.style().polish(self._star)
         self._star.setToolTip(self._t("wish_remove" if on else "wish_add"))
+        self._star.setAccessibleName(self._t("wish_remove" if on else "wish_add"))
 
     def copy_image(self):
         """The card as a picture on the clipboard, ready to paste in Discord or WhatsApp."""
         from PySide6.QtGui import QCursor
         from PySide6.QtWidgets import QApplication, QToolTip
         self._buttons.setVisible(False)          # the picture shows the card, not its buttons
+        was = self.property("selected")
         self.setProperty("selected", "false")
         self.style().unpolish(self)
         self.style().polish(self)
         pm = on_solid_background(self.grab(), 14)
         self._buttons.setVisible(True)
+        # still tagged for the question: its orange border comes back (it stayed off until the next tag change)
+        self.setProperty("selected", was)
+        self.style().unpolish(self)
+        self.style().polish(self)
         QApplication.clipboard().setPixmap(pm)
         QToolTip.showText(QCursor.pos(), self._t("copied"), self)
+
+    # the knowledge base's own prop names (data/kb/index.json): a monster's level, HP and EXP; an item's level
+    # requirement, attack and defense. ("Required Level", "Attack" and "Defense" are no KB keys: 2,147 of 2,726 item
+    # cards had no stat line at all, and none showed its level requirement.)
+    MONSTER_STATS = ("Level", "HP", "EXP")
+    ITEM_STATS = ("Level Requirement", "Weapon Attack", "Magic Attack", "Weapon Defense", "Magic Defense")
+    ITEM_BONUSES = ("STR", "DEX", "INT", "LUK", "HP", "MP", "Accuracy", "Avoidability", "Speed", "Jump")
 
     @staticmethod
     def _stats(e: dict, t) -> str:
         props = e.get("props") or {}
+        item = e.get("category") == "item"
+        keys = (EntityCard.ITEM_STATS + EntityCard.ITEM_BONUSES) if item else EntityCard.MONSTER_STATS
         bits = []
-        for k in ("Level", "HP", "EXP", "Required Level", "Attack", "Weapon Attack", "Magic Attack", "Defense"):
-            if k in props and props[k] not in (None, "", 0):
-                label = {"Level": t("card_level"), "Required Level": t("card_req_level")}.get(k, k)
-                # an English label with its value is one left-to-right piece ("HP: 233"): in a Hebrew line its colon
-                # otherwise lands on the wrong side ("233 :HP", seen live)
-                # (+ RLM: two English pieces side by side would otherwise merge into one run, in English order)
-                bits.append(f"‪{label}: {props[k]}‬‏" if label.isascii() else f"{label}: {props[k]}")
+        for k in keys:
+            v = props.get(k)
+            if v in (None, "", 0, "0"):
+                continue
+            label = {"Level": t("card_level"), "Level Requirement": t("card_req_level")}.get(k, k)
+            # an item's HP / STR is a bonus it gives: "HP +5", not the item's own "HP: 5"; a no-break space keeps a
+            # value on its label's line ("LUK" ended one line and its "+3" began the next)
+            sign = "" if str(v)[:1] in "+-" else "+"
+            text = f"{k} {sign}{v}" if item and k in EntityCard.ITEM_BONUSES else f"{label}: {v}"
+            # an English label with its value is one left-to-right piece ("HP: 233"): in a Hebrew line its colon
+            # otherwise lands on the wrong side ("233 :HP", seen live)
+            # (+ RLM: two English pieces side by side would otherwise merge into one run, in English order)
+            bits.append(f"‪{text}‬‏" if label.isascii() else text)
             if len(bits) >= 3:
                 break
         return " · ".join(bits)
@@ -522,6 +569,10 @@ class ProfileCard(QFrame):
 
     def __init__(self):
         super().__init__(objectName="ProfileCard")
+        # Tab reaches the card and Enter / Space opens the character menu (switch, add, edit, delete were
+        # mouse-only); a click doesn't focus it, so the focus ring shows only for the keyboard
+        self.setFocusPolicy(Qt.TabFocus)
+        self.setProperty("focus_ring", True)
         row = QHBoxLayout(self)
         row.setContentsMargins(10, 8, 12, 8)
         row.setSpacing(10)
@@ -545,7 +596,7 @@ class ProfileCard(QFrame):
         from PySide6.QtWidgets import QToolButton
         from . import theme
         self.refresh = QToolButton(objectName="Refresh", text=theme.ICON["refresh"])
-        self.refresh.setCursor(Qt.PointingHandCursor)
+        self.refresh.setCursor(Qt.PointingHandCursor)       # (its name and tooltip come from the chat's language)
         self.refresh.clicked.connect(self.refresh_requested.emit)
         row.addWidget(self.refresh, 0, Qt.AlignVCenter)
         from PySide6.QtWidgets import QPushButton
@@ -578,6 +629,7 @@ class ProfileCard(QFrame):
 
     def show_character(self, c, avatar_path, kb, rtl: bool) -> None:
         align = (Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter
+        self.setAccessibleDescription(f"{c.name} · Lv. {c.level} · {c.job_label}")
         self.name.setText(bidi.plain(c.name, rtl))
         self.name.setAlignment(align)
         self.meta.setText(f"Lv. {c.level} · {c.job_label}")
@@ -588,6 +640,12 @@ class ProfileCard(QFrame):
         if e.button() == Qt.LeftButton and self.rect().contains(e.position().toPoint()):
             self.clicked.emit()
 
+    def keyPressEvent(self, e):
+        if e.key() in (Qt.Key_Return, Qt.Key_Enter, Qt.Key_Space):
+            self.clicked.emit()
+            return
+        super().keyPressEvent(e)
+
 
 class SplitMenu(QMenu):
     """A menu whose card rows (QWidgetAction) stand on their own above it: the panel is drawn only behind the
@@ -596,6 +654,21 @@ class SplitMenu(QMenu):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setObjectName("SplitMenu")
+        self._lit: dict = {}          # action -> the widget that lights up when the arrow keys reach it
+        self.hovered.connect(self._light)
+
+    def add_highlight(self, action, widget) -> None:
+        """`widget` shows as hovered while the arrow keys are on `action` (its look came from :hover alone, so
+        the keyboard's row didn't show)."""
+        self._lit[action] = widget
+
+    def _light(self, action) -> None:
+        for a, w in self._lit.items():
+            on = "true" if a is action else "false"
+            if w.property("active") != on:
+                w.setProperty("active", on)
+                w.style().unpolish(w)
+                w.style().polish(w)
 
     def add_row(self, icon_name: str, text: str, on_click, enabled: bool = True) -> None:
         """A menu line laid out by us: in Hebrew the icon on the right and the text right beside it (a QMenu
@@ -621,13 +694,19 @@ class SplitMenu(QMenu):
         hl.setContentsMargins(5, 0, 5, 0)
         hl.addWidget(row)
 
+        a = QWidgetAction(self)
+        a.setDefaultWidget(holder)
+        a.setEnabled(enabled)
+        # the action runs it: Enter on the row the arrow keys reached triggers it (only a click did), and a click
+        # triggers it too, so both take one way
+        a.triggered.connect(lambda _=False: on_click())
+
         def clicked(e, row=row):
             if e.button() == Qt.LeftButton and row.isEnabled() and row.rect().contains(e.position().toPoint()):
                 self.close()
-                on_click()
+                a.trigger()
         row.mouseReleaseEvent = clicked
-        a = QWidgetAction(self)
-        a.setDefaultWidget(holder)
+        self.add_highlight(a, row)
         self.addAction(a)
 
     def paintEvent(self, e):
@@ -751,8 +830,8 @@ class EntityTile(Selectable, QFrame):
 
     def __init__(self, kb, key: str):
         super().__init__(objectName="Tile")
-        self._init_selectable(key)
         e = kb.get(key) or {}
+        self._init_selectable(key, e.get("name", key))
         self.url = e.get("url")
         self.setToolTip(e.get("name", key))
         row = QHBoxLayout(self)
@@ -790,15 +869,18 @@ class EntityTile(Selectable, QFrame):
 class TileGrid(QFrame):
     """Two-column grid of item tiles with a credit line."""
 
-    def __init__(self, kb, keys: list[str], title: str = ""):
+    def __init__(self, kb, keys: list[str], title: str = "", rtl: bool | None = None):
         super().__init__(objectName="TileGrid")
         from PySide6.QtWidgets import QApplication, QGridLayout
         from .. import bidi
+        if rtl is None:
+            rtl = QApplication.layoutDirection() == Qt.RightToLeft
+        # its own direction, from the language its title is in (a live switch mirrored it under a Hebrew title)
+        self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
         outer = QVBoxLayout(self)
         outer.setContentsMargins(8, 8, 8, 6)
         outer.setSpacing(4)
         if title:
-            rtl = QApplication.layoutDirection() == Qt.RightToLeft
             t = QLabel(bidi.plain(title, rtl), objectName="TileGridTitle")
             t.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
             t.setContentsMargins(4, 0, 4, 2)
@@ -819,12 +901,13 @@ class DropGroupCard(QFrame):
         super().__init__(objectName="TileGrid")
         from PySide6.QtWidgets import QApplication, QGridLayout
         rtl = QApplication.layoutDirection() == Qt.RightToLeft
+        self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)     # (as TileGrid)
         e = kb.get(monster) or {}
         self.url = e.get("url")
         outer = QVBoxLayout(self)
         outer.setContentsMargins(10, 8, 10, 8)
         outer.setSpacing(6)
-        header = _GroupHeader(monster)
+        header = _GroupHeader(monster, e.get("name", monster))
         outer.addWidget(header)
         head = QHBoxLayout(header)
         head.setContentsMargins(4, 2, 4, 2)
@@ -857,6 +940,6 @@ class DropGroupCard(QFrame):
 
 
 class _GroupHeader(Selectable, QFrame):
-    def __init__(self, key: str):
+    def __init__(self, key: str, name: str = ""):
         super().__init__(objectName="GroupHeader")
-        self._init_selectable(key)
+        self._init_selectable(key, name)

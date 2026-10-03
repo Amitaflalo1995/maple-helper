@@ -130,6 +130,11 @@ class VoiceController(QObject):
             out = self.transcriber.transcribe(audio)
             self.text.emit(out)
         except Exception as e:
-            self.failed.emit(str(e))
+            # the model isn't on disk after the attempt: its one-time download failed (offline, most often), and
+            # "try again in a moment" would only fail again
+            self.failed.emit(("download: " if not self.transcriber.downloaded() else "") + str(e))
         finally:
-            self.state.emit("idle")
+            # a new recording may have started while this clip was transcribed: the mic is live, and "idle" turned
+            # its light and the "listening" hint off while it kept recording
+            if self._stream is None:
+                self.state.emit("idle")
