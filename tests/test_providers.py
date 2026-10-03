@@ -28,9 +28,46 @@ class TestRegistry:
     ("You've hit your usage limit. Upgrade to Pro or try again later.", "usage_limit"),
     ("getaddrinfo ENOTFOUND api.anthropic.com", "offline"),
     ("something unexpected", None),
+    # a sign-in that ran out, word for word from codex.exe and grok.exe
+    ("Your access token could not be refreshed because your refresh token has expired. Please log out and sign in "
+     "again.", "not_logged_in"),
+    ("Your access token could not be refreshed because your refresh token was already used. Please log out and sign "
+     "in again.", "not_logged_in"),
+    ("Your access token could not be refreshed because your refresh token was revoked. Please log out and sign in "
+     "again.", "not_logged_in"),
+    ("Your access token could not be refreshed because you have since logged out or signed in to another account. "
+     "Please sign in again.", "not_logged_in"),
+    ("Your auth token is invalid or expired. Run `grok login` to re-authenticate.", "not_logged_in"),
+    # offline, in the Go (Antigravity) and Rust (Codex) CLIs' words
+    ('Eligibility check failed: Post "https://daily-cloudcode-pa.googleapis.com/v1internal:loadCodeAssist": '
+     "proxyconnect tcp: dial tcp: lookup offline.invalid: no such host", "offline"),
+    ("dial tcp: lookup daily-cloudcode-pa.googleapis.com: no such host", "offline"),
+    ("dial tcp 142.250.75.10:443: connectex: A socket operation was attempted to an unreachable network.", "offline"),
+    ("Reconnecting... 5/5 (workspace routing discovery failed)", "offline"),
+    ("failed to refresh available models: Connection failed: error sending request for url "
+     "(https://chatgpt.com/backend-api/codex/models)", "offline"),
+    ("error sending request: client error (Connect): dns error: No such host is known. (os error 11001)", "offline"),
 ])
 def test_classify_error(text, kind):
     assert base.classify_error(text) == kind
+
+
+def test_expired_sign_ins_and_offline_reach_the_player_through_each_cli():
+    """End to end through each CLI's own parser: not "Something went wrong" (api_error)."""
+    from maplehelper.providers import gemini, grok
+    expired = "Your access token could not be refreshed because your refresh token has expired. Please log out " \
+              "and sign in again."
+    events = [json.dumps({"type": "error", "message": expired}), json.dumps({"type": "turn.failed",
+                                                                             "error": {"message": expired}})]
+    assert codex.parse_events(events).error == "not_logged_in"
+    grok_expired = {"type": "result", "subtype": "error_during_execution", "is_error": True,
+                    "errors": ["Your auth token is invalid or expired. Run `grok login` to re-authenticate."]}
+    assert grok.to_result("", grok_expired, "", None).error == "not_logged_in"
+    offline = [json.dumps({"type": "turn.failed", "error": {"message": "Connection failed: error sending request"}})]
+    assert codex.parse_events(offline).error == "offline"
+    agy = {"status": "ERROR", "error": 'Eligibility check failed: Post "https://x": proxyconnect tcp: dial tcp: '
+                                      "lookup offline.invalid: no such host"}
+    assert gemini.to_result("", agy, "", None).error == "offline"
 
 
 class TestCodexCommand:

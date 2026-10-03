@@ -280,16 +280,29 @@ def http_ok(url: str, headers: dict) -> bool:
         return False
 
 
+# A sign-in that ran out, in each CLI's own words: Codex "Your access token could not be refreshed ... Please log
+# out and sign in again." (and "...Please sign in again."), Grok "Your auth token is invalid or expired. Run
+# `grok login` to re-authenticate." Without them the player got "Something went wrong. Try again." forever.
+SIGNED_OUT = ("not logged in", "please run /login", "invalid api key", "invalid_api_key", "401 unauthorized",
+              "authentication", "sign in again", "log out and sign in", "access token could not be refreshed",
+              "re-authenticate", "token is invalid or expired")
+# No connection: Node's words (Claude Code) and the Go (Antigravity: "dial tcp: lookup ...: no such host",
+# "proxyconnect tcp", "connectex") and Rust (Codex: "Connection failed: error sending request ... dns error")
+# ones. Checked after sign-in and limits: those messages can carry a URL or a "request" too.
+OFFLINE = ("enotfound", "econnrefused", "network", "fetch failed", "no such host", "dial tcp", "connectex",
+           "proxyconnect", "dns error", "error sending request", "connection failed", "getaddrinfo",
+           "workspace routing discovery failed")
+
+
 def classify_error(text: str) -> str | None:
     t = text.lower()
     if "credit balance" in t or "insufficient_quota" in t or "billing" in t:
         return "no_credit"          # an API key with no money on it (its check passed: the key itself is valid)
-    if ("not logged in" in t or "please run /login" in t or "invalid api key" in t or "invalid_api_key" in t
-            or "401 unauthorized" in t or "authentication" in t):
+    if any(s in t for s in SIGNED_OUT):
         return "not_logged_in"
     if "usage limit" in t or "rate limit" in t or "limit reached" in t or "resets" in t:
         return "usage_limit"
-    if "enotfound" in t or "econnrefused" in t or "network" in t or "fetch failed" in t:
+    if any(s in t for s in OFFLINE):
         return "offline"
     return None
 
