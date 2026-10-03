@@ -1,6 +1,9 @@
 """UI strings in Hebrew and English."""
 from __future__ import annotations
 
+import re
+import sys
+
 STRINGS = {
     "app_tagline": {"he": "העוזר האישי שלכם ב-MapleStory Classic", "en": "Your personal MapleStory Classic assistant"},
     "disclaimer": {"he": "Maple Helper רק רואה את המסך, כמו צילום מסך. הוא לא נוגע בקבצים או בזיכרון של המשחק, "
@@ -18,6 +21,8 @@ STRINGS = {
     "recapture": {"he": "צילום מחדש של מסך המשחק", "en": "Retake the game screenshot"},
     "voice_mic_failed": {"he": "לא הצלחתי להפעיל את המיקרופון. בדקו שהוא מחובר ושיש ל-Maple Helper הרשאה אליו (הגדרות Windows > פרטיות > מיקרופון).",
                          "en": "I couldn't start the microphone. Check that it's connected and that Maple Helper may use it (Windows Settings > Privacy > Microphone)."},
+    "voice_mic_failed_mac": {"he": "לא הצלחתי להפעיל את המיקרופון. בדקו שהוא מחובר ושיש ל-Maple Helper הרשאה אליו (הגדרות המערכת > פרטיות ואבטחה > מיקרופון).",
+                             "en": "I couldn't start the microphone. Check that it's connected and that Maple Helper may use it (System Settings > Privacy & Security > Microphone)."},
     "other_char_new": {"he": "במשחק מופיעה דמות אחרת, {name}, ולא {current}. את {current} לא שיניתי.",
                        "en": "The game shows another character, {name}, not {current}. I left {current} as it is."},
     "other_char_add": {"he": "הוספת {name} כדמות חדשה", "en": "Add {name} as a new character"},
@@ -216,8 +221,6 @@ STRINGS = {
     "hotkey_toggle": {"he": "מקש פתיחה/סגירה", "en": "Open/close key"},
     "hotkey_voice": {"he": "מקש דיבור (לחיצה להתחלה ולסיום)", "en": "Talk key (press to start and stop)"},
     "appearance": {"he": "מראה", "en": "Appearance"},
-    "appearance_dark": {"he": "כהה (זכוכית שחורה)", "en": "Dark (black glass)"},
-    "appearance_light": {"he": "בהיר (זכוכית לבנה)", "en": "Light (white glass)"},
     "minimize": {"he": "מזעור", "en": "Minimize"},
     "close_chat": {"he": "סגירה (F9 פותח שוב)", "en": "Close (F9 opens it again)"},
     "sec_appearance": {"he": "תצוגה", "en": "Display"},
@@ -401,8 +404,8 @@ STRINGS = {
                              "and get a note when a database update changes it."},
     "inv_found": {"he": "זיהיתי {n} פריטים בתיק:", "en": "I recognized {n} items in the inventory:"},
     "inv_found_one": {"he": "זיהיתי פריט אחד בתיק:", "en": "I recognized 1 item in the inventory:"},
-    "inv_not_found": {"he": "לא מצאתי את חלון האינבנטורי בצילום. פתחו אותו במשחק (מקש I) ונסו שוב.",
-                      "en": "I couldn't find the inventory window in the screenshot. Open it in game (I key) and try again."},
+    "inv_not_found": {"he": "לא מצאתי את חלון האינבנטורי בצילום. פתחו אותו במשחק ונסו שוב.",
+                      "en": "I couldn't find the inventory window in the screenshot. Open it in game and try again."},
     "wish_ask": {"he": "איפה הכי כדאי לי לצוד {monster} כדי להשיג {item}? כמה בערך צריך להרוג?",
                  "en": "Where's the best place for me to hunt {monster} to get {item}? About how many kills does it take?"},
     "wish_dropped_by": {"he": "מפילים:", "en": "Dropped by:"},
@@ -413,6 +416,8 @@ STRINGS = {
     "copy_card": {"he": "העתקה כתמונה, לשיתוף עם חברים", "en": "Copy as a picture to share"},
     "copied": {"he": "✓ הועתק. אפשר להדביק בדיסקורד או בוואטסאפ (Ctrl+V)",
                "en": "✓ Copied. Paste it in Discord or WhatsApp (Ctrl+V)"},
+    "copied_mac": {"he": "✓ הועתק. אפשר להדביק בדיסקורד או בוואטסאפ (⌘V)",
+                   "en": "✓ Copied. Paste it in Discord or WhatsApp (⌘V)"},
     "quick_drops": {"he": "{name} מפיל {n} פריטים:", "en": "{name} drops {n} items:"},
     "quick_not_in_game": {"he": "לפי המאגר, {name} עוד לא נמצא במשחק (לא מאושר במפה שזמינה כרגע).",
                           "en": "According to the knowledge base, {name} isn't in the game yet (not on any map that is out now)."},
@@ -454,7 +459,7 @@ STRINGS = {
     "stat_acc": {"he": "Accuracy (ACC)", "en": "Accuracy (ACC)"},
     "stat_dmg_min": {"he": "נזק מינימלי", "en": "Min damage"},
     "stat_dmg_max": {"he": "נזק מקסימלי", "en": "Max damage"},
-    "my_stats_hint": {"he": "את שלושת המספרים רואים בחלון ה-**Stat** במשחק (מקש **S**).\nהנזק שם הוא של **מכה רגילה**, בלי סקילים, אז גם מספרי המכות כאן הם למכות רגילות.", "en": "Find these three numbers in the game's **Stat** window (**S** key).\nThe damage there is one **basic attack**, without skills, so the hit counts here are for basic attacks too."},
+    "my_stats_hint": {"he": "את שלושת המספרים רואים בחלון ה-**Stat** במשחק.\nהנזק שם הוא של **מכה רגילה**, בלי סקילים, אז גם מספרי המכות כאן הם למכות רגילות.", "en": "Find these three numbers in the game's **Stat** window.\nThe damage there is one **basic attack**, without skills, so the hit counts here are for basic attacks too."},
     "my_stats_read": {"he": "לקרוא מצילום מסך (פתחו קודם את חלון ה-Stat)", "en": "Read from a screenshot (open the Stat window first)"},
     "train_need_stats": {"he": "**רוצים חישוב מדויק?** מלאו למטה ACC ונזק,\nותראו כמה פעמים תפגעו ובכמה מכות תהרגו.", "en": "**Want exact numbers?** Add your ACC and damage below\nto see your hit chance and hits per kill."},
     "train_none": {"he": "אין עדיין במאגר מפלצות קרובות ללבל שלכם.", "en": "The database has no monsters near your level yet."},
@@ -558,10 +563,8 @@ STRINGS = {
     "q_done_head": {"he": "סומנו כגמורים", "en": "Marked done"},
     "q_search": {"he": "חיפוש קווסט: שם, NPC, מפלצת או פריט", "en": "Search quests: name, NPC, monster or item"},
     "q_found": {"he": "**{n} מתוך {total} קווסטים** ב-Lv. {lv} מתאימים לחיפוש", "en": "**{n} of {total} quests** at Lv. {lv} match"},
-    "q_no_match": {"he": "אין קווסט כזה ברשימה שמתאימה לרמה שלך.", "en": "No quest like that in the list for your level."},
+    "q_no_match": {"he": "אין קווסט כזה ברשימה שמתאימה לרמה שלכם.", "en": "No quest like that in the list for your level."},
     "q_none": {"he": "אין כאן קווסטים כרגע.", "en": "No quests here right now."},
-    "q_needs": {"he": "צריך: {what}", "en": "Needs: {what}"},
-    "q_gets": {"he": "מקבלים: {what}", "en": "Rewards: {what}"},
     "q_after": {"he": "אחרי הקווסט {name}", "en": "After {name}"},
     "q_needs_head": {"he": "צריך:", "en": "Needs:"},
     "q_gets_head": {"he": "מקבלים:", "en": "Rewards:"},
@@ -597,7 +600,7 @@ STRINGS = {
     "exp_idle": {"he": "1. לוחצים **התחלת מדידה**\n2. משחקים כמה דקות\n3. לוחצים **לבדוק עכשיו**", "en": "1. Click **Start measuring**\n2. Play for a few minutes\n3. Click **Check now**"},
     "exp_hint": {"he": "המדידה קוראת את פס ה-EXP **מצילום מסך**, אז כדאי למדוד **לפחות 10 דקות**.\nכך יודעים אם מפה באמת משתלמת.", "en": "It reads the EXP bar **from a screenshot**, so measure for **at least 10 minutes**.\nThat's how you know if a map really pays."},
     "sell_title": {"he": "מה כדאי למכור?", "en": "What should I sell?"},
-    "sell_body": {"he": "פתחו את **האינבנטורי** במשחק (מקש **I**) ולחצו על הכפתור.\nהאפליקציה תצלם ותגיד לכל פריט:\n• **למכור ל-NPC**\n• **לשמור לקווסט**\n• **לשמור לקראפטינג**, למשל ל-Smithing או ל-Tailoring\n• **לשמור לציוד** שאפשר ללבוש\n• **למכור ב-Free Market**", "en": "Open your **inventory** in the game (**I** key) and click the button.\nThe app takes a screenshot and tells you, for each item:\n• **Sell to an NPC**\n• **Keep for a quest**\n• **Keep for crafting** (Smithing, Tailoring and more)\n• **Keep as gear** you can wear\n• **Sell on the Free Market**"},
+    "sell_body": {"he": "פתחו את **האינבנטורי** במשחק ולחצו על הכפתור.\nהאפליקציה תצלם ותגיד לכל פריט:\n• **למכור ל-NPC**\n• **לשמור לקווסט**\n• **לשמור לקראפטינג**, למשל ל-Smithing או ל-Tailoring\n• **לשמור לציוד** שאפשר ללבוש\n• **למכור ב-Free Market**", "en": "Open your **inventory** in the game and click the button.\nThe app takes a screenshot and tells you, for each item:\n• **Sell to an NPC**\n• **Keep for a quest**\n• **Keep for crafting** (Smithing, Tailoring and more)\n• **Keep as gear** you can wear\n• **Sell on the Free Market**"},
     "sell_go": {"he": "לבדוק את האינבנטורי", "en": "Check my inventory"},
     "sell_q": {"he": "תסתכל על האינבנטורי בצילום המסך ותמיין כל פריט שמופיע לאחת הקבוצות, עם כותרת לכל קבוצה:\n1. למכור ל-NPC (עם מחיר המכירה ל-NPC מהמאגר)\n2. לשמור לקווסט (איזה קווסט צריך אותו)\n3. לשמור לקראפטינג: חומרים שמשמשים במתכון של Smithing, Weaponcrafting, Tailoring, Woodcrafting, Leatherworking או Arcforge (תבדוק בדפי crafting במאגר, ותגיד לאיזה מתכון)\n4. לשמור לציוד שהדמות שלי יכולה ללבוש עכשיו או בקרוב\n5. למכור ב-Free Market (פריטים ששווים יותר משחקנים)\nתתחיל ממה שהכי כדאי למכור, וקצר.", "en": "Look at the inventory in the screenshot and sort every item shown into one group, with a heading per group:\n1. Sell to an NPC (with the NPC sell-back price from the knowledge base)\n2. Keep for a quest (which quest needs it)\n3. Keep for crafting: materials used in a Smithing, Weaponcrafting, Tailoring, Woodcrafting, Leatherworking or Arcforge recipe (check the crafting pages in the knowledge base, and say which recipe)\n4. Keep as gear my character can wear now or soon\n5. Sell on the Free Market (worth more to players)\nMost worth selling first, and short."},
     "shop_title": {"he": "רשימת קניות לפני גרינד", "en": "Shopping list before grinding"},
@@ -796,6 +799,8 @@ STRINGS = {
                       "en": "Tip: run the game in Borderless / Windowed Fullscreen so the chat can appear on top."},
     "ob_done_hint": {"he": "לחצו F9 בתוך המשחק כדי לפתוח ולסגור את הצ'אט.",
                      "en": "Press F9 in game to open and close the chat."},
+    "ob_done_hint_mac": {"he": "לחצו F9 בתוך המשחק כדי לפתוח ולסגור את הצ'אט (בלי fn אם הפעלתם מקשי F רגילים בהגדרות המערכת > מקלדת).",
+                         "en": "Press F9 in game to open and close the chat (without fn if you turned on standard function keys in System Settings > Keyboard)."},
     "hotkey_same": {"he": "אותו מקש לא יכול גם לפתוח את הצ'אט וגם להתחיל דיבור. בחרו מקש אחר לאחד מהם.",
                     "en": "One key can't both open the chat and start talking. Pick a different key for one of them."},
     "hotkey_taken": {"he": "המקש {key} תפוס על ידי תוכנה אחרת. בחרו מקש אחר בהגדרות.",
@@ -840,15 +845,33 @@ NBSP = " "
 # two-word English names: in a wrapped Hebrew line "Claude" at a line's end and "Code" at the next one's start
 # read as two things (and in RTL the halves swap sides), so their space is a no-break space
 WHOLE_NAMES = ("Maple Helper", "Claude Code")
+# and any short English run in a Hebrew line, not just the listed names: "Claude Pro", "Google AI Pro",
+# "Free Market", "Copy to Clipboard" split the same way, and so did names that come in through a placeholder.
+# Up to three words (a longer English run may wrap; one unbreakable block would overflow a narrow label); a
+# run may follow a Hebrew prefix hyphen ("ב-Free Market").
+_LATIN_WORD = r"[A-Za-z0-9][A-Za-z0-9.'’&+\-]*"
+_SHORT_RUN = re.compile(rf"(?<![A-Za-z0-9.'’&+])(?<![A-Za-z0-9]-)(?<![A-Za-z0-9.'’&+\-] ){_LATIN_WORD}(?: {_LATIN_WORD}){{1,2}}(?![A-Za-z0-9.'’&+\-]| [A-Za-z0-9])")
 
 
 def keep_names_whole(s: str) -> str:
     for name in WHOLE_NAMES:
         s = s.replace(name, name.replace(" ", NBSP))
-    return s
+    return _SHORT_RUN.sub(lambda m: m.group(0).replace(" ", NBSP) if re.search("[A-Za-z]", m.group(0)) else m.group(0), s)
+
+
+# macOS versions of a string ("<key>_mac"), picked by I18n: Mac paths and shortcuts (System Settings, ⌘V).
+# A listed set, not every "_mac" key: update_available_mac is a separate line next to update_available.
+MAC_VARIANTS = {"voice_mic_failed", "copied", "ob_done_hint"}
+# strings that teach a hotkey: on a Mac keyboard F9/F10 are media keys unless fn is held, so a Mac shows
+# "fn+F9" (the callers' .replace("F9", the chosen key) keeps the "fn+")
+FN_KEY_HINTS = {"input_placeholder", "voice_nothing", "mic_tip", "listening", "close_chat", "shot_hint_no_game",
+                "shot_hint_ready", "ob_done_hint"}
+_FKEY = re.compile(r"(?<![\w+])F(?:1[0-2]|[1-9])\b")
 
 
 class I18n:
+    mac = sys.platform == "darwin"
+
     def __init__(self, lang: str = "he"):
         self.lang = lang if lang in ("he", "en") else "he"
 
@@ -859,10 +882,21 @@ class I18n:
     def __call__(self, _key: str, **kw) -> str:
         if str(kw.get("n", "")) == "1" and f"{_key}_one" in STRINGS:
             _key = f"{_key}_one"         # "תוצאה אחת" / "1 result", not "1 תוצאות" / "1 results"
+        base = _key
+        if self.mac and _key in MAC_VARIANTS:
+            _key = f"{_key}_mac"
         s = STRINGS.get(_key, {}).get(self.lang) or STRINGS.get(_key, {}).get("en") or _key
         if self.lang == "he":
             s = keep_names_whole(s)
-        return s.format(**kw) if kw else s
+            # a short name that comes in through a placeholder ("Red Snail") is kept whole too; only a value that
+            # is nothing but that name: a longer one ("Tree Dungeon, Monkey Forest I") is a KB name bidi keeps
+            # whole by its exact spelling, and one with markup or an isolate is laid out already
+            kw = {k: v.replace(" ", NBSP) if isinstance(v, str) and _SHORT_RUN.fullmatch(v) and re.search("[A-Za-z]", v)
+                  else v for k, v in kw.items()}
+        s = s.format(**kw) if kw else s
+        if self.mac and base in FN_KEY_HINTS:
+            s = _FKEY.sub(lambda m: "fn+" + m.group(0), s)
+        return s
 
     def p(self, _key: str, provider: str | None, **kw) -> str:
         """The string for one AI provider: '<key>_<provider>' when it exists, else the shared '<key>'."""

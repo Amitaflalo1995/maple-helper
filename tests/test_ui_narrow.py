@@ -71,9 +71,9 @@ def test_orange_text_is_darker_on_light_glass():
     try:
         theme.set_mode("light")
         css = theme.stylesheet("Rubik", 13)
-        assert theme.accent_text() == "#C9620A"
+        assert theme.accent_text() == theme.ORANGE_TEXT_LIGHT
         link = css[css.index("QPushButton#Link, QPushButton#LinkDanger"):]
-        assert "color: #C9620A" in link.split("}")[0]
+        assert f"color: {theme.ORANGE_TEXT_LIGHT}" in link.split("}")[0]
         assert "stop:1 #F07A12" in css           # the orange fills stay the brand orange
         theme.set_mode("dark")
         assert theme.accent_text() == theme.ORANGE and theme.accent_text(deep=True) == theme.ORANGE_DEEP
