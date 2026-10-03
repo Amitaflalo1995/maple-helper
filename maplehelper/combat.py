@@ -65,6 +65,9 @@ _NOT_GRIND_MOB = re.compile(r"\(|\bFairy \d|Dummy", re.I)
 # a spawn this slow is a boss (the KB monster pages' "Respawn" column: Mano "1h-1h 30m", Jr. Balrog "3h",
 # Zombie Mushmom "1h-1h 30m"; field monsters come back in seconds, the slowest ones in 5-10m)
 BOSS_RESPAWN = 30 * 60
+# the training range: monsters this many levels below / above the player are training spots (spots(), and a KB
+# update's monster changes that matter to the player, recent.py)
+SPOT_BELOW, SPOT_ABOVE = 8, 6
 
 
 def special_monster(name: str) -> bool:
@@ -243,7 +246,7 @@ class Spot:
 
 
 def spots(kb, level: int, acc: int | None = None, dmg: tuple[int, int] | None = None, magic: bool = False,
-          below: int = 8, above: int = 6, n: int = 8) -> list[Spot]:
+          below: int = SPOT_BELOW, above: int = SPOT_ABOVE, n: int = 8) -> list[Spot]:
     """The best monsters to train on, best first: EXP per swing with your accuracy and damage.
 
     Without stats, monsters are ranked by EXP per HP near the player's level. The stat window's damage is a

@@ -23,7 +23,9 @@ _SECTION_END = re.compile(r"^(Level cap|Changes since|Preparing for launch|Not a
 _MAP_LOCATION = re.compile(r"^Location (.+?) / (.+?)\s*$", re.M)
 _NPC_LOCATION = re.compile(r"^Location\n(.+?)\s*$", re.M)
 # an item page's sources and the headings that end them
-_ITEM_SOURCES = ("MSEA Reference Drops", "Where to buy", "Quest Reward", "Quests", "Craftable", "Cash Shop")
+# ("Dropped By" opens with the community's own list, the monsters players saw drop it in Classic; then the MSEA one)
+_ITEM_SOURCES = ("Dropped By", "MSEA Reference Drops", "Where to buy", "Quest Reward", "Quests", "Craftable",
+                 "Cash Shop")
 _ITEM_STOP = re.compile(r"^(Free Market Prices|Dropped By|Needed By|Recipes|Ingredients|Change history|← Previous|"
                         r"Safe to Sell\?.*|(Similar|Compare) .* items|" + "|".join(map(re.escape, _ITEM_SOURCES)) + ")$")
 _SHOP_PLACE = re.compile(r"^(.+?): (.+?) · (.+)$")          # "Victoria Road: Perion Department Store · Perion"
@@ -205,7 +207,8 @@ class Availability:
 
     def item_open(self, key: str) -> bool:
         """An item the KB confirms a player can hold now: at least one source of it is in the game. Sources, all
-        read from the KB: a monster that drops it and is open (its monster page, or the item page's MSEA drop list),
+        read from the KB: a monster that drops it and is open (its monster page, or the item page's community or MSEA
+        drop list),
         a shop in a released place ("Where to buy"), an open quest that gives it ("Quest Reward") or asks for it
         ("Quests"), a crafting recipe ("Craftable"), or the Cash Shop selling it. An item with none (Return Scroll
         to Orbis, Dark Jr. Yeti Skin) is not in the game."""
@@ -246,7 +249,7 @@ class Availability:
         lines = [s.strip() for s in self.kb.page(key).splitlines()]
         monsters = self._names_by_category["monster"]
         for head, body in _item_sections(lines):
-            if head == "MSEA Reference Drops":
+            if head in ("Dropped By", "MSEA Reference Drops"):
                 if any(self.monster_key_open(m) for s in body for m in monsters.get(s.lower(), ())):
                     return True
             elif head == "Where to buy":

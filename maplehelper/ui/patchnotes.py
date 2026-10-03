@@ -5,8 +5,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea, QVBoxLayout, QWidget
 
-from .. import bidi
-from ..i18n import STRINGS, I18n
+from .. import bidi, recent
+from ..i18n import NBSP, STRINGS, I18n
 from ..kb import KnowledgeBase
 from .controls import Section, rtl_buttons
 from .glass import GlassDialog
@@ -22,6 +22,21 @@ def summary(t: I18n, entries: list[dict]) -> str:
     """'3 new, 12 changed' over one or more updates."""
     total = totals(entries)
     return ", ".join(t(f"pn_n_{k}", n=total[k]) for k in KINDS if total[k])
+
+
+def update_notice(t: I18n, entries: list[dict], kb, char=None, wished=()) -> str:
+    """The chat's note about a KB update: the changes that affect the active character first, by name
+    ("3 database changes affect you: Long Sword, Ribbon Pig, Snail Shell"), then how many others."""
+    mine, rest = recent.split(entries, kb, char, wished)
+    if not mine:
+        return t("patch_notes_summary", summary=summary(t, entries))
+    # each name one unbreakable block: "Fire Boar" wrapped as "Fire" / "Boar" at the end of a Hebrew line
+    names = [bidi.ltr_block((r.get("name") or r.get("key", "")).replace(" ", NBSP), t.rtl) for _, _, r in mine[:3]]
+    if len(mine) > 3:
+        names.append(t("pn_more", n=len(mine) - 3))
+    text = t("patch_notes_affects", n=len(mine), names=", ".join(names))
+    more = summary(t, rest)
+    return text + ("\n" + t("pn_and_more", summary=more) if more else "")
 
 
 def totals(entries: list[dict]) -> dict[str, int]:
@@ -149,8 +164,13 @@ class WhatsNewDialog(GlassDialog):
 
 
 class PatchNotesDialog(GlassDialog):
-    def __init__(self, entries: list[dict], lang: str, stylesheet: str, kb: KnowledgeBase):
+    """char / wished: the active character and its wishlist. The changes that matter to them (recent.split: gear for
+    their class and level, monsters in their training range, wished items) come first, the rest under them."""
+
+    def __init__(self, entries: list[dict], lang: str, stylesheet: str, kb: KnowledgeBase, char=None,
+                 wished=()):
         self.entries = entries        # (opened again as it is after a language or theme switch)
+        self.char, self.wished = char, list(wished or ())
         self.t = t = I18n(lang or "he")
         super().__init__(t("patch_notes"), t.rtl)
         self.kb = kb
@@ -172,7 +192,18 @@ class PatchNotesDialog(GlassDialog):
             empty = QLabel(bidi.plain(t("patch_notes_empty"), t.rtl), objectName="DialogBody")
             empty.setWordWrap(True)
             lay.addWidget(empty)
-        for e in entries:
+        mine, rest = recent.split(entries, kb, char, self.wished) if (char or self.wished) else ([], entries)
+        self.mine = mine
+        if mine:
+            box = QVBoxLayout()
+            box.setSpacing(8)
+            box.addWidget(QLabel(bidi.plain(t("pn_affects", n=len(mine)), t.rtl), objectName="ProfileName"))
+            for reason, kind, r in mine[:SHOWN]:
+                box.addWidget(self._card(kind, r, reason))
+            lay.addLayout(box)
+            if any(any((e.get("counts") or {}).get(k) for k in KINDS) for e in rest):
+                lay.addWidget(QLabel(bidi.plain(t("pn_more_changes"), t.rtl), objectName="ProfileName"))
+        for e in rest:
             self._entry(lay, e)
         lay.addStretch(1)
 
@@ -188,11 +219,30 @@ class PatchNotesDialog(GlassDialog):
         outer.addLayout(row)
         rtl_buttons(self, t.rtl)
 
+    def _card(self, kind: str, r: dict, reason: str = "") -> QWidget:
+        """A changed entry's card: what changed in it; a new, updated or removed entry's own card."""
+        t, rtl = self.t, self.t.rtl
+        sub = _category(t, r.get("category", ""))
+        if reason:
+            sub += " · " + t(f"pn_why_{reason}")          # why it is among the changes that affect the player
+        if kind == "changed":
+            # "Weapon Attack: 30 → 33 (COT2 → Launch)" reads left to right even in Hebrew (the arrow points from old
+            # to new), with the builds when the page's change history shows that very change
+            rc = recent.Recent(r["key"], r.get("name") or r["key"], "", {f: [a, b] for f, a, b in r.get("props", [])},
+                               list(r.get("drops_added") or []), list(r.get("drops_removed") or []),
+                               r.get("old_name") or "")
+            return ChangeCard(self.kb, r, sub, recent.lines(t, self.kb, rc), rtl)
+        if self.kb.get(r["key"]) and not reason:
+            return EntityCard(self.kb, r["key"], t.lang)     # exactly the chat's card
+        return ChangeCard(self.kb, r, sub, [], rtl)
+
     def _entry(self, lay: QVBoxLayout, e: dict):
         t, rtl = self.t, self.t.rtl
+        counts = e.get("counts") or {}
+        if not any(counts.get(k, len(e.get(k) or [])) for k in KINDS):
+            return            # every change of this update is among the player's own, above
         title = QLabel(bidi.plain(t("pn_update", date=_date(e)), rtl), objectName="ProfileName")
         lay.addWidget(title)
-        counts = e.get("counts") or {}
 
         def section(kind: str, rows: list[dict], card_fn):
             n = counts.get(kind, len(rows))
@@ -209,23 +259,5 @@ class PatchNotesDialog(GlassDialog):
                 box.addWidget(more)
             lay.addLayout(box)
 
-        def simple(r):
-            if self.kb.get(r["key"]):
-                return EntityCard(self.kb, r["key"], t.lang)     # exactly the chat's card
-            return ChangeCard(self.kb, r, _category(t, r.get("category", "")), [], rtl)
-
-        def changed(r):
-            # "HP: 45 → 50" reads left to right even in Hebrew (the arrow must point from old to new)
-            lines = [f"{bidi.LRE}{f}: {_value(a)} → {_value(b)}{bidi.PDF}" for f, a, b in r.get("props", [])]
-            if r.get("drops_added"):
-                lines.append(t("pn_drops_added", items=", ".join(r["drops_added"])))
-            if r.get("drops_removed"):
-                lines.append(t("pn_drops_removed", items=", ".join(r["drops_removed"])))
-            if r.get("old_name"):
-                lines.append(t("pn_renamed", name=r["old_name"]))
-            return ChangeCard(self.kb, r, _category(t, r.get("category", "")), lines, rtl)
-
-        section("added", e.get("added", []), simple)
-        section("changed", e.get("changed", []), changed)
-        section("updated", e.get("updated", []), simple)
-        section("removed", e.get("removed", []), simple)
+        for kind in KINDS:
+            section(kind, e.get(kind, []), lambda r, kind=kind: self._card(kind, r))
