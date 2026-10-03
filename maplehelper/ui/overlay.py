@@ -656,6 +656,12 @@ class Overlay(QWidget):
         self.version_label.show()
         self.beta_badge.setText("BETA")
         self.beta_badge.show()
+        buttons = (self.history_btn, self.tools_btn, self.guides_btn, self.wish_btn, self.settings_btn, self.min_btn,
+                   self.close_btn)
+        for b in buttons:
+            # a low minimum, so the header never holds the chat wider than 470 px; full size when there's room
+            b.setMinimumWidth(24)
+            b.setMaximumWidth(16777215)
         tb.setSpacing(8)
         for step in ("tight", "version", "badge", "beta", "nobeta", "done"):
             tb.invalidate()
@@ -664,7 +670,9 @@ class Overlay(QWidget):
             if step == "version":
                 self.version_label.hide()
             elif step == "tight":
-                tb.setSpacing(3)          # the header's buttons closer together
+                tb.setSpacing(3)          # the header's buttons closer together, and a little narrower: at the
+                for b in buttons:         # chat's narrowest (470 px) the version then stays beside BETA
+                    b.setFixedWidth(26)
             elif step == "badge":
                 self.saver_badge.setText("🍃")
             elif step == "beta":
