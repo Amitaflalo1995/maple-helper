@@ -415,3 +415,26 @@ def test_claude_found_beside_an_npm_shim(tmp_path, monkeypatch):
     monkeypatch.setattr(claude, "find_windows_exe", lambda *a: None)
     monkeypatch.setattr(base.shutil, "which", lambda _n: str(tmp_path / "claude.cmd"))
     assert claude.find_claude() == str(exe)
+
+
+class TestInstaller:
+    """The official installers run in the background; the app shows their progress and errors (no console)."""
+
+    def test_commands(self):
+        win = base.installer_command("irm https://x/install.ps1 | iex", "curl x | bash", platform="win32")
+        assert win[:2] == ["powershell", "-NoProfile"] and "-NonInteractive" in win
+        assert "irm https://x/install.ps1 | iex" in win[-1] and "UTF8" in win[-1] and win[-1].endswith("exit 0")
+        assert base.installer_command("w", "curl x | bash", platform="darwin") == \
+            ["/bin/bash", "-c", "set -o pipefail; curl x | bash"]
+
+    @pytest.mark.skipif(__import__("sys").platform != "win32", reason="runs PowerShell")
+    @pytest.mark.parametrize("cmd,code,last", [
+        ("Write-Output 'Downloading...'; Write-Output 'Installed!'", 0, "Installed!"),
+        ("throw 'Failed to download manifest.'", 1, "ERROR: Failed to download manifest."),
+        ("Write-Error 'Installation failed (exit code 3)'; exit 3", 3, "ERROR: Installation failed (exit code 3)"),
+        ("Set-StrictMode -Version Latest; Write-Output 'done'", 0, "done"),     # strict mode left on (agy's)
+    ])
+    def test_runs_hidden_and_reports(self, cmd, code, last):
+        inst = base.Installer(cmd, "true")
+        assert inst.done.wait(60)
+        assert inst.code == code and inst.status() == last

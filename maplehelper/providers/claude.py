@@ -18,7 +18,7 @@ import time
 from pathlib import Path
 
 from .. import usage
-from .base import CREATE_NO_WINDOW, Provider, RawResult, classify_error, child_env, find_posix, \
+from .base import CREATE_NO_WINDOW, Installer, Provider, RawResult, classify_error, child_env, find_posix, \
     find_windows_exe, http_ok, open_login, run_installer
 
 log = logging.getLogger(__name__)
@@ -105,7 +105,7 @@ class Claude(Provider):
         exe = find_claude()
         return open_login(exe, ["auth", "login"], env()) if exe else None
 
-    def install(self) -> subprocess.Popen:
+    def install(self) -> Installer:
         return run_installer(INSTALL_CMD, INSTALL_CMD_MAC)
 
     def test_api_key(self, key: str) -> bool:

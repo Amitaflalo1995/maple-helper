@@ -15,7 +15,6 @@ log = logging.getLogger(__name__)
 
 # no console window flashing up on Windows; elsewhere creationflags must stay 0
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
-CREATE_NEW_CONSOLE = 0x00000010 if sys.platform == "win32" else 0
 
 # API keys live in Windows Credential Manager / the macOS Keychain, never in plain files.
 KEYRING_SERVICE = "MapleHelper"
@@ -76,16 +75,6 @@ def child_env(dirs: list[str], env: dict | None = None) -> dict:
         extra = [str(Path(d).expanduser()) for d in dirs]
         env["PATH"] = os.pathsep.join([env.get("PATH") or "/usr/bin:/bin"] + extra)
     return env
-
-
-def _applescript_string(text: str) -> str:
-    return '"' + text.replace("\\", "\\\\").replace('"', '\\"') + '"'
-
-
-def in_terminal(command: str) -> subprocess.Popen:
-    """macOS: run a shell command in a new Terminal window (the player sees progress and prompts)."""
-    return subprocess.Popen(["osascript", "-e", f"tell application \"Terminal\" to do script {_applescript_string(command)}",
-                             "-e", 'tell application "Terminal" to activate'])
 
 
 _login: subprocess.Popen | None = None
@@ -151,13 +140,69 @@ def login_failed(p: subprocess.Popen | None) -> bool:
     return p is not None and p.poll() is not None and p.returncode != 0
 
 
-def run_installer(win_cmd: str, mac_cmd: str) -> subprocess.Popen:
-    """Run an official installer in a visible console so the player sees its progress."""
-    if sys.platform == "darwin":
-        return in_terminal(f"{mac_cmd}; echo; echo 'Done - you can close this window.'")
-    return subprocess.Popen(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command",
-                             f"{win_cmd}; Write-Host ''; Write-Host 'Done - you can close this window.'; pause"],
-                            creationflags=CREATE_NEW_CONSOLE)
+ANSI = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]")
+
+
+def installer_command(win_cmd: str, mac_cmd: str, platform: str = sys.platform) -> list[str]:
+    """The official installer, run with no window. On Windows: UTF-8 output (not the console's code page), no
+    progress bars or prompts (-NonInteractive: a question fails instead of waiting forever), and a failure,
+    whether the script throws or a program in it fails, ends with a non-zero exit code."""
+    if platform == "darwin":
+        return ["/bin/bash", "-c", f"set -o pipefail; {mac_cmd}"]
+    # errors come out as one plain line each ("ERROR: <message>"), not PowerShell's multi-line error records;
+    # the installer may leave strict mode on, so the exit code is read without touching an unset variable
+    script = ("[Console]::OutputEncoding = [Text.Encoding]::UTF8; $ProgressPreference = 'SilentlyContinue'; "
+              f"& {{ try {{ {win_cmd} }} catch {{ 'ERROR: ' + $_.Exception.Message; exit 1 }} }} 2>&1 | "
+              "ForEach-Object { if ($_ -is [System.Management.Automation.ErrorRecord]) "
+              "{ 'ERROR: ' + $_.Exception.Message } else { \"$_\" } }; "
+              "$c = Get-Variable LASTEXITCODE -ValueOnly -ErrorAction SilentlyContinue; if ($c) { exit $c }; exit 0")
+    return ["powershell", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-Command", script]
+
+
+class Installer:
+    """An official installer running in the background: the app shows its progress and, when it fails, why
+    (no console window). done is set when it ends; code is its exit code (0 = worked)."""
+
+    def __init__(self, win_cmd: str, mac_cmd: str, env: dict | None = None):
+        self.lines: list[str] = []
+        self.code: int | None = None
+        self.done = threading.Event()
+        try:
+            self.proc = subprocess.Popen(installer_command(win_cmd, mac_cmd), stdin=subprocess.DEVNULL,
+                                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env,
+                                         creationflags=CREATE_NO_WINDOW)
+        except OSError as e:
+            log.warning("installer can't start", exc_info=True)
+            self.proc, self.lines, self.code = None, [str(e)], -1
+            self.done.set()
+            return
+        threading.Thread(target=self._read, daemon=True).start()
+
+    def _read(self):
+        for raw in self.proc.stdout:
+            text = ANSI.sub("", raw.decode("utf-8", errors="replace")).strip()
+            if text:
+                self.lines.append(text)
+                log.info("installer: %s", re.sub(r"[\w.+-]+@[\w-]+\.[\w.]+", "<email>", text))
+        self.code = self.proc.wait()
+        log.info("installer ended with code %s", self.code)
+        self.done.set()
+
+    def status(self) -> str:
+        """The installer's latest line ("Downloading Claude Code..."), for the progress line."""
+        return self.lines[-1][:110] if self.lines else ""
+
+    def error(self, n: int = 4) -> str:
+        """What the installer said last: the reason, when it failed."""
+        return "\n".join(line[:160] for line in self.lines[-n:])
+
+    def cancel(self):
+        if self.proc and self.proc.poll() is None:
+            self.proc.kill()
+
+
+def run_installer(win_cmd: str, mac_cmd: str, env: dict | None = None) -> Installer:
+    return Installer(win_cmd, mac_cmd, env)
 
 
 def http_ok(url: str, headers: dict) -> bool:
@@ -220,7 +265,7 @@ class Provider:
     def login(self) -> subprocess.Popen | None:
         raise NotImplementedError
 
-    def install(self) -> subprocess.Popen:
+    def install(self) -> Installer:
         raise NotImplementedError
 
     def test_api_key(self, key: str) -> bool:

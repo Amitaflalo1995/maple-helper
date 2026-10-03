@@ -6,7 +6,8 @@ import threading
 
 from PySide6.QtCore import QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import (QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
+from PySide6.QtWidgets import (QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QProgressBar,
+                               QPushButton,
                                QScrollArea, QSizePolicy, QStackedWidget, QToolButton, QVBoxLayout, QWidget)
 
 from .. import bidi, providers
@@ -56,6 +57,80 @@ def _while_open(slot):
             if "already deleted" not in str(e):
                 raise
     return run
+
+
+class InstallPanel(QWidget):
+    """The official installer running in the background, shown inside the app (no console window): what it's
+    installing, a moving bar, the installer's latest line, and why it failed when it did."""
+    ended = Signal(bool)          # the installer finished: True when it reported success
+
+    def __init__(self, t: I18n, parent=None):
+        super().__init__(parent)
+        self.t, self.inst, self.name = t, None, ""
+        v = QVBoxLayout(self)
+        v.setContentsMargins(0, 8, 0, 8)
+        v.setSpacing(6)
+        self.title = QLabel(objectName="RowLabel")
+        self.title.setWordWrap(True)
+        self.bar = QProgressBar(objectName="ExpBar")
+        self.bar.setRange(0, 0)                      # busy: the installers don't report a percentage
+        self.bar.setTextVisible(False)
+        self.bar.setFixedHeight(6)
+        self.detail = QLabel(objectName="RowHint")   # the installer's own words, English: left to right
+        self.detail.setLayoutDirection(Qt.LeftToRight)
+        self.detail.setAlignment((Qt.AlignRight if t.rtl else Qt.AlignLeft) | Qt.AlignAbsolute)
+        self.error = QLabel(objectName="RowHint")
+        self.error.setWordWrap(True)
+        self.error.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        for w in (self.title, self.bar, self.detail, self.error):
+            v.addWidget(w)
+        self._timer = QTimer(self, interval=400)
+        self._timer.timeout.connect(self._tick)
+        self.hide()
+
+    def start(self, inst, name: str):
+        self.inst, self.name = inst, name
+        self.title.setText(bidi.plain(self.t("install_running", name=name), self.t.rtl))
+        self.detail.setText(self.t("install_starting"))
+        self.bar.show()
+        self.detail.show()
+        self.error.hide()
+        self.show()
+        self._timer.start()
+
+    def _tick(self):
+        line = self.inst.status()
+        if line:
+            self.detail.setText(line if len(line) <= 70 else line[:67] + "…")
+        if not self.inst.done.is_set():
+            return
+        self._timer.stop()
+        ok = self.inst.code == 0
+        if not ok:
+            self.fail()
+        self.ended.emit(ok)
+
+    def fail(self, not_found: bool = False):
+        """Stopped on an error (or ended "fine" but the CLI isn't there): say so, with the installer's reason."""
+        t, inst = self.t, self.inst
+        self._timer.stop()
+        self.bar.hide()
+        self.detail.hide()
+        self.title.setText(bidi.plain(t("install_failed", name=self.name), t.rtl))
+        if not_found:
+            why = t("install_not_found", name=self.name)
+        elif inst and inst.error():
+            why = t("install_failed_reason") + "\n" + inst.error()
+        else:
+            why = t("install_failed_none", code=getattr(inst, "code", "?"))
+        self.error.setText(why)
+        self.error.show()
+        self.show()
+
+    def stop(self):
+        """Hide it (the installer itself goes on; its result no longer matters here)."""
+        self._timer.stop()
+        self.hide()
 
 
 def _code_row(t: I18n, on_send) -> tuple[QWidget, QLineEdit]:
@@ -361,6 +436,10 @@ class Onboarding(GlassDialog):
         sec.add_widget(self.login_hint)
         self.code_row, self.code_edit = _code_row(self.t, self._send_code)
         sec.add_widget(self.code_row)
+        self.install_panel = InstallPanel(self.t)
+        self.install_panel.ended.connect(self._install_ended)
+        self._install_for, self._install_check = None, False
+        sec.add_widget(self.install_panel)
         lay.addWidget(sec)
         lay.addSpacing(8)
         sec = Section(self.t("ob_use_api_key"), rtl)
@@ -425,6 +504,8 @@ class Onboarding(GlassDialog):
         self._ai_ok = False
         stop_login()                       # a sign-in still waiting belongs to the AI the player left
         self._end_sign_in()
+        self.install_panel.stop()
+        self._install_check = False
         self.install_btn.hide()
         self.login_btn.hide()
         self._label_ai_page()
@@ -517,11 +598,21 @@ class Onboarding(GlassDialog):
             self.login_hint.setText(bidi.plain(self.t.p("ob_login_failed", self.provider), self.t.rtl))
 
     def _start_install(self):
-        self._begin_sign_in()
-        self._ai().install()
-        self.login_hint.setText(bidi.plain(self.t("ob_install_wait"), self.t.rtl))
-        self.login_hint.show()
-        self._poll_status(240)
+        """The official installer, in the background: its progress and errors show here, no console."""
+        ai = self._ai()
+        for w in (self.install_btn, self.login_btn, self.login_hint, self.code_row):
+            w.hide()
+        self._install_for = ai.name
+        self.install_panel.start(ai.install(), ai.label)
+
+    def _install_ended(self, ok: bool):
+        if self._install_for != self.provider:
+            return                         # the player picked another AI meanwhile
+        if ok:
+            self._install_check = True     # installed: the status check says what's next (sign in)
+            self._check_status()
+        else:
+            self.install_btn.show()        # "Install" again
 
     def _begin_sign_in(self):
         """The sign-in console, the installer and the browser open as normal windows: stop staying on top
@@ -585,6 +676,13 @@ class Onboarding(GlassDialog):
                 "not_installed": t.p("ob_not_installed", provider)}[st]
         self.status_label.setText(bidi.plain(text, t.rtl))
         self.login_btn.setVisible(st == "logged_out")
+        if self._install_check:
+            self._install_check = False
+            if st == "not_installed":      # the installer said it worked, but the CLI isn't there
+                self.install_panel.fail(not_found=True)
+                self.install_btn.show()
+                return
+            self.install_panel.stop()
         if self._ai_ok:
             if self._signing_in:
                 self._end_sign_in()      # back on top, showing "Connected"
@@ -818,6 +916,10 @@ class SettingsDialog(GlassDialog):
         sec.add_widget(self.account_hint)
         self.code_row, self.code_edit = _code_row(t, self._send_code)
         sec.add_widget(self.code_row)
+        self.install_panel = InstallPanel(t)
+        self.install_panel.ended.connect(self._install_ended)
+        self._install_for, self._install_check = None, False
+        sec.add_widget(self.install_panel)
         # not installed: the same official installer onboarding offers
         self.install_btn = QPushButton(t.p("ob_install", settings["provider"]), objectName="Link")
         self.install_btn.clicked.connect(self._start_install)
@@ -832,7 +934,6 @@ class SettingsDialog(GlassDialog):
             b.setCursor(Qt.PointingHandCursor)
             b.hide()
         lay.addWidget(sec)
-        self._installing = False
         self._login_broken = False
         self._account_bridge = _Bridge()
         self._account_bridge.account.connect(self._on_account)
@@ -1022,7 +1123,8 @@ class SettingsDialog(GlassDialog):
         self._login_timer.stop()
         stop_login()                       # a sign-in still waiting belongs to the AI the player left
         self.code_row.hide()
-        self._installing = self._login_broken = False
+        self.install_panel.stop()
+        self._install_check = self._login_broken = False
         self._account_status = None
         self.install_btn.setText(self.t.p("ob_install", name))
         for w in (self.install_btn, self.switch_btn, self.logout_btn, self.account_hint):
@@ -1047,11 +1149,12 @@ class SettingsDialog(GlassDialog):
         st = acc["status"]
         was, self._account_status = self._account_status, st
         api_key = self.settings.api_key_mode(p) or acc.get("method") == "api_key"
-        if self._installing and st != "not_installed":
-            # the installer finished: stop waiting for it and show what's next (sign in)
-            self._installing = False
-            self._login_timer.stop()
-            self._set_on_top(True)
+        if self._install_check:
+            self._install_check = False
+            if st == "not_installed":      # the installer said it worked, but the CLI isn't there
+                self.install_panel.fail(not_found=True)
+            else:
+                self.install_panel.stop()
         if api_key:
             self._set_account_text(t("account_api_key"))
         elif st == "ok":
@@ -1111,7 +1214,7 @@ class SettingsDialog(GlassDialog):
     def _start_login(self):
         self.switch_btn.setEnabled(True)
         self.account_hint.hide()
-        self._installing = False
+        self.install_panel.stop()
         self._account_status = "logged_out"
         self.account_changed.emit()
         self._login_proc = self._ai().login()
@@ -1145,16 +1248,23 @@ class SettingsDialog(GlassDialog):
         self.install_btn.show()
 
     def _start_install(self):
-        """The official installer, as in onboarding; then wait for it like for a sign-in (4 minutes)."""
-        self._installing = True
+        """The official installer, in the background as in onboarding: progress and errors show here."""
+        ai = self._ai()
         self._login_broken = False
         self._login_proc = None
-        self.account_hint.hide()
-        self._set_on_top(False)   # the installer's console must not open behind this window
-        self._ai().install()
-        self._set_account_text(self.t("ob_install_wait"))
-        self._login_left = 80
-        self._login_timer.start()
+        for w in (self.account_hint, self.install_btn, self.switch_btn, self.code_row):
+            w.hide()
+        self._install_for = ai.name
+        self.install_panel.start(ai.install(), ai.label)
+
+    def _install_ended(self, ok: bool):
+        if self._install_for != self._ai().name:
+            return                         # the player picked another AI meanwhile
+        if ok:
+            self._install_check = True     # installed: the account check says what's next (sign in)
+            self._refresh_account()
+        else:
+            self.install_btn.show()        # "Install" again
 
     def _set_on_top(self, on: bool):
         if bool(self.windowFlags() & Qt.WindowStaysOnTopHint) != on:
@@ -1174,7 +1284,6 @@ class SettingsDialog(GlassDialog):
         if self._login_left <= 0:
             # gave up waiting: say so (the text said "finish signing in…" forever) and show the real status
             self._login_timer.stop()
-            self._installing = False
             self._set_on_top(True)
             self.account_hint.setText(bidi.plain(self.t("sign_in_timeout"), self.t.rtl))
             self.account_hint.show()

@@ -295,3 +295,64 @@ def test_tall_windows_fit_the_screen(env):
     for dlg in (SettingsDialog(s, profiles, kb, lambda *_: ""), Onboarding(s, profiles, kb, lambda *_: "")):
         assert dlg.height() <= max(320, avail - 48)
         dlg.close()
+
+
+class FakeInstall:
+    def __init__(self):
+        import threading
+        self.lines, self.code, self.done = [], None, threading.Event()
+
+    def status(self):
+        return self.lines[-1] if self.lines else ""
+
+    def error(self, n=4):
+        return "\n".join(self.lines[-n:])
+
+    def finish(self, code, *lines):
+        self.lines += lines
+        self.code = code
+        self.done.set()
+
+
+def test_install_runs_inside_the_app_and_shows_why_it_failed(env, monkeypatch):
+    from maplehelper import providers
+    from maplehelper.ui.dialogs import Onboarding
+    s, profiles, kb = env
+    inst = FakeInstall()
+    monkeypatch.setattr(type(providers.get("codex")), "install", lambda self: inst)
+    dlg = Onboarding(s, profiles, kb, lambda *_: "")
+    dlg._on_provider("codex")
+    dlg._start_install()
+    assert not dlg.install_panel.isHidden() and "Installing ChatGPT" in dlg.install_panel.title.text()
+    assert dlg.install_btn.isHidden()
+    inst.lines.append("Downloading Codex 1.2.3")
+    dlg.install_panel._tick()
+    assert dlg.install_panel.detail.text() == "Downloading Codex 1.2.3"
+    inst.finish(1, "ERROR: Could not fetch GitHub release metadata.")
+    dlg.install_panel._tick()
+    assert "didn't install" in dlg.install_panel.title.text()
+    assert "Could not fetch GitHub release metadata" in dlg.install_panel.error.text()
+    assert not dlg.install_btn.isHidden()                      # try again
+
+
+def test_an_install_that_worked_moves_on_to_sign_in(env, monkeypatch):
+    from maplehelper import providers
+    from maplehelper.ui.dialogs import Onboarding
+    s, profiles, kb = env
+    inst = FakeInstall()
+    monkeypatch.setattr(type(providers.get("codex")), "install", lambda self: inst)
+    dlg = Onboarding(s, profiles, kb, lambda *_: "")
+    dlg._on_provider("codex")
+    dlg._start_install()
+    inst.finish(0, "Codex installed")
+    dlg.install_panel._tick()
+    dlg._on_status("codex", "logged_out")
+    assert dlg.install_panel.isHidden() and not dlg.login_btn.isHidden()
+    # "worked" but the CLI isn't there: said plainly, with the installer offered again
+    dlg._start_install()
+    inst2 = dlg.install_panel.inst
+    inst2.done.set()
+    inst2.code = 0
+    dlg.install_panel._tick()
+    dlg._on_status("codex", "not_installed")
+    assert "isn't on this PC" in dlg.install_panel.error.text() and not dlg.install_btn.isHidden()

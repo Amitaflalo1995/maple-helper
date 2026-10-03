@@ -341,7 +341,3 @@ def test_the_account_email_comes_from_agys_log(home):
                    "I1003 other line\n"
                    "I1003 server_oauth.go:203] OAuth: authenticated successfully as player@gmail.com\n")
     assert gemini.signed_in_email() == "player@gmail.com"
-
-
-def test_install_window_closes_by_itself_only_when_it_worked():
-    assert gemini.INSTALL_CMD.startswith("try {") and "; exit }" in gemini.INSTALL_CMD

@@ -30,15 +30,14 @@ import time
 from pathlib import Path
 
 from . import base
-from .base import CREATE_NO_WINDOW, Provider, RawResult, classify_error, child_env, find_posix, http_ok, \
+from .base import CREATE_NO_WINDOW, Installer, Provider, RawResult, classify_error, child_env, find_posix, http_ok, \
     run_installer
 
 log = logging.getLogger(__name__)
 STALL_TIMEOUT_S = 150    # no output for this long = stuck (tool steps and streaming print all along)
 CHECK_TIMEOUT_S = 30
 
-# the window closes by itself when it worked; a failure (the script throws) leaves it open with the reason
-INSTALL_CMD = "try { irm https://antigravity.google/cli/install.ps1 | iex; exit } catch { Write-Host $_ }"
+INSTALL_CMD = "irm https://antigravity.google/cli/install.ps1 | iex"
 INSTALL_CMD_MAC = "curl -fsSL https://antigravity.google/cli/install.sh | bash"
 POSIX_DIRS = ["~/.local/bin", "/opt/homebrew/bin", "/usr/local/bin"]
 
@@ -373,7 +372,7 @@ class Gemini(Provider):
     def submit_login_code(self, code: str) -> bool:
         return base.send_login_input(code.strip() + "\n")
 
-    def install(self) -> subprocess.Popen:
+    def install(self) -> Installer:
         return run_installer(INSTALL_CMD, INSTALL_CMD_MAC)
 
     def test_api_key(self, key: str) -> bool:
