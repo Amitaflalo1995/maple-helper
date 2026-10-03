@@ -83,6 +83,7 @@ The app uses screen capture and its own overlay window. It does not read game me
   - **ChatGPT**: a paid ChatGPT plan or an OpenAI API key (the app installs and signs in to OpenAI's official tool, the Codex CLI, for you). ChatGPT answers appear all at once instead of streaming.
   - **Gemini**: a personal Google account or a Gemini API key. The app installs Google's official tool, Antigravity (since June 2026 Google serves personal accounts only through it), and signs you in: after signing in to Google in the browser, you paste the code it shows into the app, within a minute.
 - Maple Story Classic World running in **Borderless** or **Windowed Fullscreen** mode.
+  - **Grok**: a SuperGrok or X Premium+ plan, or an xAI API key. The app installs xAI's official tool, Grok Build, and signs you in: you approve the sign-in in the browser (the code is filled in).
 - An internet connection for AI responses and initial data downloads.
 - A microphone if you want to use voice input.
 
@@ -132,7 +133,7 @@ Open PowerShell (Windows) or Terminal (macOS) in the repository folder. On macOS
    .\.venv\Scripts\python -m maplehelper
    ```
 
-4. Follow the setup screens to choose a language, connect your AI (Claude, ChatGPT or Gemini), and create your character profile. For each provider, the setup can install its CLI and sign you in, or take an API key (Anthropic for Claude, OpenAI for ChatGPT, Google AI Studio for Gemini).
+4. Follow the setup screens to choose a language, connect your AI (Claude, ChatGPT, Gemini or Grok), and create your character profile. For each provider, the setup can install its CLI and sign you in, or take an API key (Anthropic for Claude, OpenAI for ChatGPT, Google AI Studio for Gemini, xAI for Grok).
 
 ## Using the overlay
 
@@ -148,7 +149,7 @@ Open PowerShell (Windows) or Terminal (macOS) in the repository folder. On macOS
 | **Orange ?** | Hover it to see what a game term means. |
 | **System tray menu** | Show the overlay, open settings, or quit the app. |
 
-In settings, you can change the AI provider (Claude, ChatGPT or Gemini) and its account, the appearance (light or dark), hotkeys, language, font size, answer length, starting with Windows, and whether voice questions are sent immediately.
+In settings, you can change the AI provider (Claude, ChatGPT, Gemini or Grok) and its account, the appearance (light or dark), hotkeys, language, font size, answer length, starting with Windows, and whether voice questions are sent immediately.
 
 The speech model downloads on first use, so the first voice request takes longer. Transcription uses CUDA when available and falls back to the CPU (always the CPU on macOS).
 
@@ -156,7 +157,7 @@ The speech model downloads on first use, so the first voice request takes longer
 
 Settings, character profiles, conversation history, speech models, and downloaded knowledge-base updates are stored locally in `%APPDATA%\MapleHelper` on Windows and `~/Library/Application Support/MapleHelper` on macOS. The knowledge base built from source is stored in `data/kb/` inside the repository. API keys entered in the app are stored in Windows Credential Manager or the macOS Keychain.
 
-When you ask a question, the app sends your chosen AI provider (Anthropic for Claude, OpenAI for ChatGPT, Google for Gemini) your question, the available game screenshot, character profile, recent conversation, earlier session summaries, and relevant knowledge-base context. The AI can also read local knowledge-base files to answer the question; it runs read-only and cannot change files. With Codex and Gemini, the screenshot is written to a temporary file for the run and deleted right after. After a chat session has been closed for 30 minutes, the app may send the session transcript to the same provider to generate a summary for future conversations.
+When you ask a question, the app sends your chosen AI provider (Anthropic for Claude, OpenAI for ChatGPT, Google for Gemini, xAI for Grok) your question, the available game screenshot, character profile, recent conversation, earlier session summaries, and relevant knowledge-base context. The AI can also read local knowledge-base files to answer the question; it runs read-only and cannot change files. With Codex, Gemini and Grok, the screenshot is written to a temporary file for the run and deleted right after. After a chat session has been closed for 30 minutes, the app may send the session transcript to the same provider to generate a summary for future conversations.
 
 Voice recordings are transcribed locally. The resulting text is used as your question. The Prices tool asks NiaMeowDB for recent Free Market listings of the item you look up (only the item name is sent). The app also checks GitHub Releases for app and knowledge-base updates, and installs an update only when its SHA-256 matches the release's checksums.
 

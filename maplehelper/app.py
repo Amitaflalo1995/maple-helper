@@ -46,8 +46,8 @@ def _remove_stray_screenshots() -> None:
             pass
     import shutil
 
-    from .providers.gemini import shots_dir
-    for d in glob.glob(str(shots_dir() / "run-*")):
+    from .providers import gemini, grok
+    for d in glob.glob(str(gemini.shots_dir() / "run-*")) + glob.glob(str(grok.shots_dir() / "run-*")):
         try:
             if time.time() - os.path.getmtime(d) > 3600:
                 shutil.rmtree(d, ignore_errors=True)

@@ -1,0 +1,479 @@
+"""Grok through xAI's Grok Build CLI (`grok`): the player's SuperGrok / X Premium+ plan, or an xAI API key.
+
+Each question runs `grok` headless (a prompt file, streaming JSON in Claude Code's message format),
+locked down:
+  * our instructions replace its system prompt; only read_file, grep and list_dir remain, with web
+    search, sub-agents, plan mode and the MCP meta-tools off;
+  * a home of its own in Maple Helper's data folder (GROK_HOME, HOME/USERPROFILE), and the settings it
+    would otherwise pick up from Claude Code and Cursor on this PC (rules, skills, hooks, MCP servers)
+    switched off, so the player's own setup never reaches the answers;
+  * reads only in the knowledge base and the screenshot folder: on Windows a PreToolUse hook of ours
+    denies every other path (Grok's own read_file reads anything otherwise, its sandbox doesn't apply
+    there); on macOS the "strict" sandbox profile.
+Sign-in: `grok login --device-auth` prints a link that already carries the code; the app opens it and
+waits for the player to approve in the browser (no code to paste). The sign-in lives in our home.
+"""
+from __future__ import annotations
+
+import json
+import logging
+import os
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import threading
+import time
+from pathlib import Path
+
+from . import base
+from .base import CREATE_NO_WINDOW, Installer, Provider, RawResult, classify_error, child_env, find_posix, \
+    http_ok, run_installer
+
+log = logging.getLogger(__name__)
+STALL_TIMEOUT_S = 150
+CHECK_TIMEOUT_S = 30
+
+INSTALL_CMD = "irm https://x.ai/cli/install.ps1 | iex"
+INSTALL_CMD_MAC = "curl -fsSL https://x.ai/cli/install.sh | bash"
+POSIX_DIRS = ["~/.grok/bin", "~/.local/bin", "/opt/homebrew/bin", "/usr/local/bin"]
+
+TOOLS = ["read_file", "grep", "list_dir"]
+SAVER_ALIAS = "grok-fast"          # saver mode before the model list was read: the account's fast model
+LOGIN_URL = re.compile(r"https://accounts\.x\.ai/\S+")
+EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.]+")
+
+# what Grok would pick up from other tools on this PC, and its own extras: all off for Maple Helper
+OFF = {f"GROK_{k}_ENABLED": "0" for k in (
+    "CLAUDE_AGENTS", "CLAUDE_HOOKS", "CLAUDE_MCPS", "CLAUDE_RULES", "CLAUDE_SKILLS", "CURSOR_AGENTS", "CURSOR_HOOKS",
+    "CURSOR_MCPS", "CURSOR_RULES", "CURSOR_SKILLS", "MANAGED_MCPS")}
+OFF.update({"GROK_MEMORY": "0", "GROK_TELEMETRY_ENABLED": "0", "GROK_DISABLE_AUTOUPDATER": "1",
+            "GROK_SESSION_RECAP": "0", "GROK_PROMPT_SUGGESTIONS": "0", "GROK_WEB_FETCH": "0", "GROK_SUBAGENTS": "0",
+            "GROK_FEEDBACK_ENABLED": "0", "GROK_TURN_SUMMARY": "0", "GROK_WORKFLOWS": "0"})
+# credentials and endpoints in the player's environment that would override the account Maple Helper chose
+FOREIGN_ENV = ("XAI_API_KEY", "GROK_CODE_XAI_API_KEY", "GROK_DEPLOYMENT_KEY", "GROK_XAI_API_BASE_URL",
+               "GROK_CLI_BASE_URL", "GROK_AGENT", "GROK_SANDBOX", "GROK_CONFIG", "GROK_CONFIG_PATH",
+               "GROK_AUTH_PROVIDER_COMMAND", "GROK_AUTH_PROVIDER_ACCESS_TOKEN")
+
+
+def home() -> Path:
+    """Maple Helper's own Grok home: config, sign-in, sessions, our read guard."""
+    from ..store import DATA_DIR
+    return DATA_DIR / "grok"
+
+
+def grok_home() -> Path:
+    return home() / ".grok"
+
+
+def shots_dir() -> Path:
+    # inside GROK_HOME: the macOS "strict" sandbox reads there (and in the knowledge base), nowhere else
+    return grok_home() / "maplehelper-shots"
+
+
+def find_windows() -> str | None:
+    p = shutil.which("grok")
+    if p and p.lower().endswith(".exe"):
+        return p
+    dirs = [os.environ.get("GROK_BIN_DIR", ""), str(Path(os.environ.get("USERPROFILE", "")) / ".grok" / "bin")]
+    for d in dirs:
+        c = Path(d) / "grok.exe"
+        if d and c.exists():
+            return str(c)
+    return None
+
+
+def find_grok() -> str | None:
+    """Grok Build from xAI's installer (~/.grok/bin)."""
+    return find_windows() if sys.platform == "win32" else find_posix("grok", POSIX_DIRS)
+
+
+def env(api_key: str | None = None) -> dict:
+    e = child_env(POSIX_DIRS)
+    for k in FOREIGN_ENV:
+        e.pop(k, None)
+    e.update(OFF)
+    e["GROK_HOME"] = str(grok_home())
+    e["HOME"] = str(home())
+    if sys.platform == "win32":
+        e["USERPROFILE"] = str(home())
+    if api_key:
+        e["XAI_API_KEY"] = api_key
+    return e
+
+
+GUARD_PS1 = r"""# Maple Helper: Grok may read only the knowledge base and the screenshot (a PreToolUse hook).
+# Any other path, or anything unexpected, is denied: a hook that fails would let the read through.
+$deny = '{"decision":"block","reason":"Only the knowledge base and the screenshot can be read.","hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Only the knowledge base and the screenshot can be read."}}'
+try {
+  $in = [Console]::In.ReadToEnd() | ConvertFrom-Json
+  $ti = $in.tool_input
+  $p = $null
+  foreach ($k in 'target_file', 'target_directory', 'path') { if ($ti.$k) { $p = [string]$ti.$k; break } }
+  if (-not $p) { exit 0 }
+  $base = if ($in.cwd) { [string]$in.cwd } else { (Get-Location).Path }
+  $full = [IO.Path]::GetFullPath([IO.Path]::Combine($base, $p))
+  foreach ($root in @(ROOTS)) {
+    if ($full -ieq $root -or $full.StartsWith($root + '\', [StringComparison]::OrdinalIgnoreCase)) { exit 0 }
+  }
+} catch { }
+[Console]::Out.Write($deny)
+exit 2
+"""
+
+
+def _ps_quote(s: str) -> str:
+    return "'" + s.replace("'", "''") + "'"
+
+
+def write_guard(kb_root) -> None:
+    """Windows: the read guard (a hook in our Grok home). Written when the knowledge base path changes."""
+    if sys.platform != "win32":
+        return
+    roots = ", ".join(_ps_quote(str(Path(p).resolve())) for p in (kb_root, shots_dir()))
+    script = grok_home() / "maplehelper-guard.ps1"
+    _write(script, GUARD_PS1.replace("ROOTS", roots))
+    cmd = f'powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "{script}"'
+    # no matcher: it runs for each of the three tools (a tool-name matcher didn't match them)
+    _write(grok_home() / "hooks" / "maplehelper.json",
+           json.dumps({"hooks": {"PreToolUse": [{"hooks": [{"type": "command", "command": cmd, "timeout": 10}]}]}},
+                      indent=1))
+
+
+def _write(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        if path.read_text(encoding="utf-8") == text:
+            return
+    except OSError:
+        pass
+    fd, tmp = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(text)
+        os.replace(tmp, path)
+    except OSError:
+        log.warning("couldn't write %s", path.name, exc_info=True)
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
+
+
+def grok_command(exe: str, prompt_file, instructions: str, model: str | None = None, tools: bool = True,
+                 platform: str = sys.platform) -> list[str]:
+    cmd = [exe, "--prompt-file", str(prompt_file), "--system-prompt-override", instructions,
+           "--tools", ",".join(TOOLS),
+           # MCP meta-tools always; with no knowledge-base reading (a summary) the three tools too
+           "--disallowed-tools", ",".join(["search_tool", "use_tool"] + ([] if tools else TOOLS)),
+           "--disable-web-search", "--no-subagents", "--no-plan", "--permission-mode", "dontAsk",
+           "--output-format", "streaming-messages-json", "--include-partial-messages"]
+    if platform == "darwin":
+        cmd += ["--sandbox", "strict"]        # reads: the working folder (knowledge base) and GROK_HOME only
+    if model:
+        cmd += ["--model", model]
+    return cmd
+
+
+def tools_note(kb_root, shots: list[Path]) -> str:
+    note = (f"\n\nTools: the knowledge base is the current folder ({Path(kb_root).resolve()}): read it with "
+            "read_file, grep and list_dir. Nothing outside it (and the screenshot) can be read. You cannot write "
+            "files, run commands or use the web.")
+    if shots:
+        note += ("\nThe player's game screenshot is " + ", ".join(str(s) for s in shots) +
+                 ": open it with read_file first, before answering.")
+    return note
+
+
+def classify(text: str) -> str | None:
+    t = text.lower()
+    if "not signed in" in t or "not authenticated" in t or "sign in again" in t or "401" in t:
+        return "not_logged_in"
+    if "rate limit" in t or "rate_limit" in t or "usage limit" in t or "quota" in t or "429" in t:
+        return "usage_limit"
+    return classify_error(text)
+
+
+def parse_stream(lines, on_delta=None) -> tuple[str, dict | None, str | None]:
+    """(answer, result event, model) from Claude-Code-format stream lines: the text of the last message
+    (earlier messages end in a tool call: their text is a lead-in)."""
+    current, result, model = "", None, None
+    for line in lines:
+        if isinstance(line, bytes):
+            line = line.decode("utf-8", errors="replace")
+        try:
+            ev = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(ev, dict):
+            continue
+        t = ev.get("type")
+        if t == "stream_event":
+            se = ev.get("event") or {}
+            if se.get("type") == "message_start":
+                current = ""
+                model = (se.get("message") or {}).get("model") or model
+            elif se.get("type") == "content_block_delta" and (se.get("delta") or {}).get("type") == "text_delta":
+                current += se["delta"].get("text", "")
+                if on_delta:
+                    on_delta(current)
+        elif t == "system" and ev.get("subtype") == "init":
+            model = ev.get("model") or model
+        elif t == "result":
+            result = ev
+    return current, result, model
+
+
+def to_result(text: str, result: dict | None, stderr: str, model: str | None) -> RawResult:
+    if not result or result.get("is_error") or result.get("subtype") != "success":
+        detail = " ".join(str(e) for e in ((result or {}).get("errors") or [])) + "\n" + stderr
+        log.warning("Grok gave no answer: %s", detail.strip()[-1500:])
+        return RawResult(error=classify(detail) or ("api_error" if result else "no_result"))
+    answer = text or str(result.get("result") or "")
+    if not answer.strip():
+        return RawResult(error="no_result")
+    return RawResult(text=answer, model=model)
+
+
+def parse_models(output: str) -> list[tuple[str, str]]:
+    """`grok models`: "  * grok-4.6 (default)" / "  - grok-4.6-fast" under "Available models:"."""
+    out = []
+    for line in output.splitlines():
+        m = re.match(r"\s*[*-]\s+([\w.:-]+)", line)
+        if m:
+            out.append((m.group(1), m.group(1)))
+    return out
+
+
+def lightest(models: list[tuple[str, str]]) -> str | None:
+    return next((m for m, _ in models if "fast" in m or "mini" in m), None)
+
+
+_models_cache: list[tuple[str, str]] = []
+_models_at = 0.0
+_models_email: str | None = None
+_check_lock = threading.Lock()
+
+
+class CheckFailed(Exception):
+    """grok was found but didn't answer in time: neither "not installed" nor "signed out"."""
+
+
+def _run(args: list[str], timeout: float = CHECK_TIMEOUT_S) -> subprocess.CompletedProcess | None:
+    exe = find_grok()
+    if not exe:
+        return None
+    with _check_lock:
+        grok_home().mkdir(parents=True, exist_ok=True)
+        try:
+            return subprocess.run([exe, *args], capture_output=True, timeout=timeout, env=env(), cwd=str(home()),
+                                  stdin=subprocess.DEVNULL, creationflags=CREATE_NO_WINDOW)
+        except subprocess.TimeoutExpired as e:
+            log.warning("grok %s timed out", args[:1])
+            raise CheckFailed() from e
+        except OSError:
+            log.warning("grok %s can't start", args[:1], exc_info=True)
+            return None
+
+
+def read_models(max_age: float = 10.0) -> tuple[list[tuple[str, str]], str | None] | None:
+    """`grok models`: (the list, the account's email when it says) signed in, ([], None) signed out,
+    None when grok is missing or won't start."""
+    global _models_cache, _models_at, _models_email
+    if _models_cache and time.monotonic() - _models_at < max_age:
+        return _models_cache, _models_email
+    r = _run(["models"])
+    if r is None:
+        return None
+    out = (r.stdout + r.stderr).decode("utf-8", errors="replace")
+    if "not authenticated" in out.lower() or "not signed in" in out.lower():
+        return [], None
+    found = parse_models(out)
+    email = EMAIL.search(out)
+    if found:
+        _models_cache, _models_at, _models_email = found, time.monotonic(), email.group(0) if email else None
+    return found, email.group(0) if email else None
+
+
+def resolve_model(model: str | None) -> str | None:
+    if model != SAVER_ALIAS:
+        return model
+    try:
+        got = _models_cache or (read_models() or ([], None))[0]
+    except CheckFailed:
+        return None
+    return lightest(got)
+
+
+class Grok(Provider):
+    name = "grok"
+    label = "Grok"
+    keyring_user = "xai_api_key"
+    model_setting = "grok_model"
+    reports_usage = False      # the CLI reports tokens per session, not the plan's quota
+
+    @property
+    def saver_model(self) -> str | None:
+        return lightest(_models_cache) or SAVER_ALIAS
+
+    def find_exe(self) -> str | None:
+        return find_grok()
+
+    def models(self) -> list[tuple[str | None, str]]:
+        try:
+            got = read_models()
+        except CheckFailed:
+            return [(None, "")]
+        return [(None, "")] + (got[0] if got else [])
+
+    def account(self) -> dict:
+        if not find_grok():
+            return {"status": "not_installed", "email": None}
+        try:
+            got = read_models(max_age=0)
+        except CheckFailed:
+            return {"status": "logged_out", "email": None}
+        if got is None:
+            return {"status": "not_installed", "email": None}
+        found, email = got
+        return {"status": "ok", "email": email} if found else {"status": "logged_out", "email": None}
+
+    def logout(self) -> bool:
+        r = _run(["logout"])
+        return bool(r) and r.returncode == 0
+
+    def login(self) -> subprocess.Popen | None:
+        """Device sign-in, hidden: grok prints a link carrying the code (opened here) and waits for the player
+        to approve it in the browser, then ends 0. No code to paste."""
+        exe = find_grok()
+        if not exe:
+            return None
+        grok_home().mkdir(parents=True, exist_ok=True)
+        opened = threading.Event()
+
+        def on_line(text: str):
+            m = LOGIN_URL.search(text)
+            if m and not opened.is_set():
+                opened.set()
+                import webbrowser
+                webbrowser.open(m.group(0))
+        return base.open_login(exe, ["login", "--device-auth"], env(), cwd=str(home()), on_line=on_line)
+
+    def install(self) -> Installer:
+        return run_installer(INSTALL_CMD, INSTALL_CMD_MAC)
+
+    def test_api_key(self, key: str) -> bool:
+        return http_ok("https://api.x.ai/v1/api-key", {"Authorization": f"Bearer {key}"})
+
+    def backend(self, brain):
+        return GrokBackend(brain)
+
+
+class GrokBackend:
+    """Runs questions for a Brain through grok, one fresh process per question."""
+
+    def __init__(self, brain):
+        self.brain = brain
+        self.exe = find_grok()
+        self._proc: subprocess.Popen | None = None
+        self._running: set[subprocess.Popen] = set()
+
+    def prewarm(self) -> None:
+        pass
+
+    def shutdown(self) -> None:
+        self.cancel()
+        for p in list(self._running):
+            if p.poll() is None:
+                p.kill()
+
+    def cancel(self) -> None:
+        if self._proc and self._proc.poll() is None:
+            self._proc.kill()
+
+    def _exec(self, instructions: str, prompt: str, model: str | None, tools: bool = True, on_delta=None,
+              answer: bool = True, timeout: float | None = None) -> RawResult:
+        b = self.brain
+        write_guard(b.kb.root)
+        fd, prompt_file = tempfile.mkstemp(prefix="maplehelper-grok-", suffix=".txt")
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(prompt)
+        try:
+            r = self._once(instructions, prompt_file, model, tools, on_delta, answer, timeout)
+            if model and r.error == "bad_model":
+                log.warning("Grok model %s unknown, using the default", model)
+                r = self._once(instructions, prompt_file, None, tools, on_delta, answer, timeout)
+            return RawResult(error="api_error") if r.error == "bad_model" else r
+        finally:
+            try:
+                os.remove(prompt_file)
+            except OSError:
+                pass
+
+    def _once(self, instructions, prompt_file, model, tools, on_delta, answer, timeout) -> RawResult:
+        cmd = grok_command(self.exe, prompt_file, instructions, model, tools)
+        try:
+            p = subprocess.Popen(cmd, cwd=str(self.brain.kb.root), stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, env=env(self.brain.api_key), creationflags=CREATE_NO_WINDOW)
+        except OSError as e:
+            return RawResult(error=f"launch_failed: {e}")
+        if answer:
+            self._proc = p
+        self._running.add(p)
+        err: list[bytes] = []
+        reader = threading.Thread(target=lambda: err.extend(iter(lambda: p.stderr.read(4096), b"")), daemon=True)
+        reader.start()
+        last, began, stalled = [time.monotonic()], time.monotonic(), threading.Event()
+
+        def watchdog():
+            while p.poll() is None:
+                now = time.monotonic()
+                if now - last[0] > STALL_TIMEOUT_S or (timeout and now - began > timeout):
+                    stalled.set()
+                    p.kill()
+                    return
+                time.sleep(1)
+        threading.Thread(target=watchdog, daemon=True).start()
+
+        def lines():
+            for line in p.stdout:
+                last[0] = time.monotonic()
+                yield line
+        try:
+            text, result, used = parse_stream(lines(), on_delta)
+            p.wait()
+            reader.join(timeout=5)
+            stderr = b"".join(err).decode("utf-8", errors="replace")
+        finally:
+            self._running.discard(p)
+        if stalled.is_set():
+            log.warning("Grok stalled, stopped: %s", stderr[-1000:])
+            return RawResult(error="timeout")
+        errors = " ".join(str(e) for e in ((result or {}).get("errors") or [])) + stderr
+        if model and re.search(r"model.{0,40}(not found|unknown|invalid|not available)", errors, re.I):
+            return RawResult(error="bad_model")
+        return to_result(text, result, stderr, used or model)
+
+    def run(self, prompt: str, screenshot_jpeg: bytes | None, on_raw_delta=None, model: str | None = None,
+            tools: bool = True) -> RawResult:
+        b = self.brain
+        shots_dir().mkdir(parents=True, exist_ok=True)
+        folder = Path(tempfile.mkdtemp(prefix="run-", dir=shots_dir()))
+        try:
+            shots = []
+            for i, jpeg in enumerate(screenshot_jpeg if isinstance(screenshot_jpeg, list) else [screenshot_jpeg]):
+                if jpeg:
+                    shots.append(folder / f"screenshot-{i}.jpg")
+                    shots[-1].write_bytes(jpeg)
+            reads = tools or bool(shots)              # the screenshot is opened with read_file
+            return self._exec(b.system_prompt() + tools_note(b.kb.root, shots), prompt,
+                              resolve_model(model or b.model), reads, on_raw_delta)
+        finally:
+            shutil.rmtree(folder, ignore_errors=True)
+
+    def summarize(self, instructions: str, text: str, timeout: int = 90) -> str | None:
+        if not self.exe:
+            return None
+        r = self._exec(instructions, text, resolve_model(SAVER_ALIAS), tools=False, answer=False, timeout=timeout)
+        return r.text.strip() or None
