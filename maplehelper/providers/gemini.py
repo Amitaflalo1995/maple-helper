@@ -89,10 +89,13 @@ def env(api_key: str | None = None) -> dict:
     return e
 
 
+def settings_path() -> Path:
+    return home() / ".gemini" / "antigravity-cli" / "settings.json"
+
+
 def write_settings(kb_root, api_key: bool) -> None:
     """Reads only in the knowledge base and the screenshot folder; nothing outside asks (headless = denied)."""
-    d = home() / ".gemini" / "antigravity-cli"
-    d.mkdir(parents=True, exist_ok=True)
+    settings_path().parent.mkdir(parents=True, exist_ok=True)
     settings = {
         "allowNonWorkspaceAccess": False,
         "enableTelemetry": False,
@@ -100,7 +103,18 @@ def write_settings(kb_root, api_key: bool) -> None:
     }
     if api_key:
         settings["modelProvider"] = "gemini"      # the Gemini API with GEMINI_API_KEY instead of the sign-in
-    _write(d / "settings.json", json.dumps(settings, indent=2))
+    _write(settings_path(), json.dumps(settings, indent=2))
+
+
+def sign_in_mode() -> None:
+    """The account checks, the sign-in and the usage read run on the Google sign-in: an API-key question's
+    "modelProvider" left in the settings made agy refuse them all ("GEMINI_API_KEY is not set")."""
+    try:
+        settings = json.loads(settings_path().read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return
+    if isinstance(settings, dict) and settings.pop("modelProvider", None):
+        _write(settings_path(), json.dumps(settings, indent=2))
 
 
 def agent_text(name: str, instructions: str, tools: list[str]) -> str:
@@ -116,14 +130,23 @@ def write_agent(name: str, instructions: str, tools: list[str]) -> None:
 
 
 def _write(path: Path, text: str) -> None:
+    """Only when it changed, through a temp file of its own (an answer and a summary can write together)."""
     try:
         if path.read_text(encoding="utf-8") == text:
             return
     except OSError:
         pass
-    tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(text, encoding="utf-8")
-    os.replace(tmp, path)
+    fd, tmp = tempfile.mkstemp(prefix=path.name + ".", suffix=".tmp", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(text)
+        os.replace(tmp, path)
+    except OSError:
+        log.warning("couldn't write %s", path.name, exc_info=True)   # the other writer's copy is the same
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
 
 
 def tools_note(kb_root, shots: list[Path]) -> str:
@@ -203,18 +226,26 @@ def to_result(text: str, result: dict | None, stderr: str, model: str | None) ->
     return RawResult(text=answer, model=model)
 
 
+# what agy keeps across runs besides each conversation: summaries of past questions (titles, previews), state
+# snapshots and per-run locks. All of it is about questions Maple Helper asked; none of it is needed again.
+RUN_LEFTOVERS = ("conversation_summaries.db", "conversation_summaries.db-shm", "conversation_summaries.db-wal",
+                 "jetbox_summaries_proto.pb")
+
+
 def forget(conv: str | None) -> None:
-    """agy keeps every run (conversation, notes, annotations); Maple Helper keeps nothing."""
+    """agy keeps every run (conversation, notes, annotations, summaries); Maple Helper keeps nothing. A file
+    another run still has open stays (Windows won't delete it) and goes with a later run."""
     d = home() / ".gemini" / "antigravity-cli"
+    gone = []
     if conv and re.fullmatch(r"[\w-]+", conv):
-        for f in list((d / "conversations").glob(conv + ".db*")) + [d / "annotations" / f"{conv}.pbtxt"]:
-            try:
-                f.unlink()
-            except OSError:
-                pass
+        gone += list((d / "conversations").glob(conv + ".db*")) + [d / "annotations" / f"{conv}.pbtxt"]
         shutil.rmtree(d / "brain" / conv, ignore_errors=True)
+    gone += [d / name for name in RUN_LEFTOVERS]
+    for sub in ("presence", "implicit"):
+        gone += list((d / sub).glob("*"))
     logs = sorted((d / "log").glob("cli-*.log"))
-    for f in logs[:-3]:               # its own logs (they name the questions): keep the last few for problems
+    gone += logs[:-3]                 # its own logs (they name the questions): keep the last few for problems
+    for f in gone:
         try:
             f.unlink()
         except OSError:
@@ -270,6 +301,9 @@ def signed_in_email() -> str | None:
 
 
 _models_cache: list[tuple[str, str]] = []
+_models_at = 0.0
+_check_lock = threading.Lock()
+SAVER_ALIAS = "gemini-flash-low"   # saver mode before the model list was read: the newest Flash, low effort
 
 
 def lightest(models: list[tuple[str, str]]) -> str | None:
@@ -277,15 +311,54 @@ def lightest(models: list[tuple[str, str]]) -> str | None:
     return next((m for m, _ in models if "flash" in m and m.endswith("-low") and "lite" not in m), None)
 
 
+class CheckFailed(Exception):
+    """agy was found but didn't answer (timed out): neither "not installed" nor "signed out"."""
+
+
 def _run(args: list[str], timeout: float = CHECK_TIMEOUT_S) -> subprocess.CompletedProcess | None:
+    """A quick agy command on the sign-in. One at a time: each start rewrites cli.log, which names the account.
+    None when agy is missing or won't start; CheckFailed when it hangs."""
     exe = find_agy()
     if not exe:
         return None
+    with _check_lock:
+        home().mkdir(parents=True, exist_ok=True)
+        sign_in_mode()
+        try:
+            return subprocess.run([exe, *args], capture_output=True, timeout=timeout, env=env(), cwd=str(home()),
+                                  stdin=subprocess.DEVNULL, creationflags=CREATE_NO_WINDOW)
+        except subprocess.TimeoutExpired as e:
+            log.warning("agy %s timed out", args[:1])
+            raise CheckFailed() from e
+        except OSError:
+            log.warning("agy %s can't start", args[:1], exc_info=True)
+            return None
+        finally:
+            forget(None)
+
+
+def read_models(max_age: float = 10.0) -> list[tuple[str, str]] | None:
+    """`agy models`: the Gemini list when signed in, [] when signed out, None when agy is missing or won't start.
+    The account check and the model list both need it: one run serves both for a few seconds."""
+    global _models_cache, _models_at
+    if _models_cache and time.monotonic() - _models_at < max_age:
+        return _models_cache
+    r = _run(["models"])
+    if r is None:
+        return None
+    found = parse_models(r.stdout.decode("utf-8", errors="replace"))
+    if found:
+        _models_cache, _models_at = found, time.monotonic()
+    return found
+
+
+def resolve_model(model: str | None) -> str | None:
+    """SAVER_ALIAS becomes the newest light Flash this account offers (read now when the list isn't in yet)."""
+    if model != SAVER_ALIAS:
+        return model
     try:
-        return subprocess.run([exe, *args], capture_output=True, timeout=timeout, env=env(), cwd=str(home()),
-                              stdin=subprocess.DEVNULL, creationflags=CREATE_NO_WINDOW)
-    except (OSError, subprocess.TimeoutExpired):
-        log.warning("agy %s failed", args[:1], exc_info=True)
+        return lightest(_models_cache or read_models() or [])
+    except CheckFailed:
         return None
 
 
@@ -299,23 +372,25 @@ class Gemini(Provider):
 
     @property
     def saver_model(self) -> str | None:
-        return lightest(_models_cache)
+        """The list is read on demand: right after a start it isn't in yet, and saver mode then asks by alias
+        (the backend picks the model when it runs)."""
+        return lightest(_models_cache) or SAVER_ALIAS
 
     def find_exe(self) -> str | None:
         return find_agy()
 
     def models(self) -> list[tuple[str | None, str]]:
         """Google's current Gemini list for this account (agy models); just the default when it can't be read."""
-        global _models_cache
-        r = _run(["models"])
-        found = parse_models(r.stdout.decode("utf-8", errors="replace")) if r else []
-        if found:
-            _models_cache = found
-        return [(None, "")] + found
+        try:
+            return [(None, "")] + (read_models() or [])
+        except CheckFailed:
+            return [(None, "")]
 
     def read_limits(self, timeout: float = CHECK_TIMEOUT_S) -> dict | None:
-        home().mkdir(parents=True, exist_ok=True)
-        r = _run(["-p", "/usage", "--output-format", "json"], timeout)
+        try:
+            r = _run(["-p", "/usage", "--output-format", "json"], timeout)
+        except CheckFailed:
+            return None
         if not r or r.returncode != 0:
             return None
         try:
@@ -325,16 +400,16 @@ class Gemini(Provider):
 
     def account(self) -> dict:
         """agy models answers in ~2 s: the list when signed in, "Please sign in" when not."""
-        global _models_cache
         if not find_agy():
             return {"status": "not_installed", "email": None}
-        home().mkdir(parents=True, exist_ok=True)
-        r = _run(["models"])
-        if r is None:
+        try:
+            found = read_models(max_age=0)
+        except CheckFailed:
+            # it hangs (offline, a stuck update): not "not installed" (a reinstall won't help); a sign-in might
+            return {"status": "logged_out", "email": None}
+        if found is None:
             return {"status": "not_installed", "email": None}    # found but won't start: offer the installer
-        found = parse_models(r.stdout.decode("utf-8", errors="replace"))
         if found:
-            _models_cache = found
             return {"status": "ok", "email": signed_in_email()}
         return {"status": "logged_out", "email": None}
 
@@ -358,6 +433,7 @@ class Gemini(Provider):
         if not exe:
             return None
         home().mkdir(parents=True, exist_ok=True)
+        sign_in_mode()
         opened = threading.Event()
 
         def on_line(text: str):
@@ -389,12 +465,16 @@ class GeminiBackend:
         self.brain = brain
         self.exe = find_agy()
         self._proc: subprocess.Popen | None = None
+        self._running: set[subprocess.Popen] = set()     # every run, summaries too: a quit stops them all
 
     def prewarm(self) -> None:
         pass
 
     def shutdown(self) -> None:
         self.cancel()
+        for p in list(self._running):
+            if p.poll() is None:
+                p.kill()
 
     def cancel(self) -> None:
         if self._proc and self._proc.poll() is None:
@@ -426,14 +506,20 @@ class GeminiBackend:
             return RawResult(error=f"launch_failed: {e}")
         if answer:
             self._proc = p
+        self._running.add(p)
         err: list[bytes] = []
         reader = threading.Thread(target=lambda: err.extend(iter(lambda: p.stderr.read(4096), b"")), daemon=True)
         reader.start()
-        try:
-            p.stdin.write(stdin_text.encode("utf-8"))
-            p.stdin.close()
-        except OSError:
-            pass
+
+        def feed():
+            # a question is bigger than the pipe: written from here, so a CLI stuck before reading it is still
+            # stopped by the watchdog below
+            try:
+                p.stdin.write(stdin_text.encode("utf-8"))
+                p.stdin.close()
+            except OSError:
+                pass
+        threading.Thread(target=feed, daemon=True).start()
         last, began, stalled = [time.monotonic()], time.monotonic(), threading.Event()
 
         def watchdog():
@@ -457,6 +543,7 @@ class GeminiBackend:
             reader.join(timeout=5)
             stderr = b"".join(err).decode("utf-8", errors="replace")
         finally:
+            self._running.discard(p)
             forget(conv)
         if stalled.is_set():
             log.warning("Gemini stalled, stopped: %s", stderr[-1000:])
@@ -480,7 +567,7 @@ class GeminiBackend:
             instructions = b.system_prompt() + tools_note(b.kb.root, shots)
             reads = tools or bool(shots)          # the screenshot is opened with view_file
             return self._exec(AGENT if reads else QUICK_AGENT, instructions, TOOLS if reads else [],
-                              prompt, model or b.model, on_raw_delta)
+                              prompt, resolve_model(model or b.model), on_raw_delta)
         finally:
             shutil.rmtree(folder, ignore_errors=True)
 
@@ -488,5 +575,6 @@ class GeminiBackend:
         """One short call, no tools, on the lightest Flash: session summaries and guide summaries."""
         if not self.exe:
             return None
-        r = self._exec(SUMMARY_AGENT, instructions, [], text, lightest(_models_cache), answer=False, timeout=timeout)
+        r = self._exec(SUMMARY_AGENT, instructions, [], text, resolve_model(SAVER_ALIAS), answer=False,
+                       timeout=timeout)
         return r.text.strip() or None

@@ -450,9 +450,10 @@ class MapleHelperApp:
         self.apply_saver_mode()
 
     def on_account_changed(self):
-        # another provider or account: a warm process started under the old one is replaced
+        # another provider, account or model: a warm process started under the old setup is replaced. An answer
+        # in progress goes on (changing the model mid-answer killed it); switching provider ends the old one anyway
         self.apply_ai_settings()
-        self.brain.shutdown()
+        self.brain.drop_warm()
         threading.Thread(target=self.brain.prewarm, daemon=True).start()
 
     def make_report(self):
@@ -819,6 +820,11 @@ class MapleHelperApp:
             pass
         try:
             self.brain.shutdown()
+        except Exception:
+            pass
+        try:
+            from .providers.base import stop_login
+            stop_login()                         # a sign-in still waiting (Codex's holds a port the next one needs)
         except Exception:
             pass
         try:

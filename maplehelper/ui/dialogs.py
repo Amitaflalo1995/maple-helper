@@ -59,6 +59,22 @@ def _while_open(slot):
     return run
 
 
+RUNNING_INSTALLS: dict = {}     # provider name -> its Installer, while it runs (shared by every dialog)
+
+
+def install_for(ai):
+    """The installer already running for this AI, or a new one."""
+    inst = RUNNING_INSTALLS.get(ai.name)
+    if inst is None or inst.done.is_set():
+        inst = RUNNING_INSTALLS[ai.name] = ai.install()
+    return inst
+
+
+def running_install(name: str):
+    inst = RUNNING_INSTALLS.get(name)
+    return inst if inst is not None and not inst.done.is_set() else None
+
+
 class InstallPanel(QWidget):
     """The official installer running in the background, shown inside the app (no console window): what it's
     installing, a moving bar, the installer's latest line, and why it failed when it did."""
@@ -319,7 +335,11 @@ class Onboarding(GlassDialog):
         self.provider = providers.get(settings["provider"]).name
         self._ai_ok = False
         self._signing_in = False   # a sign-in/install is under way: keep the hint, re-check quietly
-        self.finished.connect(lambda *_: stop_login())
+        self._closed = False
+        # the sign-in is one for the whole app: only the window that can start one ends it (not "Add character")
+        if not only_character:
+            self.finished.connect(lambda *_: stop_login())
+        self.finished.connect(self._on_closed)
         self._build()
 
     def _build(self):
@@ -506,6 +526,9 @@ class Onboarding(GlassDialog):
         self._end_sign_in()
         self.install_panel.stop()
         self._install_check = False
+        if running_install(name):          # back to an AI whose installer still runs: show it again
+            self._install_for = name
+            self.install_panel.start(running_install(name), self._ai().label)
         self.install_btn.hide()
         self.login_btn.hide()
         self._label_ai_page()
@@ -597,13 +620,22 @@ class Onboarding(GlassDialog):
             self.code_row.hide()
             self.login_hint.setText(bidi.plain(self.t.p("ob_login_failed", self.provider), self.t.rtl))
 
+    def _on_closed(self, *_):
+        """Closed (or restarted in another language): its timers stop, so it never shows itself again."""
+        self._closed = True
+        if hasattr(self, "_poll_timer"):
+            self._poll_timer.stop()
+
     def _start_install(self):
         """The official installer, in the background: its progress and errors show here, no console."""
         ai = self._ai()
+        stop_login()                       # a sign-in still waiting holds the CLI's file (agy.exe is locked)
+        self._end_sign_in()
         for w in (self.install_btn, self.login_btn, self.login_hint, self.code_row):
             w.hide()
         self._install_for = ai.name
-        self.install_panel.start(ai.install(), ai.label)
+        self._install_check = False
+        self.install_panel.start(install_for(ai), ai.label)
 
     def _install_ended(self, ok: bool):
         if self._install_for != self.provider:
@@ -625,7 +657,7 @@ class Onboarding(GlassDialog):
             self.code_row.hide()
         if hasattr(self, "_poll_timer"):
             self._poll_timer.stop()
-        if not self.windowFlags() & Qt.WindowStaysOnTopHint:
+        if not self.windowFlags() & Qt.WindowStaysOnTopHint and not self._closed:
             self.setWindowFlag(Qt.WindowStaysOnTopHint, True)   # (changing a flag hides the window)
             self.show()
             self.raise_()
@@ -638,9 +670,11 @@ class Onboarding(GlassDialog):
         threading.Thread(target=lambda: self._bridge.status.emit(ai.name, ai.status()), daemon=True).start()
 
     def _poll_status(self, seconds: int):
+        """One timer for the dialog: a second sign-in click used to start another, and the first kept running."""
         self._poll_left = seconds // 3
-        self._poll_timer = QTimer(self, interval=3000)
-        self._poll_timer.timeout.connect(self._poll_tick)
+        if not hasattr(self, "_poll_timer"):
+            self._poll_timer = QTimer(self, interval=3000)
+            self._poll_timer.timeout.connect(self._poll_tick)
         self._poll_timer.start()
 
     def _poll_tick(self):
@@ -668,7 +702,10 @@ class Onboarding(GlassDialog):
         if provider != self.provider:
             return            # a check that started before the player switched provider
         t = self.t
-        self._ai_ok = st == "ok"
+        # a key that checked out counts as connected, whatever the account check says (it reads the sign-in)
+        self._ai_ok = st == "ok" or self.settings.api_key_mode(provider)
+        if self._ai_ok:
+            st = "ok"
         text = {"ok": t("ob_connected"), "logged_out": t.p("ob_not_logged", provider),
                 "not_installed": t.p("ob_not_installed", provider)}[st]
         self.status_label.setText(bidi.plain(text, t.rtl))
@@ -934,7 +971,8 @@ class SettingsDialog(GlassDialog):
         self._login_broken = False
         self._account_bridge = _Bridge()
         self._account_bridge.account.connect(self._on_account)
-        self._account_bridge.logged_out.connect(self._start_login)
+        self._account_bridge.logged_out.connect(self._after_logout)
+        self._logout_for = None
         self._account_status = None
         self._login_proc = None
         self.finished.connect(lambda *_: stop_login())
@@ -1119,6 +1157,7 @@ class SettingsDialog(GlassDialog):
         self._label_usage()
         self._login_timer.stop()
         stop_login()                       # a sign-in still waiting belongs to the AI the player left
+        self._set_on_top(True)             # it had stepped back for that sign-in's browser
         self.code_row.hide()
         self.install_panel.stop()
         self._install_check = self._login_broken = False
@@ -1126,6 +1165,9 @@ class SettingsDialog(GlassDialog):
         self.install_btn.setText(self.t.p("ob_install", name))
         for w in (self.install_btn, self.switch_btn, self.logout_btn, self.account_hint):
             w.hide()
+        if running_install(name):          # back to an AI whose installer still runs: show it again
+            self._install_for = name
+            self.install_panel.start(running_install(name), self._ai().label)
         self._set_account_text(self.t("ob_checking"))
         self.account_changed.emit()        # the app moves its AI over to this provider
         self._refresh_account()
@@ -1203,10 +1245,20 @@ class SettingsDialog(GlassDialog):
         self._set_account_text(self.t("account_signing_out"))
         self._drop_api_key()
 
+        self._logout_for = ai.name
+
         def work():
             ai.logout()
             self._account_bridge.logged_out.emit()
         threading.Thread(target=work, daemon=True).start()
+
+    def _after_logout(self):
+        """Signed out for "Switch account": the sign-in follows, unless the player picked another AI meanwhile
+        (Codex's sign-out takes up to 30 s, and a Google sign-in opening unasked is wrong)."""
+        if self._logout_for != self._ai().name:
+            self.switch_btn.setEnabled(True)
+            return
+        self._start_login()
 
     def _start_login(self):
         self.switch_btn.setEnabled(True)
@@ -1252,10 +1304,13 @@ class SettingsDialog(GlassDialog):
         ai = self._ai()
         self._login_broken = False
         self._login_proc = None
+        stop_login()                       # a sign-in still waiting holds the CLI's file (agy.exe is locked)
+        self._login_timer.stop()
         for w in (self.account_hint, self.install_btn, self.switch_btn, self.code_row):
             w.hide()
         self._install_for = ai.name
-        self.install_panel.start(ai.install(), ai.label)
+        self._install_check = False
+        self.install_panel.start(install_for(ai), ai.label)
 
     def _install_ended(self, ok: bool):
         if self._install_for != self._ai().name:

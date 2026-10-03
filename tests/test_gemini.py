@@ -342,3 +342,43 @@ def test_the_account_email_comes_from_agys_log(home):
                    "I1003 other line\n"
                    "I1003 server_oauth.go:203] OAuth: authenticated successfully as player@gmail.com\n")
     assert gemini.signed_in_email() == "player@gmail.com"
+
+
+def test_an_api_key_question_does_not_block_the_sign_in(home, tmp_path):
+    """modelProvider from an API-key run made agy refuse every sign-in check ("GEMINI_API_KEY is not set")."""
+    gemini.write_settings(tmp_path / "kb", api_key=True)
+    gemini.sign_in_mode()
+    s = json.loads(gemini.settings_path().read_text(encoding="utf-8"))
+    assert "modelProvider" not in s and s["permissions"]["allow"]          # the allow-list stays
+
+
+def test_forget_also_drops_agys_summaries_and_run_files(home):
+    d = home / ".gemini" / "antigravity-cli"
+    for sub in ("presence", "implicit"):
+        (d / sub).mkdir(parents=True)
+        (d / sub / "x").write_text("x")
+    for name in gemini.RUN_LEFTOVERS:
+        (d / name).write_text("x")
+    gemini.forget(None)
+    assert not any((d / name).exists() for name in gemini.RUN_LEFTOVERS)
+    assert not list((d / "presence").iterdir()) and not list((d / "implicit").iterdir())
+
+
+def test_saver_mode_works_before_the_model_list_is_read(home, monkeypatch):
+    monkeypatch.setattr(gemini, "_models_cache", [])
+    assert providers.get("gemini").saver_model == gemini.SAVER_ALIAS
+    monkeypatch.setattr(gemini, "read_models", lambda max_age=10: [("gemini-3.8-flash-low", "x")])
+    assert gemini.resolve_model(gemini.SAVER_ALIAS) == "gemini-3.8-flash-low"
+    assert gemini.resolve_model("gemini-3.1-pro-high") == "gemini-3.1-pro-high"
+    assert base.model_name(gemini.SAVER_ALIAS) == "Gemini Flash Low"
+
+
+def test_a_check_that_hangs_is_not_not_installed(home, monkeypatch):
+    monkeypatch.setattr(gemini, "find_agy", lambda: "agy.exe")
+
+    def hang(args, timeout=30):
+        raise gemini.CheckFailed()
+    monkeypatch.setattr(gemini, "_run", hang)
+    monkeypatch.setattr(gemini, "_models_cache", [])
+    assert providers.get("gemini").account()["status"] == "logged_out"
+    assert providers.get("gemini").models() == [(None, "")] and providers.get("gemini").read_limits() is None

@@ -1382,9 +1382,15 @@ class Overlay(QWidget):
         if type(ai).read_limits is providers.base.Provider.read_limits:
             return                      # this AI already reported it with the answer
         if not getattr(self, "_limits_wired", False):
-            self.limits_read.connect(self._note_usage)
+            self.limits_read.connect(self._note_read_usage)
             self._limits_wired = True
-        threading.Thread(target=lambda: self.limits_read.emit(ai.read_limits()), daemon=True).start()
+        threading.Thread(target=lambda: self.limits_read.emit({"provider": ai.name, "limits": ai.read_limits()}),
+                         daemon=True).start()
+
+    def _note_read_usage(self, r: dict):
+        """The read takes a while: numbers that arrive after the player switched AI belong to the other one."""
+        if r.get("provider") == self.settings["provider"]:
+            self._note_usage(r.get("limits"))
 
     def _note_usage(self, limits: dict | None):
         """Remember the plan usage; when the 5-hour window runs low, say so once (with the way to save)."""
