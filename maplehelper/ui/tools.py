@@ -13,7 +13,7 @@ from PySide6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (QButtonGroup, QCompleter, QFrame, QGraphicsOpacityEffect, QGridLayout, QHBoxLayout,
                                QLabel, QLineEdit, QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
 
-from .. import bidi, buildplan, combat, crafting, glossary, guides, market, plan, quests
+from .. import availability, bidi, buildplan, combat, crafting, glossary, guides, market, plan, quests
 from ..i18n import I18n
 from . import terms, theme
 from .controls import FlowLayout, Section, Segmented, Stepper, WrapLink, follow_typing, rtl_buttons
@@ -169,8 +169,10 @@ def _bold_names(text: str) -> str:
 def monster_rows(kb) -> list[tuple[str, str, object]]:
     """Every monster once (the version that spawns on the most maps), lowest level first."""
     best: dict[str, combat.Monster] = {}
+    open_ = availability.of(kb)
     for m in combat.monsters(kb):
-        if combat.special_monster(m.name):
+        # only monsters the KB confirms are in the game: none from Ossyria, none with no map at all
+        if combat.special_monster(m.name) or not open_.monster_key_open(m.key):
             continue
         if m.name not in best or sum(n for _, n in m.maps) > sum(n for _, n in best[m.name].maps):
             best[m.name] = m
@@ -195,8 +197,10 @@ def map_rows(kb) -> list[tuple[str, str, object]]:
             continue
         page = kb.page(k)
         where = re.search(r"\nLocation (.+)", page)
-        place = where.group(1).split(" / ")[-1].strip() if where else ""
-        if not combat.grind_map(f"{e['name']} {place}"):
+        street, _, place = where.group(1).partition(" / ") if where else ("", "", "")
+        place = place.strip()
+        # confirmed in the game by the KB (its continent is out), and a map people hunt on
+        if not combat.grind_map(kb, f"{e['name']} {street.strip()}"):
             continue
         lv = re.search(r"\nMonster levels Lv (\d+)\s*[-–]\s*(\d+)", page)
         lo = int(lv.group(1)) if lv else 999
@@ -1266,14 +1270,14 @@ class ToolsDialog(GlassDialog):
         lines = []
         if npc.sell_back is not None:
             lines.append(t("price_npc_buys", n=f"{npc.sell_back:,}"))
-        shops = [s for s in npc.shops if combat.released(s[1])]      # no El Nath / Orbis shop before they open
+        shops = [s for s in npc.shops if combat.released(self.kb, s[1])]      # no El Nath / Orbis shop before they open
         if shops:
             cheapest = shops[0]
             line = t("price_shop", n=f"{cheapest[2]:,}", npc=cheapest[0], where=cheapest[1].split(" · ")[-1])
             rank = npc.ranks.get(cheapest[:2])        # a town shop's item for a citizen grade and up
             lines.append(line + (" " + t("price_rank", rank=rank) if rank else ""))
         # NPCs the page lists without a price still sell it: name them
-        unpriced = [s for s in npc.unpriced if combat.released(s[1])][:3]
+        unpriced = [s for s in npc.unpriced if combat.released(self.kb, s[1])][:3]
         if unpriced:
             who = ", ".join(f"{n} ({w.split(' · ')[-1]})" for n, w in unpriced)
             lines.append(t("price_sold_by_also" if shops else "price_sold_by", npcs=who))

@@ -10,7 +10,7 @@ import kb_release
 
 def test_fixture_kb_is_valid(kb_copy):
     summary = kb_release.validate(kb_copy)
-    assert summary["count"] == 15 and set(summary["categories"]) == set(kb_release.CATEGORIES)
+    assert summary["count"] == 19 and set(summary["categories"]) == set(kb_release.CATEGORIES)
 
 
 def test_rejects_unreadable_index(kb_copy):
@@ -37,7 +37,7 @@ def test_rejects_big_drop_from_previous(kb_copy, tmp_path):
 def test_small_drop_is_fine(kb_copy, tmp_path):
     prev = tmp_path / "prev-index.json"
     prev.write_text(json.dumps([{"key": f"x/{i}"} for i in range(16)]), encoding="utf-8")
-    assert kb_release.validate(kb_copy, previous_index=prev)["count"] == 15
+    assert kb_release.validate(kb_copy, previous_index=prev)["count"] == 19
 
 
 def test_rejects_missing_pages(kb_copy):
@@ -71,7 +71,7 @@ def test_packed_kb_installs_through_the_real_updater(kb_copy, tmp_path, monkeypa
     monkeypatch.setattr(updater, "kb_dir", lambda: user_kb)
     assert updater.update_kb() is True
     assert updater.local_version() == m["version"]
-    assert len(json.loads((user_kb / "index.json").read_text(encoding="utf-8"))) == 15
+    assert len(json.loads((user_kb / "index.json").read_text(encoding="utf-8"))) == 19
 
 
 def test_default_version_sorts_as_string(kb_copy, tmp_path):

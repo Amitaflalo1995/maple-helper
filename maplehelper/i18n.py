@@ -404,6 +404,8 @@ STRINGS = {
     "copied": {"he": "✓ הועתק. אפשר להדביק בדיסקורד או בוואטסאפ (Ctrl+V)",
                "en": "✓ Copied. Paste it in Discord or WhatsApp (Ctrl+V)"},
     "quick_drops": {"he": "{name} מפיל {n} פריטים:", "en": "{name} drops {n} items:"},
+    "quick_not_in_game": {"he": "לפי המאגר, {name} עוד לא נמצא במשחק (לא מאושר במפה שזמינה כרגע).",
+                          "en": "According to the knowledge base, {name} isn't in the game yet (not on any map that is out now)."},
     "quick_who_drops": {"he": "מפלצות שמפילות את {name}:", "en": "Monsters that drop {name}:"},
     "quick_where": {"he": "{name} נמצא בעיקר במפות:", "en": "{name} is found mostly in:"},
     # the KB's drop lists are NiaMeowDB's MSEA reference list plus what players confirmed for Classic

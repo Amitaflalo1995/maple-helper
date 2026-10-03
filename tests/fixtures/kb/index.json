@@ -168,5 +168,37 @@
   "image": null,
   "props": {},
   "type": null
+ },
+ {
+  "key": "map/100000001",
+  "id": "100000001",
+  "name": "Henesys Hunting Ground I",
+  "category": "map",
+  "props": {},
+  "type": null
+ },
+ {
+  "key": "map/100000002",
+  "id": "100000002",
+  "name": "Henesys Hunting Ground II",
+  "category": "map",
+  "props": {},
+  "type": null
+ },
+ {
+  "key": "map/100000003",
+  "id": "100000003",
+  "name": "Snail Garden",
+  "category": "map",
+  "props": {},
+  "type": null
+ },
+ {
+  "key": "guide/maplestory-classic-worlds-release-date",
+  "id": "maplestory-classic-worlds-release-date",
+  "name": "MapleStory Classic World Release Date",
+  "category": "guide",
+  "props": {},
+  "type": null
  }
 ]

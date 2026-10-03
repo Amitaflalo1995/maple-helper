@@ -53,7 +53,7 @@ def test_next_job_stops_at_the_second_job_while_third_job_is_closed(monkeypatch)
     assert plan.next_job("Thief", "Thief", 29) == (["Assassin", "Bandit"], 30)
     assert plan.next_job("Thief", "Assassin", 34) is None
     assert plan.next_job("Magician", "Cleric", 69) is None
-    monkeypatch.setattr(jobs, "MAX_JOB_TIER", 3)       # the day 3rd job opens: one constant
+    monkeypatch.setattr(jobs, "open_tier", lambda kb=None: 3)     # the day the KB confirms 3rd job
     assert plan.next_job("Thief", "Assassin", 34) == (["Hermit", "Chief Bandit"], 70)
 
 
@@ -77,9 +77,10 @@ def test_job_tree_matches_the_knowledge_base(real):
         assert "at level 30" in real.page(f"class/{cls}")
     assert "advance again at level 70" in real.page("class/bowman")
     assert {lv for js in jobs.JOBS.values() for _, lv in js} == {1, 10, 30, 70}
-    # MAX_JOB_TIER = 2 because of this line
-    assert "Third job isn't available at launch" in real.page("guide/attacks-you-can-use-mid-jump")
-    assert jobs.MAX_JOB_TIER == 2
+    # 3rd job stays shut because the KB's release guide says so (availability.py reads it from there)
+    from maplehelper import availability
+    assert "3rd job are not initial-launch content" in real.page("guide/maplestory-classic-worlds-release-date")
+    assert jobs.open_tier(real) == 2 and availability.of(real).job_tier == 2
 
 
 # ------------------------------------------------------------------ 2, 3, 10, 11, 23: quests
@@ -150,7 +151,8 @@ def test_a_quest_finished_at_a_higher_level_waits_for_it():
     assert [q.key for q in quests.for_level(kb, 50)["soon"]] == ["quest/1"]
     assert [q.key for q in quests.for_level(kb, 52)["now"]] == ["quest/1"]
     kb = quest_kb()
-    assert quests.citizenship(kb, "", 30) == [] and quests.citizenship(kb, "", 52)
+    # the quest asks Henesys citizenship grade 9: a Henesys quest, whatever its NPC page says
+    assert quests.citizenship(kb, "Henesys", 30) == [] and quests.citizenship(kb, "Henesys", 52)
     quests._quest.cache_clear()
 
 
@@ -323,12 +325,12 @@ def test_instant_answers_on_the_real_kb(real):
     assert "M.DEF" in quick.answer("Lupin magic defense", real, t).text
     sells = quick.answer("who sells red potion", real, t)
     assert sells and sells.text.startswith("Where to buy Red Potion:") and "50 mesos" in sells.text
-    assert not any(r in sells.text for r in combat.NOT_YET)
+    assert "El Nath" not in sells.text and "Orbis" not in sells.text
     where = quick.answer("where is Red Snail", real, t)
     assert where and " · " in where.text.split("\n")[1]                  # "map · region" (kb.map_label)
-    assert quick.answer("where is Leatty", real, t) is None              # only El Nath / Orbis maps
+    assert "isn't in the game" in quick.answer("where is Leatty", real, t).text   # Ossyria only: not out
     assert quick.answer("where is King Slime", real, t) is None          # only its party quest stage
-    assert quick.answer("כמה חיים לג׳וניור סנטינל", real, t).text == "Jr. Sentinel · HP: 531"
+    assert "עוד לא נמצא במשחק" in quick.answer("כמה חיים לג׳וניור סנטינל", real, I18n("he")).text   # Orbis only
     assert quick.answer("Jr Boogie hp", real, t).text.startswith("Jr. Boogie 1 · HP:")
     assert quick.answer("Ghost Stump level", real, t) is None
     assert quick.answer("איפה יש תמנונים", real, t).entities == [
@@ -425,9 +427,9 @@ def test_recipe_counts_match_the_pages(real):
 def test_released_filters_unreleased_shops(real):
     from maplehelper import market
     red_cross = market.npc_prices(real, real._item_by_name["red cross shield"])
-    open_shops = [s for s in red_cross.shops if combat.released(s[1])]
+    open_shops = [s for s in red_cross.shops if combat.released(real, s[1])]
     assert open_shops and all("Orbis" not in s[1] for s in open_shops)
-    assert not combat.released("El Nath: El Nath Weapon Store · El Nath")
+    assert not combat.released(real, "El Nath")
 
 
 # ------------------------------------------------------------------ 26: guide captions

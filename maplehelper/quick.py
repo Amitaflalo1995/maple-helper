@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import re
 
-from . import combat, market
+from . import availability, combat, market
 from .brain import Answer
 from .kb import KnowledgeBase, _norm, fold_quotes
 
@@ -74,7 +74,7 @@ def _known_word(w: str) -> bool:
 
 def _maps(kb: KnowledgeBase, key: str, n: int = 3) -> list[str]:
     """Where a monster lives: maps a player can reach now (no El Nath before it opens, no PQ stage), labelled."""
-    return [kb.map_label(m) for m in kb._top_maps(key, 12) if combat.reachable_map(m)][:n]
+    return [kb.map_label(m) for m in kb._top_maps(key, 12) if combat.reachable_map(kb, m)][:n]
 
 
 def answer(question: str, kb: KnowledgeBase, t, char=None) -> Answer | None:
@@ -94,7 +94,7 @@ def answer(question: str, kb: KnowledgeBase, t, char=None) -> Answer | None:
     cat, name = e.get("category"), e.get("name", key)
 
     if cat == "item" and SELLS.search(q) and not DROPS.search(q):
-        shops = [s for s in market.npc_prices(kb, key).shops if combat.released(s[1])]
+        shops = [s for s in market.npc_prices(kb, key).shops if combat.released(kb, s[1])]
         if not shops:
             return None
         lines = [f"• {npc} · {where} · {price:,} mesos" for npc, where, price in shops[:3]]
@@ -107,6 +107,9 @@ def answer(question: str, kb: KnowledgeBase, t, char=None) -> Answer | None:
                       entities=[key], drop_groups=groups)
     if cat != "monster":
         return None
+    if not availability.of(kb).monster_key_open(key):
+        # the KB doesn't confirm it in the game (Ossyria, no map at all): say so, never its stats as if it were
+        return Answer(text=t("quick_not_in_game", name=name), entities=[])
     acc = bool(ACC_NEEDED.search(q))
     asks = [bool(DROPS.search(q) and not WHO.search(q)), bool(WHERE.search(q)),
             acc or any(rx.search(q) for rx, _, _ in STATS)]

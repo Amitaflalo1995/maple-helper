@@ -150,16 +150,16 @@ def progress(kb, level: int, exp_pct: float | None) -> dict | None:
     return out
 
 
-def next_job(base_class: str, job: str, level: int) -> tuple[list[str], int] | None:
+def next_job(base_class: str, job: str, level: int, kb=None) -> tuple[list[str], int] | None:
     """The next advancement: (job names to choose from, level), or None at the end of the tree
-    (the end of what's open: 3rd job isn't out yet, jobs.MAX_JOB_TIER)."""
+    (the end of what's open in the game: no 3rd job until the KB confirms it, jobs.open_tier)."""
     from .jobs import JOBS, tier_levels
     tree = JOBS.get(base_class, [])
     if base_class == "Beginner":
         lv = min(jobs[1][1] for c, jobs in JOBS.items() if c != "Beginner")    # level 10 for every class
         return ([c for c in JOBS if c != "Beginner"], lv) if level < lv else None
     current = next((lv for j, lv in tree if j == job), 0)
-    later = [lv for lv in tier_levels(base_class) if lv > current]
+    later = [lv for lv in tier_levels(base_class, kb) if lv > current]
     if not later:
         return None
     lv = later[0]
@@ -197,7 +197,7 @@ def tip(kb, c, t, dismissed: dict | None = None) -> Tip | None:
     def fresh(kind):
         return dismissed.get(kind) != c.level
 
-    nxt = next_job(c.base_class, c.job, c.level)
+    nxt = next_job(c.base_class, c.job, c.level, kb)
     if nxt and fresh("job") and nxt[1] - JOB_SOON <= c.level < nxt[1] + 3:
         jobs, lv = nxt
         names = " / ".join(jobs)

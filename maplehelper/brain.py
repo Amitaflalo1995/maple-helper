@@ -317,7 +317,18 @@ class Brain:
             self.last_model = None          # the other AI's model
 
     def system_prompt(self) -> str:
-        return SYSTEM_PROMPT.format(length=LENGTH.get(self.length, LENGTH["short"])) + self._running_on()
+        return (SYSTEM_PROMPT.format(length=LENGTH.get(self.length, LENGTH["short"])) + self._scope()
+                + self._running_on())
+
+    def _scope(self) -> str:
+        """What is in the game, as the KB states it (availability.py): the AI never sends a player to Orbis or
+        El Nath, or offers a 3rd job, while the KB says they aren't out."""
+        from . import availability
+        try:
+            return ("\n\nGame scope (from the knowledge base, the only source of truth): "
+                    + availability.of(self.kb).scope_note())
+        except Exception:      # noqa: BLE001 - a KB without the release guide: no scope line rather than no answer
+            return ""
 
     def _running_on(self) -> str:
         """Which AI answers: our instructions replace each CLI's own, and Grok then didn't know its model

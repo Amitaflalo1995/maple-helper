@@ -15,7 +15,7 @@ from ..providers.base import login_failed, login_waiting, stop_login
 from .controls import AdaptiveRow, FlowLayout, Section, Segmented, Select, Stepper, Switch, rtl_buttons
 from .glass import GlassDialog, no_default_buttons
 from ..i18n import I18n
-from ..jobs import JOBS, job_label        # the job tree: base class -> [(job, min level)], checked against the KB
+from ..jobs import JOBS, job_label, open_jobs        # the job tree: base class -> [(job, min level)], checked against the KB
 from ..kb import KnowledgeBase
 from ..store import ASSETS, History, Profiles, Settings
 from . import theme
@@ -24,8 +24,10 @@ CLASS_HE = {"Beginner": "ביגינר", "Warrior": "לוחם", "Magician": "קו
 MAX_LEVEL = 200
 
 
-def jobs_for(base_class: str, level: int) -> list[str]:
-    return [j for j, lv in JOBS.get(base_class, []) if lv <= level]
+def jobs_for(base_class: str, level: int, kb=None) -> list[str]:
+    """The jobs a character of this class can have at this level, only those in the game (no 3rd job until
+    the KB confirms it)."""
+    return [j for j, lv in open_jobs(base_class, kb) if lv <= level]
 
 
 def _title(text: str) -> QLabel:
@@ -178,7 +180,7 @@ class CharacterForm(QWidget):
 
     def __init__(self, t: I18n, kb: KnowledgeBase):
         super().__init__()
-        self.t = t
+        self.t, self.kb = t, kb
         lay = QVBoxLayout(self)
         lay.setSpacing(10)
         lay.addWidget(_field(t("ob_char_name")))
@@ -264,8 +266,8 @@ class CharacterForm(QWidget):
             # a class is chosen at its 1st job, so its level starts there (Warrior 10, Magician 8…)
             first_level = next(lv for j, lv in JOBS[cls] if j != "Beginner")
             self.level.setMinimum(first_level)
-            jobs = [j for j in jobs_for(cls, self.level.value()) if j != "Beginner"]
-            upcoming = [(j, lv) for j, lv in JOBS[cls] if lv > self.level.value()]
+            jobs = [j for j in jobs_for(cls, self.level.value(), self.kb) if j != "Beginner"]
+            upcoming = [(j, lv) for j, lv in open_jobs(cls, self.kb) if lv > self.level.value()]
             if upcoming:
                 lv = upcoming[0][1]
                 names = [job_label(job, self.t.lang) for job, need in upcoming if need == lv]

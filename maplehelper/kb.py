@@ -145,6 +145,15 @@ class KnowledgeBase:
                 out.setdefault(re.sub(r"\s*\(.*?\)", "", n), k)
         return out
 
+    def npc_key(self, name: str) -> str | None:
+        """The NPC page for a name as quests write it ("Arwen the Fairy", "Jake (Subway)")."""
+        n = (name or "").strip().lower()
+        return self._npc_by_name.get(n) or self._npc_by_name.get(re.sub(r"\s*\(.*?\)", "", n)) if n else None
+
+    def all_maps(self, key: str) -> list[str]:
+        """Every map cell of a monster page's "Map Locations" table ("Snail Hunting Ground I Maple Road")."""
+        return self._top_maps(key, 999)
+
     def page(self, key: str) -> str:
         e = self.get(key)
         if not e:
@@ -313,10 +322,13 @@ class KnowledgeBase:
 
     @cached_property
     def droppers(self) -> dict[str, list[str]]:
-        """item key → monster keys that drop it (lowest level first)."""
+        """item key → monster keys that drop it (lowest level first): only monsters the KB confirms are in the
+        game (availability.py), so no Orbis/El Nath or map-less monster is ever named as a source."""
+        from . import availability
+        open_ = availability.of(self)
         out: dict[str, list[str]] = {}
         for mkey, e in self.entities.items():
-            if e["category"] == "monster":
+            if e["category"] == "monster" and open_.monster_key_open(mkey):
                 for ikey in self.monster_drops(mkey):
                     out.setdefault(ikey, []).append(mkey)
         lvl = lambda k: (self.get(k).get("props") or {}).get("Level") or 999  # noqa: E731
@@ -335,12 +347,17 @@ class KnowledgeBase:
         return [{"monster": m, "items": groups[m]} for m in ordered]
 
     def ensure_drop_table(self) -> None:
-        """Write drops.tsv next to index.json so Claude can grep 'which monsters drop X' in one step."""
+        """Write drops.tsv next to index.json so Claude can grep 'which monsters drop X' in one step: only monsters
+        the KB confirms are in the game. A table from before that rule (no drops.ingame mark beside it) is redone."""
         path = self.root / "drops.tsv"
+        mark = self.root / "drops.ingame"
         idx = self.root / "index.json"
         try:
-            if path.exists() and idx.exists() and path.stat().st_mtime >= idx.stat().st_mtime:
+            if (path.exists() and mark.exists() and idx.exists()
+                    and path.stat().st_mtime >= idx.stat().st_mtime):
                 return
+            mark.write_text("drops.tsv lists only monsters the KB confirms are in the game (availability.py)\n",
+                            encoding="utf-8")
             lines = ["monster\tmonster_level\tmonster_key\titem\titem_type\titem_key"]
             for ikey, monsters in self.droppers.items():
                 it = self.get(ikey)
@@ -364,16 +381,19 @@ class KnowledgeBase:
 
     @cached_property
     def _monsters(self) -> list[dict]:
+        """The monsters the KB confirms are in the game, with their confirmed maps (the AI's level digest)."""
+        from . import availability
+        open_ = availability.of(self)
         rows = []
         for key, e in self.entities.items():
-            if e["category"] != "monster":
+            if e["category"] != "monster" or not open_.monster_key_open(key):
                 continue
             p = e.get("props", {})
             lvl = p.get("Level")
             if not isinstance(lvl, (int, float)):
                 continue
             rows.append({"key": key, "name": e["name"], "level": int(lvl), "hp": p.get("HP"),
-                         "exp": p.get("EXP"), "maps": self._top_maps(key)})
+                         "exp": p.get("EXP"), "maps": [m for m in self.all_maps(key) if open_.map_open(m)][:3]})
         return sorted(rows, key=lambda r: r["level"])
 
     def _top_maps(self, key: str, n: int = 3) -> list[str]:

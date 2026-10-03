@@ -2,7 +2,7 @@
 
 
 def test_loads_index_and_aliases(kb):
-    assert len(kb.entities) == 15
+    assert len(kb.entities) == 19
     assert kb.get("map/100000000")["name"] == "Henesys"
 
 

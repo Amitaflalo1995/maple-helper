@@ -6,6 +6,8 @@ import re
 from dataclasses import dataclass, field
 from functools import lru_cache
 
+from . import availability
+
 WINDOW_BELOW = 12     # quests this many levels under you still show (cheap EXP you may have skipped)
 WINDOW_ABOVE = 4      # and these coming soon
 
@@ -185,8 +187,10 @@ def for_level(kb, level: int, base_class: str = "", job: str = "", done: list[st
     profession level the character doesn't have (crafts given) is left out."""
     done_set = set(done or [])
     now, soon, town = [], [], []
+    open_ = availability.of(kb)
     for k, e in kb.entities.items():
-        if e.get("category") != "quest":
+        # only quests the KB confirms are in the game: none in Ossyria, no event the KB marks "Ended"
+        if e.get("category") != "quest" or not open_.quest_open(k):
             continue
         q = quest(kb, k)
         if not q or (base_class and not job_fits(q, base_class, job)) or not craft_fits(q, crafts):
@@ -210,7 +214,10 @@ TOWNS = ("Henesys", "Kerning City")          # the towns with citizenship (their
 
 
 def town_of(kb, q: Quest) -> str:
-    """The citizenship town a quest belongs to: its board's town, else where its NPC stands."""
+    """The citizenship town a quest belongs to: the town whose citizenship grade it requires, its board's town,
+    else where its NPC stands (Jake and Mr. Goldstein's pages name no town, their quests ask Kerning's grade)."""
+    if q.grade and q.grade[0] in TOWNS:
+        return q.grade[0]
     m = re.search(r"\((.+)\)", q.npc or "")
     if m and m.group(1) in TOWNS:
         return m.group(1)
@@ -225,8 +232,9 @@ def citizenship(kb, town: str, level: int, done: list[str] | None = None) -> lis
     (one you can take but only complete at a higher level, "Level 52+ to complete", waits for that level)."""
     done_set = set(done or [])
     out = []
+    open_ = availability.of(kb)
     for k, e in kb.entities.items():
-        if e.get("category") != "quest" or k in done_set:
+        if e.get("category") != "quest" or k in done_set or not open_.quest_open(k):
             continue
         q = quest(kb, k)
         if q and q.area == "Citizenship" and q.opens_at() <= level and town_of(kb, q) == town:

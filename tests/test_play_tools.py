@@ -28,7 +28,7 @@ def test_training_spots_are_reachable_and_ranked():
     from maplehelper.kb import KnowledgeBase
     kb = KnowledgeBase(REAL_KB)
     rows = combat.spots(kb, 30, acc=73, dmg=(140, 300), n=6)
-    assert rows and all(combat.grind_map(s.map) for s in rows)
+    assert rows and all(combat.grind_map(kb, s.map) for s in rows)
     assert not any("Orbis" in s.map or "Warrior's" in s.map for s in rows)
     assert rows == sorted(rows, key=lambda s: -s.score)
 

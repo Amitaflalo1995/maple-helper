@@ -202,10 +202,7 @@
    "checks": {
     "must_mention": [
      "Crimson Balrog",
-     "2652"
-    ],
-    "entities_include": [
-     "monster/700005"
+     "עוד לא נמצא במשחק"
     ],
     "instant": true
    }
@@ -348,8 +345,7 @@
    "kind": "who_drops",
    "checks": {
     "must_mention": [
-     "Mano",
-     "Trixter"
+     "Mano"
     ],
     "entities_include": [
      "item/294",
