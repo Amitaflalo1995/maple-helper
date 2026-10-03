@@ -114,6 +114,18 @@ def isolate_ltr_runs(text: str) -> str:
     return _isolate_runs(text)
 
 
+KEEP_TOGETHER = 28      # an English piece up to this long never wraps inside a Hebrew line
+
+
+def _keep_together(run: str) -> str:
+    """A short English piece in a Hebrew line stays on one line: wrapped inside, its two halves landed on two
+    lines in mirrored order ("HP/" at one line's end and "MP +10" on the next, seen live). No-break spaces, and
+    a word joiner after each "/" (a line may break after a slash)."""
+    if len(run) > KEEP_TOGETHER:
+        return run
+    return run.replace(" ", " ").replace("/", "/⁠")
+
+
 def _isolate_runs(text: str) -> str:
     out, pos = [], 0
     for m in _RUN.finditer(text):
@@ -126,7 +138,7 @@ def _isolate_runs(text: str) -> str:
         # so two English blocks never glue into one left-to-right chunk
         # Qt mirrors a ">" that follows a digit inside a Hebrew line ("Line 2 <Area 1>" shows "<Area 1<"),
         # so map names with an <area> suffix are shown as "Line 2 · Area 1"
-        shown = re.sub(r"\s*<([^<>]+)>", r" · \1", run)
+        shown = _keep_together(re.sub(r"\s*<([^<>]+)>", r" · \1", run))
         out.append(f"{LRE}{shown}{PDF}{RLM}")
         pos = end
     out.append(text[pos:])
