@@ -208,8 +208,8 @@ def other_class(update: dict, c) -> str | None:
 
 
 def read_inventory(full, cursor, kb) -> tuple[list, list, str]:
-    """(detail tiles, inventory slots, their description for the AI) from a full-resolution grab. Runs in a worker
-    thread; a failed read still leaves the AI the screenshot."""
+    """(detail tiles, inventory slots, their reading for the AI, <inventory_read>) from a full-resolution grab. Runs
+    in a worker thread; a failed read still leaves the AI the screenshot."""
     from .. import capture, inventory
     try:
         tiles = capture.detail_tiles(full)
@@ -220,7 +220,7 @@ def read_inventory(full, cursor, kb) -> tuple[list, list, str]:
     except Exception:      # noqa: BLE001
         slots = []
     try:
-        described = inventory.describe(slots, kb)
+        described = inventory.for_ai(slots, kb)
     except Exception:      # noqa: BLE001
         described = ""
     return tiles, slots, described
@@ -832,18 +832,37 @@ class Overlay(QWidget):
         self._reading_inventory = False
         if self.profiles.active_id == cid:     # another character meanwhile: its question gets none of this
             self._detail_tiles = tiles
-            self._hidden_context = ("<inventory_read>\nThe app matched each filled inventory slot's icon to the "
-                                    "database pictures (closest first; the first is almost always right):\n"
-                                    + described + "\n</inventory_read>") if described else None
-            found = [s.matches[0][0] for s in slots if s.matches]
-            # what the app itself recognised, first; the question and the AI's advice follow
-            uniq = list(dict.fromkeys(found))     # 3 slots of Red Potion are one item, as the cards show it
-            if uniq:
-                self.add_system(lambda t, n=len(uniq): t("inv_found", n=n))
-                self.add_cards(uniq)
-            else:
-                self.add_system(lambda t: t("inv_not_found"))
+            self._hidden_context = described or None
+            self._show_inventory_read(slots)
         self.ask(question, shown=shown)
+
+    def _show_inventory_read(self, slots: list):
+        """What the app itself recognised, first (the question and the AI's advice follow): cards for the items it
+        is sure of. A slot whose picture several items share, or one it can't tell, it says so and asks the player
+        to point the mouse at it in the game, so the next check's screenshot shows the item's name."""
+        from .. import inventory
+        status = lambda s: getattr(s, "status", "certain")     # noqa: E731
+        found = [s.matches[0][0] for s in slots if status(s) == "certain" and s.matches]
+        uniq = list(dict.fromkeys(found))     # 3 slots of Red Potion are one item, as the cards show it
+        if uniq:
+            self.add_system(lambda t, n=len(uniq): t("inv_found", n=n))
+            self.add_cards(uniq)
+        alike: dict[tuple, list] = {}         # the same look-alikes in several slots: one line
+        for s in slots:
+            if status(s) == "ambiguous":
+                alike.setdefault(tuple(sorted(k for k, _ in s.matches)), []).append(s)
+        for group in alike.values():
+            where = ", ".join(str(s.index) for s in group)
+            n, example = len(group[0].matches), inventory.ambiguous_example(group[0], self.kb)
+            key = "inv_alike_slots" if len(group) > 1 else "inv_alike"
+            self.add_system(lambda t, k=key, w=where, n=n, e=example: t(k, slots=w, n=n, example=e))
+        unknown = [str(s.index) for s in slots if status(s) == "unknown"]
+        if unknown:
+            self.add_system(lambda t, n=len(unknown), w=", ".join(unknown): t("inv_unknown", n=n, slots=w))
+        if alike or unknown:
+            self.add_system(lambda t: t("inv_hover"))
+        if not (uniq or alike or unknown or any(status(s) == "hovered" for s in slots)):
+            self.add_system(lambda t: t("inv_not_found"))
 
     def continue_from(self, question: str, answer: str, keys: list):
         """An earlier exchange (from the history) back in the feed; the next question is asked as its follow-up."""
@@ -1161,6 +1180,11 @@ class Overlay(QWidget):
     def keyPressEvent(self, e):
         # Esc deliberately does nothing: F9 or the window buttons close the chat.
         if e.key() == Qt.Key_Escape:
+            return
+        if e.key() == Qt.Key_F5:
+            # the inventory check again, without a click: the mouse stays on the item in the game, so its tooltip
+            # (the item's name) is in the screenshot
+            self.ask_with_screenshot(self.t("sell_q"), detail=True, shown=self.t("inv_check"))
             return
         super().keyPressEvent(e)
 

@@ -393,6 +393,18 @@ STRINGS = {
     "inv_found_one": {"he": "זיהיתי פריט אחד בתיק:", "en": "I recognized 1 item in the inventory:"},
     "inv_not_found": {"he": "לא מצאתי את חלון האינבנטורי בצילום. פתחו אותו במשחק (מקש I) ונסו שוב.",
                       "en": "I couldn't find the inventory window in the screenshot. Open it in game (I key) and try again."},
+    "inv_alike": {"he": "במשבצת {slots} יש אחד מתוך {n} פריטים שנראים בדיוק אותו דבר (למשל {example}).",
+                  "en": "Slot {slots} holds one of {n} items that look exactly the same (for example {example})."},
+    "inv_alike_slots": {"he": "במשבצות {slots} יש בכל אחת אחד מתוך {n} פריטים שנראים בדיוק אותו דבר (למשל {example}).",
+                        "en": "Slots {slots} each hold one of {n} items that look exactly the same (for example {example})."},
+    "inv_unknown": {"he": "לא הצלחתי לזהות {n} פריטים (משבצות {slots}).",
+                    "en": "I couldn't recognize {n} items (slots {slots})."},
+    "inv_unknown_one": {"he": "לא הצלחתי לזהות את הפריט במשבצת {slots}.",
+                        "en": "I couldn't recognize the item in slot {slots}."},
+    "inv_hover": {"he": "כדי שאדע בדיוק מה זה: במשחק, העבירו את העכבר מעל הפריט (בלי ללחוץ) עד שהשם שלו מופיע, "
+                        "ואז לחצו F5 כדי לבדוק שוב. אקרא את השם מהצילום.",
+                  "en": "So I know exactly which it is: in the game, hover the mouse over the item (don't click) until "
+                        "its name shows, then press F5 to check again. I'll read the name from the screenshot."},
     "wish_ask": {"he": "איפה הכי כדאי לי לצוד {monster} כדי להשיג {item}? כמה בערך צריך להרוג?",
                  "en": "Where's the best place for me to hunt {monster} to get {item}? About how many kills does it take?"},
     "wish_dropped_by": {"he": "מפילים:", "en": "Dropped by:"},

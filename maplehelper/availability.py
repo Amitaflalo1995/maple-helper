@@ -22,6 +22,26 @@ RELEASE_GUIDE = "guide/maplestory-classic-worlds-release-date"
 _SECTION_END = re.compile(r"^(Level cap|Changes since|Preparing for launch|Not at launch|Confirmed content)\s*$", re.M)
 _MAP_LOCATION = re.compile(r"^Location (.+?) / (.+?)\s*$", re.M)
 _NPC_LOCATION = re.compile(r"^Location\n(.+?)\s*$", re.M)
+# an item page's sources and the headings that end them
+_ITEM_SOURCES = ("MSEA Reference Drops", "Where to buy", "Quest Reward", "Quests", "Craftable", "Cash Shop")
+_ITEM_STOP = re.compile(r"^(Free Market Prices|Dropped By|Needed By|Recipes|Ingredients|Change history|← Previous|"
+                        r"Safe to Sell\?.*|(Similar|Compare) .* items|" + "|".join(map(re.escape, _ITEM_SOURCES)) + ")$")
+_SHOP_PLACE = re.compile(r"^(.+?): (.+?) · (.+)$")          # "Victoria Road: Perion Department Store · Perion"
+_PERCENT = re.compile(r"\(\s*[\d.]+\s*%\s*\)")
+
+
+def _item_sections(lines: list[str]):
+    """(heading, its lines) for every source section of an item page."""
+    head, body = None, []
+    for s in lines:
+        if _ITEM_STOP.match(s):
+            if head:
+                yield head, body
+            head, body = (s if s in _ITEM_SOURCES else None), []
+        elif head:
+            body.append(s)
+    if head:
+        yield head, body
 
 
 def _section(text: str, head: str) -> str:
@@ -160,6 +180,69 @@ class Availability:
         npc = self.kb.npc_key(str(props.get("NPC") or "")) if hasattr(self.kb, "npc_key") else None
         where = self.npc_continent(npc) if npc else None
         return where in self.confirmed if where else True
+
+    # ------------------------------------------------------------ items
+
+    def item_open(self, key: str) -> bool:
+        """An item the KB confirms a player can hold now: at least one source of it is in the game. Sources, all
+        read from the KB: a monster that drops it and is open (its monster page, or the item page's MSEA drop list),
+        a shop in a released place ("Where to buy"), an open quest that gives it ("Quest Reward") or asks for it
+        ("Quests"), a crafting recipe ("Craftable"), or the Cash Shop selling it. An item with none (Return Scroll
+        to Orbis, Dark Jr. Yeti Skin) is not in the game."""
+        if not self.known:
+            return True
+        return self._once("item", key, lambda: self._item_open(key))
+
+    @property
+    def _names_by_category(self) -> dict[str, dict[str, list[str]]]:
+        found = self._memo.get(("names", ""))
+        if found is None:
+            found = {"monster": {}, "quest": {}}
+            for k, e in self.kb.entities.items():
+                if e.get("category") in found and e.get("name"):
+                    found[e["category"]].setdefault(e["name"].strip().lower(), []).append(k)
+            self._memo[("names", "")] = found
+        return found
+
+    def _quest_keys_in(self, line: str) -> list[str]:
+        """The quests an item page's line names: "Jane's Final Challenge ( 25 %)", "Taking Out the Alligators 1
+        Warrior" (the quest name, then a job or the quest's NPC)."""
+        low = _PERCENT.sub("", line).strip().lower()
+        quests = self._names_by_category["quest"]
+        words = low.split(" ")
+        for n in range(len(words), 0, -1):           # the longest name the line starts with
+            hit = quests.get(" ".join(words[:n]))
+            if hit:
+                return hit
+        return []
+
+    def _item_open(self, key: str) -> bool:
+        e = self.kb.get(key)
+        if not e or e.get("category") != "item":
+            return False
+        droppers = getattr(self.kb, "droppers", None)
+        if isinstance(droppers, dict) and droppers.get(key):     # only open monsters are listed there
+            return True
+        lines = [s.strip() for s in self.kb.page(key).splitlines()]
+        monsters = self._names_by_category["monster"]
+        for head, body in _item_sections(lines):
+            if head == "MSEA Reference Drops":
+                if any(self.monster_key_open(m) for s in body for m in monsters.get(s.lower(), ())):
+                    return True
+            elif head == "Where to buy":
+                for s in body:
+                    m = _SHOP_PLACE.match(s)
+                    if m and self.place_open(m.group(1)) and self.place_open(m.group(3)):
+                        return True
+            elif head in ("Quest Reward", "Quests"):
+                if any(self.quest_open(q) for s in body for q in self._quest_keys_in(s)):
+                    return True
+            elif head == "Craftable":
+                return True
+            elif head == "Cash Shop":
+                if any(s.endswith("· Available") for s in body[:3]):
+                    return True
+        return False
 
     # ------------------------------------------------------------ jobs
 
