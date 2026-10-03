@@ -29,7 +29,7 @@
 
 ## About
 
-Maple Helper is a desktop assistant for Windows and macOS that puts a chat overlay on top of Maple Story Classic World. Press **F9** to open it, then type a question or press **F10** to speak (press again to stop). Answers draw on a screenshot of your game, your character profile, previous conversations, and a local copy of the NiaMeowDB game database.
+Maple Helper is a desktop assistant for Windows and macOS that puts a chat overlay on top of Maple Story Classic World. Press **F9** to open it, then type a question or press **F10** to speak (press again to stop). Answers come from your own AI account (Claude, ChatGPT, Gemini or Grok) and draw on a screenshot of your game, your character profile, previous conversations, and a local copy of the NiaMeowDB game database.
 
 Use it to look up drops, find quest NPCs, or ask where to train without switching away from the game. The **play tools** window adds calculators and planners that read the same database: where to train, hit and damage, your build, quests for your level, crafting, citizenship and prices.
 
@@ -143,7 +143,7 @@ Website: **https://maplehelper.app/** (source: [maple-helper-site](https://githu
   </picture>
 </p>
 <h3 align="center">Make it yours</h3>
-<p align="center">Light or dark appearance, hotkeys, language, font size, answer length, and your AI account with its plan usage.</p>
+<p align="center">Light or dark appearance, hotkeys, language, font size, answer length, and your AI (Claude, ChatGPT, Gemini or Grok) with its account and plan usage.</p>
 
 ## Download
 
@@ -153,7 +153,9 @@ Website: **https://maplehelper.app/** (source: [maple-helper-site](https://githu
 
 ## Features
 
-- **In-game chat:** Open and close the overlay with a global hotkey.
+- **In-game chat:** Open and close the overlay with a global hotkey, and resize it from any edge or corner.
+- **Your choice of AI:** Claude, ChatGPT, Gemini or Grok, on your own account or an API key. The app installs each one's official tool for you, with the progress shown in the app, and you can switch any time in settings.
+- **Stays on the game:** Questions that aren't about MapleStory Classic get a short note instead of an answer, and the answer comes in the language you asked in.
 - **Screen context:** Capture the game window when you open the overlay, with a camera button to refresh the screenshot.
 - **Character profiles:** Track your level, job, map, and active quests, with updates based on your conversations and screenshots. Edit, delete or switch characters from the character card's menu.
 - **Conversation memory:** Keep separate chat history and session summaries for each character.
@@ -166,7 +168,7 @@ Website: **https://maplehelper.app/** (source: [maple-helper-site](https://githu
   - **Where to train:** maps for your level, ranked, with your hit chance, hits to kill, EXP per kill and kills to level.
   - **Hit & damage:** pick a monster to see the ACC you need to never miss, your hit chance and hits to kill.
   - **Build plan:** your class guide's AP, SP and gear tables, with your current level highlighted.
-  - **Quests:** the quests you can take now (and soon), with the NPC, what they need and the rewards, best EXP first.
+  - **Quests:** the quests you can take now (and soon), with the NPC, what they need and the rewards, best EXP first, and a search by quest name, NPC, monster or item.
   - **Crafting:** all six professions explained (what they make, the teacher and town, the first and master quests, where to craft), then every recipe for your level, best EXP per meso first.
   - **Citizenship:** Henesys or Kerning City advice for your class, and the town's quests.
   - **Prices:** NPC buy and sell prices, and a live Free Market median from player reports on NiaMeowDB.
@@ -186,8 +188,8 @@ The app uses screen capture and its own overlay window. It does not read game me
   - **Claude**: Claude Code installed, with a Claude Pro or Max account or an Anthropic API key.
   - **ChatGPT**: a paid ChatGPT plan or an OpenAI API key (the app installs and signs in to OpenAI's official tool, the Codex CLI, for you). ChatGPT answers appear all at once instead of streaming.
   - **Gemini**: a personal Google account or a Gemini API key. The app installs Google's official tool, Antigravity (since June 2026 Google serves personal accounts only through it), and signs you in: after signing in to Google in the browser, you paste the code it shows into the app, within a minute.
-- Maple Story Classic World running in **Borderless** or **Windowed Fullscreen** mode.
   - **Grok**: a Grok account (a free one works, with a limited quota; SuperGrok or X Premium+ gives more), or an xAI API key. The app installs xAI's official tool, Grok Build, and signs you in: you approve the sign-in in the browser (the code is filled in).
+- Maple Story Classic World running in **Borderless** or **Windowed Fullscreen** mode.
 - An internet connection for AI responses and initial data downloads.
 - A microphone if you want to use voice input.
 
@@ -259,9 +261,9 @@ The speech model downloads on first use, so the first voice request takes longer
 
 ## Data and privacy
 
-Settings, character profiles, conversation history, speech models, and downloaded knowledge-base updates are stored locally in `%APPDATA%\MapleHelper` on Windows and `~/Library/Application Support/MapleHelper` on macOS. The knowledge base built from source is stored in `data/kb/` inside the repository. API keys entered in the app are stored in Windows Credential Manager or the macOS Keychain.
+Settings, character profiles, conversation history, speech models, and downloaded knowledge-base updates are stored locally in `%APPDATA%\MapleHelper` on Windows and `~/Library/Application Support/MapleHelper` on macOS. The knowledge base built from source is stored in `data/kb/` inside the repository. API keys entered in the app are stored in Windows Credential Manager or the macOS Keychain. Antigravity (Gemini) and Grok Build run with folders of their own inside Maple Helper's data folder, so your own setup of those tools never reaches the answers; Grok's sign-in is kept there, and Antigravity's in the system credential store it shares with your own Antigravity.
 
-When you ask a question, the app sends your chosen AI provider (Anthropic for Claude, OpenAI for ChatGPT, Google for Gemini, xAI for Grok) your question, the available game screenshot, character profile, recent conversation, earlier session summaries, and relevant knowledge-base context. The AI can also read local knowledge-base files to answer the question; it runs read-only and cannot change files. With Codex, Gemini and Grok, the screenshot is written to a temporary file for the run and deleted right after. After a chat session has been closed for 30 minutes, the app may send the session transcript to the same provider to generate a summary for future conversations.
+When you ask a question, the app sends your chosen AI provider (Anthropic for Claude, OpenAI for ChatGPT, Google for Gemini, xAI for Grok) your question, the available game screenshot, character profile, recent conversation, earlier session summaries, and relevant knowledge-base context. The AI can also read local knowledge-base files to answer the question; it runs read-only and cannot change files or search the web. Claude and Grok can read nothing outside the knowledge base and the screenshot; Gemini is kept out of your own files too. With Codex, Gemini and Grok, the screenshot is written to a temporary file for the run and deleted right after. After a chat session has been closed for 30 minutes, the app may send the session transcript to the same provider to generate a summary for future conversations.
 
 Voice recordings are transcribed locally. The resulting text is used as your question. The Prices tool asks NiaMeowDB for recent Free Market listings of the item you look up (only the item name is sent). The app also checks GitHub Releases for app and knowledge-base updates, and installs an update only when its SHA-256 matches the release's checksums.
 
