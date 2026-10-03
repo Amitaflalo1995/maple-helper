@@ -1,5 +1,24 @@
 [
  {
+  "version": "0.8.0",
+  "he": [
+   "אפשר לבחור עכשיו גם Gemini (עם חשבון Google) וגם Grok (עם חשבון Grok, גם חינמי), לצד Claude ו-ChatGPT. מחליפים בכל רגע בהגדרות ← חשבון AI.",
+   "ההתקנה של כלי ה-AI נעשית בתוך האפליקציה, עם פס התקדמות והודעה ברורה אם משהו נכשל, בלי חלון שחור.",
+   "כלי משחק ← קווסטים: חיפוש לפי שם קווסט, NPC, מפלצת או פריט, מתוך הקווסטים שמתאימים לרמה שלכם.",
+   "אפשר לשנות את גודל חלון הצ'אט מכל צד ומכל פינה.",
+   "העוזר נשאר ממוקד במשחק: על שאלות שלא קשורות הוא עונה בקצרה שהוא לא עוזר בהן, והתשובה תמיד בשפה ששאלתם בה.",
+   "תיקונים: ההתחברות פותחת לשונית אחת בדפדפן, החלפת מודל כבר לא עוצרת תשובה באמצע, ChatGPT נעול יותר (בלי חיפוש באינטרנט ובלי חיבורים חיצוניים), ועוד שיפורים רבים ביציבות."
+  ],
+  "en": [
+   "You can now pick Gemini (with a Google account) or Grok (with a Grok account, a free one works too), alongside Claude and ChatGPT. Switch any time in Settings → AI account.",
+   "The AI's tool installs inside the app, with a progress bar and a clear message if something fails, no black console window.",
+   "Play tools → Quests: search by quest name, NPC, monster or item, within the quests that fit your level.",
+   "Resize the chat window from any edge or corner.",
+   "The helper stays on the game: questions about anything else get a short note, and answers always come in the language you asked in.",
+   "Fixes: signing in opens one browser tab, changing the model no longer stops an answer midway, ChatGPT is locked down further (no web search, no outside connectors), and many stability improvements."
+  ]
+ },
+ {
   "version": "0.7.8",
   "he": [
    "עדכונים מהירים בהרבה: מאגר המידע (כ-8,000 קבצים) כבר לא מותקן מחדש בכל עדכון כשהוא לא השתנה."

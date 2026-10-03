@@ -33,7 +33,8 @@ APP_ICON = "app.ico" if sys.platform == "win32" else "icon-256.png"
 
 
 def _remove_stray_screenshots() -> None:
-    """Screenshots handed to ChatGPT live in %TEMP% only for one answer; a quit mid-answer left them there."""
+    """Screenshots handed to ChatGPT live in %TEMP% only for one answer; a quit mid-answer left them there
+    (Gemini's are in Maple Helper's Antigravity folder, removed the same way)."""
     import glob
     import tempfile
     import time
@@ -41,6 +42,15 @@ def _remove_stray_screenshots() -> None:
         try:
             if time.time() - os.path.getmtime(f) > 3600:
                 os.remove(f)
+        except OSError:
+            pass
+    import shutil
+
+    from .providers import gemini, grok
+    for d in glob.glob(str(gemini.shots_dir() / "run-*")) + glob.glob(str(grok.shots_dir() / "run-*")):
+        try:
+            if time.time() - os.path.getmtime(d) > 3600:
+                shutil.rmtree(d, ignore_errors=True)
         except OSError:
             pass
 
@@ -437,12 +447,14 @@ class MapleHelperApp:
         self.brain.provider = self.settings["provider"]
         ai = providers.get(self.settings["provider"])
         self.brain.api_key = ai.load_api_key() if self.settings.api_key_mode(ai.name) else None
+        self.brain.ui_lang = self.settings["language"]
         self.apply_saver_mode()
 
     def on_account_changed(self):
-        # another provider or account: a warm process started under the old one is replaced
+        # another provider, account or model: a warm process started under the old setup is replaced. An answer
+        # in progress goes on (changing the model mid-answer killed it); switching provider ends the old one anyway
         self.apply_ai_settings()
-        self.brain.shutdown()
+        self.brain.drop_warm()
         threading.Thread(target=self.brain.prewarm, daemon=True).start()
 
     def make_report(self):
@@ -809,6 +821,11 @@ class MapleHelperApp:
             pass
         try:
             self.brain.shutdown()
+        except Exception:
+            pass
+        try:
+            from .providers.base import stop_login
+            stop_login()                         # a sign-in still waiting (Codex's holds a port the next one needs)
         except Exception:
             pass
         try:

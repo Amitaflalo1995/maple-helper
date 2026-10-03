@@ -250,3 +250,23 @@ def test_ask_in_chat_while_busy_says_so_and_continue_closes_the_history():
     calls.clear()
     MapleHelperApp.continue_conversation(fake, "q", "a", [])
     assert calls == ["closed", "continue"]
+
+
+def test_every_edge_and_corner_resizes_the_chat(overlay):
+    """Only the bottom corner's grip resized it; now the frameless window's whole rim does, like a border."""
+    from PySide6.QtCore import QPoint, Qt
+    ov = overlay
+    ov.resize(500, 700)
+    w, h, z = ov.width(), ov.height(), ov.SHADOW + ov.EDGE
+    E = ov._edges_at
+    assert E(QPoint(2, 2)) == Qt.LeftEdge | Qt.TopEdge
+    assert E(QPoint(w - 2, 2)) == Qt.RightEdge | Qt.TopEdge
+    assert E(QPoint(2, h - 2)) == Qt.LeftEdge | Qt.BottomEdge
+    assert E(QPoint(w - 2, h - 2)) == Qt.RightEdge | Qt.BottomEdge
+    assert E(QPoint(w // 2, 3)) == Qt.TopEdge and E(QPoint(w - 3, h // 2)) == Qt.RightEdge
+    assert E(QPoint(z + 5, h // 2)) == Qt.Edge(0) and E(QPoint(w // 2, h // 2)) == Qt.Edge(0)
+    assert ov._edge_cursor(Qt.LeftEdge | Qt.TopEdge) == Qt.SizeFDiagCursor
+    assert ov._edge_cursor(Qt.LeftEdge | Qt.BottomEdge) == Qt.SizeBDiagCursor
+    assert ov._edge_cursor(Qt.TopEdge) == Qt.SizeVerCursor and ov._edge_cursor(Qt.Edge(0)) is None
+    # the rim is free of controls: the header and the input start inside it
+    assert ov.title_bar.geometry().top() >= z and ov.title_bar.geometry().left() >= z

@@ -1,4 +1,4 @@
-"""Asks the player's chosen AI (Claude Code or Codex, see providers/) and turns its reply into an Answer.
+"""Asks the player's chosen AI (Claude Code, Codex, Antigravity or Grok Build, see providers/) and turns its reply into an Answer.
 
 The prompt, the knowledge-base pre-fetch and the answer post-processing (cards,
 drop groups, profile updates) live here and are the same for every provider;
@@ -44,6 +44,12 @@ come from, and return every dropped item's key in entities.
 
 Advice must fit the player's level and job. If the profile lacks level or job, ask for it before recommending.
 
+Scope: you help only with MapleStory Classic (the game, the player's characters) and with Maple Helper itself (what it
+can do, its settings, which AI and model answers). Anything else
+(news, real people, politics, general knowledge, other games, coding, homework, writing or file tasks) you do not answer,
+not even briefly: reply in one short line, in the question's language, that you only help with MapleStory Classic, and
+invite a game question. Entities stay empty.
+
 Style:
 - Reply in the language of the question (Hebrew or English). Hebrew: natural gamer Hebrew (לגרינד, דרופ, לעשות ג'וב, לבל).
 - In-game names (items, monsters, maps, NPCs, skills, quests, jobs) always in English, exactly as in the data.
@@ -84,6 +90,7 @@ class Answer:
 
 
 REPLY_RULES = """<reply_rules>
+- Only MapleStory Classic: a question about anything else gets one short line saying you only help with the game.
 - At most {length} short lines. No filler, no follow-up offers.
 - NEVER translate game names: items, monsters, maps, NPCs, skills and quests stay in English exactly as in the data
   ("Blue Snail Shell", not "קונכיית חילזון כחול"), even inside a Hebrew sentence.
@@ -96,10 +103,22 @@ REPLY_RULES = """<reply_rules>
 LENGTH_LINES = {"short": 6, "detailed": 15}
 
 
+def reply_language(question: str, ui_lang: str = "he") -> str:
+    """The answer's language: the question's (Hebrew letters: Hebrew, Latin ones: English), else the app's.
+    Hebrew in the context (earlier session summaries, profile notes) made an English player's answer Hebrew."""
+    if re.search(r"[֐-׿]", question):
+        return "Hebrew"
+    if re.search(r"[A-Za-z]", _FOCUS_TAG.sub("", question)):
+        return "English"
+    return "Hebrew" if ui_lang == "he" else "English"
+
+
 def build_prompt(question: str, character: Character | None, history: History | None, kb: KnowledgeBase,
                  has_screenshot: bool, length: str = "short", focus=None, extra: str | None = None,
-                 kb_context: bool = True) -> str:
-    """kb_context=False: no knowledge-base pre-fetch (a screenshot read needs only the profile and the picture)."""
+                 kb_context: bool = True, ui_lang: str = "he") -> str:
+    """kb_context=False: no knowledge-base pre-fetch (a screenshot read needs only the profile and the picture).
+    ui_lang: the app's language, for a question with no words to tell by."""
+    language = f"Reply in {reply_language(question, ui_lang)}, whatever language the context above is in."
     parts = []
     if character:
         parts.append(f"<player_profile>\n{character.summary()}\n</player_profile>")
@@ -119,7 +138,8 @@ def build_prompt(question: str, character: Character | None, history: History | 
     ctx = []
     if not kb_context:
         question_parts = [f"<screenshot>{'attached above' if has_screenshot else 'not available'}</screenshot>",
-                          f"<question>\n{question}\n</question>", REPLY_RULES.format(length=LENGTH_LINES["short"])]
+                          f"<question>\n{question}\n</question>", language,
+                          REPLY_RULES.format(length=LENGTH_LINES["short"])]
         return "\n\n".join(parts + question_parts)
     if character:
         digest = kb.level_digest(character.level)
@@ -167,8 +187,9 @@ def build_prompt(question: str, character: Character | None, history: History | 
     if extra:
         parts.append(extra)          # app-made context (inventory read, a picked-up conversation): prompt only
     parts.append(f"<question>\n{question}\n</question>")
-    if re.search(r"[\u0590-\u05FF]", question):
-        parts.append("Reply in Hebrew.")      # it slipped into English once after a screenshot-heavy turn (live)
+    # a Hebrew question slipped into English once after a screenshot-heavy turn (live), and an English one into
+    # Hebrew with Hebrew in the context: the language is said outright, after the question
+    parts.append(language)
     parts.append(REPLY_RULES.format(length=LENGTH_LINES.get(length, 6)))
     return "\n\n".join(parts)
 
@@ -277,6 +298,8 @@ class Brain:
         self.model = model
         self.length = length
         self.api_key = api_key
+        self.last_model = None         # the model that answered last (the CLI's default has no name until then)
+        self.ui_lang = "he"            # the app's language (set by the app): for questions with no words to tell by
         self._provider = providers.get(provider)
         self.backend = self._provider.backend(self)
 
@@ -291,12 +314,22 @@ class Brain:
         if new.name != self._provider.name:
             self.backend.shutdown()
             self._provider, self.backend = new, new.backend(self)
+            self.last_model = None          # the other AI's model
 
     def system_prompt(self) -> str:
-        return SYSTEM_PROMPT.format(length=LENGTH.get(self.length, LENGTH["short"]))
+        return SYSTEM_PROMPT.format(length=LENGTH.get(self.length, LENGTH["short"])) + self._running_on()
+
+    def _running_on(self) -> str:
+        """Which AI answers: our instructions replace each CLI's own, and Grok then didn't know its model
+        ("which model am I talking to?" got "not shown in this session")."""
+        from .providers.base import model_name
+        model = self.last_model or self.model
+        name = model_name(model) if model else ""
+        return f"\nYou run on {self._provider.label}" + (f", model {name}" if name else "") + "."
 
     def prewarm(self) -> None:
         """Get the next question's process ready now, where the provider supports it."""
+        self._find_cli()
         self.backend.prewarm()
 
     def shutdown(self) -> None:
@@ -308,7 +341,19 @@ class Brain:
         if drop:
             drop()
 
+    def _find_cli(self) -> None:
+        """The backend looked for its CLI when it was made: an install since (from Settings) or a CLI that moved
+        (a Store update renames its folder) left it with none, and every question said "not installed" until
+        a restart."""
+        import os
+        exe = self.backend.exe
+        if not exe or (os.path.isabs(exe) and not os.path.exists(exe)):
+            found = self._provider.find_exe()
+            if found != exe:
+                self.backend.exe = found
+
     def available(self) -> bool:
+        self._find_cli()
         return self.backend.exe is not None
 
     def cancel(self) -> None:
@@ -321,6 +366,7 @@ class Brain:
         extra: context for the prompt only; every heuristic below reads the player's own question.
         model: another model for this one call (None: the player's). light: a screenshot read (the ⟳ sync): no
         knowledge-base pre-fetch and no file tools, so a light model answers in seconds instead of ~40 s."""
+        self._find_cli()
         if not self.backend.exe:
             return Answer(error="not_installed")
         self.kb.ensure_drop_table()
@@ -328,7 +374,7 @@ class Brain:
         # True (one screenshot), or the number of detail tiles that follow it (an int, never 1 == True)
         has = (len(shots) - 1 if len(shots) > 1 else True) if shots else False
         prompt = build_prompt(question, character, history, self.kb, has, "short" if light else self.length, focus,
-                              extra, kb_context=not light)
+                              extra, kb_context=not light, ui_lang=self.ui_lang)
         raw_delta = (lambda raw: on_delta(streamed_text(raw))) if on_delta else None
         if model or light:
             result = self.backend.run(prompt, screenshot_jpeg, raw_delta, model=model, tools=not light)
@@ -379,6 +425,8 @@ class Brain:
         box = meta.get("avatar_box")
         if not (isinstance(box, list) and len(box) == 4 and all(isinstance(v, (int, float)) for v in box)):
             box = None
+        if result.model:
+            self.last_model = result.model
         return Answer(text=text, entities=entities[:12], drop_groups=groups[:8], profile_update=meta.get("profile_update") or {},
                       avatar_box=box if screenshot_jpeg else None, cost_usd=result.cost_usd,
                       limits=result.limits, model=result.model)

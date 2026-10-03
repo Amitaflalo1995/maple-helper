@@ -38,6 +38,20 @@ def test_onboarding_relabels_the_connect_page_for_codex(env):
     assert "OpenAI" in dlg.privacy_label.text()
 
 
+def test_onboarding_relabels_the_connect_page_for_gemini(env, monkeypatch):
+    from maplehelper import providers
+    from maplehelper.ui.dialogs import Onboarding
+    monkeypatch.setattr(type(providers.get("gemini")), "account", lambda self: {"status": "not_installed", "email": None})
+    s, profiles, kb = env
+    dlg = Onboarding(s, profiles, kb, lambda *_: "")
+    dlg._on_provider("gemini")
+    assert s["provider"] == "gemini"
+    assert dlg.install_btn.text() == "Install Gemini"
+    assert dlg.login_btn.text() == "Sign in with Google"
+    assert "AIza" in dlg.key_edit.placeholderText()
+    assert "Google (Gemini)" in dlg.privacy_label.text()
+
+
 def test_onboarding_ignores_a_late_status_for_the_other_provider(env):
     from maplehelper.ui.dialogs import Onboarding
     s, profiles, kb = env
@@ -281,3 +295,122 @@ def test_tall_windows_fit_the_screen(env):
     for dlg in (SettingsDialog(s, profiles, kb, lambda *_: ""), Onboarding(s, profiles, kb, lambda *_: "")):
         assert dlg.height() <= max(320, avail - 48)
         dlg.close()
+
+
+class FakeInstall:
+    def __init__(self):
+        import threading
+        self.lines, self.code, self.done = [], None, threading.Event()
+
+    def status(self):
+        return self.lines[-1] if self.lines else ""
+
+    def error(self, n=4):
+        return "\n".join(self.lines[-n:])
+
+    def finish(self, code, *lines):
+        self.lines += lines
+        self.code = code
+        self.done.set()
+
+
+def test_install_runs_inside_the_app_and_shows_why_it_failed(env, monkeypatch):
+    from maplehelper import providers
+    from maplehelper.ui.dialogs import Onboarding
+    s, profiles, kb = env
+    inst = FakeInstall()
+    monkeypatch.setattr(type(providers.get("codex")), "install", lambda self: inst)
+    dlg = Onboarding(s, profiles, kb, lambda *_: "")
+    dlg._on_provider("codex")
+    dlg._start_install()
+    assert not dlg.install_panel.isHidden() and "Installing ChatGPT" in dlg.install_panel.title.text()
+    assert dlg.install_btn.isHidden()
+    inst.lines.append("Downloading Codex 1.2.3")
+    dlg.install_panel._tick()
+    assert dlg.install_panel.detail.text() == "Downloading Codex 1.2.3"
+    inst.finish(1, "ERROR: Could not fetch GitHub release metadata.")
+    dlg.install_panel._tick()
+    dlg._on_status("codex", "not_installed")                   # the check after it: not there
+    assert "didn't install" in dlg.install_panel.title.text()
+    assert "Could not fetch GitHub release metadata" in dlg.install_panel.error.text()
+    assert not dlg.install_btn.isHidden()                      # try again
+
+
+def test_an_install_that_worked_moves_on_to_sign_in(env, monkeypatch):
+    from maplehelper import providers
+    from maplehelper.ui.dialogs import Onboarding
+    s, profiles, kb = env
+    inst = FakeInstall()
+    monkeypatch.setattr(type(providers.get("codex")), "install", lambda self: inst)
+    dlg = Onboarding(s, profiles, kb, lambda *_: "")
+    dlg._on_provider("codex")
+    dlg._start_install()
+    inst.finish(0, "Codex installed")
+    dlg.install_panel._tick()
+    dlg._on_status("codex", "logged_out")
+    assert dlg.install_panel.isHidden() and not dlg.login_btn.isHidden()
+    # "worked" but the CLI isn't there: said plainly, with the installer offered again
+    dlg._start_install()
+    inst2 = dlg.install_panel.inst
+    inst2.done.set()
+    inst2.code = 0
+    dlg.install_panel._tick()
+    dlg._on_status("codex", "not_installed")
+    assert "isn't on this PC" in dlg.install_panel.error.text() and not dlg.install_btn.isHidden()
+
+
+def test_an_installer_that_errs_after_installing_counts_as_installed(env, monkeypatch):
+    """Antigravity's installer reported -1 although agy was in place: what decides is whether the CLI is there."""
+    from maplehelper import providers
+    from maplehelper.ui.dialogs import Onboarding
+    s, profiles, kb = env
+    inst = FakeInstall()
+    monkeypatch.setattr(type(providers.get("codex")), "install", lambda self: inst)
+    dlg = Onboarding(s, profiles, kb, lambda *_: "")
+    dlg._on_provider("codex")
+    dlg._start_install()
+    inst.finish(4294967295)
+    dlg.install_panel._tick()
+    dlg._on_status("codex", "logged_out")
+    assert dlg.install_panel.isHidden() and not dlg.login_btn.isHidden()
+
+
+def test_brain_finds_a_cli_installed_after_it_started(kb, monkeypatch):
+    from maplehelper import providers
+    from maplehelper.brain import Brain
+    found = [None]
+    monkeypatch.setattr(type(providers.get("codex")), "find_exe", lambda self: found[0])
+    b = Brain(kb, provider="codex")
+    b.backend.exe = None
+    assert not b.available()
+    found[0] = __file__                      # installed from Settings meanwhile
+    assert b.available() and b.backend.exe == __file__
+
+
+def test_a_second_sign_in_click_does_not_open_a_second_browser(env, monkeypatch):
+    """Grok's sign-in opened the browser twice: "Sign in" signed out first (seconds), and a second click meanwhile
+    started a second sign-in. Signed out, it now goes straight to the sign-in, and a waiting one isn't restarted."""
+    from maplehelper import providers
+    from maplehelper.providers import base
+    from maplehelper.ui.dialogs import SettingsDialog
+    s, profiles, kb = env
+    s["provider"] = "codex"
+    starts, logouts = [], []
+
+    class Waiting:
+        returncode = None
+
+        def poll(self):
+            return None
+
+        def kill(self):
+            pass
+    monkeypatch.setattr(type(providers.get("codex")), "login",
+                        lambda self: starts.append(1) or setattr(base, "_login", Waiting()) or base._login)
+    monkeypatch.setattr(type(providers.get("codex")), "logout", lambda self: logouts.append(1) or True)
+    dlg = SettingsDialog(s, profiles, kb, lambda *_: "")
+    dlg._on_account({"status": "logged_out", "email": None, "provider": "codex"})
+    dlg._switch_account()
+    dlg._switch_account()                    # a second click while the first waits for the browser
+    assert starts == [1] and logouts == []
+    base._login = None

@@ -690,6 +690,14 @@ class ToolsDialog(GlassDialog):
         self.q_mode = Segmented([(t("q_now"), "now"), (t("q_soon"), "soon")], "now", t.rtl)
         self.q_mode.changed.connect(lambda *_: self._fill_quests())
         lay.addWidget(self.q_mode, 0, Qt.AlignHCenter)
+        # search within the list shown (the quests that fit the character's level), not all quests
+        self.q_search = QLineEdit()
+        self.q_search.setPlaceholderText(t("q_search"))
+        self.q_search.setClearButtonEnabled(True)
+        self._q_search_timer = QTimer(self, singleShot=True, interval=200)     # rebuild once typing pauses
+        self._q_search_timer.timeout.connect(self._fill_quests)
+        self.q_search.textChanged.connect(lambda *_: self._q_search_timer.start())
+        lay.addWidget(self.q_search)
         self.q_head = self._label("", "ToolHeader")
         lay.addWidget(self.q_head)
         # "show done quests" right under the header: under a list of 50 it was out of reach
@@ -719,7 +727,14 @@ class ToolsDialog(GlassDialog):
         rows = r[mode]
         # how many are marked done is on the toggle right under the header, not here again
         self._set(self.q_head, t(f"q_head_{mode}", n=len(rows), lv=c.level))
-        if not rows:
+        query = self.q_search.text().strip()
+        if query:
+            found = [q for q in rows if q.matches(query)]
+            self._set(self.q_head, t("q_found", n=len(found), total=len(rows), lv=c.level))
+            rows = found
+            if not rows:
+                self.q_list.addWidget(self._label(t("q_no_match"), "RowHint"))
+        elif not rows:
             self.q_list.addWidget(self._label(t("q_none"), "RowHint"))
         for q in rows[:MAX_QUESTS]:
             self.q_list.addWidget(self._quest_card(q))

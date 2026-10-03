@@ -16,7 +16,7 @@ import tempfile
 import threading
 from pathlib import Path
 
-from .base import CREATE_NO_WINDOW, Provider, RawResult, classify_error, child_env, find_posix, \
+from .base import CREATE_NO_WINDOW, Installer, Provider, RawResult, classify_error, child_env, find_posix, \
     find_windows_exe, http_ok, open_login, run_installer
 
 log = logging.getLogger(__name__)
@@ -25,6 +25,14 @@ ANSWER_TIMEOUT_S = 300
 INSTALL_CMD = "irm https://chatgpt.com/codex/install.ps1 | iex"
 INSTALL_CMD_MAC = "curl -fsSL https://chatgpt.com/codex/install.sh | sh"
 POSIX_DIRS = ["~/.local/bin", "~/.codex/bin", "/opt/homebrew/bin", "/usr/local/bin", "~/.npm-global/bin"]
+
+# Codex features that are on by default and reach beyond reading the knowledge base: ChatGPT connectors,
+# browser and computer control, image generation, sub-agents, plugins, hooks, skills, goals, worktrees.
+# The shell stays (it's how Codex reads the knowledge base), and so does view_image (the screenshot).
+DISABLED_FEATURES = ("apps", "browser_use", "browser_use_external", "browser_use_full_cdp_access", "computer_use",
+                     "image_generation", "in_app_browser", "multi_agent", "plugins", "remote_plugin", "hooks",
+                     "goals", "skill_search", "skill_mcp_dependency_install", "tool_suggest", "worktrees",
+                     "in_app_local_automation")
 
 # Codex reads the knowledge base with shell commands instead of Claude's Read/Grep/Glob tools
 TOOLS_NOTE = ("\nTools: you read the knowledge base with read-only shell commands in the current directory "
@@ -62,13 +70,20 @@ def store_apps() -> list[Path]:
 def find_windows() -> str | None:
     # only a real .exe: an npm .cmd shim runs through cmd.exe, which mangles the quoted instructions
     local, appdata = os.environ.get("LOCALAPPDATA", ""), os.environ.get("APPDATA", "")
-    vendor = Path(appdata) / "npm" / "node_modules" / "@openai" / "codex" / "vendor"
-    return find_windows_exe("codex", [
-        Path(local) / "Programs" / "OpenAI" / "Codex" / "bin" / "codex.exe",
-        vendor / "x86_64-pc-windows-msvc" / "codex" / "codex.exe",
-        vendor / "aarch64-pc-windows-msvc" / "codex" / "codex.exe",
-        *store_apps(),
-    ])
+    npm = [Path(appdata) / "npm"]
+    import shutil
+    shim = shutil.which("codex")
+    if shim:
+        npm.insert(0, Path(shim).parent)         # an npm install with its own prefix
+    candidates = [Path(local) / "Programs" / "OpenAI" / "Codex" / "bin" / "codex.exe"]
+    for prefix in npm:
+        pkg = prefix / "node_modules" / "@openai" / "codex"
+        for arch, triple in (("x64", "x86_64-pc-windows-msvc"), ("arm64", "aarch64-pc-windows-msvc")):
+            # npm 0.16x: the binary sits in a per-platform package; older: in the main package's vendor folder
+            candidates += [pkg / "node_modules" / "@openai" / f"codex-win32-{arch}" / "vendor" / triple / "bin" / "codex.exe",
+                           prefix / "node_modules" / "@openai" / f"codex-win32-{arch}" / "vendor" / triple / "bin" / "codex.exe",
+                           pkg / "vendor" / triple / "codex" / "codex.exe"]
+    return find_windows_exe("codex", [*candidates, *store_apps()])
 
 
 def find_codex() -> str | None:
@@ -99,7 +114,10 @@ def codex_command(exe: str, workdir, instructions: str, model: str | None = None
         cmd += ["--image", ",".join(str(i) for i in image) if isinstance(image, list) else str(image)]
     # json.dumps gives a valid TOML basic string (same escapes), so newlines and quotes survive -c
     cmd += ["--json", "--ephemeral", "--ignore-user-config", "--ignore-rules", "--skip-git-repo-check",
-            "-s", "read-only", "-C", str(workdir), "-c", "developer_instructions=" + json.dumps(instructions)]
+            "-s", "read-only", "-C", str(workdir), "-c", "developer_instructions=" + json.dumps(instructions),
+            "-c", 'web_search="disabled"']
+    for feature in DISABLED_FEATURES:
+        cmd += ["--disable", feature]
     if platform == "win32":
         # without it, the read-only sandbox on Windows blocks even reading files
         cmd += ["-c", 'windows.sandbox="unelevated"']
@@ -110,7 +128,7 @@ def codex_command(exe: str, workdir, instructions: str, model: str | None = None
 
 def parse_events(lines, stderr: str = "") -> RawResult:
     """The answer is the run's last agent message; earlier ones are lead-ins ("I'll check the database")."""
-    answer, errors, failed = None, [], False
+    answer, errors, failed, completed = None, [], False, False
     for line in lines:
         if isinstance(line, bytes):
             line = line.decode("utf-8", errors="replace")
@@ -128,7 +146,13 @@ def parse_events(lines, stderr: str = "") -> RawResult:
         elif t == "turn.failed":
             failed = True
             errors.append(str((ev.get("error") or {}).get("message", "")))
+        elif t == "turn.completed":
+            completed = True
     detail = "\n".join(errors) + "\n" + stderr
+    if answer is not None and not completed and not failed:
+        # stopped (timeout, cancel, quit) after a lead-in ("I'll grep drops.tsv…"): that is no answer
+        log.warning("Codex stopped before finishing: %s", detail.strip()[-500:])
+        return RawResult(error="no_result")
     if failed or answer is None:
         log.warning("Codex gave no answer: %s", detail.strip()[-1500:])   # the cause, for "Report a problem"
         return RawResult(error=classify_error(detail) or ("api_error" if failed else "no_result"))
@@ -254,7 +278,7 @@ class Codex(Provider):
         exe = find_codex()
         return open_login(exe, ["login"], env()) if exe else None
 
-    def install(self) -> subprocess.Popen:
+    def install(self) -> Installer:
         return run_installer(INSTALL_CMD, INSTALL_CMD_MAC)
 
     def test_api_key(self, key: str) -> bool:
@@ -271,6 +295,7 @@ class CodexBackend:
         self.brain = brain
         self.exe = find_codex()
         self._proc: subprocess.Popen | None = None
+        self._running: set[subprocess.Popen] = set()     # every run, summaries too: a quit stops them all
 
     def prewarm(self) -> None:
         # the screenshot must be on the command line, so a process can't be started before the question
@@ -278,6 +303,9 @@ class CodexBackend:
 
     def shutdown(self) -> None:
         self.cancel()
+        for p in list(self._running):
+            if p.poll() is None:
+                p.kill()
 
     def cancel(self) -> None:
         if self._proc and self._proc.poll() is None:
@@ -293,6 +321,7 @@ class CodexBackend:
             return RawResult(error=f"launch_failed: {e}")
         if answer:
             self._proc = p
+        self._running.add(p)
         # Codex logs to stderr while it works: drain it so a full pipe never stalls the run
         err: list[bytes] = []
         reader = threading.Thread(target=lambda: err.append(p.stderr.read()), daemon=True)
@@ -307,6 +336,7 @@ class CodexBackend:
             pass
         lines = list(p.stdout)
         p.wait()
+        self._running.discard(p)
         if killer:
             killer.cancel()
         reader.join(timeout=5)
@@ -325,9 +355,17 @@ class CodexBackend:
                         f.write(jpeg)
                     images.append(path)
             image = images if len(images) > 1 else (images[0] if images else None)
-            cmd = codex_command(self.exe, b.kb.root, b.system_prompt() + TOOLS_NOTE, model or b.model, image)
-            # a stalled CLI must not leave the chat on "thinking" forever
-            r = self._exec(cmd, prompt, str(b.kb.root), b.api_key, timeout=ANSWER_TIMEOUT_S)
+            if tools:
+                cmd = codex_command(self.exe, b.kb.root, b.system_prompt() + TOOLS_NOTE, model or b.model, image)
+                # a stalled CLI must not leave the chat on "thinking" forever
+                r = self._exec(cmd, prompt, str(b.kb.root), b.api_key, timeout=ANSWER_TIMEOUT_S)
+            else:
+                # a quick read (the profile sync, 60 s in the chat): nothing to look up, so no knowledge base
+                # to dig through and low effort
+                with tempfile.TemporaryDirectory(prefix="maplehelper-quick-") as empty:
+                    cmd = codex_command(self.exe, empty, b.system_prompt(), model or b.model, image,
+                                        extra=("-c", 'model_reasoning_effort="low"'))
+                    r = self._exec(cmd, prompt, empty, b.api_key, timeout=ANSWER_TIMEOUT_S)
         finally:
             for path in images:
                 try:

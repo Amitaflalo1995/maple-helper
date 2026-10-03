@@ -17,7 +17,7 @@ class TestRegistry:
 
     def test_unknown_or_missing_falls_back_to_claude(self):
         assert providers.get(None).name == "claude"
-        assert providers.get("gemini").name == "claude"
+        assert providers.get("mistral").name == "claude"
 
 
 @pytest.mark.parametrize("text,kind", [
@@ -222,6 +222,7 @@ class TestCodexBackend:
             {"type": "item.completed", "item": {"type": "agent_message", "text": "Looking…"}},
             {"type": "item.completed", "item": {"type": "agent_message",
                                                 "text": 'Hunt **Red Snail**.\n@@META@@\n{"entities": ["monster/130101"]}'}},
+            {"type": "turn.completed"},
         )
         monkeypatch.setattr(codex.subprocess, "Popen", FakePopen)
         from maplehelper.brain import Brain
@@ -259,6 +260,7 @@ class TestCodexBackend:
     def test_not_installed(self, kb, monkeypatch):
         b = self.make(kb, monkeypatch)
         b.backend.exe = None
+        monkeypatch.setattr(type(providers.get("codex")), "find_exe", lambda self: None)   # none on this PC
         assert b.ask("hi", None, None, None).error == "not_installed"
         assert not b.available()
 
@@ -415,3 +417,105 @@ def test_claude_found_beside_an_npm_shim(tmp_path, monkeypatch):
     monkeypatch.setattr(claude, "find_windows_exe", lambda *a: None)
     monkeypatch.setattr(base.shutil, "which", lambda _n: str(tmp_path / "claude.cmd"))
     assert claude.find_claude() == str(exe)
+
+
+class TestInstaller:
+    """The official installers run in the background; the app shows their progress and errors (no console)."""
+
+    def test_commands(self):
+        win = base.installer_command("irm https://x/install.ps1 | iex", "curl x | bash", platform="win32")
+        assert win[:2] == ["powershell", "-NoProfile"] and "-NonInteractive" in win
+        assert "irm https://x/install.ps1 | iex" in win[-1] and "UTF8" in win[-1] and win[-1].endswith("exit 0")
+        assert base.installer_command("w", "curl x | bash", platform="darwin") == \
+            ["/bin/bash", "-c", "set -o pipefail; curl x | bash"]
+
+    @pytest.mark.skipif(__import__("sys").platform != "win32", reason="runs PowerShell")
+    @pytest.mark.parametrize("cmd,code,last", [
+        ("Write-Output 'Downloading...'; Write-Output 'Installed!'", 0, "Installed!"),
+        ("throw 'Failed to download manifest.'", 1, "ERROR: Failed to download manifest."),
+        ("Write-Error 'Installation failed (exit code 3)'; exit 3", 3, "ERROR: Installation failed (exit code 3)"),
+        ("Set-StrictMode -Version Latest; Write-Output 'done'", 0, "done"),     # strict mode left on (agy's)
+    ])
+    def test_runs_hidden_and_reports(self, cmd, code, last):
+        inst = base.Installer(cmd, "true")
+        assert inst.done.wait(60)
+        assert inst.code == code and inst.status() == last
+
+
+def test_every_provider_is_told_to_stay_on_the_game():
+    """Claude declined off-topic questions by itself; ChatGPT and Gemini answered them ("how old is <politician>"),
+    so the scope is spelled out, in the instructions and in the reminder sent with every question."""
+    from maplehelper.brain import REPLY_RULES, SYSTEM_PROMPT
+    assert "Scope: you help only with MapleStory Classic" in SYSTEM_PROMPT
+    assert "which AI and model answers" in SYSTEM_PROMPT           # questions about the app itself are fine
+    assert "Only MapleStory Classic" in REPLY_RULES
+
+
+def test_codex_lead_in_from_a_stopped_run_is_no_answer():
+    """Without turn.completed (timeout, cancel, quit) the last message is a lead-in, not the answer."""
+    r = codex.parse_events(events({"type": "item.completed", "item": {"type": "agent_message",
+                                                                      "text": "I'll grep drops.tsv."}}))
+    assert r.error == "no_result"
+
+
+def test_codex_runs_with_its_extras_switched_off():
+    c = codex.codex_command("codex", "C:/kb", "x", platform="linux")
+    assert 'web_search="disabled"' in c
+    for f in ("apps", "browser_use", "computer_use", "image_generation", "multi_agent", "plugins", "hooks"):
+        assert c[c.index(f) - 1] == "--disable"
+    assert c[-1] == "-"
+
+
+def test_claude_never_passes_a_stray_credential(monkeypatch):
+    for k in claude.FOREIGN_AUTH:
+        monkeypatch.setenv(k, "leftover")
+    e = claude.env()
+    assert not any(k in e for k in claude.FOREIGN_AUTH)
+    assert claude.env("sk-ant-1")["ANTHROPIC_API_KEY"] == "sk-ant-1"
+
+
+def test_an_api_key_without_credit_says_so():
+    assert base.classify_error("Your credit balance is too low to access the Anthropic API") == "no_credit"
+
+
+@pytest.mark.parametrize("question,ui,lang", [
+    ("where do I hunt snails?", "he", "English"),        # an English player in a Hebrew app: English
+    ("איפה מוצאים חלזונות?", "en", "Hebrew"),
+    ("[about Mano] 42", "he", "Hebrew"),                 # nothing to tell by: the app's language
+    ("42?", "en", "English"),
+])
+def test_the_answer_language_follows_the_question(question, ui, lang):
+    from maplehelper.brain import reply_language
+    assert reply_language(question, ui) == lang
+
+
+def test_an_english_question_is_answered_in_english_even_with_hebrew_context(kb, tmp_path):
+    """A player wrote in English and got Hebrew: earlier session summaries in Hebrew pulled the answer along."""
+    from maplehelper.brain import build_prompt
+    from maplehelper.store import History
+
+    class Hist(History):
+        def __init__(self):
+            pass
+
+        def summaries(self):
+            return ["השחקן שאל על חלזונות והתאמן ב-Henesys."]
+
+        def recent(self):
+            return [{"role": "user", "text": "מה נשמע"}, {"role": "assistant", "text": "הכל טוב"}]
+    p = build_prompt("where do Red Snails spawn?", None, Hist(), kb, False, ui_lang="he")
+    assert "Reply in English, whatever language the context above is in." in p
+    p = build_prompt("where do Red Snails spawn?", None, Hist(), kb, False, kb_context=False, ui_lang="he")
+    assert "Reply in English" in p
+
+
+def test_the_ai_is_told_what_it_runs_on(kb):
+    """Our instructions replace each CLI's own: Grok then didn't know its model ("not shown in this session")."""
+    from maplehelper.brain import Brain
+    b = Brain(kb, provider="grok")
+    assert b.system_prompt().endswith("You run on Grok.")
+    b.last_model = "grok-4.7"
+    assert b.system_prompt().endswith("You run on Grok, model grok-4.7.")
+    b.provider = "claude"
+    b.model = "sonnet"
+    assert b.system_prompt().endswith("You run on Claude, model sonnet.")
