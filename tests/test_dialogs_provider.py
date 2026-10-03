@@ -330,6 +330,7 @@ def test_install_runs_inside_the_app_and_shows_why_it_failed(env, monkeypatch):
     assert dlg.install_panel.detail.text() == "Downloading Codex 1.2.3"
     inst.finish(1, "ERROR: Could not fetch GitHub release metadata.")
     dlg.install_panel._tick()
+    dlg._on_status("codex", "not_installed")                   # the check after it: not there
     assert "didn't install" in dlg.install_panel.title.text()
     assert "Could not fetch GitHub release metadata" in dlg.install_panel.error.text()
     assert not dlg.install_btn.isHidden()                      # try again
@@ -356,3 +357,31 @@ def test_an_install_that_worked_moves_on_to_sign_in(env, monkeypatch):
     dlg.install_panel._tick()
     dlg._on_status("codex", "not_installed")
     assert "isn't on this PC" in dlg.install_panel.error.text() and not dlg.install_btn.isHidden()
+
+
+def test_an_installer_that_errs_after_installing_counts_as_installed(env, monkeypatch):
+    """Antigravity's installer reported -1 although agy was in place: what decides is whether the CLI is there."""
+    from maplehelper import providers
+    from maplehelper.ui.dialogs import Onboarding
+    s, profiles, kb = env
+    inst = FakeInstall()
+    monkeypatch.setattr(type(providers.get("codex")), "install", lambda self: inst)
+    dlg = Onboarding(s, profiles, kb, lambda *_: "")
+    dlg._on_provider("codex")
+    dlg._start_install()
+    inst.finish(4294967295)
+    dlg.install_panel._tick()
+    dlg._on_status("codex", "logged_out")
+    assert dlg.install_panel.isHidden() and not dlg.login_btn.isHidden()
+
+
+def test_brain_finds_a_cli_installed_after_it_started(kb, monkeypatch):
+    from maplehelper import providers
+    from maplehelper.brain import Brain
+    found = [None]
+    monkeypatch.setattr(type(providers.get("codex")), "find_exe", lambda self: found[0])
+    b = Brain(kb, provider="codex")
+    b.backend.exe = None
+    assert not b.available()
+    found[0] = __file__                      # installed from Settings meanwhile
+    assert b.available() and b.backend.exe == __file__

@@ -105,14 +105,14 @@ class InstallPanel(QWidget):
         if not self.inst.done.is_set():
             return
         self._timer.stop()
-        ok = self.inst.code == 0
-        if not ok:
-            self.fail()
-        self.ended.emit(ok)
+        # the exit code alone doesn't decide (Antigravity's installer reported -1 after installing fine):
+        # the dialog checks whether the CLI is there and calls fail() only when it isn't
+        self.ended.emit(self.inst.code == 0)
 
-    def fail(self, not_found: bool = False):
-        """Stopped on an error (or ended "fine" but the CLI isn't there): say so, with the installer's reason."""
+    def fail(self):
+        """The CLI isn't there after the installer ended: say so, with the installer's own reason."""
         t, inst = self.t, self.inst
+        not_found = bool(inst) and inst.code == 0          # it said it worked: then it's simply missing
         self._timer.stop()
         self.bar.hide()
         self.detail.hide()
@@ -608,11 +608,8 @@ class Onboarding(GlassDialog):
     def _install_ended(self, ok: bool):
         if self._install_for != self.provider:
             return                         # the player picked another AI meanwhile
-        if ok:
-            self._install_check = True     # installed: the status check says what's next (sign in)
-            self._check_status()
-        else:
-            self.install_btn.show()        # "Install" again
+        self._install_check = True         # the status check says whether it's there, and what's next (sign in)
+        self._check_status()
 
     def _begin_sign_in(self):
         """The sign-in console, the installer and the browser open as normal windows: stop staying on top
@@ -663,7 +660,7 @@ class Onboarding(GlassDialog):
             self._login_proc = None
             self._end_sign_in()
             self.login_hint.setText(bidi.plain(self.t.p("ob_login_failed", self.provider), self.t.rtl))
-            self.install_btn.show()
+            self.install_btn.setVisible(not self._ai().login_code)    # Gemini: sign in again, see _login_failed
             return
         self._check_status()
 
@@ -678,8 +675,8 @@ class Onboarding(GlassDialog):
         self.login_btn.setVisible(st == "logged_out")
         if self._install_check:
             self._install_check = False
-            if st == "not_installed":      # the installer said it worked, but the CLI isn't there
-                self.install_panel.fail(not_found=True)
+            if st == "not_installed":      # the CLI isn't there: why, and "Install" again
+                self.install_panel.fail()
                 self.install_btn.show()
                 return
             self.install_panel.stop()
@@ -1151,8 +1148,8 @@ class SettingsDialog(GlassDialog):
         api_key = self.settings.api_key_mode(p) or acc.get("method") == "api_key"
         if self._install_check:
             self._install_check = False
-            if st == "not_installed":      # the installer said it worked, but the CLI isn't there
-                self.install_panel.fail(not_found=True)
+            if st == "not_installed":      # the CLI isn't there: why ("Install" shows again below)
+                self.install_panel.fail()
             else:
                 self.install_panel.stop()
         if api_key:
@@ -1242,10 +1239,13 @@ class SettingsDialog(GlassDialog):
             self._login_failed()
 
     def _login_failed(self):
-        self._login_broken = True
         self.code_row.hide()
         self._set_account_text(self.t.p("ob_login_failed", self._ai().name))
-        self.install_btn.show()
+        if not self._ai().login_code:
+            # a sign-in that can't even start or ends at once: reinstalling fixes it. Gemini's ends when the
+            # minute for the code runs out: its text says to sign in again, the installer wouldn't help
+            self._login_broken = True
+            self.install_btn.show()
 
     def _start_install(self):
         """The official installer, in the background as in onboarding: progress and errors show here."""
@@ -1260,11 +1260,8 @@ class SettingsDialog(GlassDialog):
     def _install_ended(self, ok: bool):
         if self._install_for != self._ai().name:
             return                         # the player picked another AI meanwhile
-        if ok:
-            self._install_check = True     # installed: the account check says what's next (sign in)
-            self._refresh_account()
-        else:
-            self.install_btn.show()        # "Install" again
+        self._install_check = True         # the account check says whether it's there, and what's next (sign in)
+        self._refresh_account()
 
     def _set_on_top(self, on: bool):
         if bool(self.windowFlags() & Qt.WindowStaysOnTopHint) != on:

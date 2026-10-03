@@ -304,6 +304,7 @@ class Brain:
 
     def prewarm(self) -> None:
         """Get the next question's process ready now, where the provider supports it."""
+        self._find_cli()
         self.backend.prewarm()
 
     def shutdown(self) -> None:
@@ -315,7 +316,19 @@ class Brain:
         if drop:
             drop()
 
+    def _find_cli(self) -> None:
+        """The backend looked for its CLI when it was made: an install since (from Settings) or a CLI that moved
+        (a Store update renames its folder) left it with none, and every question said "not installed" until
+        a restart."""
+        import os
+        exe = self.backend.exe
+        if not exe or (os.path.isabs(exe) and not os.path.exists(exe)):
+            found = self._provider.find_exe()
+            if found != exe:
+                self.backend.exe = found
+
     def available(self) -> bool:
+        self._find_cli()
         return self.backend.exe is not None
 
     def cancel(self) -> None:
@@ -328,6 +341,7 @@ class Brain:
         extra: context for the prompt only; every heuristic below reads the player's own question.
         model: another model for this one call (None: the player's). light: a screenshot read (the ⟳ sync): no
         knowledge-base pre-fetch and no file tools, so a light model answers in seconds instead of ~40 s."""
+        self._find_cli()
         if not self.backend.exe:
             return Answer(error="not_installed")
         self.kb.ensure_drop_table()

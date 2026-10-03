@@ -321,6 +321,7 @@ class TestBackend:
     def test_not_installed(self, kb, home, monkeypatch):
         b = self.make(kb, monkeypatch)
         b.backend.exe = None
+        monkeypatch.setattr(type(providers.get("gemini")), "find_exe", lambda self: None)   # none on this PC
         assert b.ask("hi", None, None, None).error == "not_installed"
 
 
