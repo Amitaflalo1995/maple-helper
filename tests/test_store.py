@@ -367,3 +367,21 @@ def test_mac_damaged_install_offers_the_download_page(tmp_path, monkeypatch):
     assert opened == [setupwait.RELEASES_URL]
     assert setupwait.MAC_TEXT["broken"]["he"] != setupwait.BROKEN_TEXT["he"]
     assert setupwait.MAC_TEXT["startup"]["he"] != setupwait.STARTUP_TEXT["he"]
+
+
+def test_f12_hotkey_loads_as_the_default_on_windows(isolated_store, monkeypatch):
+    # Windows never lets a program register F12: a saved F12 is the default key there, and stays F12 on macOS
+    import json
+    isolated_store.Settings.path.write_text(json.dumps({"hotkey_toggle": "F12", "hotkey_voice": "F7"}), "utf-8")
+    monkeypatch.setattr(isolated_store.sys, "platform", "win32")
+    s = isolated_store.Settings()
+    assert (s["hotkey_toggle"], s["hotkey_voice"]) == ("F9", "F7")
+    # the default is the other hotkey's: the next default, never two hotkeys on one key
+    isolated_store.Settings.path.write_text(json.dumps({"hotkey_toggle": "F12", "hotkey_voice": "F9"}), "utf-8")
+    s = isolated_store.Settings()
+    assert (s["hotkey_toggle"], s["hotkey_voice"]) == ("F10", "F9")
+    isolated_store.Settings.path.write_text(json.dumps({"hotkey_toggle": "F12", "hotkey_voice": "F12"}), "utf-8")
+    s = isolated_store.Settings()
+    assert (s["hotkey_toggle"], s["hotkey_voice"]) == ("F9", "F10")
+    monkeypatch.setattr(isolated_store.sys, "platform", "darwin")
+    assert isolated_store.Settings()["hotkey_toggle"] == "F12"

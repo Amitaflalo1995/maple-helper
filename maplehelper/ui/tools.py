@@ -18,6 +18,7 @@ from ..i18n import I18n
 from . import terms, theme
 from .controls import FlowLayout, Section, Segmented, Stepper, WrapLink, follow_typing, rtl_buttons
 from .glass import GlassDialog, no_default_buttons
+from .patchnotes import gutter
 
 PAGES = ("train", "calc", "build", "quests", "crafting", "town", "prices", "exp", "more")
 MAX_QUESTS = 40
@@ -41,13 +42,13 @@ def tag(text: str, kind: str = "Tag") -> QLabel:
     return lb
 
 
-def scroll_page() -> tuple[QScrollArea, QVBoxLayout]:
+def scroll_page(rtl: bool) -> tuple[QScrollArea, QVBoxLayout]:
     sc = QScrollArea()
     sc.setWidgetResizable(True)
     sc.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
     body = QWidget(objectName="Feed")
     lay = QVBoxLayout(body)
-    lay.setContentsMargins(0, 0, 6, 0)
+    lay.setContentsMargins(*gutter(rtl))      # the room before the scrollbar, on its side (left in Hebrew)
     lay.setSpacing(14)
     sc.setWidget(body)
     return sc, lay
@@ -86,6 +87,7 @@ class EntityPicker(QLineEdit):
     def __init__(self, rows: list[tuple[str, str, object]], placeholder: str, icon: int = 36, rtl: bool = False):
         super().__init__()
         self.setPlaceholderText(placeholder)
+        self.setAccessibleName(placeholder)         # a placeholder isn't read as the field's name
         self.setClearButtonEnabled(True)
         model = _LazyIcons(self, icon)
         for shown, name, path in rows:
@@ -477,7 +479,7 @@ class ToolsDialog(GlassDialog):
     # where to train --------------------------------------------------------
 
     def _page_train(self):
-        sc, lay = scroll_page()
+        sc, lay = scroll_page(self.t.rtl)
         self.train_head = self._label("", "ToolHeader")
         lay.addWidget(self.train_head)
         # the stats first: the spots below are ranked by them, and at the end of a long list nobody found them
@@ -582,7 +584,7 @@ class ToolsDialog(GlassDialog):
 
     def _page_calc(self):
         t = self.t
-        sc, lay = scroll_page()
+        sc, lay = scroll_page(self.t.rtl)
         rows = monster_rows(self.kb)
         self.calc_input = EntityPicker(rows, self._p(t("calc_placeholder", n=len(rows))), rtl=t.rtl)
         self.calc_input.picked.connect(self._fill_calc)
@@ -811,13 +813,14 @@ class ToolsDialog(GlassDialog):
 
     def _page_quests(self):
         t = self.t
-        sc, lay = scroll_page()
+        sc, lay = scroll_page(self.t.rtl)
         self.q_mode = Segmented([(t("q_now"), "now"), (t("q_soon"), "soon")], "now", t.rtl)
         self.q_mode.changed.connect(lambda *_: self._fill_quests(new_list=True))
         lay.addWidget(self.q_mode, 0, Qt.AlignHCenter)
         # search within the list shown (the quests that fit the character's level), not all quests
         self.q_search = QLineEdit()
         self.q_search.setPlaceholderText(t("q_search"))
+        self.q_search.setAccessibleName(t("q_search"))        # a placeholder isn't read as the field's name
         self.q_search.setClearButtonEnabled(True)
         self._q_search_timer = QTimer(self, singleShot=True, interval=200)     # rebuild once typing pauses
         self._q_search_timer.timeout.connect(lambda: self._fill_quests(new_list=True))
@@ -904,16 +907,18 @@ class ToolsDialog(GlassDialog):
 
     def _thing_html(self, text: str) -> str:
         """ "Defeat Blue Snail x 10" / "Red Potion x 20" -> its picture, then the name (kept as one English block)."""
-        m = re.fullmatch(r"(Defeat |Collect )?(.+?) x ([\d,]+)( \([\d.]+%\))?", text.strip())
+        m = re.fullmatch(r"(Defeat |Collect )?(.+?) x ([\d,]+)( \([\d.]+%\))?( \(.+\))?", text.strip())
         if not m:
             return html.escape(text)
-        verb, name, n, odds = m.groups()
+        verb, name, n, odds, note = m.groups()
         n += odds or ""                 # a random reward keeps its odds: "Bronze Ore x7 (16.7%)"
         uri = self._picture_uri("monster" if verb == "Defeat " else "item", name) or \
             self._picture_uri("item" if verb == "Defeat " else "monster", name)
         img = f"<img src='{uri}' height='24' style='vertical-align: middle'>&nbsp;" if uri else ""
         # picture and name in one left-to-right unit, so in Hebrew the picture stays beside its own name
-        return f"<span style='white-space: nowrap'>{bidi.LRE}{img}{html.escape(name)} x{n}{bidi.PDF}{bidi.RLM}</span>"
+        # a note in the player's language after it ("(male character)", Quest.rewards_gender), outside the block
+        return (f"<span style='white-space: nowrap'>{bidi.LRE}{img}{html.escape(name)} x{n}{bidi.PDF}{bidi.RLM}</span>"
+                + html.escape(note or ""))
 
     def _things_label(self, head: str, things: list[str], extra: str = "") -> QLabel:
         """A heading, then one thing per line: its picture beside its own name, never split by a wrap."""
@@ -970,6 +975,10 @@ class ToolsDialog(GlassDialog):
             if things:
                 shown = things[:4] + ([t("pn_more", n=len(things) - 4)] if len(things) > 4 else [])
                 col.addWidget(self._things_label(t(head), shown))
+        # a reward that depends on the character's gender: both listed, each marked (the profile has no gender)
+        by_gender = q.rewards_gender(t)
+        if by_gender:
+            col.addWidget(self._things_label(t("q_gender_head"), by_gender))
         hints = []
         if q.after:
             hints.append(t("q_after", name=bidi.ltr_block(q.after, t.rtl)))
@@ -979,6 +988,7 @@ class ToolsDialog(GlassDialog):
             hints.append(t("q_grade", town=q.grade[0], n=q.grade[1]))
         if q.profession:
             hints.append(t("q_profession", prof=q.profession[0], n=q.profession[1]))
+        hints += q.prereq_hints(t)          # Fame, a fee to accept, any other pre-requisite line of the page
         if hints:
             col.addWidget(self._label("\n".join(hints), "RowHint"))
         acts = QHBoxLayout()
@@ -1005,6 +1015,10 @@ class ToolsDialog(GlassDialog):
         c = self.c
         if c and key not in c.quests_done:
             c.quests_done.append(key)
+            # done here is done for the chat too: the started quest leaves "Active quests" in the AI's prompt
+            q = quests.quest(self.kb, key)
+            if q:
+                c.finish_quest(q.name)
             self.profiles.save()
         self._refresh_in_place()
 
@@ -1064,7 +1078,7 @@ class ToolsDialog(GlassDialog):
 
     def _page_crafting(self):
         t = self.t
-        sc, lay = scroll_page()
+        sc, lay = scroll_page(self.t.rtl)
         # the professions live inside this tab's own card, in a lighter style than the main tabs
         sec = Section(t("craft_profession"), t.rtl)
         grid = FlowLayout(spacing=6)            # wraps: three long names on one row were wider than the window
@@ -1204,7 +1218,7 @@ class ToolsDialog(GlassDialog):
 
     def _page_town(self):
         t = self.t
-        sc, lay = scroll_page()
+        sc, lay = scroll_page(self.t.rtl)
         sec = Section(t("town_title"), t.rtl)
         self.town_pick = Segmented([(name, name) for name in quests.TOWNS], quests.TOWNS[0], t.rtl)
         self.town_pick.changed.connect(self._set_town)
@@ -1275,7 +1289,7 @@ class ToolsDialog(GlassDialog):
 
     def _page_prices(self):
         t = self.t
-        sc, lay = scroll_page()
+        sc, lay = scroll_page(self.t.rtl)
         # a term gets its "?" once on this page: in the intro, not again in the card, the market line and the hint
         self._price_seen: set = set()
         lay.addWidget(self._label(t("prices_intro"), "ToolHeader", seen=self._price_seen))
@@ -1334,7 +1348,10 @@ class ToolsDialog(GlassDialog):
             cheapest = shops[0]
             line = t("price_shop", n=f"{cheapest[2]:,}", npc=cheapest[0], where=cheapest[1].split(" · ")[-1])
             rank = npc.ranks.get(cheapest[:2])        # a town shop's item for a citizen grade and up
-            lines.append(line + (" " + t("price_rank", rank=rank) if rank else ""))
+            if rank:
+                line += " " + t("price_rank", rank=rank)
+            # the KB labels these prices as the COT2 test's, not confirmed for launch: said where the price shows
+            lines.append(line + (" " + t("price_cot2") if npc.test_price(cheapest) else ""))
         # NPCs the page lists without a price still sell it: name them
         unpriced = [s for s in npc.unpriced if combat.released(self.kb, s[1])][:3]
         if unpriced:
@@ -1383,7 +1400,7 @@ class ToolsDialog(GlassDialog):
 
     def _page_exp(self):
         t = self.t
-        sc, lay = scroll_page()
+        sc, lay = scroll_page(self.t.rtl)
         sec = Section(t("exp_title"), t.rtl)
         self.exp_now = self._label("", "RowLabel")
         sec.add_widget(self.exp_now)
@@ -1487,7 +1504,7 @@ class ToolsDialog(GlassDialog):
 
     def _page_more(self):
         t = self.t
-        sc, lay = scroll_page()
+        sc, lay = scroll_page(self.t.rtl)
         lay.addWidget(self._label(t("more_intro"), "ToolHeader"))
         sell = Section(t("sell_title"), t.rtl)
         sell.add_widget(self._label(t("sell_body"), "RowLabel"))

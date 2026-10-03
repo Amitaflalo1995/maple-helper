@@ -10,6 +10,7 @@ from ..i18n import I18n
 from ..kb import KnowledgeBase
 from .controls import rtl_buttons
 from .glass import GlassDialog
+from .patchnotes import gutter
 from .widgets import EntityCard
 
 SHOWN_DROPPERS = 5
@@ -32,7 +33,7 @@ class WishlistDialog(GlassDialog):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         body = QWidget(objectName="Feed")
         self.lay = lay = QVBoxLayout(body)
-        lay.setContentsMargins(0, 0, 6, 0)
+        lay.setContentsMargins(*gutter(rtl))          # the room before the scrollbar, on its side (left in Hebrew)
         lay.setSpacing(8)
         scroll.setWidget(body)
         outer.addWidget(scroll, 1)

@@ -174,7 +174,8 @@ def test_level_field_bound_is_the_saved_profiles_bound_not_a_game_cap(env):
     from maplehelper import store
     from maplehelper.ui.dialogs import LEVEL_FIELD_MAX, Onboarding
     s, profiles, kb = env
-    form = Onboarding(s, profiles, kb, lambda *_: "", only_character=True).form
+    dlg = Onboarding(s, profiles, kb, lambda *_: "", only_character=True)      # kept: the form is its child
+    form = dlg.form
     assert form.level.hi == LEVEL_FIELD_MAX
     # what the field accepts survives the profile's own repair on the next load
     repaired = store._repair({"id": "x", "name": "Hero", "base_class": "Warrior", "job": "Fighter",
@@ -185,7 +186,8 @@ def test_level_field_bound_is_the_saved_profiles_bound_not_a_game_cap(env):
 def test_character_form_fields_have_screen_reader_names(env):
     from maplehelper.ui.dialogs import Onboarding
     s, profiles, kb = env
-    form = Onboarding(s, profiles, kb, lambda *_: "", only_character=True).form
+    dlg = Onboarding(s, profiles, kb, lambda *_: "", only_character=True)      # kept: the form is its child
+    form = dlg.form
     assert form.name.accessibleName() == "Character name"
     assert form.level.edit.accessibleName() == "Current level"
     assert form.level.minus.accessibleName() == "Decrease by one"
@@ -222,6 +224,22 @@ def test_f12_is_not_offered_on_windows_and_a_saved_f12_falls_back(env, monkeypat
     dlg.close()
     monkeypatch.setattr(sys, "platform", "darwin")
     assert dialogs.hotkey_choices()[-1] == "F12"               # macOS has it
+
+
+def test_mac_keys_say_fn_once_under_the_pickers(env, monkeypatch):
+    from PySide6.QtWidgets import QLabel
+
+    from maplehelper.i18n import I18n
+    from maplehelper.ui import dialogs
+    s, profiles, kb = env
+    hint = I18n("en")("hotkey_fn_mac")
+    for mac in (True, False):
+        monkeypatch.setattr(I18n, "mac", mac)
+        dlg = dialogs.SettingsDialog(s, profiles, kb, lambda *_: "")
+        shown = [lb.text() for lb in dlg.findChildren(QLabel) if "fn+F9" in lb.text()]
+        assert shown == ([hint] if mac else [])
+        assert ("F11" in hint) and dlg.hk_voice.accessibleDescription() == (hint if mac else "")
+        dlg.close()
 
 
 def test_settings_controls_have_screen_reader_names(env):

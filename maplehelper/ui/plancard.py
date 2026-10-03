@@ -71,6 +71,9 @@ class TipStrip(QFrame):
         self.close_btn.clicked.connect(lambda: self.dismissed.emit(self._tip.kind) if self._tip else None)
         row.addWidget(self.close_btn, 0, Qt.AlignTop)
         self.setCursor(Qt.PointingHandCursor)
+        # a tap asks about the tip: from the keyboard too, Tab to it and Enter or Space (with the focus ring)
+        self.setFocusPolicy(Qt.TabFocus)
+        self.setProperty("focus_ring", True)
         self._tip = None
         self.hide()
 
@@ -81,6 +84,15 @@ class TipStrip(QFrame):
             self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
             self.text.setText(bidi.plain(t(tip.key, **tip.args), rtl))
             self.close_btn.setToolTip(t("tip_hide"))
+            self.close_btn.setAccessibleName(t("tip_hide"))           # an ✕ glyph, read as nothing
+            self.setAccessibleName(t(tip.key, **tip.args))
+            self.setAccessibleDescription(t("tip_ask_a11y"))
+
+    def keyPressEvent(self, e):
+        if self._tip and e.key() in (Qt.Key_Return, Qt.Key_Enter, Qt.Key_Space) and not e.modifiers():
+            self.asked.emit(self._tip.question)
+            return
+        super().keyPressEvent(e)
 
     def mouseReleaseEvent(self, e):
         if self._tip and e.button() == Qt.LeftButton:

@@ -101,8 +101,10 @@ def answer(question: str, kb: KnowledgeBase, t, char=None) -> Answer | None:
         if not shops:
             return None
         # a Town Hall shop's price is for a citizen grade and up: said, or a player without it is told to buy there
+        # and a price the KB labels as the COT2 test's is said to be one, not given as the launch price
         lines = [f"• {npc} · {where} · {price:,} mesos"
                  + (" " + t("price_rank", rank=prices.ranks[(npc, where)]) if (npc, where) in prices.ranks else "")
+                 + (" " + t("price_cot2") if prices.test_price((npc, where)) else "")
                  for npc, where, price in shops[:3]]
         return Answer(text=t("quick_sells", name=name) + "\n" + "\n".join(lines), entities=[key])
     if cat == "item" and (WHO.search(q) or DROPS.search(q)):

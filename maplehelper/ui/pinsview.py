@@ -13,6 +13,7 @@ from .. import bidi, pins
 from ..i18n import I18n
 from .controls import follow_typing, rtl_buttons
 from .glass import GlassDialog
+from .patchnotes import gutter
 
 
 def short_text(text: str, limit: int) -> str:
@@ -77,6 +78,7 @@ class PinsBar(QFrame):
         self._items, self._t, self._rtl = items, t, rtl
         self.setVisible(bool(items))
         self.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
+        self.body_lay.setContentsMargins(*gutter(rtl))     # the room before its scrollbar, on the bar's side
         # "left" is the leading edge: Qt mirrors style-sheet alignment in a right-to-left UI ("right" put the
         # Hebrew title on the left, seen live)
         self.head.setStyleSheet("text-align: left; font-weight: 600;")
@@ -223,6 +225,7 @@ class HistoryDialog(GlassDialog):
         outer.setSpacing(10)
         self.search = QLineEdit()
         self.search.setPlaceholderText(bidi.plain(t("history_search"), t.rtl))
+        self.search.setAccessibleName(t("history_search"))    # a placeholder isn't read as the field's name
         self.search.setClearButtonEnabled(True)
         follow_typing(self.search, t.rtl)
         # rebuilt once typing pauses, not on every key (each pass rebuilds up to PAGE cards)
@@ -238,7 +241,7 @@ class HistoryDialog(GlassDialog):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         body = QWidget(objectName="Feed")
         self.rows = QVBoxLayout(body)
-        self.rows.setContentsMargins(0, 0, 6, 0)
+        self.rows.setContentsMargins(*gutter(t.rtl))  # the room before the scrollbar, on its side (left in Hebrew)
         self.rows.setSpacing(10)
         scroll.setWidget(body)
         outer.addWidget(scroll, 1)
@@ -313,8 +316,12 @@ class HistoryDialog(GlassDialog):
             self.rows.addWidget(self._card(p, align))
         self._list_end = self.rows.count()
         if shown < len(hits):
-            more = QPushButton(bidi.plain(t("history_more", n=min(self.PAGE, len(hits) - shown)), rtl),
-                               objectName="Secondary")
+            # the numbers in a line over the button, not on it: a button lays a Hebrew label with a number in it
+            # out of order (the number came first, seen live), the same as the quest list's "Show more quests"
+            at_end = QLabel(bidi.plain(count, rtl), objectName="RowHint")
+            at_end.setAlignment(Qt.AlignHCenter)
+            self.rows.addWidget(at_end)
+            more = QPushButton(bidi.plain(t("history_more"), rtl), objectName="Secondary")
             more.setCursor(Qt.PointingHandCursor)
             more.setAutoDefault(False)
             more.clicked.connect(self._more)

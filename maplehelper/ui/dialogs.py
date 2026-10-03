@@ -14,6 +14,7 @@ from .. import bidi, providers
 from ..providers.base import login_failed, login_waiting, stop_login
 from .controls import AdaptiveRow, FlowLayout, Section, Segmented, Select, Stepper, Switch, rtl_buttons
 from .glass import GlassDialog, no_default_buttons
+from .patchnotes import gutter
 from ..i18n import I18n
 from ..jobs import JOBS, job_label, open_jobs        # the job tree: base class -> [(job, min level)], checked against the KB
 from ..kb import KnowledgeBase
@@ -938,7 +939,7 @@ class SettingsDialog(GlassDialog):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         body = QWidget(objectName="Feed")
         lay = QVBoxLayout(body)
-        lay.setContentsMargins(0, 0, 6, 0)
+        lay.setContentsMargins(*gutter(rtl))          # the room before the scrollbar, on its side (left in Hebrew)
         lay.setSpacing(18)
         scroll.setWidget(body)
         outer.addWidget(scroll, 1)
@@ -971,7 +972,10 @@ class SettingsDialog(GlassDialog):
             # not whichever key happened to be first in the list
             pick.setCurrentText(settings[key] if settings[key] in fkeys else DEFAULT_SETTINGS[key])
         sec.add_row(t("hotkey_toggle"), self.hk_toggle)
-        sec.add_row(t("hotkey_voice"), self.hk_voice)
+        # a Mac's F-keys are media keys unless fn is held (the texts teach "fn+F9"), and F11 shows the desktop:
+        # said once under the two keys, not on every choice
+        sec.add_row(t("hotkey_voice"), self.hk_voice, hint=t("hotkey_fn_mac") if t.mac else "",
+                    hint_below=t.mac)
         self.keys_error = QLabel(bidi.plain(t("hotkey_same"), rtl), objectName="WarnHint")   # a warning, not a hint
         self.keys_error.setWordWrap(True)
         self.keys_error.setContentsMargins(0, 4, 0, 4)
