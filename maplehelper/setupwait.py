@@ -58,7 +58,7 @@ def _tell_waiting() -> None:
                                                                      "Maple Helper", flags), daemon=True).start()
 
 
-DOWNLOAD_URL = "https://github.com/Amitaflalo1995/maple-helper/releases/latest/download/MapleHelper-Setup.exe"
+DOWNLOAD_URL = "https://github.com/Maple-Helper/maple-helper/releases/latest/download/MapleHelper-Setup.exe"
 BROKEN_TEXT = {
     "he": "חלק מהקבצים של Maple Helper חסרים או פגומים: כנראה עדכון שנקטע, או אנטי-וירוס שחסם קובץ.\n\n"
           "להתקין מחדש? ההגדרות והדמויות שלכם יישמרו.",

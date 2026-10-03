@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 
 FM_URL = "https://meowdb.com/msclassic/api/market-listings/browse"
 FM_PAGE = "https://meowdb.com/msclassic/free-market"
-UA = "Maple Helper (https://github.com/Amitaflalo1995/maple-helper)"
+UA = "Maple Helper (https://github.com/Maple-Helper/maple-helper)"
 CACHE_SECONDS = 600
 _cache: dict[str, tuple[float, dict | None]] = {}
 

@@ -131,7 +131,7 @@ checks the app.
 ## README snippet
 
 ```markdown
-[![CI](https://github.com/Amitaflalo1995/maple-helper/actions/workflows/ci.yml/badge.svg)](https://github.com/Amitaflalo1995/maple-helper/actions/workflows/ci.yml)
+[![CI](https://github.com/Maple-Helper/maple-helper/actions/workflows/ci.yml/badge.svg)](https://github.com/Maple-Helper/maple-helper/actions/workflows/ci.yml)
 
-**[Download Maple Helper](https://github.com/Amitaflalo1995/maple-helper/releases/latest/download/MapleHelper-Setup.exe)** (Windows 10/11). It updates itself.
+**[Download Maple Helper](https://github.com/Maple-Helper/maple-helper/releases/latest/download/MapleHelper-Setup.exe)** (Windows 10/11). It updates itself.
 ```

@@ -21,7 +21,7 @@ import time
 import zipfile
 from pathlib import Path
 
-REPO = "Amitaflalo1995/maple-helper"
+REPO = "Maple-Helper/maple-helper"
 CATEGORIES = ["monster", "item", "map", "quest", "npc", "skill", "class", "guide", "shop", "crafting", "formula"]
 MIN_KEEP_RATIO = 0.9   # an update may not lose more than 10% of the previous entities
 CHANGELOG = "changelog.json"

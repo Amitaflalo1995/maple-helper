@@ -104,7 +104,7 @@ def test_manifest_url_uses_latest_release():
 
 # ---------------------------------------------------------------- app self-update
 
-API = "https://api.github.com/repos/Amitaflalo1995/maple-helper/releases/latest"
+API = "https://api.github.com/repos/Maple-Helper/maple-helper/releases/latest"
 SETUP = b"MZ fake installer bytes"
 
 
@@ -193,8 +193,8 @@ def test_sums_line_with_binary_marker(app_env):
 
 def test_mac_update_notice_names_the_new_release(app_env):
     _, _, publish = app_env
-    publish(tag="v0.4.0", html_url="https://github.com/Amitaflalo1995/maple-helper/releases/tag/v0.4.0")
-    assert updater.newer_release("0.3.0") == ("0.4.0", "https://github.com/Amitaflalo1995/maple-helper/releases/tag/v0.4.0")
+    publish(tag="v0.4.0", html_url="https://github.com/Maple-Helper/maple-helper/releases/tag/v0.4.0")
+    assert updater.newer_release("0.3.0") == ("0.4.0", "https://github.com/Maple-Helper/maple-helper/releases/tag/v0.4.0")
 
 
 @pytest.mark.parametrize("kwargs", [{"tag": "v0.3.0"}, {"tag": "v0.4.0", "prerelease": True}])
