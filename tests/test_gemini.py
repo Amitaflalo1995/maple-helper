@@ -1,7 +1,7 @@
-"""Gemini CLI provider: command, locked home, output parsing, sign-in files and discovery (no real CLI calls)."""
+"""Gemini through the Antigravity CLI (agy): command, locked home, output parsing, sign-in, usage and discovery
+(no real CLI calls)."""
 import io
 import json
-import os
 
 import pytest
 
@@ -13,135 +13,182 @@ def events(*evs):
     return [json.dumps(e) + "\n" for e in evs]
 
 
-RESULT = {"type": "result", "status": "success", "stats": {"models": {
-    "gemini-3.8-flash": {"input_tokens": 50, "output_tokens": 0},       # the router
-    "gemini-3.8-pro": {"input_tokens": 900, "output_tokens": 40}}}}
+def step(**kw):
+    return {"event": "step_update", "step_update": {"conversation_id": "abc-123", **kw}}
+
+
+OK = {"event": "result", "result": {"conversation_id": "abc-123", "status": "SUCCESS", "response": "x"}}
 
 
 @pytest.fixture
 def home(tmp_path, monkeypatch):
-    h = tmp_path / "gemini-home"
+    h = tmp_path / "agy-home"
     monkeypatch.setattr(gemini, "home", lambda: h)
     return h
 
 
 def test_registered_with_its_own_settings():
     g = providers.get("gemini")
-    assert g.name == "gemini" and g.label == "Gemini"
-    assert g.model_setting == "gemini_model" and g.saver_model == "flash" and not g.reports_usage
-    assert g.models()[0] == (None, "Auto") and ("pro", "Pro") in g.models()
+    assert g.name == "gemini" and g.label == "Gemini" and g.model_setting == "gemini_model"
+    assert g.reports_usage and g.login_code and not providers.get("claude").login_code
     from maplehelper.store import DEFAULT_SETTINGS
     assert "gemini_model" in DEFAULT_SETTINGS and DEFAULT_SETTINGS["gemini_model"] is None
 
 
-def test_command_is_read_only_and_takes_the_question_on_stdin():
-    c = gemini.gemini_command(["node", "gemini.js"], "pro", "C:/shots")
-    assert c[:2] == ["node", "gemini.js"]
-    assert c[c.index("-p") + 1] == ""                                   # nothing added to the stdin question
-    assert c[c.index("--approval-mode") + 1] == "plan" and c[c.index("-e") + 1] == "none"
-    assert c[c.index("-o") + 1] == "stream-json" and "--skip-trust" in c
-    assert c[c.index("--include-directories") + 1] == "C:/shots" and c[c.index("-m") + 1] == "pro"
-    bare = gemini.gemini_command(["gemini"])
-    assert "--include-directories" not in bare and "-m" not in bare
+def test_command_takes_the_question_on_stdin_with_our_agent():
+    c = gemini.agy_command("agy.exe", "maplehelper", "gemini-3.8-flash-low")
+    assert c[0] == "agy.exe" and "-p" not in c                       # no -p: the question comes on stdin
+    assert c[c.index("--agent") + 1] == "maplehelper" and c[c.index("--output-format") + 1] == "stream-json"
+    assert "--disable-slash-commands" in c and c[c.index("--model") + 1] == "gemini-3.8-flash-low"
+    assert "--model" not in gemini.agy_command("agy", "maplehelper")
 
 
-def test_home_settings_lock_everything_down(home):
-    gemini.prepare_home(api_key=False)
-    s = json.loads((home / ".gemini" / "settings.json").read_text(encoding="utf-8"))
-    assert s["tools"]["core"] == ["read_file", "grep_search", "glob"]
-    assert s["mcp"]["allowed"] == [] and s["hooksConfig"]["enabled"] is False
-    assert s["security"]["auth"]["selectedType"] == "oauth-personal"
-    gemini.prepare_home(api_key=True)
-    s = json.loads((home / ".gemini" / "settings.json").read_text(encoding="utf-8"))
-    assert s["security"]["auth"]["selectedType"] == "gemini-api-key"
+def test_home_settings_allow_reading_only_the_knowledge_base_and_screenshots(home, tmp_path):
+    gemini.write_settings(tmp_path / "kb", api_key=False)
+    s = json.loads((home / ".gemini" / "antigravity-cli" / "settings.json").read_text(encoding="utf-8"))
+    assert s["permissions"]["allow"] == [f"read_file({(tmp_path / 'kb').resolve()})",
+                                         f"read_file({(home / 'shots').resolve()})"]
+    assert s["allowNonWorkspaceAccess"] is False and "modelProvider" not in s
+    gemini.write_settings(tmp_path / "kb", api_key=True)
+    s = json.loads((home / ".gemini" / "antigravity-cli" / "settings.json").read_text(encoding="utf-8"))
+    assert s["modelProvider"] == "gemini"
 
 
-def test_env_keeps_the_players_own_gemini_setup_out(home, monkeypatch):
-    for k in ("GEMINI_API_KEY", "GOOGLE_API_KEY", "GOOGLE_GEMINI_BASE_URL", "GEMINI_SYSTEM_MD", "NO_BROWSER"):
-        monkeypatch.setenv(k, "leftover")
+def test_agent_file_holds_our_instructions_and_only_read_tools():
+    text = gemini.agent_text("maplehelper", "You are Maple Helper.", gemini.TOOLS)
+    head, body = text.split("---\n")[1], text.split("---\n")[2]
+    assert "excludeDefaultComponents: true" in head and "  - view_file\n" in head and "run_command" not in head
+    assert body.strip() == "You are Maple Helper."
+    assert "tools: []" in gemini.agent_text("maplehelper-summary", "Summarize.", [])
+
+
+def test_env_gives_the_cli_its_own_home(home, monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "leftover")
     e = gemini.env()
-    assert not any(k in e for k in ("GEMINI_API_KEY", "GOOGLE_API_KEY", "GOOGLE_GEMINI_BASE_URL",
-                                    "GEMINI_SYSTEM_MD", "NO_BROWSER"))
-    assert e["GEMINI_CLI_HOME"] == str(home) and e["GEMINI_CLI_NO_RELAUNCH"] == "true"
-    e = gemini.env("AIzaKEY", "C:/sys.md")
-    assert e["GEMINI_API_KEY"] == "AIzaKEY" and e["GEMINI_SYSTEM_MD"] == "C:/sys.md"
+    assert e["HOME"] == str(home) and "GEMINI_API_KEY" not in e
+    if gemini.sys.platform == "win32":
+        assert e["USERPROFILE"] == str(home)
+    assert gemini.env("AIzaKEY")["GEMINI_API_KEY"] == "AIzaKEY"
 
 
 class TestEvents:
     def test_streams_and_keeps_only_the_text_after_the_last_tool(self):
         seen = []
-        text, result, errors, session = gemini.parse_events(events(
-            {"type": "init", "session_id": "7f725bdb-01c4", "model": "auto"},
-            {"type": "message", "role": "user", "content": "where?"},
-            {"type": "message", "role": "assistant", "content": "I'll check. ", "delta": True},
-            {"type": "tool_use", "tool_name": "read_file", "parameters": {"file_path": "x.md"}},
-            {"type": "tool_result", "status": "success"},
-            {"type": "message", "role": "assistant", "content": "Hunt ", "delta": True},
-            {"type": "message", "role": "assistant", "content": "snails.", "delta": True},
-            RESULT), seen.append)
-        assert text == "Hunt snails." and seen[-1] == "Hunt snails." and seen[0] == "I'll check. "
-        assert session == "7f725bdb-01c4" and errors == []
-        r = gemini.to_result(text, result, errors, "")
-        assert r.error is None and r.text == "Hunt snails." and r.model == "gemini-3.8-pro"
+        text, result, _, conv = gemini.parse_events(events(
+            {"event": "init", "conversation_id": "abc-123", "init": {"tools": []}},
+            step(step_type="agent_response", state="ACTIVE", text_delta="I'll check. "),
+            step(step_type="tool", state="ACTIVE", tool_name="view_file"),
+            step(step_type="tool", state="DONE", tool_name="view_file"),
+            step(step_type="agent_response", state="ACTIVE", text_delta="Hunt "),
+            step(step_type="agent_response", state="DONE", text_delta="snails."),
+            OK), seen.append)
+        assert text == "Hunt snails." and seen[0] == "I'll check. " and seen[-1] == "Hunt snails."
+        assert conv == "abc-123"
+        r = gemini.to_result(text, result, "", "gemini-3.8-flash-low")
+        assert r.error is None and r.text == "Hunt snails." and r.model == "gemini-3.8-flash-low"
 
-    @pytest.mark.parametrize("message,kind", [
-        ("API key not valid. Please pass a valid API key.", "not_logged_in"),
-        ("Manual authorization is required but the current session is non-interactive.", "not_logged_in"),
-        ("You have exhausted your capacity on this model. Quota exceeded", "usage_limit"),
-        ("[API Error: got status: 429 Too Many Requests]", "usage_limit"),
-        ("getaddrinfo ENOTFOUND generativelanguage.googleapis.com", "offline"),
+    @pytest.mark.parametrize("error,kind", [
+        ("authentication failed or timed out", "not_logged_in"),
+        ("Please sign in to continue", "not_logged_in"),
+        ("RESOURCE_EXHAUSTED: Five Hour Limit Remaining 0%", "usage_limit"),
+        ("dial tcp: lookup cloudcode-pa.googleapis.com: no such host network", "offline"),
     ])
-    def test_errors(self, message, kind):
-        _, result, errors, _ = gemini.parse_events(events(
-            {"type": "result", "status": "error", "error": {"type": "Error", "message": message}}))
-        assert gemini.to_result("", result, errors, "").error == kind
+    def test_errors(self, error, kind):
+        _, result, _, _ = gemini.parse_events(events(
+            {"event": "result", "result": {"status": "ERROR", "error": error}}))
+        assert gemini.to_result("", result, "", None).error == kind
 
-    def test_no_result_at_all(self):
-        assert gemini.to_result("", None, [], "Please set an Auth method").error == "not_logged_in"
-        assert gemini.to_result("", None, [], "").error == "no_result"
+    def test_an_answer_that_stopped_at_a_blocked_read(self):
+        result = {"status": "SUCCESS", "response": "", "denied_actions": [{"action": "read_file"}]}
+        assert gemini.to_result("", result, "", None).error == "denied"
+        assert gemini.to_result("", {"status": "SUCCESS", "response": ""}, "", None).error == "no_result"
+        assert gemini.to_result("", None, "", None).error == "no_result"
+
+
+def test_models_usage_and_saver_model():
+    out = ("Fetching available models...\ngemini-3.8-flash-high\tGemini 3.8 Flash (High)\n"
+           "gemini-3.8-flash-low\tGemini 3.8 Flash (Low)\ngemini-3.1-pro-high\tGemini 3.1 Pro (High)\n"
+           "claude-opus-5-5-low\tClaude Opus 5.5 (Low)\n")
+    models = gemini.parse_models(out)
+    assert [m for m, _ in models] == ["gemini-3.8-flash-high", "gemini-3.8-flash-low", "gemini-3.1-pro-high"]
+    assert gemini.lightest(models) == "gemini-3.8-flash-low" and gemini.lightest([]) is None
+    data = {"command": {"data": {"groups": [
+        {"name": "Gemini Models", "buckets": [
+            {"window": "weekly", "remaining_fraction": 0.99, "reset_time": "2026-10-10T08:49:39Z"},
+            {"window": "5h", "remaining_fraction": 0.25, "reset_time": "2026-10-03T13:49:39Z"}]},
+        {"name": "Claude and GPT models", "buckets": [{"window": "5h", "remaining_fraction": 0.0}]}]}}}
+    u = gemini.parse_usage(data)
+    assert round(u["five_hour"]["used"], 2) == 0.75 and round(u["seven_day"]["used"], 2) == 0.01
+    assert u["five_hour"]["resets"] == 1791035379.0
+    assert gemini.parse_usage({}) is None and gemini.parse_usage(None) is None
+
+
+def test_forget_removes_the_run_and_keeps_only_the_last_logs(home):
+    d = home / ".gemini" / "antigravity-cli"
+    for sub in ("conversations", "annotations", "brain/abc-123", "brain/other-1", "log"):
+        (d / sub).mkdir(parents=True)
+    for f in ("conversations/abc-123.db", "conversations/abc-123.db-wal", "conversations/other-1.db",
+              "annotations/abc-123.pbtxt", "brain/abc-123/n.md", *(f"log/cli-2026100{i}.log" for i in range(5))):
+        (d / f).write_text("x")
+    gemini.forget("abc-123")
+    assert sorted(p.name for p in (d / "conversations").iterdir()) == ["other-1.db"]
+    assert not (d / "annotations" / "abc-123.pbtxt").exists() and not (d / "brain" / "abc-123").exists()
+    assert (d / "brain" / "other-1").exists() and len(list((d / "log").iterdir())) == 3
+    gemini.forget("../../etc")             # never a path from outside
+    assert (d / "brain" / "other-1").exists()
+
+
+class Done:
+    def __init__(self, out: str, code: int = 0):
+        self.stdout, self.returncode = out.encode(), code
 
 
 class TestAccount:
-    def test_not_installed_without_the_cli_or_node(self, home, monkeypatch):
-        monkeypatch.setattr(gemini, "find_gemini", lambda: None)
-        assert providers.get("gemini").account()["status"] == "not_installed"
-        monkeypatch.setattr(gemini, "find_gemini", lambda: "gemini.js")
-        monkeypatch.setattr(gemini, "command", lambda exe: None)       # no Node.js
+    def test_not_installed(self, home, monkeypatch):
+        monkeypatch.setattr(gemini, "find_agy", lambda: None)
         assert providers.get("gemini").account()["status"] == "not_installed"
 
-    def test_signed_in_shows_the_google_email_and_sign_out_forgets_it(self, home, monkeypatch):
-        monkeypatch.setattr(gemini, "find_gemini", lambda: "gemini")
-        monkeypatch.setattr(gemini, "command", lambda exe: [exe])
-        g = providers.get("gemini")
-        assert g.account() == {"status": "logged_out", "email": None}
-        d = home / ".gemini"
-        d.mkdir(parents=True)
-        (d / "oauth_creds.json").write_text(json.dumps({"refresh_token": "r", "access_token": "a"}))
-        (d / "google_accounts.json").write_text(json.dumps({"active": "p@gmail.com", "old": []}))
-        assert g.account() == {"status": "ok", "email": "p@gmail.com"}
-        assert g.logout()
-        assert g.account()["status"] == "logged_out" and not (d / "oauth_creds.json").exists()
+    def test_signed_out_and_in(self, home, monkeypatch):
+        monkeypatch.setattr(gemini, "find_agy", lambda: "agy.exe")
+        monkeypatch.setattr(gemini, "_run", lambda args, timeout=30: Done(
+            "Error: Please sign in to view available models."))
+        assert providers.get("gemini").account() == {"status": "logged_out", "email": None}
+        monkeypatch.setattr(gemini, "_run", lambda args, timeout=30: Done("gemini-3.8-flash-low\tGemini 3.8 Flash (Low)\n"))
+        assert providers.get("gemini").account() == {"status": "ok", "email": None}
+        assert providers.get("gemini").saver_model == "gemini-3.8-flash-low"
 
-    def test_sign_in_answers_the_cli_and_runs_hidden_in_its_home(self, home, monkeypatch):
-        seen = {}
-        monkeypatch.setattr(gemini, "find_gemini", lambda: "gemini.js")
-        monkeypatch.setattr(gemini, "command", lambda exe: ["node.exe", exe])
-        monkeypatch.setattr(gemini, "open_login", lambda start, args, env, answer, cwd: seen.update(
-            start=start, args=args, env=env, answer=answer, cwd=cwd) or "proc")
+    def test_cli_that_will_not_start_counts_as_not_installed(self, home, monkeypatch):
+        monkeypatch.setattr(gemini, "find_agy", lambda: "agy.exe")
+        monkeypatch.setattr(gemini, "_run", lambda args, timeout=30: None)
+        assert providers.get("gemini").account()["status"] == "not_installed"
+
+    def test_sign_in_runs_hidden_opens_the_link_once_and_takes_the_code(self, home, monkeypatch):
+        seen, opened = {}, []
+        monkeypatch.setattr(gemini, "find_agy", lambda: "agy.exe")
+        monkeypatch.setattr(base, "open_login", lambda exe, args, env, cwd, keep_stdin, on_line: seen.update(
+            exe=exe, args=args, env=env, cwd=cwd, keep=keep_stdin, on_line=on_line) or "proc")
+        import webbrowser
+        monkeypatch.setattr(webbrowser, "open", opened.append)
         assert providers.get("gemini").login() == "proc"
-        assert seen["start"] == ["node.exe", "gemini.js"] and seen["answer"] == "y\n"
-        assert seen["cwd"] == str(home) and seen["env"]["GEMINI_CLI_HOME"] == str(home)
-        assert "GEMINI_API_KEY" not in seen["env"]
-        s = json.loads((home / ".gemini" / "settings.json").read_text(encoding="utf-8"))
-        assert s["security"]["auth"]["selectedType"] == "oauth-personal"
+        assert seen["keep"] and seen["cwd"] == str(home) and seen["env"]["HOME"] == str(home)
+        seen["on_line"]("Authentication required. Please visit the URL to log in:")
+        seen["on_line"]("https://accounts.google.com/o/oauth2/auth?client_id=1&state=2")
+        seen["on_line"]("https://accounts.google.com/o/oauth2/auth?client_id=1&state=2")
+        assert opened == ["https://accounts.google.com/o/oauth2/auth?client_id=1&state=2"]
+        typed = []
+        monkeypatch.setattr(base, "send_login_input", typed.append)
+        providers.get("gemini").submit_login_code("  4/0AXl-code \n")
+        assert typed == ["4/0AXl-code\n"]
 
 
-def test_open_login_types_the_answer(monkeypatch):
+def test_open_login_keeps_stdin_for_the_code_and_reports_lines(monkeypatch):
+    lines = []
+
     class FakeProc:
         def __init__(self, cmd, **kw):
-            self.cmd, self.kw, self.stdout = cmd, kw, iter([])
+            self.cmd, self.kw, self.stdout = cmd, kw, iter([b"Please visit the URL\n"])
             self.stdin = io.BytesIO()
-            self.stdin.close = lambda: None
+            self.stdin.flush = lambda: None
             FakeProc.last = self
 
         def poll(self):
@@ -149,59 +196,55 @@ def test_open_login_types_the_answer(monkeypatch):
 
         def wait(self):
             return 0
+
+        def kill(self):
+            pass
     monkeypatch.setattr(base.subprocess, "Popen", FakeProc)
-    base.open_login(["node.exe", "gemini.js"], ["-p", "hi"], answer="y\n", cwd="C:/h")
+    base.open_login("agy.exe", ["-p", "hi"], cwd="C:/h", keep_stdin=True, on_line=lines.append)
     p = FakeProc.last
-    assert p.cmd == ["node.exe", "gemini.js", "-p", "hi"] and p.kw["cwd"] == "C:/h"
-    assert p.kw["stdin"] == base.subprocess.PIPE and p.stdin.getvalue() == b"y\n"
-    base._login = None
+    assert p.kw["stdin"] == base.subprocess.PIPE and p.kw["cwd"] == "C:/h"
+    assert base.send_login_input("4/0code\n") and p.stdin.getvalue() == b"4/0code\n"
+    import time
+    for _ in range(50):
+        if lines:
+            break
+        time.sleep(0.01)
+    assert lines == ["Please visit the URL"]
+    base.stop_login()
+    assert not base.send_login_input("x")          # nothing waiting any more
 
 
 class TestDiscovery:
-    def test_windows_runs_the_script_never_the_cmd_shim(self, tmp_path, monkeypatch):
-        script = tmp_path / "npm" / gemini.PACKAGE
-        script.parent.mkdir(parents=True)
-        script.write_text("")
-        monkeypatch.setenv("APPDATA", str(tmp_path))
+    def test_the_official_installer_location(self, tmp_path, monkeypatch):
+        exe = tmp_path / "agy" / "bin" / "agy.exe"
+        exe.parent.mkdir(parents=True)
+        exe.write_text("")
+        monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
         monkeypatch.setattr(gemini.shutil, "which", lambda _n: None)
-        assert gemini.find_windows() is None              # still unpacking: npm writes the shim last
-        (tmp_path / "npm" / "gemini.cmd").write_text("")
-        assert gemini.find_windows() == str(script)
-        monkeypatch.setattr(gemini, "find_node", lambda: "C:/nodejs/node.exe")
-        assert gemini.command(str(script), platform="win32") == ["C:/nodejs/node.exe", str(script)]
-        monkeypatch.setattr(gemini, "find_node", lambda: None)
-        assert gemini.command(str(script), platform="win32") is None
-        assert gemini.command("/opt/homebrew/bin/gemini", platform="darwin") == ["/opt/homebrew/bin/gemini"]
-
-    def test_an_npm_install_with_its_own_prefix(self, tmp_path, monkeypatch):
-        script = tmp_path / "custom" / gemini.PACKAGE
-        script.parent.mkdir(parents=True)
-        script.write_text("")
-        (tmp_path / "custom" / "gemini.cmd").write_text("")
-        monkeypatch.setenv("APPDATA", str(tmp_path / "nothing"))
-        monkeypatch.setattr(gemini.shutil, "which", lambda _n: str(tmp_path / "custom" / "gemini.cmd"))
-        assert gemini.find_windows() == str(script)
+        assert gemini.find_windows() == str(exe)
+        monkeypatch.setattr(gemini.shutil, "which", lambda _n: "C:/elsewhere/agy.exe")
+        assert gemini.find_windows() == "C:/elsewhere/agy.exe"
 
     def test_missing(self, tmp_path, monkeypatch):
-        monkeypatch.setenv("APPDATA", str(tmp_path))
+        monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
         monkeypatch.setattr(gemini.shutil, "which", lambda _n: None)
         assert gemini.find_windows() is None
 
 
 class FakePopen:
-    """Records the run and replays canned Gemini output; checks the files exist while it runs."""
+    """Records each run and replays canned agy output (one batch per run); checks files while it runs."""
     calls: list = []
-    stdout_lines: list[str] = []
+    outputs: list = []
 
     def __init__(self, cmd, **kw):
-        FakePopen.calls.append((cmd, kw))
-        shots = cmd[cmd.index("--include-directories") + 1] if "--include-directories" in cmd else None
-        self.shot = open(os.path.join(shots, "maplehelper-shot-0.jpg"), "rb").read() if shots else None
-        self.system = open(kw["env"]["GEMINI_SYSTEM_MD"], encoding="utf-8").read()
-        FakePopen.last = self
+        self.agent = (gemini.home() / ".gemini" / "config" / "agents" / f"{cmd[cmd.index('--agent') + 1]}.md"
+                      ).read_text(encoding="utf-8")
+        self.shots = {p.name: p.read_bytes() for p in gemini.shots_dir().rglob("*.jpg")}
         self.stdin = io.BytesIO()
         self.stdin.close = lambda: None
-        self.stdout = iter(line.encode() for line in FakePopen.stdout_lines)
+        FakePopen.calls.append(self)
+        self.cmd, self.kw = cmd, kw
+        self.stdout = iter(line.encode() for line in FakePopen.outputs.pop(0))
         self.stderr = io.BytesIO(b"")
         self.returncode = 0
 
@@ -215,75 +258,76 @@ class FakePopen:
         pass
 
 
+ANSWER = events(
+    {"event": "init", "conversation_id": "abc-123"},
+    step(step_type="agent_response", state="ACTIVE", text_delta="Hunt **Red Snail**.\n@@META@@\n"),
+    step(step_type="agent_response", state="DONE", text_delta='{"entities": ["monster/130101"]}'), OK)
+DENIED = events({"event": "result", "result": {"status": "SUCCESS", "response": "",
+                                               "denied_actions": [{"action": "read_file"}]}})
+BAD_MODEL = events({"event": "result", "result": {"status": "ERROR", "error": 'invalid model selection (--model "x")'}})
+
+
 class TestBackend:
     @pytest.fixture
     def kb(self, kb_copy):
         from maplehelper.kb import KnowledgeBase
         return KnowledgeBase(kb_copy)
 
-    def make(self, kb, home, monkeypatch, api_key=None):
-        FakePopen.calls = []
-        FakePopen.stdout_lines = events(
-            {"type": "init", "session_id": "abcdef12-3456"},
-            {"type": "message", "role": "assistant", "content": "Hunt **Red Snail**.\n@@META@@\n", "delta": True},
-            {"type": "message", "role": "assistant", "content": '{"entities": ["monster/130101"]}', "delta": True},
-            RESULT)
+    def make(self, kb, monkeypatch, *outputs, api_key=None, model=None):
+        FakePopen.calls, FakePopen.outputs = [], [list(o) for o in outputs]
         monkeypatch.setattr(gemini.subprocess, "Popen", FakePopen)
-        monkeypatch.setattr(gemini, "command", lambda exe, platform=None: ["gemini"])
         from maplehelper.brain import Brain
-        b = Brain(kb, provider="gemini", api_key=api_key)
-        b.backend.exe = "gemini"
+        b = Brain(kb, provider="gemini", api_key=api_key, model=model)
+        b.backend.exe = "agy.exe"
         return b
 
     def test_answer_screenshot_and_instructions(self, kb, home, monkeypatch):
-        chats = home / ".gemini" / "tmp" / "kb" / "chats"
-        chats.mkdir(parents=True)
-        (chats / "session-2026-10-03T08-21-abcdef12.jsonl").write_text("{}")
-        (chats / "session-2026-10-03T08-21-other123.jsonl").write_text("{}")
-        b = self.make(kb, home, monkeypatch)
+        b = self.make(kb, monkeypatch, ANSWER)
         ans = b.ask("where is Red Snail?", None, None, b"JPEGDATA")
-        assert ans.error is None and ans.text == "Hunt **Red Snail**."
-        assert ans.entities[0] == "monster/130101"
-        cmd, kw = FakePopen.calls[0]
-        assert kw["cwd"] == str(kb.root) and kw["creationflags"] == base.CREATE_NO_WINDOW
-        assert FakePopen.last.shot == b"JPEGDATA"
-        question = FakePopen.last.stdin.getvalue().decode()
-        assert "<question>" in question and question.rstrip().endswith("@maplehelper-shot-0.jpg")
-        assert "read_file" in FakePopen.last.system                         # our instructions + the tools note
-        # nothing left behind: the screenshot folder, the instructions file, this run's chat file
-        assert not os.path.exists(cmd[cmd.index("--include-directories") + 1])
-        assert not os.path.exists(kw["env"]["GEMINI_SYSTEM_MD"])
-        assert [f.name for f in chats.iterdir()] == ["session-2026-10-03T08-21-other123.jsonl"]
+        assert ans.error is None and ans.text == "Hunt **Red Snail**." and ans.entities[0] == "monster/130101"
+        p = FakePopen.calls[0]
+        assert p.kw["cwd"] == str(kb.root) and p.kw["creationflags"] == base.CREATE_NO_WINDOW
+        assert p.kw["env"]["HOME"] == str(home) and "GEMINI_API_KEY" not in p.kw["env"]
+        assert p.shots == {"screenshot-0.jpg": b"JPEGDATA"}                  # there while it ran
+        assert "<question>" in p.stdin.getvalue().decode()
+        assert str(kb.root.resolve()) in p.agent and "screenshot-0.jpg" in p.agent and "  - view_file" in p.agent
+        assert not list(gemini.shots_dir().rglob("*.jpg"))                    # and gone after
 
-    def test_account_login_vs_api_key(self, kb, home, monkeypatch):
-        b = self.make(kb, home, monkeypatch)
+    def test_api_key(self, kb, home, monkeypatch):
+        b = self.make(kb, monkeypatch, ANSWER, api_key="AIzaKEY")
         b.ask("hi", None, None, None)
-        cmd, kw = FakePopen.calls[0]
-        assert "GEMINI_API_KEY" not in kw["env"] and "--include-directories" not in cmd
-        b = self.make(kb, home, monkeypatch, api_key="AIzaKEY")
-        b.ask("hi", None, None, None)
-        assert FakePopen.calls[0][1]["env"]["GEMINI_API_KEY"] == "AIzaKEY"
-        s = json.loads((home / ".gemini" / "settings.json").read_text(encoding="utf-8"))
-        assert s["security"]["auth"]["selectedType"] == "gemini-api-key"
+        assert FakePopen.calls[0].kw["env"]["GEMINI_API_KEY"] == "AIzaKEY"
 
-    def test_summary_on_flash_in_an_empty_folder(self, kb, home, monkeypatch):
-        b = self.make(kb, home, monkeypatch)
-        FakePopen.stdout_lines = events({"type": "message", "role": "assistant", "content": "• Hunt"}, RESULT)
+    def test_a_blocked_read_is_asked_once_more(self, kb, home, monkeypatch):
+        b = self.make(kb, monkeypatch, DENIED, ANSWER)
+        assert b.ask("hi", None, None, None).text == "Hunt **Red Snail**."
+        assert gemini.RETRY_NOTE in FakePopen.calls[1].stdin.getvalue().decode()
+        b = self.make(kb, monkeypatch, DENIED, DENIED)
+        assert b.ask("hi", None, None, None).error == "no_result" and len(FakePopen.calls) == 2
+
+    def test_a_model_google_dropped_falls_back_to_the_default(self, kb, home, monkeypatch):
+        b = self.make(kb, monkeypatch, BAD_MODEL, ANSWER, model="gemini-2.0-gone")
+        assert b.ask("hi", None, None, None).error is None
+        assert FakePopen.calls[0].cmd[FakePopen.calls[0].cmd.index("--model") + 1] == "gemini-2.0-gone"
+        assert "--model" not in FakePopen.calls[1].cmd
+
+    def test_summary_has_no_tools(self, kb, home, monkeypatch):
+        b = self.make(kb, monkeypatch, events(step(step_type="agent_response", state="DONE", text_delta="• Hunt"), OK))
         assert b.backend.summarize("Summarize.", "long text") == "• Hunt"
-        cmd, kw = FakePopen.calls[0]
-        assert cmd[cmd.index("-m") + 1] == "flash" and kw["cwd"] != str(kb.root)
-        assert FakePopen.last.system == "Summarize."
+        p = FakePopen.calls[0]
+        assert p.cmd[p.cmd.index("--agent") + 1] == gemini.SUMMARY_AGENT and "tools: []" in p.agent
+        assert p.agent.rstrip().endswith("Summarize.")
 
     def test_not_installed(self, kb, home, monkeypatch):
-        b = self.make(kb, home, monkeypatch)
+        b = self.make(kb, monkeypatch)
         b.backend.exe = None
         assert b.ask("hi", None, None, None).error == "not_installed"
 
 
 def test_model_names():
-    assert base.model_name("gemini-3.8-flash") == "Gemini 3.8 Flash"
-    assert base.model_name("gemini-3-pro-preview") == "Gemini 3 Pro Preview"
+    assert base.model_name("gemini-3.8-flash-low") == "Gemini 3.8 Flash Low"
 
 
-def test_install_window_closes_by_itself_only_when_it_worked():
-    assert gemini.INSTALL_CMD.endswith("if ($LASTEXITCODE -eq 0) { exit }")
+def test_install_uses_googles_official_script():
+    assert "antigravity.google/cli/install.ps1" in gemini.INSTALL_CMD
+    assert "antigravity.google/cli/install.sh" in gemini.INSTALL_CMD_MAC

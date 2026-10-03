@@ -91,32 +91,30 @@ def in_terminal(command: str) -> subprocess.Popen:
 _login: subprocess.Popen | None = None
 
 
-def open_login(exe: str | list[str], args: list[str], env: dict | None = None, answer: str | None = None,
-               cwd: str | None = None) -> subprocess.Popen | None:
+def open_login(exe: str, args: list[str], env: dict | None = None, cwd: str | None = None,
+               keep_stdin: bool = False, on_line=None) -> subprocess.Popen | None:
     """The official sign-in, with no console window: the CLI opens the browser itself and waits for it there.
     Its output goes to the log (it says why, when a sign-in fails). None when it couldn't start.
-    exe: the executable, or the command that starts it ([node, script]). answer: typed into the CLI's
-    question before the browser opens (Gemini asks "Do you want to continue? [Y/n]")."""
+    keep_stdin: the CLI waits for a code the player pastes (send_login_input). on_line(text): each output
+    line, before it's logged (Gemini's sign-in link is opened from there)."""
     global _login
     stop_login()   # one left waiting still holds its local port (Codex: 1455), so a new one would fail
-    cmd = [*exe, *args] if isinstance(exe, list) else [exe, *args]
     try:
-        p = subprocess.Popen(cmd, stdin=subprocess.PIPE if answer is not None else subprocess.DEVNULL,
+        p = subprocess.Popen([exe, *args], stdin=subprocess.PIPE if keep_stdin else subprocess.DEVNULL,
                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env, cwd=cwd,
                              creationflags=CREATE_NO_WINDOW)
     except OSError:
-        log.warning("sign-in can't start: %s", cmd[0], exc_info=True)
+        log.warning("sign-in can't start: %s", exe, exc_info=True)
         return None
-    if answer is not None:
-        try:
-            p.stdin.write(answer.encode("utf-8"))
-            p.stdin.close()
-        except OSError:
-            pass               # it already ended: drain() logs why
 
     def drain():
         for line in p.stdout:
             text = line.decode("utf-8", errors="replace").strip()
+            if text and on_line:
+                try:
+                    on_line(text)
+                except Exception:      # noqa: BLE001 - the sign-in goes on; the log says why it didn't open
+                    log.warning("sign-in line handler failed", exc_info=True)
             if text:   # the one-time sign-in links stay out of the log
                 text = re.sub(r"https?://\S+", "<link>", text)
                 log.info("sign-in: %s", re.sub(r"[\w.+-]+@[\w-]+\.[\w.]+", "<email>", text))   # no email in reports
@@ -125,6 +123,19 @@ def open_login(exe: str | list[str], args: list[str], env: dict | None = None, a
     threading.Thread(target=drain, daemon=True).start()
     _login = p
     return p
+
+
+def send_login_input(text: str) -> bool:
+    """Type into the sign-in that's waiting (a code pasted from the browser). False when none is waiting."""
+    p = _login
+    if not p or p.poll() is not None or not p.stdin:
+        return False
+    try:
+        p.stdin.write(text.encode("utf-8"))
+        p.stdin.flush()
+        return True
+    except OSError:
+        return False
 
 
 def stop_login() -> None:
@@ -180,6 +191,10 @@ class Provider:
     model_setting = ""       # settings key holding this provider's model (None = the CLI's default)
     saver_model = None       # lighter model for saver mode; None = keep the model, answers just get shorter
     reports_usage = False    # the CLI reports the player's plan usage (drives the usage meter)
+    login_code = False       # the sign-in ends with a code the player pastes back (submit_login_code)
+
+    def submit_login_code(self, code: str) -> bool:
+        return False
 
     def find_exe(self) -> str | None:
         raise NotImplementedError

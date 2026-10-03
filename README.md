@@ -57,7 +57,7 @@ Website: **https://maplehelper.app/** (source: [maple-helper-site](https://githu
 - **Tag cards:** Tap one or more cards to ask follow-up questions about them, such as "where is it?" or "which one is easier for me?".
 - **Who drops it:** Ask which monsters drop an item and get the answer grouped by monster, with pictures.
 - **Guides library:** 32 full guides (every class, grind maps, the EXP table, the damage formula and more) with skill and item icons, character art, tables and tips, in English and Hebrew. The ones that fit your character come first.
-- **Plan usage:** See how much of your Claude or ChatGPT plan is used (Gemini doesn't report its quota), with a heads-up in the chat before the 5-hour limit runs out, and a saver mode.
+- **Plan usage:** See how much of your Claude, ChatGPT or Gemini plan is used, with a heads-up in the chat before the 5-hour limit runs out, and a saver mode.
 - **Play tools:** A window of calculators and planners beside the chat, built from the game database and your character:
   - **Where to train:** maps for your level, ranked, with your hit chance, hits to kill, EXP per kill and kills to level.
   - **Hit & damage:** pick a monster to see the ACC you need to never miss, your hit chance and hits to kill.
@@ -81,7 +81,7 @@ The app uses screen capture and its own overlay window. It does not read game me
 - One AI provider, chosen during setup and switchable in settings:
   - **Claude**: Claude Code installed, with a Claude Pro or Max account or an Anthropic API key.
   - **ChatGPT**: a paid ChatGPT plan or an OpenAI API key (the app installs and signs in to OpenAI's official tool, the Codex CLI, for you). ChatGPT answers appear all at once instead of streaming.
-  - **Gemini**: a personal Google account (free daily quota, more with Google AI Pro or Ultra) or a Gemini API key. The app installs Google's official tool, Gemini CLI (and Node.js if it's missing), and signs you in. Its Google sign-in is kept inside Maple Helper's own Gemini folder, apart from any Gemini CLI setup you already have. Work and school Google accounts aren't supported.
+  - **Gemini**: a personal Google account or a Gemini API key. The app installs Google's official tool, Antigravity (since June 2026 Google serves personal accounts only through it), and signs you in: after signing in to Google in the browser, you paste the code it shows into the app, within a minute.
 - Maple Story Classic World running in **Borderless** or **Windowed Fullscreen** mode.
 - An internet connection for AI responses and initial data downloads.
 - A microphone if you want to use voice input.

@@ -1,17 +1,26 @@
-"""Gemini through the player's own Gemini CLI install (their Google account, or a Gemini API key).
+"""Gemini through Google's Antigravity CLI (`agy`): the player's Google account (Gemini plan), or a Gemini API key.
 
-Each question runs `gemini -p` locked down: read-only tools (read_file, grep_search, glob) in the
-knowledge-base folder, no extensions, MCP servers, hooks or context files. The CLI gets a home of
-its own inside Maple Helper's data folder (GEMINI_CLI_HOME), so the player's own Gemini setup never
-reaches the answers, and the Google sign-in lives there too. Our instructions replace the CLI's
-system prompt (GEMINI_SYSTEM_MD). The screenshot is a temporary file the question points at
-(@name), and the answer streams back token by token.
+Since June 2026 Google serves personal accounts (free, AI Pro, AI Ultra) only through Antigravity,
+not Gemini CLI. Each question runs `agy` headless, locked down:
+  * a custom agent of ours (excludeDefaultComponents) holds our instructions and only four read
+    tools (view_file, grep_search, list_dir, find_by_name): no shell, writing, web or browser;
+  * file reads are allowed only in the knowledge base and the screenshot folder (permissions.allow);
+    headless runs auto-deny anything that would need approval;
+  * the CLI gets a home of its own in Maple Helper's data folder (HOME/USERPROFILE), so the player's
+    own Antigravity setup (rules, skills, plugins, MCP servers) never reaches the answers. The Google
+    sign-in itself lives in the system's credential store, shared with the player's own Antigravity.
+The screenshot is a file the agent opens with view_file (agy takes only text in a message), the
+question comes on stdin and the answer streams back.
+
+Sign-in: agy prints a Google link; after signing in, the page shows a code the player pastes back
+(it waits 60 seconds). login() starts it hidden and opens the link; submit_login_code() pastes.
 """
 from __future__ import annotations
 
 import json
 import logging
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -20,155 +29,136 @@ import threading
 import time
 from pathlib import Path
 
+from . import base
 from .base import CREATE_NO_WINDOW, Provider, RawResult, classify_error, child_env, find_posix, http_ok, \
-    open_login, run_installer
+    run_installer
 
 log = logging.getLogger(__name__)
-STALL_TIMEOUT_S = 150    # no output for this long = stuck (tool calls and streaming print all along)
+STALL_TIMEOUT_S = 150    # no output for this long = stuck (tool steps and streaming print all along)
+CHECK_TIMEOUT_S = 30
 
-# Gemini CLI is an npm package (Node.js 20+): the installer brings Node.js along when it's missing or too old
-INSTALL_CMD = (
-    "$v = 0; try { $v = [int]((node -v) -replace '^v(\\d+).*', '$1') } catch {}; "
-    "if ($v -lt 20) { winget install -e --id OpenJS.NodeJS.LTS --accept-source-agreements "
-    "--accept-package-agreements; $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + "
-    "[Environment]::GetEnvironmentVariable('Path', 'User') }; "
-    "npm.cmd install -g @google/gemini-cli; "
-    # done: the window closes by itself (it stays open, with npm's error, only when the install failed)
-    "if ($LASTEXITCODE -eq 0) { exit }")
-INSTALL_CMD_MAC = ("if command -v brew >/dev/null 2>&1; then brew install gemini-cli; "
-                   "else npm install -g @google/gemini-cli; fi")
-POSIX_DIRS = ["~/.local/bin", "/opt/homebrew/bin", "/usr/local/bin", "~/.npm-global/bin"]
-PACKAGE = Path("node_modules") / "@google" / "gemini-cli" / "bundle" / "gemini.js"
+INSTALL_CMD = "irm https://antigravity.google/cli/install.ps1 | iex"
+INSTALL_CMD_MAC = "curl -fsSL https://antigravity.google/cli/install.sh | bash"
+POSIX_DIRS = ["~/.local/bin", "/opt/homebrew/bin", "/usr/local/bin"]
 
-# the aliases the CLI resolves to Google's newest model of each kind; None = its own default ("auto")
-MODELS: list[tuple[str | None, str]] = [(None, "Auto"), ("pro", "Pro"), ("flash", "Flash")]
-SAVER_MODEL = "flash"
+# the sign-in lives in the system credential store (go-keyring: service "gemini", user "antigravity")
+CREDENTIAL = ("gemini", "antigravity")
 
-# Gemini reads the knowledge base with its own read-only file tools
-TOOLS_NOTE = ("\nTools: you read the knowledge base with read_file, grep_search and glob in the current "
-              "directory. You cannot write files, run commands or use the network.")
-
-# The settings of Maple Helper's own Gemini home. Everything that could reach beyond the knowledge
-# base is off; selectedType picks the account login or the API key (the player's choice).
-LOCKED_SETTINGS = {
-    "tools": {"core": ["read_file", "grep_search", "glob"]},
-    "mcp": {"allowed": []},
-    "hooksConfig": {"enabled": False},
-    "context": {"fileName": ["MAPLEHELPER_NO_CONTEXT.md"]},     # no GEMINI.md files from the folders
-    "privacy": {"usageStatisticsEnabled": False},
-    "telemetry": {"enabled": False},
-    "general": {"checkpointing": {"enabled": False}, "enableAutoUpdate": False},
-    "advanced": {"autoConfigureMemory": False},
-}
-# environment that would point the CLI at another account, endpoint or credential store
-FOREIGN_ENV = ("GEMINI_API_KEY", "GOOGLE_API_KEY", "GOOGLE_GENAI_USE_VERTEXAI", "GOOGLE_GENAI_USE_GCA",
-               "GOOGLE_GEMINI_BASE_URL", "GOOGLE_VERTEX_BASE_URL", "GOOGLE_CLOUD_ACCESS_TOKEN", "NO_BROWSER",
-               "GEMINI_SYSTEM_MD", "GEMINI_CLI_SYSTEM_SETTINGS_PATH", "GEMINI_FORCE_ENCRYPTED_FILE_STORAGE",
-               "GEMINI_MODEL")
+AGENT = "maplehelper"
+SUMMARY_AGENT = "maplehelper-summary"     # each kind of call has its own agent file: they can run together
+QUICK_AGENT = "maplehelper-quick"
+TOOLS = ["view_file", "grep_search", "list_dir", "find_by_name"]
+RETRY_NOTE = ("\n\n(Your last attempt stopped at a blocked file. Read only inside the knowledge-base folder "
+              "and the screenshot, then answer.)")
+LOGIN_URL = re.compile(r"https://accounts\.google\.com/\S+")
 
 
 def home() -> Path:
-    """Maple Helper's own Gemini home (settings, sign-in): GEMINI_CLI_HOME."""
+    """Maple Helper's own Antigravity home: settings, our agents, the conversations it keeps."""
     from ..store import DATA_DIR
-    return DATA_DIR / "gemini"
+    return DATA_DIR / "antigravity"
 
 
-def prepare_home(api_key: bool) -> Path:
-    """Write the locked settings (only when they changed: answers and summaries can start together)."""
-    d = home() / ".gemini"
-    d.mkdir(parents=True, exist_ok=True)
-    settings = {**LOCKED_SETTINGS, "security": {"auth": {"selectedType": "gemini-api-key" if api_key
-                                                         else "oauth-personal"}}}
-    text = json.dumps(settings, indent=2)
-    path = d / "settings.json"
-    try:
-        if path.read_text(encoding="utf-8") == text:
-            return home()
-    except OSError:
-        pass
-    tmp = path.with_suffix(".tmp")
-    tmp.write_text(text, encoding="utf-8")
-    os.replace(tmp, path)
-    return home()
-
-
-def find_node() -> str | None:
-    """node.exe: on PATH, else where the Node.js installer puts it (PATH is the app's own, from before an install)."""
-    p = shutil.which("node")
-    if p and p.lower().endswith(".exe"):
-        return p
-    for base in (os.environ.get("ProgramFiles", r"C:\Program Files"), os.environ.get("LOCALAPPDATA", "")):
-        c = Path(base) / "nodejs" / "node.exe"
-        if base and c.exists():
-            return str(c)
-    return None
+def shots_dir() -> Path:
+    return home() / "shots"
 
 
 def find_windows() -> str | None:
-    """gemini.js of an npm install. Never the gemini.cmd shim: stopping an answer would only stop cmd.exe,
-    and the node.exe under it would go on. The shim still has to be there: npm writes it last, so an
-    install that's still unpacking doesn't count as installed yet."""
-    dirs = [Path(os.environ.get("APPDATA", "")) / "npm"]
-    shim = shutil.which("gemini")
-    if shim:
-        dirs.insert(0, Path(shim).parent)      # an npm install with its own prefix
-    for d in dirs:
-        script = d / PACKAGE
-        if script.exists() and (d / "gemini.cmd").exists():
-            return str(script)
-    return None
+    p = shutil.which("agy")
+    if p and p.lower().endswith(".exe"):
+        return p
+    c = Path(os.environ.get("LOCALAPPDATA", "")) / "agy" / "bin" / "agy.exe"
+    return str(c) if c.exists() else None
 
 
-def find_gemini() -> str | None:
-    """Locate the Gemini CLI (npm or Homebrew); on Windows its script, run with node.exe (see command())."""
-    return find_windows() if sys.platform == "win32" else find_posix("gemini", POSIX_DIRS)
+def find_agy() -> str | None:
+    """The Antigravity CLI from Google's installer (Windows: %LOCALAPPDATA%\\agy\\bin, macOS: ~/.local/bin)."""
+    return find_windows() if sys.platform == "win32" else find_posix("agy", POSIX_DIRS)
 
 
-def command(exe: str, platform: str = sys.platform) -> list[str] | None:
-    """How to start it: [node.exe, gemini.js] on Windows (None without Node.js), the executable elsewhere."""
-    if platform != "win32":
-        return [exe]
-    node = find_node()
-    return [node, exe] if node else None
-
-
-def env(api_key: str | None = None, system_md: str | None = None) -> dict:
+def env(api_key: str | None = None) -> dict:
     e = child_env(POSIX_DIRS)
-    for k in FOREIGN_ENV:
-        e.pop(k, None)
-    e["GEMINI_CLI_HOME"] = str(home())
-    e["GEMINI_CLI_NO_RELAUNCH"] = "true"     # one process: stopping it stops the answer (no node child left over)
+    h = str(home())
+    e["HOME"] = h
+    if sys.platform == "win32":
+        e["USERPROFILE"] = h
+    e.pop("GEMINI_API_KEY", None)
     if api_key:
         e["GEMINI_API_KEY"] = api_key
-    if system_md:
-        e["GEMINI_SYSTEM_MD"] = system_md
     return e
 
 
-def gemini_command(start: list[str], model: str | None = None, image_dir=None) -> list[str]:
-    """The question itself comes on stdin (-p "" adds nothing to it)."""
-    cmd = [*start, "-p", "", "-o", "stream-json", "--skip-trust", "--approval-mode", "plan", "-e", "none"]
-    if image_dir:
-        cmd += ["--include-directories", str(image_dir)]
+def write_settings(kb_root, api_key: bool) -> None:
+    """Reads only in the knowledge base and the screenshot folder; nothing outside asks (headless = denied)."""
+    d = home() / ".gemini" / "antigravity-cli"
+    d.mkdir(parents=True, exist_ok=True)
+    settings = {
+        "allowNonWorkspaceAccess": False,
+        "enableTelemetry": False,
+        "permissions": {"allow": [f"read_file({Path(kb_root).resolve()})", f"read_file({shots_dir().resolve()})"]},
+    }
+    if api_key:
+        settings["modelProvider"] = "gemini"      # the Gemini API with GEMINI_API_KEY instead of the sign-in
+    _write(d / "settings.json", json.dumps(settings, indent=2))
+
+
+def agent_text(name: str, instructions: str, tools: list[str]) -> str:
+    tool_lines = "".join(f"  - {t}\n" for t in tools) if tools else ""
+    return (f"---\nname: {name}\ndescription: Maple Helper, the in-game assistant for MapleStory Classic.\n"
+            f"tools:{'' if tools else ' []'}\n{tool_lines}excludeDefaultComponents: true\n---\n{instructions}\n")
+
+
+def write_agent(name: str, instructions: str, tools: list[str]) -> None:
+    d = home() / ".gemini" / "config" / "agents"
+    d.mkdir(parents=True, exist_ok=True)
+    _write(d / f"{name}.md", agent_text(name, instructions, tools))
+
+
+def _write(path: Path, text: str) -> None:
+    try:
+        if path.read_text(encoding="utf-8") == text:
+            return
+    except OSError:
+        pass
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, path)
+
+
+def tools_note(kb_root, shots: list[Path]) -> str:
+    """Without the default prompt the agent doesn't know where it is: the folder goes in by full path."""
+    note = (f"\n\nTools: the knowledge base is the folder {Path(kb_root).resolve()} - read it with view_file, "
+            "grep_search, list_dir and find_by_name, always with absolute paths. Nothing outside that folder "
+            "(and the screenshot) is open to you: never list or open other folders, they are blocked. You cannot "
+            "write files, run commands or use the network.")
+    if shots:
+        note += ("\nThe player's game screenshot is attached as " + ", ".join(str(s) for s in shots) +
+                 ": open it with view_file first, before answering.")
+    return note
+
+
+def agy_command(exe: str, agent: str, model: str | None = None) -> list[str]:
+    """The question comes on stdin (agy reads it there when there's no -p)."""
+    cmd = [exe, "--agent", agent, "--output-format", "stream-json", "--disable-slash-commands"]
     if model:
-        cmd += ["-m", model]
+        cmd += ["--model", model]
     return cmd
 
 
 def classify(text: str) -> str | None:
     t = text.lower()
-    if ("api key not valid" in t or "api_key_invalid" in t or "unauthenticated" in t or "manual authorization" in t
-            or "please set an auth method" in t or "invalid_grant" in t or "login required" in t):
+    if ("authentication" in t or "not logged in" in t or "not authenticated" in t or "sign in" in t
+            or "api key not valid" in t):
         return "not_logged_in"
-    if "quota" in t or "resource_exhausted" in t or "429" in t:
+    if "quota" in t or "limit remaining" in t or "resource_exhausted" in t or "rate limit" in t or "429" in t:
         return "usage_limit"
     return classify_error(text)
 
 
 def parse_events(lines, on_delta=None) -> tuple[str, dict | None, list[str], str | None]:
-    """(answer text, the result event, error messages, session id) from stream-json output.
-    The answer is the text after the last tool call: earlier text is a lead-in ("I'll check the database")."""
-    current, result, errors, session = "", None, [], None
+    """(answer text, the result, errors, conversation id) from agy's stream-json output. The answer is the
+    text after the last tool step: earlier text is a lead-in ("I'll check the database")."""
+    current, result, errors, conv = "", None, [], None
     for line in lines:
         if isinstance(line, bytes):
             line = line.decode("utf-8", errors="replace")
@@ -178,65 +168,110 @@ def parse_events(lines, on_delta=None) -> tuple[str, dict | None, list[str], str
             continue
         if not isinstance(ev, dict):
             continue
-        t = ev.get("type")
-        if t == "init":
-            session = ev.get("session_id") or session
-        elif t == "message" and ev.get("role") == "assistant":
-            current += str(ev.get("content") or "")
-            if on_delta:
-                on_delta(current)
-        elif t == "tool_use":
-            current = ""
-        elif t == "error":
-            errors.append(str(ev.get("message", "")))
-        elif t == "result":
-            result = ev
-    return current, result, errors, session
+        kind = ev.get("event")
+        if kind == "init":
+            conv = ev.get("conversation_id") or conv
+        elif kind == "step_update":
+            s = ev.get("step_update") or {}
+            conv = s.get("conversation_id") or conv
+            if s.get("step_type") == "tool" and s.get("state") == "ACTIVE":
+                current = ""
+            elif s.get("step_type") == "agent_response" and s.get("text_delta"):
+                current += str(s["text_delta"])
+                if on_delta:
+                    on_delta(current)
+            if (s.get("tool_info") or {}).get("error"):
+                log.info("Gemini tool %s refused: %s", s.get("tool_name"),
+                         str(s["tool_info"]["error"].get("message", ""))[:200])
+        elif kind == "result":
+            result = ev.get("result") or {}
+            conv = result.get("conversation_id") or conv
+    return current, result, errors, conv
 
 
-def answering_model(result: dict | None) -> str | None:
-    """The model that wrote the answer: the result's per-model stats name it ("gemini-3.8-flash")."""
-    models = ((result or {}).get("stats") or {}).get("models")
-    if not isinstance(models, dict):
-        return None
-    out = [name for name, s in models.items() if isinstance(s, dict) and s.get("output_tokens")]
-    return (out or list(models) or [None])[-1]
-
-
-def to_result(text: str, result: dict | None, errors: list[str], stderr: str) -> RawResult:
-    if not result or result.get("status") != "success":
-        detail = "\n".join(errors) + "\n" + str(((result or {}).get("error") or {}).get("message", "")) + "\n" + stderr
+def to_result(text: str, result: dict | None, stderr: str, model: str | None) -> RawResult:
+    if not result or result.get("status") != "SUCCESS":
+        detail = str((result or {}).get("error", "")) + "\n" + stderr
         log.warning("Gemini gave no answer: %s", detail.strip()[-1500:])   # the cause, for "Report a problem"
         return RawResult(error=classify(detail) or ("api_error" if result else "no_result"))
-    return RawResult(text=text, model=answering_model(result))
+    answer = text or str(result.get("response") or "")
+    if not answer.strip():
+        log.warning("Gemini answered nothing: %s | %s", result.get("denied_actions"), stderr[-500:])
+        # it reached for something blocked and stopped there (agy doesn't work around a refusal)
+        return RawResult(error="denied" if result.get("denied_actions") else "no_result")
+    return RawResult(text=answer, model=model)
 
 
-def forget_session(session: str | None) -> None:
-    """The CLI saves every run as a chat file in its home; Maple Helper keeps nothing (like Claude's
-    --no-session-persistence)."""
-    if not session:
-        return
-    for f in (home() / ".gemini" / "tmp").glob(f"*/chats/session-*{session[:8]}*"):
+def forget(conv: str | None) -> None:
+    """agy keeps every run (conversation, notes, annotations); Maple Helper keeps nothing."""
+    d = home() / ".gemini" / "antigravity-cli"
+    if conv and re.fullmatch(r"[\w-]+", conv):
+        for f in list((d / "conversations").glob(conv + ".db*")) + [d / "annotations" / f"{conv}.pbtxt"]:
+            try:
+                f.unlink()
+            except OSError:
+                pass
+        shutil.rmtree(d / "brain" / conv, ignore_errors=True)
+    logs = sorted((d / "log").glob("cli-*.log"))
+    for f in logs[:-3]:               # its own logs (they name the questions): keep the last few for problems
         try:
             f.unlink()
         except OSError:
             pass
 
 
-def read_account() -> dict:
-    """The Google sign-in in Maple Helper's Gemini home: {'status': 'ok' | 'logged_out', 'email'}."""
-    d = home() / ".gemini"
+def parse_models(output: str) -> list[tuple[str, str]]:
+    """`agy models` prints "<id>\\t<name>" lines; the Gemini ones are this provider's."""
+    out = []
+    for line in output.splitlines():
+        parts = line.strip().split("\t")
+        if len(parts) == 2 and parts[0].startswith("gemini-"):
+            out.append((parts[0], parts[1]))
+    return out
+
+
+def parse_usage(data) -> dict | None:
+    """`agy -p /usage --output-format json`: the Gemini group's 5-hour and weekly windows, in usage.parse's shape."""
+    from datetime import datetime
     try:
-        creds = json.loads((d / "oauth_creds.json").read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        creds = None
-    if not isinstance(creds, dict) or not (creds.get("refresh_token") or creds.get("access_token")):
-        return {"status": "logged_out", "email": None}
+        groups = data["command"]["data"]["groups"]
+    except (KeyError, TypeError):
+        return None
+    out = {}
+    for g in groups if isinstance(groups, list) else []:
+        if not isinstance(g, dict) or not str(g.get("name", "")).lower().startswith("gemini"):
+            continue
+        for b in g.get("buckets") or []:
+            name = {"5h": "five_hour", "weekly": "seven_day"}.get(b.get("window")) if isinstance(b, dict) else None
+            left = b.get("remaining_fraction") if name else None
+            if not isinstance(left, (int, float)):
+                continue
+            try:
+                resets = datetime.fromisoformat(str(b.get("reset_time")).replace("Z", "+00:00")).timestamp()
+            except ValueError:
+                resets = None
+            out[name] = {"used": max(0.0, min(1.0, 1 - float(left))), "resets": resets}
+    return out or None
+
+
+_models_cache: list[tuple[str, str]] = []
+
+
+def lightest(models: list[tuple[str, str]]) -> str | None:
+    """Saver mode: the newest Flash at low effort ("gemini-3.8-flash-low"; agy lists the newest first)."""
+    return next((m for m, _ in models if "flash" in m and m.endswith("-low") and "lite" not in m), None)
+
+
+def _run(args: list[str], timeout: float = CHECK_TIMEOUT_S) -> subprocess.CompletedProcess | None:
+    exe = find_agy()
+    if not exe:
+        return None
     try:
-        email = json.loads((d / "google_accounts.json").read_text(encoding="utf-8")).get("active")
-    except (OSError, ValueError, AttributeError):
-        email = None
-    return {"status": "ok", "email": email if isinstance(email, str) else None}
+        return subprocess.run([exe, *args], capture_output=True, timeout=timeout, env=env(), cwd=str(home()),
+                              stdin=subprocess.DEVNULL, creationflags=CREATE_NO_WINDOW)
+    except (OSError, subprocess.TimeoutExpired):
+        log.warning("agy %s failed", args[:1], exc_info=True)
+        return None
 
 
 class Gemini(Provider):
@@ -244,44 +279,83 @@ class Gemini(Provider):
     label = "Gemini"
     keyring_user = "gemini_api_key"
     model_setting = "gemini_model"
-    saver_model = SAVER_MODEL
-    reports_usage = False     # the CLI doesn't report the plan's quota
+    reports_usage = True       # read on demand (agy -p /usage)
+    login_code = True          # the sign-in ends with a code the player pastes back
+
+    @property
+    def saver_model(self) -> str | None:
+        return lightest(_models_cache)
 
     def find_exe(self) -> str | None:
-        return find_gemini()
+        return find_agy()
 
     def models(self) -> list[tuple[str | None, str]]:
-        return list(MODELS)
+        """Google's current Gemini list for this account (agy models); just the default when it can't be read."""
+        global _models_cache
+        r = _run(["models"])
+        found = parse_models(r.stdout.decode("utf-8", errors="replace")) if r else []
+        if found:
+            _models_cache = found
+        return [(None, "")] + found
+
+    def read_limits(self, timeout: float = CHECK_TIMEOUT_S) -> dict | None:
+        home().mkdir(parents=True, exist_ok=True)
+        r = _run(["-p", "/usage", "--output-format", "json"], timeout)
+        if not r or r.returncode != 0:
+            return None
+        try:
+            return parse_usage(json.loads(r.stdout.decode("utf-8", errors="replace").strip().splitlines()[-1]))
+        except (ValueError, IndexError):
+            return None
 
     def account(self) -> dict:
-        exe = find_gemini()
-        if not exe or not command(exe):
-            # no CLI, or no Node.js to run it: the installer brings both
+        """agy models answers in ~2 s: the list when signed in, "Please sign in" when not."""
+        global _models_cache
+        if not find_agy():
             return {"status": "not_installed", "email": None}
-        return read_account()
+        home().mkdir(parents=True, exist_ok=True)
+        r = _run(["models"])
+        if r is None:
+            return {"status": "not_installed", "email": None}    # found but won't start: offer the installer
+        found = parse_models(r.stdout.decode("utf-8", errors="replace"))
+        if found:
+            _models_cache = found
+            return {"status": "ok", "email": None}
+        return {"status": "logged_out", "email": None}
 
     def logout(self) -> bool:
-        """Forget the Google sign-in (only Maple Helper's: the player's own Gemini CLI keeps its own)."""
-        d = home() / ".gemini"
+        """Forget the Google sign-in (agy has no sign-out command of its own outside its window)."""
         try:
-            (d / "oauth_creds.json").unlink(missing_ok=True)
-            accounts = d / "google_accounts.json"
-            if accounts.exists():
-                accounts.write_text(json.dumps({"active": None, "old": []}), encoding="utf-8")
+            if sys.platform == "win32":
+                from win32ctypes.pywin32 import win32cred
+                win32cred.CredDelete(":".join(CREDENTIAL), win32cred.CRED_TYPE_GENERIC)
+            else:
+                import keyring
+                keyring.delete_password(*CREDENTIAL)
             return True
-        except OSError:
-            return False
+        except Exception as e:      # noqa: BLE001 - not signed in at all is fine too
+            log.info("Gemini sign-out: %s", e)
+            return "not found" in str(e).lower() or "1168" in str(e)
 
     def login(self) -> subprocess.Popen | None:
-        """Official Google sign-in: the CLI asks before it opens the browser ("y"), then answers one tiny
-        question and exits 0. No window of its own."""
-        exe = find_gemini()
-        start = command(exe) if exe else None
-        if not start:
+        """Hidden: agy prints the Google link (opened here) and waits 60 s for the code (submit_login_code)."""
+        exe = find_agy()
+        if not exe:
             return None
-        h = prepare_home(api_key=False)
-        return open_login(start, ["-p", "Reply with OK.", "-o", "json", "--skip-trust", "--approval-mode", "plan",
-                                  "-e", "none", "-m", SAVER_MODEL], env(), answer="y\n", cwd=str(h))
+        home().mkdir(parents=True, exist_ok=True)
+        opened = threading.Event()
+
+        def on_line(text: str):
+            m = LOGIN_URL.search(text)
+            if m and not opened.is_set():
+                opened.set()
+                import webbrowser
+                webbrowser.open(m.group(0))
+        return base.open_login(exe, ["-p", "Reply with just: OK", "--output-format", "json"], env(),
+                               cwd=str(home()), keep_stdin=True, on_line=on_line)
+
+    def submit_login_code(self, code: str) -> bool:
+        return base.send_login_input(code.strip() + "\n")
 
     def install(self) -> subprocess.Popen:
         return run_installer(INSTALL_CMD, INSTALL_CMD_MAC)
@@ -294,12 +368,11 @@ class Gemini(Provider):
 
 
 class GeminiBackend:
-    """Runs questions for a Brain through `gemini -p`, one fresh process per question. No warm process:
-    the CLI waits only half a second for the question on stdin."""
+    """Runs questions for a Brain through agy, one fresh process per question."""
 
     def __init__(self, brain):
         self.brain = brain
-        self.exe = find_gemini()
+        self.exe = find_agy()
         self._proc: subprocess.Popen | None = None
 
     def prewarm(self) -> None:
@@ -312,87 +385,93 @@ class GeminiBackend:
         if self._proc and self._proc.poll() is None:
             self._proc.kill()
 
-    def _exec(self, instructions: str, stdin_text: str, cwd: str, model: str | None, image_dir=None,
+    def _exec(self, agent: str, instructions: str, tools: list[str], stdin_text: str, model: str | None,
               on_delta=None, answer: bool = True, timeout: float | None = None) -> RawResult:
-        """answer=False (a summary): not tracked as the answer cancel() stops."""
-        start = command(self.exe) if self.exe else None
-        if not start:
-            return RawResult(error="launch_failed: no Node.js")
-        api_key = self.brain.api_key
-        prepare_home(api_key=bool(api_key))
-        fd, system_md = tempfile.mkstemp(prefix="maplehelper-gemini-", suffix=".md")
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
-            f.write(instructions)
-        session = None
+        b = self.brain
+        write_settings(b.kb.root, bool(b.api_key))
+        write_agent(agent, instructions, tools)
+        r = self._once(agent, stdin_text, model, on_delta, answer, timeout)
+        if r.error == "denied":
+            log.info("Gemini stopped at a blocked read: asking once more")
+            r = self._once(agent, stdin_text + RETRY_NOTE, model, on_delta, answer, timeout)
+            if r.error == "denied":
+                r = RawResult(error="no_result")
+        if model and r.error == "bad_model":
+            # a model Google no longer offers (or one of the sign-in's, on an API key): the default instead
+            log.warning("Gemini model %s unknown, using the default", model)
+            r = self._once(agent, stdin_text, None, on_delta, answer, timeout)
+        return RawResult(error="api_error") if r.error == "bad_model" else r
+
+    def _once(self, agent, stdin_text, model, on_delta, answer, timeout) -> RawResult:
         try:
-            try:
-                p = subprocess.Popen(gemini_command(start, model, image_dir), cwd=cwd, stdin=subprocess.PIPE,
-                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env(api_key, system_md),
-                                     creationflags=CREATE_NO_WINDOW)
-            except OSError as e:
-                return RawResult(error=f"launch_failed: {e}")
-            if answer:
-                self._proc = p
-            # the CLI logs to stderr while it works: drain it so a full pipe never stalls the run
-            err: list[bytes] = []
-            reader = threading.Thread(target=lambda: err.extend(iter(lambda: p.stderr.read(4096), b"")), daemon=True)
-            reader.start()
-            try:
-                p.stdin.write(stdin_text.encode("utf-8"))
-                p.stdin.close()
-            except OSError:        # it exited at once: stderr says why
-                pass
-            # stuck = no output for a while (or past a summary's own time limit)
-            last, began, stalled = [time.monotonic()], time.monotonic(), threading.Event()
+            p = subprocess.Popen(agy_command(self.exe, agent, model), cwd=str(self.brain.kb.root),
+                                 stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                 env=env(self.brain.api_key), creationflags=CREATE_NO_WINDOW)
+        except OSError as e:
+            return RawResult(error=f"launch_failed: {e}")
+        if answer:
+            self._proc = p
+        err: list[bytes] = []
+        reader = threading.Thread(target=lambda: err.extend(iter(lambda: p.stderr.read(4096), b"")), daemon=True)
+        reader.start()
+        try:
+            p.stdin.write(stdin_text.encode("utf-8"))
+            p.stdin.close()
+        except OSError:
+            pass
+        last, began, stalled = [time.monotonic()], time.monotonic(), threading.Event()
 
-            def watchdog():
-                while p.poll() is None:
-                    now = time.monotonic()
-                    if now - last[0] > STALL_TIMEOUT_S or (timeout and now - began > timeout):
-                        stalled.set()
-                        p.kill()
-                        return
-                    time.sleep(1)
-            threading.Thread(target=watchdog, daemon=True).start()
+        def watchdog():
+            while p.poll() is None:
+                now = time.monotonic()
+                if now - last[0] > STALL_TIMEOUT_S or (timeout and now - began > timeout):
+                    stalled.set()
+                    p.kill()
+                    return
+                time.sleep(1)
+        threading.Thread(target=watchdog, daemon=True).start()
 
-            def lines():
-                for line in p.stdout:
-                    last[0] = time.monotonic()
-                    yield line
-            text, result, errors, session = parse_events(lines(), on_delta)
+        def lines():
+            for line in p.stdout:
+                last[0] = time.monotonic()
+                yield line
+        conv = None
+        try:
+            text, result, _errors, conv = parse_events(lines(), on_delta)
             p.wait()
             reader.join(timeout=5)
             stderr = b"".join(err).decode("utf-8", errors="replace")
-            if stalled.is_set():
-                log.warning("Gemini stalled, stopped: %s", stderr[-1000:])
-                return RawResult(error="timeout")
-            return to_result(text, result, errors, stderr)
         finally:
-            forget_session(session)
-            try:
-                os.remove(system_md)
-            except OSError:
-                pass
+            forget(conv)
+        if stalled.is_set():
+            log.warning("Gemini stalled, stopped: %s", stderr[-1000:])
+            return RawResult(error="timeout")
+        if "invalid model selection" in str((result or {}).get("error", "")):
+            return RawResult(error="bad_model")
+        return to_result(text, result, stderr, model)
 
     def run(self, prompt: str, screenshot_jpeg: bytes | None, on_raw_delta=None, model: str | None = None,
             tools: bool = True) -> RawResult:
-        """model: this call's own (None: the player's). tools is Claude's: Gemini reads files only when asked to."""
+        """model: this call's own (None: the player's). tools=False: no knowledge-base tools (a quick call)."""
         b = self.brain
-        with tempfile.TemporaryDirectory(prefix="maplehelper-shots-") as shots:
-            names = []
+        shots_dir().mkdir(parents=True, exist_ok=True)
+        folder = Path(tempfile.mkdtemp(prefix="run-", dir=shots_dir()))
+        try:
+            shots = []
             for i, jpeg in enumerate(screenshot_jpeg if isinstance(screenshot_jpeg, list) else [screenshot_jpeg]):
                 if jpeg:
-                    names.append(f"maplehelper-shot-{i}.jpg")
-                    Path(shots, names[-1]).write_bytes(jpeg)
-            # "@name" attaches a file; the CLI finds it in the extra folder
-            question = prompt + ("\n\n" + " ".join("@" + n for n in names) if names else "")
-            return self._exec(b.system_prompt() + TOOLS_NOTE, question, str(b.kb.root), model or b.model,
-                              shots if names else None, on_raw_delta)
+                    shots.append(folder / f"screenshot-{i}.jpg")
+                    shots[-1].write_bytes(jpeg)
+            instructions = b.system_prompt() + tools_note(b.kb.root, shots)
+            reads = tools or bool(shots)          # the screenshot is opened with view_file
+            return self._exec(AGENT if reads else QUICK_AGENT, instructions, TOOLS if reads else [],
+                              prompt, model or b.model, on_raw_delta)
+        finally:
+            shutil.rmtree(folder, ignore_errors=True)
 
     def summarize(self, instructions: str, text: str, timeout: int = 90) -> str | None:
-        """One short call on Flash: session summaries and guide summaries."""
+        """One short call, no tools, on the lightest Flash: session summaries and guide summaries."""
         if not self.exe:
             return None
-        with tempfile.TemporaryDirectory(prefix="maplehelper-summary-") as empty:
-            r = self._exec(instructions, text, empty, SAVER_MODEL, answer=False, timeout=timeout)
+        r = self._exec(SUMMARY_AGENT, instructions, [], text, lightest(_models_cache), answer=False, timeout=timeout)
         return r.text.strip() or None
