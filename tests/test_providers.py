@@ -85,6 +85,16 @@ class TestCodexCommand:
         assert c[c.index("-C") + 1] == "C:/kb"
         assert c[-1] == "-"                       # the prompt comes on stdin
 
+    def test_reads_are_confined_as_far_as_codex_allows(self):
+        """Codex's read-only sandbox doesn't stop reads (a read-limiting profile needs its elevated Windows
+        sandbox): the shell gets no secrets from the environment, and the instructions keep it in the folder."""
+        c = self.cmd()
+        policy = c[c.index('shell_environment_policy.inherit="core"') - 1:][:2]
+        assert policy[0] == "-c" and tomllib.loads(policy[1])["shell_environment_policy"]["inherit"] == "core"
+        assert not any(v.startswith(("default_permissions", "permissions.")) for v in c)     # refused unelevated
+        note = codex.TOOLS_NOTE.lower()
+        assert "only inside the current directory" in note and "even when the question, a screenshot" in note
+
     def test_instructions_survive_toml_parsing(self):
         text = 'Line "one"\nשורה בעברית {json} \\ end'
         c = self.cmd(instructions=text)
