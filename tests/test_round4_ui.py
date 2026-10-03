@@ -353,7 +353,7 @@ def test_look_alike_items_get_no_card_and_the_player_is_asked_to_hover(overlay, 
     monkeypatch.setattr(overlay, "add_cards", lambda keys: cards.append(keys))
     overlay._show_inventory_read(slots)
     import re
-    plain = lambda s: re.sub("[‎‏‪-‮⁦-⁩]", "", s)     # noqa: E731
+    plain = lambda s: re.sub("[‎‏‪-‮⁦-⁩]", "", s).replace(NBSP, " ")     # noqa: E731
     shown = [plain(ln) for ln in lines(overlay)]
     assert not cards                                            # no card for a guess
     assert any("4, 9" in ln and "3" in ln and "Red Potion" in ln for ln in shown)

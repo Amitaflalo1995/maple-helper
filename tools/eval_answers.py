@@ -79,8 +79,9 @@ def validate_cases(cases: list[dict]) -> list[str]:
 # ------------------------------------------------------------------ scoring
 
 def _norm(s: str) -> str:
-    """Case, curly apostrophes and thousands separators don't matter: "7,420" is "7420"."""
-    s = s.lower().replace("’", "'")
+    """Case, curly apostrophes, thousands separators and no-break spaces don't matter: "7,420" is "7420", and a
+    Hebrew answer's "Crimson Balrog" (kept on one line with a no-break space) is "Crimson Balrog"."""
+    s = s.lower().replace("’", "'").replace(" ", " ")
     return re.sub(r"(?<=\d),(?=\d{3})", "", s)
 
 
