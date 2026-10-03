@@ -670,6 +670,8 @@ class Overlay(QWidget):
         hk_voice = self.settings["hotkey_voice"]
         self._placeholder = self.t("input_placeholder").replace("F10", hk_voice)
         self.input.set_hint(bidi.plain(self._placeholder, self.t.rtl))
+        # its name for a screen reader: the placeholder changes (listening, transcribing) and isn't read as one
+        self.input.setAccessibleName(self.t("input_a11y"))
         set_tip(self.recapture_btn, self.t("recapture"))
         set_tip(self.settings_btn, self.t("settings"))
         self.saver_badge.setToolTip(self.t.p("saver_hint", self.settings["provider"]))

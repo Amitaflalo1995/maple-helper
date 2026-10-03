@@ -13,17 +13,20 @@ from .. import bidi, guides
 from ..i18n import I18n
 from .controls import FlowLayout, follow_typing, rtl_buttons
 from .glass import GlassDialog
+from .patchnotes import gutter
 
 
 ZOOM = 3            # pictures are pixel art: a whole-number zoom keeps them sharp
 ZOOM_MAX_W = 720
 TABLE_MIN_PX = 10   # a wide table's text gets this small at the least before it scrolls sideways
+TABLE_MIN_PAD = 2   # and then its cells this little padding (the guides' tables have 5)
 
 
 def fit_tables(browser: QTextBrowser, wait: bool = True) -> None:
-    """Tables wider than the view get a smaller font, a pixel at a time, until they fit (down to TABLE_MIN_PX).
-    Lines break between words only (WordWrap), so a 10-column table no longer splits "341,782" into "341,7" /
-    "82"; what is still too wide after this scrolls sideways."""
+    """Tables wider than the view get a smaller font, a pixel at a time, until they fit (down to TABLE_MIN_PX),
+    then less padding in their cells (down to TABLE_MIN_PAD). Lines break between words only (WordWrap), so a
+    10-column table no longer splits "341,782" into "341,7" / "82"; what is still too wide after this scrolls
+    sideways."""
     if not browser.isVisible():
         # filled before its window is on screen (a window opened on this page): the view has no width yet, and
         # every table would come out at the smallest size. Measured once the window is up instead.
@@ -53,6 +56,12 @@ def fit_tables(browser: QTextBrowser, wait: bool = True) -> None:
             fmt = QTextCharFormat()
             fmt.setProperty(QTextFormat.FontPixelSize, px)
             cur.mergeCharFormat(fmt)
+        # still over at the smallest font: the width left is the cells' padding around their longest words and
+        # pictures (the Fighter guide's 8-column weapon table was 15 px too wide at 10 px, 80 px of it padding)
+        tf = frame.format()
+        while lay.frameBoundingRect(frame).width() > room + 1 and tf.cellPadding() > TABLE_MIN_PAD:
+            tf.setCellPadding(tf.cellPadding() - 1)
+            frame.setFormat(tf)
     # the sideways bar only for a table still too wide: the page itself measures a pixel over the view (rounding),
     # which put a bar under every guide
     over = doc.size().width() - browser.viewport().width()
@@ -303,6 +312,7 @@ class GuidesDialog(GlassDialog):
         lay.setSpacing(10)
         self.search = QLineEdit()
         self.search.setPlaceholderText(bidi.plain(t("g_search"), rtl))
+        self.search.setAccessibleName(t("g_search"))          # a placeholder isn't read as the field's name
         self.search.setClearButtonEnabled(True)
         self.search.textChanged.connect(lambda *_: self._fill())
         self.search.returnPressed.connect(self._open_first)          # Enter opens the top result
@@ -325,7 +335,7 @@ class GuidesDialog(GlassDialog):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         body = QWidget(objectName="Feed")
         self.rows = QVBoxLayout(body)
-        self.rows.setContentsMargins(0, 0, 6, 0)
+        self.rows.setContentsMargins(*gutter(rtl))    # the room before the scrollbar, on its side (left in Hebrew)
         self.rows.setSpacing(8)
         scroll.setWidget(body)
         lay.addWidget(scroll, 1)

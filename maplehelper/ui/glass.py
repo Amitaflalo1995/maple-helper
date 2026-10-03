@@ -11,6 +11,7 @@ from PySide6.QtCore import QObject, QTimer, Signal
 from PySide6.QtGui import QImage, QPixmap
 
 from .. import osapi
+from ..i18n import I18n
 
 SCALE = 0.25          # sample at quarter resolution
 BLUR = 7              # at quarter scale ≈ 28px of real blur
@@ -24,7 +25,6 @@ class GlassBackdrop(QObject):
 
     def __init__(self, widget):
         super().__init__(widget)
-        self.widget = widget
         self.pixmap: QPixmap | None = None
         self.timer = QTimer(self, interval=INTERVAL_MS, timeout=self.refresh)
 
@@ -34,6 +34,14 @@ class GlassBackdrop(QObject):
 
     def stop(self):
         self.timer.stop()
+
+    @property
+    def widget(self):
+        # the window it's the backdrop of, asked from Qt, not kept: a reference here and the window's to this made a
+        # cycle, so a closed dialog was freed only when Python's garbage collector next ran, on whichever thread
+        # that was, deleting its widgets under whatever used them then (seen as "Internal C++ object already
+        # deleted" in a test)
+        return self.parent()
 
     def refresh(self):
         w = self.widget
@@ -118,17 +126,17 @@ def paint_glass(widget, backdrop: "GlassBackdrop | None", strength: float = 0.6,
 
 
 class _DragBar(QWidget):
-    def __init__(self, win):
+    def __init__(self):
         super().__init__()
-        self._win, self._grab = win, None
+        self._grab = None          # (its window is self.window(), not kept: see GlassBackdrop.widget)
 
     def mousePressEvent(self, e):
         if e.button() == Qt.LeftButton:
-            self._grab = e.globalPosition().toPoint() - self._win.frameGeometry().topLeft()
+            self._grab = e.globalPosition().toPoint() - self.window().frameGeometry().topLeft()
 
     def mouseMoveEvent(self, e):
         if self._grab is not None and e.buttons() & Qt.LeftButton:
-            self._win.move(e.globalPosition().toPoint() - self._grab)
+            self.window().move(e.globalPosition().toPoint() - self._grab)
 
     def mouseReleaseEvent(self, e):
         self._grab = None
@@ -183,7 +191,7 @@ class GlassDialog(QDialog):
         root = QVBoxLayout(self)
         root.setContentsMargins(SHADOW + 18, SHADOW + 10, SHADOW + 18, SHADOW + 16)
         root.setSpacing(8)
-        bar = _DragBar(self)
+        bar = _DragBar()
         bl = QHBoxLayout(bar)
         bl.setContentsMargins(0, 0, 0, 4)
         self.title_label = QLabel(title, objectName="Title")
@@ -191,6 +199,7 @@ class GlassDialog(QDialog):
         bl.addStretch(1)
         self.close_btn = QToolButton(objectName="IconClose", text=theme.ICON["close"])
         self.close_btn.setCursor(Qt.PointingHandCursor)
+        self.close_btn.setAccessibleName(I18n("he" if rtl else "en")("close"))     # an ✕ glyph, read as nothing
         self.close_btn.clicked.connect(self.reject)
         bl.addWidget(self.close_btn)
         # only once it's in the bar: shown while it had no parent, it flashed as a tiny window of its own

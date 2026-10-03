@@ -135,6 +135,21 @@ class Settings:
 
     def __init__(self):
         self.data = {**DEFAULT_SETTINGS, **_read_json(self.path, {})}
+        self._windows_keys()
+
+    def _windows_keys(self) -> None:
+        """Windows keeps F12 for the debugger and never lets a program register it: a hotkey saved as F12 (older
+        versions offered it) never worked there, so it loads as the default key, or the other default when that
+        one is the other hotkey's, never two hotkeys on one key."""
+        if sys.platform != "win32":
+            return
+        keys = ("hotkey_toggle", "hotkey_voice")
+        for key in keys:
+            if self.data.get(key) != "F12":
+                continue
+            other = self.data.get(next(k for k in keys if k != key))
+            self.data[key] = next(k for k in (DEFAULT_SETTINGS[key], *(DEFAULT_SETTINGS[k] for k in keys),
+                                              *(f"F{i}" for i in range(1, 12))) if k != other)
 
     def __getitem__(self, key):
         return self.data.get(key, DEFAULT_SETTINGS.get(key))
@@ -186,6 +201,14 @@ class Character:
     def job_label(self) -> str:
         """The job as the player sees it in game (the app works with the MapleStory Classic name inside)."""
         return self.job_shown or self.job
+
+    def finish_quest(self, name: str) -> list[str]:
+        """The started quests this name finishes, removed from active_quests and returned: compared by
+        quest_key, so a quest marked done in Play tools by its KB name leaves the one the AI started under it."""
+        gone = [a for a in self.active_quests if quest_key(a) and quest_key(a) == quest_key(name)]
+        for a in gone:
+            self.active_quests.remove(a)
+        return gone
 
     def summary(self) -> str:
         parts = [f"Name: {self.name}", f"Class: {self.base_class}", f"Job: {self.job}", f"Level: {self.level}"]
@@ -436,9 +459,7 @@ class Profiles:
                 changed.append(("quest+", q))
         del c.active_quests[:-MAX_ACTIVE_QUESTS]
         for q in _str_list(update.get("quests_completed")):
-            for a in [a for a in c.active_quests if quest_key(a) == quest_key(q)]:
-                c.active_quests.remove(a)
-                changed.append(("quest-", a))
+            changed += [("quest-", a) for a in c.finish_quest(q)]
         stats = update.get("stats")
         if isinstance(stats, dict):
             clean = {k: int(v) for k, v in stats.items()

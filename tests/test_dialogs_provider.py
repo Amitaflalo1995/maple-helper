@@ -252,7 +252,8 @@ def test_onboarding_sign_in_that_times_out_says_try_again(env, monkeypatch):
 def test_job_is_not_guessed_when_there_is_a_choice(env):
     from maplehelper.ui.dialogs import Onboarding
     s, profiles, kb = env
-    form = Onboarding(s, profiles, kb, lambda *_: "", only_character=True).form
+    dlg = Onboarding(s, profiles, kb, lambda *_: "", only_character=True)      # kept: the form is its child
+    form = dlg.form
     form.name.setText("Bob")
     form.class_group.buttons()[1].setChecked(True)         # Warrior
     form.level.setValue(35)                                # Warrior, Fighter, Page, Spearman

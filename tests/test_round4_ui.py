@@ -134,7 +134,7 @@ def test_history_shows_a_page_with_a_count_and_more(kb):
     d = HistoryDialog(pairs, "Elipaz", "en", "")
     cards = lambda: [f for f in d.findChildren(type(d.count).__mro__[1]) if f.objectName() == "Card" and f.isVisibleTo(d)]  # noqa: E731
     assert "80 of 200" in d.count.text().replace(bidi.RLM, "")
-    assert len(cards()) == 80 and d.more_btn.text().endswith("Show 80 more")
+    assert len(cards()) == 80 and d.more_btn.text() == "Show more"
     d.more_btn.click()
     pump()
     assert "160 of 200" in d.count.text() and len(cards()) == 160
