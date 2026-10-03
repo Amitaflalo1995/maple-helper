@@ -330,3 +330,40 @@ def test_recent_reads_the_tail_of_a_big_log(isolated_store):
             f.write(json.dumps({"t": i, "role": "user", "text": f"q{i} " + "x" * 50}) + "\n")
     assert [r["text"].split()[0] for r in h.recent(3)] == ["q4997", "q4998", "q4999"]
     assert len(h.recent(2000)) == 2000
+
+
+def _mac_startup_failure(tmp_path, monkeypatch, exc, answer):
+    import subprocess
+    import sys
+    import webbrowser
+
+    from maplehelper import setupwait, store
+    monkeypatch.setattr(store, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(sys, "platform", "darwin")
+    monkeypatch.setattr(setupwait, "_language", lambda: "en")
+    calls, opened = [], []
+
+    def run(cmd, **kw):
+        calls.append(cmd)
+        return subprocess.CompletedProcess(cmd, 0, stdout=answer + "\n", stderr="")
+    monkeypatch.setattr(subprocess, "run", run)
+    monkeypatch.setattr(webbrowser, "open", opened.append)
+    setupwait.report_broken_install(exc)
+    return calls, opened
+
+
+def test_mac_startup_failure_is_shown_not_silent(tmp_path, monkeypatch):
+    """The macOS bundle has no Dock icon: a failed start showed nothing at all. Now a system alert says so."""
+    calls, opened = _mac_startup_failure(tmp_path, monkeypatch, PermissionError("read-only data folder"), "Close")
+    assert len(calls) == 1 and calls[0][0] == "osascript" and not opened
+    message = calls[0][calls[0].index("end run") + 1]
+    assert "couldn't start" in message and "startup-error.log" in message and "the Mac" in message
+
+
+def test_mac_damaged_install_offers_the_download_page(tmp_path, monkeypatch):
+    from maplehelper import setupwait
+    calls, opened = _mac_startup_failure(tmp_path, monkeypatch, ModuleNotFoundError("No module named 'x'"), "Download")
+    assert calls[0][-2:] == ["Close", "Download"] and "Applications" in calls[0][-3]
+    assert opened == [setupwait.RELEASES_URL]
+    assert setupwait.MAC_TEXT["broken"]["he"] != setupwait.BROKEN_TEXT["he"]
+    assert setupwait.MAC_TEXT["startup"]["he"] != setupwait.STARTUP_TEXT["he"]
