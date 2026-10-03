@@ -23,6 +23,10 @@ os.environ["QT_QPA_PLATFORM"] = "offscreen"
 _FONTS = {"win32": r"C:\Windows\Fonts", "darwin": "/System/Library/Fonts"}.get(sys.platform, "")
 if _FONTS and os.path.isdir(_FONTS):
     os.environ.setdefault("QT_QPA_FONTDIR", _FONTS)
+
+# telemetry.py ships a real PostHog key: no test may send real usage stats
+# (test_telemetry.py lifts this for itself and mocks the network instead)
+os.environ["MAPLEHELPER_NO_TELEMETRY"] = "1"
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tools"))

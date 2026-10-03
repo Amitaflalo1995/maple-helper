@@ -25,8 +25,8 @@ from . import report
 
 # PostHog project API key (phc_...). It can only write events, so shipping it in the app is safe.
 # Empty = telemetry off for everyone. $MAPLEHELPER_POSTHOG_KEY overrides it (local testing).
-PROJECT_KEY = ""
-HOST = "https://eu.i.posthog.com"
+PROJECT_KEY = "phc_mUxe6uw9XcoyfVDMytYXY4swn7YM78B2ZmbK7awwnrJk"
+HOST = "https://us.i.posthog.com"   # the project (643525) is on PostHog US cloud
 BATCH_SIZE = 20
 FLUSH_SECONDS = 30
 MAX_QUEUE = 500          # offline for hours: drop new events rather than grow without limit
