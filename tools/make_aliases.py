@@ -2,6 +2,8 @@
 monsters, maps, towns and NPCs, so "חילזון אדום" or "רד סנייל" resolve to Red Snail.
 
 Generated with Claude Code in batches, then merged. Re-running only fills what's missing.
+An alias given to entities with different names is dropped from all of them: the app would resolve it to
+whichever loaded last ("ג'וניור סנטינל" named two monsters).
 
 Usage: python tools/make_aliases.py monster map npc
 """
@@ -47,9 +49,24 @@ def ask(exe: str, rows: list[tuple[str, str]]) -> dict:
     return json.loads(m.group(0)) if m else {}
 
 
+def drop_ambiguous(aliases: dict[str, list[str]], names: dict[str, str]) -> tuple[dict[str, list[str]], set[str]]:
+    """Aliases that name one thing only (entities that share a display name, like the towns' Regular Cab NPCs,
+    count as one). Returns (aliases, the dropped alias forms)."""
+    sys.path.insert(0, str(ROOT))
+    from maplehelper.kb import _norm      # the form the app looks names up by
+    owners: dict[str, set[str]] = {}
+    for key, al in aliases.items():
+        for a in al:
+            owners.setdefault(_norm(a), set()).add((names.get(key) or key).lower())
+    dropped = {a for a, who in owners.items() if len(who) > 1}
+    kept = {key: [a for a in al if _norm(a) not in dropped] for key, al in aliases.items()}
+    return {k: v for k, v in kept.items() if v}, dropped
+
+
 def main(categories: list[str]):
     index = json.loads((KB / "index.json").read_text(encoding="utf-8"))
     aliases = json.loads(OUT.read_text(encoding="utf-8")) if OUT.exists() else {}
+    names = {e["key"]: e["name"] for e in index}
     exe = claude_exe()
     from maplehelper.kb import _VARIANT
     # one entry per base name, the plain entity first: "Zelya (Free Market)" and "Forgotten Hollow Instance 080003500"
@@ -75,6 +92,9 @@ def main(categories: list[str]):
         valid = {k: [a for a in v if isinstance(a, str) and re.search(r"[֐-׿]", a)]
                  for k, v in got.items() if k in dict(batch)}
         aliases.update({k: v for k, v in valid.items() if v})
+        aliases, dropped = drop_ambiguous(aliases, names)
+        if dropped:
+            print("  dropped (names several things):", ", ".join(sorted(dropped)))
         OUT.write_text(json.dumps(aliases, ensure_ascii=False, indent=0), encoding="utf-8")
         print(f"  {min(i + BATCH, len(rows))}/{len(rows)}")
     print(f"aliases.json: {len(aliases)} entries")

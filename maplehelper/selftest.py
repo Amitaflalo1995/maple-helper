@@ -82,12 +82,19 @@ def run(require_kb: bool = False) -> tuple[bool, list[str]]:
     check("qt + fonts", qt_and_fonts)
 
     def kb():
+        from . import store
         from .kb import KnowledgeBase
-        base = KnowledgeBase()
+        # --require-kb proves the build carries its KB: only the bundled copy counts. The one in use may be a
+        # download in this PC's %APPDATA%, which a fresh install won't have
+        base = KnowledgeBase(store.BUNDLED_KB) if require_kb else KnowledgeBase()
         n = len(base.entities)
         if require_kb and n == 0:
-            raise RuntimeError(f"knowledge base is empty ({base.root})")
-        return f"{n} entities, version {_kb_version(base.root) or '?'}"
+            raise RuntimeError(f"no knowledge base bundled with this build ({base.root})")
+        detail = f"{n} entities, version {_kb_version(base.root) or '?'}"
+        used = store.kb_dir()
+        if used != base.root:
+            detail += f" (in use: {used}, version {_kb_version(used) or '?'})"
+        return detail
     check("knowledge base", kb)
 
     def os_layer():

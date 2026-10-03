@@ -2,8 +2,8 @@ name: Update knowledge base
 
 # Nightly: fetch only the NiaMeowDB pages that changed (sitemap lastmod) plus new pages.
 # Sundays: full refresh, to catch edits the sitemap doesn't date.
-# Publishes kb.zip + kb-manifest.json to the latest release only when content actually changed;
-# every installed Maple Helper picks it up on its next start.
+# Publishes kb.zip + kb-manifest.json to the latest release only when content actually changed and the full
+# test suite passes against the new KB; every installed Maple Helper picks it up on its next start.
 on:
   schedule:
     - cron: "0 1 * * *"          # 01:00 UTC ≈ 04:00 Israel
@@ -27,6 +27,8 @@ jobs:
     timeout-minutes: 180
     env:
       GH_TOKEN: ${{ github.token }}
+    outputs:
+      changed: ${{ steps.changed.outputs.changed }}
     steps:
       - uses: actions/checkout@v7
 
@@ -67,13 +69,57 @@ jobs:
         if: steps.rel.outputs.exists == 'true'
         run: python tools/kb_release.py validate data/kb --previous /tmp/prev-index.json --min-entities 500
 
-      - name: Publish if anything changed
+      - name: Anything changed?
+        id: changed
         if: steps.rel.outputs.exists == 'true'
         run: |
           changed=$(python -c "import json;print(json.load(open('data/kb/last_run.json'))['changed'])")
-          if [ "$changed" -gt 0 ]; then
-            echo "$changed pages changed - publishing a new knowledge base"
-            python tools/release.py --kb-only
-          else
-            echo "No content changes."
-          fi
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+          if [ "$changed" -gt 0 ]; then echo "$changed pages changed"; else echo "No content changes."; fi
+
+      # the candidate goes to the tests first: a scrape with a valid shape but wrong game values stops there
+      - name: Pack the candidate
+        if: steps.changed.outputs.changed > 0
+        run: |
+          mkdir -p kb-candidate
+          (cd data/kb && zip -qr "$GITHUB_WORKSPACE/kb-candidate/kb.zip" .)
+
+      - uses: actions/upload-artifact@v7
+        if: steps.changed.outputs.changed > 0
+        with:
+          name: kb-candidate
+          path: kb-candidate/kb.zip
+          retention-days: 7
+
+  test:
+    needs: update
+    if: needs.update.outputs.changed > 0
+    uses: ./.github/workflows/test.yml
+    with:
+      kb-artifact: kb-candidate
+
+  publish:
+    name: Publish the new knowledge base
+    needs: [update, test]
+    if: needs.update.outputs.changed > 0
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: kb-candidate
+          path: kb-in
+
+      - name: Publish
+        run: |
+          mkdir -p data/kb
+          unzip -q kb-in/kb.zip -d data/kb
+          python tools/release.py --kb-only

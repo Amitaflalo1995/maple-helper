@@ -64,3 +64,14 @@ def test_top_maps_stop_at_the_end_of_the_map_table(kb_copy):
     page.write_text(text + "\nChange history\nupdated in COT2 ▾ Stat | COT1 | COT2 | Change\n"
                     "HP | 7,560 | 7,420 | -140\nP.DMG | 101 | 252 | +151\n", encoding="utf-8")
     assert KnowledgeBase(kb_copy)._top_maps("monster/130101") == ["Henesys Hunting Ground I"]
+
+
+def test_alias_builder_drops_a_hebrew_name_that_fits_two_things():
+    import make_aliases
+    names = {"npc/801": "Pison", "npc/112": "Pason", "npc/301": "Regular Cab", "npc/302": "Regular Cab",
+             "monster/100100": "Snail"}
+    aliases = {"npc/801": ["פייסון", "פיסון"], "npc/112": ["פייסון"], "npc/301": ["מונית"], "npc/302": ["מונית"],
+               "monster/100100": ["חילזון"]}
+    kept, dropped = make_aliases.drop_ambiguous(aliases, names)
+    assert dropped == {"פייסון"}
+    assert kept == {"npc/801": ["פיסון"], "npc/301": ["מונית"], "npc/302": ["מונית"], "monster/100100": ["חילזון"]}

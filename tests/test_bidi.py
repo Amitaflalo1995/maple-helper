@@ -86,11 +86,14 @@ def glyph_x(text: str) -> dict[int, float]:
     line = lay.createLine()
     line.setLineWidth(3000)
     lay.endLayout()
-    flags = QTextLayout.GlyphRunRetrievalFlag.RetrieveGlyphPositions | QTextLayout.GlyphRunRetrievalFlag.RetrieveStringIndexes
+    # one character at a time: with font fallback (Rubik + Segoe UI) the string indexes of a whole-line
+    # glyph run come back shifted, so a whole-line map misses characters and places others wrongly
+    flags = QTextLayout.GlyphRunRetrievalFlag.RetrieveGlyphPositions
     pos: dict[int, float] = {}
-    for run in lay.glyphRuns(0, len(text), flags):
-        for p, si in zip(run.positions(), run.stringIndexes()):
-            pos.setdefault(si, p.x())
+    for i in range(len(text)):
+        xs = [p.x() for run in lay.glyphRuns(i, 1, flags) for p in run.positions()]
+        if xs:
+            pos[i] = min(xs)
     return pos
 
 

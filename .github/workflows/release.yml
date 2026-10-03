@@ -6,7 +6,8 @@
 #   - MapleHelper-Setup.exe + SHA256SUMS.txt   (silent app self-update on Windows, verified by hash)
 # so every release carries all of them, plus MapleHelper-macOS.dmg. The current KB is carried forward
 # from the previous release; the kb job gets it once and both builds bundle that same KB.
-# The builds run alongside the tests; Publish waits for all of them, so nothing ships unless every one passes.
+# The builds run alongside the tests, which check that same KB; Publish waits for all of them, so nothing ships
+# unless every one passes.
 # Windows and macOS are published together or not at all.
 name: Release
 
@@ -54,7 +55,10 @@ jobs:
           echo "Releasing $base (prerelease: $prerelease)"
 
   test:
+    needs: kb               # the tests check the very KB this release bundles and publishes
     uses: ./.github/workflows/test.yml
+    with:
+      kb-artifact: kb
 
   kb:
     name: Get the knowledge base

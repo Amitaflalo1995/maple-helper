@@ -27,12 +27,6 @@
    "p": "A full minute of casting with a matching physical Booster where the class has one. Bandit maintains Steal and pays its refresh time and MP. Fighter's Power Strike and Slash Blast include expected Axe Mastery Bleed uptime. Slash Blast rolls Bleed separately for every target hit. Poison Breath adds one full-uptime poison stream per target. F/P, I/L and Cleric have no booster at second job."
   },
   {
-   "p": "Target matchup"
-  },
-  {
-   "p": "Tap a bar for build details. Warrior Bowman Thief Magician"
-  },
-  {
    "p": "Source: Realistic and Max-Scrolled builds from the meowdb.com Character Builder. Special thanks to Grummash for the builds."
   },
   {
@@ -42,12 +36,6 @@
    "p": "One press of the skill, every direct hit combined. A six-hit cast like Savage Blow counts once here, and so does Holy Arrow's three. Persistent ticks stay separate from DPC."
   },
   {
-   "p": "Target matchup"
-  },
-  {
-   "p": "Tap a bar for build details. Warrior Bowman Thief Magician"
-  },
-  {
    "p": "Source: Realistic and Max-Scrolled builds from the meowdb.com Character Builder. Special thanks to Grummash for the builds."
   },
   {
@@ -55,12 +43,6 @@
   },
   {
    "p": "Damage bought per MP spent. Bandit's maintained rotation includes Steal refresh costs, Fighter includes expected Bleed refresh uptime, and Poison Breath uses its full-uptime DPM. The order here looks nothing like the DPM chart."
-  },
-  {
-   "p": "Target matchup"
-  },
-  {
-   "p": "Tap a bar for build details. Warrior Bowman Thief Magician"
   },
   {
    "p": "Source: Realistic and Max-Scrolled builds from the meowdb.com Character Builder. Special thanks to Grummash for the builds."
@@ -273,12 +255,6 @@
    "p": "A full minute of casting with a matching physical Booster where the class has one. Bandit maintains Steal and pays its refresh time and MP. Fighter's Power Strike and Slash Blast include expected Axe Mastery Bleed uptime. Slash Blast rolls Bleed separately for every target hit. Poison Breath adds one full-uptime poison stream per target. F/P, I/L and Cleric have no booster at second job."
   },
   {
-   "p": "Target matchup"
-  },
-  {
-   "p": "Tap a bar for build details. Warrior Bowman Thief Magician"
-  },
-  {
    "p": "Source: Realistic and Max-Scrolled builds from the meowdb.com Character Builder. Special thanks to Grummash for the builds."
   },
   {
@@ -288,12 +264,6 @@
    "p": "One press of the skill, every direct hit combined. A six-hit cast like Savage Blow counts once here, and so does Holy Arrow's three. Persistent ticks stay separate from DPC."
   },
   {
-   "p": "Target matchup"
-  },
-  {
-   "p": "Tap a bar for build details. Warrior Bowman Thief Magician"
-  },
-  {
    "p": "Source: Realistic and Max-Scrolled builds from the meowdb.com Character Builder. Special thanks to Grummash for the builds."
   },
   {
@@ -301,12 +271,6 @@
   },
   {
    "p": "Damage bought per MP spent. Bandit's maintained rotation includes Steal refresh costs, Fighter includes expected Bleed refresh uptime, and Poison Breath uses its full-uptime DPM. The order here looks nothing like the DPM chart."
-  },
-  {
-   "p": "Target matchup"
-  },
-  {
-   "p": "Tap a bar for build details. Warrior Bowman Thief Magician"
   },
   {
    "p": "Source: Realistic and Max-Scrolled builds from the meowdb.com Character Builder. Special thanks to Grummash for the builds."
@@ -1278,5 +1242,5 @@
   }
  ],
  "source": "https://meowdb.com/msclassic/guides/class-dps-rankings",
- "hash": "9165cc306f0c"
+ "hash": "6b0bd85779a7"
 }

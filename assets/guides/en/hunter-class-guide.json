@@ -615,10 +615,6 @@
    "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 mesos · 500 HP 1.43 HP per meso [[img:d19cbf8225851d.png]] **Blue Potion** 220 mesos · 200 MP 0.91 MP per meso"
   },
   {
-   "guide": "best-buy-shop-efficiency",
-   "text": "Compare shop potion efficiency"
-  },
-  {
    "h2": "Common Hunter mistakes"
   },
   {
@@ -662,5 +658,5 @@
   }
  ],
  "source": "https://meowdb.com/msclassic/guides/hunter-class-guide",
- "hash": "8f5e43a66cd5"
+ "hash": "2b2636ffbf2d"
 }

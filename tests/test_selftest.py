@@ -16,7 +16,20 @@ def test_selftest_passes_from_source(tmp_path):
 
 
 def test_require_kb_fails_on_empty_kb(monkeypatch, tmp_path):
-    from maplehelper import kb
+    from maplehelper import kb, store
     monkeypatch.setattr(kb, "kb_dir", lambda: tmp_path)
+    monkeypatch.setattr(store, "BUNDLED_KB", tmp_path)
     ok, lines = selftest.run(require_kb=True)
     assert not ok and any(ln.startswith("FAIL knowledge base") for ln in lines)
+
+
+def test_require_kb_checks_the_bundled_kb_not_a_downloaded_one(monkeypatch, tmp_path, kb_copy):
+    """A PC that ran Maple Helper has a downloaded KB in %APPDATA%: a build without its own KB must still fail."""
+    from maplehelper import store
+    monkeypatch.setattr(store, "BUNDLED_KB", tmp_path / "empty")
+    monkeypatch.setattr(store, "USER_KB", kb_copy)
+    ok, lines = selftest.run(require_kb=True)
+    assert not ok and any(ln.startswith("FAIL knowledge base") for ln in lines)
+    monkeypatch.setattr(store, "BUNDLED_KB", kb_copy)
+    ok, lines = selftest.run(require_kb=True)
+    assert any(ln.startswith("ok   knowledge base: 19 entities") for ln in lines), lines

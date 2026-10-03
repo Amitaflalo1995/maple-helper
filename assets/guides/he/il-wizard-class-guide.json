@@ -653,10 +653,6 @@
    "p": "[[img:a699b6aea354d7.png]] **White Potion** 350 מסוס · 500 HP 1.43 HP לכל מסו [[img:d19cbf8225851d.png]] **Blue Potion** 220 מסוס · 200 MP 0.91 MP לכל מסו"
   },
   {
-   "guide": "best-buy-shop-efficiency",
-   "text": "השוו את המשתלמות של פוטים בחנות"
-  },
-  {
    "h2": "טעויות נפוצות של I/L Wizard"
   },
   {
@@ -699,5 +695,5 @@
    "p": "I/L Wizards הופכים ל-I/L Mages דרך Robeira ב-El Nath. ג'וב שלישי ו-El Nath לא נמצאים בגרסת ההשקה."
   }
  ],
- "source_hash": "360cbec0569a"
+ "source_hash": "fff5ca6480da"
 }
