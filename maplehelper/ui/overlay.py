@@ -7,7 +7,7 @@ from PySide6.QtCore import (QEasingCurve, QObject, QParallelAnimationGroup, QPoi
                             Qt, QThread, QTimer, Signal)
 from PySide6.QtGui import QAction, QGuiApplication, QIcon, QPainterPath, QPixmap
 from PySide6.QtWidgets import (QFrame, QGraphicsOpacityEffect, QHBoxLayout, QLabel, QLineEdit, QMenu, QPushButton,
-                               QScrollArea, QSizeGrip, QSizePolicy, QToolButton, QVBoxLayout, QWidget)
+                               QScrollArea, QSizePolicy, QToolButton, QVBoxLayout, QWidget)
 
 from .. import __version__, bidi, osapi, quick, telemetry
 from ..brain import Answer, Brain
@@ -544,13 +544,63 @@ class Overlay(QWidget):
         lay.addWidget(self.shot_hint)
         lay.addWidget(self.capsule)
 
-        self.grip = QSizeGrip(self)
-        self.grip.setFixedSize(16, 16)
-        self.grip.setStyleSheet("background: transparent;")
+        # every edge and corner resizes (a single grip in one bottom corner was the only way before)
+        self.setMouseTracking(True)
 
-    def _place_grip(self):
-        m = self.SHADOW
-        self.grip.move(self.width() - m - 18 if not self.t.rtl else m + 2, self.height() - m - 18)
+    # ------------------------------------------------------------------ resizing from any edge
+    # The window is frameless: its shadow margin and the panel's own margin (no controls there) are the edges.
+    # Pressing there hands the drag to the system (startSystemResize), like a normal window's border.
+
+    EDGE = 8          # how far into the panel the edge reaches, past the shadow
+
+    def _edges_at(self, pos) -> Qt.Edge:
+        zone = self.SHADOW + self.EDGE
+        x, y = pos.x(), pos.y()
+        edges = Qt.Edge(0)
+        if x < zone:
+            edges |= Qt.LeftEdge
+        elif x >= self.width() - zone:
+            edges |= Qt.RightEdge
+        if y < zone:
+            edges |= Qt.TopEdge
+        elif y >= self.height() - zone:
+            edges |= Qt.BottomEdge
+        return edges
+
+    @staticmethod
+    def _edge_cursor(edges: Qt.Edge):
+        left, right = bool(edges & Qt.LeftEdge), bool(edges & Qt.RightEdge)
+        top, bottom = bool(edges & Qt.TopEdge), bool(edges & Qt.BottomEdge)
+        if (left and top) or (right and bottom):
+            return Qt.SizeFDiagCursor
+        if (right and top) or (left and bottom):
+            return Qt.SizeBDiagCursor
+        if left or right:
+            return Qt.SizeHorCursor
+        if top or bottom:
+            return Qt.SizeVerCursor
+        return None
+
+    def mouseMoveEvent(self, e):
+        if not e.buttons():
+            cursor = self._edge_cursor(self._edges_at(e.position().toPoint()))
+            if cursor is None:
+                self.unsetCursor()
+            else:
+                self.setCursor(cursor)
+        super().mouseMoveEvent(e)
+
+    def mousePressEvent(self, e):
+        edges = self._edges_at(e.position().toPoint())
+        if e.button() == Qt.LeftButton and edges and self.windowHandle():
+            self.windowHandle().startSystemResize(edges)
+            e.accept()
+            return
+        super().mousePressEvent(e)
+
+    def leaveEvent(self, e):
+        self.unsetCursor()
+        super().leaveEvent(e)
 
     def _fit_header(self):
         """Version and saver badge only when the header has room: first the version goes, then the buttons move
@@ -575,7 +625,6 @@ class Overlay(QWidget):
     def resizeEvent(self, e):
         super().resizeEvent(e)
         self._fit_header()
-        self._place_grip()
         self.pins_bar.fit()             # the open pinned list stays a share of the conversation's height
         if self.isVisible():
             QTimer.singleShot(300, self.save_geometry)
@@ -585,7 +634,6 @@ class Overlay(QWidget):
         self.t = I18n(self.settings["language"] or "he")
         terms.LANG = self.t.lang            # the "?" explanations follow the switch too
         self.setLayoutDirection(Qt.RightToLeft if self.t.rtl else Qt.LeftToRight)
-        self._place_grip()                  # the resize corner changes sides with the language
         self.tools_btn.setToolTip(self.t("tools"))
         self.clear_tags_btn.setToolTip(self.t("untag_all"))
         if self.focus_keys:

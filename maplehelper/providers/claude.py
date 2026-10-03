@@ -130,6 +130,8 @@ class Claude(Provider):
 class ClaudeBackend:
     """Runs questions for a Brain through Claude Code, keeping the next process warm."""
 
+    _cancels = 0      # cancel() calls so far: a question being written when one lands isn't re-sent
+
     def __init__(self, brain):
         self.brain = brain
         self.exe = find_claude()
@@ -137,7 +139,6 @@ class ClaudeBackend:
         self._warm: subprocess.Popen | None = None
         self._warm_config: tuple | None = None
         self._warm_lock = threading.Lock()
-        self._cancels = 0
 
     # ------------------------------------------------------------ warm process
     # Claude Code needs ~3s to start. A process started ahead of time sits waiting for its first
