@@ -438,3 +438,12 @@ class TestInstaller:
         inst = base.Installer(cmd, "true")
         assert inst.done.wait(60)
         assert inst.code == code and inst.status() == last
+
+
+def test_every_provider_is_told_to_stay_on_the_game():
+    """Claude declined off-topic questions by itself; ChatGPT and Gemini answered them ("how old is <politician>"),
+    so the scope is spelled out, in the instructions and in the reminder sent with every question."""
+    from maplehelper.brain import REPLY_RULES, SYSTEM_PROMPT
+    assert "Scope: you help only with MapleStory Classic" in SYSTEM_PROMPT
+    assert "which AI and model answers" in SYSTEM_PROMPT           # questions about the app itself are fine
+    assert "Only MapleStory Classic" in REPLY_RULES
