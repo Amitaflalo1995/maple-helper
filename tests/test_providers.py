@@ -507,3 +507,15 @@ def test_an_english_question_is_answered_in_english_even_with_hebrew_context(kb,
     assert "Reply in English, whatever language the context above is in." in p
     p = build_prompt("where do Red Snails spawn?", None, Hist(), kb, False, kb_context=False, ui_lang="he")
     assert "Reply in English" in p
+
+
+def test_the_ai_is_told_what_it_runs_on(kb):
+    """Our instructions replace each CLI's own: Grok then didn't know its model ("not shown in this session")."""
+    from maplehelper.brain import Brain
+    b = Brain(kb, provider="grok")
+    assert b.system_prompt().endswith("You run on Grok.")
+    b.last_model = "grok-4.7"
+    assert b.system_prompt().endswith("You run on Grok, model grok-4.7.")
+    b.provider = "claude"
+    b.model = "sonnet"
+    assert b.system_prompt().endswith("You run on Claude, model sonnet.")

@@ -1,4 +1,4 @@
-"""Asks the player's chosen AI (Claude Code, Codex or Gemini CLI, see providers/) and turns its reply into an Answer.
+"""Asks the player's chosen AI (Claude Code, Codex, Antigravity or Grok Build, see providers/) and turns its reply into an Answer.
 
 The prompt, the knowledge-base pre-fetch and the answer post-processing (cards,
 drop groups, profile updates) live here and are the same for every provider;
@@ -298,6 +298,7 @@ class Brain:
         self.model = model
         self.length = length
         self.api_key = api_key
+        self.last_model = None         # the model that answered last (the CLI's default has no name until then)
         self.ui_lang = "he"            # the app's language (set by the app): for questions with no words to tell by
         self._provider = providers.get(provider)
         self.backend = self._provider.backend(self)
@@ -313,9 +314,18 @@ class Brain:
         if new.name != self._provider.name:
             self.backend.shutdown()
             self._provider, self.backend = new, new.backend(self)
+            self.last_model = None          # the other AI's model
 
     def system_prompt(self) -> str:
-        return SYSTEM_PROMPT.format(length=LENGTH.get(self.length, LENGTH["short"]))
+        return SYSTEM_PROMPT.format(length=LENGTH.get(self.length, LENGTH["short"])) + self._running_on()
+
+    def _running_on(self) -> str:
+        """Which AI answers: our instructions replace each CLI's own, and Grok then didn't know its model
+        ("which model am I talking to?" got "not shown in this session")."""
+        from .providers.base import model_name
+        model = self.last_model or self.model
+        name = model_name(model) if model else ""
+        return f"\nYou run on {self._provider.label}" + (f", model {name}" if name else "") + "."
 
     def prewarm(self) -> None:
         """Get the next question's process ready now, where the provider supports it."""
@@ -415,6 +425,8 @@ class Brain:
         box = meta.get("avatar_box")
         if not (isinstance(box, list) and len(box) == 4 and all(isinstance(v, (int, float)) for v in box)):
             box = None
+        if result.model:
+            self.last_model = result.model
         return Answer(text=text, entities=entities[:12], drop_groups=groups[:8], profile_update=meta.get("profile_update") or {},
                       avatar_box=box if screenshot_jpeg else None, cost_usd=result.cost_usd,
                       limits=result.limits, model=result.model)

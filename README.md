@@ -83,7 +83,7 @@ The app uses screen capture and its own overlay window. It does not read game me
   - **ChatGPT**: a paid ChatGPT plan or an OpenAI API key (the app installs and signs in to OpenAI's official tool, the Codex CLI, for you). ChatGPT answers appear all at once instead of streaming.
   - **Gemini**: a personal Google account or a Gemini API key. The app installs Google's official tool, Antigravity (since June 2026 Google serves personal accounts only through it), and signs you in: after signing in to Google in the browser, you paste the code it shows into the app, within a minute.
 - Maple Story Classic World running in **Borderless** or **Windowed Fullscreen** mode.
-  - **Grok**: a SuperGrok or X Premium+ plan, or an xAI API key. The app installs xAI's official tool, Grok Build, and signs you in: you approve the sign-in in the browser (the code is filled in).
+  - **Grok**: a Grok account (a free one works, with a limited quota; SuperGrok or X Premium+ gives more), or an xAI API key. The app installs xAI's official tool, Grok Build, and signs you in: you approve the sign-in in the browser (the code is filled in).
 - An internet connection for AI responses and initial data downloads.
 - A microphone if you want to use voice input.
 
