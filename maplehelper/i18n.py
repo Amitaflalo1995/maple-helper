@@ -286,6 +286,10 @@ STRINGS = {
     "voice_send": {"he": "שליחה מיידית אחרי דיבור", "en": "Send right after speaking"},
     "opacity": {"he": "שקיפות", "en": "Opacity"},
     "font_size": {"he": "גודל גופן", "en": "Font size"},
+    # screen readers: the three "A" buttons of the font size say which size they are
+    "font_small": {"he": "גופן קטן", "en": "Small text"},
+    "font_medium": {"he": "גופן בינוני", "en": "Medium text"},
+    "font_large": {"he": "גופן גדול", "en": "Large text"},
     "answer_length": {"he": "אורך תשובות", "en": "Answer length"},
     "short": {"he": "קצר", "en": "Short"},
     "detailed": {"he": "מפורט", "en": "Detailed"},
@@ -700,6 +704,9 @@ STRINGS = {
     "ob_class": {"he": "קלאס", "en": "Class"},
     "ob_job": {"he": "ג'וב נוכחי", "en": "Current job"},
     "ob_level": {"he": "לבל נוכחי", "en": "Current level"},
+    # screen readers: the stepper's − and + buttons
+    "step_less": {"he": "הורדה באחד", "en": "Decrease by one"},
+    "step_more": {"he": "העלאה באחד", "en": "Increase by one"},
     "ob_next": {"he": "הבא", "en": "Next"},
     "ob_back": {"he": "חזרה", "en": "Back"},
     "ob_finish": {"he": "סיום, בואו נשחק!", "en": "Done, let's play!"},
