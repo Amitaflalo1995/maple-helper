@@ -1,4 +1,4 @@
-"""Asks the player's chosen AI (Claude Code or Codex, see providers/) and turns its reply into an Answer.
+"""Asks the player's chosen AI (Claude Code, Codex or Gemini CLI, see providers/) and turns its reply into an Answer.
 
 The prompt, the knowledge-base pre-fetch and the answer post-processing (cards,
 drop groups, profile updates) live here and are the same for every provider;

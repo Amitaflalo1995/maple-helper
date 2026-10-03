@@ -17,7 +17,7 @@ class TestRegistry:
 
     def test_unknown_or_missing_falls_back_to_claude(self):
         assert providers.get(None).name == "claude"
-        assert providers.get("gemini").name == "claude"
+        assert providers.get("grok").name == "claude"
 
 
 @pytest.mark.parametrize("text,kind", [

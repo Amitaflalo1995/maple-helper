@@ -375,11 +375,13 @@ class Onboarding(GlassDialog):
         self.login_btn.setText(t.p("ob_login", p))
         self.key_edit.clear()
         # a Hebrew hint reads right to left while the field is empty (_key_direction), and the key's prefix
-        # ("sk-ant-") stays one block in it, not "ב--sk-ant" (ltr_block inside the Hebrew sentence)
+        # ("sk-ant-", "AIza") stays one block in it, not "ב--sk-ant" (ltr_block inside the Hebrew sentence)
         hint = t.p("ob_api_key_hint", p)
         if t.rtl:
-            prefix = "sk-ant-" if "sk-ant-" in hint else "sk-"
-            hint = bidi.plain(hint.replace(prefix, bidi.ltr_block(prefix, True)), True)
+            prefix = next((x for x in ("sk-ant-", "sk-", "AIza") if x in hint), "")
+            if prefix:
+                hint = hint.replace(prefix, bidi.ltr_block(prefix, True))
+            hint = bidi.plain(hint, True)
         self.key_edit.setPlaceholderText(hint)
         self._key_direction()
         self.key_hint.hide()

@@ -33,7 +33,8 @@ APP_ICON = "app.ico" if sys.platform == "win32" else "icon-256.png"
 
 
 def _remove_stray_screenshots() -> None:
-    """Screenshots handed to ChatGPT live in %TEMP% only for one answer; a quit mid-answer left them there."""
+    """Screenshots handed to ChatGPT live in %TEMP% only for one answer; a quit mid-answer left them there
+    (Gemini's are in a folder, removed the same way)."""
     import glob
     import tempfile
     import time
@@ -41,6 +42,13 @@ def _remove_stray_screenshots() -> None:
         try:
             if time.time() - os.path.getmtime(f) > 3600:
                 os.remove(f)
+        except OSError:
+            pass
+    import shutil
+    for d in glob.glob(os.path.join(tempfile.gettempdir(), "maplehelper-shots-*")):
+        try:
+            if time.time() - os.path.getmtime(d) > 3600:
+                shutil.rmtree(d, ignore_errors=True)
         except OSError:
             pass
 

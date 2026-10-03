@@ -40,6 +40,8 @@ def model_name(model_id: str) -> str:
         return f"{m.group(1).capitalize()} {m.group(2).replace('-', '.')}"
     if (model_id or "").startswith("gpt-"):
         return "GPT-" + "-".join(w.capitalize() for w in model_id[4:].split("-"))
+    if (model_id or "").startswith("gemini-"):      # "gemini-3.8-flash-lite" -> "Gemini 3.8 Flash Lite"
+        return " ".join(w if w[:1].isdigit() else w.capitalize() for w in model_id.split("-"))
     return model_id or ""
 
 
@@ -89,17 +91,28 @@ def in_terminal(command: str) -> subprocess.Popen:
 _login: subprocess.Popen | None = None
 
 
-def open_login(exe: str, args: list[str], env: dict | None = None) -> subprocess.Popen | None:
+def open_login(exe: str | list[str], args: list[str], env: dict | None = None, answer: str | None = None,
+               cwd: str | None = None) -> subprocess.Popen | None:
     """The official sign-in, with no console window: the CLI opens the browser itself and waits for it there.
-    Its output goes to the log (it says why, when a sign-in fails). None when it couldn't start."""
+    Its output goes to the log (it says why, when a sign-in fails). None when it couldn't start.
+    exe: the executable, or the command that starts it ([node, script]). answer: typed into the CLI's
+    question before the browser opens (Gemini asks "Do you want to continue? [Y/n]")."""
     global _login
     stop_login()   # one left waiting still holds its local port (Codex: 1455), so a new one would fail
+    cmd = [*exe, *args] if isinstance(exe, list) else [exe, *args]
     try:
-        p = subprocess.Popen([exe, *args], stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
-                             stderr=subprocess.STDOUT, env=env, creationflags=CREATE_NO_WINDOW)
+        p = subprocess.Popen(cmd, stdin=subprocess.PIPE if answer is not None else subprocess.DEVNULL,
+                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env=env, cwd=cwd,
+                             creationflags=CREATE_NO_WINDOW)
     except OSError:
-        log.warning("sign-in can't start: %s", exe, exc_info=True)
+        log.warning("sign-in can't start: %s", cmd[0], exc_info=True)
         return None
+    if answer is not None:
+        try:
+            p.stdin.write(answer.encode("utf-8"))
+            p.stdin.close()
+        except OSError:
+            pass               # it already ended: drain() logs why
 
     def drain():
         for line in p.stdout:

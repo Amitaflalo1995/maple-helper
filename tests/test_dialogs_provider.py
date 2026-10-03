@@ -38,6 +38,20 @@ def test_onboarding_relabels_the_connect_page_for_codex(env):
     assert "OpenAI" in dlg.privacy_label.text()
 
 
+def test_onboarding_relabels_the_connect_page_for_gemini(env, monkeypatch):
+    from maplehelper import providers
+    from maplehelper.ui.dialogs import Onboarding
+    monkeypatch.setattr(type(providers.get("gemini")), "account", lambda self: {"status": "not_installed", "email": None})
+    s, profiles, kb = env
+    dlg = Onboarding(s, profiles, kb, lambda *_: "")
+    dlg._on_provider("gemini")
+    assert s["provider"] == "gemini"
+    assert dlg.install_btn.text() == "Install Gemini"
+    assert dlg.login_btn.text() == "Sign in with Google"
+    assert "AIza" in dlg.key_edit.placeholderText()
+    assert "Google (Gemini)" in dlg.privacy_label.text()
+
+
 def test_onboarding_ignores_a_late_status_for_the_other_provider(env):
     from maplehelper.ui.dialogs import Onboarding
     s, profiles, kb = env

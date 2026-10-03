@@ -104,9 +104,10 @@ DEFAULT_SETTINGS = {
     "start_with_windows": False,
     "voice_send_immediately": True,
     "microphone": None,
-    "provider": "claude",          # claude | codex: which AI CLI answers (see providers/)
+    "provider": "claude",          # claude | codex | gemini: which AI CLI answers (see providers/)
     "model": "sonnet",             # Claude's model
     "codex_model": None,           # Codex's model; None = the Codex CLI default
+    "gemini_model": None,          # Gemini's model alias (pro, flash); None = the Gemini CLI default
     "last_model": {},              # provider -> the model that actually answered last (shown in Settings)
     # per provider: use an API key (stored in Credential Manager / Keychain) instead of the account login.
     # Older files hold a single bool here, which meant the Anthropic key.
