@@ -200,10 +200,18 @@ def test_open_login_keeps_stdin_for_the_code_and_reports_lines(monkeypatch):
         def kill(self):
             pass
     monkeypatch.setattr(base.subprocess, "Popen", FakeProc)
+    typed = []
+    monkeypatch.setattr(base, "type_into_console", lambda pid, text: typed.append((pid, text)) or True)
     base.open_login("agy.exe", ["-p", "hi"], cwd="C:/h", keep_stdin=True, on_line=lines.append)
     p = FakeProc.last
+    p.pid = 4242
     assert p.kw["stdin"] == base.subprocess.PIPE and p.kw["cwd"] == "C:/h"
-    assert base.send_login_input("4/0code\n") and p.stdin.getvalue() == b"4/0code\n"
+    assert base.send_login_input("4/0code\n")
+    if base.sys.platform == "win32":
+        # Antigravity reads the code from its (hidden) console, not stdin: typed there, Enter as "\r"
+        assert typed == [(4242, "4/0code\r")] and p.stdin.getvalue() == b""
+    else:
+        assert p.stdin.getvalue() == b"4/0code\n"
     import time
     for _ in range(50):
         if lines:

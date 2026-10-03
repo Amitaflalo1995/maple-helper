@@ -115,9 +115,15 @@ def open_login(exe: str, args: list[str], env: dict | None = None, cwd: str | No
 
 
 def send_login_input(text: str) -> bool:
-    """Type into the sign-in that's waiting (a code pasted from the browser). False when none is waiting."""
+    """Type into the sign-in that's waiting (a code pasted from the browser). False when none is waiting.
+    On Windows it's typed into the CLI's hidden console: Antigravity reads the code from there, not from stdin
+    (a code written to its stdin was never seen, and the sign-in timed out)."""
     p = _login
-    if not p or p.poll() is not None or not p.stdin:
+    if not p or p.poll() is not None:
+        return False
+    if sys.platform == "win32":
+        return type_into_console(p.pid, text.replace("\r\n", "\n").replace("\n", "\r"))
+    if not p.stdin:
         return False
     try:
         p.stdin.write(text.encode("utf-8"))
@@ -125,6 +131,59 @@ def send_login_input(text: str) -> bool:
         return True
     except OSError:
         return False
+
+
+_console_lock = threading.Lock()
+
+
+def type_into_console(pid: int, text: str) -> bool:
+    """Windows: key presses into another process's console (one made with CREATE_NO_WINDOW has a hidden one),
+    as if the player typed them there. "\\r" is Enter."""
+    import ctypes
+    from ctypes import wintypes
+
+    class KEY_EVENT_RECORD(ctypes.Structure):
+        _fields_ = [("bKeyDown", wintypes.BOOL), ("wRepeatCount", wintypes.WORD),
+                    ("wVirtualKeyCode", wintypes.WORD), ("wVirtualScanCode", wintypes.WORD),
+                    ("uChar", wintypes.WCHAR), ("dwControlKeyState", wintypes.DWORD)]
+
+    class EVENT(ctypes.Union):
+        _fields_ = [("KeyEvent", KEY_EVENT_RECORD), ("pad", ctypes.c_byte * 16)]
+
+    class INPUT_RECORD(ctypes.Structure):
+        _fields_ = [("EventType", wintypes.WORD), ("Event", EVENT)]
+
+    k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    k32.CreateFileW.restype = wintypes.HANDLE
+    records = []
+    for ch in text:
+        for down in (True, False):
+            r = INPUT_RECORD(EventType=1)              # KEY_EVENT
+            r.Event.KeyEvent.bKeyDown = down
+            r.Event.KeyEvent.wRepeatCount = 1
+            r.Event.KeyEvent.uChar = ch
+            r.Event.KeyEvent.wVirtualKeyCode = 0x0D if ch == "\r" else 0
+            records.append(r)
+    with _console_lock:                                # attaching is process-wide: one at a time
+        had_console = bool(k32.GetConsoleWindow())     # a run from a terminal (development) has its own
+        k32.FreeConsole()
+        try:
+            if not k32.AttachConsole(pid):
+                log.warning("can't reach the sign-in's console: %s", ctypes.get_last_error())
+                return False
+            handle = k32.CreateFileW("CONIN$", 0xC0000000, 3, None, 3, 0, None)   # read|write, shared, existing
+            if not handle or handle == wintypes.HANDLE(-1).value:
+                return False
+            try:
+                arr = (INPUT_RECORD * len(records))(*records)
+                written = wintypes.DWORD()
+                return bool(k32.WriteConsoleInputW(handle, arr, len(records), ctypes.byref(written)))
+            finally:
+                k32.CloseHandle(handle)
+        finally:
+            k32.FreeConsole()
+            if had_console:
+                k32.AttachConsole(-1)                  # ATTACH_PARENT_PROCESS: back to the terminal it ran in
 
 
 def stop_login() -> None:
