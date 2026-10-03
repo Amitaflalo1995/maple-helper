@@ -35,10 +35,10 @@ APP = {
     # Jr. Wraith Avoid 24 -> 79 ACC, Rotten Mushroom 33 -> 108) and Zombie Mushroom's page (Avoid 14 -> 47)
     "ACC": ("Accuracy: כמה טוב אתם פוגעים. ככל שה-ACC שלכם גבוה יותר מה-Avoid של המפלצת, אתם מפספסים פחות. "
             "כדי לא לפספס בכלל צריך קצת יותר מפי 3 מה-Avoid שלה כשהיא בלבל שלכם, ועוד יותר כשהיא בלבל גבוה משלכם. "
-            "רואים אותו בחלון ה-Stat (מקש S).",
+            "רואים אותו בחלון ה-Stat.",
             "Accuracy: how well you hit. The more your ACC beats a monster's Avoid, the fewer misses. "
             "To never miss you need a bit over 3x its Avoid at your level, more when it's above your level. "
-            "It's in the Stat window (S key)."),
+            "It's in the Stat window."),
     "Avoid": ("Avoidability: כמה טוב המפלצת מתחמקת. Avoid גבוה = צריך יותר ACC כדי לפגוע בה. "
               "מפלצת בלבל גבוה משלכם מתחמקת עוד יותר.",
               "Avoidability: how well a monster dodges. Higher Avoid means you need more ACC to hit it. "
