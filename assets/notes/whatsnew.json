@@ -1,5 +1,14 @@
 [
  {
+  "version": "0.7.8",
+  "he": [
+   "עדכונים מהירים בהרבה: מאגר המידע (כ-8,000 קבצים) כבר לא מותקן מחדש בכל עדכון כשהוא לא השתנה."
+  ],
+  "en": [
+   "Much faster updates: the knowledge base (about 8,000 files) is no longer reinstalled on every update when it hasn't changed."
+  ]
+ },
+ {
   "version": "0.7.7",
   "he": [
    "תוקן: בפתיחת חלון (כלי משחק, מדריכים, הגדרות) כבר לא מהבהב לרגע חלון קטן.",
