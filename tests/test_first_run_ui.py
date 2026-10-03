@@ -115,3 +115,20 @@ def test_last_session_card_continues_that_characters_chat(qapp, isolated_store, 
     go = next(x for x in card.findChildren(QPushButton) if x.objectName() == "Link")
     go.click()
     assert p.active_id == b.id and "where is Mano?" in ov._hidden_context
+
+
+def test_hebrew_search_boxes_start_on_the_right(qapp):
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QLineEdit
+
+    from maplehelper.ui.controls import follow_typing
+    e = QLineEdit()
+    follow_typing(e, True)
+    assert e.alignment() & Qt.AlignRight                     # empty: by the Hebrew hint
+    e.setText("Red Snail")
+    assert e.alignment() & Qt.AlignLeft                      # an English name runs from the left
+    e.setText("חילזון")
+    assert e.alignment() & Qt.AlignRight
+    en = QLineEdit()
+    follow_typing(en, False)
+    assert en.alignment() & Qt.AlignLeft

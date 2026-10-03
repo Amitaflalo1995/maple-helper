@@ -507,6 +507,18 @@ class WrapLink(QLabel):
         super().mouseReleaseEvent(e)
 
 
+def follow_typing(edit, rtl: bool) -> None:
+    """A search box in Hebrew: the cursor waits on the right, by the hint (Qt put it on the left of an empty
+    box); a name typed in English, as the game writes it, runs from the left. Only the text moves: the clear
+    button and any arrow keep their side."""
+    def follow(*_):
+        text = edit.text()
+        right = rtl and (not text or bool(bidi._RTL.search(text)))
+        edit.setAlignment((Qt.AlignRight if right else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
+    edit.textChanged.connect(follow)
+    follow()
+
+
 def rtl_buttons(root, rtl: bool) -> None:
     """Qt lays push-button text out left-to-right whatever the widget direction, which throws
     final punctuation ("!", "?") to the wrong side. Re-mark every button label for RTL."""

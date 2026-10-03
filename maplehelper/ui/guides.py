@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (QApplication, QButtonGroup, QFrame, QHBoxLayout, 
 
 from .. import bidi, guides
 from ..i18n import I18n
-from .controls import FlowLayout, rtl_buttons
+from .controls import FlowLayout, follow_typing, rtl_buttons
 from .glass import GlassDialog
 
 
@@ -221,6 +221,7 @@ class GuidesDialog(GlassDialog):
         self.search.setPlaceholderText(bidi.plain(t("g_search"), rtl))
         self.search.setClearButtonEnabled(True)
         self.search.textChanged.connect(lambda *_: self._fill())
+        follow_typing(self.search, rtl)
         lay.addWidget(self.search)
         chips = FlowLayout(spacing=6)        # wraps onto a second row: one row of five was 521 px wide
         self.cats = QButtonGroup(self)

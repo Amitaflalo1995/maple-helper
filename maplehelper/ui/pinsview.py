@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QLineEdit, QProgress
 
 from .. import bidi, pins
 from ..i18n import I18n
-from .controls import rtl_buttons
+from .controls import follow_typing, rtl_buttons
 from .glass import GlassDialog
 
 
@@ -162,6 +162,7 @@ class HistoryDialog(GlassDialog):
         self.search = QLineEdit()
         self.search.setPlaceholderText(bidi.plain(t("history_search"), t.rtl))
         self.search.setClearButtonEnabled(True)
+        follow_typing(self.search, t.rtl)
         # rebuilt once typing pauses, not on every key (each pass rebuilds up to PAGE cards)
         self._debounce = QTimer(self, singleShot=True, interval=self.DEBOUNCE_MS, timeout=self._new_search)
         self.search.textChanged.connect(lambda *_: self._debounce.start())

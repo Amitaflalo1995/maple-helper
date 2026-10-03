@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (QButtonGroup, QCompleter, QFrame, QGraphicsOpacit
 from .. import bidi, buildplan, combat, crafting, glossary, guides, market, plan, quests
 from ..i18n import I18n
 from . import terms, theme
-from .controls import FlowLayout, Section, Segmented, Stepper, WrapLink, rtl_buttons
+from .controls import FlowLayout, Section, Segmented, Stepper, WrapLink, follow_typing, rtl_buttons
 from .glass import GlassDialog, no_default_buttons
 
 PAGES = ("train", "calc", "build", "quests", "crafting", "town", "prices", "exp", "more")
@@ -83,7 +83,7 @@ class EntityPicker(QLineEdit):
     rows: (shown text, name to put in the box, picture path or None)."""
     picked = Signal()
 
-    def __init__(self, rows: list[tuple[str, str, object]], placeholder: str, icon: int = 36):
+    def __init__(self, rows: list[tuple[str, str, object]], placeholder: str, icon: int = 36, rtl: bool = False):
         super().__init__()
         self.setPlaceholderText(placeholder)
         self.setClearButtonEnabled(True)
@@ -121,6 +121,7 @@ class EntityPicker(QLineEdit):
         arrow = self.addAction(self._chevron(), QLineEdit.TrailingPosition)
         arrow.triggered.connect(self.open_list)
         self.setMinimumHeight(34)
+        follow_typing(self, rtl)
 
     @staticmethod
     def _chevron() -> QIcon:
@@ -558,7 +559,7 @@ class ToolsDialog(GlassDialog):
         t = self.t
         sc, lay = scroll_page()
         rows = monster_rows(self.kb)
-        self.calc_input = EntityPicker(rows, self._p(t("calc_placeholder", n=len(rows))))
+        self.calc_input = EntityPicker(rows, self._p(t("calc_placeholder", n=len(rows))), rtl=t.rtl)
         self.calc_input.picked.connect(self._fill_calc)
         lay.addWidget(self.calc_input)
         # the stats first, as on "Where to train": every number below comes from them
@@ -749,14 +750,6 @@ class ToolsDialog(GlassDialog):
             self._skills = sorted(out, key=lambda x: -len(x[0]))
         return self._skills
 
-    def _q_search_direction(self, *_):
-        """In Hebrew the cursor and the hint start on the right; an English name typed in (most quests) runs
-        left to right like the game writes it."""
-        text = self.q_search.text()
-        rtl = self.t.rtl and (not text or bool(bidi._RTL.search(text)))
-        self.q_search.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
-        self.q_search.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
-
     @staticmethod
     def _short_skill_icons(rows: list[list[str]], icons: list[tuple[str, str]]) -> list[tuple[str, str]]:
         """("Booster", its icon) for each full skill name the table uses ("Claw Booster"), when its last word
@@ -797,8 +790,7 @@ class ToolsDialog(GlassDialog):
         self._q_search_timer = QTimer(self, singleShot=True, interval=200)     # rebuild once typing pauses
         self._q_search_timer.timeout.connect(self._fill_quests)
         self.q_search.textChanged.connect(lambda *_: self._q_search_timer.start())
-        self.q_search.textChanged.connect(self._q_search_direction)
-        self._q_search_direction()
+        follow_typing(self.q_search, t.rtl)
         lay.addWidget(self.q_search)
         self.q_head = self._label("", "ToolHeader")
         lay.addWidget(self.q_head)
@@ -1225,7 +1217,7 @@ class ToolsDialog(GlassDialog):
         self._price_seen: set = set()
         lay.addWidget(self._label(t("prices_intro"), "ToolHeader", seen=self._price_seen))
         rows = item_rows(self.kb)
-        self.price_input = EntityPicker(rows, self._p(t("price_placeholder", n=f"{len(rows):,}")), icon=32)
+        self.price_input = EntityPicker(rows, self._p(t("price_placeholder", n=f"{len(rows):,}")), icon=32, rtl=t.rtl)
         self.price_input.picked.connect(self._fill_prices)
         lay.addWidget(self.price_input)
         self.price_box = QVBoxLayout()
@@ -1435,7 +1427,7 @@ class ToolsDialog(GlassDialog):
         shop = Section(t("shop_title"), t.rtl)
         shop.add_widget(self._label(t("shop_body"), "RowLabel"))
         maps = map_rows(self.kb)
-        self.shop_map = EntityPicker(maps, self._p(t("shop_map_ph", n=len(maps))), icon=40)
+        self.shop_map = EntityPicker(maps, self._p(t("shop_map_ph", n=len(maps))), icon=40, rtl=t.rtl)
         self.shop_map.setMinimumWidth(280)
         shop.add_row(t("shop_where"), self.shop_map)
         self.shop_len = Segmented([("30", 30), ("60", 60), ("120", 120)], 60, t.rtl)
