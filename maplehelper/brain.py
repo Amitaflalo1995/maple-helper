@@ -18,6 +18,7 @@ from .store import Character, History
 log = logging.getLogger(__name__)
 
 META = "@@META@@"
+_FOCUS_TAG = re.compile(r"^\s*\[about [^\]]*\]\s*")      # "[about Mano] " the chat puts before a tagged question
 REVERSE_WORDS = re.compile(r"(מאיז[הו]|מאילו|איזה|אילו)\s+מפלצ|מי\s+מפיל|which\s+monsters?|who\s+drops|what\s+drops", re.I)
 DROP_WORDS = re.compile(r"דרופ|מפיל|נופל|שנופל|drops?\b|loot", re.I)
 SUMMARY_PROMPT = ("Summarize this MapleStory Classic helper conversation in 2-3 sentences for future context: "
@@ -55,11 +56,12 @@ After the answer, output a line containing only @@META@@ followed by one JSON ob
   When the answer is a LIST of items (drops, quest rewards, shop stock, what to buy/equip), include EVERY item's key
   so the app can show each one with its picture. Find keys by grepping index.json for the item names.
 - avatar_box (only with a screenshot, only if clearly visible): [x, y, w, h] as fractions (0-1) of the screenshot, a snug box
-  around the PLAYER'S OWN character sprite (find the name tag under it matching the profile name), head to feet, excluding
-  the name tag. Omit it if unsure.
+  around the PLAYER'S OWN character sprite, head to feet, excluding the name tag. Find it by its name tag: the same name
+  as the HUD's character name (bottom left, next to the level). NPCs stand around too: their name tags are on a yellow
+  plate, often with a second title line (e.g. "Cody / Wizet Wizard"); never box an NPC. Omit it if unsure.
 - drop_groups (only for "which monsters drop X" questions): [{{"monster": "monster/12", "items": ["item/5", ...]}}, ...]
   lowest monster level first, max 8 groups.
-- profile_update: only facts the player stated or the screenshot clearly shows: "level" (int), "job", "base_class", "map", "quests_started" [..], "quests_completed" [..], "exp_percent" (number 0-100, the EXP bar's percentage, only if the screenshot shows it), "stats" (only if the in-game stat window is open in the screenshot: {{"acc": total Accuracy, "dmg_min": and "dmg_max": the attack/damage range it shows, "hp": max HP, "mp": max MP}}), "note" (a lasting preference or goal). Empty object if nothing changed.
+- profile_update: only facts the player stated or the screenshot clearly shows: "name" (the character name on the HUD, exactly as written), "level" (int), "job" (from a screenshot: exactly as the HUD writes it), "base_class", "map", "quests_started" [..], "quests_completed" [..], "exp_percent" (number 0-100, the EXP bar's percentage, only if the screenshot shows it), "stats" (only if the in-game stat window is open in the screenshot: {{"acc": total Accuracy, "dmg_min": and "dmg_max": the attack/damage range it shows, "hp": max HP, "mp": max MP}}), "note" (a lasting preference or goal). Empty object if nothing changed.
 """
 
 LENGTH = {
@@ -87,12 +89,17 @@ REPLY_RULES = """<reply_rules>
   ("Blue Snail Shell", not "קונכיית חילזון כחול"), even inside a Hebrew sentence.
 - Locations, drops and stats only from the context or the knowledge base (Grep pages/monster/*.md for "Map Locations" if needed).
 - Then the line @@META@@ and the JSON object. Always include it, even when empty. If the player states a new level/job, put it in profile_update.
+- profile_update describes ONLY the character in <player_profile>. If the player says they are on another character,
+  or the screenshot's HUD shows another name, put that character's facts in profile_update WITH its "name" (the app
+  offers to add it or switch to it), and never word it as a change of the profile's character.
 </reply_rules>"""
 LENGTH_LINES = {"short": 6, "detailed": 15}
 
 
 def build_prompt(question: str, character: Character | None, history: History | None, kb: KnowledgeBase,
-                 has_screenshot: bool, length: str = "short", focus=None) -> str:
+                 has_screenshot: bool, length: str = "short", focus=None, extra: str | None = None,
+                 kb_context: bool = True) -> str:
+    """kb_context=False: no knowledge-base pre-fetch (a screenshot read needs only the profile and the picture)."""
     parts = []
     if character:
         parts.append(f"<player_profile>\n{character.summary()}\n</player_profile>")
@@ -103,10 +110,17 @@ def build_prompt(question: str, character: Character | None, history: History | 
         if summ:
             parts.append("<earlier_sessions>\n" + "\n".join(summ[-3:]) + "\n</earlier_sessions>")
         recent = history.recent()
+        # the chat writes the question to the history before the AI runs: it goes once, in <question>
+        if recent and recent[-1].get("role") == "user" and _FOCUS_TAG.sub("", recent[-1]["text"]).strip() == question.strip():
+            recent = recent[:-1]
         if recent:
             convo = "\n".join(f"{'Player' if r['role'] == 'user' else 'Helper'}: {r['text'][:600]}" for r in recent)
             parts.append(f"<recent_conversation>\n{convo}\n</recent_conversation>")
     ctx = []
+    if not kb_context:
+        question_parts = [f"<screenshot>{'attached above' if has_screenshot else 'not available'}</screenshot>",
+                          f"<question>\n{question}\n</question>", REPLY_RULES.format(length=LENGTH_LINES["short"])]
+        return "\n\n".join(parts + question_parts)
     if character:
         digest = kb.level_digest(character.level)
         if digest:
@@ -121,7 +135,7 @@ def build_prompt(question: str, character: Character | None, history: History | 
             if k.startswith("monster/"):
                 sel.append(kb.drops_digest(k))
         ctx.append("<selected>\n" + "\n".join(x for x in sel if x) + "\n</selected>")
-    if REVERSE_WORDS.search(question):
+    if is_reverse(question, kb):
         items = item_keys_for_question(question, kb)
         groups = kb.drop_groups(items, limit=10)
         if groups:
@@ -142,8 +156,19 @@ def build_prompt(question: str, character: Character | None, history: History | 
                 ctx.append(drops)
     if ctx:
         parts.append("<kb_context>\n" + "\n\n".join(ctx) + "\n</kb_context>")
-    parts.append("<screenshot>" + ("attached above" if has_screenshot else "not available") + "</screenshot>")
+    if has_screenshot is True:
+        shot = "attached above"
+    elif not has_screenshot:
+        shot = "not available"
+    else:      # the number of full-resolution tiles that follow it
+        shot = (f"attached above, followed by {has_screenshot} full-resolution parts of the same screenshot "
+                "(left to right) for reading small icons and text")
+    parts.append(f"<screenshot>{shot}</screenshot>")
+    if extra:
+        parts.append(extra)          # app-made context (inventory read, a picked-up conversation): prompt only
     parts.append(f"<question>\n{question}\n</question>")
+    if re.search(r"[\u0590-\u05FF]", question):
+        parts.append("Reply in Hebrew.")      # it slipped into English once after a screenshot-heavy turn (live)
     parts.append(REPLY_RULES.format(length=LENGTH_LINES.get(length, 6)))
     return "\n\n".join(parts)
 
@@ -161,6 +186,12 @@ ITEM_FAMILIES = [
     (r"עגיל|earrings?\b", "Earring"),
     (r"גלימ(ה|ות)|capes?\b", "Cape"),
 ]
+
+
+def is_reverse(question: str, kb: KnowledgeBase) -> bool:
+    """A "which monsters drop X" question. "what drops does Mano have?" names a monster: it asks Mano's drops."""
+    return bool(REVERSE_WORDS.search(question)) and \
+        not any(k.startswith("monster/") for k in kb.find_mentions(question, max_results=4))
 
 
 def item_keys_for_question(question: str, kb: KnowledgeBase) -> list[str]:
@@ -182,9 +213,61 @@ def split_meta(raw: str) -> tuple[str, dict]:
     text, _, meta = raw.partition(META)
     m = re.search(r"\{.*\}", meta, re.S)
     try:
-        return text.strip(), json.loads(m.group(0)) if m else {}
+        data = json.loads(m.group(0)) if m else {}
     except json.JSONDecodeError:
-        return text.strip(), {}
+        data = {}
+    if not isinstance(data, dict):
+        data = {}
+    # every field to the type the app expects: a malformed reply must never replace a good answer with an error
+    for key, typ in (("profile_update", dict), ("entities", list), ("drop_groups", list)):
+        if key in data and not isinstance(data[key], typ):
+            del data[key]
+    _numbers(data.get("profile_update"))
+    return text.strip(), data
+
+
+def _whole(v) -> int | None:
+    """12, 12.0 and "12" (or "1,234") as an int; never a bool (True is no level 1), a fraction or a word."""
+    if isinstance(v, bool):
+        return None
+    if isinstance(v, int):
+        return v
+    if isinstance(v, float):
+        return int(v) if v.is_integer() else None
+    if isinstance(v, str) and re.fullmatch(r"\s*\d{1,3}(?:,\d{3})*\s*|\s*\d+\s*", v):
+        return int(v.replace(",", ""))
+    return None
+
+
+def _numbers(update) -> None:
+    """profile_update's level and stats as ints (the AI writes "12" or 12.0 too): the chat compares the level with
+    the saved one (a lower level asks first), which a string slipped past."""
+    if not isinstance(update, dict):
+        return
+    if "level" in update:
+        lv = _whole(update["level"])
+        if lv is None:
+            del update["level"]
+        else:
+            update["level"] = lv
+    stats = update.get("stats")
+    if "stats" in update:
+        clean = {k: n for k, v in stats.items() if (n := _whole(v)) is not None} if isinstance(stats, dict) else {}
+        if clean:
+            update["stats"] = clean
+        else:
+            del update["stats"]
+
+
+def streamed_text(raw: str) -> str:
+    """The visible part of a reply still streaming: before @@META@@, and without a marker that has only
+    partly arrived (the stream can end a chunk on "…answer.\\n@@ME")."""
+    text = raw.split(META)[0]
+    for n in range(len(META) - 1, 0, -1):
+        if text.endswith(META[:n]):
+            text = text[:-n]
+            break
+    return text.strip()
 
 
 class Brain:
@@ -219,6 +302,12 @@ class Brain:
     def shutdown(self) -> None:
         self.backend.shutdown()
 
+    def drop_warm(self) -> None:
+        """Stop the waiting process only, never an answer the player is reading (the KB swap needs the folder)."""
+        drop = getattr(self.backend, "drop_warm", None)
+        if drop:
+            drop()
+
     def available(self) -> bool:
         return self.backend.exe is not None
 
@@ -226,33 +315,50 @@ class Brain:
         self.backend.cancel()
 
     def ask(self, question: str, character: Character | None, history: History | None,
-            screenshot_jpeg: bytes | None, on_delta=None, focus=None) -> Answer:
-        """Blocking call; on_delta(visible_text_so_far) is invoked while the answer streams."""
+            screenshot_jpeg: bytes | None, on_delta=None, focus=None, extra: str | None = None,
+            model: str | None = None, light: bool = False) -> Answer:
+        """Blocking call; on_delta(visible_text_so_far) is invoked while the answer streams.
+        extra: context for the prompt only; every heuristic below reads the player's own question.
+        model: another model for this one call (None: the player's). light: a screenshot read (the ⟳ sync): no
+        knowledge-base pre-fetch and no file tools, so a light model answers in seconds instead of ~40 s."""
         if not self.backend.exe:
             return Answer(error="not_installed")
         self.kb.ensure_drop_table()
-        prompt = build_prompt(question, character, history, self.kb, screenshot_jpeg is not None, self.length, focus)
-        raw_delta = (lambda raw: on_delta(raw.split(META)[0].strip())) if on_delta else None
-        result = self.backend.run(prompt, screenshot_jpeg, raw_delta)
+        shots = screenshot_jpeg if isinstance(screenshot_jpeg, list) else [screenshot_jpeg] if screenshot_jpeg else []
+        # True (one screenshot), or the number of detail tiles that follow it (an int, never 1 == True)
+        has = (len(shots) - 1 if len(shots) > 1 else True) if shots else False
+        prompt = build_prompt(question, character, history, self.kb, has, "short" if light else self.length, focus,
+                              extra, kb_context=not light)
+        raw_delta = (lambda raw: on_delta(streamed_text(raw))) if on_delta else None
+        if model or light:
+            result = self.backend.run(prompt, screenshot_jpeg, raw_delta, model=model, tools=not light)
+        else:
+            result = self.backend.run(prompt, screenshot_jpeg, raw_delta)
         if result.error:
             return Answer(error=result.error, limits=result.limits)
         text, meta = split_meta(result.text)
-        if not meta.get("profile_update"):
+        if not text and not meta:
+            return Answer(error="no_result", limits=result.limits)   # nothing at all came back: no empty bubble
+        if "profile_update" not in meta:
+            # only when the AI sent no update at all: it saw the question and judged "{}" (nothing changed)
             stated = stated_level(question)
             if stated:
                 meta.setdefault("profile_update", {})["level"] = stated
         entities = [k for k in meta.get("entities", []) if isinstance(k, str) and kb_has(self.kb, k)][:12]
+        # only cards for what the answer actually talks about (a follow-up on snails got a Mano card, live)
+        low = text.lower()
+        entities = [k for k in entities if str((self.kb.get(k) or {}).get("name", "")).lower() in low]
         groups = []
         for g in meta.get("drop_groups") or []:
             if isinstance(g, dict) and kb_has(self.kb, str(g.get("monster", ""))):
                 items = [i for i in g.get("items") or [] if isinstance(i, str) and kb_has(self.kb, i)]
                 if items:
                     groups.append({"monster": g["monster"], "items": items[:10]})
-        if REVERSE_WORDS.search(question) and not groups:
+        if not groups and is_reverse(question, self.kb):
             # the app builds the grouping itself: the question's items, else the items the answer names
             items = item_keys_for_question(question, self.kb) or \
                 [k for k in entities if k.startswith("item/")] or \
-                [k for k in self.kb.find_mentions(text, 12) if k.startswith("item/")]
+                [k for k in self.kb.find_mentions(text, 12, answer=True) if k.startswith("item/")]
             groups = self.kb.drop_groups(items)
         if groups:
             entities = []          # the grouped view replaces the flat cards
@@ -263,10 +369,13 @@ class Brain:
             if monsters:
                 drops = self.kb.monster_drops(monsters[0])
                 entities = [monsters[0]] + drops
-        if not entities:
-            # fallback: cards for the in-game names that appear in the answer itself
-            entities = [k for k in self.kb.find_mentions(text, max_results=12)
-                        if k.split("/")[0] in ("monster", "item", "npc", "map", "quest")]
+        if not groups:
+            # cards for every in-game name the answer itself mentions, after the ones the AI listed (it listed only
+            # Snail Shell for an answer naming Brown Skullcap, Green Skullcap and Snail, seen live)
+            # (names as written: "your max HP" is no Max card, "בין לבל 10 ל-20" no Bain card)
+            named = [k for k in self.kb.find_mentions(text, max_results=12, answer=True)
+                     if k.split("/")[0] in ("monster", "item", "npc", "map", "quest")]
+            entities = entities + [k for k in named if k not in entities]
         box = meta.get("avatar_box")
         if not (isinstance(box, list) and len(box) == 4 and all(isinstance(v, (int, float)) for v in box)):
             box = None
@@ -296,12 +405,22 @@ class Brain:
 _LEVEL_PATTERNS = [
     r"(?:עליתי|הגעתי)\s+(?:ל|ללבל|לרמה)\s*-?\s*(\d{1,3})",
     r"(?:אני|עכשיו)\s+(?:ב)?(?:לבל|רמה)\s*(\d{1,3})",
-    r"(?:i'?m|i am|now|reached|hit)\s+(?:level|lvl|lv\.?)\s*(\d{1,3})",
+    # "now" only right after "I'm" ("now lv 30 quests?" asks about level 30), "hit" only as news ("just hit lvl 70",
+    # not "how long to hit level 30?" or "monsters that hit level 20 players hard")
+    r"(?:i'?m|i am)(?:\s+now)?\s+(?:level|lvl|lv\.?)\s*(\d{1,3})",
+    r"(?:reached|(?:just|finally)\s+hit)\s+(?:level|lvl|lv\.?)\s*(\d{1,3})",
 ]
 
 
+# a plan, not a fact; Hebrew words at a word start only ("עכשיו" contains "כש")
+_HYPOTHETICAL = re.compile(r"\b(?:when|once|if|until|after|before)\b|(?:^|\s)(?:כש|אם\s|עד\sש|אחרי\sש|לפני\sש)", re.I)
+
+
 def stated_level(text: str) -> int | None:
-    """A level the player states about themselves ("עליתי ללבל 16", "I'm level 16")."""
+    """A level the player states about themselves ("עליתי ללבל 16", "I'm level 16"); never a plan ("what should
+    I do once I'm level 30?" once set the profile to 30)."""
+    if _HYPOTHETICAL.search(text):
+        return None
     for pat in _LEVEL_PATTERNS:
         m = re.search(pat, text, re.I)
         if m and 1 <= int(m.group(1)) <= 250:

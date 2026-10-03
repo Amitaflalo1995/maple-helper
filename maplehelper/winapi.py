@@ -55,6 +55,8 @@ def find_game_window() -> int | None:
         return True
 
     user32.EnumWindows(EnumWindowsProc(cb), 0)
+    # the game itself before a browser tab / Discord / folder that merely mentions it ("MapleStory - Google Chrome")
+    found.sort(key=lambda h: (_title(h) not in GAME_TITLES, any(s in _title(h) for s in (" - ", " | ", " — "))))
     return found[0] if found else None
 
 
@@ -70,7 +72,7 @@ def window_rect(hwnd) -> tuple[int, int, int, int] | None:
 
 
 def capture_game(hwnd: int | None = None) -> bytes | None:
-    """JPEG of the game window (longest side 1280px), or None if the game isn't found."""
+    """JPEG of the game window (longest side capture.MAX_SIDE), or None if the game isn't found."""
     hwnd = hwnd or find_game_window()
     if not hwnd:
         return None

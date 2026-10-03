@@ -17,6 +17,11 @@ STATS = {"Beginner": ("STR", "DEX"), "Warrior": ("STR", "DEX"), "Magician": ("IN
          "Bowman": ("DEX", "STR"), "Thief": ("LUK", "DEX")}
 JOB_SOON = 2          # levels before an advancement when the tip appears
 MAP_TOO_EASY = 8      # the map's monsters this many levels below the player: suggest moving on
+# a new character stays on Maple Island until about level 8, then takes the boat to Lith Harbor
+# (pages/guide/beginners-guide-first-steps-in-maple-world.md: "By the time you finish all the beginner quests on
+# Maple Island, you'll likely be lv 8. That's when you take the boat ... to Lith Harbor")
+LEAVE_ISLAND = 8
+ISLAND_REGION = "Maple Road"      # Maple Island's maps: "Location Maple Road / Maple Island" (pages/map/*.md)
 
 
 @dataclass
@@ -107,13 +112,36 @@ def monster_exp(kb, name: str) -> int | None:
     return exp if isinstance(exp, (int, float)) and exp > 0 else None
 
 
+def island_monster(kb, level: int) -> tuple[str, int] | None:
+    """(name, EXP) of the best Maple Island monster for this level: the strongest one that lives only on the
+    island (its maps are all in ISLAND_REGION) and is at most 2 levels above the player."""
+    from .combat import special_monster
+    top = getattr(kb, "_top_maps", None)
+    best = None
+    for k, e in kb.entities.items():
+        p = e.get("props") or {}
+        lv, exp = p.get("Level"), p.get("EXP")
+        if e.get("category") != "monster" or not isinstance(lv, (int, float)) or not isinstance(exp, (int, float)) \
+                or exp <= 0 or lv > level + 2 or special_monster(e["name"]):
+            continue
+        maps = top(k) if top else []
+        if maps and all(m.endswith(" " + ISLAND_REGION) for m in maps) and (best is None or (lv, exp) > best[0]):
+            best = ((lv, exp), e["name"], int(exp))
+    return (best[1], best[2]) if best else None
+
+
 def progress(kb, level: int, exp_pct: float | None) -> dict | None:
-    """EXP left to the next level and how many of the bracket's main monster that is."""
+    """EXP left to the next level and how many of the bracket's main monster that is (on Maple Island, an island
+    monster: the grind guide's level 1-10 maps are on Victoria Island)."""
     need = exp_table(kb).get(level)
     if not need or exp_pct is None:
         return None
     left = max(0, round(need * (1 - exp_pct / 100)))
     out = {"pct": exp_pct, "need": need, "left": left}
+    island = island_monster(kb, level) if level < LEAVE_ISLAND else None
+    if island:
+        out.update(mob=island[0], kills=-(-left // island[1]))
+        return out
     spot = (spots_for(kb, level, 1) or [None])[0]
     if spot:
         mexp = monster_exp(kb, spot.mob)
@@ -123,22 +151,31 @@ def progress(kb, level: int, exp_pct: float | None) -> dict | None:
 
 
 def next_job(base_class: str, job: str, level: int) -> tuple[list[str], int] | None:
-    """The next advancement: (job names to choose from, level), or None at the end of the tree."""
-    from .ui.dialogs import JOBS
+    """The next advancement: (job names to choose from, level), or None at the end of the tree
+    (the end of what's open: 3rd job isn't out yet, jobs.MAX_JOB_TIER)."""
+    from .jobs import JOBS, tier_levels
     tree = JOBS.get(base_class, [])
     if base_class == "Beginner":
-        return (["Warrior", "Magician", "Bowman", "Thief"], 10) if level < 10 else None   # Magician from 8
+        lv = min(jobs[1][1] for c, jobs in JOBS.items() if c != "Beginner")    # level 10 for every class
+        return ([c for c in JOBS if c != "Beginner"], lv) if level < lv else None
     current = next((lv for j, lv in tree if j == job), 0)
-    later = sorted({lv for _, lv in tree if lv > current})
+    later = [lv for lv in tier_levels(base_class) if lv > current]
     if not later:
         return None
     lv = later[0]
     return [j for j, need in tree if need == lv], lv
 
 
+# a 3rd job's own 2nd job: its guide is the closest one there is (the class guide stops at 1st-job tables)
+JOB_BEFORE = {"Crusader": "Fighter", "White Knight": "Page", "Dragon Knight": "Spearman",
+              "F/P Mage": "F/P Wizard", "I/L Mage": "I/L Wizard", "Priest": "Cleric",
+              "Ranger": "Hunter", "Sniper": "Crossbowman", "Hermit": "Assassin", "Chief Bandit": "Bandit"}
+
+
 def class_guide(kb, base_class: str, job: str) -> str | None:
-    """The KB guide for the player's job ("F/P Wizard" -> guide/fp-wizard-class-guide), else for the class."""
-    for name in (job, base_class):
+    """The KB guide for the player's job ("F/P Wizard" -> guide/fp-wizard-class-guide), else for the job it
+    came from (Crusader -> Fighter), else for the class."""
+    for name in filter(None, (job, JOB_BEFORE.get(job), base_class)):
         key = "guide/" + re.sub(r"[^a-z0-9]+", "-", name.lower().replace("/", "")).strip("-") + "-class-guide"
         if kb.get(key):
             return key

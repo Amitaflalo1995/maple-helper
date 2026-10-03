@@ -26,6 +26,7 @@ class ExpBar(QFrame):
         self.bar.setFixedHeight(6)
         col.addWidget(self.bar)
         self.text = QLabel(objectName="ExpText")
+        self.text.setWordWrap(True)     # one long line here used to set the chat's narrowest width
         col.addWidget(self.text)
 
     def show_progress(self, p: dict | None, t, rtl: bool):

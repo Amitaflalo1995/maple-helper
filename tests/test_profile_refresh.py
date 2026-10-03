@@ -54,8 +54,9 @@ def test_refresh_releases_busy_state(result, isolated_store, kb, monkeypatch):
             brain.ask.assert_not_called()
             win.add_system.assert_called_once()
     finally:
+        from shiboken6 import isValid
         thread = getattr(win, "_sync_thread", None)
-        if thread is not None:
+        if thread is not None and isValid(thread):    # a finished refresh deletes its thread
             thread.quit()
             thread.wait(3000)
         win.bubble.close()

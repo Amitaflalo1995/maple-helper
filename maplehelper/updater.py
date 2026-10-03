@@ -6,10 +6,13 @@ The zip is unpacked into %APPDATA%/MapleHelper/kb, which then wins over the bund
 from __future__ import annotations
 
 import hashlib
-import re
+import http.client
 import io
+import re
+import sys
 import json
 import shutil
+import time
 import urllib.error
 import urllib.request
 import zipfile
@@ -47,28 +50,47 @@ def _get(url: str, timeout: int = 30) -> bytes | None:
         req = urllib.request.Request(url, headers={"User-Agent": "MapleHelper"})
         with urllib.request.urlopen(req, timeout=timeout) as r:
             return r.read()
-    except (urllib.error.URLError, TimeoutError, ValueError):
+    except (urllib.error.URLError, http.client.HTTPException, TimeoutError, ValueError, OSError):
         return None
 
 
-def update_kb() -> bool:
+def _rename(src, dst, tries: int = 10) -> None:
+    """A rename that waits out an antivirus scanning the freshly unpacked files."""
+    import time
+    for attempt in range(tries):
+        try:
+            src.rename(dst)
+            return
+        except OSError:
+            if attempt == tries - 1:
+                raise
+            time.sleep(0.3)
+
+
+def update_kb(before_swap=None) -> bool:
     """Download a newer knowledge base if one is published. Returns True when updated."""
+    return fetch_kb(before_swap) == "updated"
+
+
+def fetch_kb(before_swap=None) -> str:
+    """"updated", "uptodate", "postponed" or "failed". before_swap() runs right before the folders are swapped (the app
+    stops the AI process working inside the KB there); returning False postpones the update."""
     if not MANIFEST_URL:
-        return False
+        return "uptodate"
     raw = _get(MANIFEST_URL, timeout=15)
     if not raw:
-        return False
+        return "failed"
     try:
         manifest = json.loads(raw)
     except json.JSONDecodeError:
-        return False
+        return "failed"
     if not isinstance(manifest, dict) or not manifest.get("url"):
-        return False
+        return "failed"
     if str(manifest.get("version", "")) <= local_version():
-        return False
+        return "uptodate"
     data = _get(manifest["url"], timeout=300)
     if not data or hashlib.sha256(data).hexdigest() != manifest.get("sha256"):
-        return False
+        return "failed"
     tmp = USER_KB.with_name("kb.new")
     shutil.rmtree(tmp, ignore_errors=True)
     try:
@@ -76,29 +98,41 @@ def update_kb() -> bool:
             z.extractall(tmp)
     except zipfile.BadZipFile:
         shutil.rmtree(tmp, ignore_errors=True)
-        return False
-    if not (tmp / "index.json").exists():
+        return "failed"
+    try:
+        # it must load, not just exist: a bad release would otherwise stop every start
+        index = json.loads((tmp / "index.json").read_text(encoding="utf-8"))
+        if not (isinstance(index, list) and index and all(isinstance(e, dict) and e.get("key") and e.get("category")
+                                                         for e in index)):
+            raise ValueError("index.json has no usable entries")
+    except (OSError, ValueError):
         shutil.rmtree(tmp, ignore_errors=True)
-        return False
+        return "failed"
     meta_path = tmp / "meta.json"
     meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
     meta["version"] = manifest["version"]
     meta_path.write_text(json.dumps(meta, indent=1), encoding="utf-8")
     # swap by renames: on Windows a folder another process works in (the AI runs inside the KB)
     # can't be removed or renamed; then keep the current KB intact and try again next time
+    if before_swap is not None and before_swap() is False:
+        shutil.rmtree(tmp, ignore_errors=True)
+        return "postponed"            # an answer is running: the 3-hourly check tries again
     old = USER_KB.with_name("kb.old")
     shutil.rmtree(old, ignore_errors=True)
     try:
         if USER_KB.exists():
-            USER_KB.rename(old)
-        tmp.rename(USER_KB)
+            _rename(USER_KB, old)
+        _rename(tmp, USER_KB)
     except OSError:
         if old.exists() and not USER_KB.exists():
-            old.rename(USER_KB)
+            try:
+                _rename(old, USER_KB)
+            except OSError:
+                pass        # the app falls back to the bundled KB (kb_dir) on its next reload
         shutil.rmtree(tmp, ignore_errors=True)
-        return False
+        return "failed"
     shutil.rmtree(old, ignore_errors=True)
-    return True
+    return "updated"
 
 
 # ---------------------------------------------------------------- app updates
@@ -108,7 +142,18 @@ SUMS_ASSET = "SHA256SUMS.txt"     # "<sha256>  <file name>" lines, published wit
 
 
 def _version_tuple(v: str) -> tuple[int, ...]:
-    return tuple(int(x) for x in re.findall(r"\d+", v)[:3]) or (0,)
+    """'1.0' and '1.0.0' compare equal (padded to three parts)."""
+    parts = [int(x) for x in re.findall(r"\d+", v)[:3]]
+    return tuple(parts + [0] * (3 - len(parts)))
+
+
+def installed_copy() -> bool:
+    """Run from an installed copy (its uninstaller next to it), not the portable zip: only that one self-updates.
+    A portable copy updating itself installed a second copy elsewhere and kept re-downloading (found in testing)."""
+    if not getattr(sys, "frozen", False):
+        return False
+    from pathlib import Path
+    return (Path(sys.executable).parent / "unins000.exe").exists()
 
 
 def _asset(rel: dict, name: str) -> dict | None:
@@ -163,7 +208,7 @@ def _download(url: str, progress=None, timeout: int = 600) -> bytes | None:
                 if progress:
                     progress(done, total)
             return b"".join(chunks)
-    except (urllib.error.URLError, TimeoutError, ValueError, OSError):
+    except (urllib.error.URLError, http.client.HTTPException, TimeoutError, ValueError, OSError):
         return None
 
 
@@ -181,13 +226,20 @@ def download_app_update(current: str, progress=None) -> str | None:
     want = _published_sha256(rel, SETUP_ASSET) if asset else None
     if not want:
         return None
+    path = USER_KB.parent / "updates" / f"MapleHelper-Setup-{rel['tag_name']}.exe"
+    try:
+        if path.exists() and hashlib.sha256(path.read_bytes()).hexdigest() == want:
+            return str(path)       # downloaded before (an update skipped at shutdown): no second download
+    except OSError:
+        pass
     url = asset["browser_download_url"]
     data = _download(url, progress) if progress else _get(url, timeout=600)
     if not data or hashlib.sha256(data).hexdigest() != want:
         return None
-    path = USER_KB.parent / "updates" / f"MapleHelper-Setup-{rel['tag_name']}.exe"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(data)
+    part = path.with_suffix(".part")
+    part.write_bytes(data)
+    part.replace(path)          # whole or not at all: a cut write never looks like a ready installer
     return str(path)
 
 
@@ -212,15 +264,34 @@ def installer_version(path: str) -> str:
 def installer_args(path: str, reopen: bool, lang: str = "he") -> list[str]:
     # the installer starts the app again when done: in the tray after a quiet update on quit,
     # with the chat open when the player pressed "Update now" (see [Run] in packaging/installer.iss)
-    log = USER_KB.parent / "logs" / "update.log"          # why an update failed, if it ever does
+    # why an update failed, if it ever does: one log per run (Inno overwrites its log), the last few kept
+    logs = USER_KB.parent / "logs"
+    for old in sorted(logs.glob("update-*.log"))[:-2] if logs.exists() else []:
+        try:
+            old.unlink()
+        except OSError:
+            pass
+    log = logs / f"update-{time.strftime('%Y%m%d-%H%M%S')}.log"
     # "Update now": /SILENT shows the installer's own progress window while the app is closed, so the
     # player sees the update happen; an update on quit stays fully quiet (/VERYSILENT)
-    args = [path, "/SILENT" if reopen else "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", f"/LOG={log}",
+    # "Update now" keeps Inno's message boxes: a file held by an antivirus scan then offers Retry, where a
+    # suppressed box answers Abort and leaves a half-replaced install
+    args = [path, "/SILENT" if reopen else "/VERYSILENT", *([] if reopen else ["/SUPPRESSMSGBOXES"]),
+            "/NORESTART", f"/LOG={log}",
             # the installer's window in the app's language, not Windows' ([Languages] in installer.iss)
             "/LANG=" + ("english" if lang == "en" else "hebrew")]
     if reopen:
         args.append("/LAUNCHARGS=--updated")
     return args
+
+
+def windows_shutting_down() -> bool:
+    """Windows is shutting down or signing out: an installer started now would be killed halfway."""
+    if sys.platform != "win32":
+        return False
+    import ctypes
+    SM_SHUTTINGDOWN = 0x2000
+    return bool(ctypes.windll.user32.GetSystemMetrics(SM_SHUTTINGDOWN))
 
 
 def run_installer_silently(path: str, reopen: bool = False, lang: str = "he") -> None:

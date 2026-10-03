@@ -10,14 +10,14 @@ import time
 
 from PySide6.QtCore import QEvent, QPoint, QSize, Qt, QTimer, QUrl, Signal
 from PySide6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
-from PySide6.QtWidgets import (QButtonGroup, QCompleter, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
-                               QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QButtonGroup, QCompleter, QFrame, QGraphicsOpacityEffect, QGridLayout, QHBoxLayout,
+                               QLabel, QLineEdit, QPushButton, QScrollArea, QStackedWidget, QTextBrowser, QVBoxLayout, QWidget)
 
 from .. import bidi, buildplan, combat, crafting, glossary, guides, market, plan, quests
 from ..i18n import I18n
 from . import terms, theme
-from .controls import Section, Segmented, Stepper, rtl_buttons
-from .glass import GlassDialog
+from .controls import FlowLayout, Section, Segmented, Stepper, WrapLink, rtl_buttons
+from .glass import GlassDialog, no_default_buttons
 
 PAGES = ("train", "calc", "build", "quests", "crafting", "town", "prices", "exp", "more")
 MAX_QUESTS = 40
@@ -54,6 +54,28 @@ def scroll_page() -> tuple[QScrollArea, QVBoxLayout]:
 
 
 NAME_ROLE = Qt.UserRole + 1
+PATH_ROLE = Qt.UserRole + 2
+
+
+class _LazyIcons(QStandardItemModel):
+    """Pictures loaded when the list first shows their row: scaling ~3,000 item pictures up front took half a
+    second of the Tools window's opening."""
+
+    def __init__(self, parent, size: int):
+        super().__init__(parent)
+        self._size = size
+        self._icons: dict[str, QIcon] = {}
+
+    def data(self, index, role=Qt.DisplayRole):
+        if role == Qt.DecorationRole:
+            path = super().data(index, PATH_ROLE)
+            if not path:
+                return None
+            if path not in self._icons:
+                pm = QPixmap(path)
+                self._icons[path] = QIcon(pm.scaled(self._size, self._size, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            return self._icons[path]
+        return super().data(index, role)
 
 
 class EntityPicker(QLineEdit):
@@ -65,15 +87,15 @@ class EntityPicker(QLineEdit):
         super().__init__()
         self.setPlaceholderText(placeholder)
         self.setClearButtonEnabled(True)
-        model = QStandardItemModel(self)
+        model = _LazyIcons(self, icon)
         for shown, name, path in rows:
             item = QStandardItem(shown)
             item.setData(name, NAME_ROLE)
             if path:
-                item.setIcon(QIcon(QPixmap(str(path)).scaled(icon, icon, Qt.KeepAspectRatio, Qt.SmoothTransformation)))
+                item.setData(str(path), PATH_ROLE)      # the picture itself: when its row is first shown
             item.setEditable(False)
             model.appendRow(item)
-        comp = QCompleter(model, self)
+        comp = QCompleter(self)
         comp.setCompletionRole(NAME_ROLE)
         comp.setCaseSensitivity(Qt.CaseInsensitive)
         comp.setFilterMode(Qt.MatchContains)
@@ -81,6 +103,9 @@ class EntityPicker(QLineEdit):
         comp.popup().setIconSize(QSize(icon, icon))
         comp.popup().setTextElideMode(Qt.ElideNone)       # long map names stay whole (two lines, see map_rows)
         comp.popup().setWordWrap(True)
+        # every row's height from the first one: otherwise the list measures (and loads the picture of) all
+        # ~2,500 rows before it shows nine
+        comp.popup().setUniformItemSizes(True)
         c = theme.P()
         bg = "#2C2C2E" if theme.MODE == "dark" else "#FFFFFF"
         comp.popup().setStyleSheet(
@@ -88,6 +113,7 @@ class EntityPicker(QLineEdit):
             f" padding: 4px; outline: none; }}"
             f"QListView::item {{ padding: 4px 6px; border-radius: 8px; color: {c['text']}; }}"
             f"QListView::item:selected, QListView::item:hover {{ background: rgba(255,149,51,0.22); color: {c['text']}; }}")
+        comp.setModel(model)          # after the style: polishing a full list measured every row
         comp.activated.connect(lambda *_: QTimer.singleShot(0, self._chosen))
         self.setCompleter(comp)
         self.returnPressed.connect(self.picked.emit)
@@ -184,6 +210,7 @@ class ToolsDialog(GlassDialog):
     sync_requested = Signal()                 # read level/EXP/stats from a screenshot (the chat does it)
     market_ready = Signal(object)             # (item name, Market or None) from the background lookup
     ask_requested = Signal(str, bool)          # question for the chat, with a fresh screenshot?
+    detail_ask_requested = Signal(str, str)    # ...with a full-resolution screenshot (inventory icons); bubble label
     tag_requested = Signal(str)                # tag an entity (monster, quest) in the chat
     guide_requested = Signal(str)              # open a guide in the guides window
 
@@ -192,7 +219,7 @@ class ToolsDialog(GlassDialog):
         super().__init__(t("tools"), t.rtl)
         self.kb, self.profiles, self.settings, self.meter = kb, profiles, settings, exp_meter
         self.setStyleSheet(stylesheet)
-        self.resize(580, 800)
+        self.fit_screen(580, 800)
         rtl = t.rtl
         outer = QVBoxLayout(self.content)
         outer.setContentsMargins(0, 0, 0, 0)
@@ -219,6 +246,8 @@ class ToolsDialog(GlassDialog):
             self.pages[name] = w
             self.stack.addWidget(w)
         rtl_buttons(self, rtl)
+        # Enter in a search box runs that tab's search, never "click the first tab" (Where to train)
+        no_default_buttons(self)
         self.show_page(PAGES.index(page) if page in PAGES else 0)
 
     # common -------------------------------------------------------------
@@ -253,16 +282,29 @@ class ToolsDialog(GlassDialog):
                 self._set(self.exp_status, self.t("exp_failed"))
         self.refresh()
 
+    def _step_aside(self, then) -> None:
+        """Out of the screenshot, then `then()` (the chat captures ~120 ms later), back after 1.5 s. Hidden, not
+        see-through: a window at opacity 0 still left traces over the inventory slots (a fake item, seen live)."""
+        self.hide()
+        QTimer.singleShot(450, then)      # after Windows' own fade-out of the hidden window (~250 ms)
+        QTimer.singleShot(1500, self._come_back)
+
+    def _come_back(self):
+        try:
+            self.show()
+            self.raise_()
+        except RuntimeError:      # closed meanwhile
+            pass
+
     def _read_screen(self):
         """The chat reads the game from a screenshot; this window steps aside so it isn't in the picture."""
-        self.setWindowOpacity(0.0)
-        self.sync_requested.emit()
-        QTimer.singleShot(1500, lambda: self.setWindowOpacity(1.0))
+        self._step_aside(self.sync_requested.emit)
 
     def _p(self, text: str) -> str:
         return bidi.plain(text, self.t.rtl)
 
-    def _html(self, text: str) -> str:
+    def _html(self, text: str, seen: set | None = None) -> str:
+        """seen: the terms already explained in this view (one "?" per term on a page, not one per label)."""
         d = "rtl" if self.t.rtl else "ltr"
         out = []
         for line in (text or "").split("\n"):
@@ -270,16 +312,16 @@ class ToolsDialog(GlassDialog):
                 out.append("<p style='margin:0; font-size:5px;'>&nbsp;</p>")
                 continue
             out.append(bidi.paragraph_html(line, d).replace("margin:0 0 4px 0;", "margin:0 0 3px 0; line-height:135%;"))
-        return glossary.annotate("".join(out), self.t.lang)
+        return glossary.annotate("".join(out), self.t.lang, seen=seen)
 
-    def _set(self, label: QLabel, text: str):
-        label.setText(self._html(text))
+    def _set(self, label: QLabel, text: str, seen: set | None = None):
+        label.setText(self._html(text, seen))
 
-    def _label(self, text: str, obj: str = "RowLabel", wrap: bool = True) -> QLabel:
+    def _label(self, text: str, obj: str = "RowLabel", wrap: bool = True, seen: set | None = None) -> QLabel:
         lb = QLabel(objectName=obj)
         lb.setTextFormat(Qt.RichText)
         lb.setWordWrap(wrap)
-        self._set(lb, text)
+        self._set(lb, text, seen)
         return terms.watch(lb, self.t.lang)
 
     def _row(self, sec: Section, label: str, control: QWidget | None = None, hint: str = "") -> QWidget:
@@ -322,10 +364,13 @@ class ToolsDialog(GlassDialog):
             steppers[key] = st
         self.__dict__.setdefault("_steppers", []).append(steppers)
         sec.add_widget(self._label(t("my_stats_hint"), "RowHint"))
-        read = QPushButton(self._p(t("my_stats_read")), objectName="Link")
-        read.setCursor(Qt.PointingHandCursor)
+        read = WrapLink(t("my_stats_read"), t.rtl)          # a long link wraps instead of widening the window
         read.clicked.connect(self._read_screen)
-        sec.add_widget(read)
+        box = QWidget()
+        bl = QVBoxLayout(box)
+        bl.setContentsMargins(0, 8, 0, 8)
+        bl.addWidget(read)
+        sec.add_widget(box)
         return sec
 
     def _load_stats(self):
@@ -348,8 +393,8 @@ class ToolsDialog(GlassDialog):
     def _stats(self):
         s = (self.c.stats if self.c else {}) or {}
         acc = s.get("acc") or None
-        dmg = (s.get("dmg_min") or 0, s.get("dmg_max") or 0)
-        return acc, (dmg if dmg[0] > 0 else None)
+        # typed by hand: min above max is swapped, a max of 0 taken as the min (never a range like 200-10)
+        return acc, combat.damage_range(s.get("dmg_min"), s.get("dmg_max"))
 
     # where to train --------------------------------------------------------
 
@@ -383,10 +428,18 @@ class ToolsDialog(GlassDialog):
         head = " · ".join(bits)
         if not (acc and dmg):
             head += "\n" + t("train_need_stats")
+        elif magic:
+            head += "\n" + t("train_mage_note")       # the stat window's range is the staff swing, not a spell
+        else:
+            head += "\n" + t("train_basic_note")
         self._set(self.train_head, head)
         if not rows:
             self.train_list.addWidget(self._label(t("train_none"), "RowHint"))
             return
+        if not any(s.fits for s in rows):
+            # nothing passes the miss / hits limits: still the best options, with why they're shown
+            # (a Magician's hits are spells: "too many basic hits" and "skills make it faster" don't apply)
+            self.train_list.addWidget(self._label(t("train_stretch_magician" if magic else "train_stretch"), "RowHint"))
         for i, s in enumerate(rows):
             self.train_list.addWidget(self._spot_card(s, best=(i == 0)))
 
@@ -407,13 +460,15 @@ class ToolsDialog(GlassDialog):
         row.addWidget(pic, 0, Qt.AlignTop)
         col = QVBoxLayout()
         col.setSpacing(3)
-        name = QLabel(self._p(f"{m.name} · {t('lv_short', n=m.level)}"), objectName="CardName")
+        # "Name · Lv. N" as one English block, the same order as the wishlist's monsters (in Hebrew too)
+        name = QLabel(bidi.ltr_name(f"{m.name} · Lv. {m.level}", t.rtl), objectName="CardName")
+        name.setWordWrap(True)
         col.addWidget(name)
-        col.addWidget(self._label(s.map, "CardSub"))
-        # two short rows of tags: why it's picked, then the numbers (one long row pushed the card wider)
-        why, nums = QHBoxLayout(), QHBoxLayout()
-        for line in (why, nums):
-            line.setSpacing(5)
+        # "… IV · Victoria Road", one English block (run by run, a Hebrew line put the region first)
+        col.addWidget(self._label(bidi.ltr_block(self.kb.map_label(s.map), self.t.rtl), "CardSub"))
+        # two groups of tags: why it's picked, then the numbers; each wraps when the window is narrow
+        # (one long row pushed the card, and the window, wider than 470 px)
+        why, nums = FlowLayout(spacing=5), FlowLayout(spacing=5)
         if best:
             why.addWidget(tag(self._p(t("spot_best")), "TagAccent"))
         if s.recommended:
@@ -426,7 +481,6 @@ class ToolsDialog(GlassDialog):
         nums.addWidget(tag(self._p(t("spot_crowd", n=m.maps[0][1])), "Tag"))
         for line in (why, nums):
             if line.count():
-                line.addStretch(1)
                 col.addLayout(line)
         info = []
         if s.hit < 0.999 and self._stats()[0]:
@@ -437,10 +491,12 @@ class ToolsDialog(GlassDialog):
         if info:
             col.addWidget(self._label("\n".join(info), "CardSub"))
         row.addLayout(col, 1)
+        # its own row under the tags, at the reading start: beside them it took the room the tags needed
         ask = QPushButton(self._p(t("ask_short")), objectName="Link")
         ask.setCursor(Qt.PointingHandCursor)
+        ask.setAutoDefault(False)
         ask.clicked.connect(lambda _=False, k=m.key: self.tag_requested.emit(k))
-        row.addWidget(ask, 0, Qt.AlignVCenter)
+        col.addWidget(ask, 0, Qt.AlignLeft)          # AlignLeft is the leading edge (mirrored in Hebrew)
         return card
 
     # calculator ----------------------------------------------------------
@@ -480,14 +536,16 @@ class ToolsDialog(GlassDialog):
             return
         m = self._calc_monster()
         if not m:
-            self.calc_box.addWidget(self._label(t("calc_none"), "RowHint"))
+            # nothing typed (and no monster near the level) isn't "no monster by that name"
+            typed = self.calc_input.text().strip()
+            self.calc_box.addWidget(self._label(t("calc_none") if typed else t("calc_pick"), "RowHint"))
             return
         acc, dmg = self._stats()
         magic = c.base_class == combat.MAGE
-        sec = Section(f"{m.name} · {t('lv_short', n=m.level)}", t.rtl)
+        sec = Section(bidi.ltr_block(f"{m.name} · Lv. {m.level}", t.rtl), t.rtl)
         nums = QHBoxLayout()
-        for value, label in ((f"{m.hp:,}", "HP"), (f"{m.exp:,}", "EXP"), (str(m.avoid), "Avoid"),
-                             (str(m.mdef if magic else m.pdef), "M.DEF" if magic else "P.DEF")):
+        # P.DEF for every class: the hits below are the stat window's basic attack, a Magician's staff swing too
+        for value, label in ((f"{m.hp:,}", "HP"), (f"{m.exp:,}", "EXP"), (str(m.avoid), "Avoid"), (str(m.pdef), "P.DEF")):
             nums.addLayout(self._big(value, label))
         holder = QWidget()
         holder.setLayout(nums)
@@ -509,8 +567,10 @@ class ToolsDialog(GlassDialog):
                 self._row(sec, t("calc_hit"), tag(f"{round(hit * 100)}%", "TagGood" if hit >= 0.999 else "TagWarn"),
                           hint=hint)
         if dmg:
-            hits, avg = combat.hits_to_kill(dmg[0], dmg[1], m, c.level, magic)
-            self._row(sec, t("calc_hits"), tag(str(hits), "Tag"), hint=t("calc_hits_avg", n=f"{avg:.1f}"))
+            # the stat window's range is a basic attack: for a Magician the staff swing, a physical hit (P.DEF)
+            hits, avg = combat.hits_to_kill(dmg[0], dmg[1], m, c.level)
+            hint = t("calc_hits_avg", n=f"{avg:.1f}") + "\n" + t("calc_hits_mage" if magic else "calc_hits_basic")
+            self._row(sec, t("calc_hits"), tag(str(hits), "Tag"), hint=hint)
         if not (acc and dmg):
             sec.add_widget(self._label(t("calc_need_stats"), "RowHint"))
         self.calc_box.addWidget(sec)
@@ -529,7 +589,8 @@ class ToolsDialog(GlassDialog):
         if m.maps:
             maps_sec = Section(t("calc_maps_head_plain"), t.rtl)
             for mp, n in m.maps[:3]:
-                self._row(maps_sec, mp, tag(self._p(t("spot_crowd", n=n)), "Tag"))
+                # one English block: "Tree Dungeon, Forest Up North IV" kept its comma in place
+                self._row(maps_sec, bidi.ltr_name(self.kb.map_label(mp), t.rtl), tag(self._p(t("spot_crowd", n=n)), "Tag"))
             self.calc_box.addWidget(maps_sec)
 
     # build ---------------------------------------------------------------
@@ -559,11 +620,13 @@ class ToolsDialog(GlassDialog):
         if not c:
             self._set(self.build_head, t("tool_no_char"))
             self.build_view.setHtml("")
+            self._build_key = None
+            self.build_guide_btn.hide()          # no character, no guide to open
             return
         key, tables = buildplan.tables(self.kb, c.base_class, c.job, c.level, t.lang)
         self._build_key = key
         self.build_guide_btn.setVisible(bool(key))
-        self._set(self.build_head, t("build_head", job=c.job or c.base_class, n=c.level))
+        self._set(self.build_head, t("build_head", job=c.job_label or c.base_class, n=c.level))
         if not tables:
             self.build_view.setHtml(f"<p>{t('build_none')}</p>")
             return
@@ -629,6 +692,12 @@ class ToolsDialog(GlassDialog):
         lay.addWidget(self.q_mode, 0, Qt.AlignHCenter)
         self.q_head = self._label("", "ToolHeader")
         lay.addWidget(self.q_head)
+        # "show done quests" right under the header: under a list of 50 it was out of reach
+        self.q_done_toggle = self._done_toggle()
+        lay.addWidget(self.q_done_toggle, 0, Qt.AlignHCenter)
+        self.q_done = QVBoxLayout()
+        self.q_done.setSpacing(8)
+        lay.addLayout(self.q_done)
         self.q_list = QVBoxLayout()
         self.q_list.setSpacing(8)
         lay.addLayout(self.q_list)
@@ -638,19 +707,23 @@ class ToolsDialog(GlassDialog):
     def _fill_quests(self):
         t, c = self.t, self.c
         clear(self.q_list)
+        clear(self.q_done)
         if not c:
             self.q_head.setText("")
+            self.q_done_toggle.hide()
             self._no_character(self.q_list)
             return
-        r = quests.for_level(self.kb, c.level, c.base_class, c.job, c.quests_done)
+        # profession quests follow the levels set on the crafting page; none set yet: shown, with their requirement
+        r = quests.for_level(self.kb, c.level, c.base_class, c.job, c.quests_done, crafts=c.crafts or None)
         mode = self.q_mode.value()
         rows = r[mode]
-        self._set(self.q_head, t(f"q_head_{mode}", n=len(rows), lv=c.level) +
-                  ("\n" + t("q_done_count", n=r["done"]) if r["done"] else ""))
+        # how many are marked done is on the toggle right under the header, not here again
+        self._set(self.q_head, t(f"q_head_{mode}", n=len(rows), lv=c.level))
         if not rows:
             self.q_list.addWidget(self._label(t("q_none"), "RowHint"))
         for q in rows[:MAX_QUESTS]:
             self.q_list.addWidget(self._quest_card(q))
+        self._add_done(self.q_done_toggle, self.q_done, list(c.quests_done))
 
     def _picture_uri(self, kind: str, name: str) -> str | None:
         """The KB picture of a monster / item / NPC by its name, as a file URI."""
@@ -668,10 +741,11 @@ class ToolsDialog(GlassDialog):
 
     def _thing_html(self, text: str) -> str:
         """ "Defeat Blue Snail x 10" / "Red Potion x 20" -> its picture, then the name (kept as one English block)."""
-        m = re.fullmatch(r"(Defeat |Collect )?(.+?) x ([\d,]+)", text.strip())
+        m = re.fullmatch(r"(Defeat |Collect )?(.+?) x ([\d,]+)( \([\d.]+%\))?", text.strip())
         if not m:
             return html.escape(text)
-        verb, name, n = m.groups()
+        verb, name, n, odds = m.groups()
+        n += odds or ""                 # a random reward keeps its odds: "Bronze Ore x7 (16.7%)"
         uri = self._picture_uri("monster" if verb == "Defeat " else "item", name) or \
             self._picture_uri("item" if verb == "Defeat " else "monster", name)
         img = f"<img src='{uri}' height='24' style='vertical-align: middle'>&nbsp;" if uri else ""
@@ -690,7 +764,7 @@ class ToolsDialog(GlassDialog):
         lb.setWordWrap(True)
         return lb
 
-    def _quest_card(self, q: quests.Quest) -> QFrame:
+    def _quest_card(self, q: quests.Quest, done: bool = False) -> QFrame:
         t = self.t
         card = QFrame(objectName="Card")
         outer = QHBoxLayout(card)
@@ -709,7 +783,8 @@ class ToolsDialog(GlassDialog):
         col.setSpacing(4)
         outer.addLayout(col, 1)
         top = QHBoxLayout()
-        name = QLabel(self._p(q.name), objectName="CardName")
+        # an English name is one block: "[Construction Site B1] Shumi's Lost Coin" keeps its brackets in place
+        name = QLabel(bidi.ltr_name(q.name, t.rtl), objectName="CardName")
         name.setWordWrap(True)
         top.addWidget(name, 1)
         top.addWidget(tag(self._p(t("lv_short", n=q.level)), "Tag"))
@@ -722,15 +797,38 @@ class ToolsDialog(GlassDialog):
         if q.needs:
             col.addWidget(self._things_label(t("q_needs_head"), q.needs[:4]))
         gets = q.rewards[:3]
-        if gets or q.mesos:
-            col.addWidget(self._things_label(t("q_gets_head"), gets, f"{q.mesos:,} mesos" if q.mesos else ""))
+        extra = " · ".join(x for x in (f"{q.mesos:,} mesos" if q.mesos else "", f"+{q.fame} Fame" if q.fame else "") if x)
+        if gets or extra:
+            col.addWidget(self._things_label(t("q_gets_head"), gets, extra))
+        # "Pick one (class-specific)": the player's own class's choices (and "Any Class"), not the first class listed
+        base = self.c.base_class if self.c else ""
+        for head, things in (("q_pick_head", q.rewards_pick(base)), ("q_random_head", q.rewards_random(base))):
+            if things:
+                shown = things[:4] + ([t("pn_more", n=len(things) - 4)] if len(things) > 4 else [])
+                col.addWidget(self._things_label(t(head), shown))
+        hints = []
         if q.after:
-            col.addWidget(self._label(t("q_after", name=q.after), "RowHint"))
+            hints.append(t("q_after", name=bidi.ltr_block(q.after, t.rtl)))
+        if q.complete_level > q.level:
+            hints.append(t("q_complete_lv", n=q.complete_level))
+        if q.grade:
+            hints.append(t("q_grade", town=q.grade[0], n=q.grade[1]))
+        if q.profession:
+            hints.append(t("q_profession", prof=q.profession[0], n=q.profession[1]))
+        if hints:
+            col.addWidget(self._label("\n".join(hints), "RowHint"))
         acts = QHBoxLayout()
-        done = QPushButton(self._p(t("q_mark_done")), objectName="Secondary")
-        done.setCursor(Qt.PointingHandCursor)
-        done.clicked.connect(lambda _=False, k=q.key: self._quest_done(k))
-        acts.addWidget(done)
+        acts.setSpacing(16)        # the link has no padding of its own: apart from the button, not glued to it
+        if done:
+            # marked done by mistake (or a repeatable donation to do again): back to the list
+            btn = QPushButton(self._p(t("q_undo")), objectName="Secondary")
+            btn.clicked.connect(lambda _=False, k=q.key: self._quest_undo(k))
+        else:
+            btn = QPushButton(self._p(t("q_mark_done")), objectName="Secondary")
+            btn.clicked.connect(lambda _=False, k=q.key: self._quest_done(k))
+        btn.setCursor(Qt.PointingHandCursor)
+        btn.setAutoDefault(False)
+        acts.addWidget(btn)
         ask = QPushButton(self._p(t("ask_short")), objectName="Link")
         ask.setCursor(Qt.PointingHandCursor)
         ask.clicked.connect(lambda _=False, k=q.key: self.tag_requested.emit(k))
@@ -744,7 +842,53 @@ class ToolsDialog(GlassDialog):
         if c and key not in c.quests_done:
             c.quests_done.append(key)
             self.profiles.save()
+        self._refresh_in_place()
+
+    def _quest_undo(self, key: str):
+        c = self.c
+        if c and key in c.quests_done:
+            c.quests_done.remove(key)
+            self.profiles.save()
+        self._refresh_in_place()
+
+    def _refresh_in_place(self):
+        """Redraw the page where the player is reading (the list is rebuilt: it jumped to its end, seen live)."""
+        from PySide6.QtWidgets import QScrollArea
+        page = self.stack.currentWidget()
+        bar = page.verticalScrollBar() if isinstance(page, QScrollArea) else None
+        at = bar.value() if bar else 0
         self.refresh()
+        if bar:
+            bar.setValue(at)
+            QTimer.singleShot(0, lambda: bar.setValue(at))      # again once the new cards have their size
+
+    def _done_toggle(self) -> QPushButton:
+        """The "show quests marked done (n)" toggle; open, _add_done lists those quests under it."""
+        b = QPushButton(objectName="Link")
+        b.setCheckable(True)
+        b.setCursor(Qt.PointingHandCursor)
+        b.setAutoDefault(False)
+        b.toggled.connect(lambda *_: self.refresh())
+        return b
+
+    def _add_done(self, toggle: QPushButton, layout: QVBoxLayout, keys: list[str]):
+        """The toggle's label (with how many are done), and when it's open the done quests (newest first) right
+        under the toggle: a small header, then muted cards, each with a way back to the list."""
+        t = self.t
+        toggle.setVisible(bool(keys))
+        toggle.setText(self._p(t("q_hide_done" if toggle.isChecked() else "q_show_done", n=len(keys))))
+        if not (keys and toggle.isChecked()):
+            return
+        cards = [self._quest_card(q, done=True) for k in reversed(keys[-MAX_QUESTS:]) if (q := quests.quest(self.kb, k))]
+        if not cards:
+            return
+        layout.addWidget(self._label(t("q_done_head"), "PlanHead"))
+        for card in cards:
+            fade = QGraphicsOpacityEffect(card)       # muted: done, not something to do
+            fade.setOpacity(0.6)
+            card.setGraphicsEffect(fade)
+            layout.addWidget(card)
+        layout.addSpacing(12)                         # apart from what follows (the quests to take)
 
     # crafting ------------------------------------------------------------
 
@@ -753,8 +897,7 @@ class ToolsDialog(GlassDialog):
         sc, lay = scroll_page()
         # the professions live inside this tab's own card, in a lighter style than the main tabs
         sec = Section(t("craft_profession"), t.rtl)
-        grid = QGridLayout()
-        grid.setSpacing(6)
+        grid = FlowLayout(spacing=6)            # wraps: three long names on one row were wider than the window
         self.craft_pick = QButtonGroup(self)
         for i, prof in enumerate(crafting.PROFESSIONS):
             b = QPushButton(crafting.NAMES[prof], objectName="SubChip")
@@ -762,7 +905,7 @@ class ToolsDialog(GlassDialog):
             b.setCursor(Qt.PointingHandCursor)
             b.setProperty("prof", prof)
             self.craft_pick.addButton(b, i)
-            grid.addWidget(b, i // 3, i % 3)
+            grid.addWidget(b)
         self.craft_pick.button(0).setChecked(True)
         self.craft_pick.idClicked.connect(lambda *_: self._fill_crafting())
         holder = QWidget()
@@ -804,18 +947,20 @@ class ToolsDialog(GlassDialog):
         top = crafting.max_level(self.kb, prof)
         lv = int((c.crafts or {}).get(prof, 1))
         self.craft_level.blockSignals(True)
-        self.craft_level.hi = top
+        self.craft_level.setMaximum(top)          # the + button and the typed-value check follow the new top
         self.craft_level.setValue(min(lv, top))
         self.craft_level.blockSignals(False)
-        now, nxt = crafting.for_level(self.kb, prof, min(lv, top))
-        head = t("craft_head", prof=crafting.NAMES[prof], lv=lv, n=len(now.recipes) if now else 0)
+        _, nxt = crafting.for_level(self.kb, prof, min(lv, top))
+        # everything you can craft so far, not only what this exact level opened (newest first)
+        recipes = crafting.up_to(self.kb, prof, min(lv, top))
+        head = t("craft_head", prof=crafting.NAMES[prof], lv=lv, n=len(recipes))
         if nxt and nxt.needs_exp:
             head += "\n" + t("craft_next", lv=nxt.level, exp=f"{nxt.needs_exp:,}", char=nxt.char_level or "?")
         self._set(self.craft_head, head)
-        if not now or not now.recipes:
+        if not recipes:
             self.craft_list.addWidget(self._label(t("craft_none"), "RowHint"))
             return
-        for i, r in enumerate(now.recipes):
+        for i, r in enumerate(recipes):
             self.craft_list.addWidget(self._recipe_card(r, best=(i == 0)))
 
     def _craft_info_card(self, prof: str) -> QFrame:
@@ -870,13 +1015,12 @@ class ToolsDialog(GlassDialog):
         col.setSpacing(4)
         outer.addLayout(col, 1)
         col.addWidget(self._label(f"**{r.name}**", "CardName"))
-        why = QHBoxLayout()
-        why.setSpacing(5)
+        why = FlowLayout(spacing=5)               # the tags wrap at a narrow width
         if best:
             why.addWidget(tag(self._p(t("craft_best")), "TagAccent"))
+        why.addWidget(tag(self._p(t("craft_lv_tag", n=r.level)), "Tag"))     # the list spans several levels
         why.addWidget(tag(f"+{r.exp} EXP", "TagGood"))
         why.addWidget(tag(self._p(t("craft_cost", n=f"{r.catalyst:,}")), "Tag"))
-        why.addStretch(1)
         col.addLayout(why)
         col.addWidget(self._things_label(t("craft_needs"), [f"{name} x {n}" for n, name in r.ingredients]))
         net = t("craft_net_gain", n=f"{r.net:,}") if r.net >= 0 else t("craft_net_loss", n=f"{-r.net:,}")
@@ -902,6 +1046,11 @@ class ToolsDialog(GlassDialog):
         self.town_list = QVBoxLayout()
         self.town_list.setSpacing(8)
         lay.addLayout(self.town_list)
+        self.town_done_toggle = self._done_toggle()      # donations repeat: one marked done can come back
+        lay.addWidget(self.town_done_toggle, 0, Qt.AlignHCenter)
+        self.town_done = QVBoxLayout()
+        self.town_done.setSpacing(8)
+        lay.addLayout(self.town_done)
         lay.addStretch(1)
         return sc
 
@@ -915,6 +1064,8 @@ class ToolsDialog(GlassDialog):
     def _fill_town(self):
         t, c = self.t, self.c
         clear(self.town_list)
+        clear(self.town_done)
+        self.town_done_toggle.hide()
         if not c:
             self._no_character(self.town_list)
             return
@@ -925,7 +1076,7 @@ class ToolsDialog(GlassDialog):
             b.setChecked(b.property("value") == town or b.text() == town)
         self.town_pick.blockSignals(False)
         # the guide's advice, one sentence per line, the grades and towns in bold
-        lines = [t("town_recommended", town=rec, job=c.job or c.base_class)] if rec else []
+        lines = [t("town_recommended", town=rec, job=c.job_label or c.base_class)] if rec else []
         for para in paras[:2]:
             for sentence in re.split(r"(?<=[.!?])\s+", guides._ICON.sub("", para).strip()):
                 if sentence.strip():
@@ -940,13 +1091,18 @@ class ToolsDialog(GlassDialog):
             self.town_list.addWidget(self._label(t("q_none"), "RowHint"))
         for q in rows[:MAX_QUESTS]:
             self.town_list.addWidget(self._quest_card(q))
+        mine = [k for k in c.quests_done
+                if (q := quests.quest(self.kb, k)) and q.area == "Citizenship" and quests.town_of(self.kb, q) == town]
+        self._add_done(self.town_done_toggle, self.town_done, mine)
 
     # prices --------------------------------------------------------------
 
     def _page_prices(self):
         t = self.t
         sc, lay = scroll_page()
-        lay.addWidget(self._label(t("prices_intro"), "ToolHeader"))
+        # a term gets its "?" once on this page: in the intro, not again in the card, the market line and the hint
+        self._price_seen: set = set()
+        lay.addWidget(self._label(t("prices_intro"), "ToolHeader", seen=self._price_seen))
         rows = item_rows(self.kb)
         self.price_input = EntityPicker(rows, self._p(t("price_placeholder", n=f"{len(rows):,}")), icon=32)
         self.price_input.picked.connect(self._fill_prices)
@@ -954,7 +1110,7 @@ class ToolsDialog(GlassDialog):
         self.price_box = QVBoxLayout()
         self.price_box.setSpacing(12)
         lay.addLayout(self.price_box)
-        lay.addWidget(self._label(t("price_hint"), "RowHint"))
+        lay.addWidget(self._label(t("price_hint"), "RowHint", seen=set(self._price_seen)))
         lay.addStretch(1)
         self.market_ready.connect(self._on_market)
         return sc
@@ -964,6 +1120,13 @@ class ToolsDialog(GlassDialog):
         clear(self.price_box)
         name = self.price_input.text().strip()
         key = self.kb._item_by_name.get(name.lower()) if name else None
+        if name and not key:
+            # part of a name, like the damage calculator takes it ("Blue Pot" -> Blue Potion): the shortest match
+            q = name.lower()
+            part = sorted((n for n in self.kb._item_by_name if q in n), key=lambda n: (len(n), n))
+            if part:
+                key = self.kb._item_by_name[part[0]]
+                name = (self.kb.get(key) or {}).get("name", name)
         if not key:
             if name:
                 self.price_box.addWidget(self._label(t("price_none"), "RowHint"))
@@ -985,17 +1148,26 @@ class ToolsDialog(GlassDialog):
         col = QVBoxLayout()
         col.setSpacing(6)
         outer.addLayout(col, 1)
-        col.addWidget(self._label(f"**{name}**", "CardName"))
+        seen = self._card_seen = set(self._price_seen)
+        col.addWidget(self._label(f"**{name}**", "CardName", seen=seen))
         lines = []
         if npc.sell_back is not None:
             lines.append(t("price_npc_buys", n=f"{npc.sell_back:,}"))
-        if npc.shops:
-            cheapest = npc.shops[0]
-            lines.append(t("price_shop", n=f"{cheapest[2]:,}", npc=cheapest[0], where=cheapest[1].split(" · ")[-1]))
+        shops = [s for s in npc.shops if combat.released(s[1])]      # no El Nath / Orbis shop before they open
+        if shops:
+            cheapest = shops[0]
+            line = t("price_shop", n=f"{cheapest[2]:,}", npc=cheapest[0], where=cheapest[1].split(" · ")[-1])
+            rank = npc.ranks.get(cheapest[:2])        # a town shop's item for a citizen grade and up
+            lines.append(line + (" " + t("price_rank", rank=rank) if rank else ""))
+        # NPCs the page lists without a price still sell it: name them
+        unpriced = [s for s in npc.unpriced if combat.released(s[1])][:3]
+        if unpriced:
+            who = ", ".join(f"{n} ({w.split(' · ')[-1]})" for n, w in unpriced)
+            lines.append(t("price_sold_by_also" if shops else "price_sold_by", npcs=who))
         if not lines:
             lines.append(t("price_no_npc"))
-        col.addWidget(self._label("\n".join(lines), "RowLabel"))
-        self.fm_label = self._label(t("price_fm_loading"), "RowLabel")
+        col.addWidget(self._label("\n".join(lines), "RowLabel", seen=seen))
+        self.fm_label = self._label(t("price_fm_loading"), "RowLabel", seen=set(seen))
         col.addWidget(self.fm_label)
         web = QPushButton(self._p(t("price_open_site")), objectName="Link")
         web.setCursor(Qt.PointingHandCursor)
@@ -1018,7 +1190,7 @@ class ToolsDialog(GlassDialog):
         else:
             text = t("price_fm", median=f"{m.median:,}", n=m.count, low=f"{m.low:,}", high=f"{m.high:,}")
         try:
-            self._set(self.fm_label, text)
+            self._set(self.fm_label, text, set(getattr(self, "_card_seen", ())))
         except RuntimeError:
             pass                        # the card was redrawn meanwhile
 
@@ -1113,13 +1285,15 @@ class ToolsDialog(GlassDialog):
         self.exp_measure.setEnabled(bool(m.get("start")))
         if self.meter.get("pending"):
             return
-        if m.get("start") and not r:
+        if r:
+            self._set(self.exp_status, t("exp_result", n=r["minutes"]))
+        elif m.get("start") and m.get("end"):
+            # a check gave no rate: either no EXP really came in, or a reading is past the KB's EXP table (Lv. 100+)
+            known = all(plan.exp_position(self.kb, lv, pct) is not None for _, lv, pct in (m["start"], m["end"]))
+            self._set(self.exp_status, t("exp_no_gain") if known else t("exp_no_table"))
+        elif m.get("start"):
             mins = max(0, round((time.time() - m["start"][0]) / 60))
             self._set(self.exp_status, t("exp_started", n=mins, pct=f"{m['start'][2]:.1f}%"))
-        elif r:
-            self._set(self.exp_status, t("exp_result", n=r["minutes"]))
-        elif m.get("end"):
-            self._set(self.exp_status, t("exp_no_gain"))
         else:
             self._set(self.exp_status, t("exp_idle"))
 
@@ -1153,9 +1327,9 @@ class ToolsDialog(GlassDialog):
         return sc
 
     def _sell_check(self):
-        self.setWindowOpacity(0.0)           # the inventory must be in the screenshot, not this window
-        self.ask_requested.emit(self.t("sell_q"), True)
-        QTimer.singleShot(1500, lambda: self.setWindowOpacity(1.0))
+        # the inventory must be in the screenshot, not this window; the chat bubble says "Inventory check",
+        # not the nine lines of instructions the AI gets
+        self._step_aside(lambda: self.detail_ask_requested.emit(self.t("sell_q"), self.t("inv_check")))
 
     def _fill_more(self):
         c = self.c
@@ -1166,5 +1340,9 @@ class ToolsDialog(GlassDialog):
                 self.shop_map.setCursorPosition(0)     # show the start of the map name
 
     def _shopping(self):
-        where = self.shop_map.text().strip() or self.t("shop_here")
-        self.ask_requested.emit(self.t("shop_q", map=where, n=self.shop_len.value()), False)
+        where = self.shop_map.text().strip()
+        # no map picked: a sentence of its own ("grind at the place I train", not "at where I train")
+        q = self.t("shop_q", map=where, n=self.shop_len.value()) if where else self.t("shop_q_here", n=self.shop_len.value())
+        # with a fresh screenshot: the HUD shows max HP/MP as they are right now (and the potions already in the
+        # bag when the inventory is open), so the list fits the character at this moment (live feedback)
+        self._step_aside(lambda: self.ask_requested.emit(q, True))

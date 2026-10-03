@@ -89,10 +89,12 @@ if ($LASTEXITCODE -ne 0) { throw "Zipping failed" }
 if ($SkipInstaller) { Write-Host "== Skipping installer"; Get-ChildItem $Release | Format-Table Name, Length; return }
 $iscc = (Get-Command iscc.exe -ErrorAction SilentlyContinue).Source
 if (-not $iscc) {
-    $iscc = @("${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:ProgramFiles\Inno Setup 6\ISCC.exe",
-              "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe") | Where-Object { Test-Path $_ } | Select-Object -First 1
+    # any major version's folder ("Inno Setup 6", "Inno Setup 7")
+    $iscc = @("${env:ProgramFiles(x86)}", "$env:ProgramFiles", "$env:LOCALAPPDATA\Programs") |
+        ForEach-Object { Get-ChildItem "$_\Inno Setup *\ISCC.exe" -ErrorAction SilentlyContinue } |
+        Sort-Object FullName -Descending | Select-Object -First 1 -ExpandProperty FullName
 }
-if (-not $iscc) { throw "Inno Setup 6 not found. Install it (choco install innosetup) or pass -SkipInstaller." }
+if (-not $iscc) { throw "Inno Setup not found. Install it (choco install innosetup) or pass -SkipInstaller." }
 $isccArgs = @("/Q", "/DAppVersion=$Version")
 if ($FastInstaller) { $isccArgs += "/DCompression=lzma2/fast" }
 # lets an update skip the KB's ~8,000 files when the PC already has this KB (KbNeedsInstall in installer.iss)

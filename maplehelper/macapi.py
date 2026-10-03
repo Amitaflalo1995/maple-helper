@@ -100,7 +100,7 @@ def window_rect(window_id) -> tuple[int, int, int, int] | None:
 
 
 def capture_game(window_id: int | None = None) -> bytes | None:
-    """JPEG of the game window (longest side 1280px), or None if the game isn't found."""
+    """JPEG of the game window (longest side capture.MAX_SIDE), or None if the game isn't found."""
     window_id = window_id or find_game_window()
     if not window_id:
         return None

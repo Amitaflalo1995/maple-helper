@@ -7,27 +7,18 @@ import threading
 from PySide6.QtCore import QObject, Qt, QTimer, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,
-                               QScrollArea, QStackedWidget, QVBoxLayout, QWidget)
+                               QScrollArea, QSizePolicy, QStackedWidget, QToolButton, QVBoxLayout, QWidget)
 
 from .. import bidi, providers
 from ..providers.base import login_failed, stop_login
-from .controls import Section, Segmented, Select, Stepper, Switch, rtl_buttons
-from .glass import GlassDialog
+from .controls import AdaptiveRow, FlowLayout, Section, Segmented, Select, Stepper, Switch, rtl_buttons
+from .glass import GlassDialog, no_default_buttons
 from ..i18n import I18n
+from ..jobs import JOBS        # the job tree: base class -> [(job, min level)], checked against the KB
 from ..kb import KnowledgeBase
 from ..store import ASSETS, History, Profiles, Settings
 from . import theme
 
-# MapleStory Classic job tree: base class -> [(job, min level)]
-JOBS = {
-    "Beginner": [("Beginner", 1)],
-    "Warrior": [("Beginner", 1), ("Warrior", 10), ("Fighter", 30), ("Page", 30), ("Spearman", 30),
-                ("Crusader", 70), ("White Knight", 70), ("Dragon Knight", 70)],
-    "Magician": [("Beginner", 1), ("Magician", 8), ("F/P Wizard", 30), ("I/L Wizard", 30), ("Cleric", 30),
-                 ("F/P Mage", 70), ("I/L Mage", 70), ("Priest", 70)],
-    "Bowman": [("Beginner", 1), ("Bowman", 10), ("Hunter", 30), ("Crossbowman", 30), ("Ranger", 70), ("Sniper", 70)],
-    "Thief": [("Beginner", 1), ("Thief", 10), ("Assassin", 30), ("Bandit", 30), ("Hermit", 70), ("Chief Bandit", 70)],
-}
 CLASS_HE = {"Beginner": "ביגינר", "Warrior": "לוחם", "Magician": "קוסם", "Bowman": "קשת", "Thief": "גנב"}
 MAX_LEVEL = 200
 
@@ -56,6 +47,7 @@ class _Bridge(QObject):
     status = Signal(str, str)      # provider, status
     account = Signal(object)
     logged_out = Signal()
+    key_checked = Signal(str, str, bool)   # provider, API key, it works
 
 
 class CharacterForm(QWidget):
@@ -79,17 +71,20 @@ class CharacterForm(QWidget):
         self.class_group = QButtonGroup(self)
         self.class_group.setExclusive(True)
         for i, cls in enumerate(JOBS):
-            b = QPushButton()
+            # the picture above the name: beside it, a tile at 470 px had no room left ("Warrior" was cut, seen live)
+            b = QToolButton(objectName="ClassTile")
             b.setCheckable(True)
-            b.setObjectName("Quick")
+            b.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+            b.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)     # three per row share the width
             b.setMinimumHeight(72)
+            b.setCursor(Qt.PointingHandCursor)
             img = kb.image_path(f"class/{cls.lower()}")
             label = cls if t.lang == "en" else f"{CLASS_HE[cls]}\n{cls}"
             b.setText(label)
             if img:
                 from PySide6.QtGui import QIcon
                 b.setIcon(QIcon(str(img)))
-                b.setIconSize(QPixmap(str(img)).size().scaled(40, 40, Qt.KeepAspectRatio))
+                b.setIconSize(QPixmap(str(img)).size().scaled(36, 36, Qt.KeepAspectRatio))
             b.setProperty("cls", cls)
             self.class_group.addButton(b)
             grid.addWidget(b, i // 3, i % 3)
@@ -165,8 +160,11 @@ class CharacterForm(QWidget):
         self.job.clear()
         if not single:
             self.job.addItems(jobs)
-            keep = self._job_picked and previous in jobs
-            self.job.setCurrentIndex(jobs.index(previous) if keep else len(jobs) - 1)
+            if self._job_picked and previous in jobs:
+                self.job.setCurrentIndex(jobs.index(previous))
+            else:
+                # a real choice (Fighter, Page or Spearman…): the player picks; a guessed job was usually wrong
+                self.job.show_none(bidi.plain(self.t("ob_pick_job"), self.t.rtl))
         self.job_hint.setText(bidi.plain(hint, self.t.rtl) if hint else "")
         self.job_hint.setVisible(bool(hint))
         self.changed.emit()
@@ -207,9 +205,12 @@ class Onboarding(GlassDialog):
         self.settings, self.profiles, self.kb = settings, profiles, kb
         self.stylesheet_fn = stylesheet_fn
         self.only_character = only_character
-        self.resize(600, 680)
+        # Esc must not quit the first-run setup (closing it quits the app); adding a character can be cancelled
+        self.esc_closes = only_character
+        self.fit_screen(600, 680)
         self._bridge = _Bridge()
         self._bridge.status.connect(self._on_status)
+        self._bridge.key_checked.connect(self._on_key_checked)
         self.provider = providers.get(settings["provider"]).name
         self._ai_ok = False
         self._signing_in = False   # a sign-in/install is under way: keep the hint, re-check quietly
@@ -241,8 +242,15 @@ class Onboarding(GlassDialog):
         if not self.only_character:
             self.pages.append(self._page_done())
         for p in self.pages:
-            self.stack.addWidget(p)
+            # each step scrolls on its own, so on a short screen Next stays visible under it
+            scroll = QScrollArea()
+            scroll.setWidgetResizable(True)
+            scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+            scroll.setWidget(p)
+            self.stack.addWidget(scroll)
         rtl_buttons(self, self.t.rtl)
+        no_default_buttons(self)
+        self.enter_button = self.next
         self._update_nav()
 
     # pages ---------------------------------------------------------------
@@ -256,8 +264,9 @@ class Onboarding(GlassDialog):
             logo.setPixmap(QPixmap(str(wm)).scaled(260, 260, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         logo.setAlignment(Qt.AlignCenter)
         lay.addWidget(logo)
-        for line in ("העוזר האישי שלכם ב-MapleStory Classic", "Your personal MapleStory Classic assistant"):
-            lb = _body(line)
+        # both languages: the player hasn't picked one yet
+        for lang in ("he", "en"):
+            lb = _body(I18n(lang)("app_tagline"))
             lb.setAlignment(Qt.AlignHCenter)
             lay.addWidget(lb)
         lay.addSpacing(16)
@@ -293,13 +302,17 @@ class Onboarding(GlassDialog):
         lay.addWidget(self.ai_body)
         lay.addSpacing(6)
         sec = self.account_sec = Section(self.t("sec_account"), rtl)
+        # the status on its own line, its actions on a row under it (three links beside it squeezed the status
+        # into a column one word wide and pushed the window past 470 px); the row wraps when it must
         status_row = QWidget()
-        srow = QHBoxLayout(status_row)
-        srow.setContentsMargins(0, 6, 0, 6)
-        srow.setSpacing(14)
+        scol = QVBoxLayout(status_row)
+        scol.setContentsMargins(0, 8, 0, 4)
+        scol.setSpacing(2)
         self.status_label = QLabel(bidi.plain(self.t("ob_checking"), rtl), objectName="RowLabel")
         self.status_label.setWordWrap(True)
-        srow.addWidget(self.status_label, 1)
+        scol.addWidget(self.status_label)
+        srow = FlowLayout(spacing=18, line_spacing=0)
+        scol.addLayout(srow)
         self.install_btn = QPushButton(objectName="Link")
         self.login_btn = QPushButton(objectName="Link")
         self.check_btn = QPushButton(self.t("ob_check"), objectName="Link")
@@ -319,18 +332,22 @@ class Onboarding(GlassDialog):
         lay.addWidget(sec)
         lay.addSpacing(8)
         sec = Section(self.t("ob_use_api_key"), rtl)
-        kbox = QWidget()
-        krow = QHBoxLayout(kbox)
-        krow.setContentsMargins(0, 10, 0, 10)
         self.key_edit = QLineEdit()
         self.key_edit.setEchoMode(QLineEdit.Password)
         self.key_edit.setLayoutDirection(Qt.LeftToRight)
-        key_btn = QPushButton(self.t("ob_check"), objectName="Secondary")
-        key_btn.setCursor(Qt.PointingHandCursor)
-        key_btn.clicked.connect(self._check_key)
-        krow.addWidget(self.key_edit, 1)
-        krow.addWidget(key_btn)
+        self.key_edit.returnPressed.connect(self._check_key)      # Enter checks the pasted key
+        self.key_edit.textChanged.connect(self._key_direction)
+        self.key_btn = QPushButton(self.t("ob_check_key"), objectName="Secondary")
+        self.key_btn.setCursor(Qt.PointingHandCursor)
+        self.key_btn.clicked.connect(self._check_key)
+        # the field takes the whole width; its button beside it only when there is room, else under it
+        kbox = AdaptiveRow(self.key_edit, self.key_btn, main_min=260)
+        kbox.setContentsMargins(0, 10, 0, 10)
         sec.add_widget(kbox)
+        self.key_hint = QLabel(objectName="RowHint")
+        self.key_hint.setWordWrap(True)
+        self.key_hint.hide()
+        sec.add_widget(self.key_hint)
         lay.addWidget(sec)
         lay.addStretch(1)
         report_btn = QPushButton(self.t("report_problem"), objectName="Link")
@@ -343,6 +360,12 @@ class Onboarding(GlassDialog):
     def _ai(self):
         return providers.get(self.provider)
 
+    def _key_direction(self, *_):
+        """The key itself is English (left to right); the empty field shows the hint in the UI's direction."""
+        rtl = self.t.rtl and not self.key_edit.text()
+        self.key_edit.setLayoutDirection(Qt.RightToLeft if rtl else Qt.LeftToRight)
+        self.key_edit.setAlignment((Qt.AlignRight if rtl else Qt.AlignLeft) | Qt.AlignAbsolute | Qt.AlignVCenter)
+
     def _label_ai_page(self):
         """Texts of the connect page for the chosen provider."""
         t, p = self.t, self.provider
@@ -351,7 +374,15 @@ class Onboarding(GlassDialog):
         self.install_btn.setText(t.p("ob_install", p))
         self.login_btn.setText(t.p("ob_login", p))
         self.key_edit.clear()
-        self.key_edit.setPlaceholderText(t.p("ob_api_key_hint", p))
+        # a Hebrew hint reads right to left while the field is empty (_key_direction), and the key's prefix
+        # ("sk-ant-") stays one block in it, not "ב--sk-ant" (ltr_block inside the Hebrew sentence)
+        hint = t.p("ob_api_key_hint", p)
+        if t.rtl:
+            prefix = "sk-ant-" if "sk-ant-" in hint else "sk-"
+            hint = bidi.plain(hint.replace(prefix, bidi.ltr_block(prefix, True)), True)
+        self.key_edit.setPlaceholderText(hint)
+        self._key_direction()
+        self.key_hint.hide()
         if getattr(self, "privacy_label", None):          # the done page is built after this one
             self.privacy_label.setText(bidi.plain(t.p("ob_privacy", p), t.rtl))
 
@@ -377,6 +408,7 @@ class Onboarding(GlassDialog):
             if c:
                 self.form.load(c)
         self.form.changed.connect(self._update_nav)
+        self.form.name.returnPressed.connect(self._go_next)       # Enter after the name moves on (when ready)
         lay.addWidget(self.form, 1)
         return w
 
@@ -474,9 +506,16 @@ class Onboarding(GlassDialog):
 
     def _poll_tick(self):
         self._poll_left -= 1
-        if self._poll_left <= 0 or self._ai_ok:
+        if self._ai_ok:
             self._poll_timer.stop()
             self._signing_in = False
+            return
+        if self._poll_left <= 0:
+            # gave up waiting: back on top, and no more "this updates by itself" for a check that stopped
+            self._end_sign_in()
+            self.login_hint.setText(bidi.plain(self.t("sign_in_timeout"), self.t.rtl))
+            self.login_hint.show()
+            self._check_status()
             return
         if login_failed(getattr(self, "_login_proc", None)):
             self._login_proc = None
@@ -507,15 +546,44 @@ class Onboarding(GlassDialog):
 
     def _check_key(self):
         key = self.key_edit.text().strip()
+        if not key or not self.key_btn.isEnabled():
+            return                      # nothing pasted, or a check is already running
+        if not key.isascii():
+            # a key is plain Latin letters and digits; anything else can't even be sent (it raised before)
+            self._key_message(self.t("ob_key_bad_chars"))
+            return
         ai = self._ai()
-        if key and ai.test_api_key(key):
+        self.key_btn.setEnabled(False)
+        self._key_message(self.t("ob_checking"))
+
+        def work():
+            try:
+                ok = ai.test_api_key(key)
+            except Exception:
+                ok = False
+            self._bridge.key_checked.emit(ai.name, key, ok)
+        # the check can take up to 15 seconds: off the GUI thread, so the window doesn't freeze
+        threading.Thread(target=work, daemon=True).start()
+
+    def _on_key_checked(self, provider: str, key: str, ok: bool):
+        self.key_btn.setEnabled(True)
+        if provider != self.provider:
+            self.key_hint.hide()
+            return            # the player switched provider while the key was checked
+        if ok:
+            ai = providers.get(provider)
             ai.save_api_key(key)
-            self.settings.set_api_key_mode(ai.name, True)
+            self.settings.set_api_key_mode(provider, True)
             self._ai_ok = True
+            self.key_hint.hide()
             self.status_label.setText(bidi.plain(self.t("ob_connected"), self.t.rtl))
         else:
-            self.status_label.setText("✗")
+            self._key_message(self.t("ob_key_failed"))
         self._update_nav()
+
+    def _key_message(self, text: str):
+        self.key_hint.setText(bidi.plain(text, self.t.rtl))
+        self.key_hint.show()
 
     def showEvent(self, e):
         super().showEvent(e)
@@ -523,7 +591,10 @@ class Onboarding(GlassDialog):
             self._check_status()
 
     def _current_ok(self) -> bool:
-        page = self.stack.currentWidget()
+        i = self.stack.currentIndex()
+        if not 0 <= i < len(self.pages):
+            return False
+        page = self.pages[i]                # (the stack holds each page inside its scroll area)
         if not self.only_character and page is self.pages[0]:
             return self.lang_group.checkedButton() is not None
         if not self.only_character and page is self.pages[1]:
@@ -584,12 +655,14 @@ class ConfirmDialog(GlassDialog):
         yes = QPushButton(confirm, objectName="Danger" if danger else "Primary")
         for b in (no, yes):
             b.setCursor(Qt.PointingHandCursor)
-        no.clicked.connect(self.reject)
-        yes.clicked.connect(self.accept)
+        self.choice = None          # "yes" / "no" (a button), None (closed with X or Esc: neither)
+        no.clicked.connect(lambda: (setattr(self, "choice", "no"), self.reject()))
+        yes.clicked.connect(lambda: (setattr(self, "choice", "yes"), self.accept()))
         row.addWidget(no)
         row.addWidget(yes)
         lay.addLayout(row)
         rtl_buttons(self, rtl)
+        self.initial_focus = no      # the safe answer has the focus (Enter / Space never confirms by accident)
         no.setFocus()
 
 
@@ -608,7 +681,9 @@ class SettingsDialog(GlassDialog):
         self.settings, self.profiles, self.kb = settings, profiles, kb
         self.stylesheet_fn = stylesheet_fn
         self.setStyleSheet(stylesheet_fn(1.0))
-        self.resize(500, 720)
+        self.fit_screen(500, 720)
+        # Esc would close without saving, like a stray key press in the game; the close button stays the way out
+        self.esc_closes = False
         rtl = t.rtl
 
         outer = QVBoxLayout(self.content)
@@ -648,6 +723,11 @@ class SettingsDialog(GlassDialog):
         self.hk_voice.addItems(fkeys)
         self.hk_voice.setCurrentText(settings["hotkey_voice"])
         sec.add_row(t("hotkey_voice"), self.hk_voice)
+        self.keys_error = QLabel(bidi.plain(t("hotkey_same"), rtl), objectName="WarnHint")   # a warning, not a hint
+        self.keys_error.setWordWrap(True)
+        self.keys_error.setContentsMargins(0, 4, 0, 4)
+        self.keys_error.hide()
+        sec.add_widget(self.keys_error)
         self.voice_send = Switch(settings["voice_send_immediately"])
         sec.add_row(t("voice_send"), self.voice_send)
         lay.addWidget(sec)
@@ -668,7 +748,8 @@ class SettingsDialog(GlassDialog):
         sec.add_row(t("ai_provider"), self.provider_pick)
         # the model acts right away too; under it, which model answered last
         self.model_pick = Select()
-        self.model_hint = sec.add_row(t("ai_model"), self.model_pick, hint=" ").findChild(QLabel, "RowHint")
+        # the hint under the whole row: beside the dropdown it was squeezed into a narrow column
+        self.model_hint = sec.add_row(t("ai_model"), self.model_pick, hint=" ", hint_below=True).findChild(QLabel, "RowHint")
         self.model_hint.setWordWrap(True)
         self.model_pick.picked.connect(self._on_model)
         self._model_values: list = []
@@ -679,16 +760,27 @@ class SettingsDialog(GlassDialog):
         self.account_label.setWordWrap(True)
         self.account_label.setContentsMargins(0, 10, 0, 10)
         sec.add_widget(self.account_label)
+        self.account_hint = QLabel(objectName="RowHint")      # "didn't finish signing in? try again"
+        self.account_hint.setWordWrap(True)
+        self.account_hint.setContentsMargins(0, 0, 0, 8)
+        self.account_hint.hide()
+        sec.add_widget(self.account_hint)
+        # not installed: the same official installer onboarding offers
+        self.install_btn = QPushButton(t.p("ob_install", settings["provider"]), objectName="Link")
+        self.install_btn.clicked.connect(self._start_install)
+        sec.add_widget(self.install_btn)
         self.switch_btn = QPushButton(t("account_switch"), objectName="Link")
         self.switch_btn.clicked.connect(self._switch_account)
         sec.add_widget(self.switch_btn)
         self.logout_btn = QPushButton(t("account_logout"), objectName="LinkDanger")
         self.logout_btn.clicked.connect(self._logout)
         sec.add_widget(self.logout_btn)
-        for b in (self.switch_btn, self.logout_btn):
+        for b in (self.install_btn, self.switch_btn, self.logout_btn):
             b.setCursor(Qt.PointingHandCursor)
             b.hide()
         lay.addWidget(sec)
+        self._installing = False
+        self._login_broken = False
         self._account_bridge = _Bridge()
         self._account_bridge.account.connect(self._on_account)
         self._account_bridge.logged_out.connect(self._start_login)
@@ -757,7 +849,7 @@ class SettingsDialog(GlassDialog):
         brow = QHBoxLayout()
         brow.setContentsMargins(0, 10, 0, 0)
         brow.addStretch(1)
-        save = QPushButton(t("save"), objectName="Primary")
+        self.save_btn = save = QPushButton(t("save"), objectName="Primary")
         save.setCursor(Qt.PointingHandCursor)
         save.setMinimumWidth(180)
         save.clicked.connect(self._save)
@@ -765,6 +857,22 @@ class SettingsDialog(GlassDialog):
         brow.addStretch(1)
         outer.addLayout(brow)
         rtl_buttons(self, rtl)
+        no_default_buttons(self)
+        for pick in (self.hk_toggle, self.hk_voice):
+            pick.currentIndexChanged.connect(self._check_keys)
+        self._check_keys()
+        self._initial = self._values()          # the X asks before dropping changes from here on
+        self.close_btn.clicked.disconnect()
+        self.close_btn.clicked.connect(self._close_clicked)
+
+    def _keys_clash(self) -> bool:
+        return self.hk_toggle.currentText() == self.hk_voice.currentText()
+
+    def _check_keys(self, *_):
+        """One F-key can't both open the chat and start talking: say so, and don't save it like that."""
+        clash = self._keys_clash()
+        self.keys_error.setVisible(clash)
+        self.save_btn.setEnabled(not clash)
 
     # AI account ----------------------------------------------------------
 
@@ -856,9 +964,11 @@ class SettingsDialog(GlassDialog):
         self._fill_models()
         self._label_usage()
         self._login_timer.stop()
+        self._installing = self._login_broken = False
         self._account_status = None
-        self.switch_btn.hide()
-        self.logout_btn.hide()
+        self.install_btn.setText(self.t.p("ob_install", name))
+        for w in (self.install_btn, self.switch_btn, self.logout_btn, self.account_hint):
+            w.hide()
         self._set_account_text(self.t("ob_checking"))
         self.account_changed.emit()        # the app moves its AI over to this provider
         self._refresh_account()
@@ -878,6 +988,11 @@ class SettingsDialog(GlassDialog):
         st = acc["status"]
         was, self._account_status = self._account_status, st
         api_key = self.settings.api_key_mode(p) or acc.get("method") == "api_key"
+        if self._installing and st != "not_installed":
+            # the installer finished: stop waiting for it and show what's next (sign in)
+            self._installing = False
+            self._login_timer.stop()
+            self._set_on_top(True)
         if api_key:
             self._set_account_text(t("account_api_key"))
         elif st == "ok":
@@ -889,6 +1004,10 @@ class SettingsDialog(GlassDialog):
         self.switch_btn.setText(t("account_switch") if connected else t.p("ob_login", p))
         self.switch_btn.setVisible(st != "not_installed")
         self.logout_btn.setVisible(connected)
+        # not installed, or a sign-in that broke ("reinstalling should fix this"): offer the installer
+        self.install_btn.setVisible(not connected and (st == "not_installed" or self._login_broken))
+        if connected:
+            self.account_hint.hide()
         if self._login_timer.isActive() and st == "ok":
             self._login_timer.stop()
             self._set_on_top(True)
@@ -906,12 +1025,19 @@ class SettingsDialog(GlassDialog):
         return True
 
     def _switch_account(self):
-        """Sign out, then run the official sign-in so another account can be chosen in the browser."""
+        """Sign out, then run the official sign-in so another account can be chosen in the browser.
+        Signed in, it asks first like "Sign out" (both end the current sign-in); signed out, the same button is
+        "Sign in" and just goes."""
+        t, ai = self.t, self._ai()
+        if self._account_status == "ok" or self.settings.api_key_mode(ai.name):
+            dlg = ConfirmDialog(t("account_switch"), t.p("account_switch_confirm", ai.name), t("account_switch"),
+                                t("cancel"), t.rtl, self.stylesheet_fn(1.0), danger=False)
+            if not dlg.exec():
+                return
         self.switch_btn.setEnabled(False)
         self.logout_btn.hide()
         self._set_account_text(self.t("account_signing_out"))
         self._drop_api_key()
-        ai = self._ai()
 
         def work():
             ai.logout()
@@ -920,15 +1046,36 @@ class SettingsDialog(GlassDialog):
 
     def _start_login(self):
         self.switch_btn.setEnabled(True)
+        self.account_hint.hide()
+        self._installing = False
         self._account_status = "logged_out"
         self.account_changed.emit()
         self._login_proc = self._ai().login()
         if self._login_proc is None:
-            self._set_account_text(self.t.p("ob_login_failed", self._ai().name))
+            self._login_failed()
             return
+        self._login_broken = False
+        self.install_btn.hide()
         self._set_on_top(False)   # the sign-in window and the browser must not open behind this one
         self._set_account_text(self.t("account_browser"))
         self._login_left = 60   # 3 minutes
+        self._login_timer.start()
+
+    def _login_failed(self):
+        self._login_broken = True
+        self._set_account_text(self.t.p("ob_login_failed", self._ai().name))
+        self.install_btn.show()
+
+    def _start_install(self):
+        """The official installer, as in onboarding; then wait for it like for a sign-in (4 minutes)."""
+        self._installing = True
+        self._login_broken = False
+        self._login_proc = None
+        self.account_hint.hide()
+        self._set_on_top(False)   # the installer's console must not open behind this window
+        self._ai().install()
+        self._set_account_text(self.t("ob_install_wait"))
+        self._login_left = 80
         self._login_timer.start()
 
     def _set_on_top(self, on: bool):
@@ -941,12 +1088,18 @@ class SettingsDialog(GlassDialog):
     def _login_tick(self):
         self._login_left -= 1
         if login_failed(self._login_proc):
-            self._login_left = 0
-            self._set_account_text(self.t.p("ob_login_failed", self._ai().name))
-        if self._login_left <= 0:
+            self._login_proc = None
             self._login_timer.stop()
             self._set_on_top(True)
+            self._login_failed()
             return
+        if self._login_left <= 0:
+            # gave up waiting: say so (the text said "finish signing in…" forever) and show the real status
+            self._login_timer.stop()
+            self._installing = False
+            self._set_on_top(True)
+            self.account_hint.setText(bidi.plain(self.t("sign_in_timeout"), self.t.rtl))
+            self.account_hint.show()
         self._refresh_account()
 
     def _logout(self):
@@ -978,9 +1131,9 @@ class SettingsDialog(GlassDialog):
             History(c.id).clear()
             self.history_cleared.emit()
 
-    def _save(self):
-        s = self.settings
-        s.data.update({
+    def _values(self) -> dict:
+        """What Save would store (the AI account and model act at once, they're not in here)."""
+        return {
             "language": self.lang.value(),
             "appearance": self.appearance.value(),
             "font_size": self.font.value(),
@@ -992,7 +1145,32 @@ class SettingsDialog(GlassDialog):
             "answer_length": self.length.value(),
             "start_with_windows": self.autostart.isChecked(),
             "telemetry": self.telemetry.isChecked(),
-        })
+        }
+
+    def unsaved(self) -> bool:
+        return self._values() != getattr(self, "_initial", self._values())
+
+    def _close_clicked(self):
+        """The X with unsaved changes asks: save them, or not (closing the question keeps Settings open).
+        (Esc does nothing here, esc_closes; the app closing the window itself never asks.)"""
+        if self.unsaved():
+            t = self.t
+            dlg = ConfirmDialog(t("settings_unsaved"), t("settings_unsaved_body"), t("save"), t("discard"), t.rtl,
+                                self.stylesheet_fn(1.0), danger=False)
+            dlg.exec()
+            if dlg.choice == "yes":
+                self._save()
+                return
+            if dlg.choice is None:
+                return                  # closed the question: back to Settings
+        self.reject()
+
+    def _save(self):
+        if self._keys_clash():
+            self._check_keys()
+            return
+        s = self.settings
+        s.data.update(self._values())
         s.save()
         self.changed.emit()
         self.accept()

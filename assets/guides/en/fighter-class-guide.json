@@ -687,13 +687,13 @@
    "img": "8ea44ba66a1c56.png",
    "w": 43,
    "h": 70,
-   "cap": "Level 1\n500 x 300 px"
+   "cap": "Level 1\n500 x 300 px\n250 px left and right, 150 px up and down."
   },
   {
    "img": "8ea44ba66a1c56.png",
    "w": 43,
    "h": 70,
-   "cap": "Level 30\n600 x 400 px"
+   "cap": "Level 30\n600 x 400 px\n300 px left and right, 200 px up and down. The dashed line shows the level 1 area."
   },
   {
    "h3": "How Attack Power affects Warrior damage"
@@ -1417,5 +1417,5 @@
   }
  ],
  "source": "https://meowdb.com/msclassic/guides/fighter-class-guide",
- "hash": "ba3ea99627a8"
+ "hash": "c4308067f338"
 }

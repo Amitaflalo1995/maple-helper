@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import time
 import uuid
@@ -43,22 +44,50 @@ for d in (SHOTS_DIR, HISTORY_DIR, AVATAR_DIR):
 
 def kb_dir() -> Path:
     """The newest knowledge base: a downloaded update wins over the bundled copy."""
-    if (USER_KB / "index.json").exists():
-        return USER_KB
-    return BUNDLED_KB
+    if (USER_KB / "index.json").exists() and _kb_version(USER_KB) >= _kb_version(BUNDLED_KB):
+        return USER_KB      # an app update may ship a newer KB than the one downloaded earlier
+    return BUNDLED_KB if (BUNDLED_KB / "index.json").exists() or not (USER_KB / "index.json").exists() else USER_KB
+
+
+def _kb_version(root: Path) -> str:
+    try:
+        return str(json.loads((root / "meta.json").read_text(encoding="utf-8")).get("version", ""))
+    except (OSError, ValueError, AttributeError):
+        return ""
 
 
 def _read_json(path: Path, default):
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return default
+    """The file's JSON when it has the default's type; else its last good copy (.bak); else the default."""
+    for p in (path, path.with_suffix(path.suffix + ".bak")):
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, ValueError):          # missing, half-written, not UTF-8 (a power cut)
+            continue
+        if isinstance(data, type(default)):
+            return data
+    return default
 
 
 def _write_json(path: Path, data) -> None:
     tmp = path.with_suffix(".tmp")
-    tmp.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
-    tmp.replace(path)
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(json.dumps(data, ensure_ascii=False, indent=1))
+        f.flush()
+        os.fsync(f.fileno())                # on disk before the rename: a power cut can't leave it empty
+    if path.exists():
+        try:
+            import shutil
+            shutil.copyfile(path, path.with_suffix(path.suffix + ".bak"))    # the last good copy
+        except OSError:
+            pass
+    for attempt in range(5):
+        try:
+            tmp.replace(path)
+            return
+        except PermissionError:     # antivirus / the search indexer holds the file for a moment
+            if attempt == 4:
+                raise
+            time.sleep(0.1)
 
 
 # ---------------------------------------------------------------- settings
@@ -144,8 +173,15 @@ class Character:
     stats: dict = field(default_factory=dict)          # from the stat window: acc, dmg_min, dmg_max, hp, mp
     quests_done: list[str] = field(default_factory=list)   # quest keys the player marked done
     town: str = ""                                    # citizenship town (Henesys / Kerning City), "" = not chosen
+    job_shown: str = ""     # the job as the game's HUD names it ("Archer" on an Old School server for a Bowman)
+    name_seen: bool = False  # the name was read off the HUD once: from then on only that exact name is this character
     crafts: dict = field(default_factory=dict)        # crafting profession -> its level
     updated_at: float = field(default_factory=time.time)
+
+    @property
+    def job_label(self) -> str:
+        """The job as the player sees it in game (the app works with the MapleStory Classic name inside)."""
+        return self.job_shown or self.job
 
     def summary(self) -> str:
         parts = [f"Name: {self.name}", f"Class: {self.base_class}", f"Job: {self.job}", f"Level: {self.level}"]
@@ -167,6 +203,99 @@ class Character:
 STAT_KEYS = ("acc", "dmg_min", "dmg_max", "hp", "mp")
 
 
+def _consistent_job(update: dict, c: "Character") -> dict:
+    """Class and job as the app names them, and never a job of another class (the HUD of an Old School server
+    says "Archer": that once left a Bowman with the job Assassin)."""
+    from .jobs import canonical_class, canonical_job, class_of, first_job
+    update = dict(update)
+    raw = " ".join(update["job"].split()) if isinstance(update.get("job"), str) else ""
+    job = canonical_job(raw) if raw else None
+    if job:
+        # keep the HUD's own word for it when it differs ("Archer"), shown on the card
+        update["job_shown"] = raw.title() if raw.lower() != job.lower() else ""
+    cls = canonical_class(update["base_class"]) if isinstance(update.get("base_class"), str) else None
+    update.pop("job", None)
+    update.pop("base_class", None)
+    if job and class_of(job):
+        cls = class_of(job)            # the job says which class it is
+    if cls:
+        update["base_class"] = cls
+    if job:
+        update["job"] = job
+    new_cls = cls or c.base_class
+    level = update.get("level") if isinstance(update.get("level"), int) else c.level
+    current = job or c.job
+    if new_cls in ("Warrior", "Magician", "Bowman", "Thief") and class_of(current) not in (None, new_cls):
+        update["job"] = first_job(new_cls, level)
+    return update
+
+
+def same_character(saved: str, hud: str, seen: bool = False, others: tuple[str, ...] = ()) -> bool:
+    """Is the name on the HUD the saved character's? Only the same name (letter case aside). A longer name that
+    starts with it is asked about, never taken: "Ayash" (Lv. 131 Night Lord) was silently renamed to the alt
+    "Ayashii" and overwritten with the alt's class and level (a player's report). The chat offers "this is the same
+    character (update the name)" for "Kalimero" typed at setup and "KalimeroZz" in game.
+    (seen / others are kept for the callers; an exact match never depends on them.)"""
+    return saved.strip().lower() == hud.strip().lower()
+
+
+def hud_name(update) -> str | None:
+    """The character name a screenshot read, when it is a valid in-game name."""
+    name = update.get("name") if isinstance(update, dict) else None
+    return name.strip() if isinstance(name, str) and re.fullmatch(r"[A-Za-z0-9]{2,16}", name.strip()) else None
+
+
+def _str_list(v) -> list[str]:
+    """Quest names from the AI: a list of strings (a bare string is one quest, not its letters)."""
+    if isinstance(v, str):
+        v = [v]
+    return [q.strip() for q in v if isinstance(q, str) and q.strip()] if isinstance(v, list) else []
+
+
+_TYPES = {f.name: f.type for f in fields(Character)}
+
+
+def _sane(key: str, v) -> bool:
+    """A saved value of the right type: a bad one (once written from a malformed AI reply) is dropped on load."""
+    t = str(_TYPES.get(key, ""))
+    if t == "str":
+        return isinstance(v, str)
+    if t == "int":
+        return isinstance(v, int) and not isinstance(v, bool)
+    if t.startswith("list"):
+        return isinstance(v, list) and all(isinstance(x, str) for x in v)
+    if t == "dict":
+        return isinstance(v, dict)
+    if t == "bool":
+        return isinstance(v, bool)
+    if t.startswith("float"):         # exp_pct: a number or None
+        return v is None or (isinstance(v, (int, float)) and not isinstance(v, bool))
+    return True
+
+
+def _repair(c: dict) -> dict | None:
+    """A saved character with a damaged required field is repaired, not dropped: dropping it lost the character
+    for good on the next save (found in testing)."""
+    from .jobs import canonical_class, canonical_job, first_job
+    if not isinstance(c, dict) or not isinstance(c.get("id"), str) or not c["id"]:
+        return None
+    if not isinstance(c.get("name"), str) or not c["name"].strip():
+        return None          # no name at all: not a character the player made
+    c = dict(c)
+    try:
+        c["level"] = max(1, min(250, int(float(c.get("level")))))
+    except (TypeError, ValueError):
+        c["level"] = 1
+    if not isinstance(c.get("base_class"), str) or not canonical_class(c["base_class"]):
+        c["base_class"] = "Beginner"
+    if not isinstance(c.get("job"), str) or not canonical_job(c["job"]):
+        c["job"] = first_job(c["base_class"], c["level"])
+    if isinstance(c.get("stats"), dict):      # numbers only: a string here broke the play tools
+        c["stats"] = {k: int(v) for k, v in c["stats"].items()
+                      if isinstance(v, (int, float)) and not isinstance(v, bool)}
+    return c
+
+
 class Profiles:
     path = DATA_DIR / "profiles.json"
 
@@ -175,7 +304,15 @@ class Profiles:
         known = {f.name for f in fields(Character)}
         # a newer version may have saved fields this one doesn't know (after a downgrade, or a preview build):
         # skip them instead of failing to start
-        self.characters = [Character(**{k: v for k, v in c.items() if k in known}) for c in raw.get("characters", [])]
+        self.characters = []
+        for c in raw.get("characters", []) if isinstance(raw.get("characters"), list) else []:
+            c = _repair(c)
+            if c is None:
+                continue
+            try:
+                self.characters.append(Character(**{k: v for k, v in c.items() if k in known and _sane(k, v)}))
+            except (TypeError, AttributeError):    # still unusable
+                continue
         self.active_id = raw.get("active")
 
     @property
@@ -192,6 +329,10 @@ class Profiles:
     def edit(self, cid: str, name: str, base_class: str, job: str, level: int) -> None:
         c = next((c for c in self.characters if c.id == cid), None)
         if c:
+            if job != c.job:
+                c.job_shown = ""          # picked by hand: the app's own name
+            if name != c.name:
+                c.name_seen = False       # renamed by hand: the HUD may confirm it again
             c.name, c.base_class, c.job, c.level = name, base_class, job, level
             c.updated_at = time.time()
             self.save()
@@ -208,6 +349,25 @@ class Profiles:
             self.active_id = self.characters[0].id if self.characters else None
         self.save()
 
+    def other_names(self, c: "Character") -> tuple[str, ...]:
+        return tuple(o.name for o in self.characters if o is not c)
+
+    def find_by_name(self, name: str) -> "Character | None":
+        n = name.strip().lower()
+        return next((c for c in self.characters if c.name.strip().lower() == n), None)
+
+    def confirm_hud_name(self, name: str) -> list[tuple[str, object]]:
+        """The player said the HUD's other name is the active character's ("this is the same character"): it takes
+        that name, confirmed (name_seen), so the next read matches it exactly."""
+        c = self.active
+        if not c or not hud_name({"name": name}):
+            return []
+        changed = [("name", name)] if c.name != name else []
+        c.name, c.name_seen = name, True
+        c.updated_at = time.time()
+        self.save()
+        return changed
+
     def set_active(self, cid: str) -> None:
         self.active_id = cid
         self.save()
@@ -215,13 +375,28 @@ class Profiles:
     def apply_update(self, update: dict) -> list[tuple[str, object]]:
         """Apply a profile update from the assistant. Returns the changed (field, value) pairs."""
         c = self.active
-        if not c or not update:
+        if not c or not isinstance(update, dict) or not update:
             return []
+        update = _consistent_job(update, c)
         changed = []
+        relabelled = "job_shown" in update and update["job_shown"] != c.job_shown
+        if relabelled:
+            c.job_shown = update["job_shown"]
+        name = hud_name(update)
+        # the name on the HUD (a screenshot read): "Kalimero" typed at setup becomes the real "KalimeroZz".
+        # Another name altogether is another character: the overlay asks first and never lands here with it
+        if name and same_character(c.name, name, c.name_seen, self.other_names(c)):
+            if name != c.name:
+                c.name = name
+                changed.append(("name", c.name))
+            if not c.name_seen:
+                c.name_seen, relabelled = True, True
         for key in ("level", "job", "base_class", "map"):
             val = update.get(key)
             if val in (None, "", 0):
                 continue
+            if key != "level" and not isinstance(val, str):
+                continue           # the AI wrote {"name": ...} or a list: never store it (it broke every start)
             if key == "level":
                 try:
                     val = int(val)
@@ -232,11 +407,11 @@ class Profiles:
             if getattr(c, key) != val:
                 setattr(c, key, val)
                 changed.append((key, val))
-        for q in update.get("quests_started", []) or []:
+        for q in _str_list(update.get("quests_started")):
             if q not in c.active_quests:
                 c.active_quests.append(q)
                 changed.append(("quest+", q))
-        for q in update.get("quests_completed", []) or []:
+        for q in _str_list(update.get("quests_completed")):
             if q in c.active_quests:
                 c.active_quests.remove(q)
                 changed.append(("quest-", q))
@@ -255,10 +430,10 @@ class Profiles:
             c.exp_pct = round(float(pct), 2)
             changed.append(("exp", c.exp_pct))
         note = update.get("note")
-        if note and note not in c.notes:
+        if isinstance(note, str) and note.strip() and note not in c.notes:
             c.notes.append(note)
             changed.append(("note", note))
-        if changed:
+        if changed or relabelled:
             c.updated_at = time.time()
             self.save()
         return changed
@@ -299,17 +474,36 @@ class History:
         rec = {"t": time.time(), "role": role, "text": text, "entities": entities or []}
         with self.log.open("a", encoding="utf-8") as f:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        self._trim()
+
+    MAX_BYTES = 4_000_000       # ~8,000 questions: every question reads the file, it mustn't grow forever
+    KEEP_LINES = 6000
+
+    def _trim(self) -> None:
+        try:
+            if self.log.stat().st_size <= self.MAX_BYTES:
+                return
+            lines = self.log.read_text(encoding="utf-8", errors="replace").splitlines()[-self.KEEP_LINES:]
+            tmp = self.log.with_suffix(".tmp")
+            tmp.write_text("\n".join(lines) + "\n", encoding="utf-8")
+            tmp.replace(self.log)
+        except OSError:
+            pass
 
     def recent(self, n: int = RECENT) -> list[dict]:
         if not self.log.exists():
             return []
-        lines = self.log.read_text(encoding="utf-8").splitlines()[-n:]
+        # errors="replace": a line cut off mid-character by a crash must not break every question
+        lines = self.log.read_text(encoding="utf-8", errors="replace").splitlines()[-n:]
         out = []
         for ln in lines:
             try:
-                out.append(json.loads(ln))
+                rec = json.loads(ln)
             except json.JSONDecodeError:
-                pass
+                continue
+            # a valid line of the wrong shape must not break every question either
+            if isinstance(rec, dict) and isinstance(rec.get("text"), str) and rec.get("role") in ("user", "assistant"):
+                out.append(rec)
         return out
 
     def summaries(self) -> list[str]:
@@ -321,5 +515,5 @@ class History:
         _write_json(self.summaries_path, s[-10:])
 
     def clear(self) -> None:
-        for p in (self.log, self.summaries_path):
-            p.unlink(missing_ok=True)
+        for p in (self.log, self.summaries_path, self.summaries_path.with_suffix(".json.bak")):
+            p.unlink(missing_ok=True)       # the backup copy too, or cleared summaries would come back

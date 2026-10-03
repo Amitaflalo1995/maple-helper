@@ -14,6 +14,7 @@ import os
 import subprocess
 import sys
 import threading
+import time
 from pathlib import Path
 
 from .. import usage
@@ -25,6 +26,7 @@ log = logging.getLogger(__name__)
 INSTALL_CMD = "irm https://claude.ai/install.ps1 | iex"
 INSTALL_CMD_MAC = "curl -fsSL https://claude.ai/install.sh | bash"
 # An app opened from Finder gets PATH=/usr/bin:/bin:/usr/sbin:/sbin, so the usual install spots are listed here.
+STALL_TIMEOUT_S = 150   # no output from the CLI for this long = stuck (tools and streaming print all along)
 POSIX_DIRS = ["~/.local/bin", "~/.claude/local", "/opt/homebrew/bin", "/usr/local/bin", "~/.npm-global/bin"]
 
 
@@ -39,8 +41,15 @@ def find_claude() -> str | None:
     ])
     if exe:
         return exe
+    # an npm install elsewhere (a custom prefix): PATH has its claude.cmd shim, the real .exe sits beside it.
+    # Never the .cmd itself: cmd.exe cuts the multi-line --system-prompt at its first newline
     import shutil
-    return shutil.which("claude")
+    shim = shutil.which("claude")
+    if shim:
+        real = Path(shim).parent / "node_modules" / "@anthropic-ai" / "claude-code" / "bin" / "claude.exe"
+        if real.exists():
+            return str(real)
+    return None
 
 
 def env() -> dict:
@@ -126,11 +135,14 @@ class ClaudeBackend:
         b = self.brain
         return (self.exe, b.model, b.length, b.api_key, str(b.kb.root))
 
-    def _spawn(self) -> subprocess.Popen:
+    def _spawn(self, model: str | None = None, tools: bool = True) -> subprocess.Popen:
+        """model / tools: a one-off call's own (the ⟳ sync: Haiku, no file tools); the warm process uses the
+        player's model with the knowledge-base tools."""
         b = self.brain
         cmd = [self.exe, "-p", "--input-format", "stream-json", "--output-format", "stream-json", "--verbose",
-               "--include-partial-messages", "--restricted", "--strict-mcp-config", "--tools", "Read,Grep,Glob",
-               "--model", b.model or "sonnet", "--no-session-persistence", "--system-prompt", b.system_prompt()]
+               "--include-partial-messages", "--restricted", "--strict-mcp-config",
+               "--tools", "Read,Grep,Glob" if tools else "",
+               "--model", model or b.model or "sonnet", "--no-session-persistence", "--system-prompt", b.system_prompt()]
         e = env()
         if b.api_key:
             e["ANTHROPIC_API_KEY"] = b.api_key
@@ -167,6 +179,11 @@ class ClaudeBackend:
             self._warm.kill()
         self._warm = None
 
+    def drop_warm(self) -> None:
+        """Stop only the process waiting for the next question (an answer in progress goes on)."""
+        with self._warm_lock:
+            self._discard_warm()
+
     def shutdown(self) -> None:
         with self._warm_lock:
             self._discard_warm()
@@ -176,16 +193,21 @@ class ClaudeBackend:
         if self._proc and self._proc.poll() is None:
             self._proc.kill()
 
-    def run(self, prompt: str, screenshot_jpeg: bytes | None, on_raw_delta=None) -> RawResult:
+    def run(self, prompt: str, screenshot_jpeg: bytes | None, on_raw_delta=None, model: str | None = None,
+            tools: bool = True) -> RawResult:
+        """model / tools: see _spawn. The warm process serves only a call with the player's own setup."""
         content = []
-        if screenshot_jpeg:
-            content.append({"type": "image", "source": {"type": "base64", "media_type": "image/jpeg",
-                                                         "data": base64.b64encode(screenshot_jpeg).decode()}})
+        # one screenshot, or the screenshot and its full-resolution detail tiles
+        for jpeg in (screenshot_jpeg if isinstance(screenshot_jpeg, list) else [screenshot_jpeg]):
+            if jpeg:
+                content.append({"type": "image", "source": {"type": "base64", "media_type": "image/jpeg",
+                                                             "data": base64.b64encode(jpeg).decode()}})
         content.append({"type": "text", "text": prompt})
         msg = {"type": "user", "message": {"role": "user", "content": content}}
 
+        own = (model in (None, self.brain.model)) and tools        # the player's setup: the warm process fits
         try:
-            self._proc = self._take_warm() or self._spawn()
+            self._proc = (self._take_warm() if own else None) or self._spawn(model, tools)
         except OSError as e:
             log.error("could not start Claude Code: %s", e)
             return RawResult(error=f"launch_failed: {e}")
@@ -194,17 +216,37 @@ class ClaudeBackend:
             self._proc.stdin.close()
         except OSError:
             # the warm process died meanwhile: start fresh once
-            self._proc = self._spawn()
+            self._proc = self._spawn(model, tools)
             self._proc.stdin.write((json.dumps(msg) + "\n").encode("utf-8"))
             self._proc.stdin.close()
         # get the next one ready while the player reads this answer
-        threading.Thread(target=self.prewarm, daemon=True).start()
+        if own:
+            threading.Thread(target=self.prewarm, daemon=True).start()
 
         current = ""       # text of the assistant message being streamed
         result = None
         limits = None
         model = None
-        for line in self._proc.stdout:
+        proc = self._proc
+        # stderr is drained alongside: a CLI that writes a lot there would otherwise block both sides
+        err_chunks: list[bytes] = []
+        err_reader = threading.Thread(target=lambda: err_chunks.extend(iter(lambda: proc.stderr.read(4096), b"")),
+                                      daemon=True)
+        err_reader.start()
+        # a stalled CLI (network retries, a hung login) must not leave the chat on "thinking" forever
+        last = [time.monotonic()]
+        stalled = threading.Event()
+
+        def watchdog():
+            while proc.poll() is None:
+                if time.monotonic() - last[0] > STALL_TIMEOUT_S:
+                    stalled.set()
+                    proc.kill()
+                    return
+                time.sleep(2)
+        threading.Thread(target=watchdog, daemon=True).start()
+        for line in proc.stdout:
+            last[0] = time.monotonic()
             try:
                 ev = json.loads(line)
             except json.JSONDecodeError:
@@ -225,8 +267,12 @@ class ClaudeBackend:
                 model = ev.get("model") or model
             elif t == "rate_limit_event":
                 limits = usage.parse(ev.get("rate_limit_info"))
-        self._proc.wait()
-        stderr = self._proc.stderr.read().decode("utf-8", errors="replace")
+        proc.wait()
+        err_reader.join(timeout=2)
+        stderr = b"".join(err_chunks).decode("utf-8", errors="replace")
+        if stalled.is_set():
+            log.warning("Claude Code stalled for %ss, stopped: %s", STALL_TIMEOUT_S, stderr[-1000:])
+            return RawResult(error="timeout", limits=limits)
         if not result:
             if not limits:
                 log.warning("no result from Claude Code (exit %s): %s", self._proc.returncode, stderr[-1500:])
@@ -243,10 +289,15 @@ class ClaudeBackend:
             return None
         cmd = [self.exe, "-p", "--restricted", "--strict-mcp-config", "--tools", "", "--model", "haiku",
                "--no-session-persistence", "--system-prompt", instructions]
+        e = env()
+        if self.brain.api_key:                 # the same account choice as the answers (see _spawn)
+            e["ANTHROPIC_API_KEY"] = self.brain.api_key
+        else:
+            e.pop("ANTHROPIC_API_KEY", None)
         try:
             r = subprocess.run(cmd, input=text.encode("utf-8"), capture_output=True, timeout=timeout,
-                               env=env(), creationflags=CREATE_NO_WINDOW)
+                               env=e, creationflags=CREATE_NO_WINDOW)
             out = r.stdout.decode("utf-8", errors="replace").strip()
-            return out or None
+            return out if r.returncode == 0 and out else None      # an error message is no summary
         except (OSError, subprocess.TimeoutExpired):
             return None

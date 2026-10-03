@@ -105,7 +105,8 @@ def open_login(exe: str, args: list[str], env: dict | None = None) -> subprocess
         for line in p.stdout:
             text = line.decode("utf-8", errors="replace").strip()
             if text:   # the one-time sign-in links stay out of the log
-                log.info("sign-in: %s", re.sub(r"https?://\S+", "<link>", text))
+                text = re.sub(r"https?://\S+", "<link>", text)
+                log.info("sign-in: %s", re.sub(r"[\w.+-]+@[\w-]+\.[\w.]+", "<email>", text))   # no email in reports
         if p.wait():
             log.warning("sign-in ended with code %s", p.returncode)
     threading.Thread(target=drain, daemon=True).start()
@@ -136,12 +137,13 @@ def run_installer(win_cmd: str, mac_cmd: str) -> subprocess.Popen:
 
 
 def http_ok(url: str, headers: dict) -> bool:
+    import http.client
     import urllib.error
     import urllib.request
     try:
         with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=15) as r:
             return r.status == 200
-    except (urllib.error.URLError, TimeoutError):
+    except (urllib.error.URLError, http.client.HTTPException, TimeoutError, OSError):
         return False
 
 

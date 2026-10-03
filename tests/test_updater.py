@@ -20,7 +20,8 @@ def make_zip(files: dict[str, str]) -> bytes:
     return buf.getvalue()
 
 
-GOOD_ZIP = make_zip({"index.json": "[]", "meta.json": '{"source": "test"}', "pages/monster/1.md": "# x"})
+NEW_INDEX = '[{"key": "monster/1", "category": "monster", "name": "x"}]'
+GOOD_ZIP = make_zip({"index.json": NEW_INDEX, "meta.json": '{"source": "test"}', "pages/monster/1.md": "# x"})
 
 
 @pytest.fixture
@@ -51,7 +52,7 @@ def test_newer_kb_is_installed_and_versioned(env):
     user_kb, _, publish = env
     publish()
     assert updater.update_kb() is True
-    assert json.loads((user_kb / "index.json").read_text(encoding="utf-8")) == []
+    assert json.loads((user_kb / "index.json").read_text(encoding="utf-8")) == json.loads(NEW_INDEX)
     assert updater.local_version() == "2026.02.01.0000"
     assert not user_kb.with_name("kb.new").exists()
 
@@ -280,3 +281,17 @@ def test_installer_window_speaks_the_apps_language():
     """The update window follows the app's language, not Windows' (an English player saw a Hebrew installer)."""
     assert "/LANG=english" in updater.installer_args("C:/x/MapleHelper-Setup-v0.7.3.exe", reopen=True, lang="en")
     assert "/LANG=hebrew" in updater.installer_args("C:/x/MapleHelper-Setup-v0.7.3.exe", reopen=True, lang="he")
+
+
+def test_version_parts_are_padded():
+    assert updater._version_tuple("1.0") == updater._version_tuple("1.0.0") == (1, 0, 0)
+    assert updater._version_tuple("v0.7.5") > updater._version_tuple("0.7.4")
+
+
+def test_only_an_installed_copy_self_updates(tmp_path, monkeypatch):
+    import sys
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "executable", str(tmp_path / "Maple Helper.exe"))
+    assert not updater.installed_copy()               # portable zip: no uninstaller beside it
+    (tmp_path / "unins000.exe").write_bytes(b"")
+    assert updater.installed_copy()

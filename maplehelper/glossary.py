@@ -31,9 +31,13 @@ TERMS = {
 
 # clearer or missing definitions, written for the app
 APP = {
+    # "a bit over 3x": the class guides' "ACC to never miss at equal level" tables (pages/guide/cleric-class-guide.md:
+    # Jr. Wraith Avoid 24 -> 79 ACC, Rotten Mushroom 33 -> 108) and Zombie Mushroom's page (Avoid 14 -> 47)
     "ACC": ("Accuracy: כמה טוב אתם פוגעים. ככל שה-ACC שלכם גבוה יותר מה-Avoid של המפלצת, אתם מפספסים פחות. "
+            "כדי לא לפספס בכלל צריך קצת יותר מפי 3 מה-Avoid שלה כשהיא בלבל שלכם, ועוד יותר כשהיא בלבל גבוה משלכם. "
             "רואים אותו בחלון ה-Stat (מקש S).",
             "Accuracy: how well you hit. The more your ACC beats a monster's Avoid, the fewer misses. "
+            "To never miss you need a bit over 3x its Avoid at your level, more when it's above your level. "
             "It's in the Stat window (S key)."),
     "Avoid": ("Avoidability: כמה טוב המפלצת מתחמקת. Avoid גבוה = צריך יותר ACC כדי לפגוע בה. "
               "מפלצת בלבל גבוה משלכם מתחמקת עוד יותר.",
@@ -45,8 +49,12 @@ APP = {
               "Magic Defense: cuts the damage of magic hits."),
     "AP": ("Ability Points: 5 נקודות בכל עליית לבל, שמחלקים ל-STR / DEX / INT / LUK.",
            "Ability Points: 5 per level up, spent on STR / DEX / INT / LUK."),
-    "SP": ("Skill Points: נקודות לסקילים, מקבלים בכל עליית לבל אחרי הג'וב הראשון.",
-           "Skill Points: points for your skills, earned every level after your first job."),
+    # pages/guide/beginners-guide-first-steps-in-maple-world.md ("9 SP by the time you hit level 10 (1 per level-up)")
+    # and pages/guide/maplestory-classic-glossary.md ("3 SP per level, plus 1 bonus SP at lv 10 advancement")
+    "SP": ("Skill Points: נקודות לסקילים. Beginner מקבל נקודה אחת בכל עליית לבל (9 עד לבל 10), "
+           "ואחרי הג'וב הראשון מקבלים 3 בכל לבל.",
+           "Skill Points: points for your skills. A Beginner gets 1 per level up (9 by level 10), "
+           "then 3 per level after the first job."),
     "NPC": ("דמות של המשחק (לא שחקן): חנויות, נותני קווסטים ומדריכי ג'וב.",
             "A character run by the game (not a player): shops, quest givers, job instructors."),
     "Citizenship": ("אזרחות בעיר (Henesys או Kerning City) מ-Lv. 12. תרומות מעלות דרגה, שפותחת הנחות ופריטים בחנויות העיר.",
@@ -107,6 +115,8 @@ def explain(term: str, lang: str) -> str | None:
 MARK = "<b style='font-size:large;'>&nbsp;?</b>"
 
 _PATTERN = re.compile(r"(?<![\w.])(" + "|".join(re.escape(t) for t in sorted(TERMS, key=len, reverse=True)) + r")(?![\w])")
+# a term with its label colon ("HP: 7420"): the "?" goes after the colon, never between the label and it ("HP ?: 7420")
+_TERM_COLON = re.compile(_PATTERN.pattern + r"(:)?")
 
 
 def annotate(html_text: str, lang: str, color: str = "#F07A12", seen: set | None = None, limit: int = 6) -> str:
@@ -131,14 +141,17 @@ def annotate(html_text: str, lang: str, color: str = "#F07A12", seen: set | None
         # an English block inside Hebrew (LRE ... PDF, see bidi.py) must stay whole: a link in its middle
         # breaks the embedding ("Avoid 14" showed as "14 Avoid"), so its "?" go right after the block
         out, pos = [], 0
-        for run in re.finditer(f"{bidi.LRE}(.*?){bidi.PDF}", part, re.S):
-            out.append(_PATTERN.sub(lambda m: m.group(1) + link(m.group(1)) if wanted(m.group(1)) else m.group(1),
-                                    part[pos:run.start()]))
-            marks = "".join(link(m.group(1)) for m in _PATTERN.finditer(run.group(1)) if wanted(m.group(1)))
+        def sub(m):
+            whole = m.group(1) + (m.group(2) or "")
+            return whole + link(m.group(1)) if wanted(m.group(1)) else whole
+
+        # a KB name kept whole (LRI ... PDI: "Bottomwear HP Scroll: Chaos") is a name, not a use of its terms
+        for run in re.finditer(f"{bidi.LRE}(.*?){bidi.PDF}|{bidi.LRI}.*?{bidi.PDI}", part, re.S):
+            out.append(_TERM_COLON.sub(sub, part[pos:run.start()]))
+            marks = "".join(link(m.group(1)) for m in _PATTERN.finditer(run.group(1) or "") if wanted(m.group(1)))
             out.append(run.group(0) + marks)
             pos = run.end()
-        out.append(_PATTERN.sub(lambda m: m.group(1) + link(m.group(1)) if wanted(m.group(1)) else m.group(1),
-                                part[pos:]))
+        out.append(_TERM_COLON.sub(sub, part[pos:]))
         return "".join(out)
 
     # only text between tags, never inside a tag or an existing link

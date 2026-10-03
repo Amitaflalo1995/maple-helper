@@ -1,5 +1,39 @@
 [
  {
+  "version": "0.7.7",
+  "he": [
+   "תוקן: בפתיחת חלון (כלי משחק, מדריכים, הגדרות) כבר לא מהבהב לרגע חלון קטן.",
+   "עדכון אוטומטי כבר לא מחזיר את קיצור הדרך בשולחן העבודה אם מחקתם אותו."
+  ],
+  "en": [
+   "Fixed: opening a window (play tools, guides, settings) no longer flashes a tiny window for a moment.",
+   "An automatic update no longer brings back the desktop shortcut if you deleted it."
+  ]
+ },
+ {
+  "version": "0.7.6",
+  "he": [
+   "בדיקת האינבנטורי מזהה בעצמה כל פריט בתיק לפי התמונות במאגר, ומציגה את הפריטים לפני עצת ה-AI.",
+   "ריענון הדמות מהיר בהרבה (שניות), קורא גם את השם מהמשחק, ותמונת הדמות נחתכת לפי תגית השם עם רקע שקוף.",
+   "דמות אחרת במשחק לא דורסת את הדמות שלכם: מוצעת הוספה או מעבר, ושינוי מחלקה או ירידת לבל מצריכים אישור.",
+   "היסטוריה חדשה: כרטיסים לפי ימים, תמונות, התשובה המלאה בלחיצה ו\"להמשיך את השיחה בצ'אט\".",
+   "פריטים במעקב: לכל מפיל תמונה, לבל, מפה וכפתור \"לשאול בצ'אט\". רשימת הקניות קוראת את ה-HP/MP שלכם מהמסך.",
+   "תיקוני נתונים לפי המאגר: ג'וב ראשון לקוסם בלבל 10, קווסטים של אזרחות ופרסים אקראיים, בוסים לא מומלצים לאימון, וזיהוי שמות בעברית בלי מילים רגילות שנתפסות כמפלצות.",
+   "עדכונים והתקנה בטוחים יותר: התקנה פגומה מציעה התקנה מחדש, עדכון לא רץ בזמן כיבוי המחשב, ואפשר לבחור תיקיית התקנה.",
+   "ועוד עשרות תיקוני ממשק, עברית ויציבות."
+  ],
+  "en": [
+   "The inventory check now recognizes every item in your bag from the database pictures, and shows them before the AI's advice.",
+   "Character refresh is much faster (seconds), reads your name from the game, and cuts your portrait from the name tag on a transparent background.",
+   "Another character in the game never overwrites yours: you're offered to add it or switch, and a class change or a lower level asks first.",
+   "New history: cards by day, pictures, the full answer on a click and \"Continue in chat\".",
+   "Tracked items: every dropper with its picture, level, map and \"Ask in chat\". The shopping list reads your HP/MP from the screen.",
+   "Data fixes from the database: Magician 1st job at 10, citizenship quests and random rewards, no bosses as training spots, and Hebrew names without everyday words mistaken for monsters.",
+   "Safer updates and installs: a damaged install offers a reinstall, no update runs while Windows shuts down, and you can pick the install folder.",
+   "Plus dozens of interface, Hebrew and stability fixes."
+  ]
+ },
+ {
   "version": "0.7.5",
   "he": [
    "האפליקציה מזהה עכשיו גם חלונות של MapleRoyals ב-Windows וב-macOS לצילום מסך ולרענון הדמות.",

@@ -78,3 +78,43 @@ class TestBuildPrompt:
         # the system prompt uses {{ }} escapes around the META JSON; a bad escape would raise here
         s = brain.SYSTEM_PROMPT.format(length=brain.LENGTH["short"])
         assert '{"entities"' in s and brain.META in s
+
+
+@pytest.mark.parametrize("meta", ['{"entities": null}', '{"profile_update": []}', '{"drop_groups": 5}', '[1, 2]'])
+def test_malformed_meta_keeps_the_answer(meta):
+    text, data = brain.split_meta("Go to Henesys.\n@@META@@\n" + meta)
+    assert text == "Go to Henesys."
+    assert all(not (k in data and not isinstance(data[k], t))
+               for k, t in (("entities", list), ("profile_update", dict), ("drop_groups", list)))
+
+
+def test_detail_tiles_cut_a_wide_grab_and_are_announced():
+    from PIL import Image
+
+    from maplehelper import capture
+    tiles = capture.detail_tiles(Image.new("RGB", (3440, 1440)))
+    assert len(tiles) == 3 and capture.detail_tiles(Image.new("RGB", (1280, 720))) == []
+    assert all(max(Image.open(__import__("io").BytesIO(t)).size) <= capture.MAX_SIDE for t in tiles)
+    p = brain.build_prompt("מה למכור?", None, None, _NoKb(), 3)
+    assert "3 full-resolution parts" in p and "Reply in Hebrew." in p
+
+
+class _NoKb:
+    def level_digest(self, *_):
+        return ""
+
+    def find_mentions(self, *_a, **_k):
+        return []
+
+
+def test_app_context_never_drives_the_heuristics():
+    """An old 'I'm level 16' in a picked-up conversation must not reset the level of the next question."""
+    p = brain.build_prompt("איפה כדאי לי להתאמן?", None, None, _NoKb(), False,
+                           extra="<continuing>Player: אני לבל 16</continuing>")
+    assert "<continuing>" in p and p.index("<continuing>") < p.index("<question>")
+    assert brain.stated_level("איפה כדאי לי להתאמן?") is None
+
+
+@pytest.mark.parametrize("text", ["what should I do once I'm level 30?", "when im level 70 which job", "כשאני אגיע ללבל 30 מה לעשות?"])
+def test_plans_are_no_stated_level(text):
+    assert brain.stated_level(text) is None

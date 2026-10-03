@@ -15,10 +15,10 @@ from pathlib import Path
 
 # every module the app imports lazily or that PyInstaller cannot see statically
 MODULES = [
-    "PySide6.QtWidgets", "mss", "PIL.Image", "numpy", "keyring", "sounddevice",
+    "PySide6.QtWidgets", "PySide6.QtNetwork", "mss", "PIL.Image", "numpy", "keyring", "sounddevice",
     "faster_whisper", "ctranslate2",
     "maplehelper.app", "maplehelper.osapi", "maplehelper.brain", "maplehelper.voice", "maplehelper.providers",
-    "maplehelper.updater",
+    "maplehelper.updater", "maplehelper.inventory", "maplehelper.portrait", "maplehelper.jobs",
     "maplehelper.ui.overlay", "maplehelper.ui.dialogs", "maplehelper.ui.toast",
 ]
 if sys.platform == "darwin":
